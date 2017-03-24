@@ -1,0 +1,406 @@
+/*
+ * Copyright (c) 2016, 2017 ARM Limited.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#ifndef __ARM_COMPUTE_HELPERS_H__
+#define __ARM_COMPUTE_HELPERS_H__
+
+#include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/IAccessWindow.h"
+#include "arm_compute/core/Steps.h"
+#include "arm_compute/core/Strides.h"
+#include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/Window.h"
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+
+namespace arm_compute
+{
+class IKernel;
+class ITensor;
+class TensorInfo;
+
+namespace cpp14
+{
+#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
+template <class T>
+struct _Unique_if
+{
+    typedef std::unique_ptr<T> _Single_object;
+};
+
+template <class T>
+struct _Unique_if<T[]>
+{
+    typedef std::unique_ptr<T[]> _Unknown_bound;
+};
+
+template <class T, size_t N>
+struct _Unique_if<T[N]>
+{
+    typedef void _Known_bound;
+};
+
+template <class T, class... Args>
+typename _Unique_if<T>::_Single_object
+make_unique(Args &&... args)
+{
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+template <class T>
+typename _Unique_if<T>::_Unknown_bound
+make_unique(size_t n)
+{
+    typedef typename std::remove_extent<T>::type U;
+    return std::unique_ptr<T>(new U[n]());
+}
+
+template <class T, class... Args>
+typename _Unique_if<T>::_Known_bound
+make_unique(Args &&...) = delete;
+#endif /* DOXYGEN_SKIP_THIS */
+}
+}
+
+namespace
+{
+/** Computes bilinear interpolation using the pointer to the top-left pixel and the pixel's distance between
+ * the real coordinates and the smallest following integer coordinates.
+ *
+ * @param[in] pixel_ptr Pointer to the top-left pixel value. Format: Single channel U8
+ * @param[in] stride    Stride to access the bottom-left and bottom-right pixel values
+ * @param[in] dx        Pixel's distance between the X real coordinate and the smallest X following integer
+ * @param[in] dy        Pixel's distance between the Y real coordinate and the smallest Y following integer
+ *
+ * @note dx and dy must be in the range [0, 1.0]
+ *
+ * @return The bilinear interpolated pixel value
+ */
+inline uint8_t delta_bilinear_c1u8(const uint8_t *pixel_ptr, size_t stride, float dx, float dy);
+
+/** Return the pixel at (x,y) using bilinear interpolation. The image must be single channel U8
+ *
+ * @warning Only works if the iterator was created with an IImage
+ *
+ * @param[in[ first_pixel_ptr Pointer to the first pixel of a single channel U8 image.
+ * @param[in[ stride          Stride in bytes of the image;
+ *
+ * @param[in] x X position of the wanted pixel
+ * @param[in] y Y position of the wanted pixel
+ *
+ * @return The pixel at (x, y) using bilinear interpolation.
+ */
+inline uint8_t pixel_bilinear_c1u8(const uint8_t *first_pixel_ptr, size_t stride, float x, float y);
+
+/** Return the pixel at (x,y) using bilinear interpolation by clamping when out of borders. The image must be single channel U8
+ *
+ * @warning Only works if the iterator was created with an IImage
+ *
+ * @param[in] first_pixel_ptr Pointer to the first pixel of a single channel U8 image.
+ * @param[in] stride          Stride in bytes of the image
+ * @param[in] width           Width of the image
+ * @param[in] height          Height of the image
+ * @param[in] x               X position of the wanted pixel
+ * @param[in] y               Y position of the wanted pixel
+ *
+ * @return The pixel at (x, y) using bilinear interpolation.
+ */
+inline uint8_t pixel_bilinear_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float x, float y);
+
+/** Return the pixel at (x,y) using area interpolation by clamping when out of borders. The image must be single channel U8
+ *
+ * @note The interpolation area depends on the width and height ration of the input and output images
+ * @note Currently average of the contributing pixels is calculated
+ *
+ * @param[in] first_pixel_ptr Pointer to the first pixel of a single channel U8 image.
+ * @param[in] stride          Stride in bytes of the image
+ * @param[in] width           Width of the image
+ * @param[in] height          Height of the image
+ * @param[in] wr              Width ratio among the input image width and output image width.
+ * @param[in] hr              Height ratio among the input image height and output image height.
+ * @param[in] x               X position of the wanted pixel
+ * @param[in] y               Y position of the wanted pixel
+ *
+ * @return The pixel at (x, y) using area interpolation.
+ */
+inline uint8_t pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float wr, float hr, int x, int y);
+
+/** Performs clamping among a lower and upper value.
+ *
+ * @param[in] n     Value to clamp.
+ * @param[in] lower Lower threshold.
+ * @param[in] upper Upper threshold.
+ *
+ *  @return Clamped value.
+ */
+template <typename T>
+inline T clamp(const T &n, const T &lower, const T &upper)
+{
+    return std::max(lower, std::min(n, upper));
+}
+
+/** Base case of for_each. Does nothing. */
+template <typename F>
+inline void for_each(F &&)
+{
+}
+
+/** Call the function for each of the arguments
+ *
+ * @param[in] func Function to be called
+ * @param[in] arg  Argument passed to the function
+ * @param[in] args Remaining arguments
+ */
+template <typename F, typename T, typename... Ts>
+inline void for_each(F &&func, T &&arg, Ts &&... args)
+{
+    func(arg);
+    for_each(func, args...);
+}
+
+/** Base case of foldl. Return value. */
+template <typename F, typename T>
+inline T foldl(F &&, T &&value)
+{
+    return value;
+}
+
+/** Fold left.
+ *
+ * @param[in] func    Function to be called
+ * @param[in] initial Initial value
+ * @param[in] value   Argument passed to the function
+ * @param[in] values  Remaining arguments
+ */
+template <typename F, typename I, typename T, typename... Ts>
+inline I foldl(F &&func, I &&initial, T &&value, Ts &&... values)
+{
+    return foldl(func, func(initial, value), values...);
+}
+}
+
+namespace arm_compute
+{
+/** Iterator updated by @ref execute_window_loop for each window element */
+class Iterator
+{
+public:
+    /** Default constructor to create an empty iterator */
+    constexpr Iterator();
+    /** Create a container iterator for the metadata and allocation contained in the ITensor
+     *
+     * @param[in] tensor The tensor to associate to the iterator.
+     * @param[in] window The window which will be used to iterate over the tensor.
+     */
+    Iterator(const ITensor *tensor, const Window &window);
+
+    /** Increment the iterator along the specified dimension of the step value associated to the dimension.
+     *
+     * @warning It is the caller's responsibility to call increment(dimension+1) when reaching the end of a dimension, the iterator will not check for overflow.
+     *
+     * @note When incrementing a dimension 'n' the coordinates of all the dimensions in the range (0,n-1) are reset. For example if you iterate over a 2D image, everytime you change row (dimension 1), the iterator for the width (dimension 0) is reset to its start.
+     *
+     * @param[in] dimension Dimension to increment
+     */
+    void increment(size_t dimension);
+
+    /** Return the offset in bytes from the first element to the current position of the iterator
+     *
+     * @return The current position of the iterator in bytes relative to the first element.
+     */
+    constexpr int offset() const;
+
+    /** Return a pointer to the current pixel.
+     *
+     * @warning Only works if the iterator was created with an ITensor.
+     *
+     * @return equivalent to  buffer() + offset()
+     */
+    constexpr uint8_t *ptr() const;
+
+    /** Move the iterator back to the beginning of the specified dimension.
+     *
+     * @param[in] dimension Dimension to reset
+     */
+    void reset(size_t dimension);
+
+private:
+    uint8_t *_ptr;
+
+    class Dimension
+    {
+    public:
+        constexpr Dimension()
+            : _dim_start(0), _stride(0)
+        {
+        }
+
+        int _dim_start;
+        int _stride;
+    };
+
+    std::array<Dimension, Coordinates::num_max_dimensions> _dims;
+};
+
+/** Iterate through the passed window, automatically adjusting the iterators and calling the lambda_functino for each element.
+ *  It passes the x and y positions to the lambda_function for each iteration
+ *
+ * @param[in]     w               Window to iterate through.
+ * @param[in]     lambda_function The function of type void(function)( const Coordinates & id ) to call at each iteration.
+ *                                Where id represents the absolute coordinates of the item to process.
+ * @param[in,out] iterators       Tensor iterators which will be updated by this function before calling lambda_function.
+ */
+template <typename L, typename... Ts>
+inline void execute_window_loop(const Window &w, L &&lambda_function, Ts &&... iterators);
+
+/** Update window and padding size for each of the access patterns.
+ *
+ * First the window size is reduced based on all access patterns that are not
+ * allowed to modify the padding of the underlying tensor. Then the padding of
+ * the remaining tensors is increased to match the window.
+ *
+ * @param[in] win      Window that is used by the kernel.
+ * @param[in] patterns Access patterns used to calculate the final window and padding.
+ *
+ * @return True if the window has been changed. Changes to the padding do not
+ *         influence the returned value.
+ */
+template <typename... Ts>
+bool update_window_and_padding(Window &win, Ts &&... patterns)
+{
+    bool window_changed = false;
+
+    for_each([&](const IAccessWindow & w)
+    {
+        window_changed |= w.update_window_if_needed(win);
+    },
+    patterns...);
+
+    bool padding_changed = false;
+
+    for_each([&](const IAccessWindow & w)
+    {
+        padding_changed |= w.update_padding_if_needed(win);
+    },
+    patterns...);
+
+    return window_changed;
+}
+
+/** Calculate the maximum window for a given tensor shape and border setting
+ *
+ * @param[in] info        Tensor info object defining the shape of the object for which the window is created.
+ * @param[in] steps       (Optional) Number of elements processed for each step.
+ * @param[in] skip_border (Optional) If true exclude the border region from the window.
+ * @param[in] border_size (Optional) Border size.
+ *
+ * @return The maximum window the kernel can be executed on.
+ */
+Window calculate_max_window(const TensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+
+/** Calculate the maximum window used by a horizontal kernel for a given tensor shape and border setting
+ *
+ * @param[in] info        Tensor info object defining the shape of the object for which the window is created.
+ * @param[in] steps       (Optional) Number of elements processed for each step.
+ * @param[in] skip_border (Optional) If true exclude the border region from the window.
+ * @param[in] border_size (Optional) Border size. The border region will be excluded from the window.
+ *
+ * @return The maximum window the kernel can be executed on.
+ */
+Window calculate_max_window_horizontal(const TensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+
+/** Intersect multiple valid regions.
+ *
+ * @param[in] regions Valid regions.
+ *
+ * @return Intersection of all regions.
+ */
+template <typename... Ts>
+ValidRegion intersect_valid_regions(Ts &&... regions)
+{
+    auto intersect = [](const ValidRegion & r1, const ValidRegion & r2) -> ValidRegion
+    {
+        ValidRegion region;
+
+        for(size_t d = 0; d < std::min(r1.anchor.num_dimensions(), r2.anchor.num_dimensions()); ++d)
+        {
+            region.anchor.set(d, std::max(r1.anchor[d], r2.anchor[d]));
+        }
+
+        for(size_t d = 0; d < std::min(r1.shape.num_dimensions(), r2.shape.num_dimensions()); ++d)
+        {
+            region.shape.set(d, std::min(r1.shape[d], r2.shape[d]));
+        }
+
+        return region;
+    };
+
+    return foldl(intersect, std::forward<Ts>(regions)...);
+}
+
+/** Create a strides object based on the provided strides and the tensor dimensions.
+ *
+ * @param[in] info          Tensor info object providing the shape of the tensor for unspecified strides.
+ * @param[in] stride_x      Stride to be used in X dimension (in bytes).
+ * @param[in] fixed_strides Strides to be used in higher dimensions starting at Y (in bytes).
+ *
+ * @return Strides object based on the specified strides. Missing strides are
+ *         calculated based on the tensor shape and the strides of lower dimensions.
+ */
+template <typename T, typename... Ts>
+inline Strides compute_strides(const TensorInfo &info, T stride_x, Ts &&... fixed_strides)
+{
+    const TensorShape &shape = info.tensor_shape();
+
+    // Create strides object
+    Strides strides(stride_x, fixed_strides...);
+
+    for(size_t i = 1 + sizeof...(Ts); i < info.num_dimensions(); ++i)
+    {
+        strides.set(i, shape[i - 1] * strides[i - 1]);
+    }
+
+    return strides;
+}
+
+/** Create a strides object based on the tensor dimensions.
+ *
+ * @param[in] info Tensor info object used to compute the strides.
+ *
+ * @return Strides object based on element size and tensor shape.
+ */
+template <typename... Ts>
+inline Strides compute_strides(const TensorInfo &info)
+{
+    return compute_strides(info, info.element_size());
+}
+}
+
+#include "arm_compute/core/Helpers.inl"
+#endif /*__ARM_COMPUTE_HELPERS_H__ */
