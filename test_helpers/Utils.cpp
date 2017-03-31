@@ -26,7 +26,7 @@
 #include <cctype>
 #include <iomanip>
 #include <string>
-
+#include <cerrno>
 namespace
 {
 /* Advance the iterator to the first character which is not a comment
