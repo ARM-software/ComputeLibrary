@@ -45,9 +45,9 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0)) / 8.0f) && (input->info()->data_type() == DataType::F16));
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0)) / 4.0f) && (input->info()->data_type() == DataType::F32));
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0)) / 4.0f) && (input->info()->data_type() == DataType::U32));
+    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 8.0f)) && (input->info()->data_type() == DataType::F16));
+    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 4.0f)) && (input->info()->data_type() == DataType::F32));
+    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 4.0f)) && (input->info()->data_type() == DataType::U32));
 
     unsigned int num_elems_processed_per_iteration(0);
     switch(input->info()->data_type())
