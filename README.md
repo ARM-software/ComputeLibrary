@@ -7,3 +7,4 @@ Binaries available here: [v17.03.1](https://github.com/ARM-software/ComputeLibra
 
 Support: developer@arm.com
 
+License & Contributions: The software is provided under MIT license. Contributions to this project are accepted under the same license. 
