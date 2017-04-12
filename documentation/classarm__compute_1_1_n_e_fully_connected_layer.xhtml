@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.03.1</span>
+   &#160;<span id="projectnumber">17.04</span>
    </div>
   </td>
  </tr>
@@ -137,9 +137,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9a5cc50098bbd29bd8cd04040f7f0fe1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml#a9a5cc50098bbd29bd8cd04040f7f0fe1">NEFullyConnectedLayer</a> ()</td></tr>
 <tr class="memdesc:a9a5cc50098bbd29bd8cd04040f7f0fe1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a9a5cc50098bbd29bd8cd04040f7f0fe1">More...</a><br /></td></tr>
 <tr class="separator:a9a5cc50098bbd29bd8cd04040f7f0fe1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77645c78f461296c6a81268407246859"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml#a77645c78f461296c6a81268407246859">configure</a> (<a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output)</td></tr>
-<tr class="memdesc:a77645c78f461296c6a81268407246859"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a77645c78f461296c6a81268407246859">More...</a><br /></td></tr>
-<tr class="separator:a77645c78f461296c6a81268407246859"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afeecbea374f5b5e83b767a18732127d4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml#afeecbea374f5b5e83b767a18732127d4">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, bool transpose_weights=true)</td></tr>
+<tr class="memdesc:afeecbea374f5b5e83b767a18732127d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#afeecbea374f5b5e83b767a18732127d4">More...</a><br /></td></tr>
+<tr class="separator:afeecbea374f5b5e83b767a18732127d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -151,14 +151,16 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to compute a Fully Connected layer on NEON. </p>
 <p>This function calls the following NEON kernels:</p><ol type="1">
-<li><a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">NEConvolutionLayer</a> (called when the weights have 4 dimensions. Pass the stride as 1 and padding as 0)</li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m.xhtml">NEGEMM</a> (called when the weights have 2 dimensions)</li>
-<li><a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml">NETransposeKernel</a> (called when the weights have 2 dimensions)</li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">NEGEMMMatrixAccumulateBiasesKernel</a> (called when the weights have 2 dimensions)</li>
+<li><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">NEIm2ColKernel</a> (called when the input comes from a convolutional layer)</li>
+<li><a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml">NETransposeKernel</a> (if <code>transpose_weights</code> flag is set to true) (called once)</li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml">NEGEMMTranspose1xWKernel</a> (called once if we have a multi-batch input)</li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel.xhtml">NEGEMMInterleave4x4Kernel</a> (called if we have a multi-batch input)</li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml">NEGEMMMatrixMultiplyKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">NEGEMMMatrixAccumulateBiasesKernel</a> (if <code>biases</code> is not equal to nullptr)</li>
 </ol>
-<dl class="section note"><dt>Note</dt><dd>The fully connected layer accepts "weights" tensors only with 2 or 4 dimensions. In particular, the weights tensor has 4 dimensions, if the fully connected layer is computed after a convolution layer otherwise the tensor has 2 dimensions if the fully connected layer is computed after another fully connected layer </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The fully connected layer accepts "weights" tensors only with 2 dimensions. </dd></dl>
 
-<p>Definition at line <a class="el" href="_n_e_fully_connected_layer_8h_source.xhtml#l00044">44</a> of file <a class="el" href="_n_e_fully_connected_layer_8h_source.xhtml">NEFullyConnectedLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_fully_connected_layer_8h_source.xhtml#l00049">49</a> of file <a class="el" href="_n_e_fully_connected_layer_8h_source.xhtml">NEFullyConnectedLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a9a5cc50098bbd29bd8cd04040f7f0fe1"></a>
 <div class="memitem">
@@ -178,20 +180,20 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a77645c78f461296c6a81268407246859"></a>
+<a class="anchor" id="afeecbea374f5b5e83b767a18732127d4"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void configure </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
           <td class="paramname"><em>input</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
           <td class="paramname"><em>weights</em>, </td>
         </tr>
         <tr>
@@ -204,7 +206,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
-          <td class="paramname"><em>output</em>&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>transpose_weights</em> = <code>true</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -217,10 +225,11 @@ Public Member Functions</h2></td></tr>
 <p>Set the input and output tensors. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. Data type supported: F32. (Written to only if <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m.xhtml">NEGEMM</a> needs to pad with zeros the tensor) </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">weights</td><td>Weights tensor. The weights can be 2 dimensional or 4 dimensional. Data type supported: Same as <code>input</code>. (Written to only if <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m.xhtml">NEGEMM</a> needs to pad with zeros the tensor) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Bias tensor. Data type supported:Same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data type supported: F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. The weights must be 2 dimensional. Data type supported: Same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Bias tensor. Can be nullptr. Data type supported:Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: Same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">transpose_weights</td><td>(Optional) Transpose weights if true. Defaults to true. </td></tr>
   </table>
   </dd>
 </dl>
@@ -273,7 +282,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a></li>
-    <li class="footer">Generated on Fri Mar 24 2017 17:23:51 for ARM Compute Library by
+    <li class="footer">Generated on Wed Apr 12 2017 14:26:06 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

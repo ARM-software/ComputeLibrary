@@ -36,7 +36,7 @@ class NELogits1DMaxKernel : public INESimpleKernel
 {
 public:
     /** Default constructor */
-    NELogits1DMaxKernel() = default;
+    NELogits1DMaxKernel();
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. Data types supported: F32.
@@ -46,6 +46,10 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window) override;
+    BorderSize border_size() const override;
+
+private:
+    BorderSize _border_size;
 };
 
 /** Interface for shifting the logits values around the max value and exponentiating the result */
@@ -76,12 +80,14 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window) override;
+    BorderSize border_size() const override;
 
 private:
     const ITensor *_input;
     const ITensor *_max;
     ITensor       *_output;
     ITensor       *_sum;
+    BorderSize     _border_size;
 };
 
 /** Interface for calculating the final step of the Softmax Layer where each logit value is multiplied by the inverse of the sum of the logits. */

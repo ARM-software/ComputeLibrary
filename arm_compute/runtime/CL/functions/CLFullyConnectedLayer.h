@@ -24,57 +24,68 @@
 #ifndef __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__
 #define __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__
 
+#include "arm_compute/runtime/IFunction.h"
+
+#include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
+#include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
-#include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
-#include "arm_compute/runtime/CL/functions/CLGEMM.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
 
 namespace arm_compute
 {
 /** Basic function to compute a Fully Connected layer on OpenCL. This function calls the following OpenCL kernels:
- *  -# @ref CLConvolutionLayer (called when the weights have 4 dimensions. Pass the stride as 1 and padding as 0)
- *  -# @ref CLGEMM (called when the weights have 2 dimensions)
- *  -# @ref CLTransposeKernel (called when the weights have 2 dimensions)
- *  -# @ref CLGEMMMatrixAccumulateBiasesKernel (called when the weights have 2 dimensions)
  *
- * @note  The fully connected layer accepts "weights" tensors only with 2 or 4 dimensions. In particular, the weights tensor has 4 dimensions,
- *        if the fully connected layer is computed after a convolution layer otherwise the tensor has 2 dimensions if the fully connected layer
- *        is computed after another fully connected layer
+ *  -# @ref CLIm2ColKernel (called when the input comes from a convolutional layer)
+ *  -# @ref CLTransposeKernel (if @p transpose_weights is set to true) (called once)
+ *  -# @ref NEGEMMTranspose1xWKernel (called once if we have a multi-batch input)
+ *  -# @ref NEGEMMInterleave4x4Kernel (called if we have a multi-batch input)
+ *  -# @ref NEGEMMMatrixMultiplyKernel
+ *  -# @ref CLGEMMMatrixAccumulateBiasesKernel (if @p biases is not equal to nullptr)
+ *
+ * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
 class CLFullyConnectedLayer : public IFunction
 {
 public:
-    /**Constructor */
+    /** Constructor */
     CLFullyConnectedLayer();
     /** Set the input and output tensors.
      *
-     * @param[in, out] input   Source tensor. Data type supported: F16, F32. (Written to only if @ref CLGEMM needs to pad with zeros the tensor)
-     * @param[in, out] weights Weights tensor. The weights can be 2 dimensional or 4 dimensional. Data type supported: Same as @p input. (Written to only if @ref CLGEMM needs to pad with zeros the tensor)
-     * @param[in]      biases  Bias tensor. Data type supported:Same as @p input.
-     * @param[out]     output  Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  input             Source tensor. Data type supported: F16, F32.
+     * @param[in]  weights           Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
+     * @param[in]  biases            Bias tensor. It can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output            Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  transpose_weights (Optional) Transpose weights if true. Defaults to true.
      */
-    void configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *biases, ICLTensor *output);
+    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose_weights = true);
 
     //Inherited methods override
     void run() override;
 
 private:
-    /** Run the convolution layer connect to fully connected layer case */
-    void run_conv();
-    /** Run the fully connected layer connect to fully connected layer case */
-    void run_fc();
-    /** Common signature for the functions to run */
-    using FullyConnectedLayerFunction = void (CLFullyConnectedLayer::*)(void);
+    void configure_fc_fc_wb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
+    void configure_fc_fc_nb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
+    void configure_conv_fc_wb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
+    void configure_conv_fc_nb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
 
-private:
-    CLConvolutionLayer                 _conv_function;
-    CLGEMM                             _gemm_function;
+    CLIm2ColKernel                     _im2col_kernel;
     CLTransposeKernel                  _transpose_kernel;
-    CLGEMMMatrixAccumulateBiasesKernel _acc_biases_kernel;
-    FullyConnectedLayerFunction        _run_func;
-    CLTensor                           _weights_transpose;
+    CLGEMMTranspose1xWKernel           _transpose1xW_kernel;
+    CLGEMMInterleave4x4Kernel          _interleave4x4_kernel;
+    CLGEMMMatrixMultiplyKernel         _mm_kernel;
+    CLGEMMMatrixAccumulateBiasesKernel _accumulate_biases_kernel;
+    CLTensor                           _im2col_output;
+    CLTensor                           _interleave4x4_output;
+    CLTensor                           _transpose_output;
+    CLTensor                           _transpose1xW_output;
     bool                               _is_first_run;
-    bool                               _run_acc_biases;
+    bool                               _transpose_weights;
+    bool                               _fc_after_conv;
+    bool                               _batched_fc_layer;
+    bool                               _accumulate_biases;
 };
 }
 #endif /* __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__ */

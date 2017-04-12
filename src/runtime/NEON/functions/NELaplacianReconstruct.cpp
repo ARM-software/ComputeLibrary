@@ -57,8 +57,8 @@ void NELaplacianReconstruct::configure(const IPyramid *pyramid, const ITensor *i
     // Create and initialize the tmp pyramid: I(n-2) = upsample( input + Laplace(n-1) )
     PyramidInfo pyramid_info;
     pyramid_info.init(num_levels, 0.5f, output->info()->tensor_shape(), arm_compute::Format::S16);
-    _tmp_pyr.init_auto_padding(pyramid_info);
-    _tmp_pyr.allocate();
+
+    _tmp_pyr.init(pyramid_info);
 
     // Allocate add and scale functions. Level 0 does not need to be scaled.
     _addf   = arm_compute::cpp14::make_unique<NEArithmeticAddition[]>(num_levels);
@@ -77,6 +77,8 @@ void NELaplacianReconstruct::configure(const IPyramid *pyramid, const ITensor *i
 
     // Convert level 0 from S16 to U8
     _depthf.configure(_tmp_pyr.get_pyramid_level(0), output, ConvertPolicy::SATURATE, 0);
+
+    _tmp_pyr.allocate();
 }
 
 void NELaplacianReconstruct::run()

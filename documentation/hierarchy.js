@@ -140,6 +140,8 @@ var hierarchy =
         [ "NEDilate", "classarm__compute_1_1_n_e_dilate.xhtml", null ],
         [ "NEErode", "classarm__compute_1_1_n_e_erode.xhtml", null ],
         [ "NEGaussian3x3", "classarm__compute_1_1_n_e_gaussian3x3.xhtml", null ],
+        [ "NEGEMMInterleave4x4", "classarm__compute_1_1_n_e_g_e_m_m_interleave4x4.xhtml", null ],
+        [ "NEGEMMTranspose1xW", "classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w.xhtml", null ],
         [ "NEHOGDetector", "classarm__compute_1_1_n_e_h_o_g_detector.xhtml", null ],
         [ "NEIntegralImage", "classarm__compute_1_1_n_e_integral_image.xhtml", null ],
         [ "NEMagnitude", "classarm__compute_1_1_n_e_magnitude.xhtml", null ],
@@ -214,8 +216,6 @@ var hierarchy =
         [ "CLEdgeTraceKernel", "classarm__compute_1_1_c_l_edge_trace_kernel.xhtml", null ],
         [ "CLFastCornersKernel", "classarm__compute_1_1_c_l_fast_corners_kernel.xhtml", null ],
         [ "CLFillBorderKernel", "classarm__compute_1_1_c_l_fill_border_kernel.xhtml", null ],
-        [ "CLGaussianPyramidHorKernel", "classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml", null ],
-        [ "CLGaussianPyramidVertKernel", "classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml", null ],
         [ "CLGEMMInterleave4x4Kernel", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml", null ],
         [ "CLGEMMLowpMatrixMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml", null ],
         [ "CLGEMMMatrixAccumulateBiasesKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_accumulate_biases_kernel.xhtml", null ],
@@ -248,6 +248,8 @@ var hierarchy =
         [ "CLSobel7x7HorKernel", "classarm__compute_1_1_c_l_sobel7x7_hor_kernel.xhtml", null ],
         [ "CLSobel7x7VertKernel", "classarm__compute_1_1_c_l_sobel7x7_vert_kernel.xhtml", null ],
         [ "ICLSimpleKernel", "classarm__compute_1_1_i_c_l_simple_kernel.xhtml", [
+          [ "CLGaussianPyramidHorKernel", "classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml", null ],
+          [ "CLGaussianPyramidVertKernel", "classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml", null ],
           [ "ICLSimple2DKernel", "classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml", [
             [ "CLAccumulateKernel", "classarm__compute_1_1_c_l_accumulate_kernel.xhtml", null ],
             [ "CLAccumulateSquaredKernel", "classarm__compute_1_1_c_l_accumulate_squared_kernel.xhtml", null ],
@@ -303,6 +305,8 @@ var hierarchy =
           [ "NEGaussian3x3Kernel", "classarm__compute_1_1_n_e_gaussian3x3_kernel.xhtml", null ],
           [ "NEGaussian5x5HorKernel", "classarm__compute_1_1_n_e_gaussian5x5_hor_kernel.xhtml", null ],
           [ "NEGaussian5x5VertKernel", "classarm__compute_1_1_n_e_gaussian5x5_vert_kernel.xhtml", null ],
+          [ "NEGaussianPyramidHorKernel", "classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml", null ],
+          [ "NEGaussianPyramidVertKernel", "classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml", null ],
           [ "NEGEMMInterleave4x4Kernel", "classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel.xhtml", null ],
           [ "NEGEMMMatrixAdditionKernel", "classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml", null ],
           [ "NEGEMMTranspose1xWKernel", "classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml", null ],
@@ -350,8 +354,6 @@ var hierarchy =
         [ "NEFillArrayKernel", "classarm__compute_1_1_n_e_fill_array_kernel.xhtml", null ],
         [ "NEFillBorderKernel", "classarm__compute_1_1_n_e_fill_border_kernel.xhtml", null ],
         [ "NEFillInnerBorderKernel", "classarm__compute_1_1_n_e_fill_inner_border_kernel.xhtml", null ],
-        [ "NEGaussianPyramidHorKernel", "classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml", null ],
-        [ "NEGaussianPyramidVertKernel", "classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml", null ],
         [ "NEGEMMLowpMatrixMultiplyKernel", "classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel.xhtml", null ],
         [ "NEGEMMMatrixAccumulateBiasesKernel", "classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml", null ],
         [ "NEGEMMMatrixMultiplyKernel", "classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml", null ],
@@ -413,6 +415,7 @@ var hierarchy =
       [ "MultiImage", "classarm__compute_1_1_multi_image.xhtml", null ]
     ] ],
     [ "InternalKeypoint", "struct_internal_keypoint.xhtml", null ],
+    [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", null ],
     [ "IPyramid", "classarm__compute_1_1_i_pyramid.xhtml", [
       [ "CLPyramid", "classarm__compute_1_1_c_l_pyramid.xhtml", null ],
       [ "Pyramid", "classarm__compute_1_1_pyramid.xhtml", null ]

@@ -148,14 +148,14 @@ private:
     template <class T, typename>
     struct create_func_table;
 
-    const IImage        *_input;              /**< Input image. */
-    int32_t             *_min;                /**< Minimum value. */
-    int32_t             *_max;                /**< Maximum value. */
-    uint32_t            *_min_count;          /**< Count of minimum value encounters. */
-    uint32_t            *_max_count;          /**< Count of maximum value encounters. */
-    ICoordinates2DArray *_min_loc;            /**< Locations of minimum values. */
-    ICoordinates2DArray *_max_loc;            /**< Locations of maximum values. */
-    unsigned int         _processed_elements; /**< Elements processed per iteration. */
+    const IImage        *_input;                             /**< Input image. */
+    int32_t             *_min;                               /**< Minimum value. */
+    int32_t             *_max;                               /**< Maximum value. */
+    uint32_t            *_min_count;                         /**< Count of minimum value encounters. */
+    uint32_t            *_max_count;                         /**< Count of maximum value encounters. */
+    ICoordinates2DArray *_min_loc;                           /**< Locations of minimum values. */
+    ICoordinates2DArray *_max_loc;                           /**< Locations of maximum values. */
+    unsigned int         _num_elems_processed_per_iteration; /**< Elements processed per iteration. */
 };
 }
 #endif /*__ARM_COMPUTE_NEMINMAXLOCATIONKERNEL_H__ */

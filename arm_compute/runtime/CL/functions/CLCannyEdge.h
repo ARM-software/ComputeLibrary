@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/CL/kernels/CLCannyEdgeKernel.h"
+#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 
 #include <memory>
@@ -69,6 +70,7 @@ public:
 private:
     std::unique_ptr<IFunction>    _sobel;                                           /**< Pointer to Sobel kernel. */
     CLGradientKernel              _gradient;                                        /**< Gradient kernel. */
+    CLFillBorderKernel            _border_mag_gradient;                             /**< Fill border on magnitude tensor kernel */
     CLEdgeNonMaxSuppressionKernel _non_max_suppr;                                   /**< Non-Maxima suppression kernel. */
     CLEdgeTraceKernel             _edge_trace;                                      /**< Edge tracing kernel. */
     CLImage                       _gx;                                              /**< Source tensor - Gx component. */

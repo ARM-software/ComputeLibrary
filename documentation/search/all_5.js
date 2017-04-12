@@ -2,10 +2,11 @@ var searchData=
 [
   ['edge',['EDGE',['../canny_8cl.xhtml#ac243bfa96aa2c28014159ff098bd2324',1,'canny.cl']]],
   ['eigenvalue_5fthr',['EIGENVALUE_THR',['../optical__flow__pyramid__lk_8cl.xhtml#a3955a0fbedb5b3eae9a38801fb01bac5',1,'optical_flow_pyramid_lk.cl']]],
+  ['element_5fdelim',['element_delim',['../structarm__compute_1_1_i_o_format_info.xhtml#a38c5b617ead74af00cc7957553bd0d66',1,'arm_compute::IOFormatInfo']]],
   ['element_5fsize',['element_size',['../classarm__compute_1_1_tensor_info.xhtml#a448f57f9d6aec61b3d85b898affe4a2e',1,'arm_compute::TensorInfo']]],
   ['element_5fsize_5ffrom_5fdata_5ftype',['element_size_from_data_type',['../namespacearm__compute.xhtml#a34b06c0cd94808a77b697e79880b84b0',1,'arm_compute']]],
   ['empty',['empty',['../structarm__compute_1_1_border_size.xhtml#adffbf97e7b8b64e7cf32f0254cddf3c4',1,'arm_compute::BorderSize']]],
-  ['end',['end',['../classarm__compute_1_1_window_1_1_dimension.xhtml#aa9a8509af319b9e47f00c8fba23d368b',1,'arm_compute::Window::Dimension']]],
+  ['end',['end',['../classarm__compute_1_1_dimensions.xhtml#ac684b52c6197edff9cccb3abd1e41f59',1,'arm_compute::Dimensions::end()'],['../classarm__compute_1_1_dimensions.xhtml#a819e633cd63b404cf9938bc6e755c170',1,'arm_compute::Dimensions::end() const '],['../classarm__compute_1_1_window_1_1_dimension.xhtml#aa9a8509af319b9e47f00c8fba23d368b',1,'arm_compute::Window::Dimension::end()']]],
   ['enqueue',['enqueue',['../classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67',1,'arm_compute::CLScheduler::enqueue()'],['../namespacearm__compute.xhtml#a22af22ebac966b76e8553127064201a2',1,'arm_compute::enqueue()']]],
   ['enqueue_5fsync_5fevent',['enqueue_sync_event',['../classarm__compute_1_1_c_l_scheduler.xhtml#a6096d26e8e29e1a7f01b0f083fb7e33f',1,'arm_compute::CLScheduler']]],
   ['erode',['erode',['../erode_8cl.xhtml#a8b30acf5b6e25e473275a1e3f400054a',1,'erode.cl']]],

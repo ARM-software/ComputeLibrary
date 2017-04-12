@@ -45,16 +45,19 @@ void NELaplacianPyramid::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(0 == _num_levels, "Unconfigured function");
 
-    _gaussian_pyr_function.run(); // compute gaussian pyramid
+    // Compute Gaussian Pyramid
+    _gaussian_pyr_function.run();
 
     for(unsigned int i = 0; i < _num_levels; ++i)
     {
-        _convf[i].run(); // convolute gaussian pyramid
+        // Apply Gaussian filter to gaussian pyramid image
+        _convf[i].run();
     }
 
     for(unsigned int i = 0; i < _num_levels; ++i)
     {
-        _subf[i].run(); // compute laplacian image
+        // Compute laplacian image
+        _subf[i].run();
     }
 
     _depth_function.run();
@@ -77,10 +80,8 @@ void NELaplacianPyramid::configure(const ITensor *input, IPyramid *pyramid, ITen
     PyramidInfo pyramid_info;
     pyramid_info.init(_num_levels, 0.5f, pyramid->info()->tensor_shape(), arm_compute::Format::U8);
 
-    _gauss_pyr.init_auto_padding(pyramid_info);
-    _gauss_pyr.allocate();
-    _conv_pyr.init_auto_padding(pyramid_info);
-    _conv_pyr.allocate();
+    _gauss_pyr.init(pyramid_info);
+    _conv_pyr.init(pyramid_info);
 
     // Create Gaussian Pyramid function
     _gaussian_pyr_function.configure(input, &_gauss_pyr, border_mode, constant_border_value);
@@ -95,4 +96,7 @@ void NELaplacianPyramid::configure(const ITensor *input, IPyramid *pyramid, ITen
     }
 
     _depth_function.configure(_conv_pyr.get_pyramid_level(_num_levels - 1), output, ConvertPolicy::WRAP, 0);
+
+    _gauss_pyr.allocate();
+    _conv_pyr.allocate();
 }

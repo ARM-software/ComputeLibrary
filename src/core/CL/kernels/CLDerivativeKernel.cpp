@@ -83,25 +83,28 @@ void CLDerivativeKernel::configure(const ICLTensor *input, ICLTensor *output_x, 
     }
 
     // Create kernel
-    constexpr unsigned int processed_elements = 16;
-    _kernel                                   = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("derivative", build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("derivative", build_opts));
 
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowHorizontal output_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, processed_elements);
-    AccessWindowHorizontal output_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, processed_elements);
+    // Configure kernel window
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_read_rows_per_iteration       = 3;
+
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+
     AccessWindowRectangle  input_access(input->info(), 0, 0, 0, 0);
-
+    AccessWindowHorizontal output_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, num_elems_processed_per_iteration);
     if(_run_derivative_x && _run_derivative_y)
     {
-        input_access = AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, processed_elements, 3);
+        input_access = AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, num_elems_processed_per_iteration, num_read_rows_per_iteration);
     }
     else if(_run_derivative_x)
     {
-        input_access = AccessWindowHorizontal(input->info(), -border_size().left, processed_elements);
+        input_access = AccessWindowHorizontal(input->info(), -border_size().left, num_elems_processed_per_iteration);
     }
     else if(_run_derivative_y)
     {
-        input_access = AccessWindowRectangle(input->info(), 0, -border_size().top, processed_elements, 3);
+        input_access = AccessWindowRectangle(input->info(), 0, -border_size().top, num_elems_processed_per_iteration, num_read_rows_per_iteration);
     }
 
     update_window_and_padding(win,

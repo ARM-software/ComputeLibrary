@@ -138,12 +138,17 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     }
 
     // Configure kernel window
-    const unsigned int     processed_elements = 1;
-    Window                 win                = calculate_max_window(*output->info(), Steps(processed_elements));
+    const unsigned int num_elems_processed_per_iteration = 1;
+
+    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+
     AccessWindowStatic     input_access(input->info(), -pool_pad_x, -pool_pad_y, input_width + _border_size.right, input_height + _border_size.bottom);
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+
     update_window_and_padding(win, input_access, output_access);
+
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
     ICLKernel::configure(win);
 }
 

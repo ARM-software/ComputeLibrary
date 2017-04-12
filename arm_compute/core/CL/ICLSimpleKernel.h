@@ -49,13 +49,13 @@ public:
 
     /** Configure the kernel
      *
-     * @param[in]  input              Source tensor.
-     * @param[out] output             Destination tensor.
-     * @param[in]  processed_elements Number of processed elements per iteration.
-     * @param[in]  border_undefined   (Optional) True if the border mode is undefined. False if it's replicate or constant.
-     * @param[in]  border_size        (Optional) Size of the border.
+     * @param[in]  input                             Source tensor.
+     * @param[out] output                            Destination tensor.
+     * @param[in]  num_elems_processed_per_iteration Number of processed elements per iteration.
+     * @param[in]  border_undefined                  (Optional) True if the border mode is undefined. False if it's replicate or constant.
+     * @param[in]  border_size                       (Optional) Size of the border.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, unsigned int processed_elements, bool border_undefined = false, const BorderSize &border_size = BorderSize());
+    void configure(const ICLTensor *input, ICLTensor *output, unsigned int num_elems_processed_per_iteration, bool border_undefined = false, const BorderSize &border_size = BorderSize());
 
 protected:
     const ICLTensor *_input;

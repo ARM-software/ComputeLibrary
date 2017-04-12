@@ -73,15 +73,20 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, const ICLTens
     _kernel.setArg<cl_float>(idx++, norm_info.kappa());
     _kernel.setArg<cl_uint>(idx++, norm_info.norm_size() / 2);
 
-    // Configure window
-    const unsigned int     processed_elements = (is_in_map) ? 4 : 1;
-    const unsigned int     read_elements      = processed_elements + 2 * (norm_info.norm_size() / 2);
-    Window                 win                = calculate_max_window(*input->info(), Steps(processed_elements));
-    AccessWindowHorizontal input_access(input->info(), -_border_size.left, read_elements);
-    AccessWindowHorizontal squared_input_access(squared_input->info(), -_border_size.left, read_elements);
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
+    // Configure kernel window
+    const unsigned int num_elems_processed_per_iteration = (is_in_map) ? 4 : 1;
+    const unsigned int num_elems_read_per_iteration      = num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2);
+
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input->info(), -_border_size.left, num_elems_read_per_iteration);
+    AccessWindowHorizontal squared_input_access(squared_input->info(), -_border_size.left, num_elems_read_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+
     update_window_and_padding(win, input_access, squared_input_access, output_access);
+
     output_access.set_valid_region(win, input->info()->valid_region());
+
     ICLKernel::configure(win);
 }
 

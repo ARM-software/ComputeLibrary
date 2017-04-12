@@ -23,9 +23,9 @@
  */
 #include "arm_compute/core/NEON/kernels/NEChannelCombineKernel.h"
 
-#include "arm_compute/core/AccessWindowAutoPadding.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/IMultiImage.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/MultiImageInfo.h"
@@ -59,9 +59,9 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane1, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane2, 1, DataType::U8);
 
-    const Format fmt = output->info()->format();
+    const Format &output_format = output->info()->format();
 
-    if(Format::RGBA8888 == fmt)
+    if(output_format == Format::RGBA8888)
     {
         ARM_COMPUTE_ERROR_ON(plane3 == output);
         ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane3, 1, DataType::U8);
@@ -77,7 +77,7 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
     _num_elems_processed_per_iteration = 8;
     _is_parallelizable                 = true;
 
-    switch(fmt)
+    switch(output_format)
     {
         case Format::RGB888:
             _func = &NEChannelCombineKernel::combine_3C;
@@ -86,12 +86,14 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
             _func = &NEChannelCombineKernel::combine_4C;
             break;
         case Format::UYVY422:
-            _x_subsampling[0]                  = 2;
+            _x_subsampling[1]                  = 2;
+            _x_subsampling[2]                  = 2;
             _num_elems_processed_per_iteration = 16;
             _func                              = &NEChannelCombineKernel::combine_YUV_1p<true>;
             break;
         case Format::YUYV422:
-            _x_subsampling[0]                  = 2;
+            _x_subsampling[1]                  = 2;
+            _x_subsampling[2]                  = 2;
             _num_elems_processed_per_iteration = 16;
             _func                              = &NEChannelCombineKernel::combine_YUV_1p<false>;
             break;
@@ -100,18 +102,32 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
             break;
     }
 
-    // Configure kernel window
-    Window                  win = calculate_max_window(*plane0->info(), Steps(_num_elems_processed_per_iteration));
-    AccessWindowAutoPadding output_access(output->info());
+    Window win = calculate_max_window(*plane0->info(), Steps(_num_elems_processed_per_iteration));
 
-    update_window_and_padding(win,
-                              AccessWindowAutoPadding(plane0->info()),
-                              AccessWindowAutoPadding(plane1->info()),
-                              AccessWindowAutoPadding(plane2->info()),
-                              AccessWindowAutoPadding(plane3 == nullptr ? nullptr : plane3->info()),
-                              output_access);
+    AccessWindowHorizontal output_access(output->info(), 0, _num_elems_processed_per_iteration);
+    AccessWindowHorizontal plane0_access(plane0->info(), 0, _num_elems_processed_per_iteration / _x_subsampling[1], 1.f / _x_subsampling[0]);
+    AccessWindowHorizontal plane1_access(plane1->info(), 0, _num_elems_processed_per_iteration / _x_subsampling[1], 1.f / _x_subsampling[1]);
+    AccessWindowHorizontal plane2_access(plane2->info(), 0, _num_elems_processed_per_iteration / _x_subsampling[1], 1.f / _x_subsampling[2]);
+    AccessWindowHorizontal plane3_access(plane3 == nullptr ? nullptr : plane3->info(), 0, _num_elems_processed_per_iteration);
 
-    output_access.set_valid_region();
+    update_window_and_padding(
+        win,
+        plane0_access,
+        plane1_access,
+        plane2_access,
+        plane3_access,
+        output_access);
+
+    ValidRegion valid_region = intersect_valid_regions(plane0->info()->valid_region(),
+                                                       plane1->info()->valid_region(),
+                                                       plane2->info()->valid_region());
+
+    if(plane3 != nullptr)
+    {
+        valid_region = intersect_valid_regions(plane3->info()->valid_region(), valid_region);
+    }
+
+    output_access.set_valid_region(win, ValidRegion(valid_region.anchor, output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
@@ -127,25 +143,29 @@ void NEChannelCombineKernel::configure(const IImage *plane0, const IImage *plane
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane2, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::NV12, Format::NV21, Format::IYUV, Format::YUV444);
 
-    _planes[0]    = plane0;
-    _planes[1]    = plane1;
-    _planes[2]    = plane2;
-    _planes[3]    = nullptr;
-    _output       = nullptr;
-    _output_multi = output;
+    _planes[0]                            = plane0;
+    _planes[1]                            = plane1;
+    _planes[2]                            = plane2;
+    _planes[3]                            = nullptr;
+    _output                               = nullptr;
+    _output_multi                         = output;
+    bool         has_two_planes           = false;
+    unsigned int num_elems_written_plane1 = 8;
 
     _num_elems_processed_per_iteration = 8;
     _is_parallelizable                 = true;
 
-    const Format fmt = output->info()->format();
+    const Format &output_format = output->info()->format();
 
-    switch(fmt)
+    switch(output_format)
     {
         case Format::NV12:
         case Format::NV21:
-            _x_subsampling = { { 1, 2, 2 } };
-            _y_subsampling = { { 1, 2, 2 } };
-            _func          = &NEChannelCombineKernel::combine_YUV_2p;
+            _x_subsampling           = { { 1, 2, 2 } };
+            _y_subsampling           = { { 1, 2, 2 } };
+            _func                    = &NEChannelCombineKernel::combine_YUV_2p;
+            has_two_planes           = true;
+            num_elems_written_plane1 = 16;
             break;
         case Format::IYUV:
             _is_parallelizable = false;
@@ -166,30 +186,26 @@ void NEChannelCombineKernel::configure(const IImage *plane0, const IImage *plane
 
     const unsigned int y_step = *std::max_element(_y_subsampling.begin(), _y_subsampling.end());
 
-    // Configure kernel window
-    unsigned int output_plane_count = 3;
-
-    if(output->info()->format() == Format::NV12 || output->info()->format() == Format::NV21)
-    {
-        output_plane_count = 2;
-    }
-
-    Window                  win = calculate_max_window(*plane0->info(), Steps(_num_elems_processed_per_iteration, y_step));
-    AccessWindowAutoPadding output_access0(output->plane(0)->info());
-    AccessWindowAutoPadding output_access1(output->plane(1)->info());
-    AccessWindowAutoPadding output_access2(output_plane_count == 2 ? nullptr : output->plane(2)->info());
+    Window                win = calculate_max_window(*plane0->info(), Steps(_num_elems_processed_per_iteration, y_step));
+    AccessWindowRectangle output_plane0_access(output->plane(0)->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f, 1.f / _y_subsampling[0]);
+    AccessWindowRectangle output_plane1_access(output->plane(1)->info(), 0, 0, num_elems_written_plane1, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
+    AccessWindowRectangle output_plane2_access(has_two_planes ? nullptr : output->plane(2)->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
 
     update_window_and_padding(win,
-                              AccessWindowAutoPadding(plane0->info()),
-                              AccessWindowAutoPadding(plane1->info()),
-                              AccessWindowAutoPadding(plane2->info()),
-                              output_access0,
-                              output_access1,
-                              output_access2);
+                              AccessWindowHorizontal(plane0->info(), 0, _num_elems_processed_per_iteration),
+                              AccessWindowRectangle(plane1->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]),
+                              AccessWindowRectangle(plane2->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]),
+                              output_plane0_access,
+                              output_plane1_access,
+                              output_plane2_access);
 
-    output_access0.set_valid_region();
-    output_access1.set_valid_region();
-    output_access2.set_valid_region();
+    ValidRegion plane0_valid_region = plane0->info()->valid_region();
+
+    ValidRegion output_plane1_region = has_two_planes ? intersect_valid_regions(plane1->info()->valid_region(), plane2->info()->valid_region()) : plane2->info()->valid_region();
+
+    output_plane0_access.set_valid_region(win, ValidRegion(plane0_valid_region.anchor, output->plane(0)->info()->tensor_shape()));
+    output_plane1_access.set_valid_region(win, ValidRegion(output_plane1_region.anchor, output->plane(1)->info()->tensor_shape()));
+    output_plane2_access.set_valid_region(win, ValidRegion(plane2->info()->valid_region().anchor, output->plane(2)->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
@@ -272,7 +288,7 @@ void NEChannelCombineKernel::combine_YUV_1p(const Window &win)
 {
     // Create sub-sampled uv window and init uv planes
     Window win_uv(win);
-    win_uv.set_dimension_step(0, win.x().step() / _x_subsampling[0]);
+    win_uv.set_dimension_step(0, win.x().step() / _x_subsampling[1]);
     win_uv.validate();
 
     Iterator p0(_planes[0], win);

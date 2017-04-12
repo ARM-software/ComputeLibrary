@@ -62,11 +62,25 @@ public:
     AccessWindowStatic &operator=(AccessWindowStatic &&) = default;
     ~AccessWindowStatic()                                = default;
 
+    /** Set the valid region based on the static access pattern and valid
+     *  region of the inputs.
+     *
+     * @param[in] window             Execution window of the kernel.
+     * @param[in] input_valid_region Combined valid region of all inputs.
+     */
+    void set_valid_region(const Window &window, const ValidRegion &input_valid_region);
+
+    /** Compute the valid region based on the static access pattern and valid region of the inputs.
+     *
+     * @param[in] window             Execution window of the kernel.
+     * @param[in] input_valid_region Combined valid region of all inputs.
+     */
+    ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region) const;
+
     // Inherited methods overriden:
     bool update_window_if_needed(Window &window) const override;
     bool update_padding_if_needed(const Window &window) const override;
-    void set_valid_region(const Window &window, ValidRegion input_valid_region);
-    void set_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) override;
+    ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
 
     TensorInfo *_info;
     int         _start_x;

@@ -24,6 +24,7 @@
 #include "Utils.h"
 
 #include <cctype>
+#include <cerrno>
 #include <iomanip>
 #include <string>
 #include <cerrno>

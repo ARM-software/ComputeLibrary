@@ -35,27 +35,21 @@ PyramidInfo::PyramidInfo()
 {
 }
 
+PyramidInfo::PyramidInfo(size_t num_levels, float scale, size_t width, size_t height, Format format)
+    : PyramidInfo()
+{
+    init(num_levels, scale, width, height, format);
+}
+
+PyramidInfo::PyramidInfo(size_t num_levels, float scale, const TensorShape &tensor_shape, Format format)
+    : PyramidInfo()
+{
+    init(num_levels, scale, tensor_shape, format);
+}
+
 void PyramidInfo::init(size_t num_levels, float scale, size_t width, size_t height, Format format)
 {
-    ARM_COMPUTE_ERROR_ON(0 == num_levels);
-    ARM_COMPUTE_ERROR_ON(0.0f == scale);
-    ARM_COMPUTE_ERROR_ON(0 == width);
-    ARM_COMPUTE_ERROR_ON(0 == height);
-    ARM_COMPUTE_ERROR_ON(Format::IYUV == format);
-    ARM_COMPUTE_ERROR_ON(Format::NV12 == format);
-    ARM_COMPUTE_ERROR_ON(Format::NV21 == format);
-    ARM_COMPUTE_ERROR_ON(Format::UYVY422 == format);
-    ARM_COMPUTE_ERROR_ON(Format::YUV444 == format);
-    ARM_COMPUTE_ERROR_ON(Format::YUYV422 == format);
-    ARM_COMPUTE_ERROR_ON_MSG(0 != _num_levels, "PyramidInfo already initialized");
-    ARM_COMPUTE_ERROR_ON(0 == (width * pow(scale, num_levels)));
-    ARM_COMPUTE_ERROR_ON(0 == (height * pow(scale, num_levels)));
-
-    _num_levels = num_levels;
-    _format     = format;
-    _scale      = scale;
-    _tensor_shape.set(0, width);
-    _tensor_shape.set(1, height);
+    init(num_levels, scale, TensorShape(width, height), format);
 }
 
 void PyramidInfo::init(size_t num_levels, float scale, const TensorShape &tensor_shape, Format format)

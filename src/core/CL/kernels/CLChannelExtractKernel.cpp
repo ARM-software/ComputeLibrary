@@ -69,15 +69,13 @@ void CLChannelExtractKernel::configure(const ICLTensor *input, Channel channel, 
     _subsampling = ((Format::YUYV422 == format || Format::UYVY422 == format) && Channel::Y != channel) ? 2 : 1;
 
     // Configure window
-    Window                win = calculate_max_window(*input->info(), Steps(_num_elems_processed_per_iteration));
-    AccessWindowRectangle output_access(input->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _subsampling, 1.f / _subsampling);
+    Window                 win = calculate_max_window(*input->info(), Steps(_num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input->info(), 0, _num_elems_processed_per_iteration);
+    AccessWindowRectangle  output_access(input->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _subsampling, 1.f / _subsampling);
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(input->info(), 0, _num_elems_processed_per_iteration),
-                              output_access);
+    update_window_and_padding(win, input_access, output_access);
 
     ValidRegion input_valid_region = input->info()->valid_region();
-
     output_access.set_valid_region(win, ValidRegion(std::move(input_valid_region.anchor), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);

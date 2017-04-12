@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.03.1</span>
+   &#160;<span id="projectnumber">17.04</span>
    </div>
   </td>
  </tr>
@@ -148,16 +148,20 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a129a10edb6f1ecc24810945981a7e50e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#a129a10edb6f1ecc24810945981a7e50e">~AccessWindowAutoPadding</a> ()=default</td></tr>
 <tr class="separator:a129a10edb6f1ecc24810945981a7e50e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f947a06cc9bc2896f3d0efc0201ac5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#a7f947a06cc9bc2896f3d0efc0201ac5a">set_valid_region</a> ()</td></tr>
+<tr class="memdesc:a7f947a06cc9bc2896f3d0efc0201ac5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the valid region to match the entire tensor.  <a href="#a7f947a06cc9bc2896f3d0efc0201ac5a">More...</a><br /></td></tr>
 <tr class="separator:a7f947a06cc9bc2896f3d0efc0201ac5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcb885847b100ff54645487092b6af74"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#afcb885847b100ff54645487092b6af74">compute_valid_region</a> () const </td></tr>
+<tr class="memdesc:afcb885847b100ff54645487092b6af74"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a valid region that spans across the entire tensor.  <a href="#afcb885847b100ff54645487092b6af74">More...</a><br /></td></tr>
+<tr class="separator:afcb885847b100ff54645487092b6af74"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ad9fe991410dc3550f6c4fd6e87a708"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">update_window_if_needed</a> (<a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window) const override</td></tr>
 <tr class="memdesc:a7ad9fe991410dc3550f6c4fd6e87a708"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shrink the window if padding is not large enough.  <a href="#a7ad9fe991410dc3550f6c4fd6e87a708">More...</a><br /></td></tr>
 <tr class="separator:a7ad9fe991410dc3550f6c4fd6e87a708"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4b8f5a316fa4d33a1c600a3f27e590f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#ab4b8f5a316fa4d33a1c600a3f27e590f">update_padding_if_needed</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window) const override</td></tr>
 <tr class="memdesc:ab4b8f5a316fa4d33a1c600a3f27e590f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increase the padding to be large enough for the window.  <a href="#ab4b8f5a316fa4d33a1c600a3f27e590f">More...</a><br /></td></tr>
 <tr class="separator:ab4b8f5a316fa4d33a1c600a3f27e590f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2164fd5c171ac4beb159f077210d369c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#a2164fd5c171ac4beb159f077210d369c">set_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> input_valid_region, bool border_undefined, <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> border_size) override</td></tr>
-<tr class="memdesc:a2164fd5c171ac4beb159f077210d369c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the valid region based on access pattern, valid region of the inputs and border mode.  <a href="#a2164fd5c171ac4beb159f077210d369c">More...</a><br /></td></tr>
-<tr class="separator:a2164fd5c171ac4beb159f077210d369c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae80edc371ba9f02d756aed720040878b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#ae80edc371ba9f02d756aed720040878b">compute_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> input_valid_region, bool border_undefined, <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> border_size) const override</td></tr>
+<tr class="memdesc:ae80edc371ba9f02d756aed720040878b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the valid region based on access pattern and valid region of the inputs.  <a href="#ae80edc371ba9f02d756aed720040878b">More...</a><br /></td></tr>
+<tr class="separator:ae80edc371ba9f02d756aed720040878b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_access_window"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_access_window')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_access_window.xhtml">IAccessWindow</a></td></tr>
 <tr class="memitem:abc3996ab36cfa27811d661debfca5b5f inherit pub_methods_classarm__compute_1_1_i_access_window"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_access_window.xhtml#abc3996ab36cfa27811d661debfca5b5f">~IAccessWindow</a> ()=default</td></tr>
 <tr class="separator:abc3996ab36cfa27811d661debfca5b5f inherit pub_methods_classarm__compute_1_1_i_access_window"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -265,6 +269,83 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="afcb885847b100ff54645487092b6af74"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> compute_valid_region </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return a valid region that spans across the entire tensor. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae80edc371ba9f02d756aed720040878b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> compute_valid_region </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;&#160;</td>
+          <td class="paramname"><em>window</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td>
+          <td class="paramname"><em>input_valid_region</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>border_undefined</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a>&#160;</td>
+          <td class="paramname"><em>border_size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute the valid region based on access pattern and valid region of the inputs. </p>
+<dl class="section note"><dt>Note</dt><dd>This method assumes that there is no border.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">window</td><td>Execution window of the kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input_valid_region</td><td>Combined valid region of all inputs. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">border_undefined</td><td>Undefined borders are excluded from the valid region. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">border_size</td><td>Size of the border around the XY-plane of the tensor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classarm__compute_1_1_i_access_window.xhtml#ae2b4aabf2a14dce92e04c0eeb0ab73b9">IAccessWindow</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="ad38db221ef94b6cd0e73f5dfd743414a"></a>
 <div class="memitem">
 <div class="memproto">
@@ -326,64 +407,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-</div>
-</div>
-<a class="anchor" id="a2164fd5c171ac4beb159f077210d369c"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void set_valid_region </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;&#160;</td>
-          <td class="paramname"><em>window</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td>
-          <td class="paramname"><em>input_valid_region</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>border_undefined</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a>&#160;</td>
-          <td class="paramname"><em>border_size</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the valid region based on access pattern, valid region of the inputs and border mode. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">window</td><td>Execution window of the kernel. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">input_valid_region</td><td>Combined valid region of all inputs. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">border_undefined</td><td>Undefined borders are excluded from the valid region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">border_size</td><td>Size of the border around the XY-plane of the tensor. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p>Implements <a class="el" href="classarm__compute_1_1_i_access_window.xhtml#a36a87c14652ac63c1b18b3873d148957">IAccessWindow</a>.</p>
+<p>Set the valid region to match the entire tensor. </p>
 
 </div>
 </div>
@@ -466,7 +490,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml">AccessWindowAutoPadding</a></li>
-    <li class="footer">Generated on Fri Mar 24 2017 17:23:50 for ARM Compute Library by
+    <li class="footer">Generated on Wed Apr 12 2017 14:26:05 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

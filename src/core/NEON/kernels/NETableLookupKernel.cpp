@@ -40,7 +40,7 @@ namespace arm_compute
 {
 class Coordinates;
 
-const unsigned int num_processed_elements = 16;
+constexpr unsigned int num_num_elems_processed_per_iteration = 16;
 } // namespace arm_compute
 
 NETableLookupKernel::NETableLookupKernel()
@@ -54,7 +54,7 @@ void NETableLookupKernel::tableLookup(const Window &window)
     uint32_t     offset = _lut->index_offset();
     size_t       count  = _lut->num_elements();
     const auto   lut    = reinterpret_cast<const T *>(_lut->buffer());
-    unsigned int step   = num_processed_elements;
+    unsigned int step   = num_num_elems_processed_per_iteration;
 
     ARM_COMPUTE_ERROR_ON(lut == nullptr);
 
@@ -85,7 +85,7 @@ template <>
 void NETableLookupKernel::tableLookup<uint8_t>(const Window &window)
 {
     const uint8_t *const lut  = _lut->buffer();
-    unsigned int         step = num_processed_elements;
+    unsigned int         step = num_num_elems_processed_per_iteration;
 
     ARM_COMPUTE_ERROR_ON(lut == nullptr);
 
@@ -130,7 +130,7 @@ void NETableLookupKernel::configure(const ITensor *input, const ILut *lut, ITens
         ARM_COMPUTE_ERROR("Unsupported combination of input and output DataType.");
     }
 
-    INESimpleKernel::configure(input, output, num_processed_elements);
+    INESimpleKernel::configure(input, output, num_num_elems_processed_per_iteration);
 }
 
 void NETableLookupKernel::run(const Window &window)

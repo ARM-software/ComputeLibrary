@@ -54,7 +54,7 @@ public:
 
     /** Initialise the kernel's sources, destinations and border mode.
      *
-     * @param[in]  input            Source tensor. Data types supported: U8, F32. (Must be the same as the output tensor)
+     * @param[in]  input            Source tensor. Data types supported: U8, F32
      * @param[out] output           Destination tensor. Data types supported: same as @p input
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
@@ -72,11 +72,10 @@ protected:
      * @param[in]  input_stride Stride of the input tensor
      */
     using NonMaxSuppr3x3Function = void(const void *__restrict input_ptr, void *__restrict output_ptr, const uint32_t input_stride);
-    /** Non-Maxima suppression function to use for the particular tensor types passed to configure() */
-    NonMaxSuppr3x3Function *_func;
 
-    const ITensor *_input;  /**< Source tensor */
-    ITensor       *_output; /**< Destination tensor */
+    NonMaxSuppr3x3Function *_func;   /**< Non-Maxima suppression function to use for the particular tensor types passed to configure() */
+    const ITensor          *_input;  /**< Source tensor */
+    ITensor                *_output; /**< Destination tensor */
 };
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
@@ -87,8 +86,8 @@ class NENonMaximaSuppression3x3FP16Kernel : public NENonMaximaSuppression3x3Kern
 public:
     /** Initialise the kernel's sources, destinations and border mode.
      *
-     * @param[in]  input            Source tensor. Data types supported: U8, F32. (Must be the same as the output tensor)
-     * @param[out] output           Destination tensor. Data types supported: U8, F32. (Must be the same as the input tensor)
+     * @param[in]  input            Source tensor. Data types supported: U8, F32.
+     * @param[out] output           Destination tensor. Data types supported: same as @p input
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ITensor *input, ITensor *output, bool border_undefined);

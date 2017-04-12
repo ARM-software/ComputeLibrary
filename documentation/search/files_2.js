@@ -142,6 +142,7 @@ var searchData=
   ['convolution_5frectangle_2ecl',['convolution_rectangle.cl',['../convolution__rectangle_8cl.xhtml',1,'']]],
   ['coordinates_2eh',['Coordinates.h',['../_coordinates_8h.xhtml',1,'']]],
   ['cppcornercandidateskernel_2eh',['CPPCornerCandidatesKernel.h',['../_c_p_p_corner_candidates_kernel_8h.xhtml',1,'']]],
+  ['cppkernels_2eh',['CPPKernels.h',['../_c_p_p_kernels_8h.xhtml',1,'']]],
   ['cppscheduler_2eh',['CPPScheduler.h',['../_c_p_p_scheduler_8h.xhtml',1,'']]],
   ['cppsorteuclideandistancekernel_2eh',['CPPSortEuclideanDistanceKernel.h',['../_c_p_p_sort_euclidean_distance_kernel_8h.xhtml',1,'']]]
 ];

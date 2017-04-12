@@ -57,14 +57,19 @@ void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *out
     _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_interleave4x4_" + data_type_name));
 
     // Configure kernel window
-    const unsigned int     processed_elements_x = max_cl_vector_width / data_size_from_type(input->info()->data_type());
-    constexpr unsigned int processed_elements_y = 4;
-    const unsigned int     written_elements     = processed_elements_x * processed_elements_y;
-    Window                 win                  = calculate_max_window(*input->info(), Steps(processed_elements_x, processed_elements_y));
-    AccessWindowRectangle  input_access(input->info(), 0, 0, processed_elements_x, processed_elements_y);
-    AccessWindowRectangle  output_access(output->info(), 0, 0, written_elements, 1, 4.f, 0.25f);
+    const unsigned int     num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input->info()->data_type());
+    constexpr unsigned int num_elems_processed_per_iteration_y = 4;
+    const unsigned int     num_elems_written_per_iteration     = num_elems_processed_per_iteration_x * num_elems_processed_per_iteration_y;
+
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+
+    AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration, 1, 4.f, 0.25f);
+
     update_window_and_padding(win, input_access, output_access);
+
     output_access.set_valid_region(win, input->info()->valid_region());
+
     ICLKernel::configure(win);
 }
 

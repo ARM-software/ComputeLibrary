@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.03.1</span>
+   &#160;<span id="projectnumber">17.04</span>
    </div>
   </td>
  </tr>
@@ -146,6 +146,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4a774ad8d5f4837f3d7de1876d367c5b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a4a774ad8d5f4837f3d7de1876d367c5b">copy_from</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> &amp;src)</td></tr>
 <tr class="memdesc:a4a774ad8d5f4837f3d7de1876d367c5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the content of another tensor.  <a href="#a4a774ad8d5f4837f3d7de1876d367c5b">More...</a><br /></td></tr>
 <tr class="separator:a4a774ad8d5f4837f3d7de1876d367c5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b092c86d6e0fb8a114281565953a02a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0b092c86d6e0fb8a114281565953a02a">print</a> (std::ostream &amp;s, <a class="el" href="structarm__compute_1_1_i_o_format_info.xhtml">IOFormatInfo</a> io_fmt=<a class="el" href="structarm__compute_1_1_i_o_format_info.xhtml">IOFormatInfo</a>()) const </td></tr>
+<tr class="memdesc:a0b092c86d6e0fb8a114281565953a02a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print a tensor to a given stream using user defined formatting information.  <a href="#a0b092c86d6e0fb8a114281565953a02a">More...</a><br /></td></tr>
+<tr class="separator:a0b092c86d6e0fb8a114281565953a02a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for NEON tensor. </p>
@@ -204,7 +207,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">ICLTensor</a>, and <a class="el" href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">Tensor</a>.</p>
 
-<p>Referenced by <a class="el" href="_utils_8cpp_source.xhtml#l00098">test_helpers::draw_detection_rectangle()</a>, and <a class="el" href="_i_tensor_8h_source.xhtml#l00063">ITensor::ptr_to_element()</a>.</p>
+<p>Referenced by <a class="el" href="_utils_8cpp_source.xhtml#l00099">test_helpers::draw_detection_rectangle()</a>, and <a class="el" href="_i_tensor_8h_source.xhtml#l00063">ITensor::ptr_to_element()</a>.</p>
 
 </div>
 </div>
@@ -265,7 +268,7 @@ num_channels() and element_size() of both tensors must match.</dd></dl>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_c_l_tensor.xhtml#a97de03c31e0ca04be6960e2e3ffdca95">CLTensor</a>, and <a class="el" href="classarm__compute_1_1_tensor.xhtml#a97de03c31e0ca04be6960e2e3ffdca95">Tensor</a>.</p>
 
-<p>Referenced by <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00445">arm_compute::colorconvert_iyuv_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00389">arm_compute::colorconvert_nv12_to_rgb()</a>, <a class="el" href="_utils_8cpp_source.xhtml#l00098">test_helpers::draw_detection_rectangle()</a>, <a class="el" href="_validate_8h_source.xhtml#l00259">arm_compute::error_on_data_type_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00227">arm_compute::error_on_data_type_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00162">arm_compute::error_on_mismatching_data_types()</a>, <a class="el" href="_validate_8h_source.xhtml#l00109">arm_compute::have_different_shapes()</a>, and <a class="el" href="_i_tensor_8h_source.xhtml#l00063">ITensor::ptr_to_element()</a>.</p>
+<p>Referenced by <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00445">arm_compute::colorconvert_iyuv_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00389">arm_compute::colorconvert_nv12_to_rgb()</a>, <a class="el" href="_utils_8cpp_source.xhtml#l00099">test_helpers::draw_detection_rectangle()</a>, <a class="el" href="_validate_8h_source.xhtml#l00259">arm_compute::error_on_data_type_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00227">arm_compute::error_on_data_type_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00162">arm_compute::error_on_mismatching_data_types()</a>, <a class="el" href="_validate_8h_source.xhtml#l00109">arm_compute::have_different_shapes()</a>, and <a class="el" href="_i_tensor_8h_source.xhtml#l00063">ITensor::ptr_to_element()</a>.</p>
 
 </div>
 </div>
@@ -294,6 +297,43 @@ num_channels() and element_size() of both tensors must match.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to the tensor's metadata. </dd></dl>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_c_l_tensor.xhtml#aa5b3539cef9e42dee1882e909ba34e4f">CLTensor</a>, and <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa5b3539cef9e42dee1882e909ba34e4f">Tensor</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a0b092c86d6e0fb8a114281565953a02a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void print </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1_i_o_format_info.xhtml">IOFormatInfo</a>&#160;</td>
+          <td class="paramname"><em>io_fmt</em> = <code><a class="el" href="structarm__compute_1_1_i_o_format_info.xhtml">IOFormatInfo</a>()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Print a tensor to a given stream using user defined formatting information. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Output stream </td></tr>
+    <tr><td class="paramname">io_fmt</td><td>Format information </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Referenced by <a class="el" href="_i_tensor_8h_source.xhtml#l00063">ITensor::ptr_to_element()</a>.</p>
 
 </div>
 </div>
@@ -330,7 +370,7 @@ num_channels() and element_size() of both tensors must match.</dd></dl>
 
 <p>Definition at line <a class="el" href="_i_tensor_8h_source.xhtml#l00063">63</a> of file <a class="el" href="_i_tensor_8h_source.xhtml">ITensor.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#ab988210662dbd3bf32fd563c7dd1bdbf">ITensor::buffer()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a4a774ad8d5f4837f3d7de1876d367c5b">ITensor::copy_from()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a8df2a8ec8fcd4258450270f15651b6c9">ITensor::info()</a>, and <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#aaf5cc084e0feafccc97492d688f4e2e2">TensorInfo::offset_element_in_bytes()</a>.</p>
+<p>References <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#ab988210662dbd3bf32fd563c7dd1bdbf">ITensor::buffer()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a4a774ad8d5f4837f3d7de1876d367c5b">ITensor::copy_from()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a8df2a8ec8fcd4258450270f15651b6c9">ITensor::info()</a>, <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#aaf5cc084e0feafccc97492d688f4e2e2">TensorInfo::offset_element_in_bytes()</a>, and <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0b092c86d6e0fb8a114281565953a02a">ITensor::print()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    {</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_i_tensor.xhtml#ab988210662dbd3bf32fd563c7dd1bdbf">buffer</a>() + <a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a8df2a8ec8fcd4258450270f15651b6c9">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_tensor_info.xhtml#aaf5cc084e0feafccc97492d688f4e2e2">offset_element_in_bytes</a>(<span class="keywordtype">id</span>);</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_tensor_info_xhtml_aaf5cc084e0feafccc97492d688f4e2e2"><div class="ttname"><a href="classarm__compute_1_1_tensor_info.xhtml#aaf5cc084e0feafccc97492d688f4e2e2">arm_compute::TensorInfo::offset_element_in_bytes</a></div><div class="ttdeci">size_t offset_element_in_bytes(const Coordinates &amp;pos) const </div><div class="ttdoc">The offset in bytes from the beginning of the memory allocation to access the element at position (x...</div></div>
 <div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_a8df2a8ec8fcd4258450270f15651b6c9"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#a8df2a8ec8fcd4258450270f15651b6c9">arm_compute::ITensor::info</a></div><div class="ttdeci">virtual TensorInfo * info() const =0</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 <div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_ab988210662dbd3bf32fd563c7dd1bdbf"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#ab988210662dbd3bf32fd563c7dd1bdbf">arm_compute::ITensor::buffer</a></div><div class="ttdeci">virtual uint8_t * buffer() const =0</div><div class="ttdoc">Interface to be implemented by the child class to return a pointer to CPU memory. ...</div></div>
@@ -346,7 +386,7 @@ num_channels() and element_size() of both tensors must match.</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a></li>
-    <li class="footer">Generated on Fri Mar 24 2017 17:23:50 for ARM Compute Library by
+    <li class="footer">Generated on Wed Apr 12 2017 14:26:06 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

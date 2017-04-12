@@ -33,14 +33,24 @@ AccessWindowAutoPadding::AccessWindowAutoPadding(TensorInfo *info)
 {
 }
 
-void AccessWindowAutoPadding::set_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size)
+ValidRegion AccessWindowAutoPadding::compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const
 {
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_UNUSED(input_valid_region);
     ARM_COMPUTE_UNUSED(border_undefined);
     ARM_COMPUTE_UNUSED(border_size);
 
-    set_valid_region();
+    return compute_valid_region();
+}
+
+ValidRegion AccessWindowAutoPadding::compute_valid_region() const
+{
+    if(_info == nullptr)
+    {
+        return ValidRegion();
+    }
+
+    return ValidRegion(Coordinates(), _info->tensor_shape());
 }
 
 void AccessWindowAutoPadding::set_valid_region()
@@ -50,7 +60,7 @@ void AccessWindowAutoPadding::set_valid_region()
         return;
     }
 
-    _info->set_valid_region(ValidRegion(Coordinates(), _info->tensor_shape()));
+    _info->set_valid_region(compute_valid_region());
 }
 
 bool AccessWindowAutoPadding::update_window_if_needed(Window &window) const

@@ -167,6 +167,8 @@ public:
             {
                 case Format::U8:
                 {
+                    // We need to convert the data from RGB to grayscale:
+                    // Iterate through every pixel of the image
                     Window window;
                     window.set(Window::DimX, Window::Dimension(0, _width, 1));
                     window.set(Window::DimY, Window::Dimension(0, _height, 1));
@@ -191,14 +193,16 @@ public:
                 }
                 case Format::RGB888:
                 {
+                    // There is no format conversion needed: we can simply copy the content of the input file to the image one row at the time.
+                    // Create a vertical window to iterate through the image's rows:
                     Window window;
-                    window.set(Window::DimX, Window::Dimension(0, _width, _width));
                     window.set(Window::DimY, Window::Dimension(0, _height, 1));
 
                     Iterator out(&image, window);
 
                     execute_window_loop(window, [&](const Coordinates & id)
                     {
+                        // Copy one row from the input file to the current row of the image:
                         _fs.read(reinterpret_cast<std::fstream::char_type *>(out.ptr()), _width * image.info()->element_size());
                     },
                     out);

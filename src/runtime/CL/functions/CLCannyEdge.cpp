@@ -36,7 +36,7 @@
 using namespace arm_compute;
 
 CLCannyEdge::CLCannyEdge()
-    : _sobel(nullptr), _gradient(), _non_max_suppr(), _edge_trace(), _gx(), _gy(), _mag(), _phase(), _nonmax(), _visited(), _recorded(), _l1_list_counter(), _l1_stack()
+    : _sobel(nullptr), _gradient(), _border_mag_gradient(), _non_max_suppr(), _edge_trace(), _gx(), _gy(), _mag(), _phase(), _nonmax(), _visited(), _recorded(), _l1_list_counter(), _l1_stack()
 {
 }
 
@@ -48,7 +48,6 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     ARM_COMPUTE_ERROR_ON(lower_thr > upper_thr);
 
     const unsigned int L1_hysteresis_stack_size = 8;
-    int32_t            num_pixel_to_skip        = (border_mode == BorderMode::UNDEFINED) ? gradient_size / 2 : 0;
     const TensorShape  shape                    = input->info()->tensor_shape();
 
     TensorInfo gradient_info;
@@ -57,44 +56,32 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     // Initialize images
     if(gradient_size < 7)
     {
-        gradient_info.init_auto_padding(shape, 1, arm_compute::DataType::S16);
-        info.init_auto_padding(shape, 1, arm_compute::DataType::U16);
+        gradient_info.init(shape, 1, arm_compute::DataType::S16);
+        info.init(shape, 1, arm_compute::DataType::U16);
     }
     else
     {
-        gradient_info.init_auto_padding(shape, 1, arm_compute::DataType::S32);
-        info.init_auto_padding(shape, 1, arm_compute::DataType::U32);
+        gradient_info.init(shape, 1, arm_compute::DataType::S32);
+        info.init(shape, 1, arm_compute::DataType::U32);
     }
 
     _gx.allocator()->init(gradient_info);
-    _gx.allocator()->allocate();
     _gy.allocator()->init(gradient_info);
-    _gy.allocator()->allocate();
     _mag.allocator()->init(info);
-    _mag.allocator()->allocate();
     _nonmax.allocator()->init(info);
-    _nonmax.allocator()->allocate();
 
     TensorInfo info_u8(shape, 1, arm_compute::DataType::U8);
-    info_u8.auto_padding();
     _phase.allocator()->init(info_u8);
-    _phase.allocator()->allocate();
     _l1_list_counter.allocator()->init(info_u8);
-    _l1_list_counter.allocator()->allocate();
 
     TensorInfo info_u32(shape, 1, arm_compute::DataType::U32);
-    info_u32.auto_padding();
     _visited.allocator()->init(info_u32);
-    _visited.allocator()->allocate();
     _recorded.allocator()->init(info_u32);
-    _recorded.allocator()->allocate();
 
     TensorShape shape_l1_stack = input->info()->tensor_shape();
     shape_l1_stack.set(0, input->info()->dimension(0) * L1_hysteresis_stack_size);
     TensorInfo info_s32(shape_l1_stack, 1, arm_compute::DataType::S32);
-    info_s32.auto_padding();
     _l1_stack.allocator()->init(info_s32);
-    _l1_stack.allocator()->allocate();
 
     // Configure/Init sobelNxN
     if(gradient_size == 3)
@@ -121,15 +108,27 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     }
 
     // Configure gradient
-    _gradient.configure(&_gx, &_gy, &_mag, &_phase, norm_type, num_pixel_to_skip, border_mode == BorderMode::UNDEFINED);
+    _gradient.configure(&_gx, &_gy, &_mag, &_phase, norm_type);
 
     // Configure non-maxima suppression
-    _non_max_suppr.configure(&_mag, &_phase, &_nonmax, lower_thr, num_pixel_to_skip, border_mode == BorderMode::UNDEFINED);
+    _non_max_suppr.configure(&_mag, &_phase, &_nonmax, lower_thr, border_mode == BorderMode::UNDEFINED);
+
+    // Fill border around magnitude image as non-maxima suppression will access
+    // it. If border mode is undefined filling the border is a nop.
+    _border_mag_gradient.configure(&_mag, _non_max_suppr.border_size(), border_mode, constant_border_value);
 
     // Configure edge tracing
-    num_pixel_to_skip += 1;
-    _edge_trace.configure(&_nonmax, output, upper_thr, lower_thr,
-                          &_visited, &_recorded, &_l1_stack, &_l1_list_counter, num_pixel_to_skip, border_mode == BorderMode::UNDEFINED);
+    _edge_trace.configure(&_nonmax, output, upper_thr, lower_thr, &_visited, &_recorded, &_l1_stack, &_l1_list_counter);
+
+    _gx.allocator()->allocate();
+    _gy.allocator()->allocate();
+    _phase.allocator()->allocate();
+    _mag.allocator()->allocate();
+    _visited.allocator()->allocate();
+    _recorded.allocator()->allocate();
+    _l1_stack.allocator()->allocate();
+    _l1_list_counter.allocator()->allocate();
+    _nonmax.allocator()->allocate();
 }
 
 void CLCannyEdge::run()
@@ -139,6 +138,9 @@ void CLCannyEdge::run()
 
     // Run phase and magnitude calculation
     CLScheduler::get().enqueue(_gradient, false);
+
+    // Fill border before non-maxima suppression. Nop for border mode undefined.
+    CLScheduler::get().enqueue(_border_mag_gradient, false);
 
     // Run non max suppresion
     _nonmax.clear(CLScheduler::get().queue());

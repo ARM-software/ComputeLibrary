@@ -63,6 +63,7 @@ private:
     NELogits1DShiftExpSumKernel _shift_exp_sum_kernel;
     NELogits1DNormKernel        _norm_kernel;
     NEFillBorderKernel          _fill_border_kernel;
+    NEFillBorderKernel          _fill_border_kernel_sum;
     Tensor                      _max;
     Tensor                      _sum;
     Tensor                      _tmp;

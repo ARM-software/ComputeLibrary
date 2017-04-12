@@ -55,31 +55,27 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
     ARM_COMPUTE_ERROR_ON(!(block_size == 3 || block_size == 5 || block_size == 7));
 
     const TensorShape shape = input->info()->tensor_shape();
-    TensorInfo        tensor_info;
+    TensorInfo        tensor_info_gxgy;
 
-    /* Allocate memory */
     if(gradient_size < 7)
     {
-        tensor_info.init_auto_padding(shape, Format::S16);
+        tensor_info_gxgy.init(shape, Format::S16);
     }
     else
     {
-        tensor_info.init_auto_padding(shape, Format::S32);
+        tensor_info_gxgy.init(shape, Format::S32);
     }
 
-    _gx.allocator()->init(tensor_info);
-    _gx.allocator()->allocate();
-    _gy.allocator()->init(tensor_info);
-    _gy.allocator()->allocate();
+    _gx.allocator()->init(tensor_info_gxgy);
+    _gy.allocator()->init(tensor_info_gxgy);
 
-    tensor_info.init_auto_padding(shape, Format::F32);
-    _score.allocator()->init(tensor_info);
-    _score.allocator()->allocate();
-    _nonmax.allocator()->init(tensor_info);
-    _nonmax.allocator()->allocate();
+    TensorInfo tensor_info_score(shape, Format::F32);
+    _score.allocator()->init(tensor_info_score);
+    _nonmax.allocator()->init(tensor_info_score);
+
     _corners_list = arm_compute::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
 
-    /* Set/init Sobel kernel accordingly with gradient_size */
+    // Set/init Sobel kernel accordingly with gradient_size
     switch(gradient_size)
     {
         case 3:
@@ -107,11 +103,7 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
             ARM_COMPUTE_ERROR("Gradient size not implemented");
     }
 
-    /* Configure border filling before harris score*/
-    _border_gx.configure(&_gx, block_size / 2, border_mode, constant_border_value);
-    _border_gy.configure(&_gy, block_size / 2, border_mode, constant_border_value);
-
-    /* Normalization factor */
+    // Normalization factor
     const float norm_factor = 1.0f / (255.0f * pow(4.0f, gradient_size / 2) * block_size);
 
     if(use_fp16)
@@ -144,7 +136,7 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
     }
     else
     {
-        /* Set/init Harris Score kernel accordingly with block_size */
+        // Set/init Harris Score kernel accordingly with block_size
         switch(block_size)
         {
             case 3:
@@ -171,38 +163,50 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
                 break;
         }
     }
-    /* Init non-maxima suppression function */
+
+    // Configure border filling before harris score
+    _border_gx.configure(&_gx, _harris_score->border_size(), border_mode, constant_border_value);
+    _border_gy.configure(&_gy, _harris_score->border_size(), border_mode, constant_border_value);
+
+    // Init non-maxima suppression function
     _non_max_suppr.configure(&_score, &_nonmax, border_mode);
 
-    /* Init corner candidates kernel */
+    // Init corner candidates kernel
     _candidates.configure(&_nonmax, _corners_list.get(), &_num_corner_candidates);
 
-    /* Init euclidean distance*/
+    // Init euclidean distance
     _sort_euclidean.configure(_corners_list.get(), corners, &_num_corner_candidates, min_dist);
+
+    // Allocate once all the configure methods have been called
+    _gx.allocator()->allocate();
+    _gy.allocator()->allocate();
+    _score.allocator()->allocate();
+    _nonmax.allocator()->allocate();
 }
 
 void NEHarrisCorners::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
 
-    /* Init to 0 number of corner candidates */
+    // Init to 0 number of corner candidates
     _num_corner_candidates = 0;
 
-    /* Run Sobel kernel */
+    // Run Sobel kernel
     _sobel->run();
 
-    /* Fill border before harris score kernel */
+    // Fill border before harris score kernel
     _border_gx.run(_border_gx.window());
     _border_gy.run(_border_gy.window());
 
-    /* Run harris score kernel */
+    // Run harris score kernel
     NEScheduler::get().multithread(_harris_score.get());
 
-    /* Run non-maxima suppression */
+    // Run non-maxima suppression
     _non_max_suppr.run();
 
-    /* Run corner candidate kernel */
+    // Run corner candidate kernel
     NEScheduler::get().multithread(&_candidates);
 
+    // Run sort & euclidean distance
     _sort_euclidean.run(_sort_euclidean.window());
 }

@@ -48,13 +48,19 @@ void CLMedian3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, boo
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("non_linear_filter_box3x3", { "-DMEDIAN" }));
 
     // Configure kernel window
-    constexpr unsigned int processed_elements(8);
-    constexpr unsigned int read_elements(16);
-    constexpr unsigned int written_elements(8);
-    constexpr unsigned int read_rows(3);
-    Window                 win = calculate_max_window_horizontal(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowHorizontal output_access(output->info(), 0, written_elements);
-    update_window_and_padding(win, AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, read_elements, read_rows), output_access);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
+
+    Window win = calculate_max_window_horizontal(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+
+    AccessWindowRectangle  input_access(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
+
+    update_window_and_padding(win, input_access, output_access);
+
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
+
     ICLKernel::configure(win);
 }

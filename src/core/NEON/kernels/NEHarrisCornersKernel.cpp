@@ -23,7 +23,6 @@
  */
 #include "arm_compute/core/NEON/kernels/NEHarrisCornersKernel.h"
 
-#include "arm_compute/core/AccessWindowAutoPadding.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -233,7 +232,7 @@ inline void harris_score_S32_S32_FLOAT<7>(const void *__restrict in1_ptr, const 
 template <int32_t block_size>
 BorderSize        NEHarrisScoreFP16Kernel<block_size>::border_size() const
 {
-    return BorderSize(block_size / 2);
+    return _border_size;
 }
 
 template <int32_t block_size>
@@ -281,6 +280,7 @@ void NEHarrisScoreFP16Kernel<block_size>::configure(const IImage *input1, const 
     _sensitivity     = sensitivity;
     _strength_thresh = strength_thresh;
     _norm_factor     = norm_factor;
+    _border_size     = BorderSize(block_size / 2);
 
     if(input1->info()->data_type() == DataType::S16)
     {
@@ -293,18 +293,24 @@ void NEHarrisScoreFP16Kernel<block_size>::configure(const IImage *input1, const 
 
     ARM_COMPUTE_ERROR_ON(nullptr == _func);
 
-    const unsigned int processed_elements = 8;
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
+    constexpr unsigned int num_rows_read_per_iteration       = block_size;
 
     // Configure kernel window
-    Window                  win = calculate_max_window(*input1->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowAutoPadding output_access(output->info());
+    Window                 win = calculate_max_window(*input1->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowAutoPadding(input1->info()),
-                              AccessWindowAutoPadding(input2->info()),
+                              AccessWindowRectangle(input1->info(), -_border_size.left, -_border_size.top, num_elems_read_per_iteration, num_rows_read_per_iteration),
+                              AccessWindowRectangle(input2->info(), -_border_size.left, -_border_size.top, num_elems_read_per_iteration, num_rows_read_per_iteration),
                               output_access);
 
-    output_access.set_valid_region();
+    ValidRegion valid_region = intersect_valid_regions(input1->info()->valid_region(),
+                                                       input2->info()->valid_region());
+
+    output_access.set_valid_region(win, valid_region, border_undefined, border_size());
 
     INEKernel::configure(win);
 }
@@ -967,7 +973,7 @@ inline void harris_score7x7_S32_S32_FLOAT(const void *__restrict input1_ptr, con
 } // namespace
 
 INEHarrisScoreKernel::INEHarrisScoreKernel()
-    : _input1(nullptr), _input2(nullptr), _output(nullptr), _sensitivity(0.0f), _strength_thresh(0.0f), _norm_factor(0.0f)
+    : _input1(nullptr), _input2(nullptr), _output(nullptr), _sensitivity(0.0f), _strength_thresh(0.0f), _norm_factor(0.0f), _border_size()
 {
 }
 
@@ -1000,7 +1006,7 @@ void NEHarrisScoreKernel<block_size>::run(const Window &window)
 template <int32_t block_size>
 BorderSize        NEHarrisScoreKernel<block_size>::border_size() const
 {
-    return BorderSize(block_size / 2);
+    return _border_size;
 }
 
 template <int32_t block_size>
@@ -1022,6 +1028,7 @@ void NEHarrisScoreKernel<block_size>::configure(const IImage *input1, const IIma
     _sensitivity     = sensitivity;
     _strength_thresh = strength_thresh;
     _norm_factor     = norm_factor;
+    _border_size     = BorderSize(block_size / 2);
 
     if(input1->info()->data_type() == DataType::S16)
     {
@@ -1062,27 +1069,24 @@ void NEHarrisScoreKernel<block_size>::configure(const IImage *input1, const IIma
 
     ARM_COMPUTE_ERROR_ON(nullptr == _func);
 
-    unsigned int processed_elements = 0;
-
-    if(block_size != 7)
-    {
-        processed_elements = 8;
-    }
-    else
-    {
-        processed_elements = 4;
-    }
+    constexpr unsigned int num_elems_processed_per_iteration = block_size != 7 ? 8 : 4;
+    constexpr unsigned int num_elems_read_per_iteration      = block_size != 7 ? 16 : 12;
+    constexpr unsigned int num_elems_written_per_iteration   = block_size != 7 ? 8 : 4;
+    constexpr unsigned int num_rows_read_per_iteration       = block_size;
 
     // Configure kernel window
-    Window                  win = calculate_max_window(*input1->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowAutoPadding output_access(output->info());
+    Window                 win = calculate_max_window(*input1->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowAutoPadding(input1->info()),
-                              AccessWindowAutoPadding(input2->info()),
+                              AccessWindowRectangle(input1->info(), -_border_size.left, -_border_size.top, num_elems_read_per_iteration, num_rows_read_per_iteration),
+                              AccessWindowRectangle(input2->info(), -_border_size.left, -_border_size.top, num_elems_read_per_iteration, num_rows_read_per_iteration),
                               output_access);
 
-    output_access.set_valid_region();
+    ValidRegion valid_region = intersect_valid_regions(input1->info()->valid_region(),
+                                                       input2->info()->valid_region());
+
+    output_access.set_valid_region(win, valid_region, border_undefined, border_size());
 
     INEKernel::configure(win);
 }

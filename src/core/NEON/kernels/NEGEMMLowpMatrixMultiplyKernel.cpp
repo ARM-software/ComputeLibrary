@@ -67,8 +67,8 @@ void NEGEMMLowpMatrixMultiplyKernel::configure(const ITensor *input0, const ITen
     _output_mult_int = output_mult_int;
     _shift           = shift;
 
-    const unsigned int num_elems_processed_per_iteration_x = 4;
-    const unsigned int num_elems_processed_per_iteration_y = 4;
+    constexpr unsigned int num_elems_processed_per_iteration_x = 4;
+    constexpr unsigned int num_elems_processed_per_iteration_y = 4;
 
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 

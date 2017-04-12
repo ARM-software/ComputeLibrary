@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="5,2640,81,2667"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="5,2691,81,2717"/>
 <area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_canny_edge.xhtml" title="Basic function to execute canny edge on OpenCL. " alt="" coords="159,471,266,497"/>
 <area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_convolution_layer.xhtml" title="Basic function to compute the convolution layer. " alt="" coords="143,521,283,548"/>
 <area shape="rect" id="node4" href="$classarm__compute_1_1_c_l_convolution_square.xhtml" title="Basic function to execute square convolution.Currently it supports 5x5, 7x7, 9x9. ..." alt="" coords="138,573,287,614"/>
@@ -23,35 +23,35 @@
 <area shape="rect" id="node24" href="$classarm__compute_1_1_c_l_sobel7x7.xhtml" title="Basic function to execute sobel 7x7 filter. " alt="" coords="166,1500,259,1527"/>
 <area shape="rect" id="node25" href="$classarm__compute_1_1_c_l_softmax_layer.xhtml" title="Basic function to compute a SoftmaxLayer. " alt="" coords="153,1551,273,1577"/>
 <area shape="rect" id="node26" href="$classarm__compute_1_1_i_c_l_simple_function.xhtml" title="Basic interface for functions which have a single OpenCL kernel. " alt="" coords="146,1601,279,1628"/>
-<area shape="rect" id="node66" href="$classarm__compute_1_1_i_n_e_simple_function.xhtml" title="Basic interface for functions which have a single NEON kernel. " alt="" coords="145,2513,280,2540"/>
-<area shape="rect" id="node106" href="$classarm__compute_1_1_n_e_canny_edge.xhtml" title="Basic function to execute canny edge on NEON. " alt="" coords="158,2564,267,2591"/>
-<area shape="rect" id="node107" href="$classarm__compute_1_1_n_e_convolution5x5.xhtml" title="Basic function to execute convolution of size 5x5. " alt="" coords="147,2615,278,2641"/>
-<area shape="rect" id="node108" href="$classarm__compute_1_1_n_e_convolution7x7.xhtml" title="Basic function to execute convolution of size 7x7. " alt="" coords="147,2665,278,2692"/>
-<area shape="rect" id="node109" href="$classarm__compute_1_1_n_e_convolution9x9.xhtml" title="Basic function to execute convolution of size 9x9. " alt="" coords="147,2716,278,2743"/>
-<area shape="rect" id="node110" href="$classarm__compute_1_1_n_e_convolution_layer.xhtml" title="Basic function to simulate a convolution layer. " alt="" coords="141,2767,284,2793"/>
-<area shape="rect" id="node111" href="$classarm__compute_1_1_n_e_derivative.xhtml" title="Basic function to execute first order derivative operator. " alt="" coords="163,2817,263,2844"/>
-<area shape="rect" id="node112" href="$classarm__compute_1_1_n_e_equalize_histogram.xhtml" title="Basic function to execute histogram equalization. " alt="" coords="137,2868,288,2895"/>
-<area shape="rect" id="node113" href="$classarm__compute_1_1_n_e_fast_corners.xhtml" title="Basic function to execute fast corners. " alt="" coords="156,2919,269,2945"/>
-<area shape="rect" id="node114" href="$classarm__compute_1_1_n_e_fill_border.xhtml" title="Basic function to run NEFillBorderKernel. " alt="" coords="165,2969,261,2996"/>
-<area shape="rect" id="node115" href="$classarm__compute_1_1_n_e_fully_connected_layer.xhtml" title="Basic function to compute a Fully Connected layer on NEON. " alt="" coords="131,3020,295,3047"/>
-<area shape="rect" id="node116" href="$classarm__compute_1_1_n_e_gaussian5x5.xhtml" title="Basic function to execute gaussian filter 5x5. " alt="" coords="154,3071,271,3097"/>
-<area shape="rect" id="node117" href="$classarm__compute_1_1_n_e_gaussian_pyramid.xhtml" title="Common interface for all Gaussian pyramid functions. " alt="" coords="141,3121,285,3148"/>
-<area shape="rect" id="node120" href="$classarm__compute_1_1_n_e_g_e_m_m.xhtml" title="Basic function to execute GEMM on NEON. " alt="" coords="171,3172,254,3199"/>
-<area shape="rect" id="node121" href="$classarm__compute_1_1_n_e_g_e_m_m_lowp.xhtml" title="Basic function to execute GEMMLowp on NEON. " alt="" coords="156,3223,269,3249"/>
-<area shape="rect" id="node122" href="$classarm__compute_1_1_n_e_harris_corners.xhtml" title="Basic function to execute harris corners detection. " alt="" coords="151,3273,274,3300"/>
-<area shape="rect" id="node123" href="$classarm__compute_1_1_n_e_histogram.xhtml" title="Basic function to execute histogram. " alt="" coords="162,3324,263,3351"/>
-<area shape="rect" id="node124" href="$classarm__compute_1_1_n_e_h_o_g_descriptor.xhtml" title="Basic function to calculate HOG descriptor. " alt="" coords="147,3375,278,3401"/>
-<area shape="rect" id="node125" href="$classarm__compute_1_1_n_e_h_o_g_gradient.xhtml" title="Basic function to calculate the gradient for HOG. " alt="" coords="153,3425,273,3452"/>
-<area shape="rect" id="node126" href="$classarm__compute_1_1_n_e_h_o_g_multi_detection.xhtml" title="Basic function to detect multiple objects (or the same object at different scales) on the same input ..." alt="" coords="135,3476,290,3503"/>
-<area shape="rect" id="node127" href="$classarm__compute_1_1_n_e_laplacian_pyramid.xhtml" title="Basic function to execute laplacian pyramid. " alt="" coords="141,3527,285,3553"/>
-<area shape="rect" id="node128" href="$classarm__compute_1_1_n_e_laplacian_reconstruct.xhtml" title="Basic function to execute laplacian reconstruction. " alt="" coords="129,3577,296,3604"/>
-<area shape="rect" id="node129" href="$classarm__compute_1_1_n_e_mean_std_dev.xhtml" title="Basic function to execute mean and std deviation. " alt="" coords="154,3628,271,3655"/>
-<area shape="rect" id="node130" href="$classarm__compute_1_1_n_e_min_max_location.xhtml" title="Basic function to execute min and max location. " alt="" coords="145,3679,281,3705"/>
-<area shape="rect" id="node131" href="$classarm__compute_1_1_n_e_normalization_layer.xhtml" title="Basic function to simulate a normalization layer. " alt="" coords="136,3729,289,3756"/>
-<area shape="rect" id="node132" href="$classarm__compute_1_1_n_e_optical_flow.xhtml" title="Basic function to execute optical flow. " alt="" coords="157,3780,268,3807"/>
-<area shape="rect" id="node133" href="$classarm__compute_1_1_n_e_sobel5x5.xhtml" title="Basic function to execute sobel 5x5 filter. " alt="" coords="165,3831,260,3857"/>
-<area shape="rect" id="node134" href="$classarm__compute_1_1_n_e_sobel7x7.xhtml" title="Basic function to execute sobel 7x7 filter. " alt="" coords="165,3881,260,3908"/>
-<area shape="rect" id="node135" href="$classarm__compute_1_1_n_e_softmax_layer.xhtml" title="Basic function to compute a SoftmaxLayer. " alt="" coords="151,3932,274,3959"/>
+<area shape="rect" id="node66" href="$classarm__compute_1_1_i_n_e_simple_function.xhtml" title="Basic interface for functions which have a single NEON kernel. " alt="" coords="145,2564,280,2591"/>
+<area shape="rect" id="node108" href="$classarm__compute_1_1_n_e_canny_edge.xhtml" title="Basic function to execute canny edge on NEON. " alt="" coords="158,2615,267,2641"/>
+<area shape="rect" id="node109" href="$classarm__compute_1_1_n_e_convolution5x5.xhtml" title="Basic function to execute convolution of size 5x5. " alt="" coords="147,2665,278,2692"/>
+<area shape="rect" id="node110" href="$classarm__compute_1_1_n_e_convolution7x7.xhtml" title="Basic function to execute convolution of size 7x7. " alt="" coords="147,2716,278,2743"/>
+<area shape="rect" id="node111" href="$classarm__compute_1_1_n_e_convolution9x9.xhtml" title="Basic function to execute convolution of size 9x9. " alt="" coords="147,2767,278,2793"/>
+<area shape="rect" id="node112" href="$classarm__compute_1_1_n_e_convolution_layer.xhtml" title="Basic function to simulate a convolution layer. " alt="" coords="141,2817,284,2844"/>
+<area shape="rect" id="node113" href="$classarm__compute_1_1_n_e_derivative.xhtml" title="Basic function to execute first order derivative operator. " alt="" coords="163,2868,263,2895"/>
+<area shape="rect" id="node114" href="$classarm__compute_1_1_n_e_equalize_histogram.xhtml" title="Basic function to execute histogram equalization. " alt="" coords="137,2919,288,2945"/>
+<area shape="rect" id="node115" href="$classarm__compute_1_1_n_e_fast_corners.xhtml" title="Basic function to execute fast corners. " alt="" coords="156,2969,269,2996"/>
+<area shape="rect" id="node116" href="$classarm__compute_1_1_n_e_fill_border.xhtml" title="Basic function to run NEFillBorderKernel. " alt="" coords="165,3020,261,3047"/>
+<area shape="rect" id="node117" href="$classarm__compute_1_1_n_e_fully_connected_layer.xhtml" title="Basic function to compute a Fully Connected layer on NEON. " alt="" coords="131,3071,295,3097"/>
+<area shape="rect" id="node118" href="$classarm__compute_1_1_n_e_gaussian5x5.xhtml" title="Basic function to execute gaussian filter 5x5. " alt="" coords="154,3121,271,3148"/>
+<area shape="rect" id="node119" href="$classarm__compute_1_1_n_e_gaussian_pyramid.xhtml" title="Common interface for all Gaussian pyramid functions. " alt="" coords="141,3172,285,3199"/>
+<area shape="rect" id="node122" href="$classarm__compute_1_1_n_e_g_e_m_m.xhtml" title="Basic function to execute GEMM on NEON. " alt="" coords="171,3223,254,3249"/>
+<area shape="rect" id="node123" href="$classarm__compute_1_1_n_e_g_e_m_m_lowp.xhtml" title="Basic function to execute GEMMLowp on NEON. " alt="" coords="156,3273,269,3300"/>
+<area shape="rect" id="node124" href="$classarm__compute_1_1_n_e_harris_corners.xhtml" title="Basic function to execute harris corners detection. " alt="" coords="151,3324,274,3351"/>
+<area shape="rect" id="node125" href="$classarm__compute_1_1_n_e_histogram.xhtml" title="Basic function to execute histogram. " alt="" coords="162,3375,263,3401"/>
+<area shape="rect" id="node126" href="$classarm__compute_1_1_n_e_h_o_g_descriptor.xhtml" title="Basic function to calculate HOG descriptor. " alt="" coords="147,3425,278,3452"/>
+<area shape="rect" id="node127" href="$classarm__compute_1_1_n_e_h_o_g_gradient.xhtml" title="Basic function to calculate the gradient for HOG. " alt="" coords="153,3476,273,3503"/>
+<area shape="rect" id="node128" href="$classarm__compute_1_1_n_e_h_o_g_multi_detection.xhtml" title="Basic function to detect multiple objects (or the same object at different scales) on the same input ..." alt="" coords="135,3527,290,3553"/>
+<area shape="rect" id="node129" href="$classarm__compute_1_1_n_e_laplacian_pyramid.xhtml" title="Basic function to execute laplacian pyramid. " alt="" coords="141,3577,285,3604"/>
+<area shape="rect" id="node130" href="$classarm__compute_1_1_n_e_laplacian_reconstruct.xhtml" title="Basic function to execute laplacian reconstruction. " alt="" coords="129,3628,296,3655"/>
+<area shape="rect" id="node131" href="$classarm__compute_1_1_n_e_mean_std_dev.xhtml" title="Basic function to execute mean and std deviation. " alt="" coords="154,3679,271,3705"/>
+<area shape="rect" id="node132" href="$classarm__compute_1_1_n_e_min_max_location.xhtml" title="Basic function to execute min and max location. " alt="" coords="145,3729,281,3756"/>
+<area shape="rect" id="node133" href="$classarm__compute_1_1_n_e_normalization_layer.xhtml" title="Basic function to simulate a normalization layer. " alt="" coords="136,3780,289,3807"/>
+<area shape="rect" id="node134" href="$classarm__compute_1_1_n_e_optical_flow.xhtml" title="Basic function to execute optical flow. " alt="" coords="157,3831,268,3857"/>
+<area shape="rect" id="node135" href="$classarm__compute_1_1_n_e_sobel5x5.xhtml" title="Basic function to execute sobel 5x5 filter. " alt="" coords="165,3881,260,3908"/>
+<area shape="rect" id="node136" href="$classarm__compute_1_1_n_e_sobel7x7.xhtml" title="Basic function to execute sobel 7x7 filter. " alt="" coords="165,3932,260,3959"/>
+<area shape="rect" id="node137" href="$classarm__compute_1_1_n_e_softmax_layer.xhtml" title="Basic function to compute a SoftmaxLayer. " alt="" coords="151,3983,274,4009"/>
 <area shape="rect" id="node10" href="$classarm__compute_1_1_c_l_gaussian_pyramid_half.xhtml" title="Basic function to execute gaussian pyramid with HALF scale factor. " alt="" coords="363,5,529,32"/>
 <area shape="rect" id="node11" href="$classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml" title="Basic function to execute gaussian pyramid with ORB scale factor. " alt="" coords="365,56,527,83"/>
 <area shape="rect" id="node27" href="$classarm__compute_1_1_c_l_absolute_difference.xhtml" title="Basic function to run CLAbsoluteDifferenceKernel. " alt="" coords="371,107,521,133"/>
@@ -114,24 +114,26 @@
 <area shape="rect" id="node85" href="$classarm__compute_1_1_n_e_dilate.xhtml" title="Basic function to execute dilate. " alt="" coords="409,2995,483,3021"/>
 <area shape="rect" id="node86" href="$classarm__compute_1_1_n_e_erode.xhtml" title="Basic function to execute erode. " alt="" coords="409,3045,483,3072"/>
 <area shape="rect" id="node87" href="$classarm__compute_1_1_n_e_gaussian3x3.xhtml" title="Basic function to execute gaussian filter 3x3. " alt="" coords="387,3096,505,3123"/>
-<area shape="rect" id="node88" href="$classarm__compute_1_1_n_e_h_o_g_detector.xhtml" title="Basic function to execute HOG detector based on linear SVM. " alt="" coords="385,3147,507,3173"/>
-<area shape="rect" id="node89" href="$classarm__compute_1_1_n_e_integral_image.xhtml" title="Basic function to run a NEIntegralImageKernel. " alt="" coords="386,3197,506,3224"/>
-<area shape="rect" id="node90" href="$classarm__compute_1_1_n_e_magnitude.xhtml" title="Basic function to run NEMagnitudePhaseKernel. " alt="" coords="395,3248,497,3275"/>
-<area shape="rect" id="node91" href="$classarm__compute_1_1_n_e_median3x3.xhtml" title="Basic function to execute median filter. " alt="" coords="394,3299,498,3325"/>
-<area shape="rect" id="node92" href="$classarm__compute_1_1_n_e_non_linear_filter.xhtml" title="Basic function to execute non linear filter. " alt="" coords="381,3349,511,3376"/>
-<area shape="rect" id="node93" href="$classarm__compute_1_1_n_e_non_maxima_suppression3x3.xhtml" title="Basic function to execute non&#45;maxima suppression over a 3x3 window. " alt="" coords="344,3400,548,3427"/>
-<area shape="rect" id="node94" href="$classarm__compute_1_1_n_e_phase.xhtml" title="Basic function to run NEMagnitudePhaseKernel. " alt="" coords="407,3451,485,3477"/>
-<area shape="rect" id="node95" href="$classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml" title="Basic function to run NEPixelWiseMultiplicationKernel. " alt="" coords="358,3501,534,3528"/>
-<area shape="rect" id="node96" href="$classarm__compute_1_1_n_e_pooling_layer.xhtml" title="Basic function to simulate a pooling layer with the specified pooling operation. " alt="" coords="388,3552,504,3579"/>
-<area shape="rect" id="node97" href="$classarm__compute_1_1_n_e_remap.xhtml" title="Basic function to execute remap. " alt="" coords="405,3603,487,3629"/>
-<area shape="rect" id="node98" href="$classarm__compute_1_1_n_e_scale.xhtml" title="Basic function to run NEScaleKernel. " alt="" coords="409,3653,483,3680"/>
-<area shape="rect" id="node99" href="$classarm__compute_1_1_n_e_scharr3x3.xhtml" title="Basic function to execute scharr 3x3 filter. " alt="" coords="396,3704,496,3731"/>
-<area shape="rect" id="node100" href="$classarm__compute_1_1_n_e_sobel3x3.xhtml" title="Basic function to execute sobel 3x3 filter. " alt="" coords="399,3755,493,3781"/>
-<area shape="rect" id="node101" href="$classarm__compute_1_1_n_e_table_lookup.xhtml" title="Basic function to run NETableLookupKernel. " alt="" coords="389,3805,503,3832"/>
-<area shape="rect" id="node102" href="$classarm__compute_1_1_n_e_threshold.xhtml" title="Basic function to run NEThresholdKernel. " alt="" coords="397,3856,495,3883"/>
-<area shape="rect" id="node103" href="$classarm__compute_1_1_n_e_transpose.xhtml" title="Basic function to transpose a matrix on NEON. " alt="" coords="395,3907,497,3933"/>
-<area shape="rect" id="node104" href="$classarm__compute_1_1_n_e_warp_affine.xhtml" title="Basic function to run NEWarpAffineKernel. " alt="" coords="393,3957,499,3984"/>
-<area shape="rect" id="node105" href="$classarm__compute_1_1_n_e_warp_perspective.xhtml" title="Basic function to run NEWarpPerspectiveKernel. " alt="" coords="375,4008,517,4035"/>
-<area shape="rect" id="node118" href="$classarm__compute_1_1_n_e_gaussian_pyramid_half.xhtml" title="Basic function to execute gaussian pyramid with HALF scale factor. " alt="" coords="362,4059,530,4085"/>
-<area shape="rect" id="node119" href="$classarm__compute_1_1_n_e_gaussian_pyramid_orb.xhtml" title="Basic function to execute gaussian pyramid with ORB scale factor. " alt="" coords="363,4109,529,4136"/>
+<area shape="rect" id="node88" href="$classarm__compute_1_1_n_e_g_e_m_m_interleave4x4.xhtml" title="Basic function to execute NEGEMMInterleave4x4Kernel. " alt="" coords="366,3147,526,3173"/>
+<area shape="rect" id="node89" href="$classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w.xhtml" title="Basic function to execute NEGEMMTranspose1xWKernel. " alt="" coords="361,3197,531,3224"/>
+<area shape="rect" id="node90" href="$classarm__compute_1_1_n_e_h_o_g_detector.xhtml" title="Basic function to execute HOG detector based on linear SVM. " alt="" coords="385,3248,507,3275"/>
+<area shape="rect" id="node91" href="$classarm__compute_1_1_n_e_integral_image.xhtml" title="Basic function to run a NEIntegralImageKernel. " alt="" coords="386,3299,506,3325"/>
+<area shape="rect" id="node92" href="$classarm__compute_1_1_n_e_magnitude.xhtml" title="Basic function to run NEMagnitudePhaseKernel. " alt="" coords="395,3349,497,3376"/>
+<area shape="rect" id="node93" href="$classarm__compute_1_1_n_e_median3x3.xhtml" title="Basic function to execute median filter. " alt="" coords="394,3400,498,3427"/>
+<area shape="rect" id="node94" href="$classarm__compute_1_1_n_e_non_linear_filter.xhtml" title="Basic function to execute non linear filter. " alt="" coords="381,3451,511,3477"/>
+<area shape="rect" id="node95" href="$classarm__compute_1_1_n_e_non_maxima_suppression3x3.xhtml" title="Basic function to execute non&#45;maxima suppression over a 3x3 window. " alt="" coords="344,3501,548,3528"/>
+<area shape="rect" id="node96" href="$classarm__compute_1_1_n_e_phase.xhtml" title="Basic function to run NEMagnitudePhaseKernel. " alt="" coords="407,3552,485,3579"/>
+<area shape="rect" id="node97" href="$classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml" title="Basic function to run NEPixelWiseMultiplicationKernel. " alt="" coords="358,3603,534,3629"/>
+<area shape="rect" id="node98" href="$classarm__compute_1_1_n_e_pooling_layer.xhtml" title="Basic function to simulate a pooling layer with the specified pooling operation. " alt="" coords="388,3653,504,3680"/>
+<area shape="rect" id="node99" href="$classarm__compute_1_1_n_e_remap.xhtml" title="Basic function to execute remap. " alt="" coords="405,3704,487,3731"/>
+<area shape="rect" id="node100" href="$classarm__compute_1_1_n_e_scale.xhtml" title="Basic function to run NEScaleKernel. " alt="" coords="409,3755,483,3781"/>
+<area shape="rect" id="node101" href="$classarm__compute_1_1_n_e_scharr3x3.xhtml" title="Basic function to execute scharr 3x3 filter. " alt="" coords="396,3805,496,3832"/>
+<area shape="rect" id="node102" href="$classarm__compute_1_1_n_e_sobel3x3.xhtml" title="Basic function to execute sobel 3x3 filter. " alt="" coords="399,3856,493,3883"/>
+<area shape="rect" id="node103" href="$classarm__compute_1_1_n_e_table_lookup.xhtml" title="Basic function to run NETableLookupKernel. " alt="" coords="389,3907,503,3933"/>
+<area shape="rect" id="node104" href="$classarm__compute_1_1_n_e_threshold.xhtml" title="Basic function to run NEThresholdKernel. " alt="" coords="397,3957,495,3984"/>
+<area shape="rect" id="node105" href="$classarm__compute_1_1_n_e_transpose.xhtml" title="Basic function to transpose a matrix on NEON. " alt="" coords="395,4008,497,4035"/>
+<area shape="rect" id="node106" href="$classarm__compute_1_1_n_e_warp_affine.xhtml" title="Basic function to run NEWarpAffineKernel. " alt="" coords="393,4059,499,4085"/>
+<area shape="rect" id="node107" href="$classarm__compute_1_1_n_e_warp_perspective.xhtml" title="Basic function to run NEWarpPerspectiveKernel. " alt="" coords="375,4109,517,4136"/>
+<area shape="rect" id="node120" href="$classarm__compute_1_1_n_e_gaussian_pyramid_half.xhtml" title="Basic function to execute gaussian pyramid with HALF scale factor. " alt="" coords="362,4160,530,4187"/>
+<area shape="rect" id="node121" href="$classarm__compute_1_1_n_e_gaussian_pyramid_orb.xhtml" title="Basic function to execute gaussian pyramid with ORB scale factor. " alt="" coords="363,4211,529,4237"/>
 </map>

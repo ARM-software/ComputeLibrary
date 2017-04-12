@@ -92,8 +92,14 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NEGEMM.h", "_n_e_g_e_m_m_8h.xhtml", [
       [ "NEGEMM", "classarm__compute_1_1_n_e_g_e_m_m.xhtml", "classarm__compute_1_1_n_e_g_e_m_m" ]
     ] ],
+    [ "NEGEMMInterleave4x4.h", "_n_e_g_e_m_m_interleave4x4_8h.xhtml", [
+      [ "NEGEMMInterleave4x4", "classarm__compute_1_1_n_e_g_e_m_m_interleave4x4.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_interleave4x4" ]
+    ] ],
     [ "NEGEMMLowp.h", "_n_e_g_e_m_m_lowp_8h.xhtml", [
       [ "NEGEMMLowp", "classarm__compute_1_1_n_e_g_e_m_m_lowp.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_lowp" ]
+    ] ],
+    [ "NEGEMMTranspose1xW.h", "_n_e_g_e_m_m_transpose1x_w_8h.xhtml", [
+      [ "NEGEMMTranspose1xW", "classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w" ]
     ] ],
     [ "NEHarrisCorners.h", "_n_e_harris_corners_8h.xhtml", [
       [ "NEHarrisCorners", "classarm__compute_1_1_n_e_harris_corners.xhtml", "classarm__compute_1_1_n_e_harris_corners" ]

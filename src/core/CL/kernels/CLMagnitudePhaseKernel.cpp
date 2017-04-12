@@ -119,19 +119,21 @@ void CLMagnitudePhaseKernel::configure(const ICLTensor *gx, const ICLTensor *gy,
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("magnitude_phase", build_opts));
 
     // Configure kernel window
-    constexpr unsigned int processed_elements(16);
-    Window                 win = calculate_max_window(*gx->info(), Steps(processed_elements));
-    AccessWindowHorizontal output_magnitude_access(magnitude == nullptr ? nullptr : magnitude->info(), 0, processed_elements);
-    AccessWindowHorizontal output_phase_access(phase == nullptr ? nullptr : phase->info(), 0, processed_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+    Window win = calculate_max_window(*gx->info(), Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal gx_access(gx->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal gy_access(gy->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_magnitude_access(magnitude == nullptr ? nullptr : magnitude->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_phase_access(phase == nullptr ? nullptr : phase->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowHorizontal(gx->info(), 0, processed_elements),
-                              AccessWindowHorizontal(gy->info(), 0, processed_elements),
+                              gx_access, gy_access,
                               output_magnitude_access, output_phase_access);
 
     ValidRegion valid_region = intersect_valid_regions(gx->info()->valid_region(),
                                                        gy->info()->valid_region());
-
     output_magnitude_access.set_valid_region(win, valid_region);
     output_phase_access.set_valid_region(win, valid_region);
 

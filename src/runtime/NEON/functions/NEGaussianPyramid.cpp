@@ -76,23 +76,22 @@ void NEGaussianPyramidHalf::configure(const ITensor *input, IPyramid *pyramid, B
         TensorShape tensor_shape = pyramid->info()->tensor_shape();
         tensor_shape.set(0, (pyramid->info()->width() + 1) * SCALE_PYRAMID_HALF);
 
-        PyramidInfo pyramid_info;
-        pyramid_info.init(num_levels - 1, SCALE_PYRAMID_HALF, tensor_shape, Format::S16);
-
-        _tmp.init_auto_padding(pyramid_info);
-        _tmp.allocate();
+        PyramidInfo pyramid_info(num_levels - 1, SCALE_PYRAMID_HALF, tensor_shape, Format::S16);
+        _tmp.init(pyramid_info);
 
         for(unsigned int i = 0; i < num_levels - 1; ++i)
         {
-            /* Configure border */
-            _border_handler[i].configure(_pyramid->get_pyramid_level(i), 2, border_mode, PixelValue(constant_border_value));
-
             /* Configure horizontal kernel */
             _horizontal_reduction[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode == BorderMode::UNDEFINED);
 
             /* Configure vertical kernel */
             _vertical_reduction[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), border_mode == BorderMode::UNDEFINED);
+
+            /* Configure border */
+            _border_handler[i].configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
         }
+
+        _tmp.allocate();
     }
 }
 
@@ -140,11 +139,8 @@ void NEGaussianPyramidOrb::configure(const ITensor *input, IPyramid *pyramid, Bo
         _scale_nearest = arm_compute::cpp14::make_unique<NEScaleKernel[]>(num_levels - 1);
         _offsets       = arm_compute::cpp14::make_unique<Image[]>(num_levels - 1);
 
-        PyramidInfo pyramid_info;
-        pyramid_info.init(num_levels - 1, SCALE_PYRAMID_ORB, pyramid->info()->tensor_shape(), Format::U8);
-
-        _tmp.init_auto_padding(pyramid_info);
-        _tmp.allocate();
+        PyramidInfo pyramid_info(num_levels - 1, SCALE_PYRAMID_ORB, pyramid->info()->tensor_shape(), Format::U8);
+        _tmp.init(pyramid_info);
 
         for(unsigned int i = 0; i < num_levels - 1; ++i)
         {
@@ -153,9 +149,7 @@ void NEGaussianPyramidOrb::configure(const ITensor *input, IPyramid *pyramid, Bo
 
             /* Allocate Image for the offsets used by NEAREST interpolation */
             TensorInfo tensor_info(TensorShape(width, height), Format::S32);
-            tensor_info.auto_padding();
             _offsets[i].allocator()->init(tensor_info);
-            _offsets[i].allocator()->allocate();
 
             /* Configure gaussian 5x5 */
             _gaus5x5[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode, constant_border_value);
@@ -163,7 +157,11 @@ void NEGaussianPyramidOrb::configure(const ITensor *input, IPyramid *pyramid, Bo
             /* Configure scale image kernel */
             _scale_nearest[i].configure(_tmp.get_pyramid_level(i), nullptr, nullptr, _offsets.get() + i, _pyramid->get_pyramid_level(i + 1), InterpolationPolicy::NEAREST_NEIGHBOR,
                                         border_mode == BorderMode::UNDEFINED);
+
+            _offsets[i].allocator()->allocate();
         }
+
+        _tmp.allocate();
     }
 }
 

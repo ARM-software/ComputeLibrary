@@ -23,156 +23,27 @@ import collections
 import os.path
 import re
 import subprocess
+import SCons
 
-VERSION = "v17.03.1"
+VERSION = "v17.04"
+SONAME_VERSION="1.0.0"
 
 vars = Variables('scons')
 vars.Add(EnumVariable('debug','Debug (default=0)', '0', allowed_values=('0','1')))
 vars.Add(EnumVariable('asserts','Enable asserts (This flag is forced to 1 for debug=1) (default=0)', '0', allowed_values=('0','1')))
-vars.Add(EnumVariable('arch','Target Architecture (default=armv7a)', 'armv7a', allowed_values=('armv7a','arm64-v8a','arm64-v8.2-a','x86')))
+vars.Add(EnumVariable('arch','Target Architecture (default=armv7a)', 'armv7a', allowed_values=('armv7a','arm64-v8a','arm64-v8.2-a','x86_32','x86_64')))
 vars.Add(EnumVariable('os','Target OS (default=linux)', 'linux', allowed_values=('linux','android','bare_metal')))
 vars.Add(EnumVariable('build','Build type: (default=cross_compile)', 'cross_compile', allowed_values=('native','cross_compile')))
 vars.Add(EnumVariable('Werror','Enable/disable the -Werror compilation flag (Default=1)', '1', allowed_values=('0','1')))
 vars.Add(EnumVariable('opencl','Enable OpenCL support(Default=1)', '1', allowed_values=('0','1')))
 vars.Add(EnumVariable('neon','Enable Neon support(Default=0)', '0', allowed_values=('0','1')))
 vars.Add(EnumVariable('embed_kernels', 'Embed OpenCL kernels in library binary(Default=0)', '0', allowed_values=('0','1')))
+vars.Add(BoolVariable('set_soname','Set the library\'s soname and shlibversion (Requires SCons 2.4 or above)', 0))
+vars.Add(('extra_cxx_flags','Extra CXX flags to be appended to the build command', ''))
 
 env = Environment(platform='posix', variables = vars, ENV = os.environ)
 
-flags = ['-D_GLIBCXX_USE_NANOSLEEP','-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
-         '-Wextra','-Wno-unused-parameter','-pedantic','-Wdisabled-optimization','-Wformat=2',
-         '-Winit-self','-Wmissing-include-dirs','-Wstrict-overflow=2','-Wswitch-default',
-         '-fpermissive','-std=c++11','-Wno-vla','-Woverloaded-virtual',
-         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow']
-
 Help(vars.GenerateHelpText(env))
-
-if env['neon'] == '1' and env['arch'] == 'x86':
-        print "Cannot compile Neon for x86"
-        Exit(1)
-
-
-if os.environ.get('CXX','g++') == 'clang++':
-    flags += ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags']
-else:
-    flags += ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel']
-
-files_to_delete = []
-
-#Generate string with build options library version to embed in the library:
-git_hash="unknown"
-try:
-    git_hash = subprocess.check_output(["git", "rev-parse","HEAD"])
-except subprocess.CalledProcessError:
-    pass
-
-version_filename = "%s/arm_compute_version.embed" % os.path.dirname(Glob("src/core/*")[0].rstr())
-build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION, vars.args, git_hash.strip())
-open(version_filename,"w").write(build_info)
-files_to_delete.append( version_filename )
-
-def build_library(name, sources, libs, static=False):
-    if static:
-        obj = env.StaticLibrary(name, source = sources, LIBS=libs )
-    else:
-        obj = env.SharedLibrary(name, source = sources, LIBS=libs )
-    Default(obj)
-    return obj
-
-def resolve_includes(target, source, env):
-    # File collection
-    FileEntry = collections.namedtuple('FileEntry', 'target_name file_contents')
-
-    # Include pattern
-    pattern = re.compile("#include \"(.*)\"")
-
-    # Get file contents
-    files = []
-    for s in source:
-        name = s.rstr().split("/")[-1]
-        contents = s.get_contents().splitlines()
-        embed_target_name = s.abspath + "embed"
-        entry = FileEntry(target_name=embed_target_name, file_contents=contents)
-        files.append((name,entry))
-
-    # Create dictionary of tupled list
-    files_dict = dict(files)
-
-    # Check for includes (can only be files in the same folder)
-    final_files = []
-    for file in files:
-        done = False
-        tmp_file = file[1].file_contents
-        while not(done):
-            file_count = 0
-            updated_file = []
-            for line in tmp_file:
-                found = pattern.search(line)
-                if found:
-                    include_file = found.group(1)
-                    data = files_dict[include_file].file_contents
-                    updated_file.extend(data)
-                else:
-                    updated_file.append(line)
-                    file_count += 1
-
-            # Check if all include are replaced.
-            if file_count == len(tmp_file):
-                done = True
-
-            # Update temp file
-            tmp_file = updated_file
-
-        # Append and prepend string literal identifiers and add expanded file to final list
-        tmp_file.insert(0, "R\"(\n")
-        tmp_file.append("\n)\"")
-        entry = FileEntry(target_name=file[1].target_name, file_contents=tmp_file)
-        final_files.append((file[0], entry))
-
-    # Write output files
-    for file in final_files:
-        out_file = open(file[1].target_name, 'w+')
-        contents = file[1].file_contents
-        for line in contents:
-            out_file.write("%s\n" % line)
-
-core_libs = []
-libs = []
-
-prefix=""
-
-if env['arch'] == 'armv7a':
-    flags += ['-march=armv7-a','-mthumb','-mfpu=neon']
-
-    if env['os'] in ['linux','bare_metal']:
-        prefix = "arm-linux-gnueabihf-"
-        flags += ['-mfloat-abi=hard']
-    elif env['os'] == 'android':
-        prefix = "arm-linux-androideabi-"
-        flags += ['-mfloat-abi=softfp']
-elif env['arch'] == 'arm64-v8a':
-    flags += ['-march=armv8-a']
-    if env['os'] in ['linux','bare_metal']:
-        prefix = "aarch64-linux-gnu-"
-    elif env['os'] == 'android':
-        prefix = "aarch64-linux-android-"
-elif env['arch'] == 'arm64-v8.2-a':
-    flags += ['-march=armv8.2-a+fp16+simd']
-    flags += ['-DARM_COMPUTE_ENABLE_FP16']
-    if env['os'] in ['linux','bare_metal']:
-        prefix = "aarch64-linux-gnu-"
-    elif env['os'] == 'android':
-        prefix = "aarch64-linux-android-"
-
-if env['build'] == 'native':
-    prefix = ""
-
-env['CC'] = prefix + os.environ.get('CC','gcc')
-env['CXX'] = prefix + os.environ.get('CXX','g++')
-env['LD'] = prefix + "ld"
-env['AS'] = prefix + "as"
-env['AR'] = prefix + "ar"
-env['RANLIB'] = prefix + "ranlib"
 
 def version_at_least(version, required):
     end = min(len(version), len(required))
@@ -185,18 +56,181 @@ def version_at_least(version, required):
 
     return True
 
-try:
-    compiler_ver = subprocess.check_output( [env['CXX'] , "-dumpversion"] ).strip()
-except OSError:
-    print "ERROR: Compiler not found"
-    compiler_ver = ""
+if not GetOption("help"):
+    flags = ['-D_GLIBCXX_USE_NANOSLEEP','-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
+             '-Wextra','-Wno-unused-parameter','-pedantic','-Wdisabled-optimization','-Wformat=2',
+             '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
+             '-fpermissive','-std=c++11','-Wno-vla','-Woverloaded-virtual',
+             '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow']
 
-if compiler_ver != "":
-    if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
-        print "GCC 6.2.1 or newer is required to compile armv8.2-a code"
+
+    if env['neon'] == '1' and 'x86' in env['arch']:
+            print "Cannot compile NEON for x86"
+            Exit(1)
+
+    if env['set_soname'] and not version_at_least( SCons.__version__, "2.4"):
+        print "Setting the library's SONAME / SHLIBVERSION requires SCons 2.4 or above"
+        print "Update your version of SCons or use set_soname=0"
+        Exit(1)
+
+    if os.environ.get('CXX','g++') == 'clang++':
+        flags += ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags']
+    else:
+        flags += ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel']
+
+    files_to_delete = []
+
+#Generate string with build options library version to embed in the library:
+    git_hash="unknown"
+    try:
+        git_hash = subprocess.check_output(["git", "rev-parse","HEAD"])
+    except OSError: # In case git is not present
+        pass
+    except subprocess.CalledProcessError:
+        pass
+
+    version_filename = "%s/arm_compute_version.embed" % os.path.dirname(Glob("src/core/*")[0].rstr())
+    build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION, vars.args, git_hash.strip())
+    open(version_filename,"w").write(build_info)
+    files_to_delete.append( version_filename )
+
+    def build_library(name, sources, libs, static=False):
+        if static:
+            obj = env.StaticLibrary(name, source = sources, LIBS=libs )
+        else:
+            if env['set_soname']:
+                obj = env.SharedLibrary(name, source = sources, LIBS=libs, SHLIBVERSION=SONAME_VERSION)
+                symlinks = []
+                # Manually delete symlinks or SCons will get confused:
+                directory = os.path.dirname( obj[0].path )
+                library_prefix = obj[0].path[:-(1+len(SONAME_VERSION))]
+                real_lib="%s.%s" % (library_prefix, SONAME_VERSION)
+                for f in Glob( "#%s*" % library_prefix):
+                    if str(f) != real_lib:
+                        symlinks.append("%s/%s" % (directory,str(f)))
+                clean = env.Command('clean-%s' % str(obj[0]), [], Delete(symlinks))
+                Default(clean)
+                Depends(obj, clean)
+            else:
+                obj = env.SharedLibrary(name, source = sources, LIBS=libs)
+
+        Default(obj)
+        return obj
+
+    def resolve_includes(target, source, env):
+        # File collection
+        FileEntry = collections.namedtuple('FileEntry', 'target_name file_contents')
+
+        # Include pattern
+        pattern = re.compile("#include \"(.*)\"")
+
+        # Get file contents
+        files = []
+        for s in source:
+            name = s.rstr().split("/")[-1]
+            contents = s.get_contents().splitlines()
+            embed_target_name = s.abspath + "embed"
+            entry = FileEntry(target_name=embed_target_name, file_contents=contents)
+            files.append((name,entry))
+
+        # Create dictionary of tupled list
+        files_dict = dict(files)
+
+        # Check for includes (can only be files in the same folder)
+        final_files = []
+        for file in files:
+            done = False
+            tmp_file = file[1].file_contents
+            while not(done):
+                file_count = 0
+                updated_file = []
+                for line in tmp_file:
+                    found = pattern.search(line)
+                    if found:
+                        include_file = found.group(1)
+                        data = files_dict[include_file].file_contents
+                        updated_file.extend(data)
+                    else:
+                        updated_file.append(line)
+                        file_count += 1
+
+                # Check if all include are replaced.
+                if file_count == len(tmp_file):
+                    done = True
+
+                # Update temp file
+                tmp_file = updated_file
+
+            # Append and prepend string literal identifiers and add expanded file to final list
+            tmp_file.insert(0, "R\"(\n")
+            tmp_file.append("\n)\"")
+            entry = FileEntry(target_name=file[1].target_name, file_contents=tmp_file)
+            final_files.append((file[0], entry))
+
+        # Write output files
+        for file in final_files:
+            out_file = open(file[1].target_name, 'w+')
+            contents = file[1].file_contents
+            for line in contents:
+                out_file.write("%s\n" % line)
+
+    core_libs = []
+    libs = []
+
+    prefix=""
+
+    if env['arch'] == 'armv7a':
+        flags += ['-march=armv7-a','-mthumb','-mfpu=neon']
+
+        if env['os'] in ['linux','bare_metal']:
+            prefix = "arm-linux-gnueabihf-"
+            flags += ['-mfloat-abi=hard']
+        elif env['os'] == 'android':
+            prefix = "arm-linux-androideabi-"
+            flags += ['-mfloat-abi=softfp']
+    elif env['arch'] == 'arm64-v8a':
+        flags += ['-march=armv8-a']
+        if env['os'] in ['linux','bare_metal']:
+            prefix = "aarch64-linux-gnu-"
+        elif env['os'] == 'android':
+            prefix = "aarch64-linux-android-"
+    elif env['arch'] == 'arm64-v8.2-a':
+        flags += ['-march=armv8.2-a+fp16+simd']
+        flags += ['-DARM_COMPUTE_ENABLE_FP16']
+        if env['os'] in ['linux','bare_metal']:
+            prefix = "aarch64-linux-gnu-"
+        elif env['os'] == 'android':
+            prefix = "aarch64-linux-android-"
+    elif env['arch'] == 'x86_32':
+        flags += ['-m32']
+    elif env['arch'] == 'x86_64':
+        flags += ['-m64']
+
+    if env['build'] == 'native':
+        prefix = ""
+
+    env['CC'] = prefix + os.environ.get('CC','gcc')
+    env['CXX'] = prefix + os.environ.get('CXX','g++')
+    env['LD'] = prefix + "ld"
+    env['AS'] = prefix + "as"
+    env['AR'] = prefix + "ar"
+    env['RANLIB'] = prefix + "ranlib"
+
+    try:
+        compiler_ver = subprocess.check_output( [env['CXX'] , "-dumpversion"] ).strip()
+    except OSError:
+        print "ERROR: Compiler '%s' not found" % env['CXX']
         Exit(1)
 
     if os.environ.get('CXX','g++') == 'g++':
+        if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
+            print "GCC 6.2.1 or newer is required to compile armv8.2-a code"
+            Exit(1)
+
+        if env['arch'] == 'arm64-v8a' and not version_at_least(compiler_ver, '4.9'):
+            print "GCC 4.9 or newer is required to compile NEON code for AArch64"
+            Exit(1)
+
         if version_at_least(compiler_ver, '6.1'):
             flags += ['-Wno-ignored-attributes']
 
@@ -238,6 +272,7 @@ if compiler_ver != "":
     env.Append(CPPPATH=['.','#include'])
     env.Append(LIBPATH=['#build','.'])
     env.Append(CXXFLAGS=flags)
+    env.Append(CXXFLAGS=env['extra_cxx_flags'])
 
     core_files = Glob('src/core/*.cpp')
     core_files += Glob('src/core/CPP/*.cpp')
@@ -246,8 +281,9 @@ if compiler_ver != "":
 
     embed_files = []
     core_files += Glob('src/core/CPP/kernels/*.cpp')
-    # CLHarrisCorners uses the Scheduler to run multithreaded CPP kernels
-    core_files += Glob('src/runtime/CPP/CPPScheduler.cpp')
+
+    files += Glob('src/runtime/CPP/*.cpp')
+
     if env['opencl'] == '1':
         example_libs += ['OpenCL']
         core_files += Glob('src/core/CL/*.cpp')
@@ -295,14 +331,14 @@ if compiler_ver != "":
         objects.append(arm_compute_so)
         Export('arm_compute_so')
 
-    # Delete produced embed files
+# Delete produced embed files
     clean_embed = env.Command('clean-embed', [], Delete(files_to_delete))
     Default(clean_embed)
     env.Depends(clean_embed, objects)
     alias = env.Alias("arm_compute",objects)
     Default(alias)
 
-    # Build examples
+# Build examples
     test_helpers = env.Object("test_helpers/Utils.cpp")
 
     if env['opencl'] == '1' and env['neon'] == '1':

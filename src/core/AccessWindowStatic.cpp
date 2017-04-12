@@ -34,19 +34,19 @@ AccessWindowStatic::AccessWindowStatic(TensorInfo *info, int start_x, int start_
 {
 }
 
-void AccessWindowStatic::set_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size)
+ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const
 {
     ARM_COMPUTE_UNUSED(border_undefined);
     ARM_COMPUTE_UNUSED(border_size);
 
-    set_valid_region(window, input_valid_region);
+    return compute_valid_region(window, std::move(input_valid_region));
 }
 
-void AccessWindowStatic::set_valid_region(const Window &window, ValidRegion input_valid_region)
+ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, ValidRegion input_valid_region) const
 {
     if(_info == nullptr)
     {
-        return;
+        return input_valid_region;
     }
 
     Coordinates &anchor = input_valid_region.anchor;
@@ -70,7 +70,15 @@ void AccessWindowStatic::set_valid_region(const Window &window, ValidRegion inpu
         shape.set(d, std::min<int>(window[d].end(), input_valid_region.shape[d]) - anchor[d]);
     }
 
-    _info->set_valid_region(input_valid_region);
+    return input_valid_region;
+}
+
+void AccessWindowStatic::set_valid_region(const Window &window, const ValidRegion &input_valid_region)
+{
+    if(_info != nullptr)
+    {
+        _info->set_valid_region(compute_valid_region(window, input_valid_region));
+    }
 }
 
 bool AccessWindowStatic::update_window_if_needed(Window &window) const
@@ -159,6 +167,8 @@ bool AccessWindowStatic::update_window_if_needed(Window &window) const
             window_modified = true;
         }
     }
+
+    window.validate();
 
     return window_modified;
 }

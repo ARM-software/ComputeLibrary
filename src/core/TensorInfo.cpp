@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 TensorInfo::TensorInfo()
     : _total_size(0), _fixed_point_pos(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true },
-      _valid_region{ Coordinates(), _tensor_shape }
+      _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }
 {
 }
 
@@ -183,19 +183,12 @@ bool TensorInfo::auto_padding()
 {
     ARM_COMPUTE_ERROR_ON(!_is_resizable);
 
-    const size_t old_offset     = _offset_first_element_in_bytes;
-    const size_t old_total_size = _total_size;
-
     /* Some kernels compute 32 elements at the time, worst case scenario they will read 32 values after the last element */
     const size_t extra_pad_x = 32;
     const size_t pad_x       = 4;
     const size_t pad_y       = (_tensor_shape.num_dimensions() == 1 ? 0 : 4); // Skip pad_y if the tensor has just 1 dimension
 
-    const PaddingSize padding(pad_y, pad_x + extra_pad_x, pad_y, pad_x);
-
-    std::tie(_strides_in_bytes, _offset_first_element_in_bytes, _total_size) = calculate_padding_requirements(padding);
-
-    return (old_offset != _offset_first_element_in_bytes) || (old_total_size != _total_size);
+    return extend_padding(PaddingSize(pad_y, pad_x + extra_pad_x, pad_y, pad_x));
 }
 
 std::tuple<Strides, size_t, size_t> TensorInfo::calculate_padding_requirements(const PaddingSize &padding)
@@ -205,9 +198,9 @@ std::tuple<Strides, size_t, size_t> TensorInfo::calculate_padding_requirements(c
     const size_t stride_y = (padding.left + _tensor_shape[0] + padding.right) * stride_x;
     const size_t stride_z = _tensor_shape.num_dimensions() == 1 ? 0 : (padding.top + _tensor_shape[1] + padding.bottom) * stride_y;
 
-    Strides   required_strides;
-    size_t    required_total_size           = 0;
-    const int required_offset_first_element = padding.left * stride_x + padding.top * stride_y;
+    Strides      required_strides;
+    size_t       required_total_size           = 0;
+    const size_t required_offset_first_element = padding.left * stride_x + padding.top * stride_y;
 
     switch(_tensor_shape.num_dimensions())
     {
@@ -237,33 +230,33 @@ bool TensorInfo::extend_padding(const PaddingSize &padding)
 {
     ARM_COMPUTE_ERROR_ON(!_is_resizable);
 
-    Strides new_strides;
-    size_t  new_offset_first_element = 0;
-    size_t  new_total_size           = 0;
-    std::tie(new_strides, new_offset_first_element, new_total_size) = calculate_padding_requirements(padding);
-
     bool updated = false;
 
-    for(size_t i = 0; i < Strides::num_max_dimensions; ++i)
+    if(padding.top > _padding.top)
     {
-        if(new_strides[i] > _strides_in_bytes[i])
-        {
-            _strides_in_bytes.set(i, new_strides[i]);
-            updated = true;
-        }
+        _padding.top = padding.top;
+        updated      = true;
     }
 
-    if(new_offset_first_element > _offset_first_element_in_bytes)
+    if(padding.right > _padding.right)
     {
-        _offset_first_element_in_bytes = new_offset_first_element;
-        updated                        = true;
+        _padding.right = padding.right;
+        updated        = true;
     }
 
-    if(new_total_size > _total_size)
+    if(padding.bottom > _padding.bottom)
     {
-        _total_size = new_total_size;
-        updated     = true;
+        _padding.bottom = padding.bottom;
+        updated         = true;
     }
+
+    if(padding.left > _padding.left)
+    {
+        _padding.left = padding.left;
+        updated       = true;
+    }
+
+    std::tie(_strides_in_bytes, _offset_first_element_in_bytes, _total_size) = calculate_padding_requirements(_padding);
 
     return updated;
 }

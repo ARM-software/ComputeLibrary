@@ -70,6 +70,7 @@ void CLThresholdKernel::configure(const ICLTensor *input, ICLTensor *output, uin
         _kernel.setArg(idx++, upper);
     }
 
-    //Make sure _kernel is initialized befocre calling the parent's configure
-    ICLSimple2DKernel::configure(input, output, 16U);
+    // Make sure _kernel is initialized before calling the parent's configure
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
 }

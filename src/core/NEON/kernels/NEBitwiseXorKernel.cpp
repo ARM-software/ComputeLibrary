@@ -64,13 +64,13 @@ void NEBitwiseXorKernel::configure(const ITensor *input1, const ITensor *input2,
     _input2 = input2;
     _output = output;
 
-    const unsigned int processed_elements = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
-    Window                 win = calculate_max_window(*input1->info(), Steps(processed_elements));
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
+    Window                 win = calculate_max_window(*input1->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
-    update_window_and_padding(win, AccessWindowHorizontal(input1->info(), 0, processed_elements),
-                              AccessWindowHorizontal(input2->info(), 0, processed_elements), output_access);
+    update_window_and_padding(win, AccessWindowHorizontal(input1->info(), 0, num_elems_processed_per_iteration),
+                              AccessWindowHorizontal(input2->info(), 0, num_elems_processed_per_iteration), output_access);
 
     const ValidRegion valid_region = intersect_valid_regions(input1->info()->valid_region(), input2->info()->valid_region());
 

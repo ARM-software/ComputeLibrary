@@ -7,5 +7,6 @@ var searchData=
   ['ceil',['CEIL',['../namespacearm__compute.xhtml#a1fece1bd804e64f39f602d1c3969849aa5bdce8e6d9dc3efbbd31e90a8a181dff',1,'arm_compute']]],
   ['constant',['CONSTANT',['../namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92',1,'arm_compute']]],
   ['cross',['CROSS',['../namespacearm__compute.xhtml#afdda916edc7502967bbec17ea3c06c02a04dd53a8e6c2306e9bbf944c1d6047f2',1,'arm_compute']]],
-  ['cross_5fmap',['CROSS_MAP',['../namespacearm__compute.xhtml#ad4bb8dabdbf8ad75e34220cc666b59caa980fef040549733973683b1a868f96e5',1,'arm_compute']]]
+  ['cross_5fmap',['CROSS_MAP',['../namespacearm__compute.xhtml#ad4bb8dabdbf8ad75e34220cc666b59caa980fef040549733973683b1a868f96e5',1,'arm_compute']]],
+  ['custom',['Custom',['../structarm__compute_1_1_i_o_format_info.xhtml#a36c28b28da4e04d698d6b598fb1eaca6a90589c47f06eb971d548591f23c285af',1,'arm_compute::IOFormatInfo']]]
 ];

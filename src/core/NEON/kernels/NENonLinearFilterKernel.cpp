@@ -359,21 +359,21 @@ void NENonLinearFilterKernel::configure(const ITensor *input, ITensor *output, N
     ARM_COMPUTE_ERROR_ON(MatrixPattern::OTHER == pattern && nullptr == mask);
 
     // Set class variables
-    _border_size                                   = BorderSize(mask_size / 2);
-    unsigned int num_elems_processed_per_iteration = (MatrixPattern::OTHER == pattern) ? 1 : 8;
-    _input                                         = input;
-    _output                                        = output;
-    _mask                                          = mask;
-    _pattern                                       = pattern;
-    _function                                      = function;
+    _border_size = BorderSize(mask_size / 2);
+    _input       = input;
+    _output      = output;
+    _mask        = mask;
+    _pattern     = pattern;
+    _function    = function;
 
     // Configure kernel window
-    const unsigned int     processed_elements(num_elems_processed_per_iteration);
-    constexpr unsigned int read_elements(16);
-    Window                 win = calculate_max_window(*input->info(), processed_elements, border_undefined, border_size());
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
+    const unsigned int     num_elems_processed_per_iteration = (MatrixPattern::OTHER == pattern) ? 1 : 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+
+    Window                 win = calculate_max_window(*input->info(), num_elems_processed_per_iteration, border_undefined, border_size());
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, read_elements, mask_size),
+                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, mask_size),
                               output_access);
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 

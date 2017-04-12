@@ -42,5 +42,7 @@ void CLBitwiseNotKernel::configure(const ICLTensor *input, ICLTensor *output)
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("bitwise_not"));
 
-    ICLSimple2DKernel::configure(input, output, 16);
+    // Configure kernel window
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
 }

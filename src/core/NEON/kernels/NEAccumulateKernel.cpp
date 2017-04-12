@@ -251,8 +251,8 @@ void NEAccumulateKernel::configure(const ITensor *input, ITensor *accum)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::S16);
 
-    constexpr unsigned int processed_elements = 16;
-    INESimpleKernel::configure(input, accum, processed_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    INESimpleKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
 void NEAccumulateKernel::run(const Window &window)
@@ -282,8 +282,8 @@ void NEAccumulateWeightedKernel::configure(const ITensor *input, float alpha, IT
 
     _alpha = alpha;
 
-    constexpr unsigned int processed_elements = 16;
-    INESimpleKernel::configure(input, accum, processed_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    INESimpleKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
 void NEAccumulateWeightedKernel::run(const Window &window)
@@ -317,8 +317,8 @@ void NEAccumulateSquaredKernel::configure(const ITensor *input, uint32_t shift, 
 
     _shift = shift;
 
-    constexpr unsigned int processed_elements = 16;
-    INESimpleKernel::configure(input, accum, processed_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    INESimpleKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
 void NEAccumulateSquaredKernel::run(const Window &window)

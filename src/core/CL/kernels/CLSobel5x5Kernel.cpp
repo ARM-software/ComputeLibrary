@@ -87,17 +87,17 @@ void CLSobel5x5HorKernel::configure(const ICLTensor *input, ICLTensor *output_x,
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("sobel_separable1x5", build_opts));
 
     // Configure kernel window
-    constexpr unsigned int processed_elements(8);
-    constexpr unsigned int read_elements(16);
-    constexpr unsigned int written_elements(8);
-    Window                 win = calculate_max_window_horizontal(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowHorizontal output_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, written_elements);
-    AccessWindowHorizontal output_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, written_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(input->info(), -border_size().left, read_elements),
-                              output_x_access,
-                              output_y_access);
+    Window win = calculate_max_window_horizontal(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+
+    AccessWindowHorizontal input_access(input->info(), -border_size().left, num_elems_read_per_iteration);
+    AccessWindowHorizontal output_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, num_elems_written_per_iteration);
+    AccessWindowHorizontal output_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, num_elems_written_per_iteration);
+
+    update_window_and_padding(win, input_access, output_x_access, output_y_access);
 
     output_x_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
     output_y_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
@@ -184,19 +184,19 @@ void CLSobel5x5VertKernel::configure(const ICLTensor *input_x, const ICLTensor *
     const ICLTensor *input = _run_sobel_x ? _input_x : _input_y;
 
     // Configure kernel window
-    constexpr unsigned int processed_elements(8);
-    constexpr unsigned int written_elements(8);
-    constexpr unsigned int read_elements(8);
-    constexpr unsigned int read_rows(5);
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowHorizontal output_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, written_elements);
-    AccessWindowHorizontal output_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, written_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 8;
+    constexpr unsigned int num_rows_read_per_iteration       = 5;
 
-    update_window_and_padding(win,
-                              AccessWindowRectangle(input_x == nullptr ? nullptr : input_x->info(), 0, -border_size().top, read_elements, read_rows),
-                              AccessWindowRectangle(input_y == nullptr ? nullptr : input_y->info(), 0, -border_size().top, read_elements, read_rows),
-                              output_x_access,
-                              output_y_access);
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+
+    AccessWindowRectangle  input_x_access(input_x == nullptr ? nullptr : input_x->info(), 0, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration);
+    AccessWindowRectangle  input_y_access(input_y == nullptr ? nullptr : input_y->info(), 0, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration);
+    AccessWindowHorizontal output_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, num_elems_written_per_iteration);
+    AccessWindowHorizontal output_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, num_elems_written_per_iteration);
+
+    update_window_and_padding(win, input_x_access, input_y_access, output_x_access, output_y_access);
 
     output_x_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
     output_y_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());

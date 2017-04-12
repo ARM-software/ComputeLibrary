@@ -2,6 +2,7 @@ var searchData=
 [
   ['pad',['pad',['../classarm__compute_1_1_pad_stride_info.xhtml#a9a9d6d62752247f733a3466b484e08b9',1,'arm_compute::PadStrideInfo']]],
   ['pad_5fstride_5finfo',['pad_stride_info',['../classarm__compute_1_1_pooling_layer_info.xhtml#a3c82dfc72060f59eccf0bd096b81c5d5',1,'arm_compute::PoolingLayerInfo']]],
+  ['padding',['padding',['../classarm__compute_1_1_tensor_info.xhtml#ad13a67d4dbc337c707a76401dc103ff3',1,'arm_compute::TensorInfo']]],
   ['paddingsize',['PaddingSize',['../namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da',1,'arm_compute']]],
   ['padstrideinfo',['PadStrideInfo',['../classarm__compute_1_1_pad_stride_info.xhtml#aebf88ce57c0ad3d796ca66edb8a43e1a',1,'arm_compute::PadStrideInfo']]],
   ['padstrideinfo',['PadStrideInfo',['../classarm__compute_1_1_pad_stride_info.xhtml',1,'arm_compute']]],
@@ -32,6 +33,14 @@ var searchData=
   ['poolingtype',['PoolingType',['../namespacearm__compute.xhtml#a9172da722f0a434e5cc07c0a3c115d93',1,'arm_compute']]],
   ['ppmloader',['PPMLoader',['../classtest__helpers_1_1_p_p_m_loader.xhtml',1,'test_helpers']]],
   ['ppmloader',['PPMLoader',['../classtest__helpers_1_1_p_p_m_loader.xhtml#a49afa04c8a5fd9ead48e07440b37294c',1,'test_helpers::PPMLoader']]],
+  ['precision',['precision',['../structarm__compute_1_1_i_o_format_info.xhtml#a1fba9343eade93326cb985cfcb6de487',1,'arm_compute::IOFormatInfo']]],
+  ['precision_5ftype',['precision_type',['../structarm__compute_1_1_i_o_format_info.xhtml#ad53ff460a7430f45c22b27aad707e41f',1,'arm_compute::IOFormatInfo']]],
+  ['precisiontype',['PrecisionType',['../structarm__compute_1_1_i_o_format_info.xhtml#a36c28b28da4e04d698d6b598fb1eaca6',1,'arm_compute::IOFormatInfo']]],
+  ['print',['print',['../classarm__compute_1_1_i_tensor.xhtml#a0b092c86d6e0fb8a114281565953a02a',1,'arm_compute::ITensor']]],
+  ['print_5fconsecutive_5felements',['print_consecutive_elements',['../namespacearm__compute.xhtml#a51a0d2ae440bc8cab3fbbe84bfea8b1d',1,'arm_compute']]],
+  ['print_5fconsecutive_5felements_5fimpl',['print_consecutive_elements_impl',['../namespacearm__compute.xhtml#aa3a28b8acd21301990e06377c64e1276',1,'arm_compute']]],
+  ['print_5fregion',['print_region',['../structarm__compute_1_1_i_o_format_info.xhtml#a3e3b8af91d2afbfeed14560f2070fd50',1,'arm_compute::IOFormatInfo']]],
+  ['printregion',['PrintRegion',['../structarm__compute_1_1_i_o_format_info.xhtml#ae283722f31a4c59039f9abd44f10dbd0',1,'arm_compute::IOFormatInfo']]],
   ['program',['Program',['../classarm__compute_1_1_program.xhtml',1,'arm_compute']]],
   ['program',['Program',['../classarm__compute_1_1_program.xhtml#ad00a93de0aaf77172116c42bed3a5627',1,'arm_compute::Program::Program()'],['../classarm__compute_1_1_program.xhtml#ab761eeac6f1072ad0c2920feeb0a8076',1,'arm_compute::Program::Program(cl::Context context, std::string name, std::string source)'],['../classarm__compute_1_1_program.xhtml#a1615f70129362da8c0c0cd82ef6c1b44',1,'arm_compute::Program::Program(cl::Context context, cl::Device device, std::string name, std::vector&lt; unsigned char &gt; binary)'],['../classarm__compute_1_1_program.xhtml#a40ae1e88dc2e254ba8304fbc13349efb',1,'arm_compute::Program::Program(const Program &amp;)=default'],['../classarm__compute_1_1_program.xhtml#a466ef007aa3d82a7b5910fac373a3a11',1,'arm_compute::Program::Program(Program &amp;&amp;)=default']]],
   ['ptr',['ptr',['../struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32',1,'Vector::ptr()'],['../struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32',1,'Image::ptr()'],['../struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32',1,'Tensor3D::ptr()'],['../classarm__compute_1_1_iterator.xhtml#a2f0d6383162e1af2df323c456a9335d3',1,'arm_compute::Iterator::ptr()']]],
@@ -40,6 +49,6 @@ var searchData=
   ['pyramid',['Pyramid',['../classarm__compute_1_1_pyramid.xhtml',1,'arm_compute']]],
   ['pyramid_2eh',['Pyramid.h',['../_pyramid_8h.xhtml',1,'']]],
   ['pyramidinfo',['PyramidInfo',['../classarm__compute_1_1_pyramid_info.xhtml',1,'arm_compute']]],
-  ['pyramidinfo',['PyramidInfo',['../classarm__compute_1_1_pyramid_info.xhtml#a9e7e3f78b86c0a7f2cdd1ab1e836b2ed',1,'arm_compute::PyramidInfo::PyramidInfo()'],['../classarm__compute_1_1_pyramid_info.xhtml#a9ace7670f345dde6c78d6b3314f3d756',1,'arm_compute::PyramidInfo::PyramidInfo(const PyramidInfo &amp;)=default'],['../classarm__compute_1_1_pyramid_info.xhtml#ab38f8d031a5cb0f5d807a180e7107fdd',1,'arm_compute::PyramidInfo::PyramidInfo(PyramidInfo &amp;&amp;)=default']]],
+  ['pyramidinfo',['PyramidInfo',['../classarm__compute_1_1_pyramid_info.xhtml#a9e7e3f78b86c0a7f2cdd1ab1e836b2ed',1,'arm_compute::PyramidInfo::PyramidInfo()'],['../classarm__compute_1_1_pyramid_info.xhtml#a9ace7670f345dde6c78d6b3314f3d756',1,'arm_compute::PyramidInfo::PyramidInfo(const PyramidInfo &amp;)=default'],['../classarm__compute_1_1_pyramid_info.xhtml#ab38f8d031a5cb0f5d807a180e7107fdd',1,'arm_compute::PyramidInfo::PyramidInfo(PyramidInfo &amp;&amp;)=default'],['../classarm__compute_1_1_pyramid_info.xhtml#a6365834dc65fb5cc59cd17aea308db13',1,'arm_compute::PyramidInfo::PyramidInfo(size_t num_levels, float scale, size_t width, size_t height, Format format)'],['../classarm__compute_1_1_pyramid_info.xhtml#ae79dbf996c991c72eee4f1d9122152ef',1,'arm_compute::PyramidInfo::PyramidInfo(size_t num_levels, float scale, const TensorShape &amp;tensor_shape, Format format)']]],
   ['pyramidinfo_2eh',['PyramidInfo.h',['../_pyramid_info_8h.xhtml',1,'']]]
 ];

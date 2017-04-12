@@ -76,6 +76,13 @@ public:
      * @param[in] src Source tensor to copy from.
      */
     void copy_from(const ITensor &src);
+
+    /** Print a tensor to a given stream using user defined formatting information
+     *
+     * @param s      Output stream
+     * @param io_fmt Format information
+     */
+    void print(std::ostream &s, IOFormatInfo io_fmt = IOFormatInfo()) const;
 };
 
 using IImage = ITensor;

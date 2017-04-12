@@ -60,7 +60,6 @@ void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonma
     ARM_COMPUTE_ERROR_ON(threshold < 1 && threshold > 255);
 
     TensorInfo tensor_info(input->info()->tensor_shape(), 1, DataType::U8);
-
     _output.allocator()->init(tensor_info);
 
     _non_max               = nonmax_suppression;
@@ -83,9 +82,11 @@ void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonma
 
         _suppr_func.configure(&_output, &_suppr, border_mode);
         _copy_array_kernel.configure(&_suppr, update_number, corners, &_num_buffer);
+
         _suppr.allocator()->allocate();
     }
 
+    // Allocate intermediate tensors
     _output.allocator()->allocate();
 }
 

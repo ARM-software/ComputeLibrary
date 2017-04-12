@@ -27,7 +27,6 @@
 #include "arm_compute/core/NEON/kernels/NEFastCornersKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillArrayKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillInnerBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NENonMaximaSuppression3x3Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Array.h"
@@ -44,7 +43,6 @@ using IImage = ITensor;
 /** Basic function to execute fast corners. This function call the following NEON kernels:
  *
  * -# @ref NEFastCornersKernel
- * -# @ref NEFillInnerBorderKernel (executed if nonmax_suppression == true)
  * -# @ref NENonMaximaSuppression3x3Kernel (executed if nonmax_suppression == true)
  * -# @ref NEFillArrayKernel
  *
@@ -74,7 +72,6 @@ private:
     NEFillBorderKernel              _border_handler;
     NENonMaximaSuppression3x3Kernel _nonmax_kernel;
     NEFillArrayKernel               _fill_kernel;
-    NEFillInnerBorderKernel         _out_border_handler_kernel;
     Image                           _output;
     Image                           _suppressed;
     bool                            _non_max;

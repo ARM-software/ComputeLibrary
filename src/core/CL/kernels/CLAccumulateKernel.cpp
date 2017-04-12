@@ -41,9 +41,9 @@ void CLAccumulateKernel::configure(const ICLTensor *input, ICLTensor *accum)
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("accumulate"));
 
-    //Make sure _kernel is initialized before calling the parent's configure
-    constexpr unsigned int processed_elements = 16;
-    ICLSimple2DKernel::configure(input, accum, processed_elements);
+    // Make sure _kernel is initialized before calling the parent's configure
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    ICLSimple2DKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
 void CLAccumulateWeightedKernel::configure(const ICLTensor *input, float alpha, ICLTensor *accum)
@@ -52,14 +52,16 @@ void CLAccumulateWeightedKernel::configure(const ICLTensor *input, float alpha, 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(alpha < 0.0 || alpha > 1.0);
 
-    constexpr unsigned int processed_elements = 16;
-    ICLSimple2DKernel::configure(input, accum, processed_elements);
-
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("accumulate_weighted"));
 
+    // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg(idx++, alpha);
+
+    // Configure kernel window
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    ICLSimple2DKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
 void CLAccumulateSquaredKernel::configure(const ICLTensor *input, uint32_t shift, ICLTensor *accum)
@@ -68,12 +70,14 @@ void CLAccumulateSquaredKernel::configure(const ICLTensor *input, uint32_t shift
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::S16);
     ARM_COMPUTE_ERROR_ON(shift > 15);
 
-    constexpr unsigned int processed_elements = 16;
-    ICLSimple2DKernel::configure(input, accum, processed_elements);
-
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("accumulate_squared"));
 
+    // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg(idx++, shift);
+
+    // Configure kernel window
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    ICLSimple2DKernel::configure(input, accum, num_elems_processed_per_iteration);
 }

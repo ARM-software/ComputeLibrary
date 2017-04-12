@@ -58,12 +58,16 @@ public:
     AccessWindowAutoPadding &operator=(AccessWindowAutoPadding &&) = default;
     ~AccessWindowAutoPadding()                                     = default;
 
+    /** Set the valid region to match the entire tensor. */
     void set_valid_region();
+
+    /** Return a valid region that spans across the entire tensor. */
+    ValidRegion compute_valid_region() const;
 
     // Inherited methods overridden:
     bool update_window_if_needed(Window &window) const override;
     bool update_padding_if_needed(const Window &window) const override;
-    void set_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) override;
+    ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
 
 private:
     TensorInfo *_info;

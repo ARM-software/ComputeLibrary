@@ -116,6 +116,37 @@ public:
         _num_dimensions = num_dimensions;
     }
 
+    /** Returns a read/write iterator that points to the first element in the dimension array. */
+    typename std::array<T, num_max_dimensions>::iterator begin()
+    {
+        return _id.begin();
+    }
+    /** Returns a read-only (constant) iterator that points to the first element in the dimension array. */
+    typename std::array<T, num_max_dimensions>::const_iterator begin() const
+    {
+        return _id.begin();
+    }
+    /** Returns a read-only (constant) iterator that points to the first element in the dimension array. */
+    typename std::array<T, num_max_dimensions>::const_iterator cbegin() const
+    {
+        return begin();
+    }
+    /** Returns a read/write iterator that points one past the last element in the dimension array. */
+    typename std::array<T, num_max_dimensions>::iterator end()
+    {
+        return _id.end();
+    }
+    /** Returns a read-only (constant) iterator that points one past the last element in the dimension array. */
+    typename std::array<T, num_max_dimensions>::const_iterator end() const
+    {
+        return _id.end();
+    }
+    /** Returns a read-only (constant) iterator that points one past the last element in the dimension array. */
+    typename std::array<T, num_max_dimensions>::const_iterator cend() const
+    {
+        return end();
+    }
+
 protected:
     std::array<T, num_max_dimensions> _id;
     size_t _num_dimensions{ 0 };

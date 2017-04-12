@@ -104,9 +104,9 @@ private:
     void init_keypoints(int start, int end);
     /** Compute the structure tensor A^T * A based on the scharr gradients I_x and I_y
      *
-     * @param[in]  keypoint   Keypoint for which gradients are computed
-     * @param[out] bilinear_x Intermediate interpolated data for X gradient
-     * @param[out] bilinear_y Intermediate interpolated data for Y gradient
+     * @param[in]  keypoint    Keypoint for which gradients are computed
+     * @param[out] bilinear_ix Intermediate interpolated data for X gradient
+     * @param[out] bilinear_iy Intermediate interpolated data for Y gradient
      *
      * @return Values A11, A12, A22
      */
@@ -115,8 +115,8 @@ private:
      *
      * @param[in] old_keypoint Old keypoint for which gradient is computed
      * @param[in] new_keypoint New keypoint for which gradient is computed
-     * @param[in] bilinear_x   Intermediate interpolated data for X gradient
-     * @param[in] bilinear_y   Intermediate interpolated data for Y gradient
+     * @param[in] bilinear_ix  Intermediate interpolated data for X gradient
+     * @param[in] bilinear_iy  Intermediate interpolated data for Y gradient
      *
      * @return Values b1, b2
      */

@@ -342,15 +342,15 @@ void NEConvolutionKernel<matrix_size>::configure(const ITensor *input, ITensor *
     }
 
     // Configure kernel window
-    constexpr unsigned int processed_elements(8);
-    constexpr unsigned int read_elements(16);
-    constexpr unsigned int written_elements(8);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
 
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowHorizontal output_access(output->info(), 0, written_elements);
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, read_elements, matrix_size),
+                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, matrix_size),
                               output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
@@ -671,15 +671,15 @@ void NESeparableConvolutionHorKernel<matrix_size>::configure(const ITensor *inpu
     _border_size = BorderSize(border_undefined ? 0 : matrix_size / 2, matrix_size / 2);
 
     // Configure kernel window
-    constexpr unsigned int processed_elements(8);
-    constexpr unsigned int read_elements(16);
-    constexpr unsigned int written_elements(8);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
 
-    Window                 win = calculate_max_window_horizontal(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowHorizontal output_access(output->info(), 0, written_elements);
+    Window                 win = calculate_max_window_horizontal(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowHorizontal(input->info(), -border_size().left, read_elements),
+                              AccessWindowHorizontal(input->info(), -border_size().left, num_elems_read_per_iteration),
                               output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
@@ -1109,15 +1109,15 @@ void NESeparableConvolutionVertKernel<matrix_size>::configure(const ITensor *inp
     _scale = scale;
 
     // Configure kernel window
-    constexpr unsigned int processed_elements(16);
-    constexpr unsigned int read_elements(16);
-    constexpr unsigned int written_elements(16);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 16;
 
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowHorizontal output_access(output->info(), 0, written_elements);
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), 0, -border_size().top, read_elements, matrix_size),
+                              AccessWindowRectangle(input->info(), 0, -border_size().top, num_elems_read_per_iteration, matrix_size),
                               output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
@@ -1439,15 +1439,15 @@ void NEConvolutionRectangleKernel::configure(const ITensor *input, ITensor *outp
     ARM_COMPUTE_ERROR_ON(_func_idx > (_nr_supported_sizes * _nr_supported_sizes));
 
     // Configure kernel window
-    constexpr unsigned int processed_elements(8);
-    constexpr unsigned int read_elements(16);
-    constexpr unsigned int written_elements(8);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
 
-    Window                 win           = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, _border_size);
-    AccessWindowHorizontal output_access = AccessWindowHorizontal(output->info(), 0, written_elements);
+    Window                 win           = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, _border_size);
+    AccessWindowHorizontal output_access = AccessWindowHorizontal(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), -_border_size.left, -_border_size.top, read_elements, height),
+                              AccessWindowRectangle(input->info(), -_border_size.left, -_border_size.top, num_elems_read_per_iteration, height),
                               output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, _border_size);

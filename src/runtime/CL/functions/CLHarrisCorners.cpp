@@ -68,6 +68,7 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     TensorInfo info_f32(shape, 1, DataType::F32);
     _score.allocator()->init(info_f32);
     _nonmax.allocator()->init(info_f32);
+
     _corners_list = arm_compute::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
 
     /* Set/init Sobel kernel accordingly with gradient_size */

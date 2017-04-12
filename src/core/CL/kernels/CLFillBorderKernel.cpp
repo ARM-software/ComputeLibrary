@@ -105,13 +105,6 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     };
     const unsigned int total_valid_width = border_size.left + valid_width + border_size.right;
 
-    // Configure kernel window
-    Window win;
-    win.set(Window::DimX, Window::Dimension(0, total_valid_width + valid_height));
-    win.set(Window::DimY, Window::Dimension(0, 1, 1));
-    win.use_tensor_dimensions(tensor->info(), Window::DimZ);
-    ICLKernel::configure(win);
-
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the tensor parameters
     ICLKernel::add_argument<cl_uint>(idx, valid_width);
@@ -148,6 +141,13 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
                 ARM_COMPUTE_ERROR("Not handled");
         }
     }
+
+    // Configure kernel window
+    Window win;
+    win.set(Window::DimX, Window::Dimension(0, total_valid_width + valid_height));
+    win.set(Window::DimY, Window::Dimension(0, 1, 1));
+    win.use_tensor_dimensions(tensor->info(), Window::DimZ);
+    ICLKernel::configure(win);
 }
 
 void CLFillBorderKernel::run(const Window &window, cl::CommandQueue &queue)

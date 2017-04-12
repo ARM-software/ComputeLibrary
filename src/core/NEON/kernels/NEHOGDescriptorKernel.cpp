@@ -655,10 +655,10 @@ void NEHOGOrientationBinningKernel::configure(const ITensor *input_magnitude, co
         _func = &cell_width_ge8;
     }
 
-    const unsigned int processed_elements = 1;
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     // Configure kernel window
-    Window                  win = calculate_max_window(*output->info(), Steps(processed_elements));
+    Window                  win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowAutoPadding output_access(output->info());
 
     update_window_and_padding(win,
@@ -747,10 +747,10 @@ void NEHOGBlockNormalizationKernel::configure(const ITensor *input, ITensor *out
             break;
     }
 
-    const unsigned int processed_elements = 1;
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     // Configure kernel window
-    Window                  win = calculate_max_window(*output->info(), Steps(processed_elements));
+    Window                  win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowAutoPadding output_access(output->info());
 
     update_window_and_padding(win,

@@ -6,7 +6,10 @@ var NAVTREE =
         [ "Contact / Support", "index.xhtml#S0_1_contact", null ]
       ] ],
       [ "File organisation", "index.xhtml#S1_file_organisation", null ],
-      [ "Versions changelog", "index.xhtml#S2_versions_changelog", null ],
+      [ "Release versions and changelog", "index.xhtml#S2_versions_changelog", [
+        [ "Release versions", "index.xhtml#S2_1_versions", null ],
+        [ "Changelog", "index.xhtml#S2_2_changelog", null ]
+      ] ],
       [ "How to build the library and the examples", "index.xhtml#S3_how_to_build", [
         [ "Build options", "index.xhtml#S3_1_build_options", null ],
         [ "Linux", "index.xhtml#S3_2_linux", [
@@ -38,7 +41,7 @@ var NAVTREE =
           ] ],
           [ "Tensors", "index.xhtml#S4_6_2_tensors", null ],
           [ "Images and Tensors description conventions", "index.xhtml#S4_6_3_description_conventions", null ],
-          [ "Working with Images and Tensors", "index.xhtml#S4_6_4_working_with_objects", null ]
+          [ "Working with Images and Tensors using iterators", "index.xhtml#S4_6_4_working_with_objects", null ]
         ] ]
       ] ]
     ] ],
@@ -67,7 +70,7 @@ var NAVTREE =
       [ "File List", "files.xhtml", "files" ],
       [ "Globals", "globals.xhtml", [
         [ "All", "globals.xhtml", "globals_dup" ],
-        [ "Functions", "globals_func.xhtml", null ],
+        [ "Functions", "globals_func.xhtml", "globals_func" ],
         [ "Variables", "globals_vars.xhtml", null ],
         [ "Typedefs", "globals_type.xhtml", null ],
         [ "Macros", "globals_defs.xhtml", null ]
@@ -80,20 +83,20 @@ var NAVTREEINDEX =
 [
 "_access_window_auto_padding_8h.xhtml",
 "_c_l_pyramid_8h_source.xhtml",
-"_n_e_color_convert_helper_8inl.xhtml#a3c22c0d3494660b72b4fc04fec76f92d",
-"_strides_8h.xhtml",
-"classarm__compute_1_1_access_window_auto_padding.xhtml#a4bca6da5857d60a9565c60b483859208",
-"classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e",
-"classarm__compute_1_1_c_l_integral_image_vert_kernel.xhtml#ab4f161672ed88d4b2322e14d6923b4d6",
-"classarm__compute_1_1_c_l_sobel5x5.xhtml",
-"classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml#a4a631f6a74572e47d958c4c314406000",
-"classarm__compute_1_1_n_e_bitwise_xor_kernel.xhtml#aa5786af8781e59574815a07c6746943a",
-"classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69",
-"classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#a885b754efced9144226ada4c202574b6",
-"classarm__compute_1_1_n_e_transpose_kernel.xhtml#a46381b755f709be78595e61225c71afe",
-"convolution5x5_8cl.xhtml#ac80109c09492de142b4b7498f2fc6abb",
-"index.xhtml#S4_4_2_events_sync",
-"structarm__compute_1_1_key_point.xhtml#a8ca2aae59762685dd38143e5f8267147"
+"_n_e_color_convert_helper_8inl.xhtml#a14fd899b732509e245976b9967b8931d",
+"_pyramid_info_8h.xhtml",
+"cl__convolution_8cpp.xhtml#a9915340d2c3c10c51e07994dde353f01",
+"classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml#a40c8a145562e3a8a4aa332a5ee17d4c9",
+"classarm__compute_1_1_c_l_im2_col_kernel.xhtml#accc9c8b95ec9d657ae76703031c28def",
+"classarm__compute_1_1_c_l_scheduler.xhtml#a9608e5af9f3a199f69ca6aa41b94359a",
+"classarm__compute_1_1_i_c_l_multi_image.xhtml#ad6273d4c4587f7956d48f2ea356a5c9b",
+"classarm__compute_1_1_n_e_bitwise_and_kernel.xhtml#aab3def12cce96f7b7edde8f2a1de66f5",
+"classarm__compute_1_1_n_e_fill_inner_border_kernel.xhtml#a3f451de2b9b4c74b5c66a1b9b0511836",
+"classarm__compute_1_1_n_e_laplacian_reconstruct.xhtml#ad1717410afd0be936c6213a63c8005fb",
+"classarm__compute_1_1_n_e_sobel7x7_hor_kernel.xhtml#ac9d0ac2c616250612ac3835839480cc3",
+"classtest__helpers_1_1_p_p_m_loader.xhtml#a49afa04c8a5fd9ead48e07440b37294c",
+"harris__corners_8cl.xhtml#a2cf3b8c23c9f8f383d81d13bfff96e3d",
+"struct_image.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

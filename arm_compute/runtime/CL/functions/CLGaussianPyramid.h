@@ -51,6 +51,12 @@ public:
     CLGaussianPyramid(const CLGaussianPyramid &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLGaussianPyramid &operator=(const CLGaussianPyramid &) = delete;
+    /** Allow instances of this class to be moved */
+    CLGaussianPyramid(CLGaussianPyramid &&) = default;
+    /** Allow instances of this class to be moved */
+    CLGaussianPyramid &operator=(CLGaussianPyramid &&) = default;
+    /** Default destructor */
+    virtual ~CLGaussianPyramid() = default;
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in, out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)

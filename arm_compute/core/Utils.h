@@ -629,5 +629,72 @@ inline bool is_data_type_float(DataType dt)
             return false;
     }
 }
+
+/** Print consecutive elements to an output stream.
+ *
+ * @param[out] s             Output stream to print the elements to.
+ * @param[in]  ptr           Pointer to print the elements from.
+ * @param[in]  n             Number of elements to print.
+ * @param[in]  stream_width  (Optional) Width of the stream. If set to 0 the element's width is used. Defaults to 0.
+ * @param[in]  element_delim (Optional) Delimeter among the consecutive elements. Defaults to space delimeter
+ */
+template <typename T>
+void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int n, int stream_width = 0, const std::string &element_delim = " ")
+{
+    for(unsigned int i = 0; i < n; ++i)
+    {
+        // Set stream width as it is not a "sticky" stream manipulator
+        if(stream_width != 0)
+        {
+            s.width(stream_width);
+        }
+        s << std::right << ptr[i] << element_delim;
+    }
+}
+
+/** Identify the maximum width of n consecutive elements.
+ *
+ * @param[in] s The output stream which will be used to print the elements. Used to extract the stream format.
+ *
+ * @param ptr    Pointer to the elements.
+ * @param n      Number of elements.
+ *
+ * @return The maximum width of the elements.
+ */
+template <typename T>
+int max_consecutive_elements_display_width_impl(std::ostream &s, const T *ptr, unsigned int n)
+{
+    int max_width = -1;
+    for(unsigned int i = 0; i < n; ++i)
+    {
+        std::stringstream ss;
+        ss.copyfmt(s);
+        ss << ptr[i];
+        max_width = std::max<int>(max_width, ss.str().size());
+    }
+    return max_width;
+}
+
+/** Print consecutive elements to an output stream.
+ *
+ * @param[out] s             Output stream to print the elements to.
+ * @param[in]  dt            Data type of the elements
+ * @param[in]  ptr           Pointer to print the elements from.
+ * @param[in]  n             Number of elements to print.
+ * @param[in]  stream_width  (Optional) Width of the stream. If set to 0 the element's width is used. Defaults to 0.
+ * @param[in]  element_delim (Optional) Delimeter among the consecutive elements. Defaults to space delimeter
+ */
+void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim = " ");
+
+/** Identify the maximum width of n consecutive elements.
+ *
+ * @param[in] s   Output stream to print the elements to.
+ * @param[in] dt  Data type of the elements
+ * @param[in] ptr Pointer to print the elements from.
+ * @param[in] n   Number of elements to print.
+ *
+ * @return The maximum width of the elements.
+ */
+int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n);
 }
 #endif /*__ARM_COMPUTE_UTILS_H__ */

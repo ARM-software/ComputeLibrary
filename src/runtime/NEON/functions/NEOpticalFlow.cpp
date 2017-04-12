@@ -87,12 +87,9 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
         const unsigned int height_ith = new_ith_input->info()->dimension(1);
 
         TensorInfo tensor_info(TensorShape(width_ith, height_ith), Format::S16);
-        tensor_info.auto_padding();
 
         _scharr_gx[i].allocator()->init(tensor_info);
-        _scharr_gx[i].allocator()->allocate();
         _scharr_gy[i].allocator()->init(tensor_info);
-        _scharr_gy[i].allocator()->allocate();
 
         /* Init Scharr kernel */
         _func_scharr[i].configure(old_ith_input, _scharr_gx.get() + i, _scharr_gy.get() + i, border_mode, constant_border_value);
@@ -103,6 +100,9 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
                                      &_old_points_internal, &_new_points_internal,
                                      termination, use_initial_estimate, epsilon, num_iterations, window_dimension,
                                      i, _num_levels, pyr_scale, border_offset);
+
+        _scharr_gx[i].allocator()->allocate();
+        _scharr_gy[i].allocator()->allocate();
     }
 }
 

@@ -86,27 +86,25 @@ void CLChannelCombineKernel::configure(const ICLTensor *plane0, const ICLTensor 
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure window
-    const unsigned int     processed_elements = 16;
-    Window                 win                = calculate_max_window(*output->info(), Steps(processed_elements));
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
-    AccessWindowHorizontal plane3_access(plane3 == nullptr ? nullptr : plane3->info(), 0, processed_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(plane0->info(), 0, processed_elements),
-                              AccessWindowRectangle(plane1->info(), 0, 0, processed_elements, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]),
-                              AccessWindowRectangle(plane2->info(), 0, 0, processed_elements, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]),
-                              plane3_access,
-                              output_access);
+    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal plane0_access(plane0->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowRectangle  plane1_access(plane1->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
+    AccessWindowRectangle  plane2_access(plane2->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
+    AccessWindowHorizontal plane3_access(plane3 == nullptr ? nullptr : plane3->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+
+    update_window_and_padding(win, plane0_access, plane1_access, plane2_access, plane3_access, output_access);
 
     ValidRegion valid_region = intersect_valid_regions(plane0->info()->valid_region(),
                                                        plane1->info()->valid_region(),
                                                        plane2->info()->valid_region());
-
     if(plane3 != nullptr)
     {
         valid_region = intersect_valid_regions(plane3->info()->valid_region(), valid_region);
     }
-
     output_access.set_valid_region(win, ValidRegion(valid_region.anchor, output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
@@ -164,24 +162,23 @@ void CLChannelCombineKernel::configure(const ICLImage *plane0, const ICLImage *p
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Configure window
-    const unsigned int    processed_elements = 16;
-    Window                win                = calculate_max_window(*plane0->info(), Steps(processed_elements));
-    AccessWindowRectangle output_plane0_access(output->plane(0)->info(), 0, 0, processed_elements, 1, 1.f, 1.f / _y_subsampling[1]);
-    AccessWindowRectangle output_plane1_access(output->plane(1)->info(), 0, 0, processed_elements, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
-    AccessWindowRectangle output_plane2_access(has_two_planars ? nullptr : output->plane(2)->info(), 0, 0, processed_elements, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+    Window win = calculate_max_window(*plane0->info(), Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_plane0_access(plane0->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowRectangle  input_plane1_access(plane1->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
+    AccessWindowRectangle  input_plane2_access(plane2->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
+    AccessWindowRectangle  output_plane0_access(output->plane(0)->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f, 1.f / _y_subsampling[1]);
+    AccessWindowRectangle  output_plane1_access(output->plane(1)->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
+    AccessWindowRectangle  output_plane2_access(has_two_planars ? nullptr : output->plane(2)->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
 
     update_window_and_padding(win,
-                              AccessWindowHorizontal(plane0->info(), 0, processed_elements),
-                              AccessWindowRectangle(plane1->info(), 0, 0, processed_elements, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]),
-                              AccessWindowRectangle(plane2->info(), 0, 0, processed_elements, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]),
-                              output_plane0_access,
-                              output_plane1_access,
-                              output_plane2_access);
+                              input_plane0_access, input_plane1_access, input_plane2_access,
+                              output_plane0_access, output_plane1_access, output_plane2_access);
 
-    ValidRegion plane0_valid_region = plane0->info()->valid_region();
-
+    ValidRegion plane0_valid_region  = plane0->info()->valid_region();
     ValidRegion output_plane1_region = has_two_planars ? intersect_valid_regions(plane1->info()->valid_region(), plane2->info()->valid_region()) : plane2->info()->valid_region();
-
     output_plane0_access.set_valid_region(win, ValidRegion(plane0_valid_region.anchor, output->plane(0)->info()->tensor_shape()));
     output_plane1_access.set_valid_region(win, ValidRegion(output_plane1_region.anchor, output->plane(1)->info()->tensor_shape()));
     output_plane2_access.set_valid_region(win, ValidRegion(plane2->info()->valid_region().anchor, output->plane(2)->info()->tensor_shape()));

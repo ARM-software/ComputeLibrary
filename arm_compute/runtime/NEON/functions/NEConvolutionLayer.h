@@ -83,7 +83,6 @@ private:
     Tensor                                 _gemm_output;
     bool                                   _is_first_run;
     bool                                   _has_bias;
-    bool                                   _is_fc;
 };
 }
 #endif /* __ARM_COMPUTE_NECONVOLUTIONLAYER_H__ */

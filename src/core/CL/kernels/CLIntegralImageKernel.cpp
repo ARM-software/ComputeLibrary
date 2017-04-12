@@ -63,12 +63,17 @@ void CLIntegralImageVertKernel::configure(ICLTensor *in_out)
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("integral_vertical"));
 
     // Configure kernel window
-    const unsigned int    processed_elements_x = 8;
-    const unsigned int    processed_elements_y = in_out->info()->dimension(Window::DimY);
-    Window                win                  = calculate_max_window(*in_out->info(), Steps(processed_elements_x, processed_elements_y));
-    AccessWindowRectangle in_out_access(in_out->info(), 0, 0, processed_elements_x, processed_elements_y);
+    constexpr unsigned int num_elems_processed_per_iteration_x = 8;
+    const unsigned int     num_elems_processed_per_iteration_y = in_out->info()->dimension(Window::DimY);
+
+    Window win = calculate_max_window(*in_out->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+
+    AccessWindowRectangle in_out_access(in_out->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+
     update_window_and_padding(win, in_out_access);
+
     in_out_access.set_valid_region(win, in_out->info()->valid_region());
+
     ICLKernel::configure(win);
 }
 

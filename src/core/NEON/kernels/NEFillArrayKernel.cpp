@@ -23,10 +23,10 @@
  */
 #include "arm_compute/core/NEON/kernels/NEFillArrayKernel.h"
 
-#include "arm_compute/core/AccessWindowAutoPadding.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/Validate.h"
 
 using namespace arm_compute;
@@ -46,12 +46,13 @@ void NEFillArrayKernel::configure(const IImage *input, uint8_t threshold, IKeyPo
     _output    = output;
     _threshold = threshold;
 
-    const unsigned int processed_elements = 1;
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
+    constexpr unsigned int num_elems_read_per_iteration      = 1;
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(processed_elements));
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
-    update_window_and_padding(win, AccessWindowAutoPadding(input->info()));
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_read_per_iteration));
 
     INEKernel::configure(win);
 }

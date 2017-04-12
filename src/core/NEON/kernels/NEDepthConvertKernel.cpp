@@ -75,7 +75,7 @@ void NEDepthConvertKernel::configure(const ITensor *input, ITensor *output, Conv
     _policy = policy;
     _shift  = shift;
 
-    constexpr unsigned int num_elems_processed_per_iteration(16);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
     INESimpleKernel::configure(input, output, num_elems_processed_per_iteration);
 }
 

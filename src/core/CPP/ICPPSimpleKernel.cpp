@@ -34,17 +34,17 @@ ICPPSimpleKernel::ICPPSimpleKernel()
 {
 }
 
-void ICPPSimpleKernel::configure(const ITensor *input, ITensor *output, unsigned int processed_elements, bool border_undefined, const BorderSize &border_size)
+void ICPPSimpleKernel::configure(const ITensor *input, ITensor *output, unsigned int num_elems_processed_per_iteration, bool border_undefined, const BorderSize &border_size)
 {
     _input  = input;
     _output = output;
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size);
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowHorizontal(input->info(), 0, processed_elements),
+                              AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
                               output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size);

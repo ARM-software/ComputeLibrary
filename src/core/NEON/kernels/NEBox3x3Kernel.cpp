@@ -118,11 +118,11 @@ void NEBox3x3Kernel::configure(const ITensor *input, ITensor *output, bool borde
     _input  = input;
     _output = output;
 
-    const unsigned int num_elems_processed_per_iteration(8);
-    const unsigned int num_elems_read_per_iteration(16);
-    const unsigned int num_elems_written_per_iteration(8);
-    const unsigned int num_rows_read_per_iteration(3);
-    const int          rect_offset_xy(-1);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
+    constexpr int          rect_offset_xy                    = -1;
 
     // Configure kernel window
     Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());

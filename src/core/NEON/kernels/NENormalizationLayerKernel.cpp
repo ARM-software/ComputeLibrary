@@ -49,7 +49,7 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
 
-    const unsigned int border_width = (_norm_info.type() == NormType::IN_MAP) ? 3 : 0;
+    const unsigned int border_width = (norm_info.type() == NormType::IN_MAP) ? 3 : 0;
 
     _input         = input;
     _input_squared = input_squared;
@@ -58,9 +58,10 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     _func          = (norm_info.type() == NormType::IN_MAP) ? &NENormalizationLayerKernel::normalize<0> : &NENormalizationLayerKernel::normalize<2>;
     _border_size   = BorderSize(0, border_width);
 
-    const unsigned int num_elems_processed_per_iteration = 4;
-    const unsigned int num_elems_read_per_iteration      = num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2);
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
+    const unsigned int     num_elems_read_per_iteration      = num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2);
 
+    // Configure window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal input_access(input->info(), -_border_size.left, num_elems_read_per_iteration);

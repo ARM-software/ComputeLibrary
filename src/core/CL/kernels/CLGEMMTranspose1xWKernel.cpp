@@ -47,9 +47,9 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(static_cast<float>(input->info()->dimension(0)) / 8.0f)) && (input->info()->data_type() == DataType::F16));
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(static_cast<float>(input->info()->dimension(0)) / 4.0f)) && (input->info()->data_type() == DataType::F32));
 
-    _input                                = input;
-    _output                               = output;
-    const unsigned int processed_elements = max_cl_vector_width / data_size_from_type(input->info()->data_type());
+    _input                                               = input;
+    _output                                              = output;
+    const unsigned int num_elems_processed_per_iteration = max_cl_vector_width / data_size_from_type(input->info()->data_type());
 
     /*
      * Following an example of how the transposition1xW works when the input data type is F32
@@ -64,14 +64,18 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
      */
     // Create kernel
     std::string data_type_name = lower_string(string_from_data_type(input->info()->data_type()));
-    std::string kernel_name    = "gemm_transpose1x" + val_to_string(processed_elements) + "_" + data_type_name;
+    std::string kernel_name    = "gemm_transpose1x" + val_to_string(num_elems_processed_per_iteration) + "_" + data_type_name;
     _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure window
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements));
-    AccessWindowHorizontal input_access(input->info(), 0, processed_elements);
-    AccessWindowTranspose  output_access(output->info(), 0, 0, processed_elements, 1);
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowTranspose  output_access(output->info(), 0, 0, num_elems_processed_per_iteration, 1);
+
     update_window_and_padding(win, input_access, output_access);
+
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+
     ICLKernel::configure(win);
 }

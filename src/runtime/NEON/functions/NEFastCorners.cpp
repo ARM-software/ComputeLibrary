@@ -40,14 +40,13 @@ NEFastCorners::NEFastCorners()
       _border_handler(),
       _nonmax_kernel(),
       _fill_kernel(),
-      _out_border_handler_kernel(),
       _output(),
       _suppressed(),
       _non_max(false)
 {
 }
 
-void NEFastCorners::configure(IImage *input, float threshold, bool nonmax_suppression, KeyPointArray *const corners,
+void NEFastCorners::configure(IImage *input, float threshold, bool nonmax_suppression, KeyPointArray *corners,
                               BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
@@ -56,19 +55,18 @@ void NEFastCorners::configure(IImage *input, float threshold, bool nonmax_suppre
     ARM_COMPUTE_ERROR_ON(nullptr == corners);
     ARM_COMPUTE_ERROR_ON(threshold < 1 && threshold > 255);
 
+    _non_max = nonmax_suppression;
+
     TensorInfo tensor_info(input->info()->tensor_shape(), Format::U8);
     _output.allocator()->init(tensor_info);
-    _border_handler.configure(input, _fast_corners_kernel.border_size(), border_mode, constant_border_value);
-    /*
-        If border is UNDEFINED _fast_corners_kernel will operate in xwindow (3, width - 3) and ywindow (3, height -3) so
-        the output image will leave the pixels on the borders unchanged. This can cause problems if Non Max Suppression is performed afterwards.
 
-        If non max sup is true && border == UNDEFINED we must set the border texels to 0 before executing the non max sup kernel
-    */
+    // If border is UNDEFINED _fast_corners_kernel will operate in xwindow (3,
+    // width - 3) and ywindow (3, height -3) so the output image will leave the
+    // pixels on the borders unchanged. This is reflected in the valid region
+    // of the output. The non maxima suppression is only run on the valid
+    // pixels.
     _fast_corners_kernel.configure(input, &_output, threshold, nonmax_suppression, BorderMode::UNDEFINED == border_mode);
-
-    _output.allocator()->allocate();
-    _non_max = nonmax_suppression;
+    _border_handler.configure(input, _fast_corners_kernel.border_size(), border_mode, constant_border_value);
 
     if(!_non_max)
     {
@@ -76,26 +74,26 @@ void NEFastCorners::configure(IImage *input, float threshold, bool nonmax_suppre
     }
     else
     {
-        if(border_mode == BorderMode::UNDEFINED)
-        {
-            // We use this kernel to set the borders to 0 before performing non max sup
-            _out_border_handler_kernel.configure(&_output, _fast_corners_kernel.border_size(), PixelValue(static_cast<uint8_t>(0)));
-        }
-
         _suppressed.allocator()->init(tensor_info);
-        _suppressed.allocator()->allocate();
         _nonmax_kernel.configure(&_output, &_suppressed, BorderMode::UNDEFINED == border_mode);
         _fill_kernel.configure(&_suppressed, 1 /* we keep all texels >0 */, corners);
+
+        // Allocate intermediate tensors
+        _suppressed.allocator()->allocate();
     }
+
+    // Allocate intermediate tensors
+    _output.allocator()->allocate();
 }
 
 void NEFastCorners::run()
 {
+    _border_handler.run(_border_handler.window());
+
     NEScheduler::get().multithread(&_fast_corners_kernel);
 
     if(_non_max)
     {
-        NEScheduler::get().multithread(&_out_border_handler_kernel); // make sure inner borders are set to 0 before running non max sup kernel
         NEScheduler::get().multithread(&_nonmax_kernel);
     }
 

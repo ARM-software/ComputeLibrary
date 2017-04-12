@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.03.1</span>
+   &#160;<span id="projectnumber">17.04</span>
    </div>
   </td>
  </tr>
@@ -140,9 +140,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab4b8f5a316fa4d33a1c600a3f27e590f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#ab4b8f5a316fa4d33a1c600a3f27e590f">update_padding_if_needed</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window) const override</td></tr>
 <tr class="memdesc:ab4b8f5a316fa4d33a1c600a3f27e590f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increase the padding to be large enough for the window.  <a href="#ab4b8f5a316fa4d33a1c600a3f27e590f">More...</a><br /></td></tr>
 <tr class="separator:ab4b8f5a316fa4d33a1c600a3f27e590f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2164fd5c171ac4beb159f077210d369c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#a2164fd5c171ac4beb159f077210d369c">set_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> input_valid_region, bool border_undefined, <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> border_size) override</td></tr>
-<tr class="memdesc:a2164fd5c171ac4beb159f077210d369c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the valid region based on access pattern, valid region of the inputs and border mode.  <a href="#a2164fd5c171ac4beb159f077210d369c">More...</a><br /></td></tr>
-<tr class="separator:a2164fd5c171ac4beb159f077210d369c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae80edc371ba9f02d756aed720040878b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#ae80edc371ba9f02d756aed720040878b">compute_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> input_valid_region, bool border_undefined, <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> border_size) const override</td></tr>
+<tr class="memdesc:ae80edc371ba9f02d756aed720040878b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the valid region based on access pattern and valid region of the inputs.  <a href="#ae80edc371ba9f02d756aed720040878b">More...</a><br /></td></tr>
+<tr class="separator:ae80edc371ba9f02d756aed720040878b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_access_window_rectangle"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_access_window_rectangle')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml">AccessWindowRectangle</a></td></tr>
 <tr class="memitem:ab188c1e89be24e1f21b045bc8818d706 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#ab188c1e89be24e1f21b045bc8818d706">AccessWindowRectangle</a> (<a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a> *info, int x, int y, int width, int height)</td></tr>
 <tr class="memdesc:ab188c1e89be24e1f21b045bc8818d706 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for a rectangular access pattern.  <a href="#ab188c1e89be24e1f21b045bc8818d706">More...</a><br /></td></tr>
@@ -160,11 +160,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a21ab33d8ab185c1321f4c213335e6802 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32733393d362ac5cd19a588bb248e5c6 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a32733393d362ac5cd19a588bb248e5c6">~AccessWindowRectangle</a> ()=default</td></tr>
 <tr class="separator:a32733393d362ac5cd19a588bb248e5c6 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6609a604373f053cdba95d701dc22958 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a6609a604373f053cdba95d701dc22958">set_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> input_valid_region)</td></tr>
-<tr class="memdesc:a6609a604373f053cdba95d701dc22958 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the valid region based on access pattern and valid region of the inputs.  <a href="#a6609a604373f053cdba95d701dc22958">More...</a><br /></td></tr>
-<tr class="separator:a6609a604373f053cdba95d701dc22958 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2164fd5c171ac4beb159f077210d369c inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a2164fd5c171ac4beb159f077210d369c">set_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> input_valid_region, bool border_undefined, <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> border_size) override</td></tr>
-<tr class="separator:a2164fd5c171ac4beb159f077210d369c inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a718cd06814abc688b1abdc729ed3a71b inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a718cd06814abc688b1abdc729ed3a71b">set_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, const <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> &amp;input_valid_region, bool border_undefined=false, const <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> &amp;border_size=<a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a>(0))</td></tr>
+<tr class="memdesc:a718cd06814abc688b1abdc729ed3a71b inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the valid region based on access pattern, valid region of the inputs and border mode.  <a href="#a718cd06814abc688b1abdc729ed3a71b">More...</a><br /></td></tr>
+<tr class="separator:a718cd06814abc688b1abdc729ed3a71b inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a982d6e438dabc0d759d01464fe939cfd inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a982d6e438dabc0d759d01464fe939cfd">compute_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, const <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> &amp;input_valid_region) const </td></tr>
+<tr class="memdesc:a982d6e438dabc0d759d01464fe939cfd inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the valid region based on access pattern, valid region of the inputs and border mode.  <a href="#a982d6e438dabc0d759d01464fe939cfd">More...</a><br /></td></tr>
+<tr class="separator:a982d6e438dabc0d759d01464fe939cfd inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae80edc371ba9f02d756aed720040878b inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#ae80edc371ba9f02d756aed720040878b">compute_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> input_valid_region, bool border_undefined, <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> border_size) const override</td></tr>
+<tr class="separator:ae80edc371ba9f02d756aed720040878b inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ad9fe991410dc3550f6c4fd6e87a708 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">update_window_if_needed</a> (<a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window) const override</td></tr>
 <tr class="memdesc:a7ad9fe991410dc3550f6c4fd6e87a708 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shrink the window if padding is not large enough.  <a href="#a7ad9fe991410dc3550f6c4fd6e87a708">More...</a><br /></td></tr>
 <tr class="separator:a7ad9fe991410dc3550f6c4fd6e87a708 inherit pub_methods_classarm__compute_1_1_access_window_rectangle"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,7 +183,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_access_window_transpose_8h_source.xhtml#l00038">38</a> of file <a class="el" href="_access_window_transpose_8h_source.xhtml">AccessWindowTranspose.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a2164fd5c171ac4beb159f077210d369c"></a>
+<a class="anchor" id="ae80edc371ba9f02d756aed720040878b"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -188,7 +191,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void set_valid_region </td>
+          <td class="memname"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> compute_valid_region </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;&#160;</td>
           <td class="paramname"><em>window</em>, </td>
@@ -214,7 +217,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -224,7 +227,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set the valid region based on access pattern, valid region of the inputs and border mode. </p>
+<p>Compute the valid region based on access pattern and valid region of the inputs. </p>
+<dl class="section note"><dt>Note</dt><dd>This method assumes that there is no border.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">window</td><td>Execution window of the kernel. </td></tr>
@@ -235,7 +239,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classarm__compute_1_1_i_access_window.xhtml#a36a87c14652ac63c1b18b3873d148957">IAccessWindow</a>.</p>
+<p>Implements <a class="el" href="classarm__compute_1_1_i_access_window.xhtml#ae2b4aabf2a14dce92e04c0eeb0ab73b9">IAccessWindow</a>.</p>
 
 </div>
 </div>
@@ -318,7 +322,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml">AccessWindowTranspose</a></li>
-    <li class="footer">Generated on Fri Mar 24 2017 17:23:50 for ARM Compute Library by
+    <li class="footer">Generated on Wed Apr 12 2017 14:26:05 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

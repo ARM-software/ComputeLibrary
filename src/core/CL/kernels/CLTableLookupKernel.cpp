@@ -48,7 +48,7 @@ void CLTableLookupKernel::configure(const ICLTensor *input, const ICLLut *lut, I
     std::string kernel_name = (DataType::S16 == lut->type()) ? "tablelookup_S16" : "tablelookup_U8";
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
-    /* Set lut argument */
+    // Set lut argument
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg(idx++, lut->cl_buffer());
     if(DataType::S16 == lut->type())
@@ -58,5 +58,6 @@ void CLTableLookupKernel::configure(const ICLTensor *input, const ICLLut *lut, I
     }
 
     // Configure kernel
-    ICLSimple2DKernel::configure(input, output, 8U);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
 }

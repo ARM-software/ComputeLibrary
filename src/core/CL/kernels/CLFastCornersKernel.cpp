@@ -55,6 +55,9 @@ void CLFastCornersKernel::configure(const ICLImage *input, ICLImage *output, flo
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_MSG(border_mode != BorderMode::UNDEFINED, "Not implemented");
 
+    _input  = input;
+    _output = output;
+
     // Create build options
     std::set<std::string> build_opts;
 
@@ -65,26 +68,26 @@ void CLFastCornersKernel::configure(const ICLImage *input, ICLImage *output, flo
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("fast_corners", build_opts));
-    _input  = input;
-    _output = output;
+
+    // Set static kernel arguments
+    unsigned int idx = 2 * num_arguments_per_2D_tensor(); // Skip the input and output parameters
+    _kernel.setArg<cl_float>(idx, static_cast<float>(threshold));
 
     // Configure kernel window
-    constexpr unsigned int processed_elements = 1;
-    constexpr unsigned int num_elems_read_per_iteration(7);
-    constexpr unsigned int num_rows_read(3);
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
+    constexpr unsigned int num_elems_read_per_iteration      = 7;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
 
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements), border_mode == BorderMode::UNDEFINED, BorderSize(3));
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
-    AccessWindowRectangle  input_access(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read);
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_mode == BorderMode::UNDEFINED, BorderSize(3));
+
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowRectangle  input_access(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration);
 
     update_window_and_padding(win, input_access, output_access);
 
-    output_access.set_valid_region(win, input->info()->valid_region(), border_mode == BorderMode::UNDEFINED, BorderSize(3));
+    output_access.set_valid_region(win, input->info()->valid_region(), border_mode == BorderMode::UNDEFINED, border_size());
 
     ICLKernel::configure(win);
-
-    unsigned int idx = 2 * num_arguments_per_2D_tensor(); // Skip the input and output parameters
-    _kernel.setArg<cl_float>(idx, static_cast<float>(threshold));
 }
 
 void CLFastCornersKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -133,19 +136,18 @@ void CLCopyToArrayKernel::configure(const ICLImage *input, bool update_number, I
     //Get how many pixels skipped in the x dimension in the previous stages
     unsigned int offset = _input->info()->valid_region().anchor.x();
 
+    // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); // Skip the input and output parameters
-
     _kernel.setArg<unsigned int>(idx++, corners->max_num_values());
     _kernel.setArg<cl_uint>(idx++, offset);
     _kernel.setArg(idx++, *_num_buffer);
     _kernel.setArg(idx++, _corners->cl_buffer());
 
-    constexpr unsigned int processed_elements = 1;
-    Window                 win                = calculate_max_window(*input->info(), Steps(processed_elements));
-
+    // Configure kernel window
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
+    Window                 win                               = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     update_window_and_padding(win,
-                              AccessWindowHorizontal(input->info(), 0, processed_elements));
-
+                              AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
     ICLKernel::configure(win);
 }
 

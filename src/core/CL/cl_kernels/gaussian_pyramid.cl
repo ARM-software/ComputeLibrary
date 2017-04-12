@@ -93,11 +93,11 @@ __kernel void gaussian5x1_sub_y(
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
     // Load values
-    ushort8 u2_data = vload8(0, (__global ushort *)offset(&src, 0, -2));
-    ushort8 u1_data = vload8(0, (__global ushort *)offset(&src, 0, -1));
-    ushort8 m_data  = vload8(0, (__global ushort *)src.ptr);
-    ushort8 d1_data = vload8(0, (__global ushort *)offset(&src, 0, 1));
-    ushort8 d2_data = vload8(0, (__global ushort *)offset(&src, 0, 2));
+    ushort8 u2_data = vload8(0, (__global ushort *)offset(&src, 0, 0));
+    ushort8 u1_data = vload8(0, (__global ushort *)offset(&src, 0, 1));
+    ushort8 m_data  = vload8(0, (__global ushort *)offset(&src, 0, 2));
+    ushort8 d1_data = vload8(0, (__global ushort *)offset(&src, 0, 3));
+    ushort8 d2_data = vload8(0, (__global ushort *)offset(&src, 0, 4));
 
     // Compute convolution along the Y direction
     ushort8 pixels = u2_data + d2_data;

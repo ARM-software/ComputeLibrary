@@ -62,7 +62,7 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     TensorInfo         gradient_info;
     TensorInfo         magnitude_info;
 
-    /* Initialize images */
+    // Initialize images
     if(gradient_size < 7)
     {
         gradient_info.init(shape, Format::S16);
@@ -82,7 +82,7 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     _phase.allocator()->init(info);
     _nonmax.allocator()->init(info);
 
-    /* Configure/Init sobelNxN */
+    // Configure/Init sobelNxN
     if(gradient_size == 3)
     {
         auto k = arm_compute::cpp14::make_unique<NESobel3x3>();
@@ -106,7 +106,7 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
         ARM_COMPUTE_ERROR("Gradient size not supported\n");
     }
 
-    /* Configure gradient */
+    // Configure gradient
     if(use_fp16)
     {
         auto k = arm_compute::cpp14::make_unique<NEGradientFP16Kernel>();
@@ -120,28 +120,24 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
         _gradient = std::move(k);
     }
 
-    _gx.allocator()->allocate();
-    _gy.allocator()->allocate();
-
-    /* Configure non-maxima suppression */
+    // Configure non-maxima suppression
     _non_max_suppr.configure(&_magnitude, &_phase, &_nonmax, upper_thr, lower_thr, border_mode == BorderMode::UNDEFINED);
 
-    _phase.allocator()->allocate();
+    // Fill border around magnitude image as non-maxima suppression will access
+    // it. If border mode is undefined filling the border is a nop.
+    _border_mag_gradient.configure(&_magnitude, _non_max_suppr.border_size(), border_mode, constant_border_value);
 
-    if(border_mode != BorderMode::UNDEFINED)
-    {
-        /* Configure border filling for magnitude image */
-        _border_mag_gradient.configure(&_magnitude, _non_max_suppr.border_size(), BorderMode::CONSTANT, 0);
-    }
-
-    _magnitude.allocator()->allocate();
-
-    /* Configure edge tracing */
+    // Configure edge tracing
     _edge_trace.configure(&_nonmax, output);
 
     // Fill border with "No edge" to stop recursion in edge trace
     _border_edge_trace.configure(&_nonmax, _edge_trace.border_size(), BorderMode::CONSTANT, 0);
 
+    // Allocate intermediate tensors
+    _gx.allocator()->allocate();
+    _gy.allocator()->allocate();
+    _phase.allocator()->allocate();
+    _magnitude.allocator()->allocate();
     _nonmax.allocator()->allocate();
 }
 
@@ -150,16 +146,16 @@ void NECannyEdge::run()
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
     ARM_COMPUTE_ERROR_ON(_output == nullptr);
 
-    /* Run sobelNxN */
+    // Run sobelNxN
     _sobel->run();
 
-    /* Run gradient */
-    NEScheduler::get().multithread(_gradient.get());
-
-    /* Fill border before non-maxima suppression */
+    // Fill border before non-maxima suppression. Nop for border mode undefined.
     _border_mag_gradient.run(_border_mag_gradient.window());
 
-    /* Run non-maxima suppression */
+    // Run gradient
+    NEScheduler::get().multithread(_gradient.get());
+
+    // Run non-maxima suppression
     NEScheduler::get().multithread(&_non_max_suppr);
 
     ARM_COMPUTE_ERROR_ON(_output->buffer() == nullptr);
@@ -168,6 +164,6 @@ void NECannyEdge::run()
     // Fill border before edge trace
     _border_edge_trace.run(_border_edge_trace.window());
 
-    /* Run edge tracing */
+    // Run edge tracing
     _edge_trace.run(_edge_trace.window());
 }

@@ -23,7 +23,6 @@
  */
 #include "arm_compute/core/NEON/kernels/NENonMaximaSuppression3x3Kernel.h"
 
-#include "arm_compute/core/AccessWindowAutoPadding.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -208,17 +207,20 @@ void NENonMaximaSuppression3x3FP16Kernel::configure(const ITensor *input, ITenso
             break;
     }
 
-    const unsigned int processed_elements = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    const unsigned int     num_elems_read_per_iteration      = 16 + 2 * border_size().left + (input->info()->data_type() == DataType::U8 ? 0 : 3);
+    constexpr unsigned int num_elems_written_per_iteration   = 16;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
 
     // Configure kernel window
-    Window                  win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowAutoPadding output_access(output->info());
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowAutoPadding(input->info()),
+                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration),
                               output_access);
 
-    output_access.set_valid_region();
+    output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
     INEKernel::configure(win);
 }
@@ -475,17 +477,20 @@ void NENonMaximaSuppression3x3Kernel::configure(const ITensor *input, ITensor *o
         _func = &non_maxima_suppression3x3_FLOAT_FLOAT;
     }
 
-    const unsigned int processed_elements = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    const unsigned int     num_elems_read_per_iteration      = 16 + 2 * border_size().left + (input->info()->data_type() == DataType::U8 ? 0 : 3);
+    constexpr unsigned int num_elems_written_per_iteration   = 16;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
 
     // Configure kernel window
-    Window                  win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowAutoPadding output_access(output->info());
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowAutoPadding(input->info()),
+                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration),
                               output_access);
 
-    output_access.set_valid_region();
+    output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
     INEKernel::configure(win);
 }

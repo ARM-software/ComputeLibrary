@@ -74,6 +74,7 @@ protected:
     float         _sensitivity;     /**< Sensitivity value */
     float         _strength_thresh; /**< Threshold value */
     float         _norm_factor;     /**< Normalization factor */
+    BorderSize    _border_size;     /**< Border size */
 };
 
 /** Template NEON kernel to perform Harris Score.

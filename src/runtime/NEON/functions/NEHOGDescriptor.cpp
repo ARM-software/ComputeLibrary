@@ -63,19 +63,13 @@ void NEHOGDescriptor::configure(ITensor *input, ITensor *output, const IHOG *hog
 
     // Allocate memory for magnitude, phase and hog space
     TensorInfo info_mag(shape_img, Format::S16);
-    info_mag.auto_padding();
     _mag.allocator()->init(info_mag);
-    _mag.allocator()->allocate();
 
     TensorInfo info_phase(shape_img, Format::U8);
-    info_phase.auto_padding();
     _phase.allocator()->init(info_phase);
-    _phase.allocator()->allocate();
 
     TensorInfo info_space(shape_hog_space, num_bins, DataType::F32);
-    info_space.auto_padding();
     _hog_space.allocator()->init(info_space);
-    _hog_space.allocator()->allocate();
 
     // Initialise gradient kernel
     _gradient.configure(input, &_mag, &_phase, hog_info->phase_type(), border_mode, constant_border_value);
@@ -85,6 +79,11 @@ void NEHOGDescriptor::configure(ITensor *input, ITensor *output, const IHOG *hog
 
     // Initialize HOG norm kernel
     _block_norm.configure(&_hog_space, output, hog->info());
+
+    // Allocate intermediate tensors
+    _mag.allocator()->allocate();
+    _phase.allocator()->allocate();
+    _hog_space.allocator()->allocate();
 }
 
 void NEHOGDescriptor::run()

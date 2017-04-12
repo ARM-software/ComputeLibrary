@@ -45,6 +45,9 @@ void CLBox3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, bool b
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
 
+    _input  = input;
+    _output = output;
+
     // Set build options
     std::set<std::string> build_opts = { "-DMAT0=1", "-DMAT1=1", "-DMAT2=1",
                                          "-DMAT3=1", "-DMAT4=1", "-DMAT5=1",
@@ -55,19 +58,18 @@ void CLBox3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, bool b
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution3x3_static", build_opts));
 
-    _input  = input;
-    _output = output;
-
-    const unsigned int processed_elements_read    = 16;
-    const unsigned int processed_elements_written = 8;
-
     // Configure kernel window
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements_written), border_undefined, border_size());
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements_written);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
 
-    update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, processed_elements_read, 3),
-                              output_access);
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+
+    AccessWindowRectangle  input_access(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
+
+    update_window_and_padding(win, input_access, output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 

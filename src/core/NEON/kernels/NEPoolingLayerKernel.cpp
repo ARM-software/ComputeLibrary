@@ -92,11 +92,11 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     ARM_COMPUTE_UNUSED(pooled_h);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pooled_w) || (output->info()->dimension(1) != pooled_h));
 
-    const int read_elements = (pool_size == 2) ? 2 : 4; // We use vload4 for pooling3
-    const int input_width   = input->info()->dimension(0);
-    const int input_height  = input->info()->dimension(1);
-    const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + read_elements) - input_width;
-    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+    const int num_elems_read_per_iteration = (pool_size == 2) ? 2 : 4; // We use vload4 for pooling3
+    const int input_width                  = input->info()->dimension(0);
+    const int input_height                 = input->info()->dimension(1);
+    const int upper_bound_w                = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
+    const int upper_bound_h                = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
 
     // Set instance variables
     _input              = input;
@@ -121,10 +121,11 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     }
 
     // Configure kernel window
-    const unsigned int     processed_elements = 1;
-    Window                 win                = calculate_max_window(*output->info(), Steps(processed_elements));
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
+
+    Window                 win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowStatic     input_access(input->info(), -pool_pad_x, -pool_pad_y, input_width + _border_size.right, input_height + _border_size.bottom);
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
     INEKernel::configure(win);

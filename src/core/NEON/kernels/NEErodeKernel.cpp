@@ -50,15 +50,15 @@ void NEErodeKernel::configure(const ITensor *input, ITensor *output, bool border
     _input  = input;
     _output = output;
 
-    constexpr unsigned int num_elems_processed_per_iteration(8);
-    constexpr unsigned int num_elems_read_per_iteration(16);
-    constexpr unsigned int num_elems_written_per_iteration(8);
-    constexpr unsigned int num_rows_read(3);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
 
     // Configure kernel window
     Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
-    AccessWindowRectangle  input_access(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read);
+    AccessWindowRectangle  input_access(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration);
 
     update_window_and_padding(win, input_access, output_access);
 

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['a',['a',['../classarm__compute_1_1_activation_layer_info.xhtml#ab503e1dcccc58c123b218ced5abdc564',1,'arm_compute::ActivationLayerInfo']]],
+  ['a',['a',['../classarm__compute_1_1_activation_layer_info.xhtml#a55beddf67f69fc5312961b1b112560fb',1,'arm_compute::ActivationLayerInfo']]],
   ['absdiff',['absdiff',['../absdiff_8cl.xhtml#abd1c22f3b8c5d2d0a1de36f45c38b88f',1,'absdiff.cl']]],
   ['accesswindowautopadding',['AccessWindowAutoPadding',['../classarm__compute_1_1_access_window_auto_padding.xhtml#a95f438953e0e9a4b1a8e71313c03672a',1,'arm_compute::AccessWindowAutoPadding::AccessWindowAutoPadding(TensorInfo *info)'],['../classarm__compute_1_1_access_window_auto_padding.xhtml#ab876b2c3c41ed76c14c177c9373d320b',1,'arm_compute::AccessWindowAutoPadding::AccessWindowAutoPadding(const AccessWindowAutoPadding &amp;)=delete'],['../classarm__compute_1_1_access_window_auto_padding.xhtml#ae196752aa67bd2acb53c83b48f22dcce',1,'arm_compute::AccessWindowAutoPadding::AccessWindowAutoPadding(AccessWindowAutoPadding &amp;&amp;)=default']]],
   ['accesswindowhorizontal',['AccessWindowHorizontal',['../classarm__compute_1_1_access_window_horizontal.xhtml#a41241ba3df57ef9b2b35ee837cbbecbf',1,'arm_compute::AccessWindowHorizontal']]],
@@ -12,7 +12,7 @@ var searchData=
   ['accumulate_5fweighted',['accumulate_weighted',['../accumulate_8cl.xhtml#ab64020e40663a4356d6037079d7292fb',1,'accumulate.cl']]],
   ['activation',['activation',['../classarm__compute_1_1_activation_layer_info.xhtml#a63e05ce4946dd9807c005c1619fa337a',1,'arm_compute::ActivationLayerInfo']]],
   ['activation_5flayer',['activation_layer',['../activation__layer_8cl.xhtml#af56e71195597e525c12f0d8969735e47',1,'activation_layer.cl']]],
-  ['activationlayerinfo',['ActivationLayerInfo',['../classarm__compute_1_1_activation_layer_info.xhtml#af0dd342d7a3a8f7294c97850f90ac44f',1,'arm_compute::ActivationLayerInfo']]],
+  ['activationlayerinfo',['ActivationLayerInfo',['../classarm__compute_1_1_activation_layer_info.xhtml#af56abff12f887fddfa02e0bc18a318a1',1,'arm_compute::ActivationLayerInfo']]],
   ['add_5f1d_5ftensor_5fargument',['add_1D_tensor_argument',['../classarm__compute_1_1_i_c_l_kernel.xhtml#a479e7043e65dc87de35d374e108510f7',1,'arm_compute::ICLKernel']]],
   ['add_5f2d_5ftensor_5fargument',['add_2D_tensor_argument',['../classarm__compute_1_1_i_c_l_kernel.xhtml#ac74dad3e61f79334f5e73f3c3ac603cb',1,'arm_compute::ICLKernel']]],
   ['add_5f3d_5ftensor_5fargument',['add_3D_tensor_argument',['../classarm__compute_1_1_i_c_l_kernel.xhtml#a28f5847162f352444c6ac1825d0e99c7',1,'arm_compute::ICLKernel']]],

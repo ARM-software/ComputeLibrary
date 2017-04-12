@@ -448,7 +448,6 @@ public:
         LINEAR        /**< Linear */
     };
 
-public:
     /** Default Constructor
      *
      * @param[in] f The activation function to use.
@@ -456,7 +455,7 @@ public:
      *              (@ref ActivationFunction::BOUNDED_RELU, @ref ActivationFunction::LINEAR, @ref ActivationFunction::TANH).
      * @param[in] b (Optional) The beta parameter used by some activation functions (@ref ActivationFunction::LINEAR, @ref ActivationFunction::TANH).
      */
-    ActivationLayerInfo(ActivationFunction f, uint32_t a = 0, uint32_t b = 0)
+    ActivationLayerInfo(ActivationFunction f, float a = 0.0f, float b = 0.0f)
         : _act(f), _a(a), _b(b)
     {
     }
@@ -464,19 +463,19 @@ public:
     {
         return _act;
     }
-    uint32_t a() const
+    float a() const
     {
         return _a;
     }
-    uint32_t b() const
+    float b() const
     {
         return _b;
     }
 
 private:
     ActivationFunction _act;
-    uint32_t           _a;
-    uint32_t           _b;
+    float              _a;
+    float              _b;
 };
 
 /** Normalization Layer Information class */
@@ -491,7 +490,7 @@ public:
      * @param[in] beta      Beta parameter used by normalization equation. Defaults to 0.5.
      * @param[in] kappa     Kappa parameter used by [Krichevksy 2012] Across Channel Local Brightness Normalization equation.
      */
-    NormalizationLayerInfo(NormType type, uint32_t norm_size = 5, float alpha = 0.0001, float beta = 0.5, uint32_t kappa = 1.f)
+    NormalizationLayerInfo(NormType type, uint32_t norm_size = 5, float alpha = 0.0001f, float beta = 0.5f, float kappa = 1.f)
         : _type(type), _norm_size(norm_size), _alpha(alpha), _beta(beta), _kappa(kappa)
     {
     }
@@ -511,7 +510,7 @@ public:
     {
         return _beta;
     }
-    uint32_t kappa() const
+    float kappa() const
     {
         return _kappa;
     }
@@ -529,6 +528,48 @@ private:
     float    _alpha;
     float    _beta;
     float    _kappa;
+};
+
+/** IO formatting information class*/
+struct IOFormatInfo
+{
+    /** Precision type used when printing floating point numbers */
+    enum class PrecisionType
+    {
+        Default, /**< Default precision to the one that the current stream has */
+        Custom,  /**< Custom precision specified by the user using the precision parameter */
+        Full     /**< The maximum precision of the floating point representation */
+    };
+
+    /** Specifies the area to be printed, used by Tensor objects */
+    enum class PrintRegion
+    {
+        ValidRegion, /**< Prints the valid region of the Tensor object */
+        NoPadding,   /**< Prints the Tensor object without the padding */
+        Full         /**< Print the tensor object including padding */
+    };
+
+    IOFormatInfo(PrintRegion   print_region   = PrintRegion::ValidRegion,
+                 PrecisionType precision_type = PrecisionType::Default,
+                 unsigned int  precision      = 10,
+                 bool          align_columns  = true,
+                 std::string   element_delim  = " ",
+                 std::string   row_delim      = "\n")
+        : print_region(print_region),
+          precision_type(precision_type),
+          precision(precision),
+          element_delim(element_delim),
+          row_delim(row_delim),
+          align_columns(align_columns)
+    {
+    }
+
+    PrintRegion   print_region;
+    PrecisionType precision_type;
+    unsigned int  precision;
+    std::string   element_delim;
+    std::string   row_delim;
+    bool          align_columns;
 };
 }
 #endif /* __ARM_COMPUTE_TYPES_H__ */

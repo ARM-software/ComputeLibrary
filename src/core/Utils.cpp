@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <map>
 #include <string>
@@ -249,4 +250,56 @@ const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsig
     ARM_COMPUTE_ERROR_ON(((h - 1) * stride_y) >= (height + pad_y));
 
     return std::make_pair(w, h);
+}
+
+void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+            print_consecutive_elements_impl<uint8_t>(s, ptr, n, stream_width, element_delim);
+            break;
+        case DataType::U16:
+            print_consecutive_elements_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n, stream_width, element_delim);
+            break;
+        case DataType::S16:
+            print_consecutive_elements_impl<int16_t>(s, reinterpret_cast<const int16_t *>(ptr), n, stream_width, element_delim);
+            break;
+        case DataType::U32:
+            print_consecutive_elements_impl<uint32_t>(s, reinterpret_cast<const uint32_t *>(ptr), n, stream_width, element_delim);
+            break;
+        case DataType::S32:
+            print_consecutive_elements_impl<int32_t>(s, reinterpret_cast<const int32_t *>(ptr), n, stream_width, element_delim);
+            break;
+        case DataType::F32:
+            print_consecutive_elements_impl<float>(s, reinterpret_cast<const float *>(ptr), n, stream_width, element_delim);
+            break;
+        case DataType::F16:
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Undefined element size for given data type");
+    }
+}
+
+int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+            return max_consecutive_elements_display_width_impl<uint8_t>(s, ptr, n);
+        case DataType::U16:
+            return max_consecutive_elements_display_width_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n);
+        case DataType::S16:
+            return max_consecutive_elements_display_width_impl<int16_t>(s, reinterpret_cast<const int16_t *>(ptr), n);
+        case DataType::U32:
+            return max_consecutive_elements_display_width_impl<uint32_t>(s, reinterpret_cast<const uint32_t *>(ptr), n);
+        case DataType::S32:
+            return max_consecutive_elements_display_width_impl<int32_t>(s, reinterpret_cast<const int32_t *>(ptr), n);
+        case DataType::F32:
+            return max_consecutive_elements_display_width_impl<float>(s, reinterpret_cast<const float *>(ptr), n);
+        case DataType::F16:
+            return 0;
+        default:
+            ARM_COMPUTE_ERROR("Undefined element size for given data type");
+    }
 }

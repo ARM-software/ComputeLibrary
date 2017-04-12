@@ -108,6 +108,16 @@ public:
 class CLLKTrackerStage0Kernel : public ICLKernel
 {
 public:
+    /** Default constructor */
+    CLLKTrackerStage0Kernel();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLLKTrackerStage0Kernel(const CLLKTrackerStage0Kernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLLKTrackerStage0Kernel &operator=(const CLLKTrackerStage0Kernel &) = delete;
+    /** Allow instances of this class to be moved */
+    CLLKTrackerStage0Kernel(CLLKTrackerStage0Kernel &&) = default;
+    /** Allow instances of this class to be moved */
+    CLLKTrackerStage0Kernel &operator=(CLLKTrackerStage0Kernel &&) = default;
     /** Initialise the kernel input and output
      *
      * @param[in]      old_input           Pointer to the input old tensor. Data types supported: U8
@@ -119,21 +129,35 @@ public:
      * @param[out]     old_ival            Pointer to the array holding internal values
      * @param[in]      window_dimension    The size of the window on which to perform the algorithm
      * @param[in]      level               The pyramid level
-     * @param[in]      border_offset       The offset used to define the boundary of the tracked pixels in different border modes
      */
     void configure(const ICLTensor *old_input, const ICLTensor *old_scharr_gx, const ICLTensor *old_scharr_gy,
                    ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
                    ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
-                   size_t window_dimension, size_t level, int32_t border_offset);
+                   size_t window_dimension, size_t level);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
+
+private:
+    const ICLTensor *_old_input;
+    const ICLTensor *_old_scharr_gx;
+    const ICLTensor *_old_scharr_gy;
 };
 
 /** Interface to run the second stage of LKTracker, where the motion vectors of the given points are computed */
 class CLLKTrackerStage1Kernel : public ICLKernel
 {
 public:
+    /** Default constructor */
+    CLLKTrackerStage1Kernel();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLLKTrackerStage1Kernel(const CLLKTrackerStage1Kernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLLKTrackerStage1Kernel &operator=(const CLLKTrackerStage1Kernel &) = delete;
+    /** Allow instances of this class to be moved */
+    CLLKTrackerStage1Kernel(CLLKTrackerStage1Kernel &&) = default;
+    /** Allow instances of this class to be moved */
+    CLLKTrackerStage1Kernel &operator=(CLLKTrackerStage1Kernel &&) = default;
     /** Initialise the kernel input and output
      *
      * @param[in]      new_input           Pointer to the input new tensor. Data types supported: U8
@@ -145,13 +169,15 @@ public:
      * @param[in]      num_iterations      The maximum number of iterations before terminating the algorithm
      * @param[in]      window_dimension    The size of the window on which to perform the algorithm
      * @param[in]      level               The pyramid level
-     * @param[in]      border_offset       The offset used to define the boundary of the tracked pixels in different border modes
      */
     void configure(const ICLTensor *new_input, ICLLKInternalKeypointArray *new_points_internal, ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
-                   Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, size_t level, int32_t border_offset);
+                   Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, size_t level);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
+
+private:
+    const ICLTensor *_new_input;
 };
 }
 #endif /*__ARM_COMPUTE_CLLKTRACKERKERNEL_H__ */

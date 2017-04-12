@@ -94,6 +94,6 @@ void CLDepthConvertKernel::configure(const ICLTensor *input, ICLTensor *output, 
     _kernel.setArg(idx++, shift);
 
     // Configure kernel
-    constexpr unsigned int processed_elements = 16;
-    ICLSimple2DKernel::configure(input, output, processed_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
 }

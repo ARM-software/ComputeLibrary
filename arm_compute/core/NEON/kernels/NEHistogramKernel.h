@@ -125,7 +125,7 @@ private:
     uint32_t                     *_local_hist;
     uint32_t                     *_window_lut;
     std::mutex                    _hist_mtx;
-    static constexpr unsigned int _max_range_size{ 256 }; //< 256 possible pixel values as we handle only U8 images
+    static constexpr unsigned int _max_range_size{ 256 }; ///< 256 possible pixel values as we handle only U8 images
 };
 
 /** Interface for the histogram border handling kernel.
@@ -195,7 +195,7 @@ private:
     const IImage                 *_input;
     IDistribution1D              *_output;
     uint32_t                     *_window_lut;
-    static constexpr unsigned int _max_range_size{ 256 }; //< 256 possible pixel values as we handle only U8 images
+    static constexpr unsigned int _max_range_size{ 256 }; ///< 256 possible pixel values as we handle only U8 images
 };
 }
 

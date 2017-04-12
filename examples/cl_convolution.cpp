@@ -108,6 +108,7 @@ void main_cl_convolution(int argc, const char **argv)
 }
 
 /** Main program for convolution test
+ *
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to PPM image to process )
  */

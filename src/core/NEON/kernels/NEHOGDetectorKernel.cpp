@@ -23,10 +23,10 @@
  */
 #include "arm_compute/core/NEON/kernels/NEHOGDetectorKernel.h"
 
-#include "arm_compute/core/AccessWindowAutoPadding.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/HOGInfo.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/Validate.h"
 
 #include <arm_neon.h>
@@ -41,12 +41,11 @@ NEHOGDetectorKernel::NEHOGDetectorKernel()
 
 void NEHOGDetectorKernel::configure(const ITensor *input, const IHOG *hog, IDetectionWindowArray *detection_windows, const Size2D &detection_window_stride, float threshold, uint16_t idx_class)
 {
-    ARM_COMPUTE_ERROR_ON(nullptr == input);
-    ARM_COMPUTE_ERROR_ON(nullptr == hog);
-    ARM_COMPUTE_ERROR_ON(nullptr == detection_windows);
-    ARM_COMPUTE_ERROR_ON(DataType::F32 != input->info()->data_type());
-    ARM_COMPUTE_ERROR_ON(0 != (detection_window_stride.width % hog->info()->block_stride().width));
-    ARM_COMPUTE_ERROR_ON(0 != (detection_window_stride.height % hog->info()->block_stride().height));
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON(hog == nullptr);
+    ARM_COMPUTE_ERROR_ON(detection_windows == nullptr);
+    ARM_COMPUTE_ERROR_ON((detection_window_stride.width % hog->info()->block_stride().width) != 0);
+    ARM_COMPUTE_ERROR_ON((detection_window_stride.height % hog->info()->block_stride().height) != 0);
 
     const Size2D &detection_window_size = hog->info()->detection_window_size();
     const Size2D &block_size            = hog->info()->block_size();
@@ -65,11 +64,12 @@ void NEHOGDetectorKernel::configure(const ITensor *input, const IHOG *hog, IDete
     _detection_window_width      = detection_window_size.width;
     _detection_window_height     = detection_window_size.height;
 
-    /* Get the number of blocks along the x and y directions of the input tensor */
-    const size_t num_blocks_x = input->info()->dimension(Window::DimX);
-    const size_t num_blocks_y = input->info()->dimension(Window::DimY);
+    // Get the number of blocks along the x and y directions of the input tensor
+    const ValidRegion &valid_region = input->info()->valid_region();
+    const size_t       num_blocks_x = valid_region.shape[0];
+    const size_t       num_blocks_y = valid_region.shape[1];
 
-    /* Get the number of blocks along the x and y directions of the detection window */
+    // Get the number of blocks along the x and y directions of the detection window
     const size_t num_blocks_per_detection_window_x = detection_window_size.width / block_stride.width;
     const size_t num_blocks_per_detection_window_y = detection_window_size.height / block_stride.height;
 
@@ -78,10 +78,13 @@ void NEHOGDetectorKernel::configure(const ITensor *input, const IHOG *hog, IDete
 
     // Configure kernel window
     Window win;
-    win.set(Window::DimX, Window::Dimension(0, ((num_blocks_x - num_blocks_per_detection_window_x) / window_step_x) * window_step_x, window_step_x));
-    win.set(Window::DimY, Window::Dimension(0, ((num_blocks_y - num_blocks_per_detection_window_y) / window_step_y) * window_step_y, window_step_y));
+    win.set(Window::DimX, Window::Dimension(0, floor_to_multiple(num_blocks_x - num_blocks_per_detection_window_x, window_step_x), window_step_x));
+    win.set(Window::DimY, Window::Dimension(0, floor_to_multiple(num_blocks_y - num_blocks_per_detection_window_y, window_step_y), window_step_y));
 
-    update_window_and_padding(win, AccessWindowAutoPadding(input->info()));
+    const unsigned int num_elems_read_per_iteration = _num_bins_per_descriptor_x;
+    const unsigned int num_rows_read_per_iteration  = _num_blocks_per_descriptor_y;
+
+    update_window_and_padding(win, AccessWindowRectangle(input->info(), 0, 0, num_elems_read_per_iteration, num_rows_read_per_iteration));
 
     INEKernel::configure(win);
 }
@@ -90,7 +93,7 @@ void NEHOGDetectorKernel::run(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(nullptr == _hog_descriptor);
+    ARM_COMPUTE_ERROR_ON(_hog_descriptor == nullptr);
 
     const size_t in_step_y = _input->info()->strides_in_bytes()[Window::DimY] / data_size_from_type(_input->info()->data_type());
 
@@ -100,13 +103,13 @@ void NEHOGDetectorKernel::run(const Window &window)
     {
         const auto *in_row_ptr = reinterpret_cast<const float *>(in.ptr());
 
-        /* Init score_f32 with 0 */
+        // Init score_f32 with 0
         float32x4_t score_f32 = vdupq_n_f32(0.0f);
 
-        /* Init score with bias */
+        // Init score with bias
         float score = _bias;
 
-        /* Compute Linear SVM */
+        // Compute Linear SVM
         for(size_t yb = 0; yb < _num_blocks_per_descriptor_y; ++yb, in_row_ptr += in_step_y)
         {
             int32_t xb = 0;
@@ -115,7 +118,7 @@ void NEHOGDetectorKernel::run(const Window &window)
 
             for(; xb < static_cast<int32_t>(_num_bins_per_descriptor_x) - 16; xb += 16)
             {
-                /* Load descriptor values */
+                // Load descriptor values
                 const float32x4x4_t a_f32 =
                 {
                     {
@@ -126,7 +129,7 @@ void NEHOGDetectorKernel::run(const Window &window)
                     }
                 };
 
-                /* Load detector values */
+                // Load detector values
                 const float32x4x4_t b_f32 =
                 {
                     {
@@ -137,7 +140,7 @@ void NEHOGDetectorKernel::run(const Window &window)
                     }
                 };
 
-                /* Multiply accumulate */
+                // Multiply accumulate
                 score_f32 = vmlaq_f32(score_f32, a_f32.val[0], b_f32.val[0]);
                 score_f32 = vmlaq_f32(score_f32, a_f32.val[1], b_f32.val[1]);
                 score_f32 = vmlaq_f32(score_f32, a_f32.val[2], b_f32.val[2]);

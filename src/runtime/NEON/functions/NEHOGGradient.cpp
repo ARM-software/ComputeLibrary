@@ -45,11 +45,8 @@ void NEHOGGradient::configure(ITensor *input, ITensor *output_magnitude, ITensor
 
     // Allocate image memory
     TensorInfo info(shape_img, Format::S16);
-    info.auto_padding();
     _gx.allocator()->init(info);
-    _gx.allocator()->allocate();
     _gy.allocator()->init(info);
-    _gy.allocator()->allocate();
 
     // Initialise derivate kernel
     _derivative.configure(input, &_gx, &_gy, border_mode, constant_border_value);
@@ -67,6 +64,10 @@ void NEHOGGradient::configure(ITensor *input, ITensor *output_magnitude, ITensor
         k->configure(&_gx, &_gy, output_magnitude, output_phase);
         _mag_phase = std::move(k);
     }
+
+    // Allocate intermediate tensors
+    _gx.allocator()->allocate();
+    _gy.allocator()->allocate();
 }
 
 void NEHOGGradient::run()

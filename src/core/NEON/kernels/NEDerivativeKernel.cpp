@@ -73,16 +73,16 @@ void NEDerivativeKernel::configure(const ITensor *input, ITensor *output_x, ITen
     _output_x = output_x;
     _output_y = output_y;
 
-    constexpr unsigned int num_elems_processed_per_iteration(16);
-    constexpr unsigned int num_rows_read(3);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
 
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
 
     AccessWindowHorizontal out_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal out_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal in_x_access(input->info(), -border_size().left, num_elems_processed_per_iteration);
-    AccessWindowRectangle  in_y_access(input->info(), 0, -border_size().left, num_elems_processed_per_iteration, num_rows_read);
-    AccessWindowRectangle  in_xy_access(input->info(), -border_size().left, -border_size().top, num_elems_processed_per_iteration, num_rows_read);
+    AccessWindowRectangle  in_y_access(input->info(), 0, -border_size().left, num_elems_processed_per_iteration, num_rows_read_per_iteration);
+    AccessWindowRectangle  in_xy_access(input->info(), -border_size().left, -border_size().top, num_elems_processed_per_iteration, num_rows_read_per_iteration);
 
     if(run_der_x && run_der_y)
     {

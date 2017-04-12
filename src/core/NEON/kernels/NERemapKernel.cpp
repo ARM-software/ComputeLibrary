@@ -97,7 +97,7 @@ void NERemapKernel::configure(const ITensor *input, const ITensor *map_x, const 
             break;
     }
 
-    const unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));

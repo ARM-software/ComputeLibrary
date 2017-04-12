@@ -50,16 +50,16 @@ void CLBitwiseAndKernel::configure(const ICLTensor *input1, const ICLTensor *inp
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("bitwise_and"));
 
-    const unsigned int processed_elements = 16;
-
     // Configure kernel window
-    Window                 win = calculate_max_window(*input1->info(), Steps(processed_elements));
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(input1->info(), 0, processed_elements),
-                              AccessWindowHorizontal(input2->info(), 0, processed_elements),
-                              output_access);
+    Window win = calculate_max_window(*input1->info(), Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input1_access(input1->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal input2_access(input2->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+
+    update_window_and_padding(win, input1_access, input2_access, output_access);
 
     ValidRegion valid_region = intersect_valid_regions(input1->info()->valid_region(),
                                                        input2->info()->valid_region());

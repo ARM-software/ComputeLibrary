@@ -71,12 +71,12 @@ void NEMinMaxKernel::configure(const IImage *input, int32_t *min, int32_t *max)
             break;
     }
 
-    constexpr unsigned int processed_elements = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(processed_elements));
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, processed_elements));
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
 
     INEKernel::configure(win);
 }
@@ -181,7 +181,7 @@ void NEMinMaxKernel::minmax_S16(const Window &win)
 }
 
 NEMinMaxLocationKernel::NEMinMaxLocationKernel()
-    : _func(nullptr), _input(nullptr), _min(nullptr), _max(nullptr), _min_count(nullptr), _max_count(nullptr), _min_loc(nullptr), _max_loc(nullptr), _processed_elements(0)
+    : _func(nullptr), _input(nullptr), _min(nullptr), _max(nullptr), _min_count(nullptr), _max_count(nullptr), _min_loc(nullptr), _max_loc(nullptr), _num_elems_processed_per_iteration(0)
 {
 }
 
@@ -264,12 +264,12 @@ void NEMinMaxLocationKernel::configure(const IImage *input, int32_t *min, int32_
             break;
     }
 
-    _processed_elements = 16;
+    _num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(_processed_elements));
+    Window win = calculate_max_window(*input->info(), Steps(_num_elems_processed_per_iteration));
 
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, _processed_elements));
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, _num_elems_processed_per_iteration));
 
     INEKernel::configure(win);
 }
@@ -292,7 +292,7 @@ void NEMinMaxLocationKernel::minmax_loc(const Window &win)
 
         size_t       min_count = 0;
         size_t       max_count = 0;
-        unsigned int step      = _processed_elements;
+        unsigned int step      = _num_elems_processed_per_iteration;
 
         // Clear min location array
         if(loc_min)

@@ -24,14 +24,14 @@
 #ifndef __ARM_COMPUTE_NEGAUSSIANPYRAMIDKERNEL_H__
 #define __ARM_COMPUTE_NEGAUSSIANPYRAMIDKERNEL_H__
 
-#include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/NEON/INESimpleKernel.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** NEON kernel to perform a GaussianPyramid (horizontal pass) */
-class NEGaussianPyramidHorKernel : public INEKernel
+class NEGaussianPyramidHorKernel : public INESimpleKernel
 {
 public:
     /** Default constructor */
@@ -60,11 +60,12 @@ public:
     BorderSize border_size() const override;
 
 private:
-    const ITensor *_input;
-    ITensor       *_output;
+    BorderSize _border_size;
+    int        _l2_load_offset;
 };
+
 /** NEON kernel to perform a GaussianPyramid (vertical pass) */
-class NEGaussianPyramidVertKernel : public INEKernel
+class NEGaussianPyramidVertKernel : public INESimpleKernel
 {
 public:
     /** Default constructor */
@@ -93,8 +94,7 @@ public:
     BorderSize border_size() const override;
 
 private:
-    const ITensor *_input;
-    ITensor       *_output;
+    int _t2_load_offset;
 };
 }
 #endif /*__ARM_COMPUTE_NEGAUSSIANPYRAMIDKERNEL_H__ */

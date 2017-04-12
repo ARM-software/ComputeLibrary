@@ -45,9 +45,9 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(min_max == nullptr);
 
-    _input                                = input;
-    _min_max                              = min_max;
-    const unsigned int processed_elements = input->info()->dimension(0);
+    _input                                               = input;
+    _min_max                                             = min_max;
+    const unsigned int num_elems_processed_per_iteration = input->info()->dimension(0);
 
     switch(input->info()->data_type())
     {
@@ -68,7 +68,7 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.emplace("-DDATA_TYPE_MAX=" + val_to_string<int>(_data_type_max_min[0]));
     build_opts.emplace("-DDATA_TYPE_MIN=" + val_to_string<int>(_data_type_max_min[1]));
-    build_opts.emplace((0 != (processed_elements % max_cl_vector_width)) ? "-DNON_MULTIPLE_OF_16" : "");
+    build_opts.emplace((0 != (num_elems_processed_per_iteration % max_cl_vector_width)) ? "-DNON_MULTIPLE_OF_16" : "");
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("minmax", build_opts));
@@ -78,9 +78,9 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     _kernel.setArg(idx++, *_min_max);
     _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
 
-    // Configure window
-    Window win = calculate_max_window(*input->info(), Steps(processed_elements));
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, processed_elements));
+    // Configure kernel window
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
     ICLKernel::configure(win);
 }
 
@@ -142,10 +142,10 @@ void CLMinMaxLocationKernel::configure(const ICLImage *input, cl::Buffer *min_ma
         _kernel.setArg<cl_uint>(idx++, max_loc->max_num_values());
     }
 
-    // Configure window
-    constexpr unsigned int processed_elements(1);
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements));
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, processed_elements));
+    // Configure kernel window
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
+    Window                 win                               = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
     ICLKernel::configure(win);
 }
 

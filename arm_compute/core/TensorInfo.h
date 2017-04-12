@@ -280,19 +280,27 @@ public:
     {
         return _total_size;
     }
+    /** Padding of tensor.
+     *
+     * @return Padding.
+     */
+    PaddingSize padding() const
+    {
+        return _padding;
+    }
     /** Checks if the tensor has been allocated with padding or not.
      *
      * @return True if padding is allocated in the tensor, otherwise false.
      */
-    bool has_padding()
+    bool has_padding() const
     {
-        return (this->total_size() != (this->tensor_shape().total_size() * this->element_size()));
+        return !_padding.empty();
     }
     /** Flag indicating whether the size of the tensor can be changed.
      *
      * @return True if the tensor size can be changed.
      */
-    bool is_resizable()
+    bool is_resizable() const
     {
         return _is_resizable;
     }
@@ -332,6 +340,7 @@ private:
     Format      _format;
     bool        _is_resizable;
     ValidRegion _valid_region;
+    PaddingSize _padding;
 };
 }
 #endif /*__ARM_COMPUTE_TENSORINFO_H__ */

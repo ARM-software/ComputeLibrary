@@ -40,9 +40,9 @@ void NEIntegralImageKernel::configure(const ITensor *input, ITensor *output)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32);
 
-    constexpr unsigned int processed_elements = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
-    INESimpleKernel::configure(input, output, processed_elements);
+    INESimpleKernel::configure(input, output, num_elems_processed_per_iteration);
 }
 
 BorderSize NEIntegralImageKernel::border_size() const

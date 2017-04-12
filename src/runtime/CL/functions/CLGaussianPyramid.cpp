@@ -34,7 +34,6 @@
 #include "arm_compute/core/Window.h"
 
 #include "arm_compute/runtime/CL/CLPyramid.h"
-#include "arm_compute/runtime/CL/CLPyramid.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
@@ -79,23 +78,22 @@ void CLGaussianPyramidHalf::configure(ICLTensor *input, CLPyramid *pyramid, Bord
         TensorShape tensor_shape = pyramid->info()->tensor_shape();
         tensor_shape.set(0, (pyramid->info()->width() + 1) * SCALE_PYRAMID_HALF);
 
-        PyramidInfo pyramid_info;
-        pyramid_info.init(num_levels - 1, SCALE_PYRAMID_HALF, tensor_shape, Format::U16);
+        PyramidInfo pyramid_info(num_levels - 1, SCALE_PYRAMID_HALF, tensor_shape, Format::U16);
 
-        _tmp.init_auto_padding(pyramid_info);
-        _tmp.allocate();
+        _tmp.init(pyramid_info);
 
         for(size_t i = 0; i < num_levels - 1; ++i)
         {
-            /* Configure border */
-            _border_handler[i].configure(_pyramid->get_pyramid_level(i), 2, border_mode, PixelValue(constant_border_value));
-
             /* Configure horizontal kernel */
             _horizontal_reduction[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode == BorderMode::UNDEFINED);
 
             /* Configure vertical kernel */
             _vertical_reduction[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), border_mode == BorderMode::UNDEFINED);
+
+            /* Configure border */
+            _border_handler[i].configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
         }
+        _tmp.allocate();
     }
 }
 
@@ -146,11 +144,9 @@ void CLGaussianPyramidOrb::configure(ICLTensor *input, CLPyramid *pyramid, Borde
         _gauss5x5      = arm_compute::cpp14::make_unique<CLGaussian5x5[]>(num_levels - 1);
         _scale_nearest = arm_compute::cpp14::make_unique<CLScaleKernel[]>(num_levels - 1);
 
-        PyramidInfo pyramid_info;
-        pyramid_info.init(num_levels - 1, SCALE_PYRAMID_ORB, pyramid->info()->tensor_shape(), Format::U8);
+        PyramidInfo pyramid_info(num_levels - 1, SCALE_PYRAMID_ORB, pyramid->info()->tensor_shape(), Format::U8);
 
-        _tmp.init_auto_padding(pyramid_info);
-        _tmp.allocate();
+        _tmp.init(pyramid_info);
 
         for(size_t i = 0; i < num_levels - 1; ++i)
         {
@@ -160,6 +156,8 @@ void CLGaussianPyramidOrb::configure(ICLTensor *input, CLPyramid *pyramid, Borde
             /* Configure scale image kernel */
             _scale_nearest[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), InterpolationPolicy::NEAREST_NEIGHBOR, border_mode == BorderMode::UNDEFINED);
         }
+
+        _tmp.allocate();
     }
 }
 

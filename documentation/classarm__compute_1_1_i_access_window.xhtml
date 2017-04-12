@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.03.1</span>
+   &#160;<span id="projectnumber">17.04</span>
    </div>
   </td>
  </tr>
@@ -136,9 +136,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abd645498a7cbaebd88b257083e459dd6"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_access_window.xhtml#abd645498a7cbaebd88b257083e459dd6">update_padding_if_needed</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window) const =0</td></tr>
 <tr class="memdesc:abd645498a7cbaebd88b257083e459dd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increase the padding to be large enough for the window.  <a href="#abd645498a7cbaebd88b257083e459dd6">More...</a><br /></td></tr>
 <tr class="separator:abd645498a7cbaebd88b257083e459dd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36a87c14652ac63c1b18b3873d148957"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_access_window.xhtml#a36a87c14652ac63c1b18b3873d148957">set_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> input_valid_region, bool border_undefined, <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> border_size)=0</td></tr>
-<tr class="memdesc:a36a87c14652ac63c1b18b3873d148957"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the valid region based on access pattern, valid region of the inputs and border mode.  <a href="#a36a87c14652ac63c1b18b3873d148957">More...</a><br /></td></tr>
-<tr class="separator:a36a87c14652ac63c1b18b3873d148957"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2b4aabf2a14dce92e04c0eeb0ab73b9"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_access_window.xhtml#ae2b4aabf2a14dce92e04c0eeb0ab73b9">compute_valid_region</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> input_valid_region, bool border_undefined, <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> border_size) const =0</td></tr>
+<tr class="memdesc:ae2b4aabf2a14dce92e04c0eeb0ab73b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the valid region based on access pattern and valid region of the inputs.  <a href="#ae2b4aabf2a14dce92e04c0eeb0ab73b9">More...</a><br /></td></tr>
+<tr class="separator:ae2b4aabf2a14dce92e04c0eeb0ab73b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface describing methods to update access window and padding based on kernel parameters. </p>
@@ -169,7 +169,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a36a87c14652ac63c1b18b3873d148957"></a>
+<a class="anchor" id="ae2b4aabf2a14dce92e04c0eeb0ab73b9"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -177,7 +177,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void set_valid_region </td>
+          <td class="memname">virtual <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> compute_valid_region </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;&#160;</td>
           <td class="paramname"><em>window</em>, </td>
@@ -203,7 +203,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -213,7 +213,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set the valid region based on access pattern, valid region of the inputs and border mode. </p>
+<p>Compute the valid region based on access pattern and valid region of the inputs. </p>
+<dl class="section note"><dt>Note</dt><dd>This method assumes that there is no border.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">window</td><td>Execution window of the kernel. </td></tr>
@@ -224,9 +225,9 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a2164fd5c171ac4beb159f077210d369c">AccessWindowRectangle</a>, <a class="el" href="classarm__compute_1_1_access_window_static.xhtml#a2164fd5c171ac4beb159f077210d369c">AccessWindowStatic</a>, <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#a2164fd5c171ac4beb159f077210d369c">AccessWindowAutoPadding</a>, and <a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#a2164fd5c171ac4beb159f077210d369c">AccessWindowTranspose</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#ae80edc371ba9f02d756aed720040878b">AccessWindowRectangle</a>, <a class="el" href="classarm__compute_1_1_access_window_static.xhtml#ae80edc371ba9f02d756aed720040878b">AccessWindowStatic</a>, <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#ae80edc371ba9f02d756aed720040878b">AccessWindowAutoPadding</a>, and <a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#ae80edc371ba9f02d756aed720040878b">AccessWindowTranspose</a>.</p>
 
-<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00130">AccessWindowRectangle::AccessWindowRectangle()</a>.</p>
+<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00132">AccessWindowRectangle::AccessWindowRectangle()</a>.</p>
 
 </div>
 </div>
@@ -263,7 +264,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#ab4b8f5a316fa4d33a1c600a3f27e590f">AccessWindowRectangle</a>, <a class="el" href="classarm__compute_1_1_access_window_static.xhtml#ab4b8f5a316fa4d33a1c600a3f27e590f">AccessWindowStatic</a>, <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#ab4b8f5a316fa4d33a1c600a3f27e590f">AccessWindowAutoPadding</a>, and <a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#ab4b8f5a316fa4d33a1c600a3f27e590f">AccessWindowTranspose</a>.</p>
 
-<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00130">AccessWindowRectangle::AccessWindowRectangle()</a>, and <a class="el" href="_helpers_8h_source.xhtml#l00295">arm_compute::update_window_and_padding()</a>.</p>
+<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00132">AccessWindowRectangle::AccessWindowRectangle()</a>, and <a class="el" href="_helpers_8h_source.xhtml#l00294">arm_compute::update_window_and_padding()</a>.</p>
 
 </div>
 </div>
@@ -300,7 +301,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">AccessWindowRectangle</a>, <a class="el" href="classarm__compute_1_1_access_window_static.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">AccessWindowStatic</a>, <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">AccessWindowAutoPadding</a>, and <a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">AccessWindowTranspose</a>.</p>
 
-<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00130">AccessWindowRectangle::AccessWindowRectangle()</a>, and <a class="el" href="_helpers_8h_source.xhtml#l00295">arm_compute::update_window_and_padding()</a>.</p>
+<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00132">AccessWindowRectangle::AccessWindowRectangle()</a>, and <a class="el" href="_helpers_8h_source.xhtml#l00294">arm_compute::update_window_and_padding()</a>.</p>
 
 </div>
 </div>
@@ -313,7 +314,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_access_window.xhtml">IAccessWindow</a></li>
-    <li class="footer">Generated on Fri Mar 24 2017 17:23:50 for ARM Compute Library by
+    <li class="footer">Generated on Wed Apr 12 2017 14:26:06 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

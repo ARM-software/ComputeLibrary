@@ -23,7 +23,6 @@
  */
 #include "arm_compute/core/CL/kernels/CLCannyEdgeKernel.h"
 
-#include "arm_compute/core/AccessWindowAutoPadding.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -34,16 +33,11 @@
 using namespace arm_compute;
 
 CLGradientKernel::CLGradientKernel()
-    : _gx(nullptr), _gy(nullptr), _magnitude(nullptr), _phase(nullptr), _pixels_to_skip(0)
+    : _gx(nullptr), _gy(nullptr), _magnitude(nullptr), _phase(nullptr)
 {
 }
 
-BorderSize CLGradientKernel::border_size() const
-{
-    return BorderSize(_pixels_to_skip);
-}
-
-void CLGradientKernel::configure(const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase, int32_t norm_type, int32_t num_pixel_to_skip_prev, bool border_undefined)
+void CLGradientKernel::configure(const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase, int32_t norm_type)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gx, 1, DataType::S16, DataType::S32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gy, 1, DataType::S16, DataType::S32);
@@ -68,24 +62,20 @@ void CLGradientKernel::configure(const ICLTensor *gx, const ICLTensor *gy, ICLTe
     const std::string kernel_name = (norm_type == 1) ? std::string("combine_gradients_L1") : std::string("combine_gradients_L2");
     _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, built_opts));
 
-    // Skip pixels around from previous stage
-    _pixels_to_skip = num_pixel_to_skip_prev;
-
-    const unsigned int processed_elements = 4;
-
     // Configure kernel window
-    Window                  win = calculate_max_window(*_gx->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowAutoPadding magnitude_access(magnitude->info());
-    AccessWindowAutoPadding phase_access(phase->info());
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
 
-    update_window_and_padding(win,
-                              AccessWindowAutoPadding(gx->info()),
-                              AccessWindowAutoPadding(gy->info()),
-                              magnitude_access,
-                              phase_access);
+    Window win = calculate_max_window(*_gx->info(), Steps(num_elems_processed_per_iteration));
 
-    magnitude_access.set_valid_region();
-    phase_access.set_valid_region();
+    AccessWindowHorizontal gx_access(_gx->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal gy_access(_gy->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal mag_access(_magnitude->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal phase_access(_phase->info(), 0, num_elems_processed_per_iteration);
+
+    update_window_and_padding(win, gx_access, gy_access, mag_access, phase_access);
+
+    mag_access.set_valid_region(win, _gx->info()->valid_region());
+    phase_access.set_valid_region(win, _gx->info()->valid_region());
 
     ICLKernel::configure(win);
 }
@@ -109,16 +99,16 @@ void CLGradientKernel::run(const Window &window, cl::CommandQueue &queue)
 }
 
 CLEdgeNonMaxSuppressionKernel::CLEdgeNonMaxSuppressionKernel()
-    : _magnitude(nullptr), _phase(nullptr), _output(nullptr), _pixels_to_skip(0)
+    : _magnitude(nullptr), _phase(nullptr), _output(nullptr)
 {
 }
 
 BorderSize CLEdgeNonMaxSuppressionKernel::border_size() const
 {
-    return BorderSize(_pixels_to_skip);
+    return BorderSize(1);
 }
 
-void CLEdgeNonMaxSuppressionKernel::configure(const ICLTensor *magnitude, const ICLTensor *phase, ICLTensor *output, int32_t lower_thr, int32_t num_pixel_to_skip_prev, bool border_undefined)
+void CLEdgeNonMaxSuppressionKernel::configure(const ICLTensor *magnitude, const ICLTensor *phase, ICLTensor *output, int32_t lower_thr, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(magnitude, 1, DataType::U16, DataType::U32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(phase, 1, DataType::U8);
@@ -136,26 +126,24 @@ void CLEdgeNonMaxSuppressionKernel::configure(const ICLTensor *magnitude, const 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("suppress_non_maximum", built_opts));
 
-    // Pixels to skip
-    _pixels_to_skip = num_pixel_to_skip_prev;
-
     // Set minimum threshold argument
-
     unsigned int idx = 3 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg(idx++, lower_thr);
 
-    const unsigned int processed_elements = 1;
-
     // Configure kernel window
-    Window                  win = calculate_max_window(*magnitude->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowAutoPadding output_access(output->info());
+    constexpr unsigned int num_elems_processed_per_iteration    = 1;
+    constexpr unsigned int num_elems_read_written_per_iteration = 3;
 
-    update_window_and_padding(win,
-                              AccessWindowAutoPadding(magnitude->info()),
-                              AccessWindowAutoPadding(phase->info()),
-                              output_access);
+    Window win = calculate_max_window(*_magnitude->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
 
-    output_access.set_valid_region();
+    AccessWindowRectangle mag_access(_magnitude->info(), -border_size().left, -border_size().top,
+                                     num_elems_read_written_per_iteration, num_elems_read_written_per_iteration);
+    AccessWindowHorizontal phase_access(_phase->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(_output->info(), 0, num_elems_processed_per_iteration);
+
+    update_window_and_padding(win, mag_access, phase_access, output_access);
+
+    output_access.set_valid_region(win, _magnitude->info()->valid_region(), border_undefined, border_size());
 
     ICLKernel::configure(win);
 }
@@ -178,18 +166,12 @@ void CLEdgeNonMaxSuppressionKernel::run(const Window &window, cl::CommandQueue &
 }
 
 CLEdgeTraceKernel::CLEdgeTraceKernel()
-    : _input(nullptr), _output(nullptr), _lower_thr(0), _upper_thr(0), _visited(nullptr), _recorded(nullptr), _l1_stack(nullptr), _l1_stack_counter(nullptr), _pixels_to_skip(0)
+    : _input(nullptr), _output(nullptr), _lower_thr(0), _upper_thr(0), _visited(nullptr), _recorded(nullptr), _l1_stack(nullptr), _l1_stack_counter(nullptr)
 {
-}
-
-BorderSize CLEdgeTraceKernel::border_size() const
-{
-    return BorderSize(_pixels_to_skip);
 }
 
 void CLEdgeTraceKernel::configure(const ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr,
-                                  ICLTensor *visited, ICLTensor *recorded, ICLTensor *l1_stack, ICLTensor *l1_stack_counter,
-                                  int32_t num_pixel_to_skip_prev, bool border_undefined)
+                                  ICLTensor *visited, ICLTensor *recorded, ICLTensor *l1_stack, ICLTensor *l1_stack_counter)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U16, DataType::U32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
@@ -224,20 +206,29 @@ void CLEdgeTraceKernel::configure(const ICLTensor *input, ICLTensor *output, int
     _kernel.setArg(idx++, static_cast<cl_uint>(width));
     _kernel.setArg(idx++, static_cast<cl_uint>(height));
 
-    // Pixels to skip
-    _pixels_to_skip = num_pixel_to_skip_prev;
-
-    const unsigned int processed_elements = 1;
-
     // Configure kernel window
-    Window                  win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowAutoPadding output_access(output->info());
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
+    Window                 win                               = calculate_max_window(*_input->info(), Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal output_access(_output->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal visited_access(_visited->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal recorded_access(_recorded->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal l1_stack_access(_l1_stack->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal l1_stack_counter_access(_l1_stack_counter->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowAutoPadding(input->info()),
-                              output_access);
+                              AccessWindowHorizontal(_input->info(), 0, num_elems_processed_per_iteration),
+                              output_access,
+                              visited_access,
+                              recorded_access,
+                              l1_stack_access,
+                              l1_stack_counter_access);
 
-    output_access.set_valid_region();
+    output_access.set_valid_region(win, _input->info()->valid_region());
+    visited_access.set_valid_region(win, _input->info()->valid_region());
+    recorded_access.set_valid_region(win, _input->info()->valid_region());
+    l1_stack_access.set_valid_region(win, _input->info()->valid_region());
+    l1_stack_counter_access.set_valid_region(win, _input->info()->valid_region());
 
     ICLKernel::configure(win);
 }

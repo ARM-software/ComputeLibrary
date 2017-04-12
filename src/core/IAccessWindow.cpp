@@ -29,16 +29,16 @@
 
 using namespace arm_compute;
 
-void AccessWindowRectangle::set_valid_region(const Window &window, ValidRegion input_valid_region)
+ValidRegion AccessWindowRectangle::compute_valid_region(const Window &window, const ValidRegion &input_valid_region) const
 {
-    set_valid_region(window, std::move(input_valid_region), false, BorderSize(0));
+    return compute_valid_region(window, input_valid_region, false, BorderSize(0));
 }
 
-void AccessWindowRectangle::set_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size)
+ValidRegion AccessWindowRectangle::compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const
 {
     if(_info == nullptr)
     {
-        return;
+        return input_valid_region;
     }
 
     Coordinates &anchor = input_valid_region.anchor;
@@ -77,7 +77,15 @@ void AccessWindowRectangle::set_valid_region(const Window &window, ValidRegion i
         shape.set(d, std::min<int>(window[d].end(), input_valid_region.shape[d]) - anchor[d]);
     }
 
-    _info->set_valid_region(input_valid_region);
+    return input_valid_region;
+}
+
+void AccessWindowRectangle::set_valid_region(const Window &window, const ValidRegion &input_valid_region, bool border_undefined, const BorderSize &border_size)
+{
+    if(_info != nullptr)
+    {
+        _info->set_valid_region(compute_valid_region(window, input_valid_region, border_undefined, border_size));
+    }
 }
 
 bool AccessWindowRectangle::update_window_if_needed(Window &window) const
@@ -172,6 +180,8 @@ bool AccessWindowRectangle::update_window_if_needed(Window &window) const
             window_modified = true;
         }
     }
+
+    window.validate();
 
     return window_modified;
 }

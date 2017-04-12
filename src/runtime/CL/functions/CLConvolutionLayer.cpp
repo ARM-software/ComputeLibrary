@@ -77,9 +77,9 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     // Get convolved dimensions
     unsigned int conv_w = 0;
     unsigned int conv_h = 0;
-
     std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0),
                                                  stride_x, stride_y, pad_x, pad_y, conv_info.round());
+    ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
     // Create tensor to store the reshaped weights
     const size_t      mat_weights_cols = weights->info()->dimension(3);

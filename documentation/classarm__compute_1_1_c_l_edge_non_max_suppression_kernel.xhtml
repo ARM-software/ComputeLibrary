@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.03.1</span>
+   &#160;<span id="projectnumber">17.04</span>
    </div>
   </td>
  </tr>
@@ -143,9 +143,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aaa7e7959c4a5ab3705e79d81a7e94f1d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml">CLEdgeNonMaxSuppressionKernel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml#aaa7e7959c4a5ab3705e79d81a7e94f1d">operator=</a> (const <a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml">CLEdgeNonMaxSuppressionKernel</a> &amp;)=delete</td></tr>
 <tr class="memdesc:aaa7e7959c4a5ab3705e79d81a7e94f1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied (As this class contains pointers)  <a href="#aaa7e7959c4a5ab3705e79d81a7e94f1d">More...</a><br /></td></tr>
 <tr class="separator:aaa7e7959c4a5ab3705e79d81a7e94f1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac3be94ff27e2a368c861954f5a8d2afe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml#ac3be94ff27e2a368c861954f5a8d2afe">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *magnitude, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *phase, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, int32_t lower_thr, int32_t num_pixel_to_skip_prev, bool border_undefined)</td></tr>
-<tr class="memdesc:ac3be94ff27e2a368c861954f5a8d2afe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's sources, destination and border mode.  <a href="#ac3be94ff27e2a368c861954f5a8d2afe">More...</a><br /></td></tr>
-<tr class="separator:ac3be94ff27e2a368c861954f5a8d2afe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a209e05c2e2bf4d5fb2b9e3f75c7d79aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml#a209e05c2e2bf4d5fb2b9e3f75c7d79aa">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *magnitude, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *phase, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, int32_t lower_thr, bool border_undefined)</td></tr>
+<tr class="memdesc:a209e05c2e2bf4d5fb2b9e3f75c7d79aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's sources, destination and border mode.  <a href="#a209e05c2e2bf4d5fb2b9e3f75c7d79aa">More...</a><br /></td></tr>
+<tr class="separator:a209e05c2e2bf4d5fb2b9e3f75c7d79aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a493987e85723a8000eb26d1f00e2ad0e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, cl::CommandQueue &amp;queue) override</td></tr>
 <tr class="memdesc:a493987e85723a8000eb26d1f00e2ad0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enqueue the OpenCL kernel to process the given window on the passed OpenCL command queue.  <a href="#a493987e85723a8000eb26d1f00e2ad0e">More...</a><br /></td></tr>
 <tr class="separator:a493987e85723a8000eb26d1f00e2ad0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -197,11 +197,11 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>OpenCL kernel to perform Non-Maxima suppression for Canny Edge. </p>
-<dl class="section note"><dt>Note</dt><dd>This kernel is meant to be used alongside CannyEdge and performs a non-maxima suppression using magnitude and phase of input to characterize points as possible edges.</dd>
+<dl class="section note"><dt>Note</dt><dd>This kernel is meant to be used alongside CannyEdge and performs a non-maxima suppression using magnitude and phase of input to characterize points as possible edges. The output buffer needs to be cleared before this kernel is executed.</dd>
 <dd>
 Hysteresis is computed in <a class="el" href="classarm__compute_1_1_c_l_edge_trace_kernel.xhtml">CLEdgeTraceKernel</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="_c_l_canny_edge_kernel_8h_source.xhtml#l00079">79</a> of file <a class="el" href="_c_l_canny_edge_kernel_8h_source.xhtml">CLCannyEdgeKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_c_l_canny_edge_kernel_8h_source.xhtml#l00075">75</a> of file <a class="el" href="_c_l_canny_edge_kernel_8h_source.xhtml">CLCannyEdgeKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a594c3386342734f366460fccc6171c98"></a>
 <div class="memitem">
@@ -275,7 +275,7 @@ Hysteresis is computed in <a class="el" href="classarm__compute_1_1_c_l_edge_tra
 
 </div>
 </div>
-<a class="anchor" id="ac3be94ff27e2a368c861954f5a8d2afe"></a>
+<a class="anchor" id="a209e05c2e2bf4d5fb2b9e3f75c7d79aa"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -306,12 +306,6 @@ Hysteresis is computed in <a class="el" href="classarm__compute_1_1_c_l_edge_tra
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int32_t&#160;</td>
-          <td class="paramname"><em>num_pixel_to_skip_prev</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>border_undefined</em>&#160;</td>
         </tr>
@@ -328,9 +322,8 @@ Hysteresis is computed in <a class="el" href="classarm__compute_1_1_c_l_edge_tra
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">magnitude</td><td>Source tensor - Magnitude. Data types supported: U16/U32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">phase</td><td>Source tensor - Quantized phase. Data types supported: U8. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: U16/U32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lower_thr</td><td>Lower threshold. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">num_pixel_to_skip_prev</td><td>Number of pixels to skip of previous stage if border_mode = UNDEFINED </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">border_undefined</td><td>True if the border mode is undefined. False if it's replicate or constant. </td></tr>
   </table>
   </dd>
@@ -419,7 +412,7 @@ Hysteresis is computed in <a class="el" href="classarm__compute_1_1_c_l_edge_tra
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml">CLEdgeNonMaxSuppressionKernel</a></li>
-    <li class="footer">Generated on Fri Mar 24 2017 17:23:50 for ARM Compute Library by
+    <li class="footer">Generated on Wed Apr 12 2017 14:26:05 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

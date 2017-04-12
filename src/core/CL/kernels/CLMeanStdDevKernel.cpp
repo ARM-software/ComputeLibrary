@@ -80,10 +80,13 @@ void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffe
     }
 
     // Configure kernel window
-    const unsigned int processed_elements_x = 8;
-    const unsigned int processed_elements_y = input->info()->dimension(1);
-    Window             win                  = calculate_max_window(*input->info(), Steps(processed_elements_x, processed_elements_y));
-    update_window_and_padding(win, AccessWindowRectangle(input->info(), 0, 0, processed_elements_x, processed_elements_y));
+    constexpr unsigned int num_elems_processed_per_iteration_x = 8;
+    const unsigned int     num_elems_processed_per_iteration_y = input->info()->dimension(1);
+
+    Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+    update_window_and_padding(win, input_access);
+
     ICLKernel::configure(win);
 }
 

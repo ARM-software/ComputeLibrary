@@ -58,10 +58,8 @@ void CLLaplacianPyramid::configure(ICLTensor *input, CLPyramid *pyramid, ICLTens
     PyramidInfo pyramid_info;
     pyramid_info.init(_num_levels, 0.5f, pyramid->info()->tensor_shape(), arm_compute::Format::U8);
 
-    _gauss_pyr.init_auto_padding(pyramid_info);
-    _gauss_pyr.allocate();
-    _conv_pyr.init_auto_padding(pyramid_info);
-    _conv_pyr.allocate();
+    _gauss_pyr.init(pyramid_info);
+    _conv_pyr.init(pyramid_info);
 
     // Create Gaussian Pyramid function
     _gaussian_pyr_function.configure(input, &_gauss_pyr, border_mode, constant_border_value);
@@ -76,6 +74,9 @@ void CLLaplacianPyramid::configure(ICLTensor *input, CLPyramid *pyramid, ICLTens
     }
 
     _depth_function.configure(_conv_pyr.get_pyramid_level(_num_levels - 1), output, ConvertPolicy::WRAP, 0);
+
+    _gauss_pyr.allocate();
+    _conv_pyr.allocate();
 }
 
 void CLLaplacianPyramid::run()

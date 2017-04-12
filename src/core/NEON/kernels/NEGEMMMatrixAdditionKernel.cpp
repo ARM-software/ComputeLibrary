@@ -50,7 +50,7 @@ void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != output->info()->dimension(0));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != output->info()->dimension(1));
 
-    const unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     INESimpleKernel::configure(input, output, num_elems_processed_per_iteration);
 

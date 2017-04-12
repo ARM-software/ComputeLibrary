@@ -47,6 +47,29 @@ public:
     PyramidInfo(PyramidInfo &&) = default;
     /** Allow instances of this class to be moved */
     PyramidInfo &operator=(PyramidInfo &&) = default;
+
+    /** Create pyramid info for 2D tensors
+     *
+     * @param[in] num_levels The number of pyramid levels. This is required to be a non-zero value
+     * @param[in] scale      Used to indicate the scale between the pyramid levels.
+     *                       This is required to be a non-zero positive value.
+     * @param[in] width      The width of the 2D tensor at 0th pyramid level
+     * @param[in] height     The height of the 2D tensor at 0th pyramid level
+     * @param[in] format     The format of all 2D tensors in the pyramid
+     *                       NV12, NV21, IYUV, UYVY and YUYV formats are not supported.
+     */
+    PyramidInfo(size_t num_levels, float scale, size_t width, size_t height, Format format);
+
+    /** Create pyramid info using TensorShape
+     *
+     * @param[in] num_levels   The number of pyramid levels. This is required to be a non-zero value
+     * @param[in] scale        Used to indicate the scale between the pyramid levels.
+     *                         This is required to be a non-zero positive value.
+     * @param[in] tensor_shape It specifies the size for each dimension of the tensor 0th pyramid level in number of elements
+     * @param[in] format       The format of all tensors in the pyramid
+     */
+    PyramidInfo(size_t num_levels, float scale, const TensorShape &tensor_shape, Format format);
+
     /** Initialize pyramid's metadata for 2D tensors
      *
      * @param[in] num_levels The number of pyramid levels. This is required to be a non-zero value

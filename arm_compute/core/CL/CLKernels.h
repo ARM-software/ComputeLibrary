@@ -25,7 +25,6 @@
 #define __ARM_COMPUTE_CLKERNELS_H__
 
 /* Header regrouping all the CL kernels */
-
 #include "arm_compute/core/CL/kernels/CLAbsoluteDifferenceKernel.h"
 #include "arm_compute/core/CL/kernels/CLAccumulateKernel.h"
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
@@ -50,6 +49,7 @@
 #include "arm_compute/core/CL/kernels/CLFastCornersKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"

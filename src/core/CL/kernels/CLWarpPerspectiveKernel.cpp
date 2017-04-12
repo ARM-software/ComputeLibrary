@@ -78,16 +78,22 @@ void CLWarpPerspectiveKernel::configure(const ICLTensor *input, ICLTensor *outpu
     std::string kernel_name = "warp_perspective_" + interpolation_name;
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, options));
 
-    // Configure kernel window
-    const unsigned int processed_elements = 4;
-    Window             win                = calculate_max_window(*output->info(), Steps(processed_elements));
-    AccessWindowStatic output_access(output->info(), 0, 0, output->info()->dimension(0), output->info()->dimension(1));
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, processed_elements), output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    ICLKernel::configure(win);
-
-    // Set arguments
+    // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg<cl_int>(idx++, input->info()->dimension(0));
     _kernel.setArg<cl_int>(idx++, input->info()->dimension(1));
+
+    // Configure kernel window
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
+
+    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowStatic     output_access(output->info(), 0, 0, output->info()->dimension(0), output->info()->dimension(1));
+
+    update_window_and_padding(win, input_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
+    ICLKernel::configure(win);
 }

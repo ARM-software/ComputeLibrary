@@ -300,16 +300,16 @@ void NEMagnitudePhaseFP16Kernel<mag_type, phase_type>::configure(const ITensor *
         ARM_COMPUTE_ERROR("At least one output must be NOT NULL");
     }
 
-    const unsigned int processed_elements = 16;
+    const unsigned int num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*gx->info(), Steps(processed_elements));
-    AccessWindowHorizontal magnitude_access(magnitude == nullptr ? nullptr : magnitude->info(), 0, processed_elements);
-    AccessWindowHorizontal phase_access(phase == nullptr ? nullptr : phase->info(), 0, processed_elements);
+    Window                 win = calculate_max_window(*gx->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal magnitude_access(magnitude == nullptr ? nullptr : magnitude->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal phase_access(phase == nullptr ? nullptr : phase->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowHorizontal(gx->info(), 0, processed_elements),
-                              AccessWindowHorizontal(gy->info(), 0, processed_elements),
+                              AccessWindowHorizontal(gx->info(), 0, num_elems_processed_per_iteration),
+                              AccessWindowHorizontal(gy->info(), 0, num_elems_processed_per_iteration),
                               magnitude_access,
                               phase_access);
 
@@ -676,16 +676,16 @@ void NEMagnitudePhaseKernel<mag_type, phase_type>::configure(const ITensor *gx, 
         }
     }
 
-    const unsigned int processed_elements = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*gx->info(), Steps(processed_elements));
-    AccessWindowHorizontal magnitude_access(magnitude == nullptr ? nullptr : magnitude->info(), 0, processed_elements);
-    AccessWindowHorizontal phase_access(phase == nullptr ? nullptr : phase->info(), 0, processed_elements);
+    Window                 win = calculate_max_window(*gx->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal magnitude_access(magnitude == nullptr ? nullptr : magnitude->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal phase_access(phase == nullptr ? nullptr : phase->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowHorizontal(gx->info(), 0, processed_elements),
-                              AccessWindowHorizontal(gy->info(), 0, processed_elements),
+                              AccessWindowHorizontal(gx->info(), 0, num_elems_processed_per_iteration),
+                              AccessWindowHorizontal(gy->info(), 0, num_elems_processed_per_iteration),
                               magnitude_access,
                               phase_access);
 

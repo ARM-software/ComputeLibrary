@@ -92,56 +92,44 @@ You should have the following file organisation:
 	└── test_helpers --> Boiler plate code used by examples
 	    └── Utils.h
 
-@section S2_versions_changelog Versions changelog
+@section S2_versions_changelog Release versions and changelog
 
-@note There will be one major public release with new features per quarter. All releases in between will only contain bug fixes.
+@subsection S2_1_versions Release versions
 
-v16.12 (Binary release)
- - Original release
+All releases are numbered vYY.MM Where YY are the last two digits of the year, and MM the month number.
+If there is more than one release in a month then an extra sequential number is appended at the end:
 
-v17.02 (Sources)
- - New OpenCL kernels / functions:
-   - @ref CLActivationLayerKernel / @ref CLActivationLayer
-   - @ref CLChannelCombineKernel / @ref CLChannelCombine
-   - @ref CLDerivativeKernel / @ref CLChannelExtract
-   - @ref CLFastCornersKernel / @ref CLFastCorners
-   - @ref CLMeanStdDevKernel / @ref CLMeanStdDev
- - New NEON kernels / functions:
-   - HOG / SVM: @ref NEHOGOrientationBinningKernel, @ref NEHOGBlockNormalizationKernel, @ref NEHOGDetectorKernel, @ref NEHOGNonMaximaSuppressionKernel / @ref NEHOGDescriptor, @ref NEHOGDetector, @ref NEHOGGradient, @ref NEHOGMultiDetection
-   - @ref NENonLinearFilterKernel / @ref NENonLinearFilter
- - Introduced a CLScheduler to manage the default context and command queue used by the runtime library and create synchronisation events.
- - Switched all the kernels / functions to use tensors instead of images.
- - Updated documentation to include instructions to build the library from sources.
+	v17.03 (First release of March 2017)
+	v17.03.1 (Second release of March 2017)
+	v17.04 (First release of April 2017)
 
-v17.02.1 (Sources)
- - New OpenCL kernels / functions:
-   - @ref CLLogits1DMaxKernel, @ref CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
-   - @ref CLPoolingLayerKernel / @ref CLPoolingLayer
-   - @ref CLIm2ColKernel @ref CLCol2ImKernel @ref CLConvolutionLayerWeightsReshapeKernel / @ref CLConvolutionLayer
-   - @ref CLRemapKernel / @ref CLRemap
-   - @ref CLGaussianPyramidHorKernel, @ref CLGaussianPyramidVertKernel / @ref CLGaussianPyramid, @ref CLGaussianPyramidHalf, @ref CLGaussianPyramidOrb
-   - @ref CLMinMaxKernel, @ref CLMinMaxLocationKernel / @ref CLMinMaxLocation
-   - @ref CLNonLinearFilterKernel / @ref CLNonLinearFilter
- - New NEON FP16 kernels (Requires armv8.2 CPU)
-   - @ref NEAccumulateWeightedFP16Kernel
-   - @ref NEBox3x3FP16Kernel
-   - @ref NENonMaximaSuppression3x3FP16Kernel
+@note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
 
-v17.03 (Sources)
- - New OpenCL kernels / functions:
-   - @ref CLGradientKernel, @ref CLEdgeNonMaxSuppressionKernel, @ref CLEdgeTraceKernel / @ref CLCannyEdge
-   - GEMM refactoring + FP16 support: @ref CLGEMMInterleave4x4Kernel, @ref CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, @ref CLGEMMMatrixAdditionKernel / @ref CLGEMM
-   - @ref CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
-   - @ref CLTransposeKernel / @ref CLTranspose
-   - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / @ref CLOpticalFlow
-   - @ref CLNormalizationLayerKernel / @ref CLNormalizationLayer
-   - @ref CLLaplacianPyramid, @ref CLLaplacianReconstruct
- - New NEON kernels / functions:
-   - @ref NEActivationLayerKernel / @ref NEActivationLayer
-   - GEMM refactoring + FP16 support (Requires armv8.2 CPU): @ref NEGEMMInterleave4x4Kernel, @ref NEGEMMTranspose1xWKernel, @ref NEGEMMMatrixMultiplyKernel, @ref NEGEMMMatrixAdditionKernel / @ref NEGEMM
-   - @ref NEPoolingLayerKernel / @ref NEPoolingLayer
+@subsection S2_2_changelog Changelog
 
-v17.03.1 (Sources)
+v17.04 Public bug fixes release
+ The following functions have been ported to use the new accurate padding:
+ -  @ref CLColorConvertKernel
+ -  @ref CLEdgeNonMaxSuppressionKernel
+ -  @ref CLEdgeTraceKernel
+ -  @ref CLGaussianPyramidHorKernel
+ -  @ref CLGaussianPyramidVertKernel
+ -  @ref CLGradientKernel
+ -  @ref NEChannelCombineKernel
+ -  @ref NEFillArrayKernel
+ -  @ref NEGaussianPyramidHorKernel
+ -  @ref NEGaussianPyramidVertKernel
+ -  @ref NEHarrisScoreFP16Kernel
+ -  @ref NEHarrisScoreKernel
+ -  @ref NEHOGDetectorKernel
+ -  @ref NELogits1DMaxKernel
+ -  @ref NELogits1DShiftExpSumKernel
+ -  @ref NELogits1DNormKernel
+ -  @ref NENonMaximaSuppression3x3FP16Kernel
+ -  @ref NENonMaximaSuppression3x3Kernel
+
+
+v17.03.1 First Major public release of the sources
  - Renamed the library to arm_compute
  - New CPP target introduced for C++ kernels shared between NEON and CL functions.
  - New padding calculation interface introduced and ported most kernels / functions to use it.
@@ -155,6 +143,50 @@ v17.03.1 (Sources)
    - @ref NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
    - @ref NEGEMMLowpMatrixMultiplyKernel / @ref NEGEMMLowp
 
+v17.03 Sources preview
+ - New OpenCL kernels / functions:
+   - @ref CLGradientKernel, @ref CLEdgeNonMaxSuppressionKernel, @ref CLEdgeTraceKernel / @ref CLCannyEdge
+   - GEMM refactoring + FP16 support: @ref CLGEMMInterleave4x4Kernel, @ref CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, @ref CLGEMMMatrixAdditionKernel / @ref CLGEMM
+   - @ref CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
+   - @ref CLTransposeKernel / @ref CLTranspose
+   - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / @ref CLOpticalFlow
+   - @ref CLNormalizationLayerKernel / @ref CLNormalizationLayer
+   - @ref CLLaplacianPyramid, @ref CLLaplacianReconstruct
+ - New NEON kernels / functions:
+   - @ref NEActivationLayerKernel / @ref NEActivationLayer
+   - GEMM refactoring + FP16 support (Requires armv8.2 CPU): @ref NEGEMMInterleave4x4Kernel, @ref NEGEMMTranspose1xWKernel, @ref NEGEMMMatrixMultiplyKernel, @ref NEGEMMMatrixAdditionKernel / @ref NEGEMM
+   - @ref NEPoolingLayerKernel / @ref NEPoolingLayer
+
+v17.02.1 Sources preview
+ - New OpenCL kernels / functions:
+   - @ref CLLogits1DMaxKernel, @ref CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
+   - @ref CLPoolingLayerKernel / @ref CLPoolingLayer
+   - @ref CLIm2ColKernel @ref CLCol2ImKernel @ref CLConvolutionLayerWeightsReshapeKernel / @ref CLConvolutionLayer
+   - @ref CLRemapKernel / @ref CLRemap
+   - @ref CLGaussianPyramidHorKernel, @ref CLGaussianPyramidVertKernel / @ref CLGaussianPyramid, @ref CLGaussianPyramidHalf, @ref CLGaussianPyramidOrb
+   - @ref CLMinMaxKernel, @ref CLMinMaxLocationKernel / @ref CLMinMaxLocation
+   - @ref CLNonLinearFilterKernel / @ref CLNonLinearFilter
+ - New NEON FP16 kernels (Requires armv8.2 CPU)
+   - @ref NEAccumulateWeightedFP16Kernel
+   - @ref NEBox3x3FP16Kernel
+   - @ref NENonMaximaSuppression3x3FP16Kernel
+
+v17.02 Sources preview
+ - New OpenCL kernels / functions:
+   - @ref CLActivationLayerKernel / @ref CLActivationLayer
+   - @ref CLChannelCombineKernel / @ref CLChannelCombine
+   - @ref CLDerivativeKernel / @ref CLChannelExtract
+   - @ref CLFastCornersKernel / @ref CLFastCorners
+   - @ref CLMeanStdDevKernel / @ref CLMeanStdDev
+ - New NEON kernels / functions:
+   - HOG / SVM: @ref NEHOGOrientationBinningKernel, @ref NEHOGBlockNormalizationKernel, @ref NEHOGDetectorKernel, @ref NEHOGNonMaximaSuppressionKernel / @ref NEHOGDescriptor, @ref NEHOGDetector, @ref NEHOGGradient, @ref NEHOGMultiDetection
+   - @ref NENonLinearFilterKernel / @ref NENonLinearFilter
+ - Introduced a CLScheduler to manage the default context and command queue used by the runtime library and create synchronisation events.
+ - Switched all the kernels / functions to use tensors instead of images.
+ - Updated documentation to include instructions to build the library from sources.
+
+v16.12 Binary preview release
+ - Original release
 
 @section S3_how_to_build How to build the library and the examples
 
@@ -171,7 +203,7 @@ To see the build options available simply run ```scons -h```:
 		default: 0
 		actual: 0
 
-	arch: Target Architecture (default=armv7a) (armv7a|arm64-v8a|arm64-v8.2-a|x86)
+	arch: Target Architecture (default=armv7a) (armv7a|arm64-v8a|arm64-v8.2-a|x86_32|x86_64)
 		default: armv7a
 		actual: armv7a
 
@@ -199,12 +231,24 @@ To see the build options available simply run ```scons -h```:
 		default: 0
 		actual: 0
 
+	scheduler: Scheduler backend(Default=cpp) (cpp|pthread|openmp)
+		default: cpp
+		actual: cpp
+
+	set_soname: Set the library's soname and shlibversion (Requires SCons 2.4 or above) (yes|no)
+		default: 0
+		actual: False
+
+	extra_cxx_flags: Extra CXX flags to be appended to the build command
+		default:
+		actual:
+
 Debug / asserts:
  - With debug=1 asserts are enabled, and the library is built with symbols and no optimisations enabled.
  - With debug=0 and asserts=1: Optimisations are enabled and symbols are removed, however all the asserts are still present (This is about 20% slower than the release build)
  - With debug=0 and asserts=0: All optimisations are enable and no validation is performed, if the application misuses the library it is likely to result in a crash. (Only use this mode once you are sure your application is working as expected).
 
-Architecture: The x86 target can only be used with neon=0 and opencl=1.
+Architecture: The x86_32 and x86_64 targets can only be used with neon=0 and opencl=1.
 
 OS: Choose the operating system you are targeting: Linux, Android or bare metal.
 @note bare metal can only be used for NEON (not OpenCL), only static libraries get built and NEON's multi-threading support is disabled.
@@ -213,9 +257,20 @@ Build type: you can either build directly on your device (native) or cross compi
 
 Werror: If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue either on Github or by an email to developer@arm.com so that the issue can be addressed).
 
-OpenCL / NEON: Choose which SIMD technology you are interested targeting. (NEON for ARM Cortex-A CPUs or OpenCL for ARM Mali GPUs)
+OpenCL / NEON: Choose which SIMD technology you want to target. (NEON for ARM Cortex-A CPUs or OpenCL for ARM Mali GPUs)
 
 embed_kernels: For OpenCL only: set embed_kernels=1 if you want the OpenCL kernels to be built in the library's binaries instead of being read from separate ".cl" files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL kernel files by calling CLKernelLibrary::init(). By default the path is set to "./cl_kernels".
+
+set_soname: Do you want to build the versioned version of the library ?
+If enabled the library will contain a SONAME and SHLIBVERSION and some symlinks will automatically be created between the objects.
+Example:
+  libarm_compute_core.so -> libarm_compute_core.so.1.0.0
+  libarm_compute_core.so.1 -> libarm_compute_core.so.1.0.0
+  libarm_compute_core.so.1.0.0
+
+@note This options is disabled by default as it requires SCons version 2.4 or above.
+
+extra_cxx_flags: Custom CXX flags which will be appended to the end of the build command.
 
 @subsection S3_2_linux Linux
 
@@ -232,6 +287,27 @@ To cross-compile the library in debug mode, with NEON only support, for Linux 32
 To cross-compile the library in asserts mode, with OpenCL only support, for Linux 64bit:
 
 	scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=linux arch=arm64-v8a
+
+You can also compile the library natively on an ARM device by using <b>build=native</b>:
+
+	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=arm64-v8a build=native
+	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=armv7a build=native
+
+@note G++ for ARM is mono-arch, therefore if you want to compile for Linux 32bit on a Linux 64bit platform you will have to use a cross compiler.
+
+For example on a 64bit Debian based system you would have to install <b>g++-arm-linux-gnueabihf</b>
+
+	apt-get install g++-arm-linux-gnueabihf
+
+Then run
+
+	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=armv7a build=cross_compile
+
+or simply remove the build parameter as build=cross_compile is the default value:
+
+	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=armv7a
+
+@attention To cross compile with opencl=1 you need to make sure to have a version of libOpenCL matching your target architecture.
 
 @subsubsection S3_2_2_examples How to manually build the examples ?
 
@@ -447,7 +523,9 @@ The previous section shows how to run a NEON / CPP kernel in the current thread,
 
 @snippet src/runtime/CPP/CPPScheduler.cpp Scheduler example
 
-This is the very basic implementation used in the NEON runtime library by all the NEON functions, @sa CPPScheduler.
+This is the very basic implementation used in the NEON runtime library by all the NEON functions.
+
+@sa CPPScheduler.
 
 @note Some kernels like for example @ref NEHistogramKernel need some local temporary buffer to perform their calculations. In order to avoid memory corruption between threads, the local buffer must be of size: ```memory_needed_per_thread * num_threads``` and each subwindow must be initialised by calling @ref Window::set_thread_id() with a unique thread_id between 0 and num_threads.
 
@@ -529,7 +607,7 @@ There are different ways padding can be calculated:
 
 @note It's important to call allocate @b after the function is configured: if the image / tensor is already allocated then the function will shrink its execution window instead of increasing the padding. (See below for more details).
 
-- Manual padding / no padding / auto padding: You can allocate your images / tensors up front (before configuring your functions), in that case the function will use whatever padding is available and will shrink its execution window if there isn't enough padding available (Which will translates into a smaller valid region for the output @sa valid_region).
+- Manual padding / no padding / auto padding: You can allocate your images / tensors up front (before configuring your functions), in that case the function will use whatever padding is available and will shrink its execution window if there isn't enough padding available (Which will translates into a smaller valid region for the output. See also @ref valid_region).
 If you don't want to manually set the padding but still want to allocate your objects upfront then you can use auto_padding.
 
 @code{.cpp}
@@ -564,36 +642,18 @@ Some kernels (like edge detectors for example) need to read values of neighbouri
 
 Another case is: if a kernel processes 8 pixels per iteration then if the image's dimensions is not a multiple of 8 and not enough padding is available then the kernel will not be able to process the pixels near the right edge as a result these pixels will be left undefined.
 
-In order to know which pixels have been calculated, each kernel sets a valid region for each output image or tensor @sa TensorInfo::valid_region(), @ref ValidRegion
+In order to know which pixels have been calculated, each kernel sets a valid region for each output image or tensor. See also @ref TensorInfo::valid_region(), @ref ValidRegion
 
 @attention Valid regions and accurate padding have only been introduced in the library recently therefore not all the kernels and functions have been ported to use them yet. All the non ported kernels will set the @ref ValidRegion equal to the @ref TensorShape.
 
 List of kernels which haven't been ported yet:
 
-- @ref CLColorConvertKernel
-- @ref CLEdgeNonMaxSuppressionKernel
-- @ref CLEdgeTraceKernel
-- @ref CLGaussianPyramidHorKernel
-- @ref CLGaussianPyramidVertKernel
-- @ref CLGradientKernel
-- @ref NEChannelCombineKernel
 - @ref NEColorConvertKernel
-- @ref NEFillArrayKernel
-- @ref NEGaussianPyramidHorKernel
-- @ref NEGaussianPyramidVertKernel
-- @ref NEHarrisScoreFP16Kernel
-- @ref NEHarrisScoreKernel
 - @ref NEHistogramKernel
 - @ref NEHistogramBorderKernel
 - @ref NEHOGBlockNormalizationKernel
-- @ref NEHOGDetectorKernel
 - @ref NEHOGOrientationBinningKernel
-- @ref NELogits1DMaxKernel
-- @ref NELogits1DShiftExpSumKernel
-- @ref NELogits1DNormKernel
 - @ref NELKTrackerKernel
-- @ref NENonMaximaSuppression3x3FP16Kernel
-- @ref NENonMaximaSuppression3x3Kernel
 
 @subsubsection S4_6_2_tensors Tensors
 
@@ -617,36 +677,27 @@ Each kernel specifies the expected layout of each of its tensors in its document
 
 @note Unless specified otherwise in the kernel's or function's documentation the number of channels for tensors is expected to be 1 (For images, the number of channels is inferred from the @ref Format).
 
-@subsubsection S4_6_4_working_with_objects Working with Images and Tensors
+@attention Regardless of the @ref DataType used by a tensor the @ref ITensor::buffer() method will always return a uint8_t pointer, and all the metadata in @ref TensorInfo will be expressed in bytes. It is the user's responsibility to cast the pointer to the correct type.
 
-In the case that no padding exists in the Image/Tensor object you can linearize the object memory and directly copy to/from it.
+For example, to read the element located at the coordinates (x,y) of a float tensor:
+
 @code{.cpp}
-// Create a tensor object
-Tensor tensor;
-// Operate on tensor
-...
-// Copy results
-unsigned char *dst = ... // Your unpadded destination buffer
-// Copy tensor as a linear bulk of memory if no padding exists
-if(!tensor.info()->has_padding())
-{
-    std::copy_n(tensor.buffer(), tensor.info()->total_size(), dst);
-}
+float value = *reinterpret_cast<float*>(input.buffer() + input.info()->offset_element_in_bytes(Coordinates(x,y)));
 @endcode
 
-On the other hand, in case of padding, each row should be carefully copied separately.
-@code{.cpp}
-// Create an image object
-Image img;
-// Initialize image
-const unsigned char *src = ... // Your unpadded input buffer
-// Initialize the Image object using an RGB source image
-for(unsigned int y = 0; y < height; ++y)
-{
-    // Copy one RGB row at a time
-    std::copy_n(img.buffer() + img.info()->offset_element_in_bytes(Coordinates(0, y)), width * 3, src + (y * width) * 3);
-}
-@endcode
+@subsubsection S4_6_4_working_with_objects Working with Images and Tensors using iterators
+
+The library provides some iterators to access objects' data.
+Iterators are created by associating a data object (An image or a tensor for example) with an iteration window.
+
+Iteration windows are defined by an array of dimension, each of which is made of a start, end and step.
+
+The @ref execute_window_loop function takes an execution window, a lambda function and one or more iterators.
+It will iterate through every element of the execution window and for each element it will update the iterators accordingly and call the lambda function.
+
+Here is a couple of examples of how to use the iterators to fill / read tensors:
+
+@snippet examples/neon_copy_objects.cpp Copy objects example
 
 */
  }

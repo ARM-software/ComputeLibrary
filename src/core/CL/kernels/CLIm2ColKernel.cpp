@@ -112,7 +112,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
         _run_func                          = &CLIm2ColKernel::run_reduced;
     }
 
-    // Configure window
+    // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());
     // The CLIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));

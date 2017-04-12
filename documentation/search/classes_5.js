@@ -29,6 +29,7 @@ var searchData=
   ['inesimplefunction',['INESimpleFunction',['../classarm__compute_1_1_i_n_e_simple_function.xhtml',1,'arm_compute']]],
   ['inewarpkernel',['INEWarpKernel',['../classarm__compute_1_1_i_n_e_warp_kernel.xhtml',1,'arm_compute']]],
   ['internalkeypoint',['InternalKeypoint',['../struct_internal_keypoint.xhtml',1,'']]],
+  ['ioformatinfo',['IOFormatInfo',['../structarm__compute_1_1_i_o_format_info.xhtml',1,'arm_compute']]],
   ['ipyramid',['IPyramid',['../classarm__compute_1_1_i_pyramid.xhtml',1,'arm_compute']]],
   ['itensor',['ITensor',['../classarm__compute_1_1_i_tensor.xhtml',1,'arm_compute']]],
   ['itensorallocator',['ITensorAllocator',['../classarm__compute_1_1_i_tensor_allocator.xhtml',1,'arm_compute']]],

@@ -58,14 +58,14 @@ void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("transpose", build_opts));
 
     // Configure kernel window
-    const unsigned int processed_elements = max_cl_vector_width / input->info()->element_size();
+    const unsigned int num_elems_processed_per_iteration = max_cl_vector_width / input->info()->element_size();
 
-    Window                win = calculate_max_window(*input->info(), Steps(processed_elements, processed_elements));
-    AccessWindowTranspose output_access(output->info(), 0, 0, processed_elements, processed_elements);
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_elems_processed_per_iteration));
 
-    update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), 0, 0, processed_elements, processed_elements),
-                              output_access);
+    AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+    AccessWindowTranspose output_access(output->info(), 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+
+    update_window_and_padding(win, input_access, output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region());
 

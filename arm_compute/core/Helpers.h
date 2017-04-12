@@ -108,11 +108,10 @@ inline uint8_t delta_bilinear_c1u8(const uint8_t *pixel_ptr, size_t stride, floa
  *
  * @warning Only works if the iterator was created with an IImage
  *
- * @param[in[ first_pixel_ptr Pointer to the first pixel of a single channel U8 image.
- * @param[in[ stride          Stride in bytes of the image;
- *
- * @param[in] x X position of the wanted pixel
- * @param[in] y Y position of the wanted pixel
+ * @param[in] first_pixel_ptr Pointer to the first pixel of a single channel U8 image.
+ * @param[in] stride          Stride in bytes of the image;
+ * @param[in] x               X position of the wanted pixel
+ * @param[in] y               Y position of the wanted pixel
  *
  * @return The pixel at (x, y) using bilinear interpolation.
  */

@@ -73,16 +73,21 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
     _kernel.setArg<int32_t>(idx++, shift);
 
     // Configure window
-    constexpr unsigned int processed_elements_x = 16;
-    constexpr unsigned int processed_elements_y = 4;
-    constexpr unsigned int read_elements_input0 = 4;
-    constexpr unsigned int read_elements_input1 = 16;
-    Window                 win                  = calculate_max_window(*output->info(), Steps(processed_elements_x, processed_elements_y));
-    AccessWindowRectangle  input0_access(input0->info(), 0, 0, read_elements_input0, 1);
-    AccessWindowRectangle  input1_access(input1->info(), 0, 0, read_elements_input1, 1);
-    AccessWindowRectangle  output_access(output->info(), 0, 0, processed_elements_x, processed_elements_y);
+    constexpr unsigned int num_elems_processed_per_iteration_x = 16;
+    constexpr unsigned int num_elems_processed_per_iteration_y = 4;
+    constexpr unsigned int num_elems_read_per_iteration_input0 = 4;
+    constexpr unsigned int num_elems_read_per_iteration_input1 = 16;
+
+    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+
+    AccessWindowRectangle input0_access(input0->info(), 0, 0, num_elems_read_per_iteration_input0, 1);
+    AccessWindowRectangle input1_access(input1->info(), 0, 0, num_elems_read_per_iteration_input1, 1);
+    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+
     update_window_and_padding(win, input0_access, input1_access, output_access);
+
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+
     ICLKernel::configure(win);
 }
 

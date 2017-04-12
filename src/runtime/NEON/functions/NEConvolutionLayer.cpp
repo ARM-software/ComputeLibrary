@@ -35,7 +35,7 @@ using namespace arm_compute;
 
 NEConvolutionLayer::NEConvolutionLayer()
     : _input_im2col_kernel(), _input_interleave_kernel(), _weights_reshape_kernel(), _weights_transposed_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(),
-      _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _is_first_run(false), _has_bias(false), _is_fc(false)
+      _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _is_first_run(false), _has_bias(false)
 {
 }
 
@@ -64,22 +64,12 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     std::tie(stride_x, stride_y) = conv_info.stride();
     std::tie(pad_x, pad_y)       = conv_info.pad();
 
-    bool is_same_dimension = true;
-    // Make sure the input and weights have same low three dimensions
-    for(int i = 0; i < 3; i++)
-    {
-        is_same_dimension = (is_same_dimension) && (input->info()->dimension(i) == weights->info()->dimension(i));
-    }
-
-    // Run the fully connected path if is_same_dimension is true and conv_stride_x/conv_stride_y are 1, and conv_pad_x/conv_pad_y are 0 and skip col2im
-    _is_fc = (is_same_dimension) && ((stride_x & stride_y) == 1) && ((pad_x | pad_y) == 0);
-
     // Get convolved dimensions
     unsigned int conv_w = 0;
     unsigned int conv_h = 0;
-
     std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0),
                                                  stride_x, stride_y, pad_x, pad_y, conv_info.round());
+    ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
     // Create tensor to store the reshaped weights
     const size_t      mat_weights_cols = weights->info()->dimension(3);
@@ -95,15 +85,11 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
 
     // Create tensor to store im2col reshaped inputs
     const size_t mat_input_cols = mat_weights_rows;
-    const size_t mat_input_rows = _is_fc ? (input->info()->dimension(3)) : (conv_w * conv_h);
+    const size_t mat_input_rows = conv_w * conv_h;
     TensorShape  shape_im2col   = input->info()->tensor_shape();
     shape_im2col.set(0, mat_input_cols);
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
-    if(_is_fc)
-    {
-        shape_im2col.set(3, 1);
-    }
     TensorInfo info_im2col(shape_im2col, 1, input->info()->data_type());
     _input_im2col_reshaped.allocator()->init(info_im2col);
 
@@ -126,16 +112,8 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     _input_interleave_kernel.configure(&_input_im2col_reshaped, &_input_interleaved_reshaped);
     _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
     _weights_transposed_kernel.configure(&_weights_reshaped, &_weights_transposed);
-
-    if(_is_fc)
-    {
-        _mm_kernel.configure(&_input_interleaved_reshaped, &_weights_transposed, output, 1.0f);
-    }
-    else
-    {
-        _mm_kernel.configure(&_input_interleaved_reshaped, &_weights_transposed, &_gemm_output, 1.0f);
-        _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
-    }
+    _mm_kernel.configure(&_input_interleaved_reshaped, &_weights_transposed, &_gemm_output, 1.0f);
+    _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
 
     // Allocate the tensors once the all configure methods have been called
     _weights_reshaped.allocator()->allocate();
@@ -165,8 +143,5 @@ void NEConvolutionLayer::run()
     NEScheduler::get().multithread(&_mm_kernel);
 
     // Reshape output matrix
-    if(!_is_fc)
-    {
-        NEScheduler::get().multithread(&_output_col2im_kernel);
-    }
+    NEScheduler::get().multithread(&_output_col2im_kernel);
 }

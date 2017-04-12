@@ -52,7 +52,7 @@ void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor
     _biases = biases;
     _accum  = accum;
 
-    const unsigned int num_elems_processed_per_iteration = 4;
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
 
     // Configure kernel window
     Window win = calculate_max_window(*accum->info(), Steps(num_elems_processed_per_iteration));

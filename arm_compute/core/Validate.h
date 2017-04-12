@@ -243,7 +243,7 @@ void error_on_data_type_not_in(const char *function, const char *file, const int
     }),
     function, file, line, "ITensor data type %s not supported by this kernel", string_from_data_type(tensor_dt).c_str());
 }
-#define ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(d, ...) ::arm_compute::error_on_data_type_not_in(__func__, __FILE__, __LINE__, d, __VA_ARGS__)
+#define ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(t, ...) ::arm_compute::error_on_data_type_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__)
 
 /** Throw an error if the data type or the number of channels of the passed tensor does not match any of the data types and number of channels provided.
  *
@@ -266,7 +266,7 @@ void error_on_data_type_channel_not_in(const char *function, const char *file, c
 
     ARM_COMPUTE_ERROR_ON_LOC_MSG(tensor_nc != num_channels, function, file, line, "Number of channels %d. Required number of channels %d", tensor_nc, num_channels);
 }
-#define ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(d, c, ...) ::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, d, c, __VA_ARGS__)
+#define ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(t, c, ...) ::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__)
 
 /** Throw an error if the tensor is not 2D.
  *

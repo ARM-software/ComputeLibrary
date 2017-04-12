@@ -61,12 +61,12 @@ void NEBitwiseNotKernel::configure(const ITensor *input, ITensor *output)
     _input  = input;
     _output = output;
 
-    const unsigned int processed_elements = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements));
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, processed_elements), output_access);
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration), output_access);
     output_access.set_valid_region(win, input->info()->valid_region());
 
     INEKernel::configure(win);

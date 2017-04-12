@@ -329,15 +329,15 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
         ARM_COMPUTE_ERROR("You called subtract with the wrong image formats");
     }
 
-    const unsigned int processed_elements = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*input1->info(), Steps(processed_elements));
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
+    Window                 win = calculate_max_window(*input1->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowHorizontal(input1->info(), 0, processed_elements),
-                              AccessWindowHorizontal(input2->info(), 0, processed_elements),
+                              AccessWindowHorizontal(input1->info(), 0, num_elems_processed_per_iteration),
+                              AccessWindowHorizontal(input2->info(), 0, num_elems_processed_per_iteration),
                               output_access);
 
     ValidRegion valid_region = intersect_valid_regions(input1->info()->valid_region(),

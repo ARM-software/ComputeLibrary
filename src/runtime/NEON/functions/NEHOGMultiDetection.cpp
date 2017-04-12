@@ -121,14 +121,10 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
 
     // Allocate tensors for magnitude and phase
     TensorInfo info_mag(shape_img, Format::S16);
-    info_mag.auto_padding();
     _mag.allocator()->init(info_mag);
-    _mag.allocator()->allocate();
 
     TensorInfo info_phase(shape_img, Format::U8);
-    info_phase.auto_padding();
     _phase.allocator()->init(info_phase);
-    _phase.allocator()->allocate();
 
     // Initialise gradient kernel
     _gradient_kernel.configure(input, &_mag, &_phase, phase_type, border_mode, constant_border_value);
@@ -142,7 +138,7 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
         const Size2D &cell     = multi_hog->model(idx_multi_hog)->info()->cell_size();
         const size_t  num_bins = multi_hog->model(idx_multi_hog)->info()->num_bins();
 
-        // Calculate number of cells along the x and y directions for the hog_space */
+        // Calculate number of cells along the x and y directions for the hog_space
         const size_t num_cells_x = width / cell.width;
         const size_t num_cells_y = height / cell.height;
 
@@ -153,9 +149,7 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
 
         // Allocate HOG space
         TensorInfo info_space(shape_hog_space, num_bins, DataType::F32);
-        info_space.auto_padding();
         _hog_space[i].allocator()->init(info_space);
-        _hog_space[i].allocator()->allocate();
 
         // Initialise orientation binning kernel
         _orient_bin_kernel[i].configure(&_mag, &_phase, _hog_space.get() + i, multi_hog->model(idx_multi_hog)->info());
@@ -169,9 +163,7 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
 
         // Allocate normalized HOG space
         TensorInfo tensor_info(*(multi_hog->model(idx_multi_hog)->info()), width, height);
-        tensor_info.auto_padding();
         _hog_norm_space[i].allocator()->init(tensor_info);
-        _hog_norm_space[i].allocator()->allocate();
 
         // Initialize block normalization kernel
         _block_norm_kernel[i].configure(_hog_space.get() + idx_orient_bin, _hog_norm_space.get() + i, multi_hog->model(idx_multi_hog)->info());
@@ -187,6 +179,20 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
 
     // Configure non maxima suppression kernel
     _non_maxima_kernel->configure(_detection_windows, min_distance);
+
+    // Allocate intermediate tensors
+    _mag.allocator()->allocate();
+    _phase.allocator()->allocate();
+
+    for(size_t i = 0; i < _num_orient_bin_kernel; ++i)
+    {
+        _hog_space[i].allocator()->allocate();
+    }
+
+    for(size_t i = 0; i < _num_block_norm_kernel; ++i)
+    {
+        _hog_norm_space[i].allocator()->allocate();
+    }
 }
 
 void NEHOGMultiDetection::run()

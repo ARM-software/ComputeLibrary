@@ -86,12 +86,12 @@ void CPPCornerCandidatesKernel::configure(const IImage *input, InternalKeypoint 
     _output                = output;
     _num_corner_candidates = num_corner_candidates;
 
-    const unsigned int processed_elements = 4;
+    const unsigned int num_elems_processed_per_iteration = 4;
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(processed_elements));
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, processed_elements));
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
 
     INEKernel::configure(win);
 }

@@ -39,10 +39,10 @@
 
 using namespace arm_compute;
 
-/* each thread handle 16 pixels */
+// each thread handle 16 pixels
 constexpr signed int pixels_per_item = 16;
 
-/* local work group size in X dimension */
+// local work group size in X dimension
 constexpr unsigned int local_x_size = 16;
 
 CLHistogramKernel::CLHistogramKernel()
@@ -58,10 +58,10 @@ void CLHistogramKernel::configure(const ICLImage *input, ICLDistribution1D *outp
     // Check input size
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
 
-    //Check offset
+    // Check offset
     ARM_COMPUTE_ERROR_ON_MSG(0 > output->offset() || output->offset() > 256, "Offset is larger than the image value range.");
 
-    //Check range
+    // Check range
     ARM_COMPUTE_ERROR_ON_MSG(output->range() > 256 /* max range */, "Range larger than the image value range.");
 
     _input  = input;
@@ -78,19 +78,17 @@ void CLHistogramKernel::configure(const ICLImage *input, ICLDistribution1D *outp
     unsigned int range       = _output->range();
     unsigned int offrange    = offset + range;
     unsigned int bin_size    = _output->size();
+    unsigned int buffer_size = bin_size + 1; // We need one extra place for pixels that don't meet the conditions
 
-    /* We need one extra place for pixels that don't meet the conditions */
-    unsigned int buffer_size = bin_size + 1;
-
+    // Create kernel
     bool        is_fixed_size = (256 == num_bins) && (1 == window_size) && (0 == offset) && (256 == offrange);
     std::string kernel_name   = is_fixed_size ? "hist_local_kernel_fixed" : "hist_local_kernel";
+    _kernel                   = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
-
+    // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg(idx++, buffer_size, nullptr);
     _kernel.setArg(idx++, _output->cl_buffer());
-
     if(!is_fixed_size)
     {
         _kernel.setArg<cl_uint>(idx++, num_bins);
@@ -101,10 +99,14 @@ void CLHistogramKernel::configure(const ICLImage *input, ICLDistribution1D *outp
 
     // We only run histogram on Image, therefore only 2 dimensions here
     unsigned int end_position = (_input->info()->dimension(0) / pixels_per_item) * pixels_per_item;
-    Window       win;
+
+    // Configure kernel window
+    Window win;
     win.set(0, Window::Dimension(0, end_position, pixels_per_item));
     win.set(1, Window::Dimension(0, _input->info()->dimension(1)));
+
     update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, pixels_per_item));
+
     ICLKernel::configure(win);
 }
 
@@ -150,10 +152,10 @@ void CLHistogramBorderKernel::configure(const ICLImage *input, ICLDistribution1D
     // Check input size
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
 
-    //Check offset
+    // Check offset
     ARM_COMPUTE_ERROR_ON_MSG(0 > output->offset() || output->offset() > 256, "Offset is larger than the image value range.");
 
-    //Check range
+    // Check range
     ARM_COMPUTE_ERROR_ON_MSG(output->range() > 256 /* max range */, "Range larger than the image value range.");
 
     // We only run histogram on Image, therefore only 2 dimensions here
@@ -167,26 +169,20 @@ void CLHistogramBorderKernel::configure(const ICLImage *input, ICLDistribution1D
     _input  = input;
     _output = output;
 
-    Window win;
-    win.set(0, Window::Dimension(start_position, _input->info()->dimension(0)));
-    win.set(1, Window::Dimension(0, _input->info()->dimension(1)));
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, 1));
-    ICLKernel::configure(win);
-
     unsigned int num_bins    = _output->num_bins();
     unsigned int window_size = _output->window();
     unsigned int offset      = _output->offset();
     unsigned int range       = _output->range();
     unsigned int offrange    = offset + range;
 
+    // Create kernel
     bool        is_fixed_size = (256 == num_bins) && (1 == window_size) && (0 == offset) && (256 == offrange);
     std::string kernel_name   = is_fixed_size ? "hist_border_kernel_fixed" : "hist_border_kernel";
+    _kernel                   = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
-
+    // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg(idx++, _output->cl_buffer());
-
     if(!is_fixed_size)
     {
         _kernel.setArg<cl_uint>(idx++, num_bins);
@@ -194,6 +190,13 @@ void CLHistogramBorderKernel::configure(const ICLImage *input, ICLDistribution1D
         _kernel.setArg<cl_uint>(idx++, range);
         _kernel.setArg<cl_uint>(idx++, offrange);
     }
+
+    // Configure kernel window
+    Window win;
+    win.set(0, Window::Dimension(start_position, _input->info()->dimension(0)));
+    win.set(1, Window::Dimension(0, _input->info()->dimension(1)));
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, 1));
+    ICLKernel::configure(win);
 }
 
 void CLHistogramBorderKernel::run(const Window &window, cl::CommandQueue &queue)

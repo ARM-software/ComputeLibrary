@@ -4,6 +4,8 @@ var classarm__compute_1_1_pyramid_info =
     [ "~PyramidInfo", "classarm__compute_1_1_pyramid_info.xhtml#a443529237e92a4364aaf662644dfc686", null ],
     [ "PyramidInfo", "classarm__compute_1_1_pyramid_info.xhtml#a9ace7670f345dde6c78d6b3314f3d756", null ],
     [ "PyramidInfo", "classarm__compute_1_1_pyramid_info.xhtml#ab38f8d031a5cb0f5d807a180e7107fdd", null ],
+    [ "PyramidInfo", "classarm__compute_1_1_pyramid_info.xhtml#a6365834dc65fb5cc59cd17aea308db13", null ],
+    [ "PyramidInfo", "classarm__compute_1_1_pyramid_info.xhtml#ae79dbf996c991c72eee4f1d9122152ef", null ],
     [ "format", "classarm__compute_1_1_pyramid_info.xhtml#a0c875a3203d902e2ad6bc3045355e69e", null ],
     [ "height", "classarm__compute_1_1_pyramid_info.xhtml#ac0e3c6ba1d3f8a8e50aa3e3897210a2b", null ],
     [ "init", "classarm__compute_1_1_pyramid_info.xhtml#a741486bedb7b0966b1d4e6e7c6cccf60", null ],

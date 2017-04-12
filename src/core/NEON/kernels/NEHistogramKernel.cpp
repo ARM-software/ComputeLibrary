@@ -187,13 +187,13 @@ void NEHistogramKernel::configure(const IImage *input, IDistribution1D *output, 
     // Set appropriate function
     _func = &NEHistogramKernel::histogram_U8;
 
-    constexpr unsigned int processed_elements = 8;
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
 
     // We only run histogram on Image, therefore only 2 dimensions here
-    const unsigned int end_position = floor_to_multiple(_input->info()->dimension(0), processed_elements);
+    const unsigned int end_position = floor_to_multiple(_input->info()->dimension(0), num_elems_processed_per_iteration);
 
     Window win;
-    win.set(0, Window::Dimension(0, end_position, processed_elements));
+    win.set(0, Window::Dimension(0, end_position, num_elems_processed_per_iteration));
     win.set(1, Window::Dimension(0, _input->info()->dimension(1)));
 
     update_window_and_padding(win, AccessWindowAutoPadding(input->info()));
@@ -213,13 +213,13 @@ void NEHistogramKernel::configure(const IImage *input, IDistribution1D *output)
     // Set appropriate function
     _func = &NEHistogramKernel::histogram_fixed_U8;
 
-    constexpr unsigned int processed_elements = 8;
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
 
     // We only run histogram on Image, therefore only 2 dimensions here
-    const unsigned int end_position = floor_to_multiple(_input->info()->dimension(0), processed_elements);
+    const unsigned int end_position = floor_to_multiple(_input->info()->dimension(0), num_elems_processed_per_iteration);
 
     Window win;
-    win.set(0, Window::Dimension(0, end_position, processed_elements));
+    win.set(0, Window::Dimension(0, end_position, num_elems_processed_per_iteration));
     win.set(1, Window::Dimension(0, _input->info()->dimension(1)));
 
     update_window_and_padding(win, AccessWindowAutoPadding(input->info()));

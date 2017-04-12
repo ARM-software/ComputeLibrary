@@ -226,7 +226,7 @@ __kernel void suppress_non_maximum(
 
 #define EDGE 255
 #define hysteresis_local_stack_L1 8  // The size of level 1 stack. This has to agree with the host side
-#define hysteresis_local_stack_L2 12 // The size of level 2 stack, adjust this can impact the match rate with VX implementation
+#define hysteresis_local_stack_L2 16 // The size of level 2 stack, adjust this can impact the match rate with VX implementation
 
 /** Check whether pixel is valid
 *

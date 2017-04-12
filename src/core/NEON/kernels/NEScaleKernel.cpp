@@ -103,16 +103,24 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
             ARM_COMPUTE_ERROR("Unsupported interpolation mode");
     }
 
-    const unsigned int processed_elements = 16;
-    const int          border_offset      = (border_undefined) ? 0 : border_size().left;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    const int              border_offset                     = (border_undefined) ? 0 : border_size().left;
 
     // Configure kernel window
-    Window win = calculate_max_window(*output->info(), Steps(processed_elements));
+    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
 
     AccessWindowStatic     input_access(input->info(), -border_offset, -border_offset, input->info()->dimension(0) + border_offset, input->info()->dimension(1) + border_offset);
-    AccessWindowHorizontal output_access(output->info(), 0, processed_elements);
+    AccessWindowHorizontal offsets_access(offsets->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal dx_access(dx == nullptr ? nullptr : dx->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal dy_access(dy == nullptr ? nullptr : dy->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
-    update_window_and_padding(win, input_access, output_access);
+    update_window_and_padding(win,
+                              input_access,
+                              offsets_access,
+                              dx_access,
+                              dy_access,
+                              output_access);
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
@@ -121,6 +129,11 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
 
 void NEScaleKernel::scale_nearest(const Window &window)
 {
+    const size_t input_stride = _input->info()->strides_in_bytes()[1];
+
+    // Compute the ratio between source height and destination height
+    const auto hr = static_cast<float>(_input->info()->dimension(1)) / static_cast<float>(_output->info()->dimension(1));
+
     // Don't increment in X and Y direction for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
     Window win_in(window);
@@ -148,25 +161,28 @@ void NEScaleKernel::scale_nearest(const Window &window)
 
             execute_window_loop(window, [&](const Coordinates & id)
             {
-                const uint8_t *const in_ptr      = in.ptr();
                 const auto           offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
+                const uint8_t *const in_ptr      = in.ptr();
 
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[0]], tmp, 0);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[1]], tmp, 1);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[2]], tmp, 2);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[3]], tmp, 3);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[4]], tmp, 4);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[5]], tmp, 5);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[6]], tmp, 6);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[7]], tmp, 7);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[8]], tmp, 8);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[9]], tmp, 9);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[10]], tmp, 10);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[11]], tmp, 11);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[12]], tmp, 12);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[13]], tmp, 13);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[14]], tmp, 14);
-                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[15]], tmp, 15);
+                const size_t in_yi      = (id.y() + 0.5f) * hr;
+                const size_t offset_row = in_yi * input_stride;
+
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[0] + offset_row], tmp, 0);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[1] + offset_row], tmp, 1);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[2] + offset_row], tmp, 2);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[3] + offset_row], tmp, 3);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[4] + offset_row], tmp, 4);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[5] + offset_row], tmp, 5);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[6] + offset_row], tmp, 6);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[7] + offset_row], tmp, 7);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[8] + offset_row], tmp, 8);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[9] + offset_row], tmp, 9);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[10] + offset_row], tmp, 10);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[11] + offset_row], tmp, 11);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[12] + offset_row], tmp, 12);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[13] + offset_row], tmp, 13);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[14] + offset_row], tmp, 14);
+                tmp = vsetq_lane_u8(in_ptr[offsets_ptr[15] + offset_row], tmp, 15);
 
                 vst1q_u8(out.ptr(), tmp);
             },
@@ -187,23 +203,26 @@ void NEScaleKernel::scale_nearest(const Window &window)
             {
                 const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
 
-                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[0]), tmp.val[0], 0);
-                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[2]), tmp.val[0], 1);
-                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[4]), tmp.val[0], 2);
-                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[6]), tmp.val[0], 3);
-                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[8]), tmp.val[0], 4);
-                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[10]), tmp.val[0], 5);
-                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[12]), tmp.val[0], 6);
-                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[14]), tmp.val[0], 7);
+                const size_t in_yi      = (id.y() + 0.5f) * hr;
+                const size_t offset_row = in_yi * input_stride;
 
-                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[1]), tmp.val[1], 0);
-                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[3]), tmp.val[1], 1);
-                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[5]), tmp.val[1], 2);
-                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[7]), tmp.val[1], 3);
-                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[9]), tmp.val[1], 4);
-                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[11]), tmp.val[1], 5);
-                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[13]), tmp.val[1], 6);
-                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[15]), tmp.val[1], 7);
+                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
+                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[2] + offset_row), tmp.val[0], 1);
+                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[4] + offset_row), tmp.val[0], 2);
+                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[6] + offset_row), tmp.val[0], 3);
+                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[8] + offset_row), tmp.val[0], 4);
+                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[10] + offset_row), tmp.val[0], 5);
+                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[12] + offset_row), tmp.val[0], 6);
+                tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[14] + offset_row), tmp.val[0], 7);
+
+                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[1] + offset_row), tmp.val[1], 0);
+                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[3] + offset_row), tmp.val[1], 1);
+                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[5] + offset_row), tmp.val[1], 2);
+                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[7] + offset_row), tmp.val[1], 3);
+                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[9] + offset_row), tmp.val[1], 4);
+                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[11] + offset_row), tmp.val[1], 5);
+                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[13] + offset_row), tmp.val[1], 6);
+                tmp.val[1] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[15] + offset_row), tmp.val[1], 7);
 
                 vst2q_s16(reinterpret_cast<int16_t *>(out.ptr()), tmp);
             },
@@ -219,6 +238,9 @@ void NEScaleKernel::scale_nearest(const Window &window)
 void NEScaleKernel::scale_bilinear(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8);
+
+    // Compute the ratio between source height and destination height
+    const auto hr = static_cast<float>(_input->info()->dimension(1)) / static_cast<float>(_output->info()->dimension(1));
 
     // Don't increment in X and Y direction for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
@@ -251,25 +273,28 @@ void NEScaleKernel::scale_bilinear(const Window &window)
         const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
         const auto in_ptr      = reinterpret_cast<const uint8_t *>(in.ptr());
 
+        const size_t in_yi      = std::floor((id.y() + 0.5f) * hr - 0.5f);
+        const size_t offset_row = in_yi * in_stride;
+
         uint8x8_t tmp0 = vdup_n_u8(0);
-        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[0]], in_stride, dx_ptr[0], dy_ptr[0]), tmp0, 0);
-        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[1]], in_stride, dx_ptr[1], dy_ptr[1]), tmp0, 1);
-        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[2]], in_stride, dx_ptr[2], dy_ptr[2]), tmp0, 2);
-        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[3]], in_stride, dx_ptr[3], dy_ptr[3]), tmp0, 3);
-        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[4]], in_stride, dx_ptr[4], dy_ptr[4]), tmp0, 4);
-        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[5]], in_stride, dx_ptr[5], dy_ptr[5]), tmp0, 5);
-        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[6]], in_stride, dx_ptr[6], dy_ptr[6]), tmp0, 6);
-        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[7]], in_stride, dx_ptr[7], dy_ptr[7]), tmp0, 7);
+        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0]), tmp0, 0);
+        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[1] + offset_row], in_stride, dx_ptr[1], dy_ptr[1]), tmp0, 1);
+        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[2] + offset_row], in_stride, dx_ptr[2], dy_ptr[2]), tmp0, 2);
+        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[3] + offset_row], in_stride, dx_ptr[3], dy_ptr[3]), tmp0, 3);
+        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[4] + offset_row], in_stride, dx_ptr[4], dy_ptr[4]), tmp0, 4);
+        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[5] + offset_row], in_stride, dx_ptr[5], dy_ptr[5]), tmp0, 5);
+        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[6] + offset_row], in_stride, dx_ptr[6], dy_ptr[6]), tmp0, 6);
+        tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[7] + offset_row], in_stride, dx_ptr[7], dy_ptr[7]), tmp0, 7);
 
         uint8x8_t tmp1 = vdup_n_u8(0);
-        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[8]], in_stride, dx_ptr[8], dy_ptr[8]), tmp1, 0);
-        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[9]], in_stride, dx_ptr[9], dy_ptr[9]), tmp1, 1);
-        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[10]], in_stride, dx_ptr[10], dy_ptr[10]), tmp1, 2);
-        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[11]], in_stride, dx_ptr[11], dy_ptr[11]), tmp1, 3);
-        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[12]], in_stride, dx_ptr[12], dy_ptr[12]), tmp1, 4);
-        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[13]], in_stride, dx_ptr[13], dy_ptr[13]), tmp1, 5);
-        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[14]], in_stride, dx_ptr[14], dy_ptr[14]), tmp1, 6);
-        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[15]], in_stride, dx_ptr[15], dy_ptr[15]), tmp1, 7);
+        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[8] + offset_row], in_stride, dx_ptr[8], dy_ptr[8]), tmp1, 0);
+        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[9] + offset_row], in_stride, dx_ptr[9], dy_ptr[9]), tmp1, 1);
+        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[10] + offset_row], in_stride, dx_ptr[10], dy_ptr[10]), tmp1, 2);
+        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[11] + offset_row], in_stride, dx_ptr[11], dy_ptr[11]), tmp1, 3);
+        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[12] + offset_row], in_stride, dx_ptr[12], dy_ptr[12]), tmp1, 4);
+        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[13] + offset_row], in_stride, dx_ptr[13], dy_ptr[13]), tmp1, 5);
+        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[14] + offset_row], in_stride, dx_ptr[14], dy_ptr[14]), tmp1, 6);
+        tmp1           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[15] + offset_row], in_stride, dx_ptr[15], dy_ptr[15]), tmp1, 7);
 
         vst1q_u8(out.ptr(), vcombine_u8(tmp0, tmp1));
     },

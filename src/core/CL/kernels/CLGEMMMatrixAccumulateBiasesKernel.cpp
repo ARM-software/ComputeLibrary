@@ -56,11 +56,15 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
     _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_accumulate_biases_" + data_type_name));
 
     // Configure kernel window
-    const unsigned int     processed_elements = max_cl_vector_width / data_size_from_type(accum->info()->data_type());
-    Window                 win                = calculate_max_window(*_accum->info(), Steps(processed_elements));
+    const unsigned int num_elems_processed_per_iteration = max_cl_vector_width / data_size_from_type(accum->info()->data_type());
+
+    Window win = calculate_max_window(*_accum->info(), Steps(num_elems_processed_per_iteration));
+
     AccessWindowStatic     biases_access(biases->info(), 0, 0, biases->info()->dimension(0), biases->info()->dimension(1));
-    AccessWindowHorizontal accum_access(_accum->info(), 0, processed_elements);
+    AccessWindowHorizontal accum_access(_accum->info(), 0, num_elems_processed_per_iteration);
+
     update_window_and_padding(win, biases_access, accum_access);
+
     ICLKernel::configure(win);
 }
 

@@ -65,9 +65,9 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
     _new_points           = new_points;
     _num_levels           = old_pyramid->info()->num_levels();
 
-    const float pyr_scale     = old_pyramid->info()->scale();
-    const int   border_offset = (BorderMode::UNDEFINED == border_mode) ? 1 : 0;
-    const int   list_length   = old_points->num_values();
+    const float pyr_scale              = old_pyramid->info()->scale();
+    const int   list_length            = old_points->num_values();
+    const int   old_values_list_length = list_length * window_dimension * window_dimension;
 
     // Create kernels and tensors
     _tracker_init_kernel   = arm_compute::cpp14::make_unique<CLLKTrackerInitKernel[]>(_num_levels);
@@ -84,8 +84,8 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
     _new_points_internal->resize(list_length);
     _coefficient_table = arm_compute::cpp14::make_unique<CLCoefficientTableArray>(list_length);
     _coefficient_table->resize(list_length);
-    _old_values = arm_compute::cpp14::make_unique<CLOldValueArray>(list_length * window_dimension * window_dimension);
-    _old_values->resize(list_length);
+    _old_values = arm_compute::cpp14::make_unique<CLOldValueArray>(old_values_list_length);
+    _old_values->resize(old_values_list_length);
     _new_points->resize(list_length);
 
     for(size_t i = 0; i < _num_levels; ++i)
@@ -98,13 +98,10 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
         const unsigned int width_ith  = old_ith_input->info()->dimension(0);
         const unsigned int height_ith = new_ith_input->info()->dimension(1);
 
-        // Allocate Scharr tensors
+        // Initialize Scharr tensors
         TensorInfo tensor_info(TensorShape(width_ith, height_ith), 1, DataType::S16);
-        tensor_info.auto_padding();
         _scharr_gx[i].allocator()->init(tensor_info);
-        _scharr_gx[i].allocator()->allocate();
         _scharr_gy[i].allocator()->init(tensor_info);
-        _scharr_gy[i].allocator()->allocate();
 
         // Init Scharr kernel
         _func_scharr[i].configure(old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);
@@ -115,11 +112,15 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
         // Init Lucas-Kanade stage0 kernel
         _tracker_stage0_kernel[i].configure(old_ith_input, &_scharr_gx[i], &_scharr_gy[i],
                                             _old_points_internal.get(), _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
-                                            window_dimension, i, border_offset);
+                                            window_dimension, i);
 
         // Init Lucas-Kanade stage1 kernel
         _tracker_stage1_kernel[i].configure(new_ith_input, _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
-                                            termination, epsilon, num_iterations, window_dimension, i, border_offset);
+                                            termination, epsilon, num_iterations, window_dimension, i);
+
+        // Allocate intermediate buffers
+        _scharr_gx[i].allocator()->allocate();
+        _scharr_gy[i].allocator()->allocate();
     }
 
     // Finalize Lucas-Kanade
@@ -144,5 +145,6 @@ void CLOpticalFlow::run()
         // Run Lucas-Kanade stage1 kernel
         CLScheduler::get().enqueue(_tracker_stage1_kernel[level - 1]);
     }
+
     CLScheduler::get().enqueue(_tracker_finalize_kernel, true);
 }

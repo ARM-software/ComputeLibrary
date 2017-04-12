@@ -56,28 +56,28 @@ namespace fp16
 {
 inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t &gy)
 {
-    /* Constant use for evaluating score1 and score3 */
+    // Constant use for evaluating score1 and score3
     static const float32x4_t const45 = vdupq_n_f32(0.70710678118655f);
     static const float32x4_t zero    = vdupq_n_f32(0.0f);
     static const float32x4_t one     = vdupq_n_f32(1.0f);
     static const float32x4_t two     = vdupq_n_f32(2.0f);
     static const float32x4_t three   = vdupq_n_f32(3.0f);
 
-    /* Score0: (1, 0) */
+    // Score0: (1, 0)
     const float32x4x2_t score0 =
     {
         vabsq_f32(gx.val[0]),
         vabsq_f32(gx.val[1])
     };
 
-    /* Score2: ( 0, 1 ) */
+    // Score2: ( 0, 1 )
     const float32x4x2_t score2 =
     {
         vabsq_f32(gy.val[0]),
         vabsq_f32(gy.val[1])
     };
 
-    /* Score1 and Score3: ( sqrt(2) / 2, sqrt(2) / 2 ) - ( -sqrt(2) / 2, sqrt(2) / 2 ) */
+    // Score1 and Score3: ( sqrt(2) / 2, sqrt(2) / 2 ) - ( -sqrt(2) / 2, sqrt(2) / 2 )
     float32x4x2_t score1 =
     {
         vmulq_f32(gy.val[0], const45),
@@ -104,7 +104,7 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
 
     float32x4x2_t old_score = score0;
 
-    /* score1 > old_score? */
+    // score1 > old_score?
     uint32x4x2_t mask =
     {
         vcgtq_f32(score1.val[0], old_score.val[0]),
@@ -116,7 +116,7 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
     old_score.val[0] = vbslq_f32(mask.val[0], score1.val[0], old_score.val[0]);
     old_score.val[1] = vbslq_f32(mask.val[1], score1.val[1], old_score.val[1]);
 
-    /* score2 > old_score? */
+    // score2 > old_score?
     mask.val[0] = vcgtq_f32(score2.val[0], old_score.val[0]);
     mask.val[1] = vcgtq_f32(score2.val[1], old_score.val[1]);
 
@@ -125,7 +125,7 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
     old_score.val[0] = vbslq_f32(mask.val[0], score2.val[0], old_score.val[0]);
     old_score.val[1] = vbslq_f32(mask.val[1], score2.val[1], old_score.val[1]);
 
-    /* score3 > old_score? */
+    // score3 > old_score?
     mask.val[0] = vcgtq_f32(score3.val[0], old_score.val[0]);
     mask.val[1] = vcgtq_f32(score3.val[1], old_score.val[1]);
 
@@ -134,27 +134,27 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
     old_score.val[0] = vbslq_f32(mask.val[0], score3.val[0], old_score.val[0]);
     old_score.val[1] = vbslq_f32(mask.val[1], score3.val[1], old_score.val[1]);
 
-    /* Convert from float32x4_t to uint8x8_t */
+    // Convert from float32x4_t to uint8x8_t
     return vmovn_u16(vcombine_u16(vmovn_u32(vcvtq_u32_f32(phase.val[0])),
                                   vmovn_u32(vcvtq_u32_f32(phase.val[1]))));
 }
 
 inline uint8x8_t phase_quantization(float16x8_t gx, float16x8_t gy)
 {
-    /* Constant use for evaluating score1 and score3 */
+    // Constant use for evaluating score1 and score3
     static const float16x8_t const45 = vdupq_n_f16(0.70710678118655f);
     static const float16x8_t zero    = vdupq_n_f16(0.0f);
     static const float16x8_t one     = vdupq_n_f16(1.0f);
     static const float16x8_t two     = vdupq_n_f16(2.0f);
     static const float16x8_t three   = vdupq_n_f16(3.0f);
 
-    /* Score0: (1, 0) */
+    // Score0: (1, 0)
     const float16x8_t score0 = vabsq_f16(gx);
 
-    /* Score2: ( 0, 1 ) */
+    // Score2: ( 0, 1 )
     const float16x8_t score2 = vabsq_f16(gy);
 
-    /* Score1 and Score3: ( sqrt(2) / 2, sqrt(2) / 2 ) - ( -sqrt(2) / 2, sqrt(2) / 2 ) */
+    // Score1 and Score3: ( sqrt(2) / 2, sqrt(2) / 2 ) - ( -sqrt(2) / 2, sqrt(2) / 2 )
     float16x8_t score1 = vmulq_f16(gy, const45);
     float16x8_t score3 = score1;
 
@@ -167,32 +167,32 @@ inline uint8x8_t phase_quantization(float16x8_t gx, float16x8_t gy)
     float16x8_t phase     = zero;
     float16x8_t old_score = score0;
 
-    /* score1 > old_score? */
+    // score1 > old_score?
     uint16x8_t mask = vcgtq_f16(score1, old_score);
 
     phase     = vbslq_f16(mask, one, phase);
     old_score = vbslq_f16(mask, score1, old_score);
 
-    /* score2 > old_score? */
+    // score2 > old_score?
     mask = vcgtq_f16(score2, old_score);
 
     phase     = vbslq_f16(mask, two, phase);
     old_score = vbslq_f16(mask, score2, old_score);
 
-    /* score3 > old_score? */
+    // score3 > old_score?
     mask = vcgtq_f16(score3, old_score);
 
     phase = vbslq_f16(mask, three, phase);
 
-    /* Convert from float16x8_t to uint8x8_t */
+    // Convert from float16x8_t to uint8x8_t
     return vmovn_u16(vcvtq_u16_f16(phase));
 }
 
 /** Computes the gradient phase if gradient_size = 3 or 5. The output is quantized.
  *         0 = 0°, 1 = 45°, 2 = 90°, 3 = 135°
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return quantized phase for 8 pixels
  */
@@ -204,14 +204,14 @@ inline uint8x8_t phase_quantization_S16_S16(int16x8_t gx, int16x8_t gy)
 /** Computes the gradient phase if gradient_size = 7. The output is quantized.
  *         0 = 0°, 1 = 45°, 2 = 90°, 3 = 135°
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return quantized phase for 8 pixels
  */
 inline uint8x8_t phase_quantization_S32_S32(const int32x4x2_t &gx, const int32x4x2_t &gy)
 {
-    /* Convert to float */
+    // Convert to float
     const float32x4x2_t gx_f32 =
     {
         vcvtq_f32_s32(gx.val[0]),
@@ -229,8 +229,8 @@ inline uint8x8_t phase_quantization_S32_S32(const int32x4x2_t &gx, const int32x4
 
 /** Computes the magnitude using the L1-norm type if gradient_size = 3 or 5
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return magnitude for 8 pixels
  */
@@ -242,8 +242,8 @@ inline uint16x8_t mag_l1_S16_S16(int16x8_t gx, int16x8_t gy)
 
 /** Computes the magnitude using the L1-norm type if gradient_size = 7
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return magnitude for 8 pixels
  */
@@ -306,8 +306,8 @@ inline float16x8_t mag_l2(float16x8_t gx, float16x8_t gy)
 
 /** Computes the magnitude using L2-norm if gradient_size = 3 or 5
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return magnitude for 8 pixels
  */
@@ -324,14 +324,14 @@ inline uint16x8_t mag_l2_S16_S16(int16x8_t gx, int16x8_t gy)
 
 /** Computes the magnitude using L2-norm if gradient_size = 7
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return magnitude for 8 pixels
  */
 inline uint32x4x2_t mag_l2_S32_S32(const int32x4x2_t &gx, const int32x4x2_t &gy)
 {
-    /* Compute magnitude using L2 normalization */
+    // Compute magnitude using L2 normalization
     float32x4x2_t gx2 =
     {
         vcvtq_f32_s32(gx.val[0]),
@@ -356,10 +356,10 @@ inline uint32x4x2_t mag_l2_S32_S32(const int32x4x2_t &gx, const int32x4x2_t &gy)
 
 /** Gradient function used when the gradient size = 3 or 5 and when the norm_type = L1-norm
  *
- * @param[in]  in1_ptr   Pointer to source image. Gx image. Data type supported S16
- * @param[in]  in2_ptr   Pointer to source image. Gy image. Data type supported S16
- * @param[out] out1_ptr  Pointer to destination image. Magnitude. Data type supported U16
- * @param[out] out2_ptr  Pointer to destination image. Quantized phase. Data type supported U8
+ * @param[in]  in1_ptr  Pointer to source image. Gx image. Data type supported S16
+ * @param[in]  in2_ptr  Pointer to source image. Gy image. Data type supported S16
+ * @param[out] out1_ptr Pointer to destination image. Magnitude. Data type supported U16
+ * @param[out] out2_ptr Pointer to destination image. Quantized phase. Data type supported U8
  */
 void mag_phase_l1norm_S16_S16_U16_U8(const void *__restrict in1_ptr, const void *__restrict in2_ptr, void *__restrict out1_ptr, void *__restrict out2_ptr)
 {
@@ -399,10 +399,10 @@ void mag_phase_l1norm_S16_S16_U16_U8(const void *__restrict in1_ptr, const void 
 
 /** Gradient function used when the gradient size = 3 or 5 and when the norm_type = L2-norm
  *
- * @param[in]  in1_ptr   Pointer to source image. Gx image. Data type supported S16
- * @param[in]  in2_ptr   Pointer to source image. Gy image. Data type supported S16
- * @param[out] out1_ptr  Pointer to destination image. Magnitude. Data type supported U16
- * @param[out] out2_ptr  pointer to destination image. Quantized phase. Data type supported U8
+ * @param[in]  in1_ptr  Pointer to source image. Gx image. Data type supported S16
+ * @param[in]  in2_ptr  Pointer to source image. Gy image. Data type supported S16
+ * @param[out] out1_ptr Pointer to destination image. Magnitude. Data type supported U16
+ * @param[out] out2_ptr Pointer to destination image. Quantized phase. Data type supported U8
  */
 void mag_phase_l2norm_S16_S16_U16_U8(const void *__restrict in1_ptr, const void *__restrict in2_ptr, void *__restrict out1_ptr, void *__restrict out2_ptr)
 {
@@ -427,13 +427,13 @@ void mag_phase_l2norm_S16_S16_U16_U8(const void *__restrict in1_ptr, const void 
         vld1q_s16(in2 + 24)
     };
 
-    // Compute and store phase */
+    // Compute and store phase
     vst1_u8(out2 + 0, phase_quantization_S16_S16(gx.val[0], gy.val[0]));
     vst1_u8(out2 + 8, phase_quantization_S16_S16(gx.val[1], gy.val[1]));
     vst1_u8(out2 + 16, phase_quantization_S16_S16(gx.val[2], gy.val[2]));
     vst1_u8(out2 + 24, phase_quantization_S16_S16(gx.val[3], gy.val[3]));
 
-    // Compute and store magnitude using L2 normalization */
+    // Compute and store magnitude using L2 normalization
     vst1q_u16(out1 + 0, mag_l2_S16_S16(gx.val[0], gy.val[0]));
     vst1q_u16(out1 + 8, mag_l2_S16_S16(gx.val[1], gy.val[1]));
     vst1q_u16(out1 + 16, mag_l2_S16_S16(gx.val[2], gy.val[2]));
@@ -442,10 +442,10 @@ void mag_phase_l2norm_S16_S16_U16_U8(const void *__restrict in1_ptr, const void 
 
 /** Gradient function used when the gradient size = 7 and when the norm_type = L1-norm
  *
- * @param[in]  in1_ptr   Pointer to source image. Gx image. Data type supported S32
- * @param[in]  in2_ptr   Pointer to source image. Gy image. Data type supported S32
- * @param[out] out1_ptr  Pointer to destination image. Magnitude. Data type supported U32
- * @param[out] out2_ptr  Pointer to destination image. Quantized phase. Data type supported U8
+ * @param[in]  in1_ptr  Pointer to source image. Gx image. Data type supported S32
+ * @param[in]  in2_ptr  Pointer to source image. Gy image. Data type supported S32
+ * @param[out] out1_ptr Pointer to destination image. Magnitude. Data type supported U32
+ * @param[out] out2_ptr Pointer to destination image. Quantized phase. Data type supported U8
  */
 void mag_phase_l1norm_S32_S32_U32_U8(const void *__restrict in1_ptr, const void *__restrict in2_ptr, void *__restrict out1_ptr, void *__restrict out2_ptr)
 {
@@ -499,10 +499,10 @@ void mag_phase_l1norm_S32_S32_U32_U8(const void *__restrict in1_ptr, const void 
 
 /** Gradient function used when the gradient size = 7 and when the norm_type = L2-norm
  *
- * @param[in]  in1_ptr   Pointer to source image. Gx image. Data type supported S32
- * @param[in]  in2_ptr   Pointer to source image. Gy image. Data type supported S32
- * @param[out] out1_ptr  Pointer to destination image. Magnitude. Data type supported U32
- * @param[out] out2_ptr  pointer to destination image. Quantized phase. Data type supported U8
+ * @param[in]  in1_ptr  Pointer to source image. Gx image. Data type supported S32
+ * @param[in]  in2_ptr  Pointer to source image. Gy image. Data type supported S32
+ * @param[out] out1_ptr Pointer to destination image. Magnitude. Data type supported U32
+ * @param[out] out2_ptr Pointer to destination image. Quantized phase. Data type supported U8
  */
 void mag_phase_l2norm_S32_S32_U32_U8(const void *__restrict in1_ptr, const void *__restrict in2_ptr, void *__restrict out1_ptr, void *__restrict out2_ptr)
 {
@@ -598,14 +598,14 @@ inline uint16x4_t non_max_U32_helper(const uint32_t *in, const uint16x4_t pc, co
 
     mc = vbslq_u32(mask0, mc, vdupq_n_u32(0));
 
-    /* mc >= upper_thr */
-    mask0 = vcgeq_u32(mc, vdupq_n_u32(upper_thr));
+    // mc > upper_thr
+    mask0 = vcgtq_u32(mc, vdupq_n_u32(upper_thr));
 
-    /* mc <= upper_thr */
+    // mc <= lower_thr
     mask1 = vcleq_u32(mc, vdupq_n_u32(lower_thr));
 
-    /* mc < upper_thr && mc > lower_thr */
-    mask2 = vcltq_u32(mc, vdupq_n_u32(upper_thr));
+    // mc <= upper_thr && mc > lower_thr
+    mask2 = vcleq_u32(mc, vdupq_n_u32(upper_thr));
     mask2 = vandq_u32(mask2, vcgtq_u32(mc, vdupq_n_u32(lower_thr)));
 
     mc = vbslq_u32(mask0, vdupq_n_u32(EDGE), mc);
@@ -617,33 +617,33 @@ inline uint16x4_t non_max_U32_helper(const uint32_t *in, const uint16x4_t pc, co
 
 /** Computes edge tracing when is called by edge_trace_U8_U8 recursively
  *
- * @param[in]  in          Pointer to source image. Data type supported U8
- * @param[out] out         Pointer to destination image. Data type supported U8
- * @param[in]  in_stride   Stride of the input image
- * @param[in]  out_stride  Stride of the output image
+ * @param[in]  in         Pointer to source image. Data type supported U8
+ * @param[out] out        Pointer to destination image. Data type supported U8
+ * @param[in]  in_stride  Stride of the input image
+ * @param[in]  out_stride Stride of the output image
  */
 void edge_trace_recursive_U8_U8(uint8_t *__restrict in, uint8_t *__restrict out, const int32_t in_stride, const int32_t out_stride)
 {
-    /* Look for MAYBE pixels in 8 directions */
+    // Look for MAYBE pixels in 8 directions
     *out = EDGE;
 
-    /* (-1, 0) */
+    // (-1, 0)
     uint8_t pixel = *(in - 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(in - 1) = EDGE;
 
         edge_trace_recursive_U8_U8(in - 1, out - 1, in_stride, out_stride);
     }
 
-    /* (+1, 0) */
+    // (+1, 0)
     pixel = *(in + 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(in + 1) = EDGE;
 
         edge_trace_recursive_U8_U8(in + 1, out + 1, in_stride, out_stride);
@@ -652,34 +652,34 @@ void edge_trace_recursive_U8_U8(uint8_t *__restrict in, uint8_t *__restrict out,
     in -= in_stride;
     out -= out_stride;
 
-    /* (-1, -1) */
+    // (-1, -1)
     pixel = *(in - 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(in - 1) = EDGE;
 
         edge_trace_recursive_U8_U8(in - 1, out - 1, in_stride, out_stride);
     }
 
-    /* (0, -1) */
+    // (0, -1)
     pixel = *in;
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *in = EDGE;
 
         edge_trace_recursive_U8_U8(in, out, in_stride, out_stride);
     }
 
-    /* (+1, -1) */
+    // (+1, -1)
     pixel = *(in + 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(in + 1) = EDGE;
 
         edge_trace_recursive_U8_U8(in + 1, out + 1, in_stride, out_stride);
@@ -688,34 +688,34 @@ void edge_trace_recursive_U8_U8(uint8_t *__restrict in, uint8_t *__restrict out,
     in += in_stride * 2;
     out += out_stride * 2;
 
-    /* (-1, +1) */
+    // (-1, +1)
     pixel = *(in - 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(in - 1) = EDGE;
 
         edge_trace_recursive_U8_U8(in - 1, out - 1, in_stride, out_stride);
     }
 
-    /* (0, +1) */
+    // (0, +1)
     pixel = *in;
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *in = EDGE;
 
         edge_trace_recursive_U8_U8(in, out, in_stride, out_stride);
     }
 
-    /* (+1, +1) */
+    // (+1, +1)
     pixel = *(in + 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(in + 1) = EDGE;
 
         edge_trace_recursive_U8_U8(in + 1, out + 1, in_stride, out_stride);
@@ -760,15 +760,15 @@ void NEGradientFP16Kernel::configure(const ITensor *gx, const ITensor *gy, ITens
         }
     }
 
-    constexpr unsigned int processed_elements = 32;
+    constexpr unsigned int num_elems_processed_per_iteration = 32;
 
     // Configure kernel window
-    Window win = calculate_max_window(*_gx->info(), Steps(processed_elements));
+    Window win = calculate_max_window(*_gx->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowHorizontal gx_access(_gx->info(), 0, processed_elements);
-    AccessWindowHorizontal gy_access(_gy->info(), 0, processed_elements);
-    AccessWindowHorizontal mag_access(_magnitude->info(), 0, processed_elements);
-    AccessWindowHorizontal phase_access(_phase->info(), 0, processed_elements);
+    AccessWindowHorizontal gx_access(_gx->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal gy_access(_gy->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal mag_access(_magnitude->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal phase_access(_phase->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, gx_access, gy_access, mag_access, phase_access);
 
@@ -783,14 +783,14 @@ namespace
 {
 inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t &gy)
 {
-    /* Constant use for evaluating score1 and score3 */
+    // Constant use for evaluating score1 and score3
     static const float32x4_t const45 = vdupq_n_f32(0.70710678118655f);
     static const float32x4_t zero    = vdupq_n_f32(0.0f);
     static const float32x4_t one     = vdupq_n_f32(1.0f);
     static const float32x4_t two     = vdupq_n_f32(2.0f);
     static const float32x4_t three   = vdupq_n_f32(3.0f);
 
-    /* Score0: (1, 0) */
+    // Score0: (1, 0)
     const float32x4x2_t score0 =
     {
         {
@@ -799,7 +799,7 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
         }
     };
 
-    /* Score2: ( 0, 1 ) */
+    // Score2: ( 0, 1 )
     const float32x4x2_t score2 =
     {
         {
@@ -808,7 +808,7 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
         }
     };
 
-    /* Score1 and Score3: ( sqrt(2) / 2, sqrt(2) / 2 ) - ( -sqrt(2) / 2, sqrt(2) / 2 ) */
+    // Score1 and Score3: ( sqrt(2) / 2, sqrt(2) / 2 ) - ( -sqrt(2) / 2, sqrt(2) / 2 )
     float32x4x2_t score1 =
     {
         {
@@ -839,7 +839,7 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
 
     float32x4x2_t old_score = score0;
 
-    /* score1 > old_score? */
+    // score1 > old_score?
     uint32x4x2_t mask =
     {
         {
@@ -853,7 +853,7 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
     old_score.val[0] = vbslq_f32(mask.val[0], score1.val[0], old_score.val[0]);
     old_score.val[1] = vbslq_f32(mask.val[1], score1.val[1], old_score.val[1]);
 
-    /* score2 > old_score? */
+    // score2 > old_score?
     mask.val[0] = vcgtq_f32(score2.val[0], old_score.val[0]);
     mask.val[1] = vcgtq_f32(score2.val[1], old_score.val[1]);
 
@@ -862,7 +862,7 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
     old_score.val[0] = vbslq_f32(mask.val[0], score2.val[0], old_score.val[0]);
     old_score.val[1] = vbslq_f32(mask.val[1], score2.val[1], old_score.val[1]);
 
-    /* score3 > old_score? */
+    // score3 > old_score?
     mask.val[0] = vcgtq_f32(score3.val[0], old_score.val[0]);
     mask.val[1] = vcgtq_f32(score3.val[1], old_score.val[1]);
 
@@ -871,7 +871,7 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
     old_score.val[0] = vbslq_f32(mask.val[0], score3.val[0], old_score.val[0]);
     old_score.val[1] = vbslq_f32(mask.val[1], score3.val[1], old_score.val[1]);
 
-    /* Convert from float32x4_t to uint8x8_t */
+    // Convert from float32x4_t to uint8x8_t
     return vmovn_u16(vcombine_u16(vmovn_u32(vcvtq_u32_f32(phase.val[0])),
                                   vmovn_u32(vcvtq_u32_f32(phase.val[1]))));
 }
@@ -879,14 +879,14 @@ inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t
 /* Computes the gradient phase if gradient_size = 3 or 5. The output is quantized.
  * 0 = 0°, 1 = 45°, 2 = 90°, 3 = 135°
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return quantized phase for 8 pixels
  */
 inline uint8x8_t phase_quantization_S16_S16(int16x8_t gx, int16x8_t gy)
 {
-    /* Convert to float */
+    // Convert to float
     const float32x4x2_t gx_f32 =
     {
         {
@@ -909,14 +909,14 @@ inline uint8x8_t phase_quantization_S16_S16(int16x8_t gx, int16x8_t gy)
 /* Computes the gradient phase if gradient_size = 7. The output is quantized.
  * 0 = 0°, 1 = 45°, 2 = 90°, 3 = 135°
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return quantized phase for 8 pixels
  */
 inline uint8x8_t phase_quantization_S32_S32(const int32x4x2_t &gx, const int32x4x2_t &gy)
 {
-    /* Convert to float */
+    // Convert to float
     const float32x4x2_t gx_f32 =
     {
         {
@@ -938,8 +938,8 @@ inline uint8x8_t phase_quantization_S32_S32(const int32x4x2_t &gx, const int32x4
 
 /* Computes the magnitude using the L1-norm type if gradient_size = 3 or 5
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return magnitude for 8 pixels
  */
@@ -951,8 +951,8 @@ inline uint16x8_t mag_l1_S16_S16(int16x8_t gx, int16x8_t gy)
 
 /* Computes the magnitude using the L1-norm type if gradient_size = 7
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return magnitude for 8 pixels
  */
@@ -1009,14 +1009,14 @@ inline float32x4x2_t mag_l2(const float32x4x2_t &gx, const float32x4x2_t &gy)
 
 /* Computes the magnitude using L2-norm if gradient_size = 3 or 5
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return magnitude for 8 pixels
  */
 inline uint16x8_t mag_l2_S16_S16(int16x8_t gx, int16x8_t gy)
 {
-    /* Compute magnitude using L2 normalization */
+    // Compute magnitude using L2 normalization
     const float32x4x2_t gx2 =
     {
         {
@@ -1035,21 +1035,21 @@ inline uint16x8_t mag_l2_S16_S16(int16x8_t gx, int16x8_t gy)
 
     const float32x4x2_t magnitude = mag_l2(gx2, gy2);
 
-    /* Store magnitude - Convert to uint16x8 */
+    // Store magnitude - Convert to uint16x8
     return vcombine_u16(vmovn_u32(vcvtq_u32_f32(magnitude.val[0])),
                         vmovn_u32(vcvtq_u32_f32(magnitude.val[1])));
 }
 
 /* Computes the magnitude using L2-norm if gradient_size = 7
  *
- * @param[in] gx  Gx component
- * @param[in] gy  Gy component
+ * @param[in] gx Gx component
+ * @param[in] gy Gy component
  *
  * @return magnitude for 8 pixels
  */
 inline uint32x4x2_t mag_l2_S32_S32(const int32x4x2_t &gx, const int32x4x2_t &gy)
 {
-    /* Compute magnitude using L2 normalization */
+    // Compute magnitude using L2 normalization
     float32x4x2_t gx2 =
     {
         {
@@ -1080,10 +1080,10 @@ inline uint32x4x2_t mag_l2_S32_S32(const int32x4x2_t &gx, const int32x4x2_t &gy)
 
 /* Gradient function used when the gradient size = 3 or 5 and when the norm_type = L1-norm
  *
- * @param[in]  gx_ptr   Pointer to source image. Gx image. Data type supported S16
- * @param[in]  gy_ptr   Pointer to source image. Gy image. Data type supported S16
- * @param[out] magnitude_ptr  Pointer to destination image. Magnitude. Data type supported U16
- * @param[out] phase_ptr  Pointer to destination image. Quantized phase. Data type supported U8
+ * @param[in]  gx_ptr        Pointer to source image. Gx image. Data type supported S16
+ * @param[in]  gy_ptr        Pointer to source image. Gy image. Data type supported S16
+ * @param[out] magnitude_ptr Pointer to destination image. Magnitude. Data type supported U16
+ * @param[out] phase_ptr     Pointer to destination image. Quantized phase. Data type supported U8
  */
 void mag_phase_l1norm_S16_S16_U16_U8(const void *__restrict gx_ptr, const void *__restrict gy_ptr, void *__restrict magnitude_ptr, void *__restrict phase_ptr)
 {
@@ -1127,10 +1127,10 @@ void mag_phase_l1norm_S16_S16_U16_U8(const void *__restrict gx_ptr, const void *
 
 /* Gradient function used when the gradient size = 3 or 5 and when the norm_type = L2-norm
  *
- * @param[in]  gx_ptr   Pointer to source image. Gx image. Data type supported S16
- * @param[in]  gy_ptr   Pointer to source image. Gy image. Data type supported S16
- * @param[out] magnitude_ptr  Pointer to destination image. Magnitude. Data type supported U16
- * @param[out] phase_ptr  pointer to destination image. Quantized phase. Data type supported U8
+ * @param[in]  gx_ptr        Pointer to source image. Gx image. Data type supported S16
+ * @param[in]  gy_ptr        Pointer to source image. Gy image. Data type supported S16
+ * @param[out] magnitude_ptr Pointer to destination image. Magnitude. Data type supported U16
+ * @param[out] phase_ptr     Pointer to destination image. Quantized phase. Data type supported U8
  */
 void mag_phase_l2norm_S16_S16_U16_U8(const void *__restrict gx_ptr, const void *__restrict gy_ptr, void *__restrict magnitude_ptr, void *__restrict phase_ptr)
 {
@@ -1159,13 +1159,13 @@ void mag_phase_l2norm_S16_S16_U16_U8(const void *__restrict gx_ptr, const void *
         }
     };
 
-    // Compute and store phase */
+    // Compute and store phase
     vst1_u8(phase + 0, phase_quantization_S16_S16(gx_val.val[0], gy_val.val[0]));
     vst1_u8(phase + 8, phase_quantization_S16_S16(gx_val.val[1], gy_val.val[1]));
     vst1_u8(phase + 16, phase_quantization_S16_S16(gx_val.val[2], gy_val.val[2]));
     vst1_u8(phase + 24, phase_quantization_S16_S16(gx_val.val[3], gy_val.val[3]));
 
-    // Compute and store magnitude using L2 normalization */
+    // Compute and store magnitude using L2 normalization
     vst1q_u16(magnitude + 0, mag_l2_S16_S16(gx_val.val[0], gy_val.val[0]));
     vst1q_u16(magnitude + 8, mag_l2_S16_S16(gx_val.val[1], gy_val.val[1]));
     vst1q_u16(magnitude + 16, mag_l2_S16_S16(gx_val.val[2], gy_val.val[2]));
@@ -1174,10 +1174,10 @@ void mag_phase_l2norm_S16_S16_U16_U8(const void *__restrict gx_ptr, const void *
 
 /* Gradient function used when the gradient size = 7 and when the norm_type = L1-norm
  *
- * @param[in]  gx_ptr   Pointer to source image. Gx image. Data type supported S32
- * @param[in]  gy_ptr   Pointer to source image. Gy image. Data type supported S32
- * @param[out] magnitude_ptr  Pointer to destination image. Magnitude. Data type supported U32
- * @param[out] phase_ptr  Pointer to destination image. Quantized phase. Data type support U8
+ * @param[in]  gx_ptr        Pointer to source image. Gx image. Data type supported S32
+ * @param[in]  gy_ptr        Pointer to source image. Gy image. Data type supported S32
+ * @param[out] magnitude_ptr Pointer to destination image. Magnitude. Data type supported U32
+ * @param[out] phase_ptr     Pointer to destination image. Quantized phase. Data type support U8
  */
 void mag_phase_l1norm_S32_S32_U32_U8(const void *__restrict gx_ptr, const void *__restrict gy_ptr, void *__restrict magnitude_ptr, void *__restrict phase_ptr)
 {
@@ -1239,10 +1239,10 @@ void mag_phase_l1norm_S32_S32_U32_U8(const void *__restrict gx_ptr, const void *
 
 /* Gradient function used when the gradient size = 7 and when the norm_type = L2-norm
  *
- * @param[in]  gx_ptr   Pointer to source image. Gx image. Data type supported S32
- * @param[in]  gy_ptr   Pointer to source image. Gy image. Data type supported S32
- * @param[out] magnitude_ptr  Pointer to destination image. Magnitude. Data type supported U32
- * @param[out] phase_ptr  pointer to destination image. Quantized phase. Data type supported U8
+ * @param[in]  gx_ptr        Pointer to source image. Gx image. Data type supported S32
+ * @param[in]  gy_ptr        Pointer to source image. Gy image. Data type supported S32
+ * @param[out] magnitude_ptr Pointer to destination image. Magnitude. Data type supported U32
+ * @param[out] phase_ptr     Pointer to destination image. Quantized phase. Data type supported U8
  */
 void mag_phase_l2norm_S32_S32_U32_U8(const void *__restrict gx_ptr, const void *__restrict gy_ptr, void *__restrict magnitude_ptr, void *__restrict phase_ptr)
 {
@@ -1304,12 +1304,12 @@ void mag_phase_l2norm_S32_S32_U32_U8(const void *__restrict gx_ptr, const void *
 
 /* Computes non-maxima suppression and hysteresis when the gradient size = 3 or 5
  *
- * @param[in]  magnitude_ptr     Pointer to source image. Magnitude. Data type supported U16
+ * @param[in]  magnitude_ptr Pointer to source image. Magnitude. Data type supported U16
  * @param[in]  phase_ptr     Pointer to source image. Quantized phase. Data type supported U8
- * @param[out] output_ptr     Pointer to output image. Data type supported U8
- * @param[in]  stride_mag  Stride of magnitude image
- * @param[in]  lower_thr   Lower threshold used for the hysteresis
- * @param[in]  upper_thr   Upper threshold used for the hysteresis
+ * @param[out] output_ptr    Pointer to output image. Data type supported U8
+ * @param[in]  stride_mag    Stride of magnitude image
+ * @param[in]  lower_thr     Lower threshold used for the hysteresis
+ * @param[in]  upper_thr     Upper threshold used for the hysteresis
  */
 void non_max_suppression_U16_U8_U8(const void *__restrict magnitude_ptr, const void *__restrict phase_ptr, void *__restrict output_ptr, const uint32_t stride_mag, const int32_t lower_thr,
                                    const int32_t upper_thr)
@@ -1318,55 +1318,55 @@ void non_max_suppression_U16_U8_U8(const void *__restrict magnitude_ptr, const v
     const auto phase     = static_cast<const uint8_t *__restrict>(phase_ptr);
     const auto output    = static_cast<uint8_t *__restrict>(output_ptr);
 
-    /* Get magnitude and phase of the centre pixels */
+    // Get magnitude and phase of the centre pixels
     uint16x8_t mc = vld1q_u16(magnitude);
 
-    /* Angle_quantized: 0 = 0°, 1 = 45°, 2 = 90°, 3 = 135° */
+    // Angle_quantized: 0 = 0°, 1 = 45°, 2 = 90°, 3 = 135°
     const uint16x8_t pc16 = vmovl_u8(vld1_u8(phase));
 
-    /* 0 degree */
+    // 0 degree
     const uint16x8_t mk0_0 = vld1q_u16(magnitude - 1);
     const uint16x8_t mk0_1 = vld1q_u16(magnitude + 1);
     uint16x8_t       mask0 = vceqq_u16(pc16, vdupq_n_u16(0));
     mask0                  = vandq_u16(mask0, vcgeq_u16(mc, mk0_0));
     mask0                  = vandq_u16(mask0, vcgeq_u16(mc, mk0_1));
 
-    /* 45 degree */
+    // 45 degree
     const uint16x8_t mk45_0 = vld1q_u16(magnitude - stride_mag - 1);
     const uint16x8_t mk45_1 = vld1q_u16(magnitude + stride_mag + 1);
     uint16x8_t       mask1  = vceqq_u16(pc16, vdupq_n_u16(1));
     mask1                   = vandq_u16(mask1, vcgeq_u16(mc, mk45_0));
     mask1                   = vandq_u16(mask1, vcgeq_u16(mc, mk45_1));
 
-    /* 90 degree */
+    // 90 degree
     const uint16x8_t mk90_0 = vld1q_u16(magnitude - stride_mag);
     const uint16x8_t mk90_1 = vld1q_u16(magnitude + stride_mag);
     uint16x8_t       mask2  = vceqq_u16(pc16, vdupq_n_u16(2));
     mask2                   = vandq_u16(mask2, vcgeq_u16(mc, mk90_0));
     mask2                   = vandq_u16(mask2, vcgeq_u16(mc, mk90_1));
 
-    /* 135 degree */
+    // 135 degree
     const uint16x8_t mk135_0 = vld1q_u16(magnitude - stride_mag + 1);
     const uint16x8_t mk135_1 = vld1q_u16(magnitude + stride_mag - 1);
     uint16x8_t       mask3   = vceqq_u16(pc16, vdupq_n_u16(3));
     mask3                    = vandq_u16(mask3, vcgeq_u16(mc, mk135_0));
     mask3                    = vandq_u16(mask3, vcgeq_u16(mc, mk135_1));
 
-    /* Merge masks */
+    // Merge masks
     mask0 = vorrq_u16(mask0, mask1);
     mask2 = vorrq_u16(mask2, mask3);
     mask0 = vorrq_u16(mask0, mask2);
 
     mc = vbslq_u16(mask0, mc, vdupq_n_u16(0));
 
-    /* mc >= upper_thr */
-    mask0 = vcgeq_u16(mc, vdupq_n_u16(upper_thr));
+    // mc > upper_thr
+    mask0 = vcgtq_u16(mc, vdupq_n_u16(upper_thr));
 
-    /* mc <= lower_thr */
+    // mc <= lower_thr
     mask1 = vcleq_u16(mc, vdupq_n_u16(lower_thr));
 
-    /* mc < upper_thr && mc > lower_thr */
-    mask2 = vcltq_u16(mc, vdupq_n_u16(upper_thr));
+    // mc <= upper_thr && mc > lower_thr
+    mask2 = vcleq_u16(mc, vdupq_n_u16(upper_thr));
     mask2 = vandq_u16(mask2, vcgtq_u16(mc, vdupq_n_u16(lower_thr)));
 
     mc = vbslq_u16(mask0, vdupq_n_u16(EDGE), mc);
@@ -1420,14 +1420,14 @@ inline uint16x4_t non_max_U32_helper(const uint32_t *input, const uint16x4_t pc,
 
     mc = vbslq_u32(mask0, mc, vdupq_n_u32(0));
 
-    /* mc >= upper_thr */
-    mask0 = vcgeq_u32(mc, vdupq_n_u32(upper_thr));
+    // mc > upper_thr
+    mask0 = vcgtq_u32(mc, vdupq_n_u32(upper_thr));
 
-    /* mc <= upper_thr */
+    // mc <= lower_thr
     mask1 = vcleq_u32(mc, vdupq_n_u32(lower_thr));
 
-    /* mc < upper_thr && mc > lower_thr */
-    mask2 = vcltq_u32(mc, vdupq_n_u32(upper_thr));
+    // mc <= upper_thr && mc > lower_thr
+    mask2 = vcleq_u32(mc, vdupq_n_u32(upper_thr));
     mask2 = vandq_u32(mask2, vcgtq_u32(mc, vdupq_n_u32(lower_thr)));
 
     mc = vbslq_u32(mask0, vdupq_n_u32(EDGE), mc);
@@ -1439,12 +1439,12 @@ inline uint16x4_t non_max_U32_helper(const uint32_t *input, const uint16x4_t pc,
 
 /* Computes non-maxima suppression and hysteresis when the gradient_size = 7
  *
- * @param[in]  magnitude_ptr     Pointer to source image. Magnitude. Data type supported U32
+ * @param[in]  magnitude_ptr Pointer to source image. Magnitude. Data type supported U32
  * @param[in]  phase_ptr     Pointer to source image. Quantized phase. Data type supported U8
- * @param[out] output_ptr     Pointer to destination image. Data type supported U8
- * @param[in]  stride_mag  Stride of magnitude image
- * @param[in]  lower_thr   Lower threshold used for the hysteresis
- * @param[in]  upper_thr   Upper threshold used for the hysteresis
+ * @param[out] output_ptr    Pointer to destination image. Data type supported U8
+ * @param[in]  stride_mag    Stride of magnitude image
+ * @param[in]  lower_thr     Lower threshold used for the hysteresis
+ * @param[in]  upper_thr     Upper threshold used for the hysteresis
  */
 void non_max_suppression_U32_U8_U8(const void *__restrict magnitude_ptr, const void *__restrict phase_ptr, void *__restrict output_ptr, const uint32_t stride_mag, const int32_t lower_thr,
                                    const int32_t upper_thr)
@@ -1471,33 +1471,33 @@ void non_max_suppression_U32_U8_U8(const void *__restrict magnitude_ptr, const v
 
 /* Computes edge tracing when is called by edge_trace_U8_U8 recursively
  *
- * @param[in]  input          Pointer to source image. Data type supported U8
- * @param[out] output         Pointer to destination image. Data type supported U8
- * @param[in]  input_stride   Stride of the input image
- * @param[in]  output_stride  Stride of the output image
+ * @param[in]  input         Pointer to source image. Data type supported U8
+ * @param[out] output        Pointer to destination image. Data type supported U8
+ * @param[in]  input_stride  Stride of the input image
+ * @param[in]  output_stride Stride of the output image
  */
 void edge_trace_recursive_U8_U8(uint8_t *__restrict input, uint8_t *__restrict output, const int32_t input_stride, const int32_t output_stride)
 {
-    /* Look for MAYBE pixels in 8 directions */
+    // Look for MAYBE pixels in 8 directions
     *output = EDGE;
 
-    /* (-1, 0) */
+    // (-1, 0)
     uint8_t pixel = *(input - 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(input - 1) = EDGE;
 
         edge_trace_recursive_U8_U8(input - 1, output - 1, input_stride, output_stride);
     }
 
-    /* (+1, 0) */
+    // (+1, 0)
     pixel = *(input + 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(input + 1) = EDGE;
 
         edge_trace_recursive_U8_U8(input + 1, output + 1, input_stride, output_stride);
@@ -1506,34 +1506,34 @@ void edge_trace_recursive_U8_U8(uint8_t *__restrict input, uint8_t *__restrict o
     input -= input_stride;
     output -= output_stride;
 
-    /* (-1, -1) */
+    // (-1, -1)
     pixel = *(input - 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(input - 1) = EDGE;
 
         edge_trace_recursive_U8_U8(input - 1, output - 1, input_stride, output_stride);
     }
 
-    /* (0, -1) */
+    // (0, -1)
     pixel = *input;
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *input = EDGE;
 
         edge_trace_recursive_U8_U8(input, output, input_stride, output_stride);
     }
 
-    /* (+1, -1) */
+    // (+1, -1)
     pixel = *(input + 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(input + 1) = EDGE;
 
         edge_trace_recursive_U8_U8(input + 1, output + 1, input_stride, output_stride);
@@ -1542,34 +1542,34 @@ void edge_trace_recursive_U8_U8(uint8_t *__restrict input, uint8_t *__restrict o
     input += input_stride * 2;
     output += output_stride * 2;
 
-    /* (-1, +1) */
+    // (-1, +1)
     pixel = *(input - 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(input - 1) = EDGE;
 
         edge_trace_recursive_U8_U8(input - 1, output - 1, input_stride, output_stride);
     }
 
-    /* (0, +1) */
+    // (0, +1)
     pixel = *input;
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *input = EDGE;
 
         edge_trace_recursive_U8_U8(input, output, input_stride, output_stride);
     }
 
-    /* (+1, +1) */
+    // (+1, +1)
     pixel = *(input + 1);
 
     if(pixel == MAYBE)
     {
-        /* Touched a MAYBE point. MAYBE becomes EDGE */
+        // Touched a MAYBE point. MAYBE becomes EDGE
         *(input + 1) = EDGE;
 
         edge_trace_recursive_U8_U8(input + 1, output + 1, input_stride, output_stride);
@@ -1578,10 +1578,10 @@ void edge_trace_recursive_U8_U8(uint8_t *__restrict input, uint8_t *__restrict o
 
 /* Computes edge tracing
  *
- * @param[in]  input          Pointer to source image. Data type supported U8
- * @param[out] output         Pointer to destination image. Data type supported U8
- * @param[in]  input_stride   Stride of the input image
- * @param[in]  output_stride  Stride of the output image
+ * @param[in]  input         Pointer to source image. Data type supported U8
+ * @param[out] output        Pointer to destination image. Data type supported U8
+ * @param[in]  input_stride  Stride of the input image
+ * @param[in]  output_stride Stride of the output image
  */
 void edge_trace_U8_U8(uint8_t *__restrict input, uint8_t *__restrict output, const int32_t input_stride, const int32_t output_stride)
 {
@@ -1639,15 +1639,15 @@ void NEGradientKernel::configure(const ITensor *gx, const ITensor *gy, ITensor *
         }
     }
 
-    constexpr unsigned int processed_elements = 32;
+    constexpr unsigned int num_elems_processed_per_iteration = 32;
 
     // Configure kernel window
-    Window win = calculate_max_window(*_gx->info(), Steps(processed_elements));
+    Window win = calculate_max_window(*_gx->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowHorizontal gx_access(_gx->info(), 0, processed_elements);
-    AccessWindowHorizontal gy_access(_gy->info(), 0, processed_elements);
-    AccessWindowHorizontal mag_access(_magnitude->info(), 0, processed_elements);
-    AccessWindowHorizontal phase_access(_phase->info(), 0, processed_elements);
+    AccessWindowHorizontal gx_access(_gx->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal gy_access(_gy->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal mag_access(_magnitude->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal phase_access(_phase->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, gx_access, gy_access, mag_access, phase_access);
 
@@ -1707,19 +1707,20 @@ void NEEdgeNonMaxSuppressionKernel::configure(const ITensor *magnitude, const IT
             ARM_COMPUTE_ERROR("Unsupported data type!");
     }
 
-    /* Set thresholds */
+    // Set thresholds
     _lower_thr = lower_thr;
     _upper_thr = upper_thr;
 
-    constexpr unsigned int processed_elements = 8;
-    constexpr unsigned int read_rows          = 3;
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 10;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
 
     // Configure kernel window
-    Window win = calculate_max_window(*_magnitude->info(), Steps(processed_elements), border_undefined, border_size());
+    Window win = calculate_max_window(*_magnitude->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
 
-    AccessWindowRectangle  mag_access(_magnitude->info(), -border_size().left, -border_size().top, processed_elements, read_rows);
-    AccessWindowHorizontal phase_access(_phase->info(), 0, processed_elements);
-    AccessWindowHorizontal output_access(_output->info(), 0, processed_elements);
+    AccessWindowRectangle  mag_access(_magnitude->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration);
+    AccessWindowHorizontal phase_access(_phase->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(_output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, mag_access, phase_access, output_access);
 
@@ -1770,10 +1771,10 @@ void NEEdgeTraceKernel::configure(ITensor *input, ITensor *output)
     _input  = input;
     _output = output;
 
-    constexpr unsigned int processed_elements = 1;
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     // Configure kernel window
-    Window win = calculate_max_window(*_input->info(), Steps(processed_elements));
+    Window win = calculate_max_window(*_input->info(), Steps(num_elems_processed_per_iteration));
 
     const ValidRegion &input_valid_region  = input->info()->valid_region();
     const ValidRegion &output_valid_region = output->info()->valid_region();

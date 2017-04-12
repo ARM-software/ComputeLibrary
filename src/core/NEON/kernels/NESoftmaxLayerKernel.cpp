@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/NEON/kernels/NESoftmaxLayerKernel.h"
 
-#include "arm_compute/core/AccessWindowAutoPadding.h"
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Helpers.h"
@@ -40,26 +40,39 @@
 
 using namespace arm_compute;
 
+NELogits1DMaxKernel::NELogits1DMaxKernel()
+    : _border_size()
+{
+}
+
+BorderSize NELogits1DMaxKernel::border_size() const
+{
+    return _border_size;
+}
+
 void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
-    _input  = input;
-    _output = output;
+    const int              input_width                       = input->info()->valid_region().shape.x();
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
 
-    const unsigned int processed_elements = 4;
+    _input       = input;
+    _output      = output;
+    _border_size = BorderSize(0, input_width % num_elems_processed_per_iteration, 0, 0);
 
     // Configure kernel window
-    Window                  win = calculate_max_window(*input->info(), Steps(processed_elements));
-    AccessWindowAutoPadding output_access(output->info());
+    constexpr unsigned int num_elems_written_per_row = 1;
 
-    update_window_and_padding(win,
-                              AccessWindowAutoPadding(input->info()),
-                              output_access);
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_row, 1.f / input_width);
 
-    output_access.set_valid_region();
+    update_window_and_padding(win, input_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
@@ -72,7 +85,7 @@ void NELogits1DMaxKernel::run(const Window &window)
     Window in_slice = window.first_slice_window_1D();
 
     Window window_max(window);
-    window_max.set(Window::DimX, Window::Dimension(0, 1, 0));
+    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
     Window max_slice = window_max.first_slice_window_1D();
 
     do
@@ -99,10 +112,14 @@ void NELogits1DMaxKernel::run(const Window &window)
 }
 
 NELogits1DShiftExpSumKernel::NELogits1DShiftExpSumKernel()
-    : _input(nullptr), _max(nullptr), _output(nullptr), _sum(nullptr)
+    : _input(nullptr), _max(nullptr), _output(nullptr), _sum(nullptr), _border_size(0)
 {
 }
 
+BorderSize NELogits1DShiftExpSumKernel::border_size() const
+{
+    return _border_size;
+}
 void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor *max, ITensor *output, ITensor *sum)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
@@ -110,22 +127,26 @@ void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, max);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(max, sum);
 
-    _input  = input;
-    _max    = max;
-    _output = output;
-    _sum    = sum;
+    const int              input_width                       = input->info()->valid_region().shape.x();
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
 
-    const unsigned int processed_elements = 4;
+    _input       = input;
+    _max         = max;
+    _output      = output;
+    _sum         = sum;
+    _border_size = BorderSize(0, input_width % num_elems_processed_per_iteration, 0, 0);
 
     // Configure kernel window
-    Window                  win = calculate_max_window(*input->info(), Steps(processed_elements));
-    AccessWindowAutoPadding output_access(output->info());
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal max_access(max->info(), 0, 1);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal sum_access(sum->info(), 0, 1);
 
-    update_window_and_padding(win,
-                              AccessWindowAutoPadding(input->info()),
-                              output_access);
+    update_window_and_padding(win, input_access, max_access, output_access, sum_access);
 
-    output_access.set_valid_region();
+    output_access.set_valid_region(win, input->info()->valid_region());
+    sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
@@ -136,7 +157,7 @@ void NELogits1DShiftExpSumKernel::run(const Window &window)
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
     Window window_max(window);
-    window_max.set(Window::DimX, Window::Dimension(0, 1, 0));
+    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
 
     Window max_slice = window_max.first_slice_window_1D();
     Window in_slice  = window.first_slice_window_1D();
@@ -191,17 +212,18 @@ void NELogits1DNormKernel::configure(const ITensor *input, const ITensor *sum, I
     _sum    = sum;
     _output = output;
 
-    const unsigned int processed_elements = 4;
-
     // Configure kernel window
-    Window                  win = calculate_max_window(*input->info(), Steps(processed_elements));
-    AccessWindowAutoPadding output_access(output->info());
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
 
-    update_window_and_padding(win,
-                              AccessWindowAutoPadding(input->info()),
-                              output_access);
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
-    output_access.set_valid_region();
+    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowStatic     sum_access(sum->info(), 0, 0, 1, sum->info()->dimension(1));
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+
+    update_window_and_padding(win, input_access, sum_access, output_access);
+
+    output_access.set_valid_region(win, input->info()->valid_region());
 
     INEKernel::configure(win);
 }
@@ -212,7 +234,7 @@ void NELogits1DNormKernel::run(const Window &window)
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
     Window window_sum(window);
-    window_sum.set(Window::DimX, Window::Dimension(0, 1, 0));
+    window_sum.set(Window::DimX, Window::Dimension(0, 0, 0));
     Window sum_slice = window_sum.first_slice_window_1D();
     Window in_slice  = window.first_slice_window_1D();
 

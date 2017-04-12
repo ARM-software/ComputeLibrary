@@ -68,17 +68,17 @@ void NESobel3x3Kernel::configure(const ITensor *input, ITensor *output_x, ITenso
     _output_y = output_y;
 
     // Configure kernel window
-    constexpr unsigned int processed_elements(8);
-    constexpr unsigned int read_elements(16);
-    constexpr unsigned int written_elements(8);
-    constexpr unsigned int read_rows(3);
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration      = 16;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
+    constexpr unsigned int num_rows_read_per_iteration       = 3;
 
-    Window                 win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowHorizontal output_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, written_elements);
-    AccessWindowHorizontal output_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, written_elements);
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    AccessWindowHorizontal output_x_access(output_x == nullptr ? nullptr : output_x->info(), 0, num_elems_written_per_iteration);
+    AccessWindowHorizontal output_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, read_elements, read_rows),
+                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration),
                               output_x_access,
                               output_y_access);
 

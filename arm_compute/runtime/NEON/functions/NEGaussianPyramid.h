@@ -44,12 +44,19 @@ class ITensor;
 class NEGaussianPyramid : public IFunction
 {
 public:
-    /**Constructor */
+    /** Default constructor */
     NEGaussianPyramid();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGaussianPyramid(const NEGaussianPyramid &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGaussianPyramid &operator=(const NEGaussianPyramid &) = delete;
+    /** Allow instances of this class to be moved */
+    NEGaussianPyramid(NEGaussianPyramid &&) = default;
+    /** Allow instances of this class to be moved */
+    NEGaussianPyramid &operator=(NEGaussianPyramid &&) = default;
+    /** Default destructor */
+    virtual ~NEGaussianPyramid() = default;
+
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in]  input                 Source tensor. Data type supported: U8.

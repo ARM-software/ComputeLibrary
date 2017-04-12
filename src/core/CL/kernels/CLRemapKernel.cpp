@@ -68,14 +68,18 @@ void CLRemapKernel::configure(const ICLTensor *input, const ICLTensor *map_x, co
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Configure window
-    constexpr unsigned int processed_elements(4);
-    const int              border_offset = (border_undefined) ? 0 : border_size().left;
-    Window                 win           = calculate_max_window(*_output->info(), Steps(processed_elements));
-    AccessWindowStatic     input_access(output->info(), -border_offset, -border_offset,
-                                        _output->info()->dimension(0) + border_offset, _output->info()->dimension(1) + border_offset);
-    AccessWindowHorizontal output_access(input->info(), 0, processed_elements);
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
+    const int              border_offset                     = (border_undefined) ? 0 : border_size().left;
+
+    Window             win = calculate_max_window(*_output->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowStatic input_access(output->info(), -border_offset, -border_offset,
+                                    _output->info()->dimension(0) + border_offset, _output->info()->dimension(1) + border_offset);
+    AccessWindowHorizontal output_access(input->info(), 0, num_elems_processed_per_iteration);
+
     update_window_and_padding(win, input_access, output_access);
+
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
     ICLKernel::configure(win);
 
     // Set static arguments

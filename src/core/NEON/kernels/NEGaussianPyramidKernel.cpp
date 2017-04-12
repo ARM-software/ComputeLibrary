@@ -23,11 +23,11 @@
  */
 #include "arm_compute/core/NEON/kernels/NEGaussianPyramidKernel.h"
 
-#include "arm_compute/core/AccessWindowAutoPadding.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
@@ -41,13 +41,13 @@
 using namespace arm_compute;
 
 NEGaussianPyramidHorKernel::NEGaussianPyramidHorKernel()
-    : _input(nullptr), _output(nullptr)
+    : _border_size(0), _l2_load_offset(0)
 {
 }
 
-NEGaussianPyramidVertKernel::NEGaussianPyramidVertKernel()
-    : _input(nullptr), _output(nullptr)
+BorderSize NEGaussianPyramidHorKernel::border_size() const
 {
+    return _border_size;
 }
 
 void NEGaussianPyramidHorKernel::configure(const ITensor *input, ITensor *output, bool border_undefined)
@@ -62,27 +62,52 @@ void NEGaussianPyramidHorKernel::configure(const ITensor *input, ITensor *output
         ARM_COMPUTE_ERROR_ON(input->info()->dimension(i) != output->info()->dimension(i));
     }
 
-    _input  = input;
-    _output = output;
-
-    const unsigned int processed_elements = 8;
+    _input       = input;
+    _output      = output;
+    _border_size = BorderSize(border_undefined ? 0 : 2, 2);
 
     // Configure kernel window
-    Window                  win = calculate_max_window_horizontal(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    AccessWindowAutoPadding output_access(output->info());
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_read_per_iteration      = 32;
+    constexpr unsigned int num_elems_written_per_iteration   = 8;
+    constexpr float        scale_x                           = 0.5f;
+
+    Window                 win = calculate_max_window_horizontal(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration, scale_x);
+
+    // Sub sampling selects odd pixels (1, 3, 5, ...) for images with even
+    // width and even pixels (0, 2, 4, ...) for images with odd width. (Whether
+    // a pixel is even or odd is determined based on the tensor shape not the
+    // valid region!)
+    // Thus the offset from which the first pixel (L2) for the convolution is
+    // loaded depends on the anchor and shape of the valid region.
+    // In the case of an even shape (= even image width) we need to load L2
+    // from -2 if the anchor is odd and from -1 if the anchor is even. That
+    // makes sure that L2 is always loaded from an odd pixel.
+    // On the other hand, for an odd shape (= odd image width) we need to load
+    // L2 from -1 if the anchor is odd and from -2 if the anchor is even to
+    // achieve the opposite effect.
+    // The condition can be simplified to checking whether anchor + shape is
+    // odd (-2) or even (-1) as only adding an odd and an even number will have
+    // an odd result.
+    _l2_load_offset = -border_size().left;
+
+    if((_input->info()->valid_region().anchor[0] + _input->info()->valid_region().shape[0]) % 2 == 0)
+    {
+        _l2_load_offset += 1;
+    }
 
     update_window_and_padding(win,
-                              AccessWindowAutoPadding(input->info()),
+                              AccessWindowHorizontal(input->info(), _l2_load_offset, num_elems_read_per_iteration),
                               output_access);
 
-    output_access.set_valid_region();
+    ValidRegion valid_region = input->info()->valid_region();
+    valid_region.anchor.set(0, std::ceil((valid_region.anchor[0] + (border_undefined ? border_size().left : 0)) / 2.f));
+    valid_region.shape.set(0, (valid_region.shape[0] - (border_undefined ? border_size().right : 0)) / 2 - valid_region.anchor[0]);
+
+    output_access.set_valid_region(win, valid_region);
 
     INEKernel::configure(win);
-}
-
-BorderSize NEGaussianPyramidHorKernel::border_size() const
-{
-    return BorderSize(2);
 }
 
 void NEGaussianPyramidHorKernel::run(const Window &window)
@@ -91,20 +116,19 @@ void NEGaussianPyramidHorKernel::run(const Window &window)
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(window.x().step() % 2);
 
-    const int16x8_t six  = vdupq_n_s16(6);
-    const int16x8_t four = vdupq_n_s16(4);
+    static const int16x8_t six  = vdupq_n_s16(6);
+    static const int16x8_t four = vdupq_n_s16(4);
 
-    //The output is half the width of the input:
-    Window win_out(window);
-    win_out.set(Window::DimX, Window::Dimension(window.x().start() / 2, window.x().end() / 2, window.x().step() / 2));
-
-    Iterator out(_output, win_out);
-
-    const int even_width = 1 - (_input->info()->dimension(0) % 2);
-    Window    win_in(window);
-    win_in.shift(Window::DimX, -2 + even_width);
+    Window win_in(window);
+    win_in.shift(Window::DimX, _l2_load_offset);
 
     Iterator in(_input, win_in);
+
+    // The output is half the width of the input
+    Window win_out(window);
+    win_out.scale(Window::DimX, 0.5f);
+
+    Iterator out(_output, win_out);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -128,6 +152,16 @@ void NEGaussianPyramidHorKernel::run(const Window &window)
     in, out);
 }
 
+NEGaussianPyramidVertKernel::NEGaussianPyramidVertKernel()
+    : _t2_load_offset(0)
+{
+}
+
+BorderSize NEGaussianPyramidVertKernel::border_size() const
+{
+    return BorderSize(2, 0);
+}
+
 void NEGaussianPyramidVertKernel::configure(const ITensor *input, ITensor *output, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S16);
@@ -144,28 +178,41 @@ void NEGaussianPyramidVertKernel::configure(const ITensor *input, ITensor *outpu
     _input  = input;
     _output = output;
 
-    const int          even_height        = 1 - (_input->info()->dimension(1) % 2);
-    const unsigned int processed_elements = 16;
-
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(processed_elements), border_undefined, border_size());
-    // Use all elements in X direction
-    win.set(Window::DimY, Window::Dimension(win.y().start() + even_height, win.y().end() + even_height, 2));
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_rows_processed_per_iteration  = 2;
 
-    AccessWindowAutoPadding output_access(output->info());
+    constexpr unsigned int num_elems_written_per_iteration = 16;
+    constexpr unsigned int num_rows_written_per_iteration  = 1;
+
+    constexpr unsigned int num_elems_read_per_iteration = 16;
+    constexpr unsigned int num_rows_read_per_iteration  = 5;
+
+    constexpr float scale_y = 0.5f;
+
+    Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_rows_processed_per_iteration), border_undefined, border_size());
+    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration, num_rows_written_per_iteration, 1.f, scale_y);
+
+    // Determine whether we need to load even or odd rows. See above for a
+    // detailed explanation.
+    _t2_load_offset = -border_size().top;
+
+    if((_input->info()->valid_region().anchor[1] + _input->info()->valid_region().shape[1]) % 2 == 0)
+    {
+        _t2_load_offset += 1;
+    }
 
     update_window_and_padding(win,
-                              AccessWindowAutoPadding(input->info()),
+                              AccessWindowRectangle(input->info(), 0, _t2_load_offset, num_elems_read_per_iteration, num_rows_read_per_iteration),
                               output_access);
 
-    output_access.set_valid_region();
+    ValidRegion valid_region = input->info()->valid_region();
+    valid_region.anchor.set(1, std::ceil((valid_region.anchor[1] + (border_undefined ? border_size().top : 0)) / 2.f));
+    valid_region.shape.set(1, (valid_region.shape[1] - (border_undefined ? border_size().bottom : 0)) / 2 - valid_region.anchor[1]);
+
+    output_access.set_valid_region(win, valid_region);
 
     INEKernel::configure(win);
-}
-
-BorderSize NEGaussianPyramidVertKernel::border_size() const
-{
-    return BorderSize(2, 0);
 }
 
 void NEGaussianPyramidVertKernel::run(const Window &window)
@@ -176,24 +223,27 @@ void NEGaussianPyramidVertKernel::run(const Window &window)
     ARM_COMPUTE_ERROR_ON(window.y().step() % 2);
     ARM_COMPUTE_ERROR_ON(_input->buffer() == nullptr);
 
-    const uint16x8_t six  = vdupq_n_u16(6);
-    const uint16x8_t four = vdupq_n_u16(4);
+    static const uint16x8_t six  = vdupq_n_u16(6);
+    static const uint16x8_t four = vdupq_n_u16(4);
 
     Window win_in(window);
+    // Need to load two times 8 values instead of 16 values once
     win_in.set_dimension_step(Window::DimX, 8);
+    win_in.shift(Window::DimY, _t2_load_offset);
 
     Iterator in(_input, win_in);
 
+    // Output's height is half of input's
     Window win_out(window);
-    win_out.set(Window::DimY, Window::Dimension(window.y().start() / 2, window.y().end() / 2, 1));
+    win_out.scale(Window::DimY, 0.5f);
 
     Iterator out(_output, win_out);
 
-    const uint8_t *input_top2_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(win_in.x().start(), 2));
-    const uint8_t *input_top_ptr  = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(win_in.x().start(), 1));
-    const uint8_t *input_mid_ptr  = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(win_in.x().start(), 0));
-    const uint8_t *input_low_ptr  = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(win_in.x().start(), -1));
-    const uint8_t *input_low2_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(win_in.x().start(), -2));
+    const uint8_t *input_top2_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(0, 0));
+    const uint8_t *input_top_ptr  = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(0, 1));
+    const uint8_t *input_mid_ptr  = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(0, 2));
+    const uint8_t *input_low_ptr  = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(0, 3));
+    const uint8_t *input_low2_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(0, 4));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {

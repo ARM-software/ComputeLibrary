@@ -29,11 +29,17 @@
 
 using namespace arm_compute;
 
-void AccessWindowTranspose::set_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size)
+ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const
 {
+    if(_info == nullptr)
+    {
+        return input_valid_region;
+    }
+
     Coordinates &anchor = input_valid_region.anchor;
+    TensorShape &shape  = input_valid_region.shape;
     Coordinates  old_anchor(anchor);
-    TensorShape &shape = input_valid_region.shape;
+    TensorShape  old_shape(shape);
 
     if(!border_undefined)
     {
@@ -47,8 +53,10 @@ void AccessWindowTranspose::set_valid_region(const Window &window, ValidRegion i
     // the kernel to write back output values.
     // Note that because the class can handle skewed transpose operations all
     // size have to be scaled.
-    anchor.set(0, std::max<int>(DIV_CEIL(window.y().start(), window.y().step()) * _width, DIV_CEIL(anchor[1] + border_size.left, window.y().step()) * _width) + _x);
-    anchor.set(1, std::max<int>(DIV_CEIL(window.x().start(), window.x().step()) * _height, DIV_CEIL(anchor[0] + border_size.top, window.x().step()) * _height) + _y);
+    anchor.set(0, std::max<int>(DIV_CEIL(window.y().start(), window.y().step()) * _width,
+                                DIV_CEIL((anchor[1] + border_size.top) * _width, window.y().step()) + _x));
+    anchor.set(1, std::max<int>(DIV_CEIL(window.x().start(), window.x().step()) * _height,
+                                DIV_CEIL((anchor[0] + border_size.left) * _height, window.x().step()) + _y));
 
     // End of the valid region is equal to the start of the last write of the
     // kernel plus the number of written elements. (This assumes that all
@@ -60,8 +68,10 @@ void AccessWindowTranspose::set_valid_region(const Window &window, ValidRegion i
     // a size of the region.
     // Note that because the class can handle skewed transpose operations all
     // size have to be scaled.
-    shape.set(0, std::min<int>(((old_anchor[0] + shape[1] - border_size.right) / window.y().step()) * _width, (window.y().end() / window.y().step()) * _width));
-    shape.set(1, std::min<int>(((old_anchor[1] + shape[0] - border_size.bottom) / window.x().step()) * _height, (window.x().end() / window.x().step()) * _height));
+    shape.set(0, std::min<int>(((old_anchor[1] + old_shape[1] - border_size.right) * _width) / window.y().step(),
+                               (window.y().end() / window.y().step()) * _width));
+    shape.set(1, std::min<int>(((old_anchor[0] + old_shape[0] - border_size.bottom) * _height) / window.x().step(),
+                               (window.x().end() / window.x().step()) * _height));
 
     // For higher dimensions use the intersection of the window size and the
     // valid region of the input
@@ -71,7 +81,7 @@ void AccessWindowTranspose::set_valid_region(const Window &window, ValidRegion i
         shape.set(d, std::min<int>(window[d].end(), input_valid_region.shape[d]) - anchor[d]);
     }
 
-    _info->set_valid_region(input_valid_region);
+    return input_valid_region;
 }
 
 bool AccessWindowTranspose::update_window_if_needed(Window &window) const
@@ -168,6 +178,8 @@ bool AccessWindowTranspose::update_window_if_needed(Window &window) const
             window_modified = true;
         }
     }
+
+    window.validate();
 
     return window_modified;
 }

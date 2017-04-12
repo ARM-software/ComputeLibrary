@@ -41,7 +41,7 @@ using namespace arm_compute;
 
 namespace
 {
-void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float wr, float hr, size_t input_stride, size_t input_element_size)
+void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float wr, float hr, size_t input_element_size)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == offsets);
 
@@ -63,7 +63,7 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
             const int   in_xi = std::floor(in_x);
             const int   in_yi = std::floor(in_y);
 
-            *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * input_element_size + in_yi * input_stride;
+            *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * input_element_size;
             *reinterpret_cast<float *>(dx_it.ptr())        = in_x - in_xi;
             *reinterpret_cast<float *>(dy_it.ptr())        = in_y - in_yi;
         },
@@ -77,9 +77,8 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
         execute_window_loop(win, [&](const Coordinates & id)
         {
             const size_t in_xi = (id.x() + 0.5f) * wr;
-            const size_t in_yi = (id.y() + 0.5f) * hr;
 
-            *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * input_element_size + in_yi * input_stride;
+            *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * input_element_size;
         },
         offsets_it);
     }
@@ -108,8 +107,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
     const auto wr = static_cast<float>(input->info()->dimension(0)) / static_cast<float>(output->info()->dimension(0));
     const auto hr = static_cast<float>(input->info()->dimension(1)) / static_cast<float>(output->info()->dimension(1));
 
-    // Get the input stride and the input element size
-    const size_t input_stride       = input->info()->strides_in_bytes()[1];
+    // Get the element size of the input image
     const size_t input_element_size = input->info()->element_size();
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
@@ -128,7 +126,6 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         case InterpolationPolicy::NEAREST_NEIGHBOR:
         {
             TensorInfo tensor_info_offsets(shape, Format::S32);
-            tensor_info_offsets.auto_padding();
             _offsets.allocator()->init(tensor_info_offsets);
 
             k->configure(input, nullptr, nullptr, &_offsets, output, policy, border_undefined);
@@ -137,16 +134,13 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _offsets.allocator()->allocate();
 
             // Pre-compute offsets for nearest interpolation
-            precompute_dx_dy_offsets(nullptr, nullptr, &_offsets, wr, hr, input_stride, input_element_size);
+            precompute_dx_dy_offsets(nullptr, nullptr, &_offsets, wr, hr, input_element_size);
             break;
         }
         case InterpolationPolicy::BILINEAR:
         {
             TensorInfo tensor_info_offsets(shape, Format::S32);
             TensorInfo tensor_info_dxdy(shape, Format::F32);
-
-            tensor_info_offsets.auto_padding();
-            tensor_info_dxdy.auto_padding();
 
             _offsets.allocator()->init(tensor_info_offsets);
             _dx.allocator()->init(tensor_info_dxdy);
@@ -160,7 +154,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dy.allocator()->allocate();
 
             // Pre-compute dx, dy and offsets for bilinear interpolation
-            precompute_dx_dy_offsets(&_dx, &_dy, &_offsets, wr, hr, input_stride, input_element_size);
+            precompute_dx_dy_offsets(&_dx, &_dy, &_offsets, wr, hr, input_element_size);
             break;
         }
         case InterpolationPolicy::AREA:

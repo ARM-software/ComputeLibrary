@@ -25,7 +25,6 @@
 #define __ARM_COMPUTE_CLFUNCTIONS_H__
 
 /* Header regrouping all the CL functions */
-
 #include "arm_compute/runtime/CL/functions/CLAbsoluteDifference.h"
 #include "arm_compute/runtime/CL/functions/CLAccumulate.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"

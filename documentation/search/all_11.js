@@ -28,6 +28,7 @@ var searchData=
   ['right',['right',['../structarm__compute_1_1_border_size.xhtml#a78b0fed184c642b78f32fd34b228a5f9',1,'arm_compute::BorderSize']]],
   ['round',['round',['../classarm__compute_1_1_pad_stride_info.xhtml#a3d7de69b5d597f77362f3279c6ec1c44',1,'arm_compute::PadStrideInfo']]],
   ['roundingpolicy',['RoundingPolicy',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50be',1,'arm_compute']]],
+  ['row_5fdelim',['row_delim',['../structarm__compute_1_1_i_o_format_info.xhtml#ab1a3e6cb2768124a6853f52bd0e10596',1,'arm_compute::IOFormatInfo']]],
   ['row_5freduce_5fmax_5f3',['row_reduce_max_3',['../non__linear__filter__helpers_8h.xhtml#a3138dafa8474a59f73dd837073f18ed7',1,'non_linear_filter_helpers.h']]],
   ['row_5freduce_5fmax_5f5',['row_reduce_max_5',['../non__linear__filter__helpers_8h.xhtml#a310f21b7cf0409431ddf246c4a98e52e',1,'non_linear_filter_helpers.h']]],
   ['row_5freduce_5fmin_5f3',['row_reduce_min_3',['../non__linear__filter__helpers_8h.xhtml#ae3e09114bb887de4e20122eed42671a1',1,'non_linear_filter_helpers.h']]],

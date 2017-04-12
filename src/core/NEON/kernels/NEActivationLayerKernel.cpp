@@ -65,7 +65,7 @@ void NEActivationLayerKernel::configure(const ITensor *input, ITensor *output, A
     _func     = act_map[activation_info.activation()];
     _act_info = activation_info;
 
-    const unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     INESimpleKernel::configure(_input, _output, num_elems_processed_per_iteration);
 }

@@ -11,6 +11,7 @@ var _types_8h =
     [ "PoolingLayerInfo", "classarm__compute_1_1_pooling_layer_info.xhtml", "classarm__compute_1_1_pooling_layer_info" ],
     [ "ActivationLayerInfo", "classarm__compute_1_1_activation_layer_info.xhtml", "classarm__compute_1_1_activation_layer_info" ],
     [ "NormalizationLayerInfo", "classarm__compute_1_1_normalization_layer_info.xhtml", "classarm__compute_1_1_normalization_layer_info" ],
+    [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", "structarm__compute_1_1_i_o_format_info" ],
     [ "InternalKeypoint", "_types_8h.xhtml#a2ab89a5d0959531aac270879cdd3ed78", null ],
     [ "PaddingSize", "_types_8h.xhtml#a4467b302fc9ec312c40580336ab783da", null ],
     [ "BilinearInterpolation", "_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202", [

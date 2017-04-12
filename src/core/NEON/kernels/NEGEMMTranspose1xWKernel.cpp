@@ -49,7 +49,7 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 4.0f)) && (input->info()->data_type() == DataType::F32));
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 4.0f)) && (input->info()->data_type() == DataType::U32));
 
-    unsigned int num_elems_processed_per_iteration(0);
+    unsigned int num_elems_processed_per_iteration = 0;
     switch(input->info()->data_type())
     {
         case DataType::F32:

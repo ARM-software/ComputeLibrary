@@ -28,6 +28,7 @@
 #include "arm_compute/core/Window.h"
 
 #include <cstring>
+#include <limits>
 
 using namespace arm_compute;
 
@@ -68,4 +69,82 @@ void ITensor::copy_from(const ITensor &src)
         memcpy(dst_it.ptr(), src_it.ptr(), line_size);
     },
     src_it, dst_it);
+}
+
+void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
+{
+    ARM_COMPUTE_ERROR_ON(this->buffer() == nullptr);
+
+    const DataType    dt       = this->info()->data_type();
+    const size_t      slices2D = this->info()->tensor_shape().total_size_upper(2);
+    const Strides     strides  = this->info()->strides_in_bytes();
+    const PaddingSize padding  = this->info()->padding();
+
+    // Set precision
+    if(is_data_type_float(dt) && (io_fmt.precision_type != IOFormatInfo::PrecisionType::Default))
+    {
+        int precision = io_fmt.precision;
+        if(io_fmt.precision_type == IOFormatInfo::PrecisionType::Full)
+        {
+            precision = std::numeric_limits<float>().max_digits10;
+        }
+        s.precision(precision);
+    }
+
+    // Define region to print
+    size_t print_width  = 0;
+    size_t print_height = 0;
+    int    start_offset = 0;
+    switch(io_fmt.print_region)
+    {
+        case IOFormatInfo::PrintRegion::NoPadding:
+            print_width  = this->info()->dimension(0);
+            print_height = this->info()->dimension(1);
+            start_offset = this->info()->offset_first_element_in_bytes();
+            break;
+        case IOFormatInfo::PrintRegion::ValidRegion:
+            print_width  = this->info()->valid_region().shape.x();
+            print_height = this->info()->valid_region().shape.y();
+            start_offset = this->info()->offset_element_in_bytes(Coordinates(this->info()->valid_region().anchor.x(),
+                                                                             this->info()->valid_region().anchor.y()));
+            break;
+        case IOFormatInfo::PrintRegion::Full:
+            print_width  = padding.left + this->info()->dimension(0) + padding.right;
+            print_height = padding.top + this->info()->dimension(1) + padding.bottom;
+            start_offset = static_cast<int>(this->info()->offset_first_element_in_bytes()) - padding.top * strides[1] - padding.left * strides[0];
+            break;
+        default:
+            break;
+    }
+
+    // Set pointer to start
+    const uint8_t *ptr = this->buffer() + start_offset;
+
+    // Start printing
+    for(size_t i = 0; i < slices2D; ++i)
+    {
+        // Find max_width of elements in slice to align columns
+        int max_element_width = 0;
+        if(io_fmt.align_columns)
+        {
+            size_t offset = i * strides[2];
+            for(size_t h = 0; h < print_height; ++h)
+            {
+                max_element_width = std::max<int>(max_element_width, max_consecutive_elements_display_width(s, dt, ptr + offset, print_width));
+                offset += strides[1];
+            }
+        }
+
+        // Print slice
+        {
+            size_t offset = i * strides[2];
+            for(size_t h = 0; h < print_height; ++h)
+            {
+                print_consecutive_elements(s, dt, ptr + offset, print_width, max_element_width, io_fmt.element_delim);
+                offset += strides[1];
+                s << io_fmt.row_delim;
+            }
+            s << io_fmt.row_delim;
+        }
+    }
 }

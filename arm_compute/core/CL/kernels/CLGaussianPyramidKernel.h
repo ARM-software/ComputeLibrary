@@ -24,14 +24,14 @@
 #ifndef __ARM_COMPUTE_CLGAUSSIANPYRAMIDKERNEL_H__
 #define __ARM_COMPUTE_CLGAUSSIANPYRAMIDKERNEL_H__
 
-#include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/CL/ICLSimpleKernel.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
 /** OpenCL kernel to perform a Gaussian filter and half scaling across width (horizontal pass) */
-class CLGaussianPyramidHorKernel : public ICLKernel
+class CLGaussianPyramidHorKernel : public ICLSimpleKernel
 {
 public:
     /** Default constructor */
@@ -60,12 +60,12 @@ public:
     BorderSize border_size() const override;
 
 private:
-    const ICLTensor *_input;
-    ICLTensor       *_output;
+    BorderSize _border_size;
+    int        _l2_load_offset;
 };
 
 /** OpenCL kernel to perform a Gaussian filter and half scaling across height (vertical pass) */
-class CLGaussianPyramidVertKernel : public ICLKernel
+class CLGaussianPyramidVertKernel : public ICLSimpleKernel
 {
 public:
     /** Default constructor */
@@ -94,8 +94,7 @@ public:
     BorderSize border_size() const override;
 
 private:
-    const ICLTensor *_input;
-    ICLTensor       *_output;
+    int _t2_load_offset;
 };
 }
 #endif /*__ARM_COMPUTE_CLGAUSSIANPYRAMIDKERNEL_H__ */
