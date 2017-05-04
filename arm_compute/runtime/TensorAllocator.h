@@ -63,8 +63,15 @@ public:
      *
      * @note The tensor must not already be allocated when calling this function.
      *
-     **/
+     */
     void allocate() override;
+
+    /** Free allocated CPU memory.
+     *
+     * @note The tensor must have been allocated when calling this function.
+     *
+     */
+    void free() override;
 
 protected:
     /** No-op for CPU memory

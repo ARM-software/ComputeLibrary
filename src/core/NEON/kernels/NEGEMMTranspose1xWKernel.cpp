@@ -47,18 +47,22 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 8.0f)) && (input->info()->data_type() == DataType::F16));
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 4.0f)) && (input->info()->data_type() == DataType::F32));
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 4.0f)) && (input->info()->data_type() == DataType::U32));
+    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 4.0f)) && (input->info()->data_type() == DataType::U8));
 
     unsigned int num_elems_processed_per_iteration = 0;
+    float        scale_x                           = 1.f;
+
     switch(input->info()->data_type())
     {
         case DataType::F32:
         case DataType::U8:
             num_elems_processed_per_iteration = 4;
+            scale_x                           = 4.f;
             break;
         case DataType::F16:
 #ifdef ARM_COMPUTE_ENABLE_FP16
             num_elems_processed_per_iteration = 8;
+            scale_x                           = 8.f;
             break;
 #endif
         default:
@@ -71,7 +75,7 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
 
     // Configure kernel window
     Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowTranspose output_access(output->info(), 0, 0, num_elems_processed_per_iteration, 1);
+    AccessWindowTranspose output_access(output->info(), 0, 0, num_elems_processed_per_iteration, 1, scale_x, 1.f / scale_x);
 
     update_window_and_padding(win,
                               AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),

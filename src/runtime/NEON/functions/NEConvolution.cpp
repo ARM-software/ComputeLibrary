@@ -47,32 +47,34 @@ void NEConvolution3x3::configure(ITensor *input, ITensor *output, const int16_t 
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
 }
 
-NEConvolution5x5::NEConvolution5x5()
+template <unsigned int matrix_size>
+NEConvolutionSquare<matrix_size>::NEConvolutionSquare()
     : _tmp(), _is_separable(false), _kernel_hor(), _kernel_vert(), _kernel(), _border_handler()
 {
 }
 
-void NEConvolution5x5::configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
+template <unsigned int matrix_size>
+void NEConvolutionSquare<matrix_size>::configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON(conv == nullptr);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
 
-    std::array<int16_t, 5> conv_col{ { 0 } };
-    std::array<int16_t, 5> conv_row{ { 0 } };
+    std::array<int16_t, matrix_size> conv_col{ { 0 } };
+    std::array<int16_t, matrix_size> conv_row{ { 0 } };
 
-    _is_separable = separate_matrix(conv, conv_col.data(), conv_row.data(), 5);
+    _is_separable = separate_matrix(conv, conv_col.data(), conv_row.data(), matrix_size);
 
     if(_is_separable)
     {
         DataType intermediate_type = DataType::UNKNOWN;
-        std::tie(std::ignore, intermediate_type) = data_type_for_convolution(conv_col.data(), conv_row.data(), 5);
+        std::tie(std::ignore, intermediate_type) = data_type_for_convolution(conv_col.data(), conv_row.data(), matrix_size);
 
         _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, intermediate_type));
 
         if(scale == 0)
         {
-            scale = calculate_matrix_scale(conv, 5);
+            scale = calculate_matrix_scale(conv, matrix_size);
         }
 
         _kernel_hor.configure(input, &_tmp, conv_row.data(), border_mode == BorderMode::UNDEFINED);
@@ -89,7 +91,8 @@ void NEConvolution5x5::configure(ITensor *input, ITensor *output, const int16_t 
     }
 }
 
-void NEConvolution5x5::run()
+template <unsigned int matrix_size>
+void                   NEConvolutionSquare<matrix_size>::run()
 {
     _border_handler.run(_border_handler.window());
 
@@ -104,119 +107,9 @@ void NEConvolution5x5::run()
     }
 }
 
-NEConvolution7x7::NEConvolution7x7()
-    : _tmp(), _is_separable(false), _kernel_hor(), _kernel_vert(), _kernel(), _border_handler()
-{
-}
-
-void NEConvolution7x7::configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
-{
-    ARM_COMPUTE_ERROR_ON(conv == nullptr);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
-
-    std::array<int16_t, 7> conv_col{ { 0 } };
-    std::array<int16_t, 7> conv_row{ { 0 } };
-
-    _is_separable = separate_matrix(conv, conv_col.data(), conv_row.data(), 7);
-
-    if(_is_separable)
-    {
-        DataType intermediate_type = DataType::UNKNOWN;
-        std::tie(std::ignore, intermediate_type) = data_type_for_convolution(conv_col.data(), conv_row.data(), 7);
-
-        _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, intermediate_type));
-
-        if(scale == 0)
-        {
-            scale = calculate_matrix_scale(conv, 7);
-        }
-
-        _kernel_hor.configure(input, &_tmp, conv_row.data(), border_mode == BorderMode::UNDEFINED);
-        _kernel_vert.configure(&_tmp, output, conv_col.data(), scale, border_mode == BorderMode::UNDEFINED);
-
-        _tmp.allocator()->allocate();
-
-        _border_handler.configure(input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
-    }
-    else
-    {
-        _kernel.configure(input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
-        _border_handler.configure(input, _kernel.border_size(), border_mode, PixelValue(constant_border_value));
-    }
-}
-
-void NEConvolution7x7::run()
-{
-    _border_handler.run(_border_handler.window());
-
-    if(_is_separable)
-    {
-        NEScheduler::get().multithread(&_kernel_hor);
-        NEScheduler::get().multithread(&_kernel_vert);
-    }
-    else
-    {
-        NEScheduler::get().multithread(&_kernel);
-    }
-}
-
-NEConvolution9x9::NEConvolution9x9()
-    : _tmp(), _is_separable(false), _kernel_hor(), _kernel_vert(), _kernel(), _border_handler()
-{
-}
-
-void NEConvolution9x9::configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
-{
-    ARM_COMPUTE_ERROR_ON(conv == nullptr);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
-
-    std::array<int16_t, 9> conv_col{ { 0 } };
-    std::array<int16_t, 9> conv_row{ { 0 } };
-
-    _is_separable = separate_matrix(conv, conv_col.data(), conv_row.data(), 9);
-
-    if(_is_separable)
-    {
-        DataType intermediate_type = DataType::UNKNOWN;
-        std::tie(std::ignore, intermediate_type) = data_type_for_convolution(conv_col.data(), conv_row.data(), 9);
-
-        _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, intermediate_type));
-
-        if(scale == 0)
-        {
-            scale = calculate_matrix_scale(conv, 9);
-        }
-
-        _kernel_hor.configure(input, &_tmp, conv_row.data(), border_mode == BorderMode::UNDEFINED);
-        _kernel_vert.configure(&_tmp, output, conv_col.data(), scale, border_mode == BorderMode::UNDEFINED);
-
-        _tmp.allocator()->allocate();
-
-        _border_handler.configure(input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
-    }
-    else
-    {
-        _kernel.configure(input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
-        _border_handler.configure(input, _kernel.border_size(), border_mode, PixelValue(constant_border_value));
-    }
-}
-
-void NEConvolution9x9::run()
-{
-    _border_handler.run(_border_handler.window());
-
-    if(_is_separable)
-    {
-        NEScheduler::get().multithread(&_kernel_hor);
-        NEScheduler::get().multithread(&_kernel_vert);
-    }
-    else
-    {
-        NEScheduler::get().multithread(&_kernel);
-    }
-}
+template class arm_compute::NEConvolutionSquare<5>;
+template class arm_compute::NEConvolutionSquare<7>;
+template class arm_compute::NEConvolutionSquare<9>;
 
 void NEConvolutionRectangle::configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t rows, uint32_t cols, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
 {

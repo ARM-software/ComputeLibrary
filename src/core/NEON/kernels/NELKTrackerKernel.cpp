@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/NEON/kernels/NELKTrackerKernel.h"
 
-#include "arm_compute/core/AccessWindowAutoPadding.h"
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -322,15 +322,20 @@ std::pair<int, int> NELKTrackerKernel::compute_image_mismatch_vector(const NELKI
 NELKTrackerKernel::NELKTrackerKernel()
     : _input_old(nullptr), _input_new(nullptr), _old_scharr_gx(nullptr), _old_scharr_gy(nullptr), _new_points(nullptr), _new_points_estimates(nullptr), _old_points(nullptr), _old_points_internal(),
       _new_points_internal(), _termination(Termination::TERM_CRITERIA_EPSILON), _use_initial_estimate(false), _pyramid_scale(0.0f), _epsilon(0.0f), _num_iterations(0), _window_dimension(0), _level(0),
-      _num_levels(0), _border_offset(0)
+      _num_levels(0), _valid_region()
 {
+}
+
+BorderSize NELKTrackerKernel::border_size() const
+{
+    return BorderSize(1);
 }
 
 void NELKTrackerKernel::configure(const ITensor *input_old, const ITensor *input_new, const ITensor *old_scharr_gx, const ITensor *old_scharr_gy,
                                   const IKeyPointArray *old_points, const IKeyPointArray *new_points_estimates, IKeyPointArray *new_points,
                                   INELKInternalKeypointArray *old_points_internal, INELKInternalKeypointArray *new_points_internal,
                                   Termination termination, bool use_initial_estimate, float epsilon, unsigned int num_iterations, size_t window_dimension,
-                                  size_t level, size_t num_levels, float pyramid_scale, int32_t border_offset)
+                                  size_t level, size_t num_levels, float pyramid_scale)
 
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_old, 1, DataType::U8);
@@ -355,25 +360,29 @@ void NELKTrackerKernel::configure(const ITensor *input_old, const ITensor *input
     _level                = level;
     _num_levels           = num_levels;
     _pyramid_scale        = pyramid_scale;
-    _border_offset        = border_offset;
     _num_levels           = num_levels;
 
     Window window;
     window.set(Window::DimX, Window::Dimension(0, old_points->num_values()));
     window.set(Window::DimY, Window::Dimension(0, 1));
 
+    _valid_region = intersect_valid_regions(
+                        input_old->info()->valid_region(),
+                        input_new->info()->valid_region(),
+                        old_scharr_gx->info()->valid_region(),
+                        old_scharr_gy->info()->valid_region());
+
     update_window_and_padding(window,
-                              AccessWindowAutoPadding(input_old->info()),
-                              AccessWindowAutoPadding(input_new->info()),
-                              AccessWindowAutoPadding(old_scharr_gx->info()),
-                              AccessWindowAutoPadding(old_scharr_gy->info()));
+                              AccessWindowStatic(input_old->info(), _valid_region.start(0), _valid_region.start(1),
+                                                 _valid_region.end(0), _valid_region.end(1)),
+                              AccessWindowStatic(input_new->info(), _valid_region.start(0), _valid_region.start(1),
+                                                 _valid_region.end(0), _valid_region.end(1)),
+                              AccessWindowStatic(old_scharr_gx->info(), _valid_region.start(0), _valid_region.start(1),
+                                                 _valid_region.end(0), _valid_region.end(1)),
+                              AccessWindowStatic(old_scharr_gy->info(), _valid_region.start(0), _valid_region.start(1),
+                                                 _valid_region.end(0), _valid_region.end(1)));
 
     INEKernel::configure(window);
-}
-
-BorderSize NELKTrackerKernel::border_size() const
-{
-    return BorderSize(1);
 }
 
 void NELKTrackerKernel::run(const Window &window)
@@ -396,15 +405,13 @@ void NELKTrackerKernel::run(const Window &window)
     int       bilinear_iy[buffer_size];
 
     const int half_window = _window_dimension / 2;
-    const int width       = _input_old->info()->dimension(0);
-    const int height      = _input_old->info()->dimension(1);
 
     auto is_invalid_keypoint = [&](const NELKInternalKeypoint & keypoint)
     {
         const int x = std::floor(keypoint.x);
         const int y = std::floor(keypoint.y);
 
-        return (x - half_window < _border_offset) || (x + half_window >= width - _border_offset - 1) || (y - half_window < _border_offset) || (y + half_window >= height - _border_offset - 1);
+        return (x - half_window < _valid_region.start(0)) || (x + half_window >= _valid_region.end(0) - 1) || (y - half_window < _valid_region.start(1)) || (y + half_window >= _valid_region.end(1) - 1);
     };
 
     for(int list_indx = list_start; list_indx < list_end; ++list_indx)

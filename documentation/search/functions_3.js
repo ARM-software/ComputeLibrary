@@ -16,5 +16,5 @@ var searchData=
   ['dimensions',['Dimensions',['../classarm__compute_1_1_dimensions.xhtml#a0d3c59537291735849c740364496a41c',1,'arm_compute::Dimensions::Dimensions(const Dimensions &amp;)=default'],['../classarm__compute_1_1_dimensions.xhtml#aa2c609345b3b6fa8da2486f75fff8ed8',1,'arm_compute::Dimensions::Dimensions(Dimensions &amp;&amp;)=default'],['../classarm__compute_1_1_i_distribution.xhtml#a254be7b34cd78d12ffc7ed2aba4882b1',1,'arm_compute::IDistribution::dimensions()'],['../classarm__compute_1_1_i_distribution1_d.xhtml#ad251169c06da412071bdfb6e92444e6e',1,'arm_compute::IDistribution1D::dimensions()']]],
   ['distribution1d',['Distribution1D',['../classarm__compute_1_1_distribution1_d.xhtml#a243c829bced69df597b496eb7456efb0',1,'arm_compute::Distribution1D']]],
   ['div_5fceil',['DIV_CEIL',['../namespacearm__compute.xhtml#a12705a88669cb9fb90451ebe0db53c41',1,'arm_compute']]],
-  ['draw_5fdetection_5frectangle',['draw_detection_rectangle',['../namespacetest__helpers.xhtml#a35367e474c33789a32cab099884301e0',1,'test_helpers']]]
+  ['draw_5fdetection_5frectangle',['draw_detection_rectangle',['../namespacetest__helpers.xhtml#ad1b5373f466a3945e1f0ef1c9943c357',1,'test_helpers']]]
 ];

@@ -29,6 +29,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 #include <utility>
 
 namespace arm_compute
@@ -98,6 +99,18 @@ struct ValidRegion
     ValidRegion(Coordinates anchor, TensorShape shape)
         : anchor{ anchor }, shape{ shape }
     {
+    }
+
+    /** Return the start of the valid region for the given dimension @p d */
+    int start(unsigned int d) const
+    {
+        return anchor[d];
+    }
+
+    /** Return the end of the valid region for the given dimension @p d */
+    int end(unsigned int d) const
+    {
+        return anchor[d] + shape[d];
     }
 
     Coordinates anchor;

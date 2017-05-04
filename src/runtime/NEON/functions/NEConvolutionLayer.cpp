@@ -60,7 +60,10 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     _is_first_run = true;
 
     // Get parameters for conv_info
-    unsigned int stride_x, stride_y, pad_x, pad_y = 0;
+    unsigned int stride_x = 0;
+    unsigned int stride_y = 0;
+    unsigned int pad_x    = 0;
+    unsigned int pad_y    = 0;
     std::tie(stride_x, stride_y) = conv_info.stride();
     std::tie(pad_x, pad_y)       = conv_info.pad();
 
@@ -72,21 +75,21 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
     // Create tensor to store the reshaped weights
-    const size_t      mat_weights_cols = weights->info()->dimension(3);
-    const size_t      mat_weights_rows = weights->info()->dimension(0) * weights->info()->dimension(1) * weights->info()->dimension(2) + ((_has_bias) ? 1 : 0);
-    const TensorShape shape_wr(mat_weights_cols, mat_weights_rows);
-    TensorInfo        info_wr(shape_wr, 1, weights->info()->data_type());
+    const unsigned int mat_weights_cols = weights->info()->dimension(3);
+    const unsigned int mat_weights_rows = weights->info()->dimension(0) * weights->info()->dimension(1) * weights->info()->dimension(2) + (_has_bias ? 1 : 0);
+    TensorShape        shape_wr(mat_weights_cols, mat_weights_rows);
+    TensorInfo         info_wr(shape_wr, 1, weights->info()->data_type());
     _weights_reshaped.allocator()->init(info_wr);
 
     // Create tensor to store transposed weights
-    TensorShape shape_wt(mat_weights_rows * 4, static_cast<size_t>(std::ceil(mat_weights_cols / 4.f)));
+    TensorShape shape_wt(mat_weights_rows * 4, static_cast<unsigned int>(std::ceil(mat_weights_cols / 4.f)));
     TensorInfo  info_wt(shape_wt, 1, weights->info()->data_type());
     _weights_transposed.allocator()->init(info_wt);
 
     // Create tensor to store im2col reshaped inputs
-    const size_t mat_input_cols = mat_weights_rows;
-    const size_t mat_input_rows = conv_w * conv_h;
-    TensorShape  shape_im2col   = input->info()->tensor_shape();
+    const unsigned int mat_input_cols = mat_weights_rows;
+    const unsigned int mat_input_rows = conv_w * conv_h;
+    TensorShape        shape_im2col   = input->info()->tensor_shape();
     shape_im2col.set(0, mat_input_cols);
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
@@ -96,7 +99,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     // Create tensor to prepare input tensor for GEMM
     TensorShape shape_interleaved = shape_im2col;
     shape_interleaved.set(0, shape_interleaved.x() * 4);
-    shape_interleaved.set(1, std::ceil(static_cast<float>(shape_interleaved.y()) / 4));
+    shape_interleaved.set(1, std::ceil(shape_interleaved.y() / 4.f));
     TensorInfo info_interleaved(shape_interleaved, 1, input->info()->data_type());
     _input_interleaved_reshaped.allocator()->init(info_interleaved);
 

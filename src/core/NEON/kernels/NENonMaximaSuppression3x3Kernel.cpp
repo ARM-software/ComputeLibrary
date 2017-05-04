@@ -233,7 +233,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
     auto       input  = static_cast<const float *__restrict>(input_ptr) - 1;
     const auto output = static_cast<float *__restrict>(output_ptr);
 
-    /* Get centre scores */
+    // Get centre scores
     const float32x4x4_t vc =
     {
         {
@@ -244,14 +244,14 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
         }
     };
 
-    /* Neighboring pixels */
+    // Neighboring pixels
     float32x4x4_t l_nc{ {} };
     float32x4x4_t m_nc{ {} };
     float32x4x4_t r_nc{ {} };
 
     input -= input_stride;
 
-    /* Row0 - Low part */
+    // Row0 - Low part
     float32x4_t tmp_low   = vld1q_f32(input);
     float32x4_t tmp_high  = vld1q_f32(input + 4);
     float32x4_t tmp_high1 = vld1q_f32(input + 8);
@@ -267,7 +267,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
     m_nc.val[1] = vextq_f32(tmp_low, tmp_high, 1);
     r_nc.val[1] = vextq_f32(tmp_low, tmp_high, 2);
 
-    /* Row0 - High part */
+    // Row0 - High part
     tmp_low   = tmp_high1;
     tmp_high  = vld1q_f32(input + 12);
     tmp_high1 = vld1q_f32(input + 16);
@@ -283,7 +283,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
     m_nc.val[3] = vextq_f32(tmp_low, tmp_high, 1);
     r_nc.val[3] = vextq_f32(tmp_low, tmp_high, 2);
 
-    /* mc >= nc.val[0], mc >= nc.val[1], mc >= nc.val[2] */
+    // mc >= nc.val[0], mc >= nc.val[1], mc >= nc.val[2]
     uint32x4x4_t mask{ {} };
     mask.val[0] = vcgeq_f32(vc.val[0], l_nc.val[0]);
     mask.val[0] = vandq_u32(mask.val[0], vcgeq_f32(vc.val[0], m_nc.val[0]));
@@ -300,7 +300,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
 
     input += input_stride;
 
-    /* Row1 - Low part */
+    // Row1 - Low part
     tmp_low   = vld1q_f32(input);
     tmp_high  = vld1q_f32(input + 4);
     tmp_high1 = vld1q_f32(input + 8);
@@ -314,7 +314,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
     l_nc.val[1] = tmp_low;
     r_nc.val[1] = vextq_f32(tmp_low, tmp_high, 2);
 
-    /* Row1 - High part */
+    // Row1 - High part
     tmp_low   = tmp_high1;
     tmp_high  = vld1q_f32(input + 12);
     tmp_high1 = vld1q_f32(input + 16);
@@ -328,7 +328,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
     l_nc.val[3] = tmp_low;
     r_nc.val[3] = vextq_f32(tmp_low, tmp_high, 2);
 
-    /* mc >= nc.val[0], mc > nc.val[2] */
+    // mc >= nc.val[0], mc > nc.val[2]
     mask.val[0] = vandq_u32(mask.val[0], vcgeq_f32(vc.val[0], l_nc.val[0]));
     mask.val[0] = vandq_u32(mask.val[0], vcgtq_f32(vc.val[0], r_nc.val[0]));
     mask.val[1] = vandq_u32(mask.val[1], vcgeq_f32(vc.val[1], l_nc.val[1]));
@@ -340,7 +340,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
 
     input += input_stride;
 
-    /* Row2 - Low part */
+    // Row2 - Low part
     tmp_low   = vld1q_f32(input);
     tmp_high  = vld1q_f32(input + 4);
     tmp_high1 = vld1q_f32(input + 8);
@@ -356,7 +356,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
     m_nc.val[1] = vextq_f32(tmp_low, tmp_high, 1);
     r_nc.val[1] = vextq_f32(tmp_low, tmp_high, 2);
 
-    /* Row2 - High part */
+    // Row2 - High part
     tmp_low   = tmp_high1;
     tmp_high  = vld1q_f32(input + 12);
     tmp_high1 = vld1q_f32(input + 16);
@@ -372,7 +372,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
     m_nc.val[3] = vextq_f32(tmp_low, tmp_high, 1);
     r_nc.val[3] = vextq_f32(tmp_low, tmp_high, 2);
 
-    /* mc > nc.val[0], mc > nc.val[1], mc > nc.val[2] */
+    // mc > nc.val[0], mc > nc.val[1], mc > nc.val[2]
     mask.val[0] = vandq_u32(mask.val[0], vcgtq_f32(vc.val[0], l_nc.val[0]));
     mask.val[0] = vandq_u32(mask.val[0], vcgtq_f32(vc.val[0], m_nc.val[0]));
     mask.val[0] = vandq_u32(mask.val[0], vcgtq_f32(vc.val[0], r_nc.val[0]));
@@ -388,7 +388,7 @@ inline void non_maxima_suppression3x3_FLOAT_FLOAT(const void *__restrict input_p
 
     static const float32x4_t zero = vdupq_n_f32(0.f);
 
-    /* Store */
+    // Store
     vst1q_f32(output + 0, vbslq_f32(mask.val[0], vc.val[0], zero));
     vst1q_f32(output + 4, vbslq_f32(mask.val[1], vc.val[1], zero));
     vst1q_f32(output + 8, vbslq_f32(mask.val[2], vc.val[2], zero));
@@ -400,51 +400,51 @@ inline void non_maxima_suppression3x3_U8_U8(const void *__restrict input_ptr, vo
     auto       input  = static_cast<const uint8_t *__restrict>(input_ptr) - 1;
     const auto output = static_cast<uint8_t *__restrict>(output_ptr);
 
-    /* Get centre scores */
+    // Get centre scores
     const uint8x16_t vc = vld1q_u8(input + 1);
 
-    /* Neighboring pixels */
+    // Neighboring pixels
     uint8x16_t l_nc{};
     uint8x16_t m_nc{};
     uint8x16_t r_nc{};
 
     input -= input_stride;
 
-    /* Row0 */
+    // Row0
     l_nc = vld1q_u8(input);
     m_nc = vld1q_u8(input + 1);
     r_nc = vld1q_u8(input + 2);
 
-    /* mc >= l_nc, mc >= m_nc, mc >= r_nc */
+    // mc >= l_nc, mc >= m_nc, mc >= r_nc
     uint8x16_t mask = vcgeq_u8(vc, l_nc);
     mask            = vandq_u8(mask, vcgeq_u8(vc, m_nc));
     mask            = vandq_u8(mask, vcgeq_u8(vc, r_nc));
 
     input += input_stride;
 
-    /* Row1 */
+    // Row1
     l_nc = vld1q_u8(input);
     r_nc = vld1q_u8(input + 2);
 
-    /* mc >= l_nc, mc > r_nc */
+    // mc >= l_nc, mc > r_nc
     mask = vandq_u8(mask, vcgeq_u8(vc, l_nc));
     mask = vandq_u8(mask, vcgtq_u8(vc, r_nc));
 
     input += input_stride;
 
-    /* Row2 */
+    // Row2
     l_nc = vld1q_u8(input);
     m_nc = vld1q_u8(input + 1);
     r_nc = vld1q_u8(input + 2);
 
-    /* mc > l_nc, mc > m_nc, mc > r_nc */
+    // mc > l_nc, mc > m_nc, mc > r_nc
     mask = vandq_u8(mask, vcgtq_u8(vc, l_nc));
     mask = vandq_u8(mask, vcgtq_u8(vc, m_nc));
     mask = vandq_u8(mask, vcgtq_u8(vc, r_nc));
 
     static const uint8x16_t zero = vdupq_n_u8(0);
 
-    /* Store */
+    // Store
     vst1q_u8(output, vbslq_u8(mask, vc, zero));
 }
 } // namespace

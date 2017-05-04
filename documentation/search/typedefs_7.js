@@ -1,8 +1,11 @@
 var searchData=
 [
   ['neconvolution3x3kernel',['NEConvolution3x3Kernel',['../namespacearm__compute.xhtml#acf81639b3d33b5da654ef088e4d10520',1,'arm_compute']]],
+  ['neconvolution5x5',['NEConvolution5x5',['../namespacearm__compute.xhtml#adbc7771d367ba8f51da1450d3602e5c0',1,'arm_compute']]],
   ['neconvolution5x5kernel',['NEConvolution5x5Kernel',['../namespacearm__compute.xhtml#a21898b2d2e31ab9af8933c66ff82c8c6',1,'arm_compute']]],
+  ['neconvolution7x7',['NEConvolution7x7',['../namespacearm__compute.xhtml#aeb2682fbeb2766df26b4be1971c9757d',1,'arm_compute']]],
   ['neconvolution7x7kernel',['NEConvolution7x7Kernel',['../namespacearm__compute.xhtml#ae46cbbe03d31c6c8e7eba7b58999842d',1,'arm_compute']]],
+  ['neconvolution9x9',['NEConvolution9x9',['../namespacearm__compute.xhtml#ae5a088552f26a1afafd0cbf821d256fb',1,'arm_compute']]],
   ['neconvolution9x9kernel',['NEConvolution9x9Kernel',['../namespacearm__compute.xhtml#a1025306f820a9e76df7e5891caacff7b',1,'arm_compute']]],
   ['nescheduler',['NEScheduler',['../namespacearm__compute.xhtml#a9d037379f22f90d871d3fa4ad337437a',1,'arm_compute']]],
   ['neseparableconvolution5x5horkernel',['NESeparableConvolution5x5HorKernel',['../namespacearm__compute.xhtml#ac78a7593874c21cff86478c1ba6df27b',1,'arm_compute']]],

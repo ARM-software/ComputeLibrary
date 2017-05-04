@@ -45,8 +45,8 @@ public:
      * @note The implementation supports just 2 border modes: UNDEFINED and CONSTANT
      *       The constant values used with CONSTANT border mode is 0
      *
-     * @param[in, out] input       Source tensor. Data type supported: F32. (Written to only for @p border_mode != UNDEFINED)
-     * @param[out]     output      Destination for the Non-Maxima suppressions 3x3. Data type supported: F32.
+     * @param[in, out] input       Source tensor. Data type supported: U8, F32. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]     output      Destination for the Non-Maxima suppressions 3x3. Data type supported: same as @p input
      * @param[in]      border_mode Border mode to use for non-maxima suppression. The implementation supports just 2 border modes: UNDEFINED and CONSTANT
      *
      */

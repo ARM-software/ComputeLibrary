@@ -149,12 +149,12 @@ void CLLKTrackerStage0Kernel::configure(const ICLTensor *old_input, const ICLTen
                                          old_scharr_gy->info()->valid_region());
 
     update_window_and_padding(window,
-                              AccessWindowStatic(old_input->info(), valid_region.anchor[0], valid_region.anchor[1],
-                                                 valid_region.shape[0], valid_region.shape[1]),
-                              AccessWindowStatic(old_scharr_gx->info(), valid_region.anchor[0], valid_region.anchor[1],
-                                                 valid_region.shape[0], valid_region.shape[1]),
-                              AccessWindowStatic(old_scharr_gy->info(), valid_region.anchor[0], valid_region.anchor[1],
-                                                 valid_region.shape[0], valid_region.shape[1]));
+                              AccessWindowStatic(old_input->info(), valid_region.start(0), valid_region.start(1),
+                                                 valid_region.end(0), valid_region.end(1)),
+                              AccessWindowStatic(old_scharr_gx->info(), valid_region.start(0), valid_region.start(1),
+                                                 valid_region.end(0), valid_region.end(1)),
+                              AccessWindowStatic(old_scharr_gy->info(), valid_region.start(0), valid_region.start(1),
+                                                 valid_region.end(0), valid_region.end(1)));
 
     ICLKernel::configure(window);
 
@@ -168,9 +168,9 @@ void CLLKTrackerStage0Kernel::configure(const ICLTensor *old_input, const ICLTen
     {
         {
             // -1 because we load 2 values at once for bilinear interpolation
-            static_cast<float>(valid_region.anchor[0] + static_cast<int>(valid_region.shape[0]) - window_size - 1),
-            static_cast<float>(valid_region.anchor[1] + static_cast<int>(valid_region.shape[1]) - window_size - 1),
-            static_cast<float>(valid_region.anchor[0])
+            static_cast<cl_float>(valid_region.end(0) - window_size - 1),
+            static_cast<cl_float>(valid_region.end(1) - window_size - 1),
+            static_cast<cl_float>(valid_region.start(0))
         }
     };
 
@@ -229,8 +229,8 @@ void CLLKTrackerStage1Kernel::configure(const ICLTensor *new_input, ICLLKInterna
     const ValidRegion &valid_region = new_input->info()->valid_region();
 
     update_window_and_padding(window,
-                              AccessWindowStatic(new_input->info(), valid_region.anchor[0], valid_region.anchor[1],
-                                                 valid_region.shape[0], valid_region.shape[1]));
+                              AccessWindowStatic(new_input->info(), valid_region.start(0), valid_region.start(1),
+                                                 valid_region.end(0), valid_region.end(1)));
 
     ICLKernel::configure(window);
 
@@ -244,9 +244,9 @@ void CLLKTrackerStage1Kernel::configure(const ICLTensor *new_input, ICLLKInterna
     {
         {
             // -1 because we load 2 values at once for bilinear interpolation
-            static_cast<float>(valid_region.anchor[0] + static_cast<int>(valid_region.shape[0]) - window_size - 1),
-            static_cast<float>(valid_region.anchor[1] + static_cast<int>(valid_region.shape[1]) - window_size - 1),
-            static_cast<float>(valid_region.anchor[0])
+            static_cast<cl_float>(valid_region.end(0) - window_size - 1),
+            static_cast<cl_float>(valid_region.end(1) - window_size - 1),
+            static_cast<cl_float>(valid_region.start(0))
         }
     };
     const int term_iteration = (termination == Termination::TERM_CRITERIA_ITERATIONS || termination == Termination::TERM_CRITERIA_BOTH) ? 1 : 0;

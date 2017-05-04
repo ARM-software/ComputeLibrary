@@ -183,11 +183,24 @@ inline void for_each(F &&func, T &&arg, Ts &&... args)
     for_each(func, args...);
 }
 
-/** Base case of foldl. Return value. */
+/** Base case of foldl.
+ *
+ * @return value.
+ */
 template <typename F, typename T>
-inline T foldl(F &&, T &&value)
+inline T foldl(F &&, const T &value)
 {
     return value;
+}
+
+/** Base case of foldl.
+ *
+ * @return Function evaluation for value1 and value2
+ */
+template <typename F, typename T, typename U>
+inline auto foldl(F &&func, T &&value1, U &&value2) -> decltype(func(value1, value2))
+{
+    return func(value1, value2);
 }
 
 /** Fold left.
@@ -197,10 +210,10 @@ inline T foldl(F &&, T &&value)
  * @param[in] value   Argument passed to the function
  * @param[in] values  Remaining arguments
  */
-template <typename F, typename I, typename T, typename... Ts>
-inline I foldl(F &&func, I &&initial, T &&value, Ts &&... values)
+template <typename F, typename I, typename T, typename... Vs>
+inline I foldl(F &&func, I &&initial, T &&value, Vs &&... values)
 {
-    return foldl(func, func(initial, value), values...);
+    return foldl(std::forward<F>(func), func(std::forward<I>(initial), std::forward<T>(value)), std::forward<Vs>(values)...);
 }
 }
 

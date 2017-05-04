@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.04</span>
+   &#160;<span id="projectnumber">17.05</span>
    </div>
   </td>
  </tr>
@@ -193,8 +193,8 @@ Public Member Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>The implementation supports just 2 border modes: UNDEFINED and CONSTANT The constant values used with CONSTANT border mode is 0</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. Data type supported: F32. (Written to only for <code>border_mode</code> != UNDEFINED) </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination for the Non-Maxima suppressions 3x3. Data type supported: F32. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. Data type supported: U8, F32. (Written to only for <code>border_mode</code> != UNDEFINED) </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination for the Non-Maxima suppressions 3x3. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">border_mode</td><td>Border mode to use for non-maxima suppression. The implementation supports just 2 border modes: UNDEFINED and CONSTANT </td></tr>
   </table>
   </dd>
@@ -211,7 +211,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_non_maxima_suppression3x3.xhtml">NENonMaximaSuppression3x3</a></li>
-    <li class="footer">Generated on Wed Apr 12 2017 14:26:06 for ARM Compute Library by
+    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

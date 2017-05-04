@@ -70,8 +70,26 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
+    float scale_x = 1.f;
+
+    switch(input->info()->data_type())
+    {
+        case DataType::U8:
+            scale_x = 16.f;
+            break;
+        case DataType::F16:
+            scale_x = 8.f;
+            break;
+        case DataType::F32:
+            scale_x = 4.f;
+            break;
+        default:
+            // Do nothing
+            break;
+    }
+
     AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowTranspose  output_access(output->info(), 0, 0, num_elems_processed_per_iteration, 1);
+    AccessWindowTranspose  output_access(output->info(), 0, 0, num_elems_processed_per_iteration, 1, scale_x, 1.f / scale_x);
 
     update_window_and_padding(win, input_access, output_access);
 

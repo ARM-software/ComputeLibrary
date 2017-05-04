@@ -27,7 +27,9 @@
 #include <cerrno>
 #include <iomanip>
 #include <string>
-#include <cerrno>
+
+using namespace arm_compute;
+
 namespace
 {
 /* Advance the iterator to the first character which is not a comment

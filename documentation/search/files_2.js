@@ -62,6 +62,7 @@ var searchData=
   ['clgaussianpyramid_2eh',['CLGaussianPyramid.h',['../_c_l_gaussian_pyramid_8h.xhtml',1,'']]],
   ['clgaussianpyramidkernel_2eh',['CLGaussianPyramidKernel.h',['../_c_l_gaussian_pyramid_kernel_8h.xhtml',1,'']]],
   ['clgemm_2eh',['CLGEMM.h',['../_c_l_g_e_m_m_8h.xhtml',1,'']]],
+  ['clgemminterleave4x4_2eh',['CLGEMMInterleave4x4.h',['../_c_l_g_e_m_m_interleave4x4_8h.xhtml',1,'']]],
   ['clgemminterleave4x4kernel_2eh',['CLGEMMInterleave4x4Kernel.h',['../_c_l_g_e_m_m_interleave4x4_kernel_8h.xhtml',1,'']]],
   ['clgemmlowp_2eh',['CLGEMMLowp.h',['../_c_l_g_e_m_m_lowp_8h.xhtml',1,'']]],
   ['clgemmlowpmatrixmultiplykernel_2eh',['CLGEMMLowpMatrixMultiplyKernel.h',['../_c_l_g_e_m_m_lowp_matrix_multiply_kernel_8h.xhtml',1,'']]],

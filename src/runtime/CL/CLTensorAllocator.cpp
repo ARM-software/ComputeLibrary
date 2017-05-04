@@ -52,6 +52,14 @@ void CLTensorAllocator::allocate()
     info().set_is_resizable(false);
 }
 
+void CLTensorAllocator::free()
+{
+    ARM_COMPUTE_ERROR_ON(_buffer.get() == nullptr);
+
+    _buffer = cl::Buffer();
+    info().set_is_resizable(true);
+}
+
 uint8_t *CLTensorAllocator::lock()
 {
     ARM_COMPUTE_ERROR_ON(_mapping != nullptr);

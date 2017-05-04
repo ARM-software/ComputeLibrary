@@ -101,6 +101,14 @@ void TensorAllocator::allocate()
     info().set_is_resizable(false);
 }
 
+void TensorAllocator::free()
+{
+    ARM_COMPUTE_ERROR_ON(_buffer == nullptr);
+
+    _buffer.reset();
+    info().set_is_resizable(true);
+}
+
 uint8_t *TensorAllocator::lock()
 {
     return (_buffer != nullptr) ? _buffer.get()->data() : nullptr;

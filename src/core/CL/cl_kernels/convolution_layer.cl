@@ -115,40 +115,35 @@ __kernel void im2col_generic(
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Image    dst = CONVERT_TO_IMAGE_STRUCT_NO_STEP(dst);
 
-    // Kernel radius
-    int KH = kernel_size >> 1;
-
     // Determine output index
-    uint     idx                = (get_global_id(1) * width + get_global_id(0)) * dst.stride_y;
-    __global uchar *tmp_out_ptr = dst.ptr + idx;
+    uint     idx               = (get_global_id(1) * width + get_global_id(0)) * dst.stride_y;
+    __global uchar *output_ptr = dst.ptr + idx;
 
     // Determine current input index
-    const int wi = get_global_id(0) * strides.x - paddings.x;
-    const int hi = get_global_id(1) * strides.y - paddings.y;
+    const int top_left_x = get_global_id(0) * strides.x - paddings.x;
+    const int top_left_y = get_global_id(1) * strides.y - paddings.y;
 
     // Linearize convolution elements
     for(int d = 0; d < kernel_depth; ++d)
     {
-        int cur_h = hi;
-        for(int h = -KH; h <= KH; ++h, ++cur_h)
+        for(int y = top_left_y, y_e = top_left_y + kernel_size; y < y_e; ++y)
         {
-            int cur_w = wi;
-            for(int w = -KH; w <= KH; ++w, ++cur_w)
+            for(int x = top_left_x, x_e = top_left_x + kernel_size; x < x_e; ++x, output_ptr += dst.stride_x)
             {
-                if(((cur_w < 0) || (cur_w >= input_dims.x)) || ((cur_h < 0) || (cur_h >= input_dims.y)))
+                if(x < 0 || x >= input_dims.x || y < 0 || y >= input_dims.y)
                 {
-                    *((__global DATA_TYPE *)tmp_out_ptr) = 0;
+                    *((__global DATA_TYPE *)output_ptr) = 0;
                 }
                 else
                 {
-                    *((__global DATA_TYPE *)tmp_out_ptr) = *((__global DATA_TYPE *)(tensor3D_offset(&src, w, h, d)));
+                    *((__global DATA_TYPE *)output_ptr) = *((__global DATA_TYPE *)(tensor3D_offset(&src, x, y, d)));
                 }
-                tmp_out_ptr += dst.stride_x;
             }
         }
     }
+
 #if defined HAS_BIAS
-    *((__global DATA_TYPE *)tmp_out_ptr) = (DATA_TYPE)(1);
+    *((__global DATA_TYPE *)output_ptr) = 1;
 #endif
 }
 

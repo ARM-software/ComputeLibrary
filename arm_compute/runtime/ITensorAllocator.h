@@ -63,12 +63,19 @@ public:
      * @return Constant reference to the tensor's metadata.
      */
     const TensorInfo &info() const;
+
     /** Interface to be implemented by the child class to allocate the tensor.
      *
      * @note The child is expected to use the TensorInfo to get the size of the memory allocation.
      * @warning The tensor must not already be allocated. Otherwise calling the function will fail.
      */
     virtual void allocate() = 0;
+
+    /** Interface to be implemented by the child class to free the allocated tensor.
+     *
+     * @warning The tensor must have been allocated previously. Otherwise calling the function will fail.
+     */
+    virtual void free() = 0;
 
 protected:
     /** Interface to be implemented by the child class to lock the memory allocation for the CPU to access.

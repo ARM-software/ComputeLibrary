@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: NEConvolution9x9 Class Reference</title>
+<title>ARM Compute Library: NEConvolutionSquare&lt; matrix_size &gt; Class Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.04</span>
+   &#160;<span id="projectnumber">17.05</span>
    </div>
   </td>
  </tr>
@@ -96,7 +96,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_convolution9x9.xhtml','');});
+$(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_convolution_square.xhtml','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -117,30 +117,30 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_convolution9
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a>  </div>
   <div class="headertitle">
-<div class="title">NEConvolution9x9 Class Reference</div>  </div>
+<div class="title">NEConvolutionSquare&lt; matrix_size &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Basic function to execute convolution of size 9x9.  
- <a href="classarm__compute_1_1_n_e_convolution9x9.xhtml#details">More...</a></p>
+<p>Basic function to execute convolution of size 5x5, 7x7, 9x9.  
+ <a href="classarm__compute_1_1_n_e_convolution_square.xhtml#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_n_e_convolution_8h_source.xhtml">NEConvolution.h</a>&gt;</code></p>
 <div class="dynheader">
-Collaboration diagram for NEConvolution9x9:</div>
+Collaboration diagram for NEConvolutionSquare&lt; matrix_size &gt;:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_n_e_convolution9x9__coll__graph.svg" width="142" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_n_e_convolution_square__coll__graph.svg" width="162" height="127"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 <center><span class="legend">[<a target="top" href="graph_legend.xhtml">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ada1aa23065a11fa05e6880a84392b471"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution9x9.xhtml#ada1aa23065a11fa05e6880a84392b471">NEConvolution9x9</a> ()</td></tr>
-<tr class="memdesc:ada1aa23065a11fa05e6880a84392b471"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#ada1aa23065a11fa05e6880a84392b471">More...</a><br /></td></tr>
-<tr class="separator:ada1aa23065a11fa05e6880a84392b471"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58d050865536a28b56a92eeaf3ac478e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution9x9.xhtml#a58d050865536a28b56a92eeaf3ac478e">configure</a> (<a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const int16_t *conv, uint32_t scale, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value=0)</td></tr>
+<tr class="memitem:ab60f2bd87482f390d4bbfca943bcdf2b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_square.xhtml#ab60f2bd87482f390d4bbfca943bcdf2b">NEConvolutionSquare</a> ()</td></tr>
+<tr class="memdesc:ab60f2bd87482f390d4bbfca943bcdf2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#ab60f2bd87482f390d4bbfca943bcdf2b">More...</a><br /></td></tr>
+<tr class="separator:ab60f2bd87482f390d4bbfca943bcdf2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58d050865536a28b56a92eeaf3ac478e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_square.xhtml#a58d050865536a28b56a92eeaf3ac478e">configure</a> (<a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const int16_t *conv, uint32_t scale, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value=0)</td></tr>
 <tr class="memdesc:a58d050865536a28b56a92eeaf3ac478e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, conv and border_mode.  <a href="#a58d050865536a28b56a92eeaf3ac478e">More...</a><br /></td></tr>
 <tr class="separator:a58d050865536a28b56a92eeaf3ac478e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution9x9.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
+<tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_square.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_function"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_function')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_function.xhtml">IFunction</a></td></tr>
@@ -149,22 +149,25 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Basic function to execute convolution of size 9x9. </p>
+<div class="textblock"><h3>template&lt;unsigned int matrix_size&gt;<br />
+class arm_compute::NEConvolutionSquare&lt; matrix_size &gt;</h3>
+
+<p>Basic function to execute convolution of size 5x5, 7x7, 9x9. </p>
 <p>This function calls the following NEON kernels:</p>
 <ol type="1">
 <li><a class="el" href="classarm__compute_1_1_n_e_fill_border_kernel.xhtml">NEFillBorderKernel</a> (executed if border_mode == CONSTANT or border_mode == REPLICATE)</li>
-<li><a class="el" href="namespacearm__compute.xhtml#a1025306f820a9e76df7e5891caacff7b">NEConvolution9x9Kernel</a> or<br />
- <a class="el" href="namespacearm__compute.xhtml#a4ba5f6b7cd6b70b75e42149f3bc08f38">NESeparableConvolution9x9HorKernel</a> and <a class="el" href="namespacearm__compute.xhtml#a6310d21f215fface41df4cde725a62b9">NESeparableConvolution9x9VertKernel</a> (if convolution matrix is separable) </li>
+<li><a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml">NEConvolutionKernel</a> or<br />
+ <a class="el" href="classarm__compute_1_1_n_e_separable_convolution_hor_kernel.xhtml">NESeparableConvolutionHorKernel</a> and <a class="el" href="classarm__compute_1_1_n_e_separable_convolution_vert_kernel.xhtml">NESeparableConvolutionVertKernel</a> (if convolution matrix is separable) </li>
 </ol>
 
-<p>Definition at line <a class="el" href="_n_e_convolution_8h_source.xhtml#l00138">138</a> of file <a class="el" href="_n_e_convolution_8h_source.xhtml">NEConvolution.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_convolution_8h_source.xhtml#l00069">69</a> of file <a class="el" href="_n_e_convolution_8h_source.xhtml">NEConvolution.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="ada1aa23065a11fa05e6880a84392b471"></a>
+<a class="anchor" id="ab60f2bd87482f390d4bbfca943bcdf2b"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classarm__compute_1_1_n_e_convolution9x9.xhtml">NEConvolution9x9</a> </td>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_n_e_convolution_square.xhtml">NEConvolutionSquare</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -238,6 +241,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
+<p>Referenced by <a class="el" href="neon__convolution_8cpp_source.xhtml#l00052">main_neon_convolution()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ad1717410afd0be936c6213a63c8005fb"></a>
@@ -275,6 +280,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_function.xhtml#a18954417d3124a8095783ea13dc6d00b">IFunction</a>.</p>
 
+<p>Referenced by <a class="el" href="neon__convolution_8cpp_source.xhtml#l00052">main_neon_convolution()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -285,8 +292,8 @@ Public Member Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_convolution9x9.xhtml">NEConvolution9x9</a></li>
-    <li class="footer">Generated on Wed Apr 12 2017 14:26:06 for ARM Compute Library by
+    <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_convolution_square.xhtml">NEConvolutionSquare</a></li>
+    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

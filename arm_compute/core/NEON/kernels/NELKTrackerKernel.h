@@ -83,13 +83,12 @@ public:
      * @param[in]      level                The pyramid level
      * @param[in]      num_levels           The number of pyramid levels
      * @param[in]      pyramid_scale        Scale factor used for generating the pyramid
-     * @param[in]      border_offset        The offset used to define the boundary of the tracked pixels in different border modes
      */
     void configure(const ITensor *input_old, const ITensor *input_new, const ITensor *old_scharr_gx, const ITensor *old_scharr_gy,
                    const IKeyPointArray *old_points, const IKeyPointArray *new_points_estimates, IKeyPointArray *new_points,
                    INELKInternalKeypointArray *old_points_internal, INELKInternalKeypointArray *new_points_internal,
                    Termination termination, bool use_initial_estimate, float epsilon, unsigned int num_iterations, size_t window_dimension,
-                   size_t level, size_t num_levels, float pyramid_scale, int32_t border_offset);
+                   size_t level, size_t num_levels, float pyramid_scale);
 
     // Inherited methods overridden:
     void run(const Window &window) override;
@@ -137,9 +136,9 @@ private:
     float                       _epsilon;
     unsigned int                _num_iterations;
     int                         _window_dimension;
-    size_t                      _level;
-    size_t                      _num_levels;
-    int32_t                     _border_offset;
+    unsigned int                _level;
+    unsigned int                _num_levels;
+    ValidRegion                 _valid_region;
 };
 }
 #endif /*__ARM_COMPUTE_NELKTRACKERKERNEL_H__ */

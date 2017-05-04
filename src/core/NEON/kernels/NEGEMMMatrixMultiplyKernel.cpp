@@ -23,8 +23,10 @@
  */
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 
+#include "arm_compute/core/AccessWindowTranspose.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -523,8 +525,8 @@ void NEGEMMMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor 
         AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
 
         update_window_and_padding(win,
-                                  AccessWindowRectangle(input0->info(), 0, 0, 4, 1),
-                                  AccessWindowRectangle(input1->info(), 0, 0, 4, 1),
+                                  AccessWindowRectangle(input0->info(), 0, 0, 4, 1, 1.f, 0.25f),
+                                  AccessWindowTranspose(input1->info(), 0, 0, 4, 1, 0.f, 0.25f),
                                   output_access);
 
         output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));

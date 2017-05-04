@@ -35,20 +35,13 @@ namespace arm_compute
 {
 class IDistribution1D;
 
-/** Basic function to execute histogram. This function calls the following NEON kernels:
- *
- *  -# @ref NEHistogramKernel
- *  -# @ref NEHistogramBorderKernel
- *
- */
+/** Basic function to run @ref NEHistogramKernel. */
 class NEHistogram : public IFunction
 {
 public:
     /** Default Constructor. */
     NEHistogram();
     /** Initialise the kernel's inputs.
-     *
-     * @note Currently the width of the input image must be a multiple of 16.
      *
      * @param[in]  input  Input image. Data type supported: U8.
      * @param[out] output Output distribution.
@@ -60,11 +53,9 @@ public:
 
 private:
     NEHistogramKernel           _histogram_kernel;
-    NEHistogramBorderKernel     _border_histogram_kernel;
     std::unique_ptr<uint32_t[]> _local_hist;
     std::unique_ptr<uint32_t[]> _window_lut;
     size_t                      _local_hist_size;
-    bool                        _run_border_hist;
     /** 256 possible pixel values as we handle only U8 images */
     static constexpr unsigned int window_lut_default_size = 256;
 };

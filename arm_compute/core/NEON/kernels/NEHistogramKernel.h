@@ -97,13 +97,13 @@ private:
       *
      *  @param[in] win Region on which to execute the kernel
      */
-    void histogram_U8(const Window &win);
+    void histogram_U8(Window win);
     /** Function to perform histogram on the given window where histogram is
      *         of fixed size 256 without ranges and offsets.
      *
      *  @param[in] win Region on which to execute the kernel
      */
-    void histogram_fixed_U8(const Window &win);
+    void histogram_fixed_U8(Window win);
     /** Pre-calculate the pixel windowing for every possible pixel
      *
      * Calculate (V - offset) * numBins / range where V is every possible pixel value.
@@ -115,11 +115,9 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using HistogramFunction = void (NEHistogramKernel::*)(const Window &window);
-    /** Histogram function to use for the particular image types passed to configure() */
-    HistogramFunction _func;
+    using HistogramFunctionPtr = void (NEHistogramKernel::*)(Window window);
 
-private:
+    HistogramFunctionPtr          _func; ///< Histogram function to use for the particular image types passed to configure()
     const IImage                 *_input;
     IDistribution1D              *_output;
     uint32_t                     *_local_hist;
@@ -127,76 +125,5 @@ private:
     std::mutex                    _hist_mtx;
     static constexpr unsigned int _max_range_size{ 256 }; ///< 256 possible pixel values as we handle only U8 images
 };
-
-/** Interface for the histogram border handling kernel.
- *
- * @note If the image width is not a multiple of the number of elements processed by @ref NEHistogramKernel
- * this kernel is used to handle the leftover columns.
- */
-class NEHistogramBorderKernel : public INEKernel
-{
-public:
-    /** Default constructor */
-    NEHistogramBorderKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEHistogramBorderKernel(const NEHistogramBorderKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEHistogramBorderKernel &operator=(const NEHistogramBorderKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEHistogramBorderKernel(NEHistogramBorderKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEHistogramBorderKernel &operator=(NEHistogramBorderKernel &&) = default;
-    /** Default destructor */
-    ~NEHistogramBorderKernel() = default;
-
-    /** Set the input image and the distribution output.
-     *
-     * @param[in]  input                    Source image. Data type supported: U8.
-     * @param[out] output                   Destination distribution.
-     * @param[in]  window_lut               LUT with precalculated possible window values.
-     * @param[in]  hist_elements_per_thread Pixels per thread that the histogram kernel computes.
-     */
-    void configure(const IImage *input, IDistribution1D *output, uint32_t *window_lut, const unsigned int hist_elements_per_thread);
-    /** Set the input image and the distribution output.
-     *
-     * @note Used for histogram of fixed size equal to 256
-     *
-     * @param[in]  input                    Source image. Data type supported: U8.
-     * @param[out] output                   Destination distribution.
-     * @param[in]  hist_elements_per_thread Pixels per thread that the histogram kernel computes.
-     */
-    void configure(const IImage *input, IDistribution1D *output, const unsigned int hist_elements_per_thread);
-
-    // Inherited methods overridden:
-    void run(const Window &window) override;
-    bool is_parallelisable() const override;
-
-private:
-    /** Function to perform histogram on the given window
-      *
-     *  @param[in] win Region on which to execute the kernel
-     */
-    void histogram_U8(const Window &win);
-    /** Function to perform histogram on the given window where histogram is
-     *  of fixed size 256 without ranges and offsets.
-     *
-     *  @param[in] win Region on which to execute the kernel
-     */
-    void histogram_fixed_U8(const Window &win);
-    /** Common signature for all the specialised Histogram functions
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    using HistogramBorderFunction = void (NEHistogramBorderKernel::*)(const Window &window);
-    /** Histogram function to use for the particular image types passed to configure() */
-    HistogramBorderFunction _func;
-
-private:
-    const IImage                 *_input;
-    IDistribution1D              *_output;
-    uint32_t                     *_window_lut;
-    static constexpr unsigned int _max_range_size{ 256 }; ///< 256 possible pixel values as we handle only U8 images
-};
 }
-
 #endif /*__ARM_COMPUTE_NEHISTOGRAMKERNEL_H__ */

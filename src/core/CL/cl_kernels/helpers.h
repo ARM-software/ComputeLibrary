@@ -184,12 +184,12 @@ Tensor3D inline update_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_fi
 
 /** Get the pointer position of a Vector
  *
- * @param[in] img Pointer to the starting position of the buffer
+ * @param[in] vec Pointer to the starting position of the buffer
  * @param[in] x   Relative X position
  */
-__global inline const uchar *vector_offset(const Image *img, int x)
+__global inline const uchar *vector_offset(const Vector *vec, int x)
 {
-    return img->ptr + x * img->stride_x;
+    return vec->ptr + x * vec->stride_x;
 }
 
 /** Get the pointer position of a Image

@@ -1,5 +1,11 @@
 var NAVTREEINDEX4 =
 {
+"channel__extract_8cl_source.xhtml":[3,0,2,0,0,0,7],
+"cl__convolution_8cpp.xhtml":[3,0,1,0],
+"cl__convolution_8cpp.xhtml#a217dbf8b442f20279ea00b898af96f52":[3,0,1,0,1],
+"cl__convolution_8cpp.xhtml#a565013cf7e49a591bacd548571951f94":[3,0,1,0,4],
+"cl__convolution_8cpp.xhtml#a63683d6451d68be4415ea2a694b350e7":[3,0,1,0,2],
+"cl__convolution_8cpp.xhtml#a741ba5321da40184f8653e0a50ace070":[3,0,1,0,3],
 "cl__convolution_8cpp.xhtml#a9915340d2c3c10c51e07994dde353f01":[3,0,1,0,0],
 "cl__convolution_8cpp_source.xhtml":[3,0,1,0],
 "cl__events_8cpp.xhtml":[3,0,1,1],
@@ -243,11 +249,5 @@ var NAVTREEINDEX4 =
 "classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml#ab32afb44c79da5f80f07730a11d37060":[2,0,0,46,3],
 "classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml#ab9a3d635b7642f677e665ec9e80a56ab":[2,0,0,46,0],
 "classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml#adc3c56d8a6ee712ffb9bff20d84e7375":[2,0,0,46,2],
-"classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml#adfa0598bf65ae8e9cff93ae3769c3925":[2,0,0,46,6],
-"classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml#ae0214c82efeb2ed2d6e4c0311ed19778":[2,0,0,46,1],
-"classarm__compute_1_1_c_l_convolution_rectangle.xhtml":[2,0,0,47],
-"classarm__compute_1_1_c_l_convolution_rectangle.xhtml#aa0b5cdc99cad00d35521aa756365cef2":[2,0,0,47,0],
-"classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml":[2,0,0,48],
-"classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml#a2146854d485039a04e73bb6254ae788b":[2,0,0,48,0],
-"classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml#a4075f3040a87951071878e672bab27dd":[2,0,0,48,1]
+"classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml#adfa0598bf65ae8e9cff93ae3769c3925":[2,0,0,46,6]
 };

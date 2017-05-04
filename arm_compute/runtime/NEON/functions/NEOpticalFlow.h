@@ -89,7 +89,7 @@ private:
     const IKeyPointArray                *_old_points;
     LKInternalKeypointArray              _new_points_internal;
     LKInternalKeypointArray              _old_points_internal;
-    size_t                               _num_levels;
+    unsigned int                         _num_levels;
 };
 }
 #endif /*__ARM_COMPUTE_NEOPTICALFLOW_H__ */

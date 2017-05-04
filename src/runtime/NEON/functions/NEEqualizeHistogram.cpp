@@ -32,8 +32,7 @@
 using namespace arm_compute;
 
 NEEqualizeHistogram::NEEqualizeHistogram()
-    : _histogram_kernel(), _border_histogram_kernel(), _cd_histogram_kernel(), _map_histogram_kernel(), _hist(nr_bins, 0, max_range), _cum_dist(nr_bins, 0, max_range), _cd_lut(nr_bins, DataType::U8),
-      _run_border_hist(false)
+    : _histogram_kernel(), _cd_histogram_kernel(), _map_histogram_kernel(), _hist(nr_bins, 0, max_range), _cum_dist(nr_bins, 0, max_range), _cd_lut(nr_bins, DataType::U8)
 {
 }
 
@@ -43,22 +42,9 @@ void NEEqualizeHistogram::configure(const IImage *input, IImage *output)
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_MSG((input->info()->dimension(0) % 16) != 0, "Currently the width of the image must be a multiple of 16");
 
     // Configure kernels
     _histogram_kernel.configure(input, &_hist);
-
-    //COMPMID-196: Figure out how to handle the border part
-    ARM_COMPUTE_UNUSED(_run_border_hist);
-#if 0
-    _run_border_hist = (input->info()->dimension(0) % _histogram_kernel.num_elems_processed_per_iteration()) != 0U;
-
-    if(_run_border_hist)
-    {
-        _border_histogram_kernel.configure(input, &_hist, _histogram_kernel.num_elems_processed_per_iteration());
-    }
-#endif
-
     _cd_histogram_kernel.configure(input, &_hist, &_cum_dist, &_cd_lut);
     _map_histogram_kernel.configure(input, &_cd_lut, output);
 }
@@ -67,15 +53,6 @@ void NEEqualizeHistogram::run()
 {
     // Calculate histogram of input.
     NEScheduler::get().multithread(&_histogram_kernel);
-
-    // Calculate remaining pixels when image is not multiple of the elements of histogram kernel
-    //COMPMID-196: Figure out how to handle the border part
-#if 0
-    if(_run_border_hist)
-    {
-        _border_histogram_kernel.run(_border_histogram_kernel.window());
-    }
-#endif
 
     // Calculate cumulative distribution of histogram and create LUT.
     _cd_histogram_kernel.run(_cd_histogram_kernel.window());

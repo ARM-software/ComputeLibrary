@@ -109,7 +109,7 @@ void NENormalizationLayerKernel::normalize(const Window &window)
 
         // Normalize
         const float32x4_t normalized       = vpowq_f32(vmlaq_f32(kappa_vec, coeff_vec, accu), beta_vec);
-        const float32x4_t normalized_pixel = vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr())), vinv_f32(normalized));
+        const float32x4_t normalized_pixel = vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr())), vinvq_f32(normalized));
         vst1q_f32(reinterpret_cast<float *>(output.ptr()), normalized_pixel);
     },
     input, input_squared, output);

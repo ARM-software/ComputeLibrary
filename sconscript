@@ -25,25 +25,11 @@ import re
 import subprocess
 import SCons
 
-VERSION = "v17.04"
-SONAME_VERSION="1.0.0"
+VERSION = "v17.05"
+SONAME_VERSION="2.0.0"
 
-vars = Variables('scons')
-vars.Add(EnumVariable('debug','Debug (default=0)', '0', allowed_values=('0','1')))
-vars.Add(EnumVariable('asserts','Enable asserts (This flag is forced to 1 for debug=1) (default=0)', '0', allowed_values=('0','1')))
-vars.Add(EnumVariable('arch','Target Architecture (default=armv7a)', 'armv7a', allowed_values=('armv7a','arm64-v8a','arm64-v8.2-a','x86_32','x86_64')))
-vars.Add(EnumVariable('os','Target OS (default=linux)', 'linux', allowed_values=('linux','android','bare_metal')))
-vars.Add(EnumVariable('build','Build type: (default=cross_compile)', 'cross_compile', allowed_values=('native','cross_compile')))
-vars.Add(EnumVariable('Werror','Enable/disable the -Werror compilation flag (Default=1)', '1', allowed_values=('0','1')))
-vars.Add(EnumVariable('opencl','Enable OpenCL support(Default=1)', '1', allowed_values=('0','1')))
-vars.Add(EnumVariable('neon','Enable Neon support(Default=0)', '0', allowed_values=('0','1')))
-vars.Add(EnumVariable('embed_kernels', 'Embed OpenCL kernels in library binary(Default=0)', '0', allowed_values=('0','1')))
-vars.Add(BoolVariable('set_soname','Set the library\'s soname and shlibversion (Requires SCons 2.4 or above)', 0))
-vars.Add(('extra_cxx_flags','Extra CXX flags to be appended to the build command', ''))
-
-env = Environment(platform='posix', variables = vars, ENV = os.environ)
-
-Help(vars.GenerateHelpText(env))
+Import('env')
+Import('vars')
 
 def version_at_least(version, required):
     end = min(len(version), len(required))
@@ -56,311 +42,339 @@ def version_at_least(version, required):
 
     return True
 
-if not GetOption("help"):
-    flags = ['-D_GLIBCXX_USE_NANOSLEEP','-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
-             '-Wextra','-Wno-unused-parameter','-pedantic','-Wdisabled-optimization','-Wformat=2',
-             '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
-             '-fpermissive','-std=c++11','-Wno-vla','-Woverloaded-virtual',
-             '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow']
-
-
-    if env['neon'] == '1' and 'x86' in env['arch']:
-            print "Cannot compile NEON for x86"
-            Exit(1)
-
-    if env['set_soname'] and not version_at_least( SCons.__version__, "2.4"):
-        print "Setting the library's SONAME / SHLIBVERSION requires SCons 2.4 or above"
-        print "Update your version of SCons or use set_soname=0"
-        Exit(1)
-
-    if os.environ.get('CXX','g++') == 'clang++':
-        flags += ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags']
+def build_library(name, sources, libs, static=False):
+    if static:
+        obj = env.StaticLibrary(name, source = sources, LIBS=libs )
     else:
-        flags += ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel']
-
-    files_to_delete = []
-
-#Generate string with build options library version to embed in the library:
-    git_hash="unknown"
-    try:
-        git_hash = subprocess.check_output(["git", "rev-parse","HEAD"])
-    except OSError: # In case git is not present
-        pass
-    except subprocess.CalledProcessError:
-        pass
-
-    version_filename = "%s/arm_compute_version.embed" % os.path.dirname(Glob("src/core/*")[0].rstr())
-    build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION, vars.args, git_hash.strip())
-    open(version_filename,"w").write(build_info)
-    files_to_delete.append( version_filename )
-
-    def build_library(name, sources, libs, static=False):
-        if static:
-            obj = env.StaticLibrary(name, source = sources, LIBS=libs )
+        if env['set_soname']:
+            obj = env.SharedLibrary(name, source = sources, LIBS=libs, SHLIBVERSION=SONAME_VERSION)
+            symlinks = []
+            # Manually delete symlinks or SCons will get confused:
+            directory = os.path.dirname( obj[0].path )
+            library_prefix = obj[0].path[:-(1+len(SONAME_VERSION))]
+            real_lib="%s.%s" % (library_prefix, SONAME_VERSION)
+            for f in Glob( "#%s*" % library_prefix):
+                if str(f) != real_lib:
+                    symlinks.append("%s/%s" % (directory,str(f)))
+            clean = env.Command('clean-%s' % str(obj[0]), [], Delete(symlinks))
+            Default(clean)
+            Depends(obj, clean)
         else:
-            if env['set_soname']:
-                obj = env.SharedLibrary(name, source = sources, LIBS=libs, SHLIBVERSION=SONAME_VERSION)
-                symlinks = []
-                # Manually delete symlinks or SCons will get confused:
-                directory = os.path.dirname( obj[0].path )
-                library_prefix = obj[0].path[:-(1+len(SONAME_VERSION))]
-                real_lib="%s.%s" % (library_prefix, SONAME_VERSION)
-                for f in Glob( "#%s*" % library_prefix):
-                    if str(f) != real_lib:
-                        symlinks.append("%s/%s" % (directory,str(f)))
-                clean = env.Command('clean-%s' % str(obj[0]), [], Delete(symlinks))
-                Default(clean)
-                Depends(obj, clean)
-            else:
-                obj = env.SharedLibrary(name, source = sources, LIBS=libs)
+            obj = env.SharedLibrary(name, source = sources, LIBS=libs)
 
-        Default(obj)
-        return obj
+    Default(obj)
+    return obj
 
-    def resolve_includes(target, source, env):
-        # File collection
-        FileEntry = collections.namedtuple('FileEntry', 'target_name file_contents')
+def resolve_includes(target, source, env):
+    # File collection
+    FileEntry = collections.namedtuple('FileEntry', 'target_name file_contents')
 
-        # Include pattern
-        pattern = re.compile("#include \"(.*)\"")
+    # Include pattern
+    pattern = re.compile("#include \"(.*)\"")
 
-        # Get file contents
-        files = []
-        for s in source:
-            name = s.rstr().split("/")[-1]
-            contents = s.get_contents().splitlines()
-            embed_target_name = s.abspath + "embed"
-            entry = FileEntry(target_name=embed_target_name, file_contents=contents)
-            files.append((name,entry))
+    # Get file contents
+    files = []
+    for s in source:
+        name = s.rstr().split("/")[-1]
+        contents = s.get_contents().splitlines()
+        embed_target_name = s.abspath + "embed"
+        entry = FileEntry(target_name=embed_target_name, file_contents=contents)
+        files.append((name,entry))
 
-        # Create dictionary of tupled list
-        files_dict = dict(files)
+    # Create dictionary of tupled list
+    files_dict = dict(files)
 
-        # Check for includes (can only be files in the same folder)
-        final_files = []
-        for file in files:
-            done = False
-            tmp_file = file[1].file_contents
-            while not(done):
-                file_count = 0
-                updated_file = []
-                for line in tmp_file:
-                    found = pattern.search(line)
-                    if found:
-                        include_file = found.group(1)
-                        data = files_dict[include_file].file_contents
-                        updated_file.extend(data)
-                    else:
-                        updated_file.append(line)
-                        file_count += 1
+    # Check for includes (can only be files in the same folder)
+    final_files = []
+    for file in files:
+        done = False
+        tmp_file = file[1].file_contents
+        while not done:
+            file_count = 0
+            updated_file = []
+            for line in tmp_file:
+                found = pattern.search(line)
+                if found:
+                    include_file = found.group(1)
+                    data = files_dict[include_file].file_contents
+                    updated_file.extend(data)
+                else:
+                    updated_file.append(line)
+                    file_count += 1
 
-                # Check if all include are replaced.
-                if file_count == len(tmp_file):
-                    done = True
+            # Check if all include are replaced.
+            if file_count == len(tmp_file):
+                done = True
 
-                # Update temp file
-                tmp_file = updated_file
+            # Update temp file
+            tmp_file = updated_file
 
-            # Append and prepend string literal identifiers and add expanded file to final list
-            tmp_file.insert(0, "R\"(\n")
-            tmp_file.append("\n)\"")
-            entry = FileEntry(target_name=file[1].target_name, file_contents=tmp_file)
-            final_files.append((file[0], entry))
+        # Append and prepend string literal identifiers and add expanded file to final list
+        tmp_file.insert(0, "R\"(\n")
+        tmp_file.append("\n)\"")
+        entry = FileEntry(target_name=file[1].target_name, file_contents=tmp_file)
+        final_files.append((file[0], entry))
 
-        # Write output files
-        for file in final_files:
-            out_file = open(file[1].target_name, 'w+')
+    # Write output files
+    for file in final_files:
+        with open(file[1].target_name, 'w+') as out_file:
             contents = file[1].file_contents
             for line in contents:
                 out_file.write("%s\n" % line)
 
-    core_libs = []
-    libs = []
+if GetOption("help"):
+    Exit(0)
 
-    prefix=""
+flags = ['-D_GLIBCXX_USE_NANOSLEEP','-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
+         '-Wextra','-Wno-unused-parameter','-pedantic','-Wdisabled-optimization','-Wformat=2',
+         '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
+         '-fpermissive','-std=gnu++11','-Wno-vla','-Woverloaded-virtual',
+         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow']
 
-    if env['arch'] == 'armv7a':
-        flags += ['-march=armv7-a','-mthumb','-mfpu=neon']
+if env['neon'] and 'x86' in env['arch']:
+    print "Cannot compile NEON for x86"
+    Exit(1)
 
-        if env['os'] in ['linux','bare_metal']:
-            prefix = "arm-linux-gnueabihf-"
-            flags += ['-mfloat-abi=hard']
-        elif env['os'] == 'android':
-            prefix = "arm-linux-androideabi-"
-            flags += ['-mfloat-abi=softfp']
-    elif env['arch'] == 'arm64-v8a':
-        flags += ['-march=armv8-a']
-        if env['os'] in ['linux','bare_metal']:
-            prefix = "aarch64-linux-gnu-"
-        elif env['os'] == 'android':
-            prefix = "aarch64-linux-android-"
-    elif env['arch'] == 'arm64-v8.2-a':
-        flags += ['-march=armv8.2-a+fp16+simd']
-        flags += ['-DARM_COMPUTE_ENABLE_FP16']
-        if env['os'] in ['linux','bare_metal']:
-            prefix = "aarch64-linux-gnu-"
-        elif env['os'] == 'android':
-            prefix = "aarch64-linux-android-"
-    elif env['arch'] == 'x86_32':
-        flags += ['-m32']
-    elif env['arch'] == 'x86_64':
-        flags += ['-m64']
+if env['set_soname'] and not version_at_least(SCons.__version__, "2.4"):
+    print "Setting the library's SONAME / SHLIBVERSION requires SCons 2.4 or above"
+    print "Update your version of SCons or use set_soname=0"
+    Exit(1)
 
-    if env['build'] == 'native':
-        prefix = ""
+if os.environ.get('CXX','g++') == 'clang++':
+    flags += ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags']
+else:
+    flags += ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel']
 
-    env['CC'] = prefix + os.environ.get('CC','gcc')
-    env['CXX'] = prefix + os.environ.get('CXX','g++')
-    env['LD'] = prefix + "ld"
-    env['AS'] = prefix + "as"
-    env['AR'] = prefix + "ar"
-    env['RANLIB'] = prefix + "ranlib"
+if env['cppthreads']:
+    flags += ['-DARM_COMPUTE_CPP_SCHEDULER=1']
 
-    try:
-        compiler_ver = subprocess.check_output( [env['CXX'] , "-dumpversion"] ).strip()
-    except OSError:
-        print "ERROR: Compiler '%s' not found" % env['CXX']
+if env['openmp']:
+    if os.environ.get('CXX','g++') == 'clang++':
+        print "Clang does not support OpenMP. Use scheduler=cpp."
         Exit(1)
 
-    if os.environ.get('CXX','g++') == 'g++':
-        if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
-            print "GCC 6.2.1 or newer is required to compile armv8.2-a code"
-            Exit(1)
+    flags += ['-DARM_COMPUTE_OPENMP_SCHEDULER=1','-fopenmp']
+    env.Append(LINKFLAGS=['-fopenmp'])
 
-        if env['arch'] == 'arm64-v8a' and not version_at_least(compiler_ver, '4.9'):
-            print "GCC 4.9 or newer is required to compile NEON code for AArch64"
-            Exit(1)
+files_to_delete = []
 
-        if version_at_least(compiler_ver, '6.1'):
-            flags += ['-Wno-ignored-attributes']
+# Generate string with build options library version to embed in the library:
+try:
+    git_hash = subprocess.check_output(["git", "rev-parse","HEAD"])
+except (OSError, subbprocess.CalledProcessError):
+    git_hash="unknown"
 
-        if compiler_ver == '4.8.3':
-            flags += ['-Wno-array-bounds']
+version_filename = "%s/arm_compute_version.embed" % os.path.dirname(Glob("src/core/*")[0].rstr())
+build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION, vars.args, git_hash.strip())
 
-    if env['Werror'] == '1':
-        flags += ['-Werror']
+with open(version_filename, "w") as fd:
+    fd.write(build_info)
 
-    example_libs = []
-    if env['os'] == 'android':
-        flags += ['-DANDROID']
-        env.Append(LINKFLAGS=['-pie','-static-libstdc++'])
-        example_libs = ['arm_compute-static']
-    elif env['os'] == 'bare_metal':
-        env.Append(LINKFLAGS=['-static'])
-        flags += ['-fPIC','-DNO_MULTI_THREADING']
-        example_libs = ['arm_compute-static']
-    else:
-        libs += ['pthread']
-        example_libs = ['arm_compute']
+files_to_delete.append(version_filename)
 
-    if env['opencl'] == '1':
-        if env['os'] == 'bare_metal':
-            raise Exception("Cannot link OpenCL statically, which is required on bare metal")
-        core_libs += ['OpenCL']
-        if env['embed_kernels'] == '1':
-            flags += ['-DEMBEDDED_KERNELS']
+core_libs = ['dl']
+libs = ['dl']
 
-    if env['debug'] == '1':
-        env['asserts'] = '1'
-        flags += ['-O0','-g','-gdwarf-2']
-    else:
-        flags += ['-O3','-ftree-vectorize']
+prefix=""
 
-    if env['asserts'] == '1':
-        flags += ['-DARM_COMPUTE_ASSERTS_ENABLED']
+if env['arch'] == 'armv7a':
+    flags += ['-march=armv7-a','-mthumb','-mfpu=neon']
 
-    env.Append(CPPPATH=['.','#include'])
-    env.Append(LIBPATH=['#build','.'])
-    env.Append(CXXFLAGS=flags)
-    env.Append(CXXFLAGS=env['extra_cxx_flags'])
+    if env['os'] in ['linux','bare_metal']:
+        prefix = "arm-linux-gnueabihf-"
+        flags += ['-mfloat-abi=hard']
+    elif env['os'] == 'android':
+        prefix = "arm-linux-androideabi-"
+        flags += ['-mfloat-abi=softfp']
+elif env['arch'] == 'arm64-v8a':
+    flags += ['-march=armv8-a']
 
-    core_files = Glob('src/core/*.cpp')
-    core_files += Glob('src/core/CPP/*.cpp')
+    if env['os'] in ['linux','bare_metal']:
+        prefix = "aarch64-linux-gnu-"
+    elif env['os'] == 'android':
+        prefix = "aarch64-linux-android-"
+elif env['arch'] == 'arm64-v8.2-a':
+    flags += ['-march=armv8.2-a+fp16+simd']
+    flags += ['-DARM_COMPUTE_ENABLE_FP16']
 
-    files = Glob('src/runtime/*.cpp')
+    if env['os'] in ['linux','bare_metal']:
+        prefix = "aarch64-linux-gnu-"
+    elif env['os'] == 'android':
+        prefix = "aarch64-linux-android-"
+elif env['arch'] == 'x86_32':
+    flags += ['-m32']
+elif env['arch'] == 'x86_64':
+    flags += ['-m64']
 
-    embed_files = []
-    core_files += Glob('src/core/CPP/kernels/*.cpp')
+if env['build'] == 'native':
+    prefix = ""
 
-    files += Glob('src/runtime/CPP/*.cpp')
+env['CC'] = prefix + os.environ.get('CC','gcc')
+env['CXX'] = prefix + os.environ.get('CXX','g++')
+env['LD'] = prefix + "ld"
+env['AS'] = prefix + "as"
+env['AR'] = prefix + "ar"
+env['RANLIB'] = prefix + "ranlib"
 
-    if env['opencl'] == '1':
-        example_libs += ['OpenCL']
-        core_files += Glob('src/core/CL/*.cpp')
-        core_files += Glob('src/core/CL/kernels/*.cpp')
-        files += Glob('src/runtime/CL/*.cpp')
-        files += Glob('src/runtime/CL/functions/*.cpp')
-        # Generate embed files
-        if env['embed_kernels'] == '1':
-            cl_files  = Glob('src/core/CL/cl_kernels/*.cl') + Glob('src/core/CL/cl_kernels/*.h')
-            source_list = []
-            for file in cl_files:
-                source_name = file.rstr()
-                source_list.append(source_name)
-                embed_files.append(source_name + "embed")
-            generate_embed = env.Command(embed_files, source_list, action=resolve_includes)
-            Default(generate_embed)
-            files_to_delete += embed_files
+try:
+    compiler_ver = subprocess.check_output( [env['CXX'] , "-dumpversion"] ).strip()
+except OSError:
+    print "ERROR: Compiler '%s' not found" % env['CXX']
+    Exit(1)
 
-    if env['neon'] == '1':
-        core_files += Glob('src/core/NEON/*.cpp')
-        core_files += Glob('src/core/NEON/kernels/*.cpp')
-        files += Glob('src/runtime/NEON/*.cpp')
-        files += Glob('src/runtime/NEON/functions/*.cpp')
+if os.environ.get('CXX','g++') == 'g++':
+    if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
+        print "GCC 6.2.1 or newer is required to compile armv8.2-a code"
+        Exit(1)
 
-    objects=[]
-    static_core_objects = [ env.StaticObject( f ) for f in core_files ]
-    shared_core_objects = [ env.SharedObject( f ) for f in core_files ]
+    if env['arch'] == 'arm64-v8a' and not version_at_least(compiler_ver, '4.9'):
+        print "GCC 4.9 or newer is required to compile NEON code for AArch64"
+        Exit(1)
 
-    arm_compute_core_a = build_library('arm_compute_core-static', static_core_objects, core_libs, static=True)
-    objects.append(arm_compute_core_a)
-    Export('arm_compute_core_a')
+    if version_at_least(compiler_ver, '6.1'):
+        flags += ['-Wno-ignored-attributes']
 
-    if env['os'] != 'bare_metal':
-        arm_compute_core_so = build_library('arm_compute_core', shared_core_objects, core_libs, static=False)
-        objects.append(arm_compute_core_so)
-        Export('arm_compute_core_so')
-    shared_objects = [ env.SharedObject( f ) for f in files ]
-    static_objects = [ env.StaticObject( f ) for f in files ]
+    if compiler_ver == '4.8.3':
+        flags += ['-Wno-array-bounds']
 
-    arm_compute_a = build_library('arm_compute-static', static_core_objects + static_objects, libs, static=True)
-    objects.append(arm_compute_a)
-    Export('arm_compute_a')
-    if env['os'] != 'bare_metal':
-        arm_compute_so = build_library('arm_compute', shared_core_objects + shared_objects, libs, static=False)
-        objects.append(arm_compute_so)
-        Export('arm_compute_so')
+if env['Werror']:
+    flags += ['-Werror']
+
+example_libs = []
+
+if env['os'] == 'android':
+    flags += ['-DANDROID']
+    env.Append(LINKFLAGS=['-pie','-static-libstdc++'])
+    example_libs = ['arm_compute-static']
+elif env['os'] == 'bare_metal':
+    env.Append(LINKFLAGS=['-static'])
+    flags += ['-fPIC','-DNO_MULTI_THREADING']
+    example_libs = ['arm_compute-static']
+else:
+    libs += ['pthread']
+    example_libs = ['arm_compute']
+
+if env['opencl']:
+    if env['os'] == 'bare_metal':
+        raise Exception("Cannot link OpenCL statically, which is required on bare metal")
+    if env['embed_kernels']:
+        flags += ['-DEMBEDDED_KERNELS']
+
+if env['debug']:
+    env['asserts'] = True
+    flags += ['-O0','-g','-gdwarf-2']
+else:
+    flags += ['-O3','-ftree-vectorize']
+
+if env['asserts']:
+    flags += ['-DARM_COMPUTE_ASSERTS_ENABLED']
+
+env.Append(CPPPATH=['.','#include'])
+env.Append(LIBPATH=['#build/%s' % env['build_dir'],'.'])
+env.Append(CXXFLAGS=flags)
+env.Append(CXXFLAGS=env['extra_cxx_flags'])
+
+core_files = Glob('src/core/*.cpp')
+core_files += Glob('src/core/CPP/*.cpp')
+
+files = Glob('src/runtime/*.cpp')
+
+embed_files = []
+core_files += Glob('src/core/CPP/kernels/*.cpp')
+# CLHarrisCorners uses the Scheduler to run CPP kernels
+files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
+
+if env['os'] == 'bare_metal':
+    if env['cppthreads'] or env['openmp']:
+         print "ERROR: OpenMP and C++11 threads not supported in bare_metal. Use cppthreads=0 openmp=0"
+         Exit(1)
+else:
+    if env['cppthreads']:
+         files += Glob('src/runtime/CPP/CPPScheduler.cpp')
+    if env['openmp']:
+         files += Glob('src/runtime/OMP/OMPScheduler.cpp')
+
+if env['opencl']:
+    core_files += Glob('src/core/CL/*.cpp')
+    core_files += Glob('src/core/CL/kernels/*.cpp')
+    files += Glob('src/runtime/CL/*.cpp')
+    files += Glob('src/runtime/CL/functions/*.cpp')
+
+    # Generate embed files
+    if env['embed_kernels']:
+        cl_files  = Glob('src/core/CL/cl_kernels/*.cl') + Glob('src/core/CL/cl_kernels/*.h')
+        source_list = []
+        for file in cl_files:
+            source_name = file.rstr()
+            source_list.append(source_name)
+            embed_files.append(source_name + "embed")
+        generate_embed = env.Command(embed_files, source_list, action=resolve_includes)
+        Default(generate_embed)
+        files_to_delete += embed_files
+
+if env['neon']:
+    core_files += Glob('src/core/NEON/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/*.cpp')
+    files += Glob('src/runtime/NEON/*.cpp')
+    files += Glob('src/runtime/NEON/functions/*.cpp')
+
+objects=[]
+static_core_objects = [ env.StaticObject( f ) for f in core_files ]
+shared_core_objects = [ env.SharedObject( f ) for f in core_files ]
+
+arm_compute_core_a = build_library('arm_compute_core-static', static_core_objects, core_libs, static=True)
+objects.append(arm_compute_core_a)
+Export('arm_compute_core_a')
+
+if env['os'] != 'bare_metal':
+    arm_compute_core_so = build_library('arm_compute_core', shared_core_objects, core_libs, static=False)
+    objects.append(arm_compute_core_so)
+    Export('arm_compute_core_so')
+
+shared_objects = [ env.SharedObject( f ) for f in files ]
+static_objects = [ env.StaticObject( f ) for f in files ]
+
+arm_compute_a = build_library('arm_compute-static', static_core_objects + static_objects, libs, static=True)
+objects.append(arm_compute_a)
+Export('arm_compute_a')
+
+if env['os'] != 'bare_metal':
+    arm_compute_so = build_library('arm_compute', shared_core_objects + shared_objects, libs, static=False)
+    objects.append(arm_compute_so)
+    Export('arm_compute_so')
 
 # Delete produced embed files
-    clean_embed = env.Command('clean-embed', [], Delete(files_to_delete))
-    Default(clean_embed)
-    env.Depends(clean_embed, objects)
-    alias = env.Alias("arm_compute",objects)
-    Default(alias)
+clean_embed = env.Command('clean-embed', [], Delete(files_to_delete))
+Default(clean_embed)
+env.Depends(clean_embed, objects)
+alias = env.Alias("arm_compute",objects)
+Default(alias)
 
 # Build examples
-    test_helpers = env.Object("test_helpers/Utils.cpp")
+test_helpers = env.Object("test_helpers/Utils.cpp")
 
-    if env['opencl'] == '1' and env['neon'] == '1':
-        for file in Glob("examples/neoncl_*.cpp"):
-            example =  os.path.basename( os.path.splitext(str(file))[0])
-            prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs)
-            alias = env.Alias(example, prog)
-            Depends(prog, objects)
-            Default( alias )
+if env['opencl'] and env['neon']:
+    for file in Glob("examples/neoncl_*.cpp"):
+        example =  os.path.basename( os.path.splitext(str(file))[0])
+        prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs+['OpenCL'])
+        alias = env.Alias(example, prog)
+        Depends(prog, objects)
+        Default( alias )
 
-    if env['opencl'] == '1':
-        for file in Glob("examples/cl_*.cpp"):
-            example =  os.path.basename( os.path.splitext(str(file))[0])
-            prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs)
-            alias = env.Alias(example, prog)
-            Depends(prog, objects)
-            Default( alias )
+if env['opencl']:
+    for file in Glob("examples/cl_*.cpp"):
+        example =  os.path.basename( os.path.splitext(str(file))[0])
+        prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs+['OpenCL'])
+        alias = env.Alias(example, prog)
+        Depends(prog, objects)
+        Default( alias )
 
-    if env['neon'] == '1':
-        for file in Glob("examples/neon_*.cpp"):
-            example =  os.path.basename( os.path.splitext(str(file))[0])
-            prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs)
-            alias = env.Alias(example, prog)
-            Depends(prog, objects)
-            Default( alias )
+if env['neon']:
+    for file in Glob("examples/neon_*.cpp"):
+        example =  os.path.basename( os.path.splitext(str(file))[0])
+        prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs)
+        alias = env.Alias(example, prog)
+        Depends(prog, objects)
+        Default( alias )
+
+Export('env')

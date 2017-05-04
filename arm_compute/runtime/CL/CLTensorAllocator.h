@@ -71,12 +71,20 @@ public:
      * @param[in]     mapping The cpu mapping to unmap.
      */
     void unmap(cl::CommandQueue &q, uint8_t *mapping);
+
     /** Allocate size specified by TensorInfo of OpenCL memory.
      *
      * @note: The tensor must not already be allocated when calling this function.
      *
-     * */
+     */
     void allocate() override;
+
+    /** Free allocated OpenCL memory.
+     *
+     * @note The tensor must have been allocated when calling this function.
+     *
+     */
+    void free() override;
 
 protected:
     /** Call map() on the OpenCL buffer.

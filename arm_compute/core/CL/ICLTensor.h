@@ -43,6 +43,9 @@ public:
     ICLTensor();
     ICLTensor(const ICLTensor &) = delete;
     ICLTensor &operator=(const ICLTensor &) = delete;
+    ICLTensor(ICLTensor &&)                 = default;
+    ICLTensor &operator=(ICLTensor &&) = default;
+    virtual ~ICLTensor()               = default;
 
     /** Interface to be implemented by the child class to return a reference to the OpenCL buffer containing the image's data.
      *

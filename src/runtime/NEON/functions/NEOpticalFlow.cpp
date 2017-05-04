@@ -74,15 +74,13 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
     _new_points_internal = LKInternalKeypointArray(old_points->num_values());
     _new_points->resize(old_points->num_values());
 
-    const int border_offset = BorderMode::UNDEFINED == border_mode ? 1 : 0;
-
-    for(size_t i = 0; i < _num_levels; ++i)
+    for(unsigned int i = 0; i < _num_levels; ++i)
     {
-        /* Get images from the ith level of old and right pyramid */
+        // Get images from the ith level of old and right pyramid
         IImage *old_ith_input = old_pyramid->get_pyramid_level(i);
         IImage *new_ith_input = new_pyramid->get_pyramid_level(i);
 
-        /* Get width and height of images */
+        // Get width and height of images
         const unsigned int width_ith  = old_ith_input->info()->dimension(0);
         const unsigned int height_ith = new_ith_input->info()->dimension(1);
 
@@ -91,15 +89,15 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
         _scharr_gx[i].allocator()->init(tensor_info);
         _scharr_gy[i].allocator()->init(tensor_info);
 
-        /* Init Scharr kernel */
+        // Init Scharr kernel
         _func_scharr[i].configure(old_ith_input, _scharr_gx.get() + i, _scharr_gy.get() + i, border_mode, constant_border_value);
 
-        /* Init Lucas-Kanade kernel */
+        // Init Lucas-Kanade kernel
         _kernel_tracker[i].configure(old_ith_input, new_ith_input, _scharr_gx.get() + i, _scharr_gy.get() + i,
                                      old_points, new_points_estimates, new_points,
                                      &_old_points_internal, &_new_points_internal,
                                      termination, use_initial_estimate, epsilon, num_iterations, window_dimension,
-                                     i, _num_levels, pyr_scale, border_offset);
+                                     i, _num_levels, pyr_scale);
 
         _scharr_gx[i].allocator()->allocate();
         _scharr_gy[i].allocator()->allocate();
@@ -112,7 +110,7 @@ void NEOpticalFlow::run()
 
     for(unsigned int level = _num_levels; level > 0; --level)
     {
-        /* Run Scharr kernel */
+        // Run Scharr kernel
         _func_scharr[level - 1].run();
 
         /* Run Lucas-Kanade kernel */

@@ -27,7 +27,6 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IDistribution1D.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEHistogramKernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
@@ -35,7 +34,7 @@
 using namespace arm_compute;
 
 NEHistogram::NEHistogram()
-    : _histogram_kernel(), _border_histogram_kernel(), _local_hist(), _window_lut(arm_compute::cpp14::make_unique<uint32_t[]>(window_lut_default_size)), _local_hist_size(0), _run_border_hist(false)
+    : _histogram_kernel(), _local_hist(), _window_lut(arm_compute::cpp14::make_unique<uint32_t[]>(window_lut_default_size)), _local_hist_size(0)
 {
 }
 
@@ -43,38 +42,17 @@ void NEHistogram::configure(const IImage *input, IDistribution1D *output)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(nullptr == output);
-    ARM_COMPUTE_ERROR_ON_MSG((input->info()->dimension(0) % 16) != 0, "Currently the width of the image must be a multiple of 16");
 
     // Allocate space for threads local histograms
     _local_hist_size = output->num_bins() * NEScheduler::get().num_threads();
     _local_hist      = arm_compute::cpp14::make_unique<uint32_t[]>(_local_hist_size);
 
-    // Configure kernels
+    // Configure kernel
     _histogram_kernel.configure(input, output, _local_hist.get(), _window_lut.get());
-
-    //COMPMID-196: Figure out how to handle the border part
-    ARM_COMPUTE_UNUSED(_run_border_hist);
-#if 0
-    _run_border_hist = (input->info()->dimension(0) % _histogram_kernel.num_elems_processed_per_iteration()) != 0U;
-
-    if(_run_border_hist)
-    {
-        _border_histogram_kernel.configure(input, output, _window_lut.get(), _histogram_kernel.num_elems_processed_per_iteration());
-    }
-#endif
 }
 
 void NEHistogram::run()
 {
     // Calculate histogram of input.
     NEScheduler::get().multithread(&_histogram_kernel);
-
-    // Calculate remaining pixels when image is not multiple of the elements of histogram kernel
-    //COMPMID-196: Figure out how to handle the border part
-#if 0
-    if(_run_border_hist)
-    {
-        _border_histogram_kernel.run(_border_histogram_kernel.window());
-    }
-#endif
 }

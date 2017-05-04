@@ -86,6 +86,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLGEMM.h", "_c_l_g_e_m_m_8h.xhtml", [
       [ "CLGEMM", "classarm__compute_1_1_c_l_g_e_m_m.xhtml", "classarm__compute_1_1_c_l_g_e_m_m" ]
     ] ],
+    [ "CLGEMMInterleave4x4.h", "_c_l_g_e_m_m_interleave4x4_8h.xhtml", [
+      [ "CLGEMMInterleave4x4", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4" ]
+    ] ],
     [ "CLGEMMLowp.h", "_c_l_g_e_m_m_lowp_8h.xhtml", [
       [ "CLGEMMLowp", "classarm__compute_1_1_c_l_g_e_m_m_lowp.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp" ]
     ] ],

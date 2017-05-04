@@ -44,7 +44,7 @@ var searchData=
   ['sort5',['sort5',['../non__linear__filter__helpers_8h.xhtml#a7b5c174de888c3cfa7c08c16682fd770',1,'non_linear_filter_helpers.h']]],
   ['sort9',['sort9',['../non__linear__filter__helpers_8h.xhtml#a0960df49e39a9499677066c32600c17f',1,'non_linear_filter_helpers.h']]],
   ['split_5fwindow',['split_window',['../classarm__compute_1_1_window.xhtml#aa4ce41fc0f8c3203753a4fbee8211f5a',1,'arm_compute::Window']]],
-  ['start',['start',['../classarm__compute_1_1_window_1_1_dimension.xhtml#a27c3790df96e9523b0370e7e10c0d375',1,'arm_compute::Window::Dimension']]],
+  ['start',['start',['../structarm__compute_1_1_valid_region.xhtml#aec54a7ff1ca347fdda25821cfb8fd0ed',1,'arm_compute::ValidRegion::start()'],['../classarm__compute_1_1_window_1_1_dimension.xhtml#a27c3790df96e9523b0370e7e10c0d375',1,'arm_compute::Window::Dimension::start()']]],
   ['step',['step',['../classarm__compute_1_1_window_1_1_dimension.xhtml#a992b375fc3254afe2e38f63bc29a43d4',1,'arm_compute::Window::Dimension']]],
   ['steps',['Steps',['../classarm__compute_1_1_steps.xhtml#ae1478601d1a4df4ce6952dfedc42aea6',1,'arm_compute::Steps::Steps(const Steps &amp;)=default'],['../classarm__compute_1_1_steps.xhtml#a55144677120e26b771c2ed3959fb21bf',1,'arm_compute::Steps::Steps(Steps &amp;&amp;)=default']]],
   ['stride',['stride',['../classarm__compute_1_1_pad_stride_info.xhtml#ad2f1ea50a9e215ad8ef612a724a4866a',1,'arm_compute::PadStrideInfo']]],

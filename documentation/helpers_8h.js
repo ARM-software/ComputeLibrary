@@ -29,5 +29,5 @@ var helpers_8h =
     [ "update_image_workitem_ptr", "helpers_8h.xhtml#a0a4395130f74a4293a7d3a19d8fac86d", null ],
     [ "update_tensor3D_workitem_ptr", "helpers_8h.xhtml#a912ccbcc4235bf1274c95d05b50440d4", null ],
     [ "update_vector_workitem_ptr", "helpers_8h.xhtml#a8fee90913ba658b25516a43cf71e5cbd", null ],
-    [ "vector_offset", "helpers_8h.xhtml#a37878e370129d09b9a86f61b57dbc0a8", null ]
+    [ "vector_offset", "helpers_8h.xhtml#a7e4940407322d6f0ccb8b6b86b856019", null ]
 ];

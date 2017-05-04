@@ -64,17 +64,14 @@ public:
 
 private:
     NEHistogramKernel              _histogram_kernel;        /**< Kernel that calculates the histogram of input. */
-    NEHistogramBorderKernel        _border_histogram_kernel; /**< Kernel that calculates the histogram on the borders. */
     NECumulativeDistributionKernel _cd_histogram_kernel;     /**< Kernel that calculates the cumulative distribution
-                                                                      and creates the relevant LookupTable. */
+                                                                  and creates the relevant LookupTable. */
     NETableLookupKernel            _map_histogram_kernel;    /**< Kernel that maps the input to output using the lut. */
     Distribution1D                 _hist;                    /**< Distribution that holds the histogram of the input image. */
     Distribution1D                 _cum_dist;                /**< Distribution that holds the cummulative distribution of the input histogram. */
     Lut                            _cd_lut;                  /**< Holds the equalization lookuptable. */
-    bool                           _run_border_hist;         /**< Boolean that specifies if a separate histogram kernel has to run on the borders */
-private:
-    static constexpr uint32_t nr_bins{ 256 };           /**< Histogram bins of the internal histograms. */
-    static constexpr uint32_t max_range{ nr_bins - 1 }; /**< Histogram range of the internal histograms. */
+    static constexpr uint32_t      nr_bins{ 256 };           /**< Histogram bins of the internal histograms. */
+    static constexpr uint32_t      max_range{ nr_bins - 1 }; /**< Histogram range of the internal histograms. */
 };
 }
 #endif /*__ARM_COMPUTE_NEEQUALIZEHISTOGRAM_H__ */

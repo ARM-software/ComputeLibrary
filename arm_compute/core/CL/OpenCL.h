@@ -35,4 +35,9 @@ namespace cl
 {
 static const NDRange Range_128_1 = NDRange(128, 1);
 }
+
+namespace arm_compute
+{
+bool opencl_is_available();
+}
 #endif /* __ARM_COMPUTE_OPENCL_H__ */

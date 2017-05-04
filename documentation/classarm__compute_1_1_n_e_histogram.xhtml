@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.04</span>
+   &#160;<span id="projectnumber">17.05</span>
    </div>
   </td>
  </tr>
@@ -121,7 +121,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_histogram.xh
 </div><!--header-->
 <div class="contents">
 
-<p>Basic function to execute histogram.  
+<p>Basic function to run <a class="el" href="classarm__compute_1_1_n_e_histogram_kernel.xhtml">NEHistogramKernel</a>.  
  <a href="classarm__compute_1_1_n_e_histogram.xhtml#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_n_e_histogram_8h_source.xhtml">NEHistogram.h</a>&gt;</code></p>
@@ -149,14 +149,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Basic function to execute histogram. </p>
-<p>This function calls the following NEON kernels:</p>
-<ol type="1">
-<li><a class="el" href="classarm__compute_1_1_n_e_histogram_kernel.xhtml">NEHistogramKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_histogram_border_kernel.xhtml">NEHistogramBorderKernel</a> </li>
-</ol>
+<div class="textblock"><p>Basic function to run <a class="el" href="classarm__compute_1_1_n_e_histogram_kernel.xhtml">NEHistogramKernel</a>. </p>
 
-<p>Definition at line <a class="el" href="_n_e_histogram_8h_source.xhtml#l00044">44</a> of file <a class="el" href="_n_e_histogram_8h_source.xhtml">NEHistogram.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_histogram_8h_source.xhtml#l00039">39</a> of file <a class="el" href="_n_e_histogram_8h_source.xhtml">NEHistogram.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a15d0892c4a1aa404f5a6967b8bc49fa8"></a>
 <div class="memitem">
@@ -201,7 +196,6 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Initialise the kernel's inputs. </p>
-<dl class="section note"><dt>Note</dt><dd>Currently the width of the input image must be a multiple of 16.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input image. Data type supported: U8. </td></tr>
@@ -258,7 +252,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_histogram.xhtml">NEHistogram</a></li>
-    <li class="footer">Generated on Wed Apr 12 2017 14:26:06 for ARM Compute Library by
+    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

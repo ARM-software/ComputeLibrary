@@ -101,6 +101,7 @@ var hierarchy =
         [ "CLErode", "classarm__compute_1_1_c_l_erode.xhtml", null ],
         [ "CLFillBorder", "classarm__compute_1_1_c_l_fill_border.xhtml", null ],
         [ "CLGaussian3x3", "classarm__compute_1_1_c_l_gaussian3x3.xhtml", null ],
+        [ "CLGEMMInterleave4x4", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4.xhtml", null ],
         [ "CLMagnitude", "classarm__compute_1_1_c_l_magnitude.xhtml", null ],
         [ "CLMedian3x3", "classarm__compute_1_1_c_l_median3x3.xhtml", null ],
         [ "CLNonLinearFilter", "classarm__compute_1_1_c_l_non_linear_filter.xhtml", null ],
@@ -162,10 +163,8 @@ var hierarchy =
         [ "NEWarpPerspective", "classarm__compute_1_1_n_e_warp_perspective.xhtml", null ]
       ] ],
       [ "NECannyEdge", "classarm__compute_1_1_n_e_canny_edge.xhtml", null ],
-      [ "NEConvolution5x5", "classarm__compute_1_1_n_e_convolution5x5.xhtml", null ],
-      [ "NEConvolution7x7", "classarm__compute_1_1_n_e_convolution7x7.xhtml", null ],
-      [ "NEConvolution9x9", "classarm__compute_1_1_n_e_convolution9x9.xhtml", null ],
       [ "NEConvolutionLayer", "classarm__compute_1_1_n_e_convolution_layer.xhtml", null ],
+      [ "NEConvolutionSquare< matrix_size >", "classarm__compute_1_1_n_e_convolution_square.xhtml", null ],
       [ "NEDerivative", "classarm__compute_1_1_n_e_derivative.xhtml", null ],
       [ "NEEqualizeHistogram", "classarm__compute_1_1_n_e_equalize_histogram.xhtml", null ],
       [ "NEFastCorners", "classarm__compute_1_1_n_e_fast_corners.xhtml", null ],
@@ -315,16 +314,7 @@ var hierarchy =
           [ "NEMedian3x3Kernel", "classarm__compute_1_1_n_e_median3x3_kernel.xhtml", null ],
           [ "NESeparableConvolutionHorKernel< matrix_size >", "classarm__compute_1_1_n_e_separable_convolution_hor_kernel.xhtml", null ],
           [ "NESeparableConvolutionVertKernel< matrix_size >", "classarm__compute_1_1_n_e_separable_convolution_vert_kernel.xhtml", null ],
-          [ "NETableLookupKernel", "classarm__compute_1_1_n_e_table_lookup_kernel.xhtml", null ],
-          [ "NEConvolutionKernel< 5 >", "classarm__compute_1_1_n_e_convolution_kernel.xhtml", null ],
-          [ "NEConvolutionKernel< 7 >", "classarm__compute_1_1_n_e_convolution_kernel.xhtml", null ],
-          [ "NEConvolutionKernel< 9 >", "classarm__compute_1_1_n_e_convolution_kernel.xhtml", null ],
-          [ "NESeparableConvolutionHorKernel< 5 >", "classarm__compute_1_1_n_e_separable_convolution_hor_kernel.xhtml", null ],
-          [ "NESeparableConvolutionHorKernel< 7 >", "classarm__compute_1_1_n_e_separable_convolution_hor_kernel.xhtml", null ],
-          [ "NESeparableConvolutionHorKernel< 9 >", "classarm__compute_1_1_n_e_separable_convolution_hor_kernel.xhtml", null ],
-          [ "NESeparableConvolutionVertKernel< 5 >", "classarm__compute_1_1_n_e_separable_convolution_vert_kernel.xhtml", null ],
-          [ "NESeparableConvolutionVertKernel< 7 >", "classarm__compute_1_1_n_e_separable_convolution_vert_kernel.xhtml", null ],
-          [ "NESeparableConvolutionVertKernel< 9 >", "classarm__compute_1_1_n_e_separable_convolution_vert_kernel.xhtml", null ]
+          [ "NETableLookupKernel", "classarm__compute_1_1_n_e_table_lookup_kernel.xhtml", null ]
         ] ],
         [ "INEHarrisScoreKernel", "classarm__compute_1_1_i_n_e_harris_score_kernel.xhtml", [
           [ "NEHarrisScoreFP16Kernel< block_size >", "classarm__compute_1_1_n_e_harris_score_f_p16_kernel.xhtml", null ],
@@ -360,7 +350,6 @@ var hierarchy =
         [ "NEGradientKernel", "classarm__compute_1_1_n_e_gradient_kernel.xhtml", [
           [ "NEGradientFP16Kernel", "classarm__compute_1_1_n_e_gradient_f_p16_kernel.xhtml", null ]
         ] ],
-        [ "NEHistogramBorderKernel", "classarm__compute_1_1_n_e_histogram_border_kernel.xhtml", null ],
         [ "NEHistogramKernel", "classarm__compute_1_1_n_e_histogram_kernel.xhtml", null ],
         [ "NEHOGBlockNormalizationKernel", "classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml", null ],
         [ "NEHOGDetectorKernel", "classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml", null ],
@@ -432,8 +421,8 @@ var hierarchy =
     ] ],
     [ "Iterator", "classarm__compute_1_1_iterator.xhtml", null ],
     [ "Kernel", "classarm__compute_1_1_kernel.xhtml", null ],
-    [ "Keypoint", "struct_keypoint.xhtml", null ],
     [ "KeyPoint", "structarm__compute_1_1_key_point.xhtml", null ],
+    [ "Keypoint", "struct_keypoint.xhtml", null ],
     [ "MultiImageInfo", "classarm__compute_1_1_multi_image_info.xhtml", null ],
     [ "NELKInternalKeypoint", "structarm__compute_1_1_n_e_l_k_internal_keypoint.xhtml", null ],
     [ "NormalizationLayerInfo", "classarm__compute_1_1_normalization_layer_info.xhtml", null ],

@@ -42,7 +42,7 @@ var searchData=
   ['distribution1d',['Distribution1D',['../classarm__compute_1_1_distribution1_d.xhtml',1,'arm_compute']]],
   ['distribution1d_2eh',['Distribution1D.h',['../_distribution1_d_8h.xhtml',1,'']]],
   ['div_5fceil',['DIV_CEIL',['../namespacearm__compute.xhtml#a12705a88669cb9fb90451ebe0db53c41',1,'arm_compute']]],
-  ['draw_5fdetection_5frectangle',['draw_detection_rectangle',['../namespacetest__helpers.xhtml#a35367e474c33789a32cab099884301e0',1,'test_helpers']]],
+  ['draw_5fdetection_5frectangle',['draw_detection_rectangle',['../namespacetest__helpers.xhtml#ad1b5373f466a3945e1f0ef1c9943c357',1,'test_helpers']]],
   ['dummy',['dummy',['../structarm__compute_1_1_c_l_l_k_internal_keypoint.xhtml#aaf67d90c5e431e85ea2b7681537beab9',1,'arm_compute::CLLKInternalKeypoint::dummy()'],['../structarm__compute_1_1_c_l_old_value.xhtml#a7531a17738ce5ec5517e2d160e7508a0',1,'arm_compute::CLOldValue::dummy()'],['../struct_internal_keypoint.xhtml#aaf67d90c5e431e85ea2b7681537beab9',1,'InternalKeypoint::dummy()']]],
   ['documentation',['Documentation',['../index.xhtml',1,'']]]
 ];

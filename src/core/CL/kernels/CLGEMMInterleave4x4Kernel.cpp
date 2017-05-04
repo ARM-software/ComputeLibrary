@@ -43,8 +43,8 @@ CLGEMMInterleave4x4Kernel::CLGEMMInterleave4x4Kernel()
 
 void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != input->info()->dimension(0) * 4);
     ARM_COMPUTE_ERROR_ON(output->info()->dimension(1) != std::ceil(static_cast<float>(input->info()->dimension(1)) / 4.0f));
@@ -53,8 +53,9 @@ void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *out
     _output = output;
 
     // Create kernel
-    std::string data_type_name = lower_string(string_from_data_type(input->info()->data_type()));
-    _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_interleave4x4_" + data_type_name));
+    std::string data_type_name;
+    data_type_name = val_to_string(input->info()->element_size() * 8) + "bit";
+    _kernel        = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_interleave4x4_" + data_type_name));
 
     // Configure kernel window
     const unsigned int     num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input->info()->data_type());

@@ -1,10 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"classtest__helpers_1_1_p_p_m_loader.xhtml#a49afa04c8a5fd9ead48e07440b37294c":[2,0,1,0,0],
-"color__convert_8cl.xhtml":[3,0,2,0,0,0,8],
-"color__convert_8cl.xhtml#a02037a65e2f5ec0579b8ed8efc33ff18":[3,0,2,0,0,0,8,5],
-"color__convert_8cl.xhtml#a0b20f3b21bfb3e5ef177eb946e3c905f":[3,0,2,0,0,0,8,22],
-"color__convert_8cl.xhtml#a0e87467985f2b64c5aaf073ee5c64267":[3,0,2,0,0,0,8,12],
 "color__convert_8cl.xhtml#a18ef3b2b70de9af3e4386b2a07f2cd36":[3,0,2,0,0,0,8,16],
 "color__convert_8cl.xhtml#a22e98db2ca5538961967bdbaa19754b3":[3,0,2,0,0,0,8,23],
 "color__convert_8cl.xhtml#a2a21de930ca0898bed0a081f40cb4406":[3,0,2,0,0,0,8,14],
@@ -192,12 +187,12 @@ var NAVTREEINDEX13 =
 "gemm_8cl.xhtml":[3,0,2,0,0,0,22],
 "gemm_8cl.xhtml#a11d87ecaf1388b4f57404e062265b374":[3,0,2,0,0,0,22,7],
 "gemm_8cl.xhtml#a21d7061f36aec78824e368f2ef1cafc1":[3,0,2,0,0,0,22,6],
+"gemm_8cl.xhtml#a2f32d740e780059f68da8aa589ed0a5b":[3,0,2,0,0,0,22,2],
+"gemm_8cl.xhtml#a560b2d50aa886edc0f5daf4fe729717f":[3,0,2,0,0,0,22,3],
 "gemm_8cl.xhtml#a675879eb72964ddbd5f71155da3b0cc3":[3,0,2,0,0,0,22,5],
 "gemm_8cl.xhtml#a76295c333dfa3c9bb20975579dce87e8":[3,0,2,0,0,0,22,0],
 "gemm_8cl.xhtml#a7c619984bc9c31f5f6c19ecc88b56581":[3,0,2,0,0,0,22,1],
-"gemm_8cl.xhtml#a830ba1cc0ad3c8cffa4a14424b2d0411":[3,0,2,0,0,0,22,4],
-"gemm_8cl.xhtml#acd423b6f992354e7c00137b20d687281":[3,0,2,0,0,0,22,3],
-"gemm_8cl.xhtml#ae333c12d780666b2591f7c8e9faaf5a9":[3,0,2,0,0,0,22,2],
+"gemm_8cl.xhtml#aa66a7b6b0420e54ec173743e6c5bfc45":[3,0,2,0,0,0,22,4],
 "gemm_8cl_source.xhtml":[3,0,2,0,0,0,22],
 "globals.xhtml":[3,1,0],
 "globals.xhtml":[3,1,0,0],
@@ -249,5 +244,10 @@ var NAVTREEINDEX13 =
 "globals_x.xhtml":[3,1,0,21],
 "globals_y.xhtml":[3,1,0,22],
 "harris__corners_8cl.xhtml":[3,0,2,0,0,0,23],
-"harris__corners_8cl.xhtml#a0f0af2add0a40f2f4b8a14f409186a02":[3,0,2,0,0,0,23,3]
+"harris__corners_8cl.xhtml#a0f0af2add0a40f2f4b8a14f409186a02":[3,0,2,0,0,0,23,3],
+"harris__corners_8cl.xhtml#a2cf3b8c23c9f8f383d81d13bfff96e3d":[3,0,2,0,0,0,23,2],
+"harris__corners_8cl.xhtml#a2fadfd6378605824bb7926e1ac0123fb":[3,0,2,0,0,0,23,1],
+"harris__corners_8cl.xhtml#a468ac2728816485f017f51faeb0a7d65":[3,0,2,0,0,0,23,4],
+"harris__corners_8cl.xhtml#a71d10f5d9e840b6d270620a2cd856926":[3,0,2,0,0,0,23,0],
+"harris__corners_8cl_source.xhtml":[3,0,2,0,0,0,23]
 };

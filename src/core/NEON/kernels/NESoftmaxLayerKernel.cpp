@@ -181,7 +181,7 @@ void NELogits1DShiftExpSumKernel::run(const Window &window)
 
             float32x4_t vec_elements = vld1q_f32(in_ptr);
             vec_elements             = vsubq_f32(vec_elements, vec_max);
-            vec_elements             = vexp_f32(vec_elements);
+            vec_elements             = vexpq_f32(vec_elements);
 
             vst1q_f32(exp_ptr, vec_elements);
 

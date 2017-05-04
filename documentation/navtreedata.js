@@ -82,21 +82,21 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_access_window_auto_padding_8h.xhtml",
-"_c_l_pyramid_8h_source.xhtml",
-"_n_e_color_convert_helper_8inl.xhtml#a14fd899b732509e245976b9967b8931d",
-"_pyramid_info_8h.xhtml",
-"cl__convolution_8cpp.xhtml#a9915340d2c3c10c51e07994dde353f01",
-"classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml#a40c8a145562e3a8a4aa332a5ee17d4c9",
-"classarm__compute_1_1_c_l_im2_col_kernel.xhtml#accc9c8b95ec9d657ae76703031c28def",
-"classarm__compute_1_1_c_l_scheduler.xhtml#a9608e5af9f3a199f69ca6aa41b94359a",
-"classarm__compute_1_1_i_c_l_multi_image.xhtml#ad6273d4c4587f7956d48f2ea356a5c9b",
-"classarm__compute_1_1_n_e_bitwise_and_kernel.xhtml#aab3def12cce96f7b7edde8f2a1de66f5",
-"classarm__compute_1_1_n_e_fill_inner_border_kernel.xhtml#a3f451de2b9b4c74b5c66a1b9b0511836",
-"classarm__compute_1_1_n_e_laplacian_reconstruct.xhtml#ad1717410afd0be936c6213a63c8005fb",
-"classarm__compute_1_1_n_e_sobel7x7_hor_kernel.xhtml#ac9d0ac2c616250612ac3835839480cc3",
-"classtest__helpers_1_1_p_p_m_loader.xhtml#a49afa04c8a5fd9ead48e07440b37294c",
-"harris__corners_8cl.xhtml#a2cf3b8c23c9f8f383d81d13bfff96e3d",
-"struct_image.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e"
+"_c_l_pooling_layer_kernel_8h_source.xhtml",
+"_n_e_color_convert_helper_8inl.xhtml",
+"_open_c_l_8h.xhtml#ae7c96c1469662004d842704e2ff076fb",
+"channel__extract_8cl_source.xhtml",
+"classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml#ae0214c82efeb2ed2d6e4c0311ed19778",
+"classarm__compute_1_1_c_l_histogram_kernel.xhtml#aa829a82c818f626213fd9bc071609261",
+"classarm__compute_1_1_c_l_scharr3x3_kernel.xhtml#abce0bd975f2f2ea4b70aedd72685edc1",
+"classarm__compute_1_1_i_c_l_lut.xhtml#a8740c6498dafc80428e500a056135bf1",
+"classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#a6501ef61f473949fc980b4ada8e18bad",
+"classarm__compute_1_1_n_e_fill_border_kernel.xhtml#acfb02d08dc643683c69a86b220e30574",
+"classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69",
+"classarm__compute_1_1_n_e_sobel7x7_vert_kernel.xhtml#a119c48528fa6440b33a4e25c9825d07f",
+"color__convert_8cl.xhtml#a18ef3b2b70de9af3e4386b2a07f2cd36",
+"helpers_8h.xhtml",
+"struct_internal_keypoint.xhtml#ad0da36b2558901e21e7a30f6c227a45e"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

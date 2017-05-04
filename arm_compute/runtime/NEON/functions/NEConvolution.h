@@ -58,18 +58,19 @@ public:
     void configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
 };
 
-/** Basic function to execute convolution of size 5x5. This function calls the following NEON kernels:
+/** Basic function to execute convolution of size 5x5, 7x7, 9x9. This function calls the following NEON kernels:
  *
  * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
- * -# @ref NEConvolution5x5Kernel or<br/>
- *    @ref NESeparableConvolution5x5HorKernel and @ref NESeparableConvolution5x5VertKernel (if convolution matrix is separable)
+ * -# @ref NEConvolutionKernel or<br/>
+ *    @ref NESeparableConvolutionHorKernel and @ref NESeparableConvolutionVertKernel (if convolution matrix is separable)
  *
  */
-class NEConvolution5x5 : public IFunction
+template <unsigned int matrix_size>
+class NEConvolutionSquare : public IFunction
 {
 public:
     /** Default constructor */
-    NEConvolution5x5();
+    NEConvolutionSquare();
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in,out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -85,83 +86,20 @@ public:
     void run() override;
 
 private:
-    Tensor                              _tmp;            /**< temporary buffer for output of horizontal pass */
-    bool                                _is_separable;   /**< true if the convolution can be separated */
-    NESeparableConvolution5x5HorKernel  _kernel_hor;     /**< kernel for horizontal pass of separated convolution */
-    NESeparableConvolution5x5VertKernel _kernel_vert;    /**< kernel for vertical pass of separated convolution */
-    NEConvolution5x5Kernel              _kernel;         /**< kernel for non-separated convolution **/
-    NEFillBorderKernel                  _border_handler; /**< kernel for border handling */
+    Tensor                                        _tmp;            /**< temporary buffer for output of horizontal pass */
+    bool                                          _is_separable;   /**< true if the convolution can be separated */
+    NESeparableConvolutionHorKernel<matrix_size>  _kernel_hor;     /**< kernel for horizontal pass of separated convolution */
+    NESeparableConvolutionVertKernel<matrix_size> _kernel_vert;    /**< kernel for vertical pass of separated convolution */
+    NEConvolutionKernel<matrix_size>              _kernel;         /**< kernel for non-separated convolution **/
+    NEFillBorderKernel                            _border_handler; /**< kernel for border handling */
 };
 
-/** Basic function to execute convolution of size 7x7. This function calls the following NEON kernels:
- *
- * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
- * -# @ref NEConvolution7x7Kernel or<br/>
- *    @ref NESeparableConvolution7x7HorKernel and @ref NESeparableConvolution7x7VertKernel (if convolution matrix is separable)
- *
- */
-class NEConvolution7x7 : public IFunction
-{
-public:
-    /** Default constructor */
-    NEConvolution7x7();
-    /** Initialize the function's source, destination, conv and border_mode.
-     *
-     * @param[in,out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
-     * @param[out]    output                Destination tensor, Data types supported: U8 or S16.
-     * @param[in]     conv                  matrix_size x matrix_size S16 coefficients structured as a row-major 2D array in a linear buffer.
-     * @param[in]     scale                 Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
-     * @param[in]     border_mode           Strategy to use for borders.
-     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
-     */
-    void configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    Tensor                              _tmp;            /**< temporary buffer for output of horizontal pass */
-    bool                                _is_separable;   /**< true if the convolution can be separated */
-    NESeparableConvolution7x7HorKernel  _kernel_hor;     /**< kernel for horizontal pass of separated convolution */
-    NESeparableConvolution7x7VertKernel _kernel_vert;    /**< kernel for vertical pass of separated convolution */
-    NEConvolution7x7Kernel              _kernel;         /**< kernel for non-separated convolution **/
-    NEFillBorderKernel                  _border_handler; /**< kernel for border handling */
-};
-
-/** Basic function to execute convolution of size 9x9. This function calls the following NEON kernels:
- *
- * -# @ref NEFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
- * -# @ref NEConvolution9x9Kernel or<br/>
- *    @ref NESeparableConvolution9x9HorKernel and @ref NESeparableConvolution9x9VertKernel (if convolution matrix is separable)
- *
- */
-class NEConvolution9x9 : public IFunction
-{
-public:
-    /** Default constructor */
-    NEConvolution9x9();
-    /** Initialize the function's source, destination, conv and border_mode.
-     *
-     * @param[in,out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
-     * @param[out]    output                Destination tensor, Data types supported: U8 or S16.
-     * @param[in]     conv                  matrix_size x matrix_size S16 coefficients structured as a row-major 2D array in a linear buffer.
-     * @param[in]     scale                 Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
-     * @param[in]     border_mode           Strategy to use for borders.
-     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
-     */
-    void configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    Tensor                              _tmp;            /**< temporary buffer for output of horizontal pass */
-    bool                                _is_separable;   /**< true if the convolution can be separated */
-    NESeparableConvolution9x9HorKernel  _kernel_hor;     /**< kernel for horizontal pass of separated convolution */
-    NESeparableConvolution9x9VertKernel _kernel_vert;    /**< kernel for vertical pass of separated convolution */
-    NEConvolution9x9Kernel              _kernel;         /**< kernel for non-separated convolution **/
-    NEFillBorderKernel                  _border_handler; /**< kernel for border handling */
-};
+/** Basic function to run 5x5 convolution. */
+using NEConvolution5x5 = NEConvolutionSquare<5>;
+/** Basic function to run 7x7 convolution. */
+using NEConvolution7x7 = NEConvolutionSquare<7>;
+/** Basic function to run 9x9 convolution. */
+using NEConvolution9x9 = NEConvolutionSquare<9>;
 
 /** Basic function to execute non-square convolution. This function calls the following NEON kernels:
  *

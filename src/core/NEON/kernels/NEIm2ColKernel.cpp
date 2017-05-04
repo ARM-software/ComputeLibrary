@@ -43,13 +43,12 @@ void NEIm2ColKernel::run_generic(const Window &window)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    const int half_kernel_size = (_kernel_size >> 1);
-    const int kernel_depth     = _input->info()->dimension(2);
-    const int input_w          = _input->info()->dimension(0);
-    const int input_h          = _input->info()->dimension(1);
-    const int input_stride_x   = _input->info()->strides_in_bytes().x();
-    const int input_stride_y   = _input->info()->strides_in_bytes().y();
-    const int input_stride_z   = _input->info()->strides_in_bytes().z();
+    const int kernel_depth   = _input->info()->dimension(2);
+    const int input_w        = _input->info()->dimension(0);
+    const int input_h        = _input->info()->dimension(1);
+    const int input_stride_x = _input->info()->strides_in_bytes().x();
+    const int input_stride_y = _input->info()->strides_in_bytes().y();
+    const int input_stride_z = _input->info()->strides_in_bytes().z();
 
     int pad_x    = 0;
     int pad_y    = 0;
@@ -59,12 +58,14 @@ void NEIm2ColKernel::run_generic(const Window &window)
     std::tie(stride_x, stride_y) = _conv_info.stride();
 
     // Setup input window
-    const int start_x = -pad_x + (_kernel_size >> 1);
-    const int start_y = -pad_y + (_kernel_size >> 1);
-    Window    window_in(window);
-    window_in.set(Window::DimX, Window::Dimension(window.x().start() * stride_x + start_x, (window.x().end() * stride_x) + start_x, stride_x));
-    window_in.set(Window::DimY, Window::Dimension(window.y().start() * stride_y + start_y, (window.y().end() * stride_y) + start_y, stride_y));
-    window_in.set(Window::DimZ, Window::Dimension(0, _input->info()->dimension(2), _input->info()->dimension(2)));
+    const int start_x = -pad_x;
+    const int start_y = -pad_y;
+
+    Window window_in(window);
+    // The first three dimensions of the input are increased by the inner loops
+    window_in.set(Window::DimX, Window::Dimension(0, 0, 0));
+    window_in.set(Window::DimY, Window::Dimension(0, 0, 0));
+    window_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     // Setup output window
     Window window_out(window);
@@ -78,9 +79,8 @@ void NEIm2ColKernel::run_generic(const Window &window)
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        // Determine current input index
-        const int wi = id.x() * stride_x - pad_x;
-        const int hi = id.y() * stride_y - pad_y;
+        const int top_left_x = id.x() * stride_x + start_x;
+        const int top_left_y = id.y() * stride_y + start_y;
 
         // Get pointers
         const uint8_t *const input_ptr  = in.ptr();
@@ -89,14 +89,18 @@ void NEIm2ColKernel::run_generic(const Window &window)
         // Linearize volume
         for(int d = 0; d < kernel_depth; ++d)
         {
-            int cur_h = hi;
-            for(int h = -half_kernel_size; h <= half_kernel_size; ++h, ++cur_h)
+            for(int y = top_left_y, y_e = top_left_y + static_cast<int>(_kernel_size); y < y_e; ++y)
             {
-                int cur_w = wi;
-                for(int w = -half_kernel_size; w <= half_kernel_size; ++w, ++cur_w, ++output_ptr)
+                for(int x = top_left_x, x_e = top_left_x + static_cast<int>(_kernel_size); x < x_e; ++x, ++output_ptr)
                 {
-                    bool is_out_of_bounds = (((cur_w < 0) || (cur_w >= input_w)) || ((cur_h < 0) || (cur_h >= input_h)));
-                    *output_ptr           = (is_out_of_bounds) ? 0 : *(reinterpret_cast<const float *>(input_ptr + (d * input_stride_z + h * input_stride_y + w * input_stride_x)));
+                    if(x < 0 || x >= input_w || y < 0 || y >= input_h)
+                    {
+                        *output_ptr = 0.f;
+                    }
+                    else
+                    {
+                        *output_ptr = *(reinterpret_cast<const float *>(input_ptr + (d * input_stride_z + y * input_stride_y + x * input_stride_x)));
+                    }
                 }
             }
         }
@@ -171,12 +175,15 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<
     std::tie(pad_x, pad_y)       = conv_info.pad();
     std::tie(stride_x, stride_y) = conv_info.stride();
 
-    // Run the fully connected path if convolved_dims, stride_x, stride_y are 1 and pad_x, pad_y are 0.
-    bool is_fc = ((convolved_dims.first & convolved_dims.second & stride_x & stride_y) == 1) && ((pad_x | pad_y) == 0);
+    bool run_img2col_reduced = (output->info()->dimension(0) == (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))) && (TensorShape::num_max_dimensions >= 4)
+                               && (std::equal(input->info()->tensor_shape().cbegin() + 3,
+                                              input->info()->tensor_shape().cend(),
+                                              output->info()->tensor_shape().cbegin() + 1))
+                               && ((stride_x == 1) && (stride_y == 1) && (pad_x == 0) && (pad_y == 0));
 
     Window window = calculate_max_window(*input->info(), Steps());
 
-    if(is_fc)
+    if(run_img2col_reduced)
     {
         _func = &NEIm2ColKernel::run_reduced;
     }

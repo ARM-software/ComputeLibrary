@@ -20,4 +20,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-SConscript('sconscript', variant_dir='build', duplicate=0)
+import os
+
+vars = Variables("scons")
+vars.AddVariables(
+    BoolVariable("debug", "Debug", False),
+    BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
+    EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "x86_32", "x86_64")),
+    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
+    EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile")),
+    BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
+    BoolVariable("opencl", "Enable OpenCL support", True),
+    BoolVariable("neon", "Enable Neon support", False),
+    BoolVariable("embed_kernels", "Embed OpenCL kernels in library binary", False),
+    BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
+    BoolVariable("openmp", "Enable OpenMP backend", False),
+    BoolVariable("cppthreads", "Enable C++11 threads backend", True),
+    PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathIsDirCreate),
+    ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", "")
+)
+
+env = Environment(platform='posix', variables = vars, ENV = os.environ)
+
+Help(vars.GenerateHelpText(env))
+
+Export('vars')
+Export('env')
+
+if not GetOption("help"):
+    SConscript('sconscript', variant_dir='#build/%s/arm_compute' % env['build_dir'], duplicate=0)

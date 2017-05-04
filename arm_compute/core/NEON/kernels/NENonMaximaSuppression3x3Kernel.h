@@ -79,7 +79,7 @@ protected:
 };
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
-/** NEON kernel to perform Non-Maxima suppression 3x3
+/** NEON kernel to perform Non-Maxima suppression 3x3 with intermediate results in F16 if the input data type is F32
  */
 class NENonMaximaSuppression3x3FP16Kernel : public NENonMaximaSuppression3x3Kernel
 {

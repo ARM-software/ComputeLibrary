@@ -55,14 +55,20 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.emplace((has_bias ? "-DHAS_BIAS" : ""));
 
-    int pad_x, pad_y, stride_x, stride_y = 0;
+    int pad_x    = 0;
+    int pad_y    = 0;
+    int stride_x = 0;
+    int stride_y = 0;
     std::tie(pad_x, pad_y)       = conv_info.pad();
     std::tie(stride_x, stride_y) = conv_info.stride();
 
-    // Run the fully connected path if convolved_dims, stride_x, stride_y are 1 and pad_x, pad_y are 0.
-    bool is_fc = ((convolved_dims.first & convolved_dims.second & stride_x & stride_y) == 1) && ((pad_x | pad_y) == 0);
+    const bool run_img2col_reduced = (output->info()->dimension(0) == (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))) && (TensorShape::num_max_dimensions >= 4)
+                                     && (std::equal(input->info()->tensor_shape().cbegin() + 3,
+                                                    input->info()->tensor_shape().cend(),
+                                                    output->info()->tensor_shape().cbegin() + 1))
+                                     && ((stride_x == 1) && (stride_y == 1) && (pad_x == 0) && (pad_y == 0));
 
-    if(!is_fc)
+    if(!run_img2col_reduced)
     {
         _convolved_dims                    = convolved_dims;
         _conv_info                         = conv_info;
@@ -130,20 +136,28 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
-    int pad_x, pad_y, stride_x, stride_y = 0;
+    int pad_x    = 0;
+    int pad_y    = 0;
+    int stride_x = 0;
+    int stride_y = 0;
     std::tie(pad_x, pad_y)       = _conv_info.pad();
     std::tie(stride_x, stride_y) = _conv_info.stride();
 
     // Get initial windows
+    Window slice     = window.first_slice_window_3D();
     Window slice_in  = window.first_slice_window_3D();
     Window slice_out = window.first_slice_window_3D();
 
+    // Setup slice
+    slice.set(Window::DimX, Window::Dimension(0, static_cast<int>(_convolved_dims.first), 1));
+    slice.set(Window::DimY, Window::Dimension(0, static_cast<int>(_convolved_dims.second), 1));
+    slice.set(Window::DimZ, Window::Dimension(0, 1, 1));
+
     // Setup input slice
-    const int start_x = -pad_x + (_kernel_size >> 1);
-    const int start_y = -pad_y + (_kernel_size >> 1);
-    slice_in.set(Window::DimX, Window::Dimension(start_x, (static_cast<int>(_convolved_dims.first) * stride_x) + start_x, stride_x));
-    slice_in.set(Window::DimY, Window::Dimension(start_y, (static_cast<int>(_convolved_dims.second) * stride_y) + start_y, stride_y));
-    slice_in.set(Window::DimZ, Window::Dimension(0, 1, 1));
+    // The first three dimensions of the input are increased by the inner loops
+    slice_in.set(Window::DimX, Window::Dimension(0, 0, 0));
+    slice_in.set(Window::DimY, Window::Dimension(0, 0, 0));
+    slice_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     // Setup output slice
     slice_out.set(Window::DimX, Window::Dimension(0, _output->info()->dimension(0), _num_elems_processed_per_iteration));
@@ -156,9 +170,9 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_in);
+        enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_3D(slice_out) && window.slide_window_slice_3D(slice_in));
+    while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_out) && window.slide_window_slice_3D(slice_in));
 }
 
 void CLIm2ColKernel::run_reduced(const Window &window, cl::CommandQueue &queue)

@@ -40,8 +40,6 @@
 #include <fstream>
 #include <iostream>
 
-using namespace arm_compute;
-
 namespace test_helpers
 {
 /** Signature of an example to run
@@ -67,7 +65,7 @@ int run_example(int argc, const char **argv, example &func);
  * @param[in]      g      Green colour to use
  * @param[in]      b      Blue colour to use
  */
-void draw_detection_rectangle(ITensor *tensor, const DetectionWindow &rect, uint8_t r, uint8_t g, uint8_t b);
+void draw_detection_rectangle(arm_compute::ITensor *tensor, const arm_compute::DetectionWindow &rect, uint8_t r, uint8_t g, uint8_t b);
 
 /** Parse the ppm header from an input file stream. At the end of the execution,
  *  the file position pointer will be located at the first pixel stored in the ppm file
@@ -122,13 +120,13 @@ public:
      * @param[in]  format Format to use for the image (Must be RGB888 or U8)
      */
     template <typename T>
-    void init_image(T &image, Format format)
+    void init_image(T &image, arm_compute::Format format)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON(format != Format::RGB888 && format != Format::U8);
+        ARM_COMPUTE_ERROR_ON(format != arm_compute::Format::RGB888 && format != arm_compute::Format::U8);
 
         // Use the size of the input PPM image
-        TensorInfo image_info(_width, _height, format);
+        arm_compute::TensorInfo image_info(_width, _height, format);
         image.allocator()->init(image_info);
     }
 
@@ -143,12 +141,12 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON(image.info()->dimension(0) != _width || image.info()->dimension(1) != _height);
-        ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&image, Format::U8, Format::RGB888);
+        ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&image, arm_compute::Format::U8, arm_compute::Format::RGB888);
         try
         {
 #ifdef ARM_COMPUTE_CL
             // Map buffer if creating a CLTensor
-            if(std::is_same<typename std::decay<T>::type, CLImage>::value)
+            if(std::is_same<typename std::decay<T>::type, arm_compute::CLImage>::value)
             {
                 image.map();
             }
@@ -165,21 +163,21 @@ public:
 
             switch(image.info()->format())
             {
-                case Format::U8:
+                case arm_compute::Format::U8:
                 {
                     // We need to convert the data from RGB to grayscale:
                     // Iterate through every pixel of the image
-                    Window window;
-                    window.set(Window::DimX, Window::Dimension(0, _width, 1));
-                    window.set(Window::DimY, Window::Dimension(0, _height, 1));
+                    arm_compute::Window window;
+                    window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, _width, 1));
+                    window.set(arm_compute::Window::DimY, arm_compute::Window::Dimension(0, _height, 1));
 
-                    Iterator out(&image, window);
+                    arm_compute::Iterator out(&image, window);
 
                     unsigned char red   = 0;
                     unsigned char green = 0;
                     unsigned char blue  = 0;
 
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
                     {
                         red   = _fs.get();
                         green = _fs.get();
@@ -191,16 +189,16 @@ public:
 
                     break;
                 }
-                case Format::RGB888:
+                case arm_compute::Format::RGB888:
                 {
                     // There is no format conversion needed: we can simply copy the content of the input file to the image one row at the time.
                     // Create a vertical window to iterate through the image's rows:
-                    Window window;
-                    window.set(Window::DimY, Window::Dimension(0, _height, 1));
+                    arm_compute::Window window;
+                    window.set(arm_compute::Window::DimY, arm_compute::Window::Dimension(0, _height, 1));
 
-                    Iterator out(&image, window);
+                    arm_compute::Iterator out(&image, window);
 
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
                     {
                         // Copy one row from the input file to the current row of the image:
                         _fs.read(reinterpret_cast<std::fstream::char_type *>(out.ptr()), _width * image.info()->element_size());
@@ -215,7 +213,7 @@ public:
 
 #ifdef ARM_COMPUTE_CL
             // Unmap buffer if creating a CLTensor
-            if(std::is_same<typename std::decay<T>::type, CLTensor>::value)
+            if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
             {
                 image.unmap();
             }
@@ -244,7 +242,7 @@ private:
 template <typename T>
 void save_to_ppm(T &tensor, const std::string &ppm_filename)
 {
-    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&tensor, Format::RGB888, Format::U8);
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&tensor, arm_compute::Format::RGB888, arm_compute::Format::U8);
     ARM_COMPUTE_ERROR_ON(tensor.info()->num_dimensions() > 2);
 
     std::ofstream fs;
@@ -262,7 +260,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
 #ifdef ARM_COMPUTE_CL
         // Map buffer if creating a CLTensor
-        if(std::is_same<typename std::decay<T>::type, CLTensor>::value)
+        if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
         {
             tensor.map();
         }
@@ -270,15 +268,15 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
         switch(tensor.info()->format())
         {
-            case Format::U8:
+            case arm_compute::Format::U8:
             {
-                Window window;
-                window.set(Window::DimX, Window::Dimension(0, width, 1));
-                window.set(Window::DimY, Window::Dimension(0, height, 1));
+                arm_compute::Window window;
+                window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, width, 1));
+                window.set(arm_compute::Window::DimY, arm_compute::Window::Dimension(0, height, 1));
 
-                Iterator in(&tensor, window);
+                arm_compute::Iterator in(&tensor, window);
 
-                execute_window_loop(window, [&](const Coordinates & id)
+                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
                 {
                     const unsigned char value = *in.ptr();
 
@@ -288,15 +286,15 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
                 break;
             }
-            case Format::RGB888:
+            case arm_compute::Format::RGB888:
             {
-                Window window;
-                window.set(Window::DimX, Window::Dimension(0, width, width));
-                window.set(Window::DimY, Window::Dimension(0, height, 1));
+                arm_compute::Window window;
+                window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, width, width));
+                window.set(arm_compute::Window::DimY, arm_compute::Window::Dimension(0, height, 1));
 
-                Iterator in(&tensor, window);
+                arm_compute::Iterator in(&tensor, window);
 
-                execute_window_loop(window, [&](const Coordinates & id)
+                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
                 {
                     fs.write(reinterpret_cast<std::fstream::char_type *>(in.ptr()), width * tensor.info()->element_size());
                 },
@@ -309,7 +307,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         }
 #ifdef ARM_COMPUTE_CL
         // Unmap buffer if creating a CLTensor
-        if(std::is_same<typename std::decay<T>::type, CLTensor>::value)
+        if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
         {
             tensor.unmap();
         }

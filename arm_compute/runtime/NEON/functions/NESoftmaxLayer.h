@@ -36,7 +36,7 @@ class ITensor;
 /** Basic function to compute a SoftmaxLayer.
  *
  * Softmax is calculated by :
- * @f[ out = exp(x - max(x)) / sum(exp(x - max(x))) @f]
+ * @f[ out = \frac{e^{x - max(x)}}{\sum{e^{x - max(x)}}} @f]
  *
  * This function runs the following kernels:
  * -# @ref NELogits1DMaxKernel

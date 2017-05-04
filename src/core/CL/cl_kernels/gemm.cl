@@ -121,21 +121,21 @@ __kernel void gemm_transpose1x16_u8(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel reshapes the input matrix transposing each 4x4 block and interleaving the values
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U32/S32/F32
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: F32
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: U32/S32/F32
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
  */
-__kernel void gemm_interleave4x4_f32(IMAGE_DECLARATION(src),
-                                     IMAGE_DECLARATION(dst))
+__kernel void gemm_interleave4x4_32bit(IMAGE_DECLARATION(src),
+                                       IMAGE_DECLARATION(dst))
 {
     /* Compute source and destination addresses */
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
@@ -162,21 +162,21 @@ __kernel void gemm_interleave4x4_f32(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel reshapes the input matrix transposing each 4x4 block and interleaving the values
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F16
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U16/S16/F16
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: F16
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: U16/S16/F16
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
  */
-__kernel void gemm_interleave4x4_f16(IMAGE_DECLARATION(src),
-                                     IMAGE_DECLARATION(dst))
+__kernel void gemm_interleave4x4_16bit(IMAGE_DECLARATION(src),
+                                       IMAGE_DECLARATION(dst))
 {
     /* Compute source and destination addresses */
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
@@ -203,21 +203,21 @@ __kernel void gemm_interleave4x4_f16(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel reshapes the input matrix transposing each 4x4 block and interleaving the values
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: U8
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: U8/S8
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
  */
-__kernel void gemm_interleave4x4_u8(IMAGE_DECLARATION(src),
-                                    IMAGE_DECLARATION(dst))
+__kernel void gemm_interleave4x4_8bit(IMAGE_DECLARATION(src),
+                                      IMAGE_DECLARATION(dst))
 {
     /* Compute source and destination addresses */
     Image src = CONVERT_TO_IMAGE_STRUCT(src);

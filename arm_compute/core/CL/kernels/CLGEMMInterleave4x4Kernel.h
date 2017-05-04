@@ -47,7 +47,7 @@ class ICLTensor;
  * \end{array} \right)
  * @f]
  *
- * After this operation, the output matrix will have the following shape: [ height * 4, width / 4 ]
+ * After this operation, the output matrix will have the following shape: [ height * 4, ceil(width / 4.0f) ]
  */
 class CLGEMMInterleave4x4Kernel : public ICLKernel
 {
@@ -64,7 +64,7 @@ public:
     CLGEMMInterleave4x4Kernel &operator=(CLGEMMInterleave4x4Kernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/F16/F32
+     * @param[in]  input  Input tensor. Data types supported: U8/S8/U16/S16/F16/U32/S32/F32
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);

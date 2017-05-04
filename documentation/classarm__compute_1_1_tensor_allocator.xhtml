@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.04</span>
+   &#160;<span id="projectnumber">17.05</span>
    </div>
   </td>
  </tr>
@@ -146,6 +146,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6e509c2a177b0b29e9e2369535094dee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#a6e509c2a177b0b29e9e2369535094dee">allocate</a> () override</td></tr>
 <tr class="memdesc:a6e509c2a177b0b29e9e2369535094dee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate size specified by <a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata. ">TensorInfo</a> of CPU memory.  <a href="#a6e509c2a177b0b29e9e2369535094dee">More...</a><br /></td></tr>
 <tr class="separator:a6e509c2a177b0b29e9e2369535094dee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1468b0adb6ec3f9d38aa7d60b8a91974"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#a1468b0adb6ec3f9d38aa7d60b8a91974">free</a> () override</td></tr>
+<tr class="memdesc:a1468b0adb6ec3f9d38aa7d60b8a91974"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free allocated CPU memory.  <a href="#a1468b0adb6ec3f9d38aa7d60b8a91974">More...</a><br /></td></tr>
+<tr class="separator:a1468b0adb6ec3f9d38aa7d60b8a91974"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_tensor_allocator"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_tensor_allocator')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml">ITensorAllocator</a></td></tr>
 <tr class="memitem:af97d553d2aa86688c92db8ed9a67cf0e inherit pub_methods_classarm__compute_1_1_i_tensor_allocator"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#af97d553d2aa86688c92db8ed9a67cf0e">ITensorAllocator</a> ()</td></tr>
 <tr class="memdesc:af97d553d2aa86688c92db8ed9a67cf0e inherit pub_methods_classarm__compute_1_1_i_tensor_allocator"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#af97d553d2aa86688c92db8ed9a67cf0e">More...</a><br /></td></tr>
@@ -245,6 +248,34 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a1468b0adb6ec3f9d38aa7d60b8a91974"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void free </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Free allocated CPU memory. </p>
+<dl class="section note"><dt>Note</dt><dd>The tensor must have been allocated when calling this function. </dd></dl>
+
+<p>Implements <a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#a1781eecaabd2bc97d074437d01b2c683">ITensorAllocator</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a3014ce2f4215e8a44331aa5daf3ba0d4"></a>
 <div class="memitem">
 <div class="memproto">
@@ -300,7 +331,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml">TensorAllocator</a></li>
-    <li class="footer">Generated on Wed Apr 12 2017 14:26:06 for ARM Compute Library by
+    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

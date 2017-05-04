@@ -128,10 +128,10 @@ void NEActivationLayerKernel::activation(const Window &window)
                 tmp =
                 {
                     {
-                        vinv_f32(vaddq_f32(CONST_1, vexp_f32(vnegq_f32(in.val[0])))),
-                        vinv_f32(vaddq_f32(CONST_1, vexp_f32(vnegq_f32(in.val[1])))),
-                        vinv_f32(vaddq_f32(CONST_1, vexp_f32(vnegq_f32(in.val[2])))),
-                        vinv_f32(vaddq_f32(CONST_1, vexp_f32(vnegq_f32(in.val[3])))),
+                        vinvq_f32(vaddq_f32(CONST_1, vexpq_f32(vnegq_f32(in.val[0])))),
+                        vinvq_f32(vaddq_f32(CONST_1, vexpq_f32(vnegq_f32(in.val[1])))),
+                        vinvq_f32(vaddq_f32(CONST_1, vexpq_f32(vnegq_f32(in.val[2])))),
+                        vinvq_f32(vaddq_f32(CONST_1, vexpq_f32(vnegq_f32(in.val[3])))),
                     }
                 };
                 break;
@@ -150,10 +150,10 @@ void NEActivationLayerKernel::activation(const Window &window)
                 tmp =
                 {
                     {
-                        vlog_f32(vaddq_f32(CONST_1, vexp_f32(in.val[0]))),
-                        vlog_f32(vaddq_f32(CONST_1, vexp_f32(in.val[1]))),
-                        vlog_f32(vaddq_f32(CONST_1, vexp_f32(in.val[2]))),
-                        vlog_f32(vaddq_f32(CONST_1, vexp_f32(in.val[3]))),
+                        vlogq_f32(vaddq_f32(CONST_1, vexpq_f32(in.val[0]))),
+                        vlogq_f32(vaddq_f32(CONST_1, vexpq_f32(in.val[1]))),
+                        vlogq_f32(vaddq_f32(CONST_1, vexpq_f32(in.val[2]))),
+                        vlogq_f32(vaddq_f32(CONST_1, vexpq_f32(in.val[3]))),
                     }
                 };
                 break;
@@ -161,10 +161,10 @@ void NEActivationLayerKernel::activation(const Window &window)
                 tmp =
                 {
                     {
-                        vinv_f32(vinvsqrt_f32(in.val[0])),
-                        vinv_f32(vinvsqrt_f32(in.val[1])),
-                        vinv_f32(vinvsqrt_f32(in.val[2])),
-                        vinv_f32(vinvsqrt_f32(in.val[3])),
+                        vinvq_f32(vinvsqrtq_f32(in.val[0])),
+                        vinvq_f32(vinvsqrtq_f32(in.val[1])),
+                        vinvq_f32(vinvsqrtq_f32(in.val[2])),
+                        vinvq_f32(vinvsqrtq_f32(in.val[3])),
                     }
                 };
                 break;
@@ -183,10 +183,10 @@ void NEActivationLayerKernel::activation(const Window &window)
                 tmp =
                 {
                     {
-                        vmulq_f32(a, vtanh_f32(vmulq_f32(b, in.val[0]))),
-                        vmulq_f32(a, vtanh_f32(vmulq_f32(b, in.val[1]))),
-                        vmulq_f32(a, vtanh_f32(vmulq_f32(b, in.val[2]))),
-                        vmulq_f32(a, vtanh_f32(vmulq_f32(b, in.val[3]))),
+                        vmulq_f32(a, vtanhq_f32(vmulq_f32(b, in.val[0]))),
+                        vmulq_f32(a, vtanhq_f32(vmulq_f32(b, in.val[1]))),
+                        vmulq_f32(a, vtanhq_f32(vmulq_f32(b, in.val[2]))),
+                        vmulq_f32(a, vtanhq_f32(vmulq_f32(b, in.val[3]))),
                     }
                 };
                 break;

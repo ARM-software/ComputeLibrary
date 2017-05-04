@@ -118,8 +118,7 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
       [ "NEHarrisScoreFP16Kernel", "classarm__compute_1_1_n_e_harris_score_f_p16_kernel.xhtml", "classarm__compute_1_1_n_e_harris_score_f_p16_kernel" ]
     ] ],
     [ "NEHistogramKernel.h", "_n_e_histogram_kernel_8h.xhtml", [
-      [ "NEHistogramKernel", "classarm__compute_1_1_n_e_histogram_kernel.xhtml", "classarm__compute_1_1_n_e_histogram_kernel" ],
-      [ "NEHistogramBorderKernel", "classarm__compute_1_1_n_e_histogram_border_kernel.xhtml", "classarm__compute_1_1_n_e_histogram_border_kernel" ]
+      [ "NEHistogramKernel", "classarm__compute_1_1_n_e_histogram_kernel.xhtml", "classarm__compute_1_1_n_e_histogram_kernel" ]
     ] ],
     [ "NEHOGDescriptorKernel.h", "_n_e_h_o_g_descriptor_kernel_8h.xhtml", [
       [ "NEHOGOrientationBinningKernel", "classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml", "classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel" ],

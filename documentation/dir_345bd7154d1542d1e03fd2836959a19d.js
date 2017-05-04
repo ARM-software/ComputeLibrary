@@ -44,13 +44,7 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NEColorConvert.h", "_n_e_color_convert_8h.xhtml", [
       [ "NEColorConvert", "classarm__compute_1_1_n_e_color_convert.xhtml", "classarm__compute_1_1_n_e_color_convert" ]
     ] ],
-    [ "NEConvolution.h", "_n_e_convolution_8h.xhtml", [
-      [ "NEConvolution3x3", "classarm__compute_1_1_n_e_convolution3x3.xhtml", "classarm__compute_1_1_n_e_convolution3x3" ],
-      [ "NEConvolution5x5", "classarm__compute_1_1_n_e_convolution5x5.xhtml", "classarm__compute_1_1_n_e_convolution5x5" ],
-      [ "NEConvolution7x7", "classarm__compute_1_1_n_e_convolution7x7.xhtml", "classarm__compute_1_1_n_e_convolution7x7" ],
-      [ "NEConvolution9x9", "classarm__compute_1_1_n_e_convolution9x9.xhtml", "classarm__compute_1_1_n_e_convolution9x9" ],
-      [ "NEConvolutionRectangle", "classarm__compute_1_1_n_e_convolution_rectangle.xhtml", "classarm__compute_1_1_n_e_convolution_rectangle" ]
-    ] ],
+    [ "NEConvolution.h", "_n_e_convolution_8h.xhtml", "_n_e_convolution_8h" ],
     [ "NEConvolutionLayer.h", "_n_e_convolution_layer_8h.xhtml", [
       [ "NEConvolutionLayer", "classarm__compute_1_1_n_e_convolution_layer.xhtml", "classarm__compute_1_1_n_e_convolution_layer" ]
     ] ],
