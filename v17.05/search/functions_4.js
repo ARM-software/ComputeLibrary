@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['element_5fsize',['element_size',['../classarm__compute_1_1_tensor_info.xhtml#a448f57f9d6aec61b3d85b898affe4a2e',1,'arm_compute::TensorInfo']]],
+  ['element_5fsize_5ffrom_5fdata_5ftype',['element_size_from_data_type',['../namespacearm__compute.xhtml#a34b06c0cd94808a77b697e79880b84b0',1,'arm_compute']]],
+  ['empty',['empty',['../structarm__compute_1_1_border_size.xhtml#adffbf97e7b8b64e7cf32f0254cddf3c4',1,'arm_compute::BorderSize']]],
+  ['end',['end',['../classarm__compute_1_1_dimensions.xhtml#ac684b52c6197edff9cccb3abd1e41f59',1,'arm_compute::Dimensions::end()'],['../classarm__compute_1_1_dimensions.xhtml#a819e633cd63b404cf9938bc6e755c170',1,'arm_compute::Dimensions::end() const '],['../structarm__compute_1_1_valid_region.xhtml#adc8388028db66f138de6b1aca27ad620',1,'arm_compute::ValidRegion::end()'],['../classarm__compute_1_1_window_1_1_dimension.xhtml#aa9a8509af319b9e47f00c8fba23d368b',1,'arm_compute::Window::Dimension::end()']]],
+  ['enqueue',['enqueue',['../classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67',1,'arm_compute::CLScheduler::enqueue()'],['../namespacearm__compute.xhtml#a22af22ebac966b76e8553127064201a2',1,'arm_compute::enqueue()']]],
+  ['enqueue_5fsync_5fevent',['enqueue_sync_event',['../classarm__compute_1_1_c_l_scheduler.xhtml#a6096d26e8e29e1a7f01b0f083fb7e33f',1,'arm_compute::CLScheduler']]],
+  ['erode',['erode',['../erode_8cl.xhtml#a8b30acf5b6e25e473275a1e3f400054a',1,'erode.cl']]],
+  ['error',['error',['../namespacearm__compute.xhtml#a568b0fbfa3d903099d9c9f7b6acf188d',1,'arm_compute']]],
+  ['error_5fon_5fchannel_5fnot_5fin',['error_on_channel_not_in',['../namespacearm__compute.xhtml#a593d972357b3bcfeecb87207dc925417',1,'arm_compute']]],
+  ['error_5fon_5fchannel_5fnot_5fin_5fknown_5fformat',['error_on_channel_not_in_known_format',['../namespacearm__compute.xhtml#ad0d001a84424d440f9a11fc1b80ed2ff',1,'arm_compute']]],
+  ['error_5fon_5fcoordinates_5fdimensions_5fgte',['error_on_coordinates_dimensions_gte',['../namespacearm__compute.xhtml#a130822528598f21a48f7ee0e6d8438a0',1,'arm_compute']]],
+  ['error_5fon_5fdata_5ftype_5fchannel_5fnot_5fin',['error_on_data_type_channel_not_in',['../namespacearm__compute.xhtml#a690ce072b4480f4a5bad433f23c9fe05',1,'arm_compute']]],
+  ['error_5fon_5fdata_5ftype_5fnot_5fin',['error_on_data_type_not_in',['../namespacearm__compute.xhtml#a0c52339d3cb372d145deeafb5a313807',1,'arm_compute']]],
+  ['error_5fon_5fformat_5fnot_5fin',['error_on_format_not_in',['../namespacearm__compute.xhtml#a0b360558b516e256f0af005a164c674e',1,'arm_compute']]],
+  ['error_5fon_5finvalid_5fmulti_5fhog',['error_on_invalid_multi_hog',['../namespacearm__compute.xhtml#a307666ca482a84d5a64251d78889a818',1,'arm_compute']]],
+  ['error_5fon_5finvalid_5fsubwindow',['error_on_invalid_subwindow',['../namespacearm__compute.xhtml#a0916477887763c20822b43be144963eb',1,'arm_compute']]],
+  ['error_5fon_5fmismatching_5fdata_5ftypes',['error_on_mismatching_data_types',['../namespacearm__compute.xhtml#ad35d92af32949e38ec38b3d8e46b566c',1,'arm_compute']]],
+  ['error_5fon_5fmismatching_5fshapes',['error_on_mismatching_shapes',['../namespacearm__compute.xhtml#a7b689868b627ba9e22c8473c5f985512',1,'arm_compute']]],
+  ['error_5fon_5fmismatching_5fwindows',['error_on_mismatching_windows',['../namespacearm__compute.xhtml#a26a9847c05c48bd1470f22f898ee254d',1,'arm_compute']]],
+  ['error_5fon_5ftensor_5fnot_5f2d',['error_on_tensor_not_2d',['../namespacearm__compute.xhtml#a65c8e0610dff27ecf1ef30214f08d19e',1,'arm_compute']]],
+  ['error_5fon_5funconfigured_5fkernel',['error_on_unconfigured_kernel',['../namespacearm__compute.xhtml#a21a4884cd1dbfa83351b8efa265f526a',1,'arm_compute']]],
+  ['error_5fon_5fwindow_5fdimensions_5fgte',['error_on_window_dimensions_gte',['../namespacearm__compute.xhtml#a6fed5543ae383442a51362e6607c4e65',1,'arm_compute']]],
+  ['execute_5fwindow_5floop',['execute_window_loop',['../namespacearm__compute.xhtml#a78fd1c0056e9add7ab01b8e118c0038d',1,'arm_compute']]],
+  ['extend_5fpadding',['extend_padding',['../classarm__compute_1_1_tensor_info.xhtml#a8d37b60af520149481b2c7bbe1d829fd',1,'arm_compute::TensorInfo']]]
+];

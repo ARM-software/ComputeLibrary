@@ -1,0 +1,176 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="5,3429,68,3456"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="121,1319,201,1345"/>
+<area shape="rect" id="node84" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="116,5493,207,5520"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_absolute_difference_kernel.xhtml" title="Interface for the absolute difference kernel. " alt="" coords="276,5,463,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_c_l_arithmetic_addition_kernel.xhtml" title="Interface for the arithmetic addition kernel. " alt="" coords="278,56,461,83"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_c_l_arithmetic_subtraction_kernel.xhtml" title="Interface for the arithmetic subtraction kernel. " alt="" coords="269,107,470,133"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_c_l_bitwise_and_kernel.xhtml" title="Interface for the bitwise AND operation kernel. " alt="" coords="298,157,441,184"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1_c_l_bitwise_or_kernel.xhtml" title="Interface for the bitwise OR operation kernel. " alt="" coords="303,208,436,235"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1_c_l_bitwise_xor_kernel.xhtml" title="Interface for the bitwise XOR operation kernel. " alt="" coords="300,259,439,285"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1_c_l_channel_combine_kernel.xhtml" title="Interface for the channel combine kernel. " alt="" coords="281,309,457,336"/>
+<area shape="rect" id="node10" href="$classarm__compute_1_1_c_l_channel_extract_kernel.xhtml" title="Interface for the channel extract kernel. " alt="" coords="286,360,453,387"/>
+<area shape="rect" id="node11" href="$classarm__compute_1_1_c_l_col2_im_kernel.xhtml" title="Interface for the col2im reshaping kernel. " alt="" coords="310,411,429,437"/>
+<area shape="rect" id="node12" href="$classarm__compute_1_1_c_l_color_convert_kernel.xhtml" title="Interface for the color convert kernel. " alt="" coords="293,461,446,488"/>
+<area shape="rect" id="node13" href="$classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml" title="Interface for the weights reshape kernel used by convolution and fully connected layers. " alt="" coords="275,513,463,554"/>
+<area shape="rect" id="node14" href="$classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml" title="Kernel for the running convolution on a rectangle matrix. " alt="" coords="267,579,471,605"/>
+<area shape="rect" id="node15" href="$classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml" title="CL kernel to copy keypoints information to ICLKeyPointArray and counts the number of key points..." alt="" coords="293,629,446,656"/>
+<area shape="rect" id="node16" href="$classarm__compute_1_1_c_l_derivative_kernel.xhtml" title="Interface for the derivative kernel. " alt="" coords="302,680,437,707"/>
+<area shape="rect" id="node17" href="$classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml" title="OpenCL kernel to perform Non&#45;Maxima suppression for Canny Edge. " alt="" coords="256,731,483,757"/>
+<area shape="rect" id="node18" href="$classarm__compute_1_1_c_l_edge_trace_kernel.xhtml" title="OpenCL kernel to perform Edge tracing. " alt="" coords="300,781,439,808"/>
+<area shape="rect" id="node19" href="$classarm__compute_1_1_c_l_fast_corners_kernel.xhtml" title="CL kernel to perform fast corners. " alt="" coords="295,832,443,859"/>
+<area shape="rect" id="node20" href="$classarm__compute_1_1_c_l_fill_border_kernel.xhtml" title="Interface for filling the border of a kernel. " alt="" coords="304,883,435,909"/>
+<area shape="rect" id="node21" href="$classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml" title="OpenCL kernel which interleaves the elements of a matrix A in chunk of 4x4. " alt="" coords="272,933,467,960"/>
+<area shape="rect" id="node22" href="$classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml" title="OpenCL kernel to compute low precision matrix multiplication kernel. " alt="" coords="273,985,465,1026"/>
+<area shape="rect" id="node23" href="$classarm__compute_1_1_c_l_g_e_m_m_matrix_accumulate_biases_kernel.xhtml" title="Interface to add a bias to each row of the input tensor. " alt="" coords="257,1050,482,1091"/>
+<area shape="rect" id="node24" href="$classarm__compute_1_1_c_l_g_e_m_m_matrix_addition_kernel.xhtml" title="OpenCL kernel to perform the in&#45;place matrix addition between 2 matrices, taking into account that th..." alt="" coords="269,1116,469,1143"/>
+<area shape="rect" id="node25" href="$classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml" title="OpenCL kernel to multiply two input matrices &quot;A&quot; and &quot;B&quot; or to multiply a vector &quot;A&quot; by a matrix &quot;B&quot;..." alt="" coords="270,1167,469,1193"/>
+<area shape="rect" id="node26" href="$classarm__compute_1_1_c_l_gradient_kernel.xhtml" title="OpenCL kernel to perform Gradient computation. " alt="" coords="307,1217,432,1244"/>
+<area shape="rect" id="node27" href="$classarm__compute_1_1_c_l_harris_score_kernel.xhtml" title="Interface for the harris score kernel. " alt="" coords="297,1268,442,1295"/>
+<area shape="rect" id="node28" href="$classarm__compute_1_1_c_l_histogram_border_kernel.xhtml" title="Interface to run the histogram kernel to handle the leftover part of image. " alt="" coords="282,1319,457,1345"/>
+<area shape="rect" id="node29" href="$classarm__compute_1_1_c_l_histogram_kernel.xhtml" title="Interface to run the histogram kernel. " alt="" coords="301,1369,437,1396"/>
+<area shape="rect" id="node30" href="$classarm__compute_1_1_c_l_im2_col_kernel.xhtml" title="Interface for the im2col reshape kernel. " alt="" coords="310,1420,429,1447"/>
+<area shape="rect" id="node31" href="$classarm__compute_1_1_c_l_integral_image_vert_kernel.xhtml" title="Interface to run the vertical pass of the integral image kernel. " alt="" coords="280,1471,459,1497"/>
+<area shape="rect" id="node32" href="$classarm__compute_1_1_c_l_l_k_tracker_finalize_kernel.xhtml" title="Interface to run the finalize step of LKTracker, where it truncates the coordinates stored in new_poi..." alt="" coords="279,1521,460,1548"/>
+<area shape="rect" id="node33" href="$classarm__compute_1_1_c_l_l_k_tracker_init_kernel.xhtml" title="Interface to run the initialization step of LKTracker. " alt="" coords="292,1572,447,1599"/>
+<area shape="rect" id="node34" href="$classarm__compute_1_1_c_l_l_k_tracker_stage0_kernel.xhtml" title="Interface to run the first stage of LKTracker, where A11, A12, A22, min_eig, ival, ixval and iyval are computed. " alt="" coords="281,1623,458,1649"/>
+<area shape="rect" id="node35" href="$classarm__compute_1_1_c_l_l_k_tracker_stage1_kernel.xhtml" title="Interface to run the second stage of LKTracker, where the motion vectors of the given points are comp..." alt="" coords="281,1673,458,1700"/>
+<area shape="rect" id="node36" href="$classarm__compute_1_1_c_l_logits1_d_norm_kernel.xhtml" title="Interface for calculating the final step of the Softmax Layer where each logit value is multiplied by..." alt="" coords="289,1724,449,1751"/>
+<area shape="rect" id="node37" href="$classarm__compute_1_1_c_l_logits1_d_shift_exp_sum_kernel.xhtml" title="Interface for shifting the logits values around the max value and exponentiating the result..." alt="" coords="267,1775,472,1801"/>
+<area shape="rect" id="node38" href="$classarm__compute_1_1_c_l_magnitude_phase_kernel.xhtml" title="Template interface for the kernel to compute magnitude and phase. " alt="" coords="283,1825,456,1852"/>
+<area shape="rect" id="node39" href="$classarm__compute_1_1_c_l_mean_std_dev_kernel.xhtml" title="Interface for the kernel to calculate mean and standard deviation of input image pixels. " alt="" coords="293,1876,445,1903"/>
+<area shape="rect" id="node40" href="$classarm__compute_1_1_c_l_min_max_kernel.xhtml" title="Interface for the kernel to perform min max search on an image. " alt="" coords="308,1927,431,1953"/>
+<area shape="rect" id="node41" href="$classarm__compute_1_1_c_l_min_max_location_kernel.xhtml" title="Interface for the kernel to find min max locations of an image. " alt="" coords="284,1977,455,2004"/>
+<area shape="rect" id="node42" href="$classarm__compute_1_1_c_l_normalization_layer_kernel.xhtml" title="Interface for the normalization layer kernel. " alt="" coords="275,2028,463,2055"/>
+<area shape="rect" id="node43" href="$classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel.xhtml" title="Interface for the pixelwise multiplication kernel. " alt="" coords="282,2079,457,2121"/>
+<area shape="rect" id="node44" href="$classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml" title="Interface for the pooling layer kernel. " alt="" coords="294,2145,445,2172"/>
+<area shape="rect" id="node45" href="$classarm__compute_1_1_c_l_remap_kernel.xhtml" title="OpenCL kernel to perform a remap on a tensor. " alt="" coords="310,2196,429,2223"/>
+<area shape="rect" id="node46" href="$classarm__compute_1_1_c_l_scharr3x3_kernel.xhtml" title="Interface for the kernel to run a 3x3 Scharr filter on a tensor. " alt="" coords="302,2247,437,2273"/>
+<area shape="rect" id="node47" href="$classarm__compute_1_1_c_l_sobel3x3_kernel.xhtml" title="Interface for the kernel to run a 3x3 Sobel filter on a tensor. " alt="" coords="304,2297,435,2324"/>
+<area shape="rect" id="node48" href="$classarm__compute_1_1_c_l_sobel5x5_hor_kernel.xhtml" title="Interface for the kernel to run the horizontal pass of 5x5 Sobel filter on a tensor. " alt="" coords="294,2348,445,2375"/>
+<area shape="rect" id="node49" href="$classarm__compute_1_1_c_l_sobel5x5_vert_kernel.xhtml" title="Interface for the kernel to run the vertical pass of 5x5 Sobel filter on a tensor. " alt="" coords="292,2399,447,2425"/>
+<area shape="rect" id="node50" href="$classarm__compute_1_1_c_l_sobel7x7_hor_kernel.xhtml" title="Interface for the kernel to run the horizontal pass of 7x7 Sobel filter on a tensor. " alt="" coords="294,2449,445,2476"/>
+<area shape="rect" id="node51" href="$classarm__compute_1_1_c_l_sobel7x7_vert_kernel.xhtml" title="Interface for the kernel to run the vertical pass of 7x7 Sobel filter on a tensor. " alt="" coords="292,2500,447,2527"/>
+<area shape="rect" id="node52" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="309,2551,429,2577"/>
+<area shape="rect" id="node53" href="$classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml" title="OpenCL kernel to perform a Gaussian filter and half scaling across width (horizontal pass) ..." alt="" coords="535,2475,735,2501"/>
+<area shape="rect" id="node54" href="$classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml" title="OpenCL kernel to perform a Gaussian filter and half scaling across height (vertical pass) ..." alt="" coords="534,2525,737,2552"/>
+<area shape="rect" id="node55" href="$classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="567,2576,704,2603"/>
+<area shape="rect" id="node56" href="$classarm__compute_1_1_c_l_accumulate_kernel.xhtml" title="Interface for the accumulate kernel. " alt="" coords="817,1901,962,1928"/>
+<area shape="rect" id="node57" href="$classarm__compute_1_1_c_l_accumulate_squared_kernel.xhtml" title="Interface for the accumulate squared kernel. " alt="" coords="793,1952,986,1979"/>
+<area shape="rect" id="node58" href="$classarm__compute_1_1_c_l_accumulate_weighted_kernel.xhtml" title="Interface for the accumulate weighted kernel. " alt="" coords="789,2003,989,2029"/>
+<area shape="rect" id="node59" href="$classarm__compute_1_1_c_l_activation_layer_kernel.xhtml" title="Interface for the activation layer kernel. " alt="" coords="806,2053,973,2080"/>
+<area shape="rect" id="node60" href="$classarm__compute_1_1_c_l_bitwise_not_kernel.xhtml" title="Interface for the bitwise NOT operation kernel. " alt="" coords="819,2104,959,2131"/>
+<area shape="rect" id="node61" href="$classarm__compute_1_1_c_l_box3x3_kernel.xhtml" title="Interface for the box 3x3 filter kernel. " alt="" coords="829,2155,949,2181"/>
+<area shape="rect" id="node62" href="$classarm__compute_1_1_c_l_convolution_kernel.xhtml" title="Interface for the kernel to run an arbitrary size convolution on a tensor. " alt="" coords="817,2206,962,2247"/>
+<area shape="rect" id="node63" href="$classarm__compute_1_1_c_l_depth_convert_kernel.xhtml" title="Interface for the depth conversion kernel. " alt="" coords="811,2272,968,2299"/>
+<area shape="rect" id="node64" href="$classarm__compute_1_1_c_l_dilate_kernel.xhtml" title="Interface for the dilate kernel. " alt="" coords="834,2323,945,2349"/>
+<area shape="rect" id="node65" href="$classarm__compute_1_1_c_l_erode_kernel.xhtml" title="Interface for the erode kernel. " alt="" coords="834,2373,945,2400"/>
+<area shape="rect" id="node66" href="$classarm__compute_1_1_c_l_gaussian3x3_kernel.xhtml" title="Interface for the Gaussian 3x3 filter kernel. " alt="" coords="813,2424,965,2451"/>
+<area shape="rect" id="node67" href="$classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml" title="OpenCL kernel which transposes the elements of a matrix in chunks of 1x4 if the input data type is F3..." alt="" coords="787,2475,992,2501"/>
+<area shape="rect" id="node68" href="$classarm__compute_1_1_c_l_integral_image_hor_kernel.xhtml" title="Interface to run the horizontal pass of the integral image kernel. " alt="" coords="801,2525,977,2552"/>
+<area shape="rect" id="node69" href="$classarm__compute_1_1_c_l_logits1_d_max_kernel.xhtml" title="Interface for the identifying the max value of 1D Logits. " alt="" coords="813,2576,966,2603"/>
+<area shape="rect" id="node70" href="$classarm__compute_1_1_c_l_median3x3_kernel.xhtml" title="Interface for the median 3x3 filter kernel. " alt="" coords="820,2627,959,2653"/>
+<area shape="rect" id="node71" href="$classarm__compute_1_1_c_l_non_linear_filter_kernel.xhtml" title="Interface for the kernel to apply a non&#45;linear filter. " alt="" coords="807,2677,971,2704"/>
+<area shape="rect" id="node72" href="$classarm__compute_1_1_c_l_non_maxima_suppression3x3_kernel.xhtml" title="Interface to perform Non&#45;Maxima suppression over a 3x3 window using OpenCL. " alt="" coords="788,2729,991,2770"/>
+<area shape="rect" id="node73" href="$classarm__compute_1_1_c_l_scale_kernel.xhtml" title="Interface for the warp affine kernel. " alt="" coords="835,2795,944,2821"/>
+<area shape="rect" id="node74" href="$classarm__compute_1_1_c_l_separable_convolution_hor_kernel.xhtml" title="Kernel for the Horizontal pass of a Separable Convolution. " alt="" coords="796,2846,983,2887"/>
+<area shape="rect" id="node76" href="$classarm__compute_1_1_c_l_separable_convolution_vert_kernel.xhtml" title="Kernel for the Vertical pass of a Separable Convolution. " alt="" coords="794,2911,985,2953"/>
+<area shape="rect" id="node78" href="$classarm__compute_1_1_c_l_table_lookup_kernel.xhtml" title="Interface for the kernel to perform table lookup calculations. " alt="" coords="814,2977,965,3004"/>
+<area shape="rect" id="node79" href="$classarm__compute_1_1_c_l_threshold_kernel.xhtml" title="Interface for the thresholding kernel. " alt="" coords="823,3028,956,3055"/>
+<area shape="rect" id="node80" href="$classarm__compute_1_1_c_l_transpose_kernel.xhtml" title="OpenCL kernel which transposes the elements of a matrix. " alt="" coords="821,3079,958,3105"/>
+<area shape="rect" id="node81" href="$classarm__compute_1_1_c_l_warp_affine_kernel.xhtml" title="Interface for the warp affine kernel. " alt="" coords="819,3129,960,3156"/>
+<area shape="rect" id="node82" href="$classarm__compute_1_1_c_l_warp_perspective_kernel.xhtml" title="Interface for the warp perspective kernel. " alt="" coords="801,3180,977,3207"/>
+<area shape="rect" id="node83" href="$classarm__compute_1_1_i_c_l_simple3_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="821,3231,958,3257"/>
+<area shape="rect" id="node75" href="$classarm__compute_1_1_c_l_gaussian5x5_hor_kernel.xhtml" title="Interface for the kernel to run the horizontal pass of 5x5 Gaussian filter on a tensor. " alt="" coords="1041,2853,1215,2880"/>
+<area shape="rect" id="node77" href="$classarm__compute_1_1_c_l_gaussian5x5_vert_kernel.xhtml" title="Interface for the kernel to run the vertical pass of 5x5 Gaussian filter on a tensor. " alt="" coords="1040,2919,1216,2945"/>
+<area shape="rect" id="node85" href="$classarm__compute_1_1_c_p_p_corner_candidates_kernel.xhtml" title="CPP kernel to perform corner candidates. " alt="" coords="273,3724,465,3751"/>
+<area shape="rect" id="node86" href="$classarm__compute_1_1_c_p_p_sort_euclidean_distance_kernel.xhtml" title="CPP kernel to perform sorting and euclidean distance. " alt="" coords="278,3775,461,3817"/>
+<area shape="rect" id="node87" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple NEON kernels having 1 tensor input and 1 tensor output. " alt="" coords="304,3841,435,3868"/>
+<area shape="rect" id="node114" href="$classarm__compute_1_1_i_n_e_harris_score_kernel.xhtml" title="Common interface for all Harris Score kernels. " alt="" coords="294,4164,445,4191"/>
+<area shape="rect" id="node117" href="$classarm__compute_1_1_i_n_e_warp_kernel.xhtml" title="Common interface for warp affine and warp perspective. " alt="" coords="313,4215,426,4241"/>
+<area shape="rect" id="node120" href="$classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml" title="Interface for the absolute difference kernel. " alt="" coords="275,4265,464,4292"/>
+<area shape="rect" id="node121" href="$classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml" title="Interface for the kernel to perform addition between two tensors. " alt="" coords="277,4316,461,4343"/>
+<area shape="rect" id="node122" href="$classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml" title="Interface for the kernel to perform subtraction between two tensors. " alt="" coords="268,4367,471,4393"/>
+<area shape="rect" id="node123" href="$classarm__compute_1_1_n_e_bitwise_and_kernel.xhtml" title="Interface for the kernel to perform bitwise AND between XY&#45;planes of two tensors. ..." alt="" coords="297,4417,441,4444"/>
+<area shape="rect" id="node124" href="$classarm__compute_1_1_n_e_bitwise_not_kernel.xhtml" title="Interface for the kernel to perform bitwise NOT operation. " alt="" coords="298,4468,441,4495"/>
+<area shape="rect" id="node125" href="$classarm__compute_1_1_n_e_bitwise_or_kernel.xhtml" title="Interface for the kernel to perform bitwise inclusive OR between two tensors. " alt="" coords="302,4519,437,4545"/>
+<area shape="rect" id="node126" href="$classarm__compute_1_1_n_e_bitwise_xor_kernel.xhtml" title="Interface for the kernel to perform bitwise exclusive OR (XOR) between two tensors. " alt="" coords="299,4569,440,4596"/>
+<area shape="rect" id="node127" href="$classarm__compute_1_1_n_e_channel_combine_kernel.xhtml" title="Interface for the channel combine kernel. " alt="" coords="280,4620,459,4647"/>
+<area shape="rect" id="node128" href="$classarm__compute_1_1_n_e_col2_im_kernel.xhtml" title="NEON kernel to perform col2im reshaping. " alt="" coords="309,4671,429,4697"/>
+<area shape="rect" id="node129" href="$classarm__compute_1_1_n_e_color_convert_kernel.xhtml" title="Interface for the color convert kernel. " alt="" coords="292,4721,447,4748"/>
+<area shape="rect" id="node130" href="$classarm__compute_1_1_n_e_convolution_layer_weights_reshape_kernel.xhtml" title="NEON kernel to perform reshaping on the weights used by convolution layer. " alt="" coords="274,4773,465,4814"/>
+<area shape="rect" id="node131" href="$classarm__compute_1_1_n_e_convolution_rectangle_kernel.xhtml" title="Kernel for the running convolution on a rectangle matrix. " alt="" coords="266,4839,473,4865"/>
+<area shape="rect" id="node132" href="$classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml" title="Interface for the cumulative distribution (cummulative summmation) calculation kernel. " alt="" coords="283,4890,456,4931"/>
+<area shape="rect" id="node133" href="$classarm__compute_1_1_n_e_derivative_kernel.xhtml" title="Interface for the kernel to run the derivative along the X/Y directions on a tensor. " alt="" coords="301,4956,438,4983"/>
+<area shape="rect" id="node134" href="$classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml" title="NEON kernel to perform Non&#45;Maxima suppression for Canny Edge. " alt="" coords="255,5007,484,5033"/>
+<area shape="rect" id="node135" href="$classarm__compute_1_1_n_e_edge_trace_kernel.xhtml" title="NEON kernel to perform Edge tracing. " alt="" coords="299,5057,440,5084"/>
+<area shape="rect" id="node136" href="$classarm__compute_1_1_n_e_fast_corners_kernel.xhtml" title="NEON kernel to perform fast corners. " alt="" coords="294,5108,445,5135"/>
+<area shape="rect" id="node137" href="$classarm__compute_1_1_n_e_fill_array_kernel.xhtml" title="This kernel adds all texels greater than or equal to the threshold value to the keypoint array..." alt="" coords="306,5159,433,5185"/>
+<area shape="rect" id="node138" href="$classarm__compute_1_1_n_e_fill_border_kernel.xhtml" title="Interface for the kernel to fill borders. " alt="" coords="303,5209,436,5236"/>
+<area shape="rect" id="node139" href="$classarm__compute_1_1_n_e_fill_inner_border_kernel.xhtml" title="Interface for the kernel to fill the interior borders. " alt="" coords="288,5260,451,5287"/>
+<area shape="rect" id="node140" href="$classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel.xhtml" title="NEON kernel to multiply matrices. " alt="" coords="272,5311,467,5353"/>
+<area shape="rect" id="node141" href="$classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml" title="NEON kernel to add a bias to each row of the input tensor. " alt="" coords="256,5377,483,5418"/>
+<area shape="rect" id="node142" href="$classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml" title="NEON kernel to multiply two input matrices &quot;A&quot; and &quot;B&quot;. " alt="" coords="269,5443,469,5469"/>
+<area shape="rect" id="node143" href="$classarm__compute_1_1_n_e_gradient_kernel.xhtml" title="Computes magnitude and quantised phase from inputs gradients. " alt="" coords="306,5493,433,5520"/>
+<area shape="rect" id="node145" href="$classarm__compute_1_1_n_e_histogram_kernel.xhtml" title="Interface for the histogram kernel. " alt="" coords="300,5544,439,5571"/>
+<area shape="rect" id="node146" href="$classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml" title="NEON kernel to perform HOG block normalization. " alt="" coords="259,5595,480,5621"/>
+<area shape="rect" id="node147" href="$classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml" title="NEON kernel to perform HOG detector kernel using linear SVM. " alt="" coords="290,5645,449,5672"/>
+<area shape="rect" id="node148" href="$classarm__compute_1_1_n_e_h_o_g_non_maxima_suppression_kernel.xhtml" title="NEON kernel to perform in&#45;place computation of euclidean distance based non&#45;maxima suppression for HO..." alt="" coords="263,5697,476,5738"/>
+<area shape="rect" id="node149" href="$classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml" title="NEON kernel to perform HOG Orientation Binning. " alt="" coords="262,5763,477,5789"/>
+<area shape="rect" id="node150" href="$classarm__compute_1_1_n_e_im2_col_kernel.xhtml" title="Interface for the im2col reshape kernel. " alt="" coords="309,5813,429,5840"/>
+<area shape="rect" id="node151" href="$classarm__compute_1_1_n_e_l_k_tracker_kernel.xhtml" title="Interface for the Lucas&#45;Kanade tracker kernel. " alt="" coords="300,5864,439,5891"/>
+<area shape="rect" id="node152" href="$classarm__compute_1_1_n_e_logits1_d_norm_kernel.xhtml" title="Interface for calculating the final step of the Softmax Layer where each logit value is multiplied by..." alt="" coords="288,5915,451,5941"/>
+<area shape="rect" id="node153" href="$classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml" title="Interface for shifting the logits values around the max value and exponentiating the result..." alt="" coords="266,5965,473,5992"/>
+<area shape="rect" id="node154" href="$classarm__compute_1_1_n_e_magnitude_phase_f_p16_kernel.xhtml" title="Template interface for the kernel to compute magnitude and phase. " alt="" coords="266,6017,473,6058"/>
+<area shape="rect" id="node155" href="$classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml" title="Template interface for the kernel to compute magnitude and phase. " alt="" coords="280,6082,459,6123"/>
+<area shape="rect" id="node156" href="$classarm__compute_1_1_n_e_mean_std_dev_kernel.xhtml" title="Interface for the kernel to calculate mean and standard deviation of input image pixels. " alt="" coords="292,6148,447,6175"/>
+<area shape="rect" id="node157" href="$classarm__compute_1_1_n_e_min_max_kernel.xhtml" title="Interface for the kernel to perform min max search on an image. " alt="" coords="307,6199,431,6225"/>
+<area shape="rect" id="node158" href="$classarm__compute_1_1_n_e_min_max_location_kernel.xhtml" title="Interface for the kernel to find min max locations of an image. " alt="" coords="283,6249,456,6276"/>
+<area shape="rect" id="node159" href="$classarm__compute_1_1_n_e_non_linear_filter_kernel.xhtml" title="Interface for the kernel to apply a non&#45;linear filter. " alt="" coords="286,6300,453,6327"/>
+<area shape="rect" id="node160" href="$classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml" title="Interface to perform Non&#45;Maxima suppression over a 3x3 window using NEON. " alt="" coords="267,6351,471,6393"/>
+<area shape="rect" id="node162" href="$classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml" title="Interface for the normalization layer kernel. " alt="" coords="274,6417,465,6444"/>
+<area shape="rect" id="node163" href="$classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml" title="Interface for the kernel to perform addition between two tensors. " alt="" coords="281,6469,457,6510"/>
+<area shape="rect" id="node164" href="$classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml" title="Interface for the pooling layer kernel. " alt="" coords="293,6535,446,6561"/>
+<area shape="rect" id="node165" href="$classarm__compute_1_1_n_e_remap_kernel.xhtml" title="NEON kernel to perform a remap on a tensor. " alt="" coords="309,6585,429,6612"/>
+<area shape="rect" id="node166" href="$classarm__compute_1_1_n_e_scale_kernel.xhtml" title="NEON kernel to perform scaling on a tensor. " alt="" coords="314,6636,425,6663"/>
+<area shape="rect" id="node167" href="$classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml" title="Interface for the kernel to run a 3x3 Scharr filter on a tensor. " alt="" coords="301,6687,438,6713"/>
+<area shape="rect" id="node168" href="$classarm__compute_1_1_n_e_sobel3x3_kernel.xhtml" title="Interface for the kernel to run a 3x3 Sobel X filter on a tensor. " alt="" coords="303,6737,435,6764"/>
+<area shape="rect" id="node169" href="$classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml" title="Interface for the kernel to run the horizontal pass of 5x5 Sobel filter on a tensor. " alt="" coords="293,6788,446,6815"/>
+<area shape="rect" id="node170" href="$classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml" title="Interface for the kernel to run the vertical pass of 5x5 Sobel Y filter on a tensor. " alt="" coords="291,6839,447,6865"/>
+<area shape="rect" id="node171" href="$classarm__compute_1_1_n_e_sobel7x7_hor_kernel.xhtml" title="Interface for the kernel to run the horizontal pass of 7x7 Sobel filter on a tensor. " alt="" coords="293,6889,446,6916"/>
+<area shape="rect" id="node172" href="$classarm__compute_1_1_n_e_sobel7x7_vert_kernel.xhtml" title="Interface for the kernel to run the vertical pass of 7x7 Sobel Y filter on a tensor. " alt="" coords="291,6940,447,6967"/>
+<area shape="rect" id="node173" href="$classarm__compute_1_1_n_e_threshold_kernel.xhtml" title="Interface for the thresholding kernel. " alt="" coords="302,6991,437,7017"/>
+<area shape="rect" id="node174" href="$classarm__compute_1_1_n_e_transpose_kernel.xhtml" title="NEON kernel which transposes the elements of a matrix. " alt="" coords="300,7041,439,7068"/>
+<area shape="rect" id="node88" href="$classarm__compute_1_1_n_e_accumulate_kernel.xhtml" title="Interface for the accumulate kernel. " alt="" coords="562,3167,709,3193"/>
+<area shape="rect" id="node89" href="$classarm__compute_1_1_n_e_accumulate_squared_kernel.xhtml" title="Interface for the accumulate squared kernel. " alt="" coords="538,3217,733,3244"/>
+<area shape="rect" id="node90" href="$classarm__compute_1_1_n_e_accumulate_weighted_kernel.xhtml" title="Interface for the accumulate weighted kernel. " alt="" coords="534,3268,737,3295"/>
+<area shape="rect" id="node92" href="$classarm__compute_1_1_n_e_activation_layer_kernel.xhtml" title="Interface for the activation layer kernel. " alt="" coords="551,3319,719,3345"/>
+<area shape="rect" id="node93" href="$classarm__compute_1_1_n_e_box3x3_kernel.xhtml" title="NEON kernel to perform a Box 3x3 filter. " alt="" coords="574,3369,697,3396"/>
+<area shape="rect" id="node95" href="$classarm__compute_1_1_n_e_channel_extract_kernel.xhtml" title="Interface for the channel extract kernel. " alt="" coords="551,3420,719,3447"/>
+<area shape="rect" id="node96" href="$classarm__compute_1_1_n_e_convolution_kernel.xhtml" title="Interface for the kernel to run an arbitrary size convolution on a tensor. " alt="" coords="562,3471,709,3513"/>
+<area shape="rect" id="node97" href="$classarm__compute_1_1_n_e_depth_convert_kernel.xhtml" title="Depth conversion kernel. " alt="" coords="556,3537,715,3564"/>
+<area shape="rect" id="node98" href="$classarm__compute_1_1_n_e_dilate_kernel.xhtml" title="Interface for the kernel to perform boolean image dilatation. " alt="" coords="579,3588,691,3615"/>
+<area shape="rect" id="node99" href="$classarm__compute_1_1_n_e_erode_kernel.xhtml" title="Interface for the kernel to perform boolean image erosion. " alt="" coords="579,3639,691,3665"/>
+<area shape="rect" id="node100" href="$classarm__compute_1_1_n_e_gaussian3x3_kernel.xhtml" title="NEON kernel to perform a Gaussian 3x3 filter. " alt="" coords="558,3689,713,3716"/>
+<area shape="rect" id="node101" href="$classarm__compute_1_1_n_e_gaussian5x5_hor_kernel.xhtml" title="NEON kernel to perform a Gaussian 5x5 filter (horizontal pass) " alt="" coords="548,3740,723,3767"/>
+<area shape="rect" id="node102" href="$classarm__compute_1_1_n_e_gaussian5x5_vert_kernel.xhtml" title="NEON kernel to perform a Gaussian 5x5 filter (vertical pass) " alt="" coords="546,3791,725,3817"/>
+<area shape="rect" id="node103" href="$classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml" title="NEON kernel to perform a GaussianPyramid (horizontal pass) " alt="" coords="534,3841,737,3868"/>
+<area shape="rect" id="node104" href="$classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml" title="NEON kernel to perform a GaussianPyramid (vertical pass) " alt="" coords="533,3892,738,3919"/>
+<area shape="rect" id="node105" href="$classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel.xhtml" title="NEON kernel to interleave the elements of a matrix. " alt="" coords="537,3943,734,3969"/>
+<area shape="rect" id="node106" href="$classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml" title="NEON kernel to perform the in&#45;place matrix addition between 2 matrices taking into account that the s..." alt="" coords="534,3993,737,4020"/>
+<area shape="rect" id="node107" href="$classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml" title="NEON kernel which transposes the elements of a matrix in chunks of 1x4 if the input data type is F32 ..." alt="" coords="532,4044,739,4071"/>
+<area shape="rect" id="node108" href="$classarm__compute_1_1_n_e_integral_image_kernel.xhtml" title="Kernel to perform an image integral on an image. " alt="" coords="557,4095,714,4121"/>
+<area shape="rect" id="node109" href="$classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml" title="Interface for the identifying the max value of 1D Logits. " alt="" coords="558,4145,713,4172"/>
+<area shape="rect" id="node110" href="$classarm__compute_1_1_n_e_median3x3_kernel.xhtml" title="Kernel to perform a median filter on a tensor. " alt="" coords="565,4196,706,4223"/>
+<area shape="rect" id="node111" href="$classarm__compute_1_1_n_e_separable_convolution_hor_kernel.xhtml" title="Kernel for the Horizontal pass of a Separable Convolution. " alt="" coords="541,4247,730,4289"/>
+<area shape="rect" id="node112" href="$classarm__compute_1_1_n_e_separable_convolution_vert_kernel.xhtml" title="Kernel for the Vertical pass of a Separable Convolution. " alt="" coords="539,4313,731,4354"/>
+<area shape="rect" id="node113" href="$classarm__compute_1_1_n_e_table_lookup_kernel.xhtml" title="Interface for the kernel to perform table lookup calculations. " alt="" coords="559,4379,711,4405"/>
+<area shape="rect" id="node91" href="$classarm__compute_1_1_n_e_accumulate_weighted_f_p16_kernel.xhtml" title="Interface for the accumulate weighted kernel using F16. " alt="" coords="791,3282,987,3323"/>
+<area shape="rect" id="node94" href="$classarm__compute_1_1_n_e_box3x3_f_p16_kernel.xhtml" title="NEON kernel to perform a Box 3x3 filter using F16 simd. " alt="" coords="813,3369,966,3396"/>
+<area shape="rect" id="node115" href="$classarm__compute_1_1_n_e_harris_score_f_p16_kernel.xhtml" title="Interface for the accumulate Weighted kernel using F16. " alt="" coords="546,4430,725,4471"/>
+<area shape="rect" id="node116" href="$classarm__compute_1_1_n_e_harris_score_kernel.xhtml" title="Template NEON kernel to perform Harris Score. " alt="" coords="562,4495,709,4537"/>
+<area shape="rect" id="node118" href="$classarm__compute_1_1_n_e_warp_affine_kernel.xhtml" title="Template interface for the kernel to compute warp affine. " alt="" coords="564,4561,707,4602"/>
+<area shape="rect" id="node119" href="$classarm__compute_1_1_n_e_warp_perspective_kernel.xhtml" title="Template interface for the kernel to compute warp perspective. " alt="" coords="546,4626,725,4667"/>
+<area shape="rect" id="node144" href="$classarm__compute_1_1_n_e_gradient_f_p16_kernel.xhtml" title="NEON kernel to perform Gradient computation. " alt="" coords="556,5493,715,5520"/>
+<area shape="rect" id="node161" href="$classarm__compute_1_1_n_e_non_maxima_suppression3x3_f_p16_kernel.xhtml" title="NEON kernel to perform Non&#45;Maxima suppression 3x3 with intermediate results in F16 if the input data ..." alt="" coords="533,6351,737,6393"/>
+</map>
