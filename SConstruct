@@ -29,6 +29,7 @@ vars.AddVariables(
     EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "x86_32", "x86_64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile")),
+    BoolVariable("examples", "Build example programs", False),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Neon support", False),
