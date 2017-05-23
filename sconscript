@@ -351,30 +351,32 @@ alias = env.Alias("arm_compute",objects)
 Default(alias)
 
 # Build examples
-test_helpers = env.Object("test_helpers/Utils.cpp")
 
-if env['opencl'] and env['neon']:
-    for file in Glob("examples/neoncl_*.cpp"):
-        example =  os.path.basename( os.path.splitext(str(file))[0])
-        prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs+['OpenCL'])
-        alias = env.Alias(example, prog)
-        Depends(prog, objects)
-        Default( alias )
+if env['examples']:
+    test_helpers = env.Object("test_helpers/Utils.cpp")
 
-if env['opencl']:
-    for file in Glob("examples/cl_*.cpp"):
-        example =  os.path.basename( os.path.splitext(str(file))[0])
-        prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs+['OpenCL'])
-        alias = env.Alias(example, prog)
-        Depends(prog, objects)
-        Default( alias )
+    if env['opencl'] and env['neon']:
+        for file in Glob("examples/neoncl_*.cpp"):
+            example =  os.path.basename( os.path.splitext(str(file))[0])
+            prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs+['OpenCL'])
+            alias = env.Alias(example, prog)
+            Depends(prog, objects)
+            Default( alias )
 
-if env['neon']:
-    for file in Glob("examples/neon_*.cpp"):
-        example =  os.path.basename( os.path.splitext(str(file))[0])
-        prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs)
-        alias = env.Alias(example, prog)
-        Depends(prog, objects)
-        Default( alias )
+    if env['opencl']:
+        for file in Glob("examples/cl_*.cpp"):
+            example =  os.path.basename( os.path.splitext(str(file))[0])
+            prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs+['OpenCL'])
+            alias = env.Alias(example, prog)
+            Depends(prog, objects)
+            Default( alias )
+
+    if env['neon']:
+        for file in Glob("examples/neon_*.cpp"):
+            example =  os.path.basename( os.path.splitext(str(file))[0])
+            prog = env.Program(example, ['examples/%s.cpp' % example, test_helpers], LIBS=example_libs)
+            alias = env.Alias(example, prog)
+            Depends(prog, objects)
+            Default( alias )
 
 Export('env')
