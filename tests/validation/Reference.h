@@ -26,6 +26,7 @@
 
 #include "RawTensor.h"
 #include "Types.h"
+#include "arm_compute/runtime/Array.h"
 
 #include <map>
 #include <vector>
@@ -58,6 +59,21 @@ public:
      * @return Computed raw tensors along x and y axis.
      */
     static std::pair<RawTensor, RawTensor> compute_reference_sobel_5x5(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value);
+    /** Compute min max location.
+     *
+     * @param[in]  shape     Shape of the input tensors.
+     * @param[in]  dt_in     Data type of input tensor.
+     * @param[out] min       Minimum value of tensor
+     * @param[out] max       Maximum value of tensor
+     * @param[out] min_loc   Array with locations of minimum values
+     * @param[out] max_loc   Array with locations of maximum values
+     * @param[out] min_count Number of minimum values found
+     * @param[out] max_count Number of maximum values found
+     *
+     * @return Computed minimum, maximum values and their locations.
+     */
+    static void compute_reference_min_max_location(const TensorShape &shape, DataType dt_in, int32_t &min, int32_t &max, Coordinates2DArray &min_loc, Coordinates2DArray &max_loc, uint32_t &min_count,
+                                                   uint32_t &max_count);
     /** Compute reference mean and standard deviation.
      *
      * @param[in] shape Shape of the input tensors.

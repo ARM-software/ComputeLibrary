@@ -70,6 +70,13 @@ void ReferenceCPP::sobel_5x5(RawTensor &src, RawTensor &dst_x, RawTensor &dst_y,
     tensor_operations::sobel_5x5(s, dx, dy, border_mode, constant_border_value);
 }
 
+// Minimum maximum location
+void ReferenceCPP::min_max_location(const RawTensor &src, int32_t &min, int32_t &max, Coordinates2DArray &min_loc, Coordinates2DArray &max_loc, uint32_t &min_count, uint32_t &max_count)
+{
+    const TensorVariant s = TensorFactory::get_tensor(src);
+    boost::apply_visitor(tensor_visitors::min_max_location_visitor(min, max, min_loc, max_loc, min_count, max_count), s);
+}
+
 // Absolute difference
 void ReferenceCPP::absolute_difference(const RawTensor &src1, const RawTensor &src2, RawTensor &dst)
 {

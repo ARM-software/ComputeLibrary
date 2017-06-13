@@ -22,6 +22,7 @@
 cmake_minimum_required (VERSION 3.1)
 
 set(arm_compute_test_validation_NEON_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/NEON/Helper.h
     ${CMAKE_SOURCE_DIR}/NEON/NEAccessor.h
     ${CMAKE_CURRENT_SOURCE_DIR}/AbsoluteDifference.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Accumulate.cpp
@@ -45,17 +46,17 @@ set(arm_compute_test_validation_NEON_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/Fixedpoint/Reciprocal_QS8.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FullyConnectedLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Gaussian3x3.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Gaussian5x5.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GEMM.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/IntegralImage.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/MeanStdDev.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/NormalizationLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PixelWiseMultiplication.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/MeanStdDev.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Pooling/PoolingLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel3x3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel5x5.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/SoftmaxLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Threshold.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/MinMaxLocation.cpp
 )
 
 add_library(arm_compute_test_validation_NEON OBJECT

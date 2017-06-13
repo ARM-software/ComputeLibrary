@@ -311,6 +311,56 @@ void sobel_5x5(Tensor<T1> &in, Tensor<T2> &out_x, Tensor<T2> &out_y, BorderMode 
     }
 }
 
+// Min max location
+template <typename T1>
+void min_max_location(const Tensor<T1> &in, int32_t &min, int32_t &max, Coordinates2DArray &min_loc, Coordinates2DArray &max_loc, uint32_t &min_count, uint32_t &max_count)
+{
+    // Set min and max to first pixel
+    min       = in[0];
+    max       = in[0];
+    min_count = 0;
+    max_count = 0;
+
+    const size_t width = in.shape().x();
+
+    // Look for min and max values
+    for(int i = 1; i < in.num_elements(); ++i)
+    {
+        if(static_cast<int32_t>(in[i]) < min)
+        {
+            min = in[i];
+        }
+        if(static_cast<int32_t>(in[i]) > max)
+        {
+            max = in[i];
+        }
+    }
+
+    for(int i = 0; i < in.num_elements(); ++i)
+    {
+        if(static_cast<int32_t>(in[i]) == min)
+        {
+            Coordinates2D min_coord;
+            min_coord.x = static_cast<int32_t>(i % width);
+            min_coord.y = static_cast<int32_t>(i / width);
+
+            min_loc.push_back(min_coord);
+
+            min_count++;
+        }
+        if(static_cast<int32_t>(in[i]) == max)
+        {
+            Coordinates2D max_coord;
+            max_coord.x = static_cast<int32_t>(i % width);
+            max_coord.y = static_cast<int32_t>(i / width);
+
+            max_loc.push_back(max_coord);
+
+            max_count++;
+        }
+    }
+}
+
 // Mean Standard Deviation
 template <typename T1>
 void mean_and_standard_deviation(const Tensor<T1> &in, float &mean, float &std_dev)

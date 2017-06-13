@@ -64,6 +64,17 @@ public:
      *
      */
     static void sobel_5x5(RawTensor &src, RawTensor &dst_x, RawTensor &dst_y, BorderMode border_mode, uint8_t constant_border_value);
+    /** Function to compute the min max values and their location in a tensor.
+     *
+     * @param[in]  src       Input tensor.
+     * @param[out] min       Minimum value of the tensor.
+     * @param[out] max       Maximum value of the tensor
+     * @param[out] min_loc   Array with locations of minimum values
+     * @param[out] max_loc   Array with locations of maximum values
+     * @param[out] min_count Number of minimum values found
+     * @param[out] max_count Number of maximum values found
+     */
+    static void min_max_location(const RawTensor &src, int32_t &min, int32_t &max, Coordinates2DArray &min_loc, Coordinates2DArray &max_loc, uint32_t &min_count, uint32_t &max_count);
     /** Function to compute the mean and standard deviation of a tensor.
      *
      * @param[in]  src     Input tensor.
