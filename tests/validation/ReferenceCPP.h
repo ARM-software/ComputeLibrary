@@ -42,6 +42,13 @@ namespace validation
 class ReferenceCPP final : public Reference
 {
 public:
+    /** Function to compute the mean and standard deviation of a tensor.
+     *
+     * @param[in]  src     Input tensor.
+     * @param[out] mean    Mean of the tensor.
+     * @param[out] std_dev Standard deviation of the tensor
+     */
+    static void mean_and_standard_deviation(const RawTensor &src, float &mean, float &std_dev);
     /** Function to compute the integral image of a tensor.
      *
      * @param[in]  src Input tensor.

@@ -78,7 +78,19 @@ struct is_dataset<arm_compute::test::Small1DShape> : boost::mpl::true_
 
 /// Register the data set with Boost
 template <>
+struct is_dataset<arm_compute::test::Small2DShapes> : boost::mpl::true_
+{
+};
+
+/// Register the data set with Boost
+template <>
 struct is_dataset<arm_compute::test::LargeShapes> : boost::mpl::true_
+{
+};
+
+/// Register the data set with Boost
+template <>
+struct is_dataset<arm_compute::test::Large2DShapes> : boost::mpl::true_
 {
 };
 

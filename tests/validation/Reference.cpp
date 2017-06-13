@@ -39,6 +39,23 @@ namespace test
 {
 namespace validation
 {
+std::pair<float, float> Reference::compute_reference_mean_and_standard_deviation(const TensorShape &shape)
+{
+    // Create reference
+    RawTensor ref_src = library->get(shape, DataType::U8);
+
+    // Create output variables
+    float mean;
+    float std_dev;
+
+    // Fill reference
+    library->fill_tensor_uniform(ref_src, 0);
+
+    // Compute reference
+    ReferenceCPP::mean_and_standard_deviation(ref_src, mean, std_dev);
+
+    return std::make_pair(mean, std_dev);
+}
 RawTensor Reference::compute_reference_integral_image(const TensorShape &shape)
 {
     // Create reference

@@ -37,6 +37,13 @@ namespace validation
 class Reference
 {
 public:
+    /** Compute reference mean and standard deviation.
+     *
+     * @param[in] shape Shape of the input tensors.
+     *
+     * @return Computed mean and standard deviation.
+     */
+    static std::pair<float, float> compute_reference_mean_and_standard_deviation(const TensorShape &shape);
     /** Compute reference integral image.
      *
      * @param[in] shape Shape of the input and output tensors.

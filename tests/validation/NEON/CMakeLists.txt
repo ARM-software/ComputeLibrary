@@ -42,6 +42,7 @@ set(arm_compute_test_validation_NEON_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/NormalizationLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PixelWiseMultiplication.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/IntegralImage.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/MeanStdDev.cpp
 )
 
 add_library(arm_compute_test_validation_NEON OBJECT

@@ -102,6 +102,17 @@ public:
     }
 };
 
+/** Data set containing two small 2D tensor shapes. */
+class Small2DShapes final : public ShapeDataset<2>
+{
+public:
+    Small2DShapes()
+        : ShapeDataset(TensorShape(5U, 5U),
+                       TensorShape(640U, 480U))
+    {
+    }
+};
+
 /** Data set containing small tensor shapes. */
 class SmallShapes final : public ShapeDataset<3>
 {
@@ -121,6 +132,17 @@ public:
     LargeShapes()
         : ShapeDataset(TensorShape(1920U, 1080U),
                        TensorShape(1245U, 652U, 1U, 3U),
+                       TensorShape(4160U, 3120U))
+    {
+    }
+};
+
+/** Data set containing two 2D large tensor shapes. */
+class Large2DShapes final : public ShapeDataset<2>
+{
+public:
+    Large2DShapes()
+        : ShapeDataset(TensorShape(1920U, 1080U),
                        TensorShape(4160U, 3120U))
     {
     }
