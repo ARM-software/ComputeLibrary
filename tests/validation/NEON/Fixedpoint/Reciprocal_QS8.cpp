@@ -78,9 +78,9 @@ Tensor compute_reciprocal_qs8(const TensorShape &shape, int fixed_point_position
     BOOST_TEST(!src.info()->is_resizable());
     BOOST_TEST(!dst.info()->is_resizable());
 
-    // Fill tensors. Keep the range between (15, 100) so the result won't
+    // Fill tensors. Keep the range between [15, 100) so the result won't
     // overflow. E.g. for Q2.5 reciprocal(0.001) = 1000, which cannot be represented.
-    std::uniform_int_distribution<> distribution(15, 100);
+    std::uniform_int_distribution<> distribution(15, 0x7F);
     library->fill(NEAccessor(src), distribution, 0);
 
     Iterator input(&src, window);

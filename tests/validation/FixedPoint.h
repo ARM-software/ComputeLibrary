@@ -756,8 +756,9 @@ struct functions
         fixed_point<T>       a          = shift < 0 ? shift_left(x, -shift) : shift_right(x, shift);
         const fixed_point<T> x_half     = shift_right(a, 1);
 
-        // We need three iterations to find the result
-        for(int i = 0; i < 3; ++i)
+        // We need three iterations to find the result for QS8 and five for QS16
+        constexpr int num_iterations = std::is_same<T, int8_t>::value ? 3 : 5;
+        for(int i = 0; i < num_iterations; ++i)
         {
             a = mul(a, sub(three_half, mul(x_half, mul(a, a))));
         }

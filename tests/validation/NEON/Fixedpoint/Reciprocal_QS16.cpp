@@ -49,21 +49,21 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance = 5; /**< Tolerance value for comparing reference's output against implementation's output */
+const float tolerance = 9.0f; /**< Tolerance value for comparing reference's output against implementation's output. */
 
-/** Compute Neon logarithm function for signed 8bit fixed point.
+/** Compute Neon reciprocal function for signed 16 bit fixed point.
  *
  * @param[in] shape Shape of the input and output tensors.
  *
  * @return Computed output tensor.
  */
-Tensor compute_log_qs8(const TensorShape &shape, int fixed_point_position)
+Tensor compute_reciprocal_qs16(const TensorShape &shape, int fixed_point_position)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::QS8, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, DataType::QS8, 1, fixed_point_position);
+    Tensor src = create_tensor(shape, DataType::QS16, 1, fixed_point_position);
+    Tensor dst = create_tensor(shape, DataType::QS16, 1, fixed_point_position);
 
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
     Window                 window                            = calculate_max_window(*src.info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(src.info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal output_access(dst.info(), 0, num_elems_processed_per_iteration);
@@ -78,9 +78,9 @@ Tensor compute_log_qs8(const TensorShape &shape, int fixed_point_position)
     BOOST_TEST(!src.info()->is_resizable());
     BOOST_TEST(!dst.info()->is_resizable());
 
-    // Fill tensors. Keep the range between [(1 << (fixed_point_position - 1), 63) so the result won't
-    // overflow. E.g. for Q2.5 ln(0.001) = -6.9, which cannot be represented.
-    std::uniform_int_distribution<> distribution((1 << (fixed_point_position - 1)), 0x3F);
+    // Fill tensors. Keep the range between [15, 0x7FFF) so the result won't
+    // overflow.
+    std::uniform_int_distribution<> distribution(15, 0x7FFF);
     library->fill(NEAccessor(src), distribution, 0);
 
     Iterator input(&src, window);
@@ -88,8 +88,8 @@ Tensor compute_log_qs8(const TensorShape &shape, int fixed_point_position)
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        qint8x16_t in = vld1q_s8(reinterpret_cast<const qint8_t *>(input.ptr()));
-        vst1q_s8(reinterpret_cast<qint8_t *>(output.ptr()), vlogq_qs8(in, fixed_point_position));
+        qint16x8_t in = vld1q_qs16(reinterpret_cast<const qint16_t *>(input.ptr()));
+        vst1q_qs16(reinterpret_cast<qint16_t *>(output.ptr()), vqrecipq_qs16(in, fixed_point_position));
     },
     input, output);
 
@@ -100,17 +100,17 @@ Tensor compute_log_qs8(const TensorShape &shape, int fixed_point_position)
 #ifndef DOXYGEN_SKIP_THIS
 BOOST_AUTO_TEST_SUITE(NEON)
 BOOST_AUTO_TEST_SUITE(FixedPoint)
-BOOST_AUTO_TEST_SUITE(QS8)
-BOOST_AUTO_TEST_SUITE(Log)
+BOOST_AUTO_TEST_SUITE(QS16)
+BOOST_AUTO_TEST_SUITE(Reciprocal)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunSmall, Small1DShape() * boost::unit_test::data::xrange(3, 6), shape, fixed_point_position)
+BOOST_DATA_TEST_CASE(RunSmall, Small1DShape() * boost::unit_test::data::xrange(1, 14), shape, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_log_qs8(shape, fixed_point_position);
+    Tensor dst = compute_reciprocal_qs16(shape, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_fixed_point_operation(shape, DataType::QS8, DataType::QS8, FixedPointOp::LOG, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_fixed_point_operation(shape, DataType::QS16, DataType::QS16, FixedPointOp::RECIPROCAL, fixed_point_position);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst, tolerance, 0);

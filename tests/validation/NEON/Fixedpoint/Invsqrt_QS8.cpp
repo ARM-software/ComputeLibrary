@@ -49,7 +49,7 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance = 3; /**< Tolerance value for comparing reference's output against implementation's output */
+const float tolerance = 4.0f; /**< Tolerance value for comparing reference's output against implementation's output */
 
 /** Compute Neon inverse square root function for signed 8bit fixed point.
  *
@@ -78,9 +78,8 @@ Tensor compute_invsqrt_qs8(const TensorShape &shape, int fixed_point_position)
     BOOST_TEST(!src.info()->is_resizable());
     BOOST_TEST(!dst.info()->is_resizable());
 
-    // Fill tensors. Keep the range between (32, 127) so the result won't
-    // overflow. E.g. for Q2.5 invsqrt(0.001) = 31.6, which cannot be represented.
-    std::uniform_int_distribution<> distribution(32, 127);
+    // Fill tensors. Keep the range between [1, 127).
+    std::uniform_int_distribution<> distribution(1, 127);
     library->fill(NEAccessor(src), distribution, 0);
 
     Iterator input(&src, window);
@@ -89,7 +88,7 @@ Tensor compute_invsqrt_qs8(const TensorShape &shape, int fixed_point_position)
     execute_window_loop(window, [&](const Coordinates & id)
     {
         qint8x16_t in = vld1q_s8(reinterpret_cast<const qint8_t *>(input.ptr()));
-        vst1q_s8(reinterpret_cast<qint8_t *>(output.ptr()), vinvsqrtq_qs8(in, fixed_point_position));
+        vst1q_s8(reinterpret_cast<qint8_t *>(output.ptr()), vqinvsqrtq_qs8(in, fixed_point_position));
     },
     input, output);
 

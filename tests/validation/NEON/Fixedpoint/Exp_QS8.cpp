@@ -78,9 +78,9 @@ Tensor compute_exp_qs8(const TensorShape &shape, int fixed_point_position)
     BOOST_TEST(!src.info()->is_resizable());
     BOOST_TEST(!dst.info()->is_resizable());
 
-    // Fill tensors. Keep the range between (1, (1 << (fixed_point_position - 1))) so the result won't
+    // Fill tensors. Keep the range between [-1.0, 1.0) so the result won't
     // overflow. E.g. e^7 = 1096, which cannot be represented in QS8
-    std::uniform_int_distribution<> distribution(1, (1 << (fixed_point_position - 1)));
+    std::uniform_int_distribution<> distribution(-(1 << (fixed_point_position - 1)), (1 << (fixed_point_position - 1)));
     library->fill(NEAccessor(src), distribution, 0);
 
     Iterator input(&src, window);

@@ -83,6 +83,7 @@ public:
                 v                    = Tensor<uint16_t>(shape, dt, fixed_point_position, reinterpret_cast<value_type_u16 *>(data));
                 break;
             case DataType::S16:
+            case DataType::QS16:
                 using value_type_s16 = typename match_const<R, int16_t>::type;
                 v                    = Tensor<int16_t>(shape, dt, fixed_point_position, reinterpret_cast<value_type_s16 *>(data));
                 break;

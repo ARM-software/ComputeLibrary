@@ -657,20 +657,20 @@ RawTensor Reference::compute_reference_fixed_point_operation(const TensorShape &
     switch(op)
     {
         case(FixedPointOp::INV_SQRT):
-            min = 32;
-            max = 127;
+            min = 1;
+            max = (dt_in == DataType::QS8) ? 0x7F : 0x7FFF;
             break;
         case(FixedPointOp::LOG):
             min = (1 << (fixed_point_position - 1));
-            max = 63;
+            max = (dt_in == DataType::QS8) ? 0x3F : 0x3FFF;
             break;
         case(FixedPointOp::EXP):
-            min = 1;
+            min = -(1 << (fixed_point_position - 1));
             max = (1 << (fixed_point_position - 1));
             break;
         case(FixedPointOp::RECIPROCAL):
             min = 15;
-            max = 100;
+            max = (dt_in == DataType::QS8) ? 0x7F : 0x7FFF;
             break;
         default:
             ARM_COMPUTE_ERROR("Fixed point operation not supported");

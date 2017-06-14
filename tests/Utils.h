@@ -499,6 +499,7 @@ void store_value_with_data_type(void *ptr, T value, DataType data_type)
             *reinterpret_cast<uint16_t *>(ptr) = value;
             break;
         case DataType::S16:
+        case DataType::QS16:
             *reinterpret_cast<int16_t *>(ptr) = value;
             break;
         case DataType::U32:
