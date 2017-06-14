@@ -49,7 +49,7 @@ namespace tensor_visitors
 struct min_max_location_visitor : public boost::static_visitor<>
 {
 public:
-    explicit min_max_location_visitor(int32_t &min, int32_t &max, Coordinates2DArray &min_loc, Coordinates2DArray &max_loc, uint32_t &min_count, uint32_t &max_count)
+    explicit min_max_location_visitor(int32_t &min, int32_t &max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count)
         : _min(min), _max(max), _min_loc(min_loc), _max_loc(max_loc), _min_count(min_count), _max_count(max_count)
     {
     }
@@ -60,12 +60,12 @@ public:
     }
 
 private:
-    int32_t            &_min;
-    int32_t            &_max;
-    Coordinates2DArray &_min_loc;
-    Coordinates2DArray &_max_loc;
-    uint32_t           &_min_count;
-    uint32_t           &_max_count;
+    int32_t               &_min;
+    int32_t               &_max;
+    IArray<Coordinates2D> &_min_loc;
+    IArray<Coordinates2D> &_max_loc;
+    uint32_t              &_min_count;
+    uint32_t              &_max_count;
 };
 // Absolute Difference visitor
 struct absolute_difference_visitor : public boost::static_visitor<>

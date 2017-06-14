@@ -411,7 +411,7 @@ void validate(float target, float ref, float tolerance_abs_error, float toleranc
 }
 
 void validate_min_max_loc(int32_t min, int32_t ref_min, int32_t max, int32_t ref_max,
-                          Coordinates2DArray &min_loc, Coordinates2DArray &ref_min_loc, Coordinates2DArray &max_loc, Coordinates2DArray &ref_max_loc,
+                          IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &ref_min_loc, IArray<Coordinates2D> &max_loc, IArray<Coordinates2D> &ref_max_loc,
                           uint32_t min_count, uint32_t ref_min_count, uint32_t max_count, uint32_t ref_max_count)
 {
     BOOST_TEST(min == ref_min);
@@ -427,14 +427,22 @@ void validate_min_max_loc(int32_t min, int32_t ref_min, int32_t max, int32_t ref
 
     for(uint32_t i = 0; i < min_count; i++)
     {
-        BOOST_TEST(min_loc.at(i).x == ref_min_loc.at(i).x);
-        BOOST_TEST(min_loc.at(i).y == ref_min_loc.at(i).y);
+        Coordinates2D *same_coords = std::find_if(ref_min_loc.buffer(), ref_min_loc.buffer() + min_count, [&min_loc, i](Coordinates2D coord)
+        {
+            return coord.x == min_loc.at(i).x && coord.y == min_loc.at(i).y;
+        });
+
+        BOOST_TEST(same_coords != ref_min_loc.buffer() + min_count);
     }
 
     for(uint32_t i = 0; i < max_count; i++)
     {
-        BOOST_TEST(max_loc.at(i).x == ref_max_loc.at(i).x);
-        BOOST_TEST(max_loc.at(i).y == ref_max_loc.at(i).y);
+        Coordinates2D *same_coords = std::find_if(ref_max_loc.buffer(), ref_max_loc.buffer() + max_count, [&max_loc, i](Coordinates2D coord)
+        {
+            return coord.x == max_loc.at(i).x && coord.y == max_loc.at(i).y;
+        });
+
+        BOOST_TEST(same_coords != ref_max_loc.buffer() + max_count);
     }
 }
 

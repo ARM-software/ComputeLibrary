@@ -333,7 +333,7 @@ void sobel_5x5(Tensor<T1> &in, Tensor<T2> &out_x, Tensor<T2> &out_y, BorderMode 
 
 // Min max location
 template <typename T1>
-void min_max_location(const Tensor<T1> &in, int32_t &min, int32_t &max, Coordinates2DArray &min_loc, Coordinates2DArray &max_loc, uint32_t &min_count, uint32_t &max_count)
+void min_max_location(const Tensor<T1> &in, int32_t &min, int32_t &max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count)
 {
     // Set min and max to first pixel
     min       = in[0];

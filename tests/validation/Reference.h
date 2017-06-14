@@ -72,7 +72,8 @@ public:
      *
      * @return Computed minimum, maximum values and their locations.
      */
-    static void compute_reference_min_max_location(const TensorShape &shape, DataType dt_in, int32_t &min, int32_t &max, Coordinates2DArray &min_loc, Coordinates2DArray &max_loc, uint32_t &min_count,
+    static void compute_reference_min_max_location(const TensorShape &shape, DataType dt_in, int32_t &min, int32_t &max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc,
+                                                   uint32_t &min_count,
                                                    uint32_t &max_count);
     /** Compute reference mean and standard deviation.
      *

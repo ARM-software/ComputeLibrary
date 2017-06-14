@@ -134,7 +134,7 @@ void validate(float target, float ref, float tolerance_abs_error = std::numeric_
  * - All values should match
  */
 void validate_min_max_loc(int32_t min, int32_t ref_min, int32_t max, int32_t ref_max,
-                          Coordinates2DArray &min_loc, Coordinates2DArray &ref_min_loc, Coordinates2DArray &max_loc, Coordinates2DArray &ref_max_loc,
+                          IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &ref_min_loc, IArray<Coordinates2D> &max_loc, IArray<Coordinates2D> &ref_max_loc,
                           uint32_t min_count, uint32_t ref_min_count, uint32_t max_count, uint32_t ref_max_count);
 
 } // namespace validation

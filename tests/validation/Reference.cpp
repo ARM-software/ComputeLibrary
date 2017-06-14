@@ -71,7 +71,7 @@ std::pair<RawTensor, RawTensor> Reference::compute_reference_sobel_5x5(const Ten
 
     return std::make_pair(ref_dst_x, ref_dst_y);
 }
-void Reference::compute_reference_min_max_location(const TensorShape &shape, DataType dt_in, int32_t &min, int32_t &max, Coordinates2DArray &min_loc, Coordinates2DArray &max_loc,
+void Reference::compute_reference_min_max_location(const TensorShape &shape, DataType dt_in, int32_t &min, int32_t &max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc,
                                                    uint32_t &min_count, uint32_t &max_count)
 {
     // Create reference
