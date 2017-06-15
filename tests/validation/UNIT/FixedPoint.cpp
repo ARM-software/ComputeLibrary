@@ -139,14 +139,14 @@ BOOST_DATA_TEST_CASE(FixedPointQS8Outputs, (boost::unit_test::data::make(func_na
             out_val   = fixed_point_arithmetic::inv_sqrt(in_val);
         }
 
-        BOOST_TEST_INFO("input = " << in_val);
-        BOOST_TEST_INFO("output = " << out_val);
-        BOOST_TEST_INFO("reference = " << ref_val);
-        BOOST_TEST_INFO("tolerance = " << tolerance);
-        BOOST_TEST_WARN((std::abs(static_cast<float>(out_val) - ref_val) <= tolerance));
-
         if(std::abs(static_cast<float>(out_val) - ref_val) > tolerance)
         {
+            BOOST_TEST_INFO("input = " << in_val);
+            BOOST_TEST_INFO("output = " << out_val);
+            BOOST_TEST_INFO("reference = " << ref_val);
+            BOOST_TEST_INFO("tolerance = " << tolerance);
+            BOOST_TEST_WARN((std::abs(static_cast<float>(out_val) - ref_val) <= tolerance));
+
             ++num_mismatches;
         }
 

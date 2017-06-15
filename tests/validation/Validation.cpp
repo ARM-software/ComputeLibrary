@@ -57,6 +57,11 @@ namespace
  */
 double get_double_data(const void *ptr, DataType data_type)
 {
+    if(ptr == nullptr)
+    {
+        ARM_COMPUTE_ERROR("Can't dereference a null pointer!");
+    }
+
     switch(data_type)
     {
         case DataType::U8:
@@ -92,6 +97,39 @@ double get_double_data(const void *ptr, DataType data_type)
     }
 }
 
+bool is_equal(double target, double ref, double max_absolute_error = std::numeric_limits<double>::epsilon(), double max_relative_error = 0.0001f)
+{
+    if(!std::isfinite(target) || !std::isfinite(ref))
+    {
+        return false;
+    }
+
+    // No need further check if they are equal
+    if(ref == target)
+    {
+        return true;
+    }
+
+    // Need this check for the situation when the two values close to zero but have different sign
+    if(std::abs(std::abs(ref) - std::abs(target)) <= max_absolute_error)
+    {
+        return true;
+    }
+
+    double relative_error = 0;
+
+    if(std::abs(target) > std::abs(ref))
+    {
+        relative_error = std::abs((target - ref) / target);
+    }
+    else
+    {
+        relative_error = std::abs((ref - target) / ref);
+    }
+
+    return relative_error <= max_relative_error;
+}
+
 void check_border_element(const IAccessor &tensor, const Coordinates &id,
                           const BorderMode &border_mode, const void *border_value,
                           int64_t &num_elements, int64_t &num_mismatches)
@@ -112,15 +150,15 @@ void check_border_element(const IAccessor &tensor, const Coordinates &id,
         const size_t channel_offset = channel * channel_size;
         const double target         = get_double_data(ptr + channel_offset, tensor.data_type());
         const double ref            = get_double_data(static_cast<const uint8_t *>(border_value) + channel_offset, tensor.data_type());
-        const double difference     = target - ref;
+        const bool   equal          = is_equal(target, ref);
 
         BOOST_TEST_INFO("id = " << id);
         BOOST_TEST_INFO("channel = " << channel);
         BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
         BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
-        BOOST_TEST_WARN(difference == 0);
+        BOOST_TEST_WARN(equal);
 
-        if(difference != 0.f)
+        if(!equal)
         {
             ++num_mismatches;
         }
@@ -141,22 +179,22 @@ void check_single_element(const Coordinates &id, const IAccessor &tensor, const 
         const size_t channel_offset = channel * channel_size;
         const double target         = get_double_data(ptr + channel_offset, reference.data_type());
         const double ref            = get_double_data(ref_ptr + channel_offset, reference.data_type());
-        const double difference     = target - ref;
+        bool         equal          = is_equal(target, ref, tolerance_value);
 
-        BOOST_TEST_INFO("id = " << id);
-        BOOST_TEST_INFO("channel = " << channel);
-        BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
-        BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
-        BOOST_TEST_WARN(difference == 0);
-
-        if(std::abs(difference) > tolerance_value)
+        if(wrap_range != 0 && !equal)
         {
-            // If no special cases for tolerating wrappping cases
-            // or the special case of wrapping exceeds tolerance_value
-            if(wrap_range == 0 || (wrap_range - std::abs(difference)) > tolerance_value)
-            {
-                ++num_mismatches;
-            }
+            equal = is_equal(target, ref, wrap_range - tolerance_value);
+        }
+
+        if(!equal)
+        {
+            BOOST_TEST_INFO("id = " << id);
+            BOOST_TEST_INFO("channel = " << channel);
+            BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
+            BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
+            BOOST_TEST_WARN(equal);
+
+            ++num_mismatches;
         }
         ++num_elements;
     }
@@ -247,15 +285,15 @@ void validate(const IAccessor &tensor, const void *reference_value)
             const size_t channel_offset = channel * channel_size;
             const double target         = get_double_data(ptr + channel_offset, tensor.data_type());
             const double ref            = get_double_data(reference_value, tensor.data_type());
-            const double difference     = target - ref;
+            const bool   equal          = is_equal(target, ref);
 
             BOOST_TEST_INFO("id = " << id);
             BOOST_TEST_INFO("channel = " << channel);
             BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
             BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
-            BOOST_TEST_WARN(difference == 0);
+            BOOST_TEST_WARN(equal);
 
-            if(difference != 0.f)
+            if(!equal)
             {
                 ++num_mismatches;
             }
