@@ -46,33 +46,14 @@ namespace test
 {
 namespace
 {
-void convert_rgb_to_u8(const RawTensor &src, RawTensor &dst)
+template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+void rgb_to_luminance(const RawTensor &src, RawTensor &dst)
 {
     const size_t min_size = std::min(src.size(), dst.size());
 
     for(size_t i = 0, j = 0; i < min_size; i += 3, ++j)
     {
-        dst.data()[j] = 0.2126f * src.data()[i + 0] + 0.7152f * src.data()[i + 1] + 0.0722f * src.data()[i + 2];
-    }
-}
-
-void convert_rgb_to_u16(const RawTensor &src, RawTensor &dst)
-{
-    const size_t min_size = std::min(src.size(), dst.size());
-
-    for(size_t i = 0, j = 0; i < min_size; i += 3, ++j)
-    {
-        reinterpret_cast<uint16_t *>(dst.data())[j] = 0.2126f * src.data()[i + 0] + 0.7152f * src.data()[i + 1] + 0.0722f * src.data()[i + 2];
-    }
-}
-
-void convert_rgb_to_s16(const RawTensor &src, RawTensor &dst)
-{
-    const size_t min_size = std::min(src.size(), dst.size());
-
-    for(size_t i = 0, j = 0; i < min_size; i += 3, ++j)
-    {
-        reinterpret_cast<int16_t *>(dst.data())[j] = 0.2126f * src.data()[i + 0] + 0.7152f * src.data()[i + 1] + 0.0722f * src.data()[i + 2];
+        reinterpret_cast<T *>(dst.data())[j] = 0.2126f * src.data()[i + 0] + 0.7152f * src.data()[i + 1] + 0.0722f * src.data()[i + 2];
     }
 }
 
@@ -261,9 +242,10 @@ const TensorLibrary::Converter &TensorLibrary::get_converter(Format src, Format 
 {
     static std::map<std::pair<Format, Format>, Converter> converters =
     {
-        { std::make_pair(Format::RGB888, Format::U8), convert_rgb_to_u8 },
-        { std::make_pair(Format::RGB888, Format::U16), convert_rgb_to_u16 },
-        { std::make_pair(Format::RGB888, Format::S16), convert_rgb_to_s16 }
+        { std::make_pair(Format::RGB888, Format::U8), rgb_to_luminance<uint8_t> },
+        { std::make_pair(Format::RGB888, Format::U16), rgb_to_luminance<uint16_t> },
+        { std::make_pair(Format::RGB888, Format::S16), rgb_to_luminance<int16_t> },
+        { std::make_pair(Format::RGB888, Format::U32), rgb_to_luminance<uint32_t> }
     };
 
     const auto it = converters.find(std::make_pair(src, dst));
@@ -411,6 +393,11 @@ const RawTensor &TensorLibrary::find_or_create_raw_tensor(const std::string &nam
     (*get_extractor(format, channel))(src, dst);
 
     return _cache.add(std::make_tuple(name, format, channel), std::move(dst));
+}
+
+TensorShape TensorLibrary::get_image_shape(const std::string &name)
+{
+    return load_image(name).shape();
 }
 
 RawTensor TensorLibrary::get(const TensorShape &shape, DataType data_type, int num_channels, int fixed_point_position)

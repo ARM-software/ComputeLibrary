@@ -73,6 +73,12 @@ public:
     /** Seed that is used to fill tensors with random values. */
     std::random_device::result_type seed() const;
 
+    /** Provides a tensor shape for the specified image.
+     *
+     * @param[in] name Image file used to look up the raw tensor.
+     */
+    TensorShape get_image_shape(const std::string &name);
+
     /** Creates an uninitialised raw tensor with the given @p shape, @p
      * data_type and @p num_channels.
      *
