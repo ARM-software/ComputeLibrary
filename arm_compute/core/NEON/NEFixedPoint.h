@@ -681,6 +681,15 @@ qint8x16_t vtanhq_qs8(qint8x16_t a, int fixed_point_position);
  * @return The result of the 8bit power.
  */
 qint8x8_t vqpowq_qs8(qint8x8_t a, qint8x16_t b, int fixed_point_position);
+
+/** Compute lane-by-lane maximum between elements of a float vector with 4x2 elements
+ *
+ * @param[in] a Float input vector
+ * @param[in] b Float input vector
+ *
+ * @return The lane-by-lane maximum -> float32x4x2
+ */
+float32x4x2_t vmax2q_f32(float32x4x2_t a, float32x4x2_t b);
 }
 #include "arm_compute/core/NEON/NEFixedPoint.inl"
 #endif /* __ARM_COMPUTE_NEFIXEDPOINT_H__ */

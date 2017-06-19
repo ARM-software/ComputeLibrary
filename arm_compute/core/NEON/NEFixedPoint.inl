@@ -1015,4 +1015,16 @@ inline qint8x16_t vqpowq_qs8(qint8x16_t a, qint8x16_t b, int fixed_point_positio
 {
     return vqexpq_qs8(vqmulq_qs8(b, vlogq_qs8(a, fixed_point_position), fixed_point_position), fixed_point_position);
 }
+
+inline float32x4x2_t vmax2q_f32(float32x4x2_t a, float32x4x2_t b)
+{
+    float32x4x2_t res =
+    {
+        {
+            vmaxq_f32(a.val[0], b.val[0]),
+            vmaxq_f32(a.val[1], b.val[1])
+        }
+    };
+    return res;
+}
 }

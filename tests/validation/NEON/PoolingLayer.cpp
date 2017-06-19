@@ -92,6 +92,20 @@ Tensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &sha
 
     return dst;
 }
+
+TensorShape get_output_shape(TensorShape in_shape, const PoolingLayerInfo &pool_info)
+{
+    TensorShape out_shape(in_shape);
+    const std::pair<unsigned int, unsigned int> scaled_dims = arm_compute::scaled_dimensions(in_shape.x(),
+                                                                                             in_shape.y(),
+                                                                                             pool_info.pool_size(),
+                                                                                             pool_info.pad_stride_info().stride().first, pool_info.pad_stride_info().stride().second,
+                                                                                             pool_info.pad_stride_info().pad().first, pool_info.pad_stride_info().pad().second,
+                                                                                             pool_info.pad_stride_info().round());
+    out_shape.set(0, scaled_dims.first);
+    out_shape.set(1, scaled_dims.second);
+    return out_shape;
+}
 } // namespace
 
 #ifndef DOXYGEN_SKIP_THIS
@@ -109,6 +123,23 @@ BOOST_DATA_TEST_CASE(RandomDataset,
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_pooling_layer(obj.src_shape, obj.dst_shape, dt, obj.info);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst, tolerance_f, 0);
+}
+
+BOOST_DATA_TEST_CASE(RunSmall7x7,
+                     SmallShapes() * CNNFloatDataTypes() * PoolingTypes() * boost::unit_test::data::make({ 2, 3, 7 }) * boost::unit_test::data::make({ 1, 2 }) * boost::unit_test::data::make({ 0, 1 }),
+                     src_shape, dt, pool_type, pool_size, pool_stride, pool_pad)
+{
+    PoolingLayerInfo pool_info(pool_type, pool_size, PadStrideInfo(pool_stride, pool_stride, pool_pad, pool_pad, DimensionRoundingType::CEIL));
+    TensorShape      dst_shape = get_output_shape(src_shape, pool_info);
+
+    // Compute function
+    Tensor dst = compute_pooling_layer(src_shape, dst_shape, dt, pool_info);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_pooling_layer(src_shape, dst_shape, dt, pool_info);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst, tolerance_f, 0);

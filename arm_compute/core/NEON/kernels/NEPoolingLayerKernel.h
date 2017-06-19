@@ -87,6 +87,13 @@ private:
      */
     template <PoolingType pooling_type>
     void pooling3_q8(const Window &window_input, const Window &window);
+    /** Function to perform 7x7 pooling.
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type>
+    void pooling7_f32(const Window &window_input, const Window &window);
     /** Common signature for all the specialised Pooling functions
      *
      * @param[in] window_input Input region on which to execute the kernel.
