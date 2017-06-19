@@ -58,8 +58,8 @@ public:
         std::stringstream ss;
         ss << "Threshold";
         ss << "_threshold_value" << threshold;
-        ss << "_false_value" << false_value;
-        ss << "_true_value" << true_value;
+        ss << "_false_value" << std::boolalpha << false_value;
+        ss << "_true_value" << std::boolalpha << true_value;
         ss << "_type";
         ss << ((type == ThresholdType::BINARY) ? "binary" : "range");
         ss << "_upper" << upper;

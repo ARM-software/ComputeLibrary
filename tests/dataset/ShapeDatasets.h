@@ -118,7 +118,7 @@ class SmallShapes final : public ShapeDataset<3>
 {
 public:
     SmallShapes()
-        : ShapeDataset(TensorShape(5U, 5U),
+        : ShapeDataset(TensorShape(7U, 7U),
                        TensorShape(27U, 13U, 2U),
                        TensorShape(128U, 64U, 1U, 3U))
     {

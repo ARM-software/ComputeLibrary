@@ -52,6 +52,7 @@ public:
      * @param[in]  input     Source tensor. Data types supported: F16, F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     *                       Supported pooling sizes : 2, 3 and 7
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
 

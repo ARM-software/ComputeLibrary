@@ -96,7 +96,6 @@ Tensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &sha
 
 #ifndef DOXYGEN_SKIP_THIS
 BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(Pooling)
 BOOST_AUTO_TEST_SUITE(PoolingLayer)
 
 BOOST_AUTO_TEST_SUITE(Float)
@@ -133,7 +132,6 @@ BOOST_DATA_TEST_CASE(RandomDataset,
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 #endif

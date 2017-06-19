@@ -36,6 +36,7 @@
 #include "dataset/InterpolationPolicyDataset.h"
 #include "dataset/NormalizationTypeDataset.h"
 #include "dataset/PoolingLayerDataset.h"
+#include "dataset/PoolingTypesDataset.h"
 #include "dataset/RoundingPolicyDataset.h"
 #include "dataset/ShapeDatasets.h"
 #include "dataset/ThresholdDataset.h"
@@ -181,6 +182,12 @@ struct is_dataset<arm_compute::test::RandomPoolingLayerDataset> : boost::mpl::tr
 /// Register the data set with Boost
 template <>
 struct is_dataset<arm_compute::test::RoundingPolicies> : boost::mpl::true_
+{
+};
+
+/// Register the data set with Boost
+template <>
+struct is_dataset<arm_compute::test::PoolingTypes> : boost::mpl::true_
 {
 };
 

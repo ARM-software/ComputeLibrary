@@ -65,10 +65,13 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
+    static const std::set<int> supported_pool_sizes = { 2, 3, 7 };
+    ARM_COMPUTE_UNUSED(supported_pool_sizes);
+
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON(2 != pool_size && 3 != pool_size);
+    ARM_COMPUTE_ERROR_ON(supported_pool_sizes.find(pool_size) == supported_pool_sizes.end());
     ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
 
     // Check output dimensions
@@ -82,10 +85,11 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     ARM_COMPUTE_UNUSED(pooled_h);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pooled_w) || (output->info()->dimension(1) != pooled_h));
 
-    const int input_width   = input->info()->dimension(0);
-    const int input_height  = input->info()->dimension(1);
-    const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + pool_size) - input_width;
-    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+    const int num_elements_read_per_iteration = (pool_size == 7) ? 8 : pool_size;
+    const int input_width                     = input->info()->dimension(0);
+    const int input_height                    = input->info()->dimension(1);
+    const int upper_bound_w                   = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elements_read_per_iteration) - input_width;
+    const int upper_bound_h                   = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
 
     // Set instance variables
     _input              = input;
@@ -138,17 +142,12 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     }
 
     // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = 1;
-
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
-
+    const unsigned int     num_elems_processed_per_iteration = 1;
+    Window                 win                               = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowStatic     input_access(input->info(), -pool_pad_x, -pool_pad_y, input_width + _border_size.right, input_height + _border_size.bottom);
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-
     update_window_and_padding(win, input_access, output_access);
-
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
     ICLKernel::configure(win);
 }
 
