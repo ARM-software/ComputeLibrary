@@ -295,6 +295,21 @@ RawTensor Reference::compute_reference_depth_convert(const TensorShape &shape, D
     return ref_dst;
 }
 
+RawTensor Reference::compute_reference_gaussian3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
+{
+    // Create reference
+    RawTensor ref_src = library->get(shape, DataType::U8);
+    RawTensor ref_dst = library->get(shape, DataType::U8);
+
+    // Fill reference
+    library->fill_tensor_uniform(ref_src, 0);
+
+    // Compute reference
+    ReferenceCPP::gaussian3x3(ref_src, ref_dst, border_mode, constant_border_value);
+
+    return ref_dst;
+}
+
 RawTensor Reference::compute_reference_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2, const TensorShape &src_shape3,
                                             const TensorShape &dst_shape, float alpha, float beta, DataType dt, int fixed_point_position)
 {
