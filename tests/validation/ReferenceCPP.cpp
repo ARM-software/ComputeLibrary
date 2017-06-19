@@ -48,6 +48,26 @@ namespace test
 {
 namespace validation
 {
+// Sobel 3x3
+void ReferenceCPP::sobel_3x3(RawTensor &src, RawTensor &dst_x, RawTensor &dst_y, BorderMode border_mode, uint8_t constant_border_value)
+{
+    ARM_COMPUTE_ERROR_ON(src.data_type() != DataType::U8 || dst_x.data_type() != DataType::S16 || dst_y.data_type() != DataType::S16);
+    Tensor<uint8_t> s(src.shape(), src.data_type(), src.fixed_point_position(), reinterpret_cast<const uint8_t *>(src.data()));
+    Tensor<int16_t> dx(dst_x.shape(), dst_x.data_type(), dst_x.fixed_point_position(), reinterpret_cast<int16_t *>(dst_x.data()));
+    Tensor<int16_t> dy(dst_y.shape(), dst_y.data_type(), dst_y.fixed_point_position(), reinterpret_cast<int16_t *>(dst_y.data()));
+    tensor_operations::sobel_3x3(s, dx, dy, border_mode, constant_border_value);
+}
+
+// Sobel 5x5
+void ReferenceCPP::sobel_5x5(RawTensor &src, RawTensor &dst_x, RawTensor &dst_y, BorderMode border_mode, uint8_t constant_border_value)
+{
+    ARM_COMPUTE_ERROR_ON(src.data_type() != DataType::U8 || dst_x.data_type() != DataType::S16 || dst_y.data_type() != DataType::S16);
+    Tensor<uint8_t> s(src.shape(), src.data_type(), src.fixed_point_position(), reinterpret_cast<const uint8_t *>(src.data()));
+    Tensor<int16_t> dx(dst_x.shape(), dst_x.data_type(), dst_x.fixed_point_position(), reinterpret_cast<int16_t *>(dst_x.data()));
+    Tensor<int16_t> dy(dst_y.shape(), dst_y.data_type(), dst_y.fixed_point_position(), reinterpret_cast<int16_t *>(dst_y.data()));
+    tensor_operations::sobel_5x5(s, dx, dy, border_mode, constant_border_value);
+}
+
 // Absolute difference
 void ReferenceCPP::absolute_difference(const RawTensor &src1, const RawTensor &src2, RawTensor &dst)
 {

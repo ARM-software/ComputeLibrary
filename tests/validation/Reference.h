@@ -37,6 +37,24 @@ namespace validation
 class Reference
 {
 public:
+    /** Compute reference sobel 3x3.
+     *
+     * @param[in] shape                 Shape of the input and output tensors.
+     * @param[in] border_mode           Border mode to use for input tensor
+     * @param[in] constant_border_value Constant value to use if @p border_mode is constant
+     *
+     * @return Computed raw tensors along x and y axis.
+     */
+    static std::pair<RawTensor, RawTensor> compute_reference_sobel_3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value);
+    /** Compute reference sobel 5x5.
+     *
+     * @param[in] shape                 Shape of the input and output tensors.
+     * @param[in] border_mode           Border mode to use for input tensor
+     * @param[in] constant_border_value Constant value to use if @p border_mode is constant
+     *
+     * @return Computed raw tensors along x and y axis.
+     */
+    static std::pair<RawTensor, RawTensor> compute_reference_sobel_5x5(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value);
     /** Compute reference mean and standard deviation.
      *
      * @param[in] shape Shape of the input tensors.

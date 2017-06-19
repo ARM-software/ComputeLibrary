@@ -39,6 +39,36 @@ namespace test
 {
 namespace validation
 {
+std::pair<RawTensor, RawTensor> Reference::compute_reference_sobel_3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
+{
+    // Create reference
+    RawTensor ref_src   = library->get(shape, Format::U8);
+    RawTensor ref_dst_x = library->get(shape, Format::S16);
+    RawTensor ref_dst_y = library->get(shape, Format::S16);
+
+    // Fill reference
+    library->fill_tensor_uniform(ref_src, 0);
+
+    // Compute reference
+    ReferenceCPP::sobel_3x3(ref_src, ref_dst_x, ref_dst_y, border_mode, constant_border_value);
+
+    return std::make_pair(ref_dst_x, ref_dst_y);
+}
+std::pair<RawTensor, RawTensor> Reference::compute_reference_sobel_5x5(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
+{
+    // Create reference
+    RawTensor ref_src   = library->get(shape, Format::U8);
+    RawTensor ref_dst_x = library->get(shape, Format::S16);
+    RawTensor ref_dst_y = library->get(shape, Format::S16);
+
+    // Fill reference
+    library->fill_tensor_uniform(ref_src, 0);
+
+    // Compute reference
+    ReferenceCPP::sobel_5x5(ref_src, ref_dst_x, ref_dst_y, border_mode, constant_border_value);
+
+    return std::make_pair(ref_dst_x, ref_dst_y);
+}
 std::pair<float, float> Reference::compute_reference_mean_and_standard_deviation(const TensorShape &shape)
 {
     // Create reference

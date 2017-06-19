@@ -34,10 +34,12 @@
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Types.h"
 #include "tests/validation/FixedPoint.h"
+#include "tests/validation/ValidationUserConfiguration.h"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <random>
 
 namespace arm_compute
 {
@@ -199,38 +201,118 @@ void vector_matrix_multiply(const int8_t *in, const int8_t *weights, const int8_
     }
 }
 
+template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+T tensor_elem_at(const Tensor<T> &in, Coordinates &coord, BorderMode border_mode, T constant_border_value)
+{
+    const int x      = coord.x();
+    const int y      = coord.y();
+    const int width  = static_cast<int>(in.shape().x());
+    const int height = static_cast<int>(in.shape().y());
+
+    // If on border
+    if(x < 0 || y < 0 || x >= width || y >= height)
+    {
+        if(border_mode == BorderMode::CONSTANT)
+        {
+            return constant_border_value;
+        }
+        else if(border_mode == BorderMode::REPLICATE)
+        {
+            coord.set(0, std::max(0, std::min(x, width - 1)));
+            coord.set(1, std::max(0, std::min(y, height - 1)));
+            return in[coord2index(in.shape(), coord)];
+        }
+        else
+        {
+            // Return a random value if on border and border_mode == UNDEFINED
+            std::mt19937                     gen(user_config.seed.get());
+            std::uniform_int_distribution<T> distribution(0, 255);
+            return distribution(gen);
+        }
+    }
+    else
+    {
+        return in[coord2index(in.shape(), coord)];
+    }
+}
+
 /** Apply 2D spatial filter on a single element of @p in at coordinates @p coord
  *
  * - filter sizes have to be odd number
- * - Valid region assumed
  * - Row major order of filter assumed
  * - TO_ZERO rounding policy assumed
  * - SATURATE convert policy assumed
  *
  */
 template <typename T1, typename T2, typename T3>
-void apply_2d_spatial_filter(Coordinates coord, const Tensor<T1> &in, Tensor<T3> &out, const TensorShape &filter_shape, const T2 *filter_itr, float scale)
+void apply_2d_spatial_filter(Coordinates coord, const Tensor<T1> &in, Tensor<T3> &out, const TensorShape &filter_shape, const T2 *filter_itr, float scale, BorderMode border_mode,
+                             T1 constant_border_value = 0)
 {
-    using intermediate_type = typename common_promoted_signed_type<T1, T2, T3>::intermediate_type;
-    intermediate_type val   = 0;
-    int               x     = coord.x();
-    int               y     = coord.y();
-    for(size_t j = y - filter_shape[1] / 2; j <= y + filter_shape[1] / 2; ++j)
+    double    val = 0;
+    const int x   = coord.x();
+    const int y   = coord.y();
+    for(int j = y - static_cast<int>(filter_shape[1] / 2); j <= y + static_cast<int>(filter_shape[1] / 2); ++j)
     {
-        for(size_t i = x - filter_shape[0] / 2; i <= x + filter_shape[0] / 2; ++i)
+        for(int i = x - static_cast<int>(filter_shape[0] / 2); i <= x + static_cast<int>(filter_shape[0] / 2); ++i)
         {
             coord.set(0, i);
             coord.set(1, j);
-            val += static_cast<intermediate_type>(*filter_itr) * static_cast<intermediate_type>(in[coord2index(in.shape(), coord)]);
+            double pixel_to_multiply = tensor_elem_at(in, coord, border_mode, constant_border_value);
+            val += static_cast<double>(*filter_itr) * pixel_to_multiply;
             ++filter_itr;
         }
     }
     coord.set(0, x);
     coord.set(1, y);
-    double rounded_val = cpp11::trunc(val * static_cast<double>(scale));
+    const double rounded_val = cpp11::trunc(val * static_cast<double>(scale));
     out[coord2index(in.shape(), coord)] = saturate_cast<T3>(rounded_val);
 }
 } // namespace
+
+// Sobel 3x3
+template <typename T1, typename T2>
+void sobel_3x3(Tensor<T1> &in, Tensor<T2> &out_x, Tensor<T2> &out_y, BorderMode border_mode, uint8_t constant_border_value)
+{
+    const std::array<int8_t, 9> sobel_x{ { -1, 0, 1, -2, 0, 2, -1, 0, 1 } };
+    const std::array<int8_t, 9> sobel_y{ { -1, -2, -1, 0, 0, 0, 1, 2, 1 } };
+
+    for(int element_idx = 0; element_idx < in.num_elements(); ++element_idx)
+    {
+        const Coordinates id = index2coord(in.shape(), element_idx);
+
+        apply_2d_spatial_filter(id, in, out_x, TensorShape(3U, 3U), sobel_x.data(), 1.f, border_mode, constant_border_value);
+        apply_2d_spatial_filter(id, in, out_y, TensorShape(3U, 3U), sobel_y.data(), 1.f, border_mode, constant_border_value);
+    }
+}
+
+// Sobel 5x5
+template <typename T1, typename T2>
+void sobel_5x5(Tensor<T1> &in, Tensor<T2> &out_x, Tensor<T2> &out_y, BorderMode border_mode, uint8_t constant_border_value)
+{
+    const std::array<int8_t, 25> sobel_x{ {
+            -1, -2, 0, 2, 1,
+            -4, -8, 0, 8, 4,
+            -6, -12, 0, 12, 6,
+            -4, -8, 0, 8, 4,
+            -1, -2, 0, 2, 1
+        } };
+
+    const std::array<int8_t, 25> sobel_y{ {
+            -1, -4, -6, -4, -1,
+            -2, -8, -12, -8, -2,
+            0, 0, 0, 0, 0,
+            2, 8, 12, 8, 2,
+            1, 4, 6, 4, 1
+        } };
+
+    for(int element_idx = 0; element_idx < in.num_elements(); ++element_idx)
+    {
+        const Coordinates id = index2coord(in.shape(), element_idx);
+
+        apply_2d_spatial_filter(id, in, out_x, TensorShape(5U, 5U), sobel_x.data(), 1.f, border_mode, constant_border_value);
+        apply_2d_spatial_filter(id, in, out_y, TensorShape(5U, 5U), sobel_y.data(), 1.f, border_mode, constant_border_value);
+    }
+}
 
 // Mean Standard Deviation
 template <typename T1>
@@ -438,7 +520,7 @@ void box3x3(const Tensor<T> &in, Tensor<T> &out)
         const Coordinates id = index2coord(in.shape(), element_idx);
         if(is_in_valid_region(valid_region, id))
         {
-            apply_2d_spatial_filter(id, in, out, TensorShape(3U, 3U), filter.data(), scale);
+            apply_2d_spatial_filter(id, in, out, TensorShape(3U, 3U), filter.data(), scale, BorderMode::UNDEFINED);
         }
     }
 }
