@@ -70,17 +70,17 @@ private:
      *
      * @param win The window to run the algorithm on.
      */
-    void minmax_U8(const Window &win);
+    void minmax_U8(Window win);
     /** Performs the min/max algorithm on S16 images on a given window.
      *
      * @param win The window to run the algorithm on.
      */
-    void minmax_S16(const Window &win);
+    void minmax_S16(Window win);
     /** Common signature for all the specialised MinMax functions
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using MinMaxFunction = void (NEMinMaxKernel::*)(const Window &window);
+    using MinMaxFunction = void (NEMinMaxKernel::*)(Window window);
     /** MinMax function to use for the particular image types passed to configure() */
     MinMaxFunction _func;
     /** Helper to update min/max values **/
@@ -148,14 +148,13 @@ private:
     template <class T, typename>
     struct create_func_table;
 
-    const IImage        *_input;                             /**< Input image. */
-    int32_t             *_min;                               /**< Minimum value. */
-    int32_t             *_max;                               /**< Maximum value. */
-    uint32_t            *_min_count;                         /**< Count of minimum value encounters. */
-    uint32_t            *_max_count;                         /**< Count of maximum value encounters. */
-    ICoordinates2DArray *_min_loc;                           /**< Locations of minimum values. */
-    ICoordinates2DArray *_max_loc;                           /**< Locations of maximum values. */
-    unsigned int         _num_elems_processed_per_iteration; /**< Elements processed per iteration. */
+    const IImage        *_input;     /**< Input image. */
+    int32_t             *_min;       /**< Minimum value. */
+    int32_t             *_max;       /**< Maximum value. */
+    uint32_t            *_min_count; /**< Count of minimum value encounters. */
+    uint32_t            *_max_count; /**< Count of maximum value encounters. */
+    ICoordinates2DArray *_min_loc;   /**< Locations of minimum values. */
+    ICoordinates2DArray *_max_loc;   /**< Locations of maximum values. */
 };
 }
 #endif /*__ARM_COMPUTE_NEMINMAXLOCATIONKERNEL_H__ */

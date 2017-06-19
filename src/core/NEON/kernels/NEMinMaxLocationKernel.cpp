@@ -31,7 +31,9 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/Window.h"
 
+#include <algorithm>
 #include <arm_neon.h>
 #include <climits>
 #include <cstddef>
@@ -71,12 +73,10 @@ void NEMinMaxKernel::configure(const IImage *input, int32_t *min, int32_t *max)
             break;
     }
 
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
 
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
     INEKernel::configure(win);
 }
@@ -113,20 +113,44 @@ void NEMinMaxKernel::update_min_max(const T min, const T max)
     }
 }
 
-void NEMinMaxKernel::minmax_U8(const Window &win)
+void NEMinMaxKernel::minmax_U8(Window win)
 {
     uint8x8_t carry_min = vdup_n_u8(UCHAR_MAX);
     uint8x8_t carry_max = vdup_n_u8(0);
+
+    uint8_t carry_max_scalar = 0;
+    uint8_t carry_min_scalar = UCHAR_MAX;
+
+    const int x_start = win.x().start();
+    const int x_end   = win.x().end();
+
+    // Handle X dimension manually to split into two loops
+    // First one will use vector operations, second one processes the left over pixels
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Iterator input(_input, win);
 
     execute_window_loop(win, [&](const Coordinates & id)
     {
-        const uint8x16_t pixels  = vld1q_u8(input.ptr());
-        const uint8x8_t  tmp_min = vmin_u8(vget_high_u8(pixels), vget_low_u8(pixels));
-        const uint8x8_t  tmp_max = vmax_u8(vget_high_u8(pixels), vget_low_u8(pixels));
-        carry_min                = vmin_u8(tmp_min, carry_min);
-        carry_max                = vmax_u8(tmp_max, carry_max);
+        int x = x_start;
+
+        // Vector loop
+        for(; x <= x_end - 16; x += 16)
+        {
+            const uint8x16_t pixels  = vld1q_u8(input.ptr() + x);
+            const uint8x8_t  tmp_min = vmin_u8(vget_high_u8(pixels), vget_low_u8(pixels));
+            const uint8x8_t  tmp_max = vmax_u8(vget_high_u8(pixels), vget_low_u8(pixels));
+            carry_min                = vmin_u8(tmp_min, carry_min);
+            carry_max                = vmax_u8(tmp_max, carry_max);
+        }
+
+        // Process leftover pixels
+        for(; x < x_end; ++x)
+        {
+            const uint8_t pixel = input.ptr()[x];
+            carry_min_scalar    = std::min(pixel, carry_min_scalar);
+            carry_max_scalar    = std::max(pixel, carry_max_scalar);
+        }
     },
     input);
 
@@ -139,30 +163,55 @@ void NEMinMaxKernel::minmax_U8(const Window &win)
     carry_max = vpmax_u8(carry_max, carry_max);
 
     // Extract max/min values
-    const uint8_t min_i = vget_lane_u8(carry_min, 0);
-    const uint8_t max_i = vget_lane_u8(carry_max, 0);
+    const uint8_t min_i = std::min(vget_lane_u8(carry_min, 0), carry_min_scalar);
+    const uint8_t max_i = std::max(vget_lane_u8(carry_max, 0), carry_max_scalar);
 
     // Perform reduction of local min/max values
     update_min_max(min_i, max_i);
 }
 
-void NEMinMaxKernel::minmax_S16(const Window &win)
+void NEMinMaxKernel::minmax_S16(Window win)
 {
     int16x4_t carry_min = vdup_n_s16(SHRT_MAX);
     int16x4_t carry_max = vdup_n_s16(SHRT_MIN);
+
+    int16_t carry_max_scalar = SHRT_MIN;
+    int16_t carry_min_scalar = SHRT_MAX;
+
+    const int x_start = win.x().start();
+    const int x_end   = win.x().end();
+
+    // Handle X dimension manually to split into two loops
+    // First one will use vector operations, second one processes the left over pixels
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Iterator input(_input, win);
 
     execute_window_loop(win, [&](const Coordinates & id)
     {
-        const auto        in_ptr   = reinterpret_cast<const int16_t *>(input.ptr());
-        const int16x8x2_t pixels   = vld2q_s16(in_ptr);
-        const int16x8_t   tmp_min1 = vminq_s16(pixels.val[0], pixels.val[1]);
-        const int16x8_t   tmp_max1 = vmaxq_s16(pixels.val[0], pixels.val[1]);
-        const int16x4_t   tmp_min2 = vmin_s16(vget_high_s16(tmp_min1), vget_low_s16(tmp_min1));
-        const int16x4_t   tmp_max2 = vmax_s16(vget_high_s16(tmp_max1), vget_low_s16(tmp_max1));
-        carry_min                  = vmin_s16(tmp_min2, carry_min);
-        carry_max                  = vmax_s16(tmp_max2, carry_max);
+        int        x      = x_start;
+        const auto in_ptr = reinterpret_cast<const int16_t *const>(input.ptr());
+
+        // Vector loop
+        for(; x <= x_end - 16; x += 16)
+        {
+            const int16x8x2_t pixels   = vld2q_s16(in_ptr + x);
+            const int16x8_t   tmp_min1 = vminq_s16(pixels.val[0], pixels.val[1]);
+            const int16x8_t   tmp_max1 = vmaxq_s16(pixels.val[0], pixels.val[1]);
+            const int16x4_t   tmp_min2 = vmin_s16(vget_high_s16(tmp_min1), vget_low_s16(tmp_min1));
+            const int16x4_t   tmp_max2 = vmax_s16(vget_high_s16(tmp_max1), vget_low_s16(tmp_max1));
+            carry_min                  = vmin_s16(tmp_min2, carry_min);
+            carry_max                  = vmax_s16(tmp_max2, carry_max);
+        }
+
+        // Process leftover pixels
+        for(; x < x_end; ++x)
+        {
+            const int16_t pixel = in_ptr[x];
+            carry_min_scalar    = std::min(pixel, carry_min_scalar);
+            carry_max_scalar    = std::max(pixel, carry_max_scalar);
+        }
+
     },
     input);
 
@@ -173,15 +222,15 @@ void NEMinMaxKernel::minmax_S16(const Window &win)
     carry_max = vpmax_s16(carry_max, carry_max);
 
     // Extract max/min values
-    const int16_t min_i = vget_lane_s16(carry_min, 0);
-    const int16_t max_i = vget_lane_s16(carry_max, 0);
+    const int16_t min_i = std::min(vget_lane_s16(carry_min, 0), carry_min_scalar);
+    const int16_t max_i = std::max(vget_lane_s16(carry_max, 0), carry_max_scalar);
 
     // Perform reduction of local min/max values
     update_min_max(min_i, max_i);
 }
 
 NEMinMaxLocationKernel::NEMinMaxLocationKernel()
-    : _func(nullptr), _input(nullptr), _min(nullptr), _max(nullptr), _min_count(nullptr), _max_count(nullptr), _min_loc(nullptr), _max_loc(nullptr), _num_elems_processed_per_iteration(0)
+    : _func(nullptr), _input(nullptr), _min(nullptr), _max(nullptr), _min_count(nullptr), _max_count(nullptr), _min_loc(nullptr), _max_loc(nullptr)
 {
 }
 
@@ -259,12 +308,12 @@ void NEMinMaxLocationKernel::configure(const IImage *input, int32_t *min, int32_
             break;
     }
 
-    _num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(_num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, _num_elems_processed_per_iteration));
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
 
     INEKernel::configure(win);
 }
@@ -285,9 +334,8 @@ void NEMinMaxLocationKernel::minmax_loc(const Window &win)
     {
         Iterator input(_input, win);
 
-        size_t       min_count = 0;
-        size_t       max_count = 0;
-        unsigned int step      = _num_elems_processed_per_iteration;
+        size_t min_count = 0;
+        size_t max_count = 0;
 
         // Clear min location array
         if(loc_min)
@@ -307,40 +355,37 @@ void NEMinMaxLocationKernel::minmax_loc(const Window &win)
             int32_t idx    = id.x();
             int32_t idy    = id.y();
 
-            for(unsigned int i = 0; i < step; ++i)
+            const T       pixel = *in_ptr;
+            Coordinates2D p{ idx, idy };
+
+            if(count_min || loc_min)
             {
-                const T       pixel = *in_ptr++;
-                Coordinates2D p{ idx++, idy };
-
-                if(count_min || loc_min)
+                if(*_min == pixel)
                 {
-                    if(*_min == pixel)
+                    if(count_min)
                     {
-                        if(count_min)
-                        {
-                            ++min_count;
-                        }
+                        ++min_count;
+                    }
 
-                        if(loc_min)
-                        {
-                            _min_loc->push_back(p);
-                        }
+                    if(loc_min)
+                    {
+                        _min_loc->push_back(p);
                     }
                 }
+            }
 
-                if(count_max || loc_max)
+            if(count_max || loc_max)
+            {
+                if(*_max == pixel)
                 {
-                    if(*_max == pixel)
+                    if(count_max)
                     {
-                        if(count_max)
-                        {
-                            ++max_count;
-                        }
+                        ++max_count;
+                    }
 
-                        if(loc_max)
-                        {
-                            _max_loc->push_back(p);
-                        }
+                    if(loc_max)
+                    {
+                        _max_loc->push_back(p);
                     }
                 }
             }
