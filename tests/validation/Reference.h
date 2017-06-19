@@ -182,6 +182,15 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_gaussian3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value);
+    /** Compute reference gaussian5x5 filter.
+     *
+     * @param[in] shape                 Shape of the input and output tensors.
+     * @param[in] border_mode           BorderMode used by the input tensor.
+     * @param[in] constant_border_value Constant to use if @p border_mode == CONSTANT.
+     *
+     * @return Computed raw tensor.
+     */
+    static RawTensor compute_reference_gaussian5x5(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value);
     /** Compute matrix multiply function.
      *
      * @param[in]  src_shape1           First input tensor shape

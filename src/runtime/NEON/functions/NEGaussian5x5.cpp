@@ -40,7 +40,7 @@ NEGaussian5x5::NEGaussian5x5()
 void NEGaussian5x5::configure(ITensor *input, ITensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Init temporary buffer
-    TensorInfo tensor_info(input->info()->tensor_shape(), Format::S16);
+    TensorInfo tensor_info(input->info()->tensor_shape(), 1, DataType::S16);
     _tmp.allocator()->init(tensor_info);
 
     // Create and configure kernels for the two passes
