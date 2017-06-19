@@ -54,9 +54,12 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
-    _input                                               = input;
-    _output                                              = output;
     const unsigned int num_elems_processed_per_iteration = max_cl_vector_width / data_size_from_type(input->info()->data_type());
+    const float        scale_x                           = num_elems_processed_per_iteration;
+    ARM_COMPUTE_ERROR_ON((0 == static_cast<int>(input->info()->dimension(0) * (1.f / scale_x))));
+
+    _input  = input;
+    _output = output;
 
     /*
      * Following an example of how the transposition1xW works when the input data type is F32
@@ -77,30 +80,12 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
-    float scale_x = 1.f;
-
-    switch(input->info()->data_type())
-    {
-        case DataType::U8:
-            scale_x = 16.f;
-            break;
-        case DataType::F16:
-            scale_x = 8.f;
-            break;
-        case DataType::F32:
-            scale_x = 4.f;
-            break;
-        default:
-            // Do nothing
-            break;
-    }
-
     AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
     AccessWindowTranspose  output_access(output->info(), 0, 0, num_elems_processed_per_iteration, 1, scale_x, 1.f / scale_x);
 
     update_window_and_padding(win, input_access, output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->info()->tensor_shape()));
 
     ICLKernel::configure(win);
 }

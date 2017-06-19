@@ -59,6 +59,7 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
     const float        scale_x                           = num_elems_processed_per_iteration;
+    ARM_COMPUTE_ERROR_ON((0 == static_cast<int>(input->info()->dimension(0) * (1.f / scale_x))));
 
     _input  = input;
     _output = output;
@@ -71,7 +72,7 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
                               AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
                               output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
