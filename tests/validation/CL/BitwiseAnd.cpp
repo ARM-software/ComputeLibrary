@@ -51,7 +51,7 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-/** Compute Neon bitwise and function.
+/** Compute CL bitwise and function.
  *
  * @param[in] shape Shape of the input and output tensors.
  *

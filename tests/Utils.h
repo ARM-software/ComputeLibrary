@@ -451,16 +451,27 @@ inline I foldl(F &&func, I &&initial, T &&value, Vs &&... values)
     return foldl(std::forward<F>(func), func(std::forward<I>(initial), std::forward<T>(value)), std::forward<Vs>(values)...);
 }
 
-/** Create a valid region covering the enitre tensor shape.
+/** Create a valid region based on tensor shape, border mode and border size
  *
- * @param[in] shape Shape used as size of the valid region.
+ * @param[in] shape            Shape used as size of the valid region.
+ * @param[in] border_undefined (Optional) Boolean indicating if the border mode is undefined.
+ * @param[in] border_size      (Optional) Border size used to specify the region to exclude.
  *
- * @return A valid region starting at (0, 0, ...) with size of @p shape.
+ * @return A valid region starting at (0, 0, ...) with size of @p shape if @p border_undefined is false; otherwise
+ *  return A valid region starting at (@p border_size.left, @p border_size.top, ...) with reduced size of @p shape.
  */
-inline ValidRegion shape_to_valid_region(TensorShape shape)
+inline ValidRegion shape_to_valid_region(TensorShape shape, bool border_undefined = false, BorderSize border_size = BorderSize(0))
 {
     Coordinates anchor;
-    anchor.set(std::max<int>(0, shape.num_dimensions() - 1), 0);
+    anchor.set(std::max(0, static_cast<int>(shape.num_dimensions()) - 1), 0);
+    if(border_undefined)
+    {
+        ARM_COMPUTE_ERROR_ON(shape.num_dimensions() < 2);
+        anchor.set(0, border_size.left);
+        anchor.set(1, border_size.top);
+        shape.set(0, shape.x() - border_size.left - border_size.right);
+        shape.set(1, shape.y() - border_size.top - border_size.bottom);
+    }
     return ValidRegion(std::move(anchor), std::move(shape));
 }
 

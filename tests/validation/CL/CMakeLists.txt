@@ -29,9 +29,13 @@ set(arm_compute_test_validation_OPENCL_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/CLFixture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/CLFixture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BitwiseAnd.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/IntegralImage.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Box3x3.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DepthConvert.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FillBorder.cpp
+`   ${CMAKE_CURRENT_SOURCE_DIR}/IntegralImage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel3x3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel5x5.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Threshold.cpp
 )
 
 add_library(arm_compute_test_validation_OPENCL OBJECT

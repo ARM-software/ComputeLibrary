@@ -30,21 +30,31 @@ set(arm_compute_test_validation_NEON_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/AccumulateWeighted.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ArithmeticAddition.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ArithmeticSubtraction.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/BatchNormalizationLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BitwiseAnd.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BitwiseNot.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BitwiseOr.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BitwiseXor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Box3x3.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConvolutionLayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConvolutionLayerDirect.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DepthConvert.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FillBorder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Fixedpoint/Exp_QS8.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Fixedpoint/Invsqrt_QS8.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Fixedpoint/Log_QS8.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Fixedpoint/Reciprocal_QS8.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FullyConnectedLayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GEMM.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/IntegralImage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/NormalizationLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PixelWiseMultiplication.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/IntegralImage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/MeanStdDev.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Pooling/PoolingLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel3x3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel5x5.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/SoftmaxLayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Threshold.cpp
 )
 
 add_library(arm_compute_test_validation_NEON OBJECT

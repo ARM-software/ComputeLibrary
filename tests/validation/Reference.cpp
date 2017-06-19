@@ -266,7 +266,7 @@ RawTensor Reference::compute_reference_bitwise_not(const TensorShape &shape)
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_box3x3(const TensorShape &shape)
+RawTensor Reference::compute_reference_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference
     RawTensor ref_src = library->get(shape, DataType::U8);
@@ -276,7 +276,7 @@ RawTensor Reference::compute_reference_box3x3(const TensorShape &shape)
     library->fill_tensor_uniform(ref_src, 0);
 
     // Compute reference
-    ReferenceCPP::box3x3(ref_src, ref_dst);
+    ReferenceCPP::box3x3(ref_src, ref_dst, border_mode, constant_border_value);
 
     return ref_dst;
 }

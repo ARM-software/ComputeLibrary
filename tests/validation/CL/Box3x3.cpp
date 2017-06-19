@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "CL/CLAccessor.h"
+#include "CL/Helper.h"
 #include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
@@ -35,10 +35,9 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEBox3x3.h"
-#include "arm_compute/runtime/SubTensor.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/CLTensorAllocator.h"
+#include "arm_compute/runtime/CL/functions/CLBox3x3.h"
 
 #include "boost_wrapper.h"
 
@@ -47,12 +46,12 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
+using namespace arm_compute::test::cl;
 using namespace arm_compute::test::validation;
 
 namespace
 {
-/** Compute Neon box3x3 filter.
+/** Compute CL box3x3 filter.
  *
  * @param[in] shape                 Shape of the input and output tensors.
  * @param[in] border_mode           BorderMode used by the input tensor.
@@ -60,14 +59,14 @@ namespace
  *
  * @return Computed output tensor.
  */
-Tensor compute_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
+CLTensor compute_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U8);
+    CLTensor src = create_tensor(shape, DataType::U8);
+    CLTensor dst = create_tensor(shape, DataType::U8);
 
     // Create and configure function
-    NEBox3x3 box3x3;
+    CLBox3x3 box3x3;
     box3x3.configure(&src, &dst, border_mode, constant_border_value);
 
     // Allocate tensors
@@ -78,7 +77,7 @@ Tensor compute_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t 
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
+    library->fill_tensor_uniform(CLAccessor(src), 0);
 
     // Compute function
     box3x3.run();
@@ -88,21 +87,21 @@ Tensor compute_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t 
 } // namespace
 
 #ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
+BOOST_AUTO_TEST_SUITE(CL)
 BOOST_AUTO_TEST_SUITE(Box3x3)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * BorderModes(), shape, border_mode)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U8);
+    CLTensor src = create_tensor(shape, DataType::U8);
+    CLTensor dst = create_tensor(shape, DataType::U8);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());
 
     // Create and configure function
-    NEBox3x3 box3x3;
+    CLBox3x3 box3x3;
     box3x3.configure(&src, &dst, border_mode);
 
     // Validate valid region
@@ -135,13 +134,13 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * BorderModes(), shape, border_mode
     const uint8_t                          border_value = distribution(gen);
 
     // Compute function
-    Tensor dst = compute_box3x3(shape, border_mode, border_value);
+    CLTensor dst = compute_box3x3(shape, border_mode, border_value);
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_box3x3(shape, border_mode, border_value);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(1)));
+    validate(CLAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(1)));
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -152,13 +151,13 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * BorderModes(), shape, border_mode
     const uint8_t                          border_value = distribution(gen);
 
     // Compute function
-    Tensor dst = compute_box3x3(shape, border_mode, border_value);
+    CLTensor dst = compute_box3x3(shape, border_mode, border_value);
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_box3x3(shape, border_mode, border_value);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(1)));
+    validate(CLAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(1)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
