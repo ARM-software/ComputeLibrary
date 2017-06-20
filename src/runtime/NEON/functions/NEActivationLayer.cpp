@@ -28,7 +28,7 @@
 
 using namespace arm_compute;
 
-void NEActivationLayer::configure(const ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
+void NEActivationLayer::configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
 {
     auto k = arm_compute::cpp14::make_unique<NEActivationLayerKernel>();
     k->configure(input, output, activation_info);

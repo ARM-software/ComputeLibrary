@@ -41,11 +41,14 @@ class NEActivationLayer : public INESimpleFunction
 public:
     /** Set the input and output tensor.
      *
-     * @param[in]  input           Source tensor. Data type supported: QS8/F32.
-     * @param[out] output          Destination tensor. Data type supported: same as @p input
-     * @param[in]  activation_info Activation layer parameters.
+     * @note If the output tensor is a nullptr, the activation function will be performed in-place
+     *
+     * @param[in, out] input           Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
+     *                                 of the activation function. Data types supported: QS8/F32.
+     * @param[out]     output          Destination tensor. Data type supported: same as @p input
+     * @param[in]      activation_info Activation layer parameters.
      */
-    void configure(const ITensor *input, ITensor *output, ActivationLayerInfo activation_info);
+    void configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info);
 };
 }
 #endif /* __ARM_COMPUTE_NEACTIVATIONLAYER_H__ */

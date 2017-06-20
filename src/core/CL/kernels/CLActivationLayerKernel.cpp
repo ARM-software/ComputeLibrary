@@ -35,17 +35,24 @@
 
 using namespace arm_compute;
 
-void CLActivationLayerKernel::configure(const ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+CLActivationLayerKernel::CLActivationLayerKernel()
+    : _input(nullptr), _output(nullptr)
+{
+}
+
+void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    if(output != nullptr)
+    {
+        // Output auto inizialitation if not yet initialized
+        auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
 
     // Set build options
     std::set<std::string> build_opts;
@@ -54,11 +61,55 @@ void CLActivationLayerKernel::configure(const ICLTensor *input, ICLTensor *outpu
     build_opts.insert(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.insert(("-DA=" + val_to_string(act_info.a())));
     build_opts.insert(("-DB=" + val_to_string(act_info.b())));
+    build_opts.insert(output == nullptr ? "-DIN_PLACE" : "");
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("activation_layer", build_opts));
 
     // Make sure _kernel is initialized before calling the parent's configure
     constexpr unsigned int num_elems_processed_per_iteration = 16;
-    ICLSimple3DKernel::configure(input, output, num_elems_processed_per_iteration);
+
+    _input  = input;
+    _output = output;
+
+    // Configure kernel window
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+
+    if(output != nullptr)
+    {
+        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+
+        update_window_and_padding(win,
+                                  AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
+                                  output_access);
+
+        output_access.set_valid_region(win, input->info()->valid_region());
+    }
+    else
+    {
+        update_window_and_padding(win,
+                                  AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
+    }
+
+    ICLKernel::configure(win);
+}
+
+void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+
+    Window slice = window.first_slice_window_3D();
+
+    do
+    {
+        unsigned int idx = 0;
+        add_3D_tensor_argument(idx, _input, slice);
+        if(_output != nullptr)
+        {
+            add_3D_tensor_argument(idx, _output, slice);
+        }
+        enqueue(queue, *this, slice);
+    }
+    while(window.slide_window_slice_3D(slice));
 }

@@ -25,6 +25,8 @@
 
 /** This performs an activation function floating point inputs.
  *
+ * @note In order to perform the activation function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Activation function should be given as a preprocessor argument using -DNAME. e.g. -DTANH
  * @note Distinction between floating point and integer is done using -DTYPE_FP and -DTYPE_INT preprocessor argument
@@ -48,12 +50,20 @@
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
  */
 __kernel void activation_layer(
-    TENSOR3D_DECLARATION(input),
-    TENSOR3D_DECLARATION(output))
+    TENSOR3D_DECLARATION(input)
+#if !defined IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif
+)
 {
     // Get pixels pointer
-    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT(input);
+#if defined  IN_PLACE
+    Tensor3D output = input;
+#else
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+#endif
 
     // Load data
     VEC_DATA_TYPE(DATA_TYPE, 16)
@@ -63,7 +73,7 @@ __kernel void activation_layer(
 #if defined LOGISTIC
     data = 1 / (1 + exp(-data));
 #elif defined TANH
-    data = (VEC_DATA_TYPE(DATA_TYPE, 16))A * tanh((VEC_DATA_TYPE(DATA_TYPE, 16))B * data);
+    data            = (VEC_DATA_TYPE(DATA_TYPE, 16))A * tanh((VEC_DATA_TYPE(DATA_TYPE, 16))B * data);
 #elif defined RELU
     data = max(0, data);
 #elif defined BRELU

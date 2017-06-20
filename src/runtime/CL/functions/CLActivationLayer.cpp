@@ -28,7 +28,7 @@
 
 using namespace arm_compute;
 
-void CLActivationLayer::configure(const ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
     auto k = arm_compute::cpp14::make_unique<CLActivationLayerKernel>();
     k->configure(input, output, act_info);

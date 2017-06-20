@@ -25,14 +25,14 @@
 #define __ARM_COMPUTE_NEACTIVATIONLAYERKERNEL_H__
 
 #include "arm_compute/core/FixedPoint.h"
-#include "arm_compute/core/NEON/INESimpleKernel.h"
+#include "arm_compute/core/NEON/INEKernel.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Interface for the activation layer kernel. */
-class NEActivationLayerKernel : public INESimpleKernel
+class NEActivationLayerKernel : public INEKernel
 {
 public:
     /** Constructor */
@@ -47,11 +47,14 @@ public:
     NEActivationLayerKernel &operator=(NEActivationLayerKernel &&) = default;
     /** Set the input and output tensor.
      *
-     * @param[in]  input           Source tensor. Data types supported: QS8/F32.
-     * @param[out] output          Destination tensor. Data type supported: same as @p input
-     * @param[in]  activation_info Activation layer information.
+     * @note If the output tensor is a nullptr, the activation function will be performed in-place
+     *
+     * @param[in, out] input           Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
+     *                                 of the activation function. Data types supported: QS8/F32.
+     * @param[out]     output          Destination tensor. Data type supported: same as @p input
+     * @param[in]      activation_info Activation layer information.
      */
-    void configure(const ITensor *input, ITensor *output, ActivationLayerInfo activation_info);
+    void configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info);
 
     // Inherited methods overridden:
     void run(const Window &window) override;
@@ -77,6 +80,8 @@ private:
     typename std::enable_if<std::is_same<T, qint8_t>::value, void>::type activation(const Window &window);
 
 private:
+    ITensor                      *_input;
+    ITensor                      *_output;
     ActivationFunctionExecutorPtr _func;
     ActivationLayerInfo           _act_info;
 };

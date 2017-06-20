@@ -41,21 +41,29 @@
 using namespace arm_compute;
 
 NEActivationLayerKernel::NEActivationLayerKernel()
-    : _func(nullptr), _act_info(ActivationFunction::LOGISTIC)
+    : _input(nullptr), _output(nullptr), _func(nullptr), _act_info(ActivationFunction::LOGISTIC)
 {
 }
 
-void NEActivationLayerKernel::configure(const ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
+void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    _input    = input;
+    _act_info = activation_info;
+    _output   = input;
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    if(output != nullptr)
+    {
+        // Output auto inizialitation if not yet initialized
+        auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+
+        _output = output;
+    }
 
     // Activation functions : FP32
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f32 =
@@ -85,9 +93,6 @@ void NEActivationLayerKernel::configure(const ITensor *input, ITensor *output, A
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qint8_t> },
     };
 
-    _input    = input;
-    _output   = output;
-    _act_info = activation_info;
     switch(input->info()->data_type())
     {
         case DataType::F32:
@@ -102,7 +107,27 @@ void NEActivationLayerKernel::configure(const ITensor *input, ITensor *output, A
 
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
-    INESimpleKernel::configure(_input, _output, num_elems_processed_per_iteration);
+    // Configure kernel window
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+
+    if(output != nullptr)
+    {
+        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+
+        update_window_and_padding(win,
+                                  AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
+                                  output_access);
+
+        output_access.set_valid_region(win, input->info()->valid_region());
+    }
+    else
+    {
+        // In-place computation
+        update_window_and_padding(win,
+                                  AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
+    }
+
+    ICPPKernel::configure(win);
 }
 
 template <ActivationLayerInfo::ActivationFunction F, typename T>
@@ -295,7 +320,7 @@ typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivation
 void NEActivationLayerKernel::run(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
     (this->*_func)(window);
