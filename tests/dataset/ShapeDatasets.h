@@ -97,7 +97,7 @@ class Small1DShape final : public ShapeDataset<1>
 {
 public:
     Small1DShape()
-        : ShapeDataset(TensorShape(128U))
+        : ShapeDataset(TensorShape(256U))
     {
     }
 };

@@ -174,6 +174,17 @@ public:
     {
         _kernel_path = kernel_path;
     };
+    /** Gets the path that the kernels reside in.
+     */
+    std::string get_kernel_path()
+    {
+        return _kernel_path;
+    };
+    /** Gets the source of the selected program
+      *
+      * @param[in] program_name Program name.
+     */
+    std::string get_program_source(const std::string &program_name);
     /** Sets the CL context used to create programs.
      *
      * @note Setting the context also resets the device to the

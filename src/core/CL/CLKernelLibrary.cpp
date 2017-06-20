@@ -486,7 +486,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "warp_perspective.cl",
 #include "./cl_kernels/warp_perspective.clembed"
-    }
+    },
 #endif
 };
 
@@ -601,4 +601,16 @@ std::string CLKernelLibrary::stringify_set(const StringSet &s) const
     }
 
     return concat_set;
+}
+
+std::string CLKernelLibrary::get_program_source(const std::string &program_name)
+{
+    const auto program_source_it = _program_source_map.find(program_name);
+
+    if(program_source_it == _program_source_map.end())
+    {
+        ARM_COMPUTE_ERROR("Embedded program for %s does not exist.", program_name.c_str());
+    }
+
+    return program_source_it->second;
 }
