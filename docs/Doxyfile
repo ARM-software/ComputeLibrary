@@ -771,7 +771,9 @@ WARN_LOGFILE           =
 INPUT                  = ./docs/00_introduction.dox \
                          ./docs/01_library.dox \
                          ./docs/02_tests.dox \
+                         ./docs/03_scripts.dox \
                          ./arm_compute/ \
+                         ./scripts/ \
                          ./src/core/CL/cl_kernels/ \
                          ./examples/ \
                          ./tests/ \

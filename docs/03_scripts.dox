@@ -1,0 +1,40 @@
+/**
+@page data_import Importing data from existing models
+
+@tableofcontents
+
+@section caffe_data_extractor Extract data from pre-trained caffe model
+
+One can find caffe <a href="https://github.com/BVLC/caffe/wiki/Model-Zoo">pre-trained models</a> on
+caffe's official github repository.
+
+The caffe_data_extractor.py provided in the @ref scripts folder is an example script that shows how to
+extract the hyperparameter values from a trained model.
+
+@note complex networks might require alter the script to properly work.
+
+@subsection how_to How to use the script
+
+Install caffe following <a href="http://caffe.berkeleyvision.org/installation.html">caffe's document</a>.
+Make sure the pycaffe has been added into the PYTHONPATH.
+
+Download the pre-trained caffe model.
+
+Run the caffe_data_extractor.py script by
+
+         ./caffe_data_extractor.py -m <caffe model> -n <caffe netlist>
+
+For example, to extract the data from pre-trained caffe Alex model to binary file:
+
+        ./caffe_data_extractor.py -m /path/to/bvlc_alexnet.caffemodel -n /path/to/caffe/models/bvlc_alexnet/deploy.prototxt
+
+The script has been tested under Python2.7.
+
+@subsection result  What is the expected ouput from the script
+
+If the script run succesfully, it prints the shapes of each layer onto the standard
+output and generates *.dat files containing the weights and biases of each layer.
+
+The @ref arm_compute::utils::load_trained_data shows how one could load
+the weights and biases into tensor from the .dat file by the help of Accessor.
+*/
