@@ -23,8 +23,6 @@ import SCons
 import os.path
 
 Import('env')
-Import('arm_compute_a')
-Import('arm_compute_so')
 
 if env['opencl']:
     Import('opencl')
@@ -38,10 +36,12 @@ examples_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
 # Build examples
 utils = examples_env.Object("../utils/Utils.cpp")
 
-if env['os'] in ['android', 'bare_metal']:
+if env['os'] in ['android', 'bare_metal'] or env['standalone']:
+    Import('arm_compute_a')
     arm_compute_lib = arm_compute_a
     arm_compute_dependency = arm_compute_a
 else:
+    Import('arm_compute_so')
     arm_compute_lib = "arm_compute"
     arm_compute_dependency = arm_compute_so
 

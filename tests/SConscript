@@ -24,8 +24,6 @@ import os.path
 
 Import('env')
 Import('vars')
-Import('arm_compute_a')
-Import('arm_compute_so')
 
 # vars is imported from arm_compute:
 variables = [
@@ -49,10 +47,12 @@ vars.Update(common_env)
 
 Help(new_options.GenerateHelpText(common_env))
 
-if env['os'] in ['android', 'bare_metal']:
+if env['os'] in ['android', 'bare_metal'] or env['standalone']:
+    Import('arm_compute_a')
     common_env.Append(LIBS = [arm_compute_a])
     arm_compute_lib = arm_compute_a
 else:
+    Import('arm_compute_so')
     common_env.Append(LIBS = ["arm_compute"])
     arm_compute_lib = arm_compute_so
 

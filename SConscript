@@ -178,7 +178,7 @@ shared_core_objects = [arm_compute_env.SharedObject(f) for f in core_files]
 arm_compute_core_a = build_library('arm_compute_core-static', static_core_objects, static=True)
 Export('arm_compute_core_a')
 
-if env['os'] != 'bare_metal':
+if env['os'] != 'bare_metal' and not env['standalone']:
     arm_compute_core_so = build_library('arm_compute_core', shared_core_objects, static=False)
     Export('arm_compute_core_so')
 
@@ -188,12 +188,20 @@ static_objects = [arm_compute_env.StaticObject(f) for f in files]
 arm_compute_a = build_library('arm_compute-static', static_core_objects + static_objects, static=True)
 Export('arm_compute_a')
 
-if env['os'] != 'bare_metal':
+if env['os'] != 'bare_metal' and not env['standalone']:
     arm_compute_so = build_library('arm_compute', shared_core_objects + shared_objects, static=False)
     Export('arm_compute_so')
 
-alias = arm_compute_env.Alias("arm_compute", [arm_compute_a, arm_compute_so])
+if env['standalone']:
+    alias = arm_compute_env.Alias("arm_compute", [arm_compute_a])
+else:
+    alias = arm_compute_env.Alias("arm_compute", [arm_compute_a, arm_compute_so])
+
 Default(alias)
 
 Default(generate_embed)
-Depends([alias,arm_compute_core_so, arm_compute_core_a], generate_embed)
+
+if env['standalone']:
+    Depends([alias,arm_compute_core_a], generate_embed)
+else:
+    Depends([alias,arm_compute_core_so, arm_compute_core_a], generate_embed)

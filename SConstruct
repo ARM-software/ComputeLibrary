@@ -44,6 +44,7 @@ vars.AddVariables(
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
+    BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Neon support", False),
     BoolVariable("embed_kernels", "Embed OpenCL kernels in library binary", False),
@@ -160,6 +161,10 @@ if not GetOption("help"):
 
         if compiler_ver == '4.8.3':
             env.Append(CXXFLAGS = ['-Wno-array-bounds'])
+
+if env['standalone']:
+    env.Append(CXXFLAGS = ['-fPIC'])
+    env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
 
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])
