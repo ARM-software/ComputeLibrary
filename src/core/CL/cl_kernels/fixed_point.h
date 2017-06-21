@@ -162,13 +162,34 @@ SUBQ_SAT_IMPL(qs8x16)
 #define SUB_SAT_OP_EXPAND_STR(a, b, type, size) sub_sat_##type##x##size((a), (b))
 #define SUB_SAT_OP_EXPAND(a, b, type, size) SUB_SAT_OP_EXPAND_STR(a, b, type, size)
 
-/** Saturate multiply of two fixed point numbers
-  *
-  * @param[in] type  the actual data type.
-  * @param[in] itype the intermediate data type.
-  *
-  * @return The result of the fixed point multiplication. The result is saturated in case of overflow
-  */
+/* Multiply of two fixed point numbers
+ *
+ * @param[in] type  the actual data type.
+ * @param[in] itype the intermediate data type.
+ *
+ * @return The result of the fixed point multiplication.
+ */
+#define MULQ_IMPL(type, itype)                                                         \
+    inline type mul_##type(type VopA, type VopB, int fixed_point_position)             \
+    {                                                                                  \
+        itype round_val = (itype)(1 << (fixed_point_position - 1));                    \
+        itype res       = CONVERT((VopA), itype) * CONVERT((VopB), itype) + round_val; \
+        return CONVERT((res >> (itype)fixed_point_position), type);                    \
+    }
+
+MULQ_IMPL(qs8x16, qs16x16)
+MULQ_IMPL(qs16x16, qs32x16)
+
+#define MUL_OP_EXPAND_STR(a, b, type, size, position) mul_##type##x##size((a), (b), (position))
+#define MUL_OP_EXPAND(a, b, type, size, position) MUL_OP_EXPAND_STR(a, b, type, size, position)
+
+/* Saturate multiply of two fixed point numbers
+ *
+ * @param[in] type  the actual data type.
+ * @param[in] itype the intermediate data type.
+ *
+ * @return The result of the fixed point multiplication. The result is saturated in case of overflow
+ */
 #define MULQ_SAT_IMPL(type, itype)                                                            \
     inline type mul_sat_##type(type VopA, type VopB, int fixed_point_position)                \
     {                                                                                         \
@@ -179,6 +200,7 @@ SUBQ_SAT_IMPL(qs8x16)
 
 MULQ_SAT_IMPL(qs8x16, qs16x16)
 MULQ_SAT_IMPL(qs16x8, qs32x8)
+MULQ_SAT_IMPL(qs16x16, qs32x16)
 
 #define MUL_SAT_OP_EXPAND_STR(a, b, type, size, position) mul_sat_##type##x##size((a), (b), (position))
 #define MUL_SAT_OP_EXPAND(a, b, type, size, position) MUL_SAT_OP_EXPAND_STR(a, b, type, size, position)

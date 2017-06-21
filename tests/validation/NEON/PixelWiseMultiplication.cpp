@@ -49,7 +49,7 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-/** Compute Neon arithmetic addition function.
+/** Compute Neon pixel-wise multiplication function.
  *
  * @param[in] shape                Shape of the input and output tensors.
  * @param[in] dt_in0               Data type of first input tensor.
@@ -58,7 +58,7 @@ namespace
  * @param[in] scale                Non-negative scale.
  * @param[in] convert_policy       Overflow policy of the operation.
  * @param[in] rounding_policy      Rounding policy of the operation.
- * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number.
+ * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number.
  *
  * @return Computed output tensor.
  */
@@ -314,7 +314,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Da
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(F32)
+BOOST_AUTO_TEST_SUITE(Float)
 BOOST_AUTO_TEST_SUITE(Scale255)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * (1.f / 255.f) * ConvertPolicies()
@@ -407,7 +407,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ 1.
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(QS8)
+BOOST_AUTO_TEST_SUITE(Quantized)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * DataType::QS8 *ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange<int>(1, 7),
                      shape, dt, convert_policy, rounding_policy, fixed_point_position)

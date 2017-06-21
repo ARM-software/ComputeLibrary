@@ -360,7 +360,7 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QS8, DataType::S16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->data_type() == DataType::U8 && (input1->info()->data_type() != DataType::U8 || input2->info()->data_type() != DataType::U8),
                              "Output can only be U8 if both inputs are U8");
-    if(output->info()->data_type() == DataType::QS8 || input1->info()->data_type() == DataType::QS8 || output->info()->data_type() == DataType::QS8)
+    if(input1->info()->data_type() == DataType::QS8)
     {
         // All data types must be QS8
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2, output);
