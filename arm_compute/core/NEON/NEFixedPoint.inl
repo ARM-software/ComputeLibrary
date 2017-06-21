@@ -1050,7 +1050,8 @@ inline qint8x8_t vrecip_qs8(qint8x8_t a, int fixed_point_position)
     const qint8x8_t shift_value = vneg_s8(vsub_s8(vdup_n_s8(8), vadd_s8(vclz_s8(a), vdup_n_s8(fixed_point_position))));
     const qint8x8_t temp        = vshl_s8(a, shift_value);
 
-    qint8x8_t x = vadd_s8(const_48_over_17, vmul_qs8(temp, const_32_over_17, fixed_point_position));
+    // Newton-Raphson division initial estimate X0 calculation
+    qint8x8_t x = vsub_s8(const_48_over_17, vmul_qs8(temp, const_32_over_17, fixed_point_position));
 
     uint8x8_t set_one = vcgt_s8(x, const_one);
     x                 = vbsl_s8(set_one, const_one, x);
@@ -1074,7 +1075,8 @@ inline qint16x4_t vrecip_qs16(qint16x4_t a, int fixed_point_position)
     const qint16x4_t shift_value = vneg_s16(vsub_s16(vdup_n_s16(8), vadd_s16(vclz_s16(a), vdup_n_s16(fixed_point_position))));
     const qint16x4_t temp        = vshl_s16(a, shift_value);
 
-    qint16x4_t x = vadd_s16(const_48_over_17, vmul_qs16(temp, const_32_over_17, fixed_point_position));
+    // Newton-Raphson division initial estimate X0 calculation
+    qint16x4_t x = vsub_s16(const_48_over_17, vmul_qs16(temp, const_32_over_17, fixed_point_position));
 
     uint16x4_t set_one = vcgt_s16(x, const_one);
     x                  = vbsl_s16(set_one, const_one, x);
@@ -1097,10 +1099,11 @@ inline qint8x8_t vqrecip_qs8(qint8x8_t a, int fixed_point_position)
     const qint8x8_t const_one        = vdup_n_s8(1 << fixed_point_position);
 
     // Find shift value
-    const qint8x8_t shift_value = vqneg_s8(vsub_s8(vdup_n_s8(8), vqadd_s8(vclz_s8(a), vdup_n_s8(fixed_point_position))));
+    const qint8x8_t shift_value = vqneg_s8(vqsub_s8(vdup_n_s8(8), vqadd_s8(vclz_s8(a), vdup_n_s8(fixed_point_position))));
     const qint8x8_t temp        = vqshl_s8(a, shift_value);
 
-    qint8x8_t x = vqadd_s8(const_48_over_17, vqmul_qs8(temp, const_32_over_17, fixed_point_position));
+    // Newton-Raphson division initial estimate X0 calculation
+    qint8x8_t x = vqsub_s8(const_48_over_17, vqmul_qs8(temp, const_32_over_17, fixed_point_position));
 
     uint8x8_t set_one = vcgt_s8(x, const_one);
     x                 = vbsl_s8(set_one, const_one, x);
@@ -1124,17 +1127,18 @@ inline qint16x4_t vqrecip_qs16(qint16x4_t a, int fixed_point_position)
     const qint16x4_t shift_value = vqneg_s16(vqsub_s16(vdup_n_s16(8), vqadd_s16(vclz_s16(a), vdup_n_s16(fixed_point_position))));
     const qint16x4_t temp        = vqshl_s16(a, shift_value);
 
-    qint16x4_t x = vqadd_s16(const_48_over_17, vqmul_qs16(temp, const_32_over_17, fixed_point_position));
+    // Newton-Raphson division initial estimate X0 calculation
+    qint16x4_t x = vqsub_s16(const_48_over_17, vqmul_qs16(temp, const_32_over_17, fixed_point_position));
 
     uint16x4_t set_one = vcgt_s16(x, const_one);
     x                  = vbsl_s16(set_one, const_one, x);
 
     // Use five iterations of Newton-Raphson  method to get the result
-    x = vqadd_s16(x, vmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s16(x, vmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s16(x, vmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s16(x, vmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s16(x, vmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
+    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
+    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
+    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
+    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
+    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
 
     return vqshl_s16(x, shift_value);
 }
@@ -1150,6 +1154,7 @@ inline qint8x16_t vrecipq_qs8(qint8x16_t a, int fixed_point_position)
     const qint8x16_t shift_value = vnegq_s8(vsubq_s8(vdupq_n_s8(8), vaddq_s8(vclzq_s8(a), vdupq_n_s8(fixed_point_position))));
     const qint8x16_t temp        = vshlq_s8(a, shift_value);
 
+    // Newton-Raphson division initial estimate X0 calculation
     qint8x16_t x = vsubq_qs8(const_48_over_17, vmulq_qs8(temp, const_32_over_17, fixed_point_position));
 
     // Set initial guess to one if x > 1
@@ -1175,6 +1180,7 @@ inline qint16x8_t vrecipq_qs16(qint16x8_t a, int fixed_point_position)
     const qint16x8_t shift_value = vnegq_s16(vsubq_s16(vdupq_n_s16(16), vaddq_s16(vclzq_s16(a), vdupq_n_s16(fixed_point_position))));
     const qint16x8_t temp        = vshlq_s16(a, shift_value);
 
+    // Newton-Raphson division initial estimate X0 calculation
     qint16x8_t x = vsubq_qs16(const_48_over_17, vmulq_qs16(temp, const_32_over_17, fixed_point_position));
 
     // Set initial guess to one if x > 1
@@ -1202,6 +1208,7 @@ inline qint8x16_t vqrecipq_qs8(qint8x16_t a, int fixed_point_position)
     const qint8x16_t shift_value = vqnegq_s8(vqsubq_s8(vdupq_n_s8(8), vqaddq_s8(vclzq_s8(a), vdupq_n_s8(fixed_point_position))));
     const qint8x16_t temp        = vqshlq_s8(a, shift_value);
 
+    // Newton-Raphson division initial estimate X0 calculation
     qint8x16_t x = vqsubq_qs8(const_48_over_17, vqmulq_qs8(temp, const_32_over_17, fixed_point_position));
 
     // Set initial guess to one if x > 1
@@ -1227,6 +1234,7 @@ inline qint16x8_t vqrecipq_qs16(qint16x8_t a, int fixed_point_position)
     const qint16x8_t shift_value = vqnegq_s16(vqsubq_s16(vdupq_n_s16(16), vqaddq_s16(vclzq_s16(a), vdupq_n_s16(fixed_point_position))));
     const qint16x8_t temp        = vqshlq_s16(a, shift_value);
 
+    // Newton-Raphson division initial estimate X0 calculation
     qint16x8_t x = vqsubq_qs16(const_48_over_17, vqmulq_qs16(temp, const_32_over_17, fixed_point_position));
 
     // Set initial guess to one if x > 1
@@ -1881,10 +1889,10 @@ inline qint8x8_t vqtanh_qs8(qint8x8_t a, int fixed_point_position)
     const qint8x8_t const_one = vdup_n_s8(1 << fixed_point_position);
     const qint8x8_t const_two = vdup_n_s8(2 << fixed_point_position);
 
-    qint8x8_t exp2x = vqexp_qs8(vqmul_qs8(const_two, a, fixed_point_position), fixed_point_position);
-    qint8x8_t num   = vqsub_qs8(exp2x, const_one);
-    qint8x8_t den   = vqadd_qs8(exp2x, const_one);
-    qint8x8_t tanh  = vqmul_qs8(num, vqrecip_qs8(den, fixed_point_position), fixed_point_position);
+    const qint8x8_t exp2x = vqexp_qs8(vqmul_qs8(const_two, a, fixed_point_position), fixed_point_position);
+    const qint8x8_t num   = vqsub_qs8(exp2x, const_one);
+    const qint8x8_t den   = vqadd_qs8(exp2x, const_one);
+    const qint8x8_t tanh  = vqmul_qs8(num, vqrecip_qs8(den, fixed_point_position), fixed_point_position);
 
     return tanh;
 }
@@ -1894,10 +1902,10 @@ inline qint16x4_t vqtanh_qs16(qint16x4_t a, int fixed_point_position)
     const qint16x4_t const_one = vdup_n_s16(1 << fixed_point_position);
     const qint16x4_t const_two = vdup_n_s16(2 << fixed_point_position);
 
-    qint16x4_t exp2x = vqexp_qs16(vqmul_qs16(const_two, a, fixed_point_position), fixed_point_position);
-    qint16x4_t num   = vqsub_qs16(exp2x, const_one);
-    qint16x4_t den   = vqadd_qs16(exp2x, const_one);
-    qint16x4_t tanh  = vqmul_qs16(num, vqrecip_qs16(den, fixed_point_position), fixed_point_position);
+    const qint16x4_t exp2x = vqexp_qs16(vqmul_qs16(const_two, a, fixed_point_position), fixed_point_position);
+    const qint16x4_t num   = vqsub_qs16(exp2x, const_one);
+    const qint16x4_t den   = vqadd_qs16(exp2x, const_one);
+    const qint16x4_t tanh  = vqmul_qs16(num, vqrecip_qs16(den, fixed_point_position), fixed_point_position);
 
     return tanh;
 }
@@ -1907,10 +1915,10 @@ inline qint8x16_t vqtanhq_qs8(qint8x16_t a, int fixed_point_position)
     const qint8x16_t const_one = vdupq_n_s8(1 << fixed_point_position);
     const qint8x16_t const_two = vdupq_n_s8(2 << fixed_point_position);
 
-    qint8x16_t exp2x = vqexpq_qs8(vqmulq_qs8(const_two, a, fixed_point_position), fixed_point_position);
-    qint8x16_t num   = vqsubq_qs8(exp2x, const_one);
-    qint8x16_t den   = vqaddq_qs8(exp2x, const_one);
-    qint8x16_t tanh  = vqmulq_qs8(num, vqrecipq_qs8(den, fixed_point_position), fixed_point_position);
+    const qint8x16_t exp2x = vqexpq_qs8(vqmulq_qs8(const_two, a, fixed_point_position), fixed_point_position);
+    const qint8x16_t num   = vqsubq_qs8(exp2x, const_one);
+    const qint8x16_t den   = vqaddq_qs8(exp2x, const_one);
+    const qint8x16_t tanh  = vqmulq_qs8(num, vqrecipq_qs8(den, fixed_point_position), fixed_point_position);
 
     return tanh;
 }
@@ -1920,10 +1928,10 @@ inline qint16x8_t vqtanhq_qs16(qint16x8_t a, int fixed_point_position)
     const qint16x8_t const_one = vdupq_n_s16(1 << fixed_point_position);
     const qint16x8_t const_two = vdupq_n_s16(2 << fixed_point_position);
 
-    qint16x8_t exp2x = vqexpq_qs16(vqmulq_qs16(const_two, a, fixed_point_position), fixed_point_position);
-    qint16x8_t num   = vqsubq_qs16(exp2x, const_one);
-    qint16x8_t den   = vqaddq_qs16(exp2x, const_one);
-    qint16x8_t tanh  = vqmulq_qs16(num, vqrecipq_qs16(den, fixed_point_position), fixed_point_position);
+    const qint16x8_t exp2x = vqexpq_qs16(vqmulq_qs16(const_two, a, fixed_point_position), fixed_point_position);
+    const qint16x8_t num   = vqsubq_qs16(exp2x, const_one);
+    const qint16x8_t den   = vqaddq_qs16(exp2x, const_one);
+    const qint16x8_t tanh  = vqmulq_qs16(num, vqrecipq_qs16(den, fixed_point_position), fixed_point_position);
 
     return tanh;
 }

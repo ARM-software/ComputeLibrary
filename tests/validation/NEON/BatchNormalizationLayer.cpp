@@ -42,8 +42,9 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance_f = 1e-05; /**< Tolerance value for comparing reference's output against floating point implementation's output */
-const float tolerance_q = 3;     /**< Tolerance value for comparing reference's output against quantized implementation's output */
+const float tolerance_f    = 1e-05; /**< Tolerance value for comparing reference's output against floating point implementation's output */
+const float tolerance_qs8  = 6;     /**< Tolerance value for comparing reference's output against quantized implementation's output */
+const float tolerance_qs16 = 6;     /**< Tolerance value for comparing reference's output against quantized implementation's output */
 
 /** Compute Neon batch normalization function.
  *
@@ -129,7 +130,7 @@ BOOST_AUTO_TEST_SUITE(NEON)
 BOOST_AUTO_TEST_SUITE(BatchNormalizationLayer)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, RandomBatchNormalizationLayerDataset() * (boost::unit_test::data::make(DataType::F32) + boost::unit_test::data::make(DataType::QS8)), obj, dt)
+BOOST_DATA_TEST_CASE(Configuration, RandomBatchNormalizationLayerDataset() * boost::unit_test::data::make({ DataType::QS8, DataType::QS16, DataType::F32 }), obj, dt)
 {
     // Set fixed point position data type allowed
     int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
@@ -182,6 +183,7 @@ BOOST_DATA_TEST_CASE(Random,
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(Quantized)
+BOOST_AUTO_TEST_SUITE(QS8)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(Random,
                      RandomBatchNormalizationLayerDataset() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(1, 6),
@@ -194,8 +196,26 @@ BOOST_DATA_TEST_CASE(Random,
     RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_q, 0);
+    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
 }
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(QS16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(Random,
+                     RandomBatchNormalizationLayerDataset() * boost::unit_test::data::make(DataType::QS16) * boost::unit_test::data::xrange(1, 14),
+                     obj, dt, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst, tolerance_qs16);
+}
+BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
