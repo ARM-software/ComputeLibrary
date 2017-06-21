@@ -80,6 +80,7 @@
 #include "arm_compute/core/NEON/kernels/NENormalizationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NERemapKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScharr3x3Kernel.h"

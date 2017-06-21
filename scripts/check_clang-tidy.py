@@ -37,6 +37,8 @@ if __name__ == "__main__":
                    ("PMUCounter.cpp" in line and "consider replacing 'long long' with 'int64'" in line) or
                    ("Validation.cpp" in line and "parameter 'classified_labels' is unused" in line) or
                    ("Validation.cpp" in line and "parameter 'expected_labels' is unused" in line) or
+                   ("Reference.cpp" in line and "parameter 'rois' is unused" in line) or
+                   ("ReferenceCPP.cpp" in line and "parameter 'rois' is unused" in line) or
                    "3rdparty" in line):
                     continue
 

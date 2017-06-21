@@ -27,8 +27,12 @@
 #include "Types.h"
 #include "ValidationUserConfiguration.h"
 
+#include "arm_compute/core/Types.h"
+
+#include <random>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace arm_compute
 {
@@ -168,6 +172,16 @@ inline void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPatt
     }
 }
 
+/** Create a vector of random ROIs.
+ *
+ * @param[in] shape     The shape of the input tensor.
+ * @param[in] pool_info The ROI pooling information.
+ * @param[in] num_rois  The number of ROIs to be created.
+ * @param[in] seed      The random seed to be used.
+ *
+ * @return A vector that contains the requested number of random ROIs
+ */
+std::vector<ROI> generate_random_rois(const TensorShape &shape, const ROIPoolingLayerInfo &pool_info, unsigned int num_rois, std::random_device::result_type seed);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

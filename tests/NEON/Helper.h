@@ -27,6 +27,7 @@
 #include "Globals.h"
 #include "TensorLibrary.h"
 
+#include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -70,6 +71,18 @@ inline Tensor create_tensor(const std::string &name, DataType data_type, int fix
     tensor.allocator()->init(TensorInfo(raw.shape(), num_channels, data_type, fixed_point_position));
 
     return tensor;
+}
+
+template <typename T>
+Array<T> create_array(const std::vector<T> &v)
+{
+    const size_t v_size = v.size();
+    Array<T>     array(v_size);
+
+    array.resize(v_size);
+    std::copy(v.begin(), v.end(), array.buffer());
+
+    return array;
 }
 } // namespace neon
 } // namespace test

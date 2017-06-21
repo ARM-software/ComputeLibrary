@@ -34,6 +34,7 @@ class KeyPoint;
 class Coordinates2D;
 class DetectionWindow;
 class Size2D;
+class ROI;
 
 /** Array of type T */
 template <class T>
@@ -137,6 +138,7 @@ private:
 };
 using IKeyPointArray        = IArray<KeyPoint>;
 using ICoordinates2DArray   = IArray<Coordinates2D>;
+using IROIArray             = IArray<ROI>;
 using IDetectionWindowArray = IArray<DetectionWindow>;
 using ISize2DArray          = IArray<Size2D>;
 using IUInt8Array           = IArray<uint8_t>;

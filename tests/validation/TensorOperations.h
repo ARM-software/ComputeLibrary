@@ -1438,6 +1438,78 @@ void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_in
     }
 }
 
+// Pooling layer
+template <typename T>
+void roi_pooling_layer(const Tensor<T> &in, Tensor<T> &out, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
+{
+    const int   num_rois   = rois.size();
+    const int   width_in   = in.shape().x();
+    const int   height_in  = in.shape().y();
+    const int   fms        = in.shape().z();
+    const int   volume_in  = width_in * height_in * fms;
+    const int   pool_w     = pool_info.pooled_width();
+    const int   pool_h     = pool_info.pooled_height();
+    const int   volume_out = pool_w * pool_h * fms;
+    const float roi_scale  = pool_info.spatial_scale();
+
+    // Iterate through all rois
+    for(int roi_idx = 0; roi_idx < num_rois; ++roi_idx)
+    {
+        // Get dimensions of current ROI
+        const ROI &roi = rois[roi_idx];
+
+        int batch_id    = roi.batch_idx;
+        int roi_start_x = support::cpp11::round(roi.rect.x * roi_scale);
+        int roi_start_y = support::cpp11::round(roi.rect.y * roi_scale);
+        int roi_width   = std::max(support::cpp11::round(roi.rect.width * roi_scale), 1.f);
+        int roi_height  = std::max(support::cpp11::round(roi.rect.height * roi_scale), 1.f);
+
+        // Determine pooling regions
+        float pool_region_size_x = static_cast<float>(roi_width) / pool_w;
+        float pool_region_size_y = static_cast<float>(roi_height) / pool_h;
+
+        // Iterate through all channel
+        for(int fm = 0; fm < fms; ++fm)
+        {
+            // Calculate each output pixel
+            for(int py = 0; py < pool_h; ++py)
+            {
+                for(int px = 0; px < pool_w; ++px)
+                {
+                    int region_start_x = static_cast<int>(std::floor(px * pool_region_size_x));
+                    int region_end_x   = static_cast<int>(std::ceil((px + 1) * pool_region_size_x));
+                    int region_start_y = static_cast<int>(std::floor(py * pool_region_size_y));
+                    int region_end_y   = static_cast<int>(std::ceil((py + 1) * pool_region_size_y));
+
+                    region_start_x = std::min(std::max(region_start_x + roi_start_x, 0), width_in);
+                    region_end_x   = std::min(std::max(region_end_x + roi_start_x, 0), width_in);
+                    region_start_y = std::min(std::max(region_start_y + roi_start_y, 0), height_in);
+                    region_end_y   = std::min(std::max(region_end_y + roi_start_y, 0), height_in);
+
+                    // Iterate through each pixel in the pooling region
+                    if((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
+                    {
+                        out[roi_idx * volume_out + fm * pool_w * pool_h + py * pool_w + px] = 0;
+                    }
+                    else
+                    {
+                        T curr_max = std::numeric_limits<T>::lowest();
+                        for(int j = region_start_y; j < region_end_y; ++j)
+                        {
+                            for(int i = region_start_x; i < region_end_x; ++i)
+                            {
+                                const auto val = in[batch_id * volume_in + fm * width_in * height_in + j * width_in + i];
+                                curr_max       = std::max(val, curr_max);
+                            }
+                        }
+                        out[roi_idx * volume_out + fm * pool_w * pool_h + py * pool_w + px] = curr_max;
+                    }
+                }
+            }
+        }
+    }
+}
+
 // Softmax Layer
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
 void softmax_layer(const Tensor<T> &in, Tensor<T> &out)

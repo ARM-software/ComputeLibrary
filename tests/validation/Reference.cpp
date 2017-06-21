@@ -30,6 +30,7 @@
 #include "validation/Helpers.h"
 
 #include <random>
+#include <vector>
 
 using namespace arm_compute::test;
 
@@ -616,6 +617,28 @@ RawTensor Reference::compute_reference_pooling_layer(const TensorShape &shape_in
 
     // Compute reference
     ReferenceCPP::pooling_layer(ref_src, ref_dst, pool_info, fixed_point_position);
+
+    return ref_dst;
+}
+
+RawTensor Reference::compute_reference_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
+{
+    TensorShape shape_dst;
+    shape_dst.set(0, pool_info.pooled_width());
+    shape_dst.set(1, pool_info.pooled_height());
+    shape_dst.set(2, shape.z());
+    shape_dst.set(3, rois.size());
+
+    // Create reference
+    RawTensor ref_src = library->get(shape, dt);
+    RawTensor ref_dst = library->get(shape_dst, dt);
+
+    // Fill reference
+    std::uniform_real_distribution<> distribution(-1, 1);
+    library->fill(ref_src, distribution, 0.0);
+
+    // Compute reference
+    ReferenceCPP::roi_pooling_layer(ref_src, ref_dst, rois, pool_info);
 
     return ref_dst;
 }

@@ -38,7 +38,7 @@ namespace test
 ProgramOptions::ProgramOptions()
 {
     boost::program_options::options_description generic("Generic options");
-    generic.add_options()("help", "Print help message")("seed", boost::program_options::value<std::random_device::result_type>(), "Seed for the tensor library");
+    generic.add_options()("help", "Print help message")("seed", boost::program_options::value<std::random_device::result_type>()->default_value(std::random_device()()), "Seed for the tensor library");
 
     _visible.add(generic);
 

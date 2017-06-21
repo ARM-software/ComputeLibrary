@@ -331,6 +331,14 @@ public:
       * @return Computed raw tensor.
       */
     static RawTensor compute_reference_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info, int fixed_point_position = 0);
+    /** Compute reference roi pooling layer.
+     *
+     * @param[in] shape     Shape of the input tensor.
+     * @param[in] dt        Data type of input and output tensors.
+     * @param[in] rois      Region of interest vector.
+     * @param[in] pool_info ROI Pooling Layer information.
+     */
+    static RawTensor compute_reference_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info);
     /** Compute reference softmax layer.
      *
      * @param[in] shape                Shape of the input and output tensors.

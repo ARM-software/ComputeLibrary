@@ -300,6 +300,13 @@ struct Coordinates3D
     uint32_t z; /**< Z coordinates */
 };
 
+/** Region of interest */
+struct ROI
+{
+    Rectangle rect;      /**< Rectangle specifying the region of interest */
+    uint16_t  batch_idx; /**< The batch index of the region of interest */
+};
+
 /** Available channels */
 enum class Channel
 {
@@ -452,6 +459,39 @@ private:
     PoolingType   _pool_type;
     unsigned int  _pool_size;
     PadStrideInfo _pad_stride_info;
+};
+
+/** ROI Pooling Layer Information class */
+class ROIPoolingLayerInfo
+{
+public:
+    /** Default Constructor
+     *
+     * @param[in] pooled_width  Pooled width of the layer.
+     * @param[in] pooled_height Pooled height of the layer.
+     * @param[in] spatial_scale Spatial scale to be applied to the ROI coordinates and dimensions.
+     */
+    ROIPoolingLayerInfo(unsigned int pooled_width, unsigned int pooled_height, float spatial_scale)
+        : _pooled_width(pooled_width), _pooled_height(pooled_height), _spatial_scale(spatial_scale)
+    {
+    }
+    unsigned int pooled_width() const
+    {
+        return _pooled_width;
+    }
+    unsigned int pooled_height() const
+    {
+        return _pooled_height;
+    }
+    float spatial_scale() const
+    {
+        return _spatial_scale;
+    }
+
+private:
+    unsigned int _pooled_width;
+    unsigned int _pooled_height;
+    float        _spatial_scale;
 };
 
 /** Activation Layer Information class */

@@ -318,6 +318,14 @@ void ReferenceCPP::pooling_layer(const RawTensor &src, RawTensor &dst, PoolingLa
     boost::apply_visitor(tensor_visitors::pooling_layer_visitor(s, pool_info, fixed_point_position), d);
 }
 
+// ROI Pooling Layer
+void ReferenceCPP::roi_pooling_layer(const RawTensor &src, RawTensor &dst, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
+{
+    const TensorVariant s = TensorFactory::get_tensor(src);
+    TensorVariant       d = TensorFactory::get_tensor(dst);
+    boost::apply_visitor(tensor_visitors::roi_pooling_layer_visitor(s, rois, pool_info), d);
+}
+
 // Softmax Layer
 void ReferenceCPP::softmax_layer(const RawTensor &src, RawTensor &dst)
 {

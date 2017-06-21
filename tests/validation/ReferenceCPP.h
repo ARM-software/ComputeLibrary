@@ -276,7 +276,7 @@ public:
      * @param[in]  norm_info Normalization Layer information.
      */
     static void normalization_layer(const RawTensor &src, RawTensor &dst, NormalizationLayerInfo norm_info);
-    /** Pooling layer of @p src based on the information from @p norm_info.
+    /** Pooling layer of @p src based on the information from @p pool_info.
      *
      * @param[in]  src                  Input tensor.
      * @param[out] dst                  Result tensor.
@@ -284,6 +284,14 @@ public:
      * @param[in]  fixed_point_position Fixed point position. (Optional)
      */
     static void pooling_layer(const RawTensor &src, RawTensor &dst, PoolingLayerInfo pool_info, int fixed_point_position = 0);
+    /** ROI Pooling layer of @p src based on the information from @p pool_info and @p rois.
+     *
+     * @param[in]  src       Input tensor.
+     * @param[out] dst       Result tensor.
+     * @param[in]  rois      Region of Interest points.
+     * @param[in]  pool_info ROI Pooling Layer information.
+     */
+    static void roi_pooling_layer(const RawTensor &src, RawTensor &dst, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info);
     /** Softmax Layer of @p src.
      *
      * @param[in]  src Input tensor.

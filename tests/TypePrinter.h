@@ -53,6 +53,18 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimen
     return os;
 }
 
+/** Formatted output of the Rectangle type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
+{
+    os << "(";
+    os << rect.height << ", " << rect.width;
+    os << ", ";
+    os << rect.x << ", " << rect.y;
+    os << ")";
+
+    return os;
+}
+
 /** Formatted output of the PadStridInfo type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_stride_info)
 {
@@ -62,6 +74,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_s
     os << pad_stride_info.pad().first << ", " << pad_stride_info.pad().second;
     os << ")";
 
+    return os;
+}
+
+/** Formatted output of the ROIPoolingInfo type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo &pool_info)
+{
+    os << pool_info.pooled_width() << ", " << pool_info.pooled_height() << ", " << pool_info.spatial_scale();
     return os;
 }
 
