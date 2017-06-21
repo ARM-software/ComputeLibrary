@@ -37,7 +37,8 @@ namespace
 template <typename T>
 void weights_reshape(const ITensor *input, const ITensor *bias, ITensor *output, const Window &window)
 {
-    const unsigned int kernel_size     = input->info()->dimension(0);
+    const unsigned int kernel_size_x   = input->info()->dimension(0);
+    const unsigned int kernel_size_y   = input->info()->dimension(1);
     const unsigned int kernel_depth    = input->info()->dimension(2);
     const unsigned int input_stride_x  = input->info()->strides_in_bytes().x();
     const unsigned int input_stride_y  = input->info()->strides_in_bytes().y();
@@ -61,9 +62,9 @@ void weights_reshape(const ITensor *input, const ITensor *bias, ITensor *output,
         // Linearize volume
         for(unsigned int d = 0; d < kernel_depth; ++d)
         {
-            for(unsigned int j = 0; j < kernel_size; ++j)
+            for(unsigned int j = 0; j < kernel_size_y; ++j)
             {
-                for(unsigned int i = 0; i < kernel_size; ++i)
+                for(unsigned int i = 0; i < kernel_size_x; ++i)
                 {
                     *(reinterpret_cast<T *>(tmp_output_ptr)) = *(reinterpret_cast<const T *>(tmp_input_ptr));
                     tmp_input_ptr += input_stride_x;
