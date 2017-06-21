@@ -24,6 +24,7 @@
 #include "Globals.h"
 #include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
+#include "PaddingCalculator.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -151,7 +152,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTyp
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, required_padding(shape.x(), 16), 0, 0);
+    const PaddingSize padding(0, PaddingCalculator(shape.x(), 16).required_padding(), 0, 0);
     validate(src.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }

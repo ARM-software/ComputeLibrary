@@ -24,6 +24,7 @@
 #include "Globals.h"
 #include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
+#include "PaddingCalculator.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -108,8 +109,16 @@ BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
-    const PaddingSize read_padding(0, required_padding_undefined_border_read(shape.x(), 16, 8), 0, 0);
-    const PaddingSize write_padding(0, required_padding_undefined_border_write(shape.x(), 8, 1), 0, 0);
+    PaddingCalculator calculator(shape.x(), 8);
+    calculator.set_border_size(1);
+
+    const PaddingSize write_padding(0, calculator.required_padding(), 0, 0);
+
+    calculator.set_accessed_elements(16);
+    calculator.set_access_offset(-1);
+
+    const PaddingSize read_padding(0, calculator.required_padding(), 0, 0);
+
     validate(src.info()->padding(), read_padding);
     validate(dst.info()->padding(), write_padding);
 }

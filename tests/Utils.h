@@ -475,45 +475,6 @@ inline ValidRegion shape_to_valid_region_undefined_border(TensorShape shape, Bor
     return ValidRegion(std::move(anchor), shape);
 }
 
-/** Calculate the required padding given the available @p size and the required.
- * @p step.
- *
- * @param[in] size Available size.
- * @param[in] step Required step size.
- *
- * @return Difference between next greater multiple of @p step and @p size.
- */
-inline int required_padding(int size, int step)
-{
-    return ((size + step - 1) / step) * step - size;
-}
-
-/** Calculate the required padding for writing operation with UNDEFINED border mode.
- *
- * @param[in] size        Available size.
- * @param[in] step        Required step size; number of elements to write at each iteration.
- * @param[in] border_size Border size.
- *
- * @return Required padding size plus border size.
- */
-inline int required_padding_undefined_border_write(int size, int step, int border_size)
-{
-    return required_padding(size, step) + border_size;
-}
-
-/** Calculate the required padding for reading operation with UNDEFINED border mode.
- *
- * @param[in] size         Available size.
- * @param[in] read_step    Required step size; number of elements to read at each iteration.
- * @param[in] process_step Required step size; number of elements to process at each iteration.
- *
- * @return Required padding size.
- */
-inline int required_padding_undefined_border_read(int size, int read_step, int process_step)
-{
-    return required_padding(size, process_step) + read_step - process_step;
-}
-
 /** Write the value after casting the pointer according to @p data_type.
  *
  * @warning The type of the value must match the specified data type.
