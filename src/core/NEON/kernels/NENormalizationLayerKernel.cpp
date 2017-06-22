@@ -51,12 +51,15 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, input_squared, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, input_squared, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, input_squared, output);
     ARM_COMPUTE_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
-    ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.beta(), input);
-    ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.kappa(), input);
-    ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.scale_coeff(), input);
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, input_squared, output);
+        ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.beta(), input);
+        ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.kappa(), input);
+        ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.scale_coeff(), input);
+    }
 
     const unsigned int border_width = (norm_info.type() == NormType::CROSS_MAP) ? 0 : std::min(norm_info.norm_size() / 2, 3U);
 

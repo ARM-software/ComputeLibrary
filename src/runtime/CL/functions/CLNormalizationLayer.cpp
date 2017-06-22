@@ -41,7 +41,8 @@ void CLNormalizationLayer::configure(const ICLTensor *input, ICLTensor *output, 
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
 
-    _squared_input.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, input->info()->data_type()));
+    TensorInfo tensor_info(input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    _squared_input.allocator()->init(tensor_info);
 
     _norm_kernel.configure(input, &_squared_input, output, norm_info);
     _multiply_kernel.configure(input, input, &_squared_input, 1.0f, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);

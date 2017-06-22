@@ -378,6 +378,7 @@ EXPQ_IMPL(qs16, qs16x16, 16)
 
 LOGQ_IMPL(qs8, qs8x16, 16)
 LOGQ_IMPL(qs16, qs16x8, 8)
+LOGQ_IMPL(qs16, qs16x16, 16)
 
 #define LOG_OP_EXPAND_STR(a, type, size, position) log_sat_##type##x##size((a), (position))
 #define LOG_OP_EXPAND(a, type, size, position) LOG_OP_EXPAND_STR(a, type, size, position)

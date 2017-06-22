@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "fixed_point.h"
 #include "helpers.h"
 
 /** Fill N pixel of the padding edge of a single channel image by replicating the closest valid pixel.
