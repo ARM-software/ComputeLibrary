@@ -51,6 +51,8 @@ using GEMMFP16GoogLeNet1 = GEMM<GoogLeNetGEMMDataset1, CLTensor, CLAccessor, CLG
 using GEMMFP16GoogLeNet2 = GEMM<GoogLeNetGEMMDataset2, CLTensor, CLAccessor, CLGEMM, DataType::F16>;
 using GEMMFP32GoogLeNet1 = GEMM<GoogLeNetGEMMDataset1, CLTensor, CLAccessor, CLGEMM, DataType::F32>;
 using GEMMFP32GoogLeNet2 = GEMM<GoogLeNetGEMMDataset2, CLTensor, CLAccessor, CLGEMM, DataType::F32>;
+using FP16MatrixMultiply = GEMM<MatrixMultiplyDataset, CLTensor, CLAccessor, CLGEMM, DataType::F16>;
+using FP32MatrixMultiply = GEMM<MatrixMultiplyDataset, CLTensor, CLAccessor, CLGEMM, DataType::F32>;
 } // namespace
 
 BENCHMARK_DEFINE_F(GEMMFP16GoogLeNet1, cl_googlenet)
@@ -490,3 +492,49 @@ BENCHMARK_REGISTER_F(GEMMFP32GoogLeNet2, cl_googlenet)
 BENCHMARK_REGISTER_F(GEMMFP32GoogLeNet2, cl_googlenet)
 ->Threads(1)
 ->Apply(DataSetArg<GoogLeNetGEMMDataset2, 31>);
+
+BENCHMARK_DEFINE_F(FP16MatrixMultiply, cl_matrix_multiply)
+(::benchmark::State &state)
+{
+    while(state.KeepRunning())
+    {
+        // Run function
+        profiler.start();
+        gemm_layer->run();
+        CLScheduler::get().sync();
+        profiler.stop();
+    }
+}
+
+BENCHMARK_REGISTER_F(FP16MatrixMultiply, cl_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 0>);
+BENCHMARK_REGISTER_F(FP16MatrixMultiply, cl_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 1>);
+BENCHMARK_REGISTER_F(FP16MatrixMultiply, cl_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 2>);
+
+BENCHMARK_DEFINE_F(FP32MatrixMultiply, cl_matrix_multiply)
+(::benchmark::State &state)
+{
+    while(state.KeepRunning())
+    {
+        // Run function
+        profiler.start();
+        gemm_layer->run();
+        CLScheduler::get().sync();
+        profiler.stop();
+    }
+}
+
+BENCHMARK_REGISTER_F(FP32MatrixMultiply, cl_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 0>);
+BENCHMARK_REGISTER_F(FP32MatrixMultiply, cl_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 1>);
+BENCHMARK_REGISTER_F(FP32MatrixMultiply, cl_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 2>);

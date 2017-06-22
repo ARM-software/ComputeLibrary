@@ -49,11 +49,14 @@ namespace
 #ifdef ENABLE_FP16
 using GEMMFP16GoogLeNet1 = GEMM<GoogLeNetGEMMDataset1, Tensor, NEAccessor, NEGEMM, DataType::F16>;
 using GEMMFP16GoogLeNet2 = GEMM<GoogLeNetGEMMDataset2, Tensor, NEAccessor, NEGEMM, DataType::F16>;
+using FP16MatrixMultiply = GEMM<MatrixMultiplyDataset, Tensor, NEAccessor, NEGEMM, DataType::F16>;
 #endif /* ENABLE_FP16 */
 using GEMMFP32GoogLeNet1 = GEMM<GoogLeNetGEMMDataset1, Tensor, NEAccessor, NEGEMM, DataType::F32>;
 using GEMMFP32GoogLeNet2 = GEMM<GoogLeNetGEMMDataset2, Tensor, NEAccessor, NEGEMM, DataType::F32>;
 using GEMMQS8GoogLeNet1  = GEMM<GoogLeNetGEMMDataset1, Tensor, NEAccessor, NEGEMM, DataType::QS8>;
 using GEMMQS8GoogLeNet2  = GEMM<GoogLeNetGEMMDataset2, Tensor, NEAccessor, NEGEMM, DataType::QS8>;
+using FP32MatrixMultiply = GEMM<MatrixMultiplyDataset, Tensor, NEAccessor, NEGEMM, DataType::F32>;
+using QS8MatrixMultiply  = GEMM<MatrixMultiplyDataset, Tensor, NEAccessor, NEGEMM, DataType::QS8>;
 } // namespace
 #ifdef ENABLE_FP16
 BENCHMARK_DEFINE_F(GEMMFP16GoogLeNet1, neon_googlenet)
@@ -272,6 +275,28 @@ BENCHMARK_REGISTER_F(GEMMFP16GoogLeNet2, neon_googlenet)
 BENCHMARK_REGISTER_F(GEMMFP16GoogLeNet2, neon_googlenet)
 ->Threads(1)
 ->Apply(DataSetArg<GoogLeNetGEMMDataset2, 31>);
+
+BENCHMARK_DEFINE_F(FP16MatrixMultiply, neon_matrix_multiply)
+(::benchmark::State &state)
+{
+    while(state.KeepRunning())
+    {
+        // Run function
+        profiler.start();
+        gemm_layer->run();
+        profiler.stop();
+    }
+}
+
+BENCHMARK_REGISTER_F(FP16MatrixMultiply, neon_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 0>);
+BENCHMARK_REGISTER_F(FP16MatrixMultiply, neon_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 1>);
+BENCHMARK_REGISTER_F(FP16MatrixMultiply, neon_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 2>);
 #endif /* ENABLE_FP16 */
 
 BENCHMARK_DEFINE_F(GEMMFP32GoogLeNet1, neon_googlenet)
@@ -707,3 +732,47 @@ BENCHMARK_REGISTER_F(GEMMQS8GoogLeNet2, neon_googlenet)
 BENCHMARK_REGISTER_F(GEMMQS8GoogLeNet2, neon_googlenet)
 ->Threads(1)
 ->Apply(DataSetArg<GoogLeNetGEMMDataset2, 31>);
+
+BENCHMARK_DEFINE_F(FP32MatrixMultiply, neon_matrix_multiply)
+(::benchmark::State &state)
+{
+    while(state.KeepRunning())
+    {
+        // Run function
+        profiler.start();
+        gemm_layer->run();
+        profiler.stop();
+    }
+}
+
+BENCHMARK_REGISTER_F(FP32MatrixMultiply, neon_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 0>);
+BENCHMARK_REGISTER_F(FP32MatrixMultiply, neon_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 1>);
+BENCHMARK_REGISTER_F(FP32MatrixMultiply, neon_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 2>);
+
+BENCHMARK_DEFINE_F(QS8MatrixMultiply, neon_matrix_multiply)
+(::benchmark::State &state)
+{
+    while(state.KeepRunning())
+    {
+        // Run function
+        profiler.start();
+        gemm_layer->run();
+        profiler.stop();
+    }
+}
+
+BENCHMARK_REGISTER_F(QS8MatrixMultiply, neon_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 0>);
+BENCHMARK_REGISTER_F(QS8MatrixMultiply, neon_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 1>);
+BENCHMARK_REGISTER_F(QS8MatrixMultiply, neon_matrix_multiply)
+->Threads(1)
+->Apply(DataSetArg<MatrixMultiplyDataset, 2>);
