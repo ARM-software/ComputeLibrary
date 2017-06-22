@@ -72,7 +72,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input          The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                            while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/F32
+     *                            while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/F16/F32
      * @param[out] output         The output tensor. Data types supported: Same as @p input
      * @param[in]  convolved_dims The convolved output dimensions.
      * @param[in]  conv_info      Contains padding and stride information described in @ref PadStrideInfo.

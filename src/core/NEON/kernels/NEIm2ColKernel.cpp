@@ -266,8 +266,8 @@ NEIm2ColKernel::NEIm2ColKernel()
 
 void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<unsigned int, unsigned int> convolved_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32, DataType::QS8);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
     _input          = input;
@@ -296,6 +296,11 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<
             case DataType::F32:
                 _func = &NEIm2ColKernel::run_reduced<float>;
                 break;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+            case DataType::F16:
+                _func = &NEIm2ColKernel::run_reduced<float16_t>;
+                break;
+#endif
             case DataType::QS8:
                 _func = &NEIm2ColKernel::run_reduced<qint8_t>;
                 break;
@@ -311,6 +316,11 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<
             case DataType::F32:
                 _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<float, false> : &NEIm2ColKernel::run_generic<float, true>;
                 break;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+            case DataType::F16:
+                _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<float16_t, false> : &NEIm2ColKernel::run_generic<float16_t, true>;
+                break;
+#endif
             case DataType::QS8:
                 _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<qint8_t, false> : &NEIm2ColKernel::run_generic<qint8_t, true>;
                 break;

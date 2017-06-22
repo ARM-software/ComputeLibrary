@@ -130,6 +130,25 @@ BOOST_DATA_TEST_CASE(Configuration,
     validate(dst.info()->valid_region(), dst_valid_region);
 }
 
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
+                     SmallConvolutionLayerDataset() * boost::unit_test::data::make(DataType::F16),
+                     conv_set, dt)
+{
+    // Compute function
+    Tensor dst = compute_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+}
+BOOST_AUTO_TEST_SUITE_END()
+#endif
+
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(SmallConvolutionLayer,

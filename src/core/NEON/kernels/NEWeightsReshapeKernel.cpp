@@ -95,7 +95,7 @@ NEWeightsReshapeKernel::NEWeightsReshapeKernel()
 
 void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QS8);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != input->info()->dimension(1));
 
@@ -113,7 +113,7 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
     set_fixed_point_position_if_zero(*output->info(), fixed_point_position);
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32, DataType::QS8);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
@@ -127,7 +127,7 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
         set_shape_if_empty(*bias->info(), bias_shape);
 
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(bias->info()->tensor_shape(), bias_shape);
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::F32, DataType::QS8);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::F16, DataType::F32, DataType::QS8);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
@@ -141,6 +141,11 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
         case DataType::F32:
         {
             _func = &weights_reshape<uint32_t>;
+            break;
+        }
+        case DataType::F16:
+        {
+            _func = &weights_reshape<uint16_t>;
             break;
         }
         case DataType::QS8:
