@@ -681,6 +681,7 @@ inline bool is_in_valid_region(const ValidRegion &valid_region, const Coordinate
     }
     return true;
 }
+
 } // namespace test
 } // namespace arm_compute
 #endif

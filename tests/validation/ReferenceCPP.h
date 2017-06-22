@@ -188,6 +188,19 @@ public:
      */
     static void gemm(const RawTensor &src1, const RawTensor &src2, const RawTensor &src3,
                      RawTensor &dst, float alpha, float beta);
+    /** Compute non linear filter function.
+     *
+     * @param[in]  src                   First input tensor
+     * @param[out] dst                   Output tensor
+     * @param[in]  function              Non linear function to perform
+     * @param[in]  mask_size             Mask size. Supported sizes: 3, 5
+     * @param[in]  pattern               Matrix pattern
+     * @param[in]  mask                  The given mask.
+     * @param[in]  border_mode           Strategy to use for borders.
+     * @param[in]  constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+    */
+    static void non_linear_filter(const RawTensor &src, RawTensor &dst, NonLinearFilterFunction function, unsigned int mask_size,
+                                  MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value = 0);
     /** Element-wise multiplication of @p src1, @p src2 and @p scale
      *
      * @param[in]  src1            First tensor.

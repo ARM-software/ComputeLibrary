@@ -34,6 +34,8 @@
 #include "dataset/GEMMDataset.h"
 #include "dataset/ImageDatasets.h"
 #include "dataset/InterpolationPolicyDataset.h"
+#include "dataset/MatrixPatternDataset.h"
+#include "dataset/NonLinearFilterFunctionDataset.h"
 #include "dataset/NormalizationTypeDataset.h"
 #include "dataset/PoolingLayerDataset.h"
 #include "dataset/PoolingTypesDataset.h"
@@ -248,6 +250,18 @@ struct is_dataset<arm_compute::test::RandomBatchNormalizationLayerDataset> : boo
 /// Register the data set with Boost
 template <>
 struct is_dataset<arm_compute::test::ThresholdDataset> : boost::mpl::true_
+{
+};
+
+/// Register the data set with Boost
+template <>
+struct is_dataset<arm_compute::test::NonLinearFilterFunctions> : boost::mpl::true_
+{
+};
+
+/// Register the data set with Boost
+template <>
+struct is_dataset<arm_compute::test::MatrixPatterns> : boost::mpl::true_
 {
 };
 }

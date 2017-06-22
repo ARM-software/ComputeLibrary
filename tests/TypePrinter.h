@@ -86,6 +86,51 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderMode &mode)
     return os;
 }
 
+/** Formatted output of the NonLinearFilterFunction type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const NonLinearFilterFunction &function)
+{
+    switch(function)
+    {
+        case NonLinearFilterFunction::MAX:
+            os << "MAX";
+            break;
+        case NonLinearFilterFunction::MEDIAN:
+            os << "MEDIAN";
+            break;
+        case NonLinearFilterFunction::MIN:
+            os << "MIN";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the MatrixPattern type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const MatrixPattern &pattern)
+{
+    switch(pattern)
+    {
+        case MatrixPattern::BOX:
+            os << "BOX";
+            break;
+        case MatrixPattern::CROSS:
+            os << "CROSS";
+            break;
+        case MatrixPattern::DISK:
+            os << "DISK";
+            break;
+        case MatrixPattern::OTHER:
+            os << "OTHER";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
 /** Formatted output of the InterpolationPolicy type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy &policy)
 {

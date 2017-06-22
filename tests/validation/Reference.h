@@ -206,6 +206,20 @@ public:
      */
     static RawTensor compute_reference_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2, const TensorShape &src_shape3,
                                             const TensorShape &dst_shape, float alpha, float beta, DataType dt, int fixed_point_position = 0);
+    /** Compute reference non linear filter function
+     *
+     * @param[in] shape                 Shape of the input and output tensors.Data type supported: U8
+     * @param[in] function              Non linear function to perform
+     * @param[in] mask_size             Mask size. Supported sizes: 3, 5
+     * @param[in] pattern               Matrix pattern
+     * @param[in] mask                  The given mask. Will be used only if pattern is specified to PATTERN_OTHER
+     * @param[in] border_mode           Strategy to use for borders.
+     * @param[in] constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     *
+     * @return Computed raw tensor.
+    */
+    static RawTensor compute_reference_non_linear_filter(const TensorShape &shape, NonLinearFilterFunction function, unsigned int mask_size,
+                                                         MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value = 0);
     /** Compute reference pixel-wise multiplication
      *
      * @param[in] shape           Shape of the input and output tensors.

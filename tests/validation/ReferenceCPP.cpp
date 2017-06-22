@@ -224,6 +224,15 @@ void ReferenceCPP::gemm(const RawTensor &src1, const RawTensor &src2, const RawT
 
     boost::apply_visitor(tensor_visitors::gemm_visitor(s1, s2, s3, alpha, beta), d);
 }
+// Non linear filter
+void ReferenceCPP::non_linear_filter(const RawTensor &src, RawTensor &dst, NonLinearFilterFunction function, unsigned int mask_size,
+                                     MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value)
+{
+    ARM_COMPUTE_ERROR_ON(src.data_type() != DataType::U8 || dst.data_type() != DataType::U8);
+    const Tensor<uint8_t> s(src.shape(), src.data_type(), src.fixed_point_position(), reinterpret_cast<const uint8_t *>(src.data()));
+    Tensor<uint8_t>       d(dst.shape(), dst.data_type(), dst.fixed_point_position(), reinterpret_cast<uint8_t *>(dst.data()));
+    tensor_operations::non_linear_filter(s, d, function, mask_size, pattern, mask, border_mode, constant_border_value);
+}
 
 // Pixel-wise multiplication
 void ReferenceCPP::pixel_wise_multiplication(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
