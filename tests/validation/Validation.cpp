@@ -392,6 +392,16 @@ void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned 
         BOOST_TEST(classified_labels[i] == expected_labels[i]);
     }
 }
+
+void validate(float target, float ref, float tolerance_abs_error = std::numeric_limits<float>::epsilon(), float tolerance_relative_error = 0.0001f)
+{
+    const bool equal = is_equal(target, ref, tolerance_abs_error, tolerance_relative_error);
+
+    BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
+    BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
+    BOOST_TEST(equal);
+}
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

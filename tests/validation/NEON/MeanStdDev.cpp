@@ -123,8 +123,8 @@ BOOST_DATA_TEST_CASE(RunSmall, Small2DShapes(), shape)
     std::pair<float, float> ref_output = Reference::compute_reference_mean_and_standard_deviation(shape);
 
     // Validate output
-    BOOST_TEST(static_cast<int>(output.first) == static_cast<int>(ref_output.first));
-    BOOST_TEST(static_cast<int>(output.second) == static_cast<int>(ref_output.second));
+    validate(output.first, ref_output.first);
+    validate(output.second, ref_output.second);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -137,8 +137,8 @@ BOOST_DATA_TEST_CASE(RunLarge, Large2DShapes(), shape)
     std::pair<float, float> ref_output = Reference::compute_reference_mean_and_standard_deviation(shape);
 
     // Validate output
-    BOOST_TEST(static_cast<int>(output.first) == static_cast<int>(ref_output.first));
-    BOOST_TEST(static_cast<int>(output.second) == static_cast<int>(ref_output.second));
+    validate(output.first, ref_output.first);
+    validate(output.second, ref_output.second);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
