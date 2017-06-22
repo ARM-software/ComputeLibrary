@@ -133,10 +133,18 @@ NEGEMMInterleave4x4Kernel::NEGEMMInterleave4x4Kernel()
 void NEGEMMInterleave4x4Kernel::configure(const ITensor *input, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+
+    TensorShape output_shape = input->info()->tensor_shape();
+    output_shape.set(0, input->info()->dimension(0) * 4);
+    output_shape.set(1, std::ceil(input->info()->dimension(1) / 4.0f));
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != input->info()->dimension(0) * 4);
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(1) != std::ceil(input->info()->dimension(1) / 4.0f));
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     _input  = input;
     _output = output;
