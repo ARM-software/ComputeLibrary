@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include <limits>
 
 namespace arm_compute
 {
@@ -1196,7 +1197,7 @@ inline qint8x16_t vqrecipq_qs8(qint8x16_t a, int fixed_point_position)
     const qint8x16_t shift_value = vqnegq_s8(vqsubq_s8(vdupq_n_s8(8), vqaddq_s8(vclzq_s8(a), vdupq_n_s8(fixed_point_position))));
     const qint8x16_t temp        = vqshlq_s8(a, shift_value);
 
-    qint8x16_t x = vqsubq_qs8(const_48_over_17, vmulq_qs8(temp, const_32_over_17, fixed_point_position));
+    qint8x16_t x = vqsubq_qs8(const_48_over_17, vqmulq_qs8(temp, const_32_over_17, fixed_point_position));
 
     // Set initial guess to one if x > 1
     uint8x16_t set_one = vcgtq_s8(x, const_one);
@@ -1234,7 +1235,8 @@ inline qint16x8_t vqrecipq_qs16(qint16x8_t a, int fixed_point_position)
     x = vqaddq_s16(x, vqmulq_qs16(x, vqsubq_s16(const_one, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
     x = vqaddq_s16(x, vqmulq_qs16(x, vqsubq_s16(const_one, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
 
-    return vqshlq_s16(x, shift_value);
+    // Saturate result in case of overflow
+    return vbslq_s16(vceqq_s16(a, vdupq_n_s16(0)), vdupq_n_s16(std::numeric_limits<int16_t>::max()), vqshlq_s16(x, shift_value));
 }
 
 inline qint8x8_t vdiv_qs8(qint8x8_t a, qint8x8_t b, int fixed_point_position)

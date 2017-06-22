@@ -53,12 +53,13 @@ namespace
 {
 /** Define tolerance of the activation layer
  *
+ * @param[in] dt                   The data type used.
  * @param[in] activation           The activation function used.
  * @param[in] fixed_point_position Number of bits for the fractional part..
  *
  * @return Tolerance depending on the activation function.
  */
-float activation_layer_tolerance(ActivationLayerInfo::ActivationFunction activation, int fixed_point_position = 0)
+float activation_layer_tolerance(DataType dt, ActivationLayerInfo::ActivationFunction activation, int fixed_point_position = 0)
 {
     switch(activation)
     {
@@ -66,7 +67,15 @@ float activation_layer_tolerance(ActivationLayerInfo::ActivationFunction activat
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
-            return (fixed_point_position != 0) ? 5.f : 0.00001f;
+            switch(dt)
+            {
+                case DataType::QS8:
+                    return 5.f;
+                case DataType::QS16:
+                    return 11.f;
+                default:
+                    return 0.00001f;
+            }
             break;
         default:
             return 0.f;
@@ -124,7 +133,14 @@ Tensor compute_activation_layer(bool in_place, const TensorShape &shape, DataTyp
     {
         int min_bound = 0;
         int max_bound = 0;
-        std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+        if(dt == DataType::QS8)
+        {
+            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+        }
+        else
+        {
+            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int16_t>(act_info.activation(), fixed_point_position);
+        }
         std::uniform_int_distribution<> distribution(min_bound, max_bound);
         library->fill(NEAccessor(src), distribution, 0);
     }
@@ -206,7 +222,7 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
     RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, dt, act_info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(act_function));
+    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(dt, act_function));
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -223,7 +239,7 @@ BOOST_DATA_TEST_CASE(RunLarge, boost::unit_test::data::make({ false, true }) * L
     RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, dt, act_info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(act_function));
+    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(dt, act_function));
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -246,13 +262,13 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
     RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, DataType::QS8, act_info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(act_function, fixed_point_position));
+    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(DataType::QS8, act_function, fixed_point_position));
 }
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(QS16)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * ActivationFunctions() * boost::unit_test::data::xrange(3, 6, 1) * boost::unit_test::data::make({ 0.5f, 1.f }),
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * ActivationFunctions() * boost::unit_test::data::xrange(3, 14, 1) * boost::unit_test::data::make({ 0.5f, 1.f }),
                      in_place, shape, act_function, fixed_point_position, alpha_beta)
 {
     // Create activation layer info
@@ -265,7 +281,7 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
     RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, DataType::QS16, act_info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(act_function, fixed_point_position));
+    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(DataType::QS16, act_function, fixed_point_position));
 }
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -459,7 +459,14 @@ RawTensor Reference::compute_reference_activation_layer(const TensorShape &shape
     {
         int min_bound = 0;
         int max_bound = 0;
-        std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+        if(dt == DataType::QS8)
+        {
+            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+        }
+        else
+        {
+            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int16_t>(act_info.activation(), fixed_point_position);
+        }
         std::uniform_int_distribution<> distribution(min_bound, max_bound);
         library->fill(ref_src, distribution, 0);
     }

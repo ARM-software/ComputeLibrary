@@ -99,6 +99,24 @@ TYPE_ALIAS(int, qs32)
 #define CONVERT_SAT_STR(x, type) CONVERT_SAT_STR2(x, type, type##_TYPE)
 #define CONVERT_SAT(x, type) CONVERT_SAT_STR(x, type)
 
+/** Computes saturating absolute value of fixed point vector.
+  *
+  * @param[in] type the actual data type.
+  *
+  * @return The result of the fixed point absolute value.
+  */
+#define ABSQ_SAT_IMPL(type)                  \
+    inline type abs_##type##_sat(type VopA)  \
+    {                                        \
+        return CONVERT_SAT(abs(VopA), type); \
+    }
+
+ABSQ_SAT_IMPL(qs8x16)
+ABSQ_SAT_IMPL(qs16x8)
+
+#define ABS_SAT_OP_EXPAND_STR(a, type, size) abs_##type##x##size##_sat((a))
+#define ABS_SAT_OP_EXPAND(a, type, size) ABS_SAT_OP_EXPAND_STR(a, type, size)
+
 /** Computes max of fixed point types.
   *
   * @param[in] type the actual data type.
@@ -280,6 +298,7 @@ MLALQ_SAT_IMPL(qs16x8, qs32x8)
     }
 
 DIVQ_SAT_IMPL(qs8, qs8x16, qs16x16)
+DIVQ_SAT_IMPL(qs16, qs16x8, qs32x8)
 DIVQ_SAT_IMPL(qs16, qs16x16, qs32x16)
 
 #define DIV_SAT_OP_EXPAND_STR(a, b, type, size, position) div_sat_##type##x##size((a), (b), (position))
@@ -287,40 +306,45 @@ DIVQ_SAT_IMPL(qs16, qs16x16, qs32x16)
 
 /** Saturate exponential of a fixed point vector
   *
+  * @note Implemented approach uses taylor polynomial to approximate the exponential function.
+  *
   * @param[in] stype the actual scalar data type.
   * @param[in] type  the actual data type.
   * @param[in] size  the number of the calculated elements.
   *
   * @return The result of the fixed point exponential. The result is saturated in case of overflow
   */
-#define EXPQ_IMPL(stype, type, size)                                                                                     \
-    inline type exp_sat_##type(type VopA, int fixed_point_position)                                                      \
-    {                                                                                                                    \
-        type const_one = (type)(1 << (fixed_point_position));                                                            \
-        type ln2       = (type)((((0x58B9 >> (14 - fixed_point_position))) + 1) >> 1);                                   \
-        type inv_ln2   = (type)((((0x38AA >> (14 - fixed_point_position)) + 1) >> 1)) | const_one;                       \
-        type A         = (type)(((0x7FBA >> (14 - fixed_point_position)) + 1) >> 1);                                     \
-        type B         = (type)(((0x3FE9 >> (14 - fixed_point_position)) + 1) >> 1);                                     \
-        type C         = (type)(((0x1693 >> (14 - fixed_point_position)) + 1) >> 1);                                     \
-        type D         = (type)(((0x0592 >> (14 - fixed_point_position)) + 1) >> 1);                                     \
-        type m         = MUL_SAT_OP_EXPAND(VopA, inv_ln2, stype, size, fixed_point_position);                            \
-        type dec_m     = m >> (type)fixed_point_position;                                                                \
-        type alpha     = MUL_SAT_OP_EXPAND(dec_m << (type)fixed_point_position, ln2, stype, size, fixed_point_position); \
-        alpha          = CONVERT(abs_diff(VopA, alpha), type);                                                           \
-        type sum       = add_sat(MUL_SAT_OP_EXPAND(alpha, D, stype, size, fixed_point_position), C);                     \
-        sum            = add_sat(MUL_SAT_OP_EXPAND(alpha, sum, stype, size, fixed_point_position), B);                   \
-        sum            = add_sat(MUL_SAT_OP_EXPAND(alpha, sum, stype, size, fixed_point_position), A);                   \
-        sum            = add_sat(MUL_SAT_OP_EXPAND(alpha, sum, stype, size, fixed_point_position), const_one);           \
-        return select(select(sum << dec_m, sum >> -dec_m, dec_m < (type)0), (type)stype##_MAX, clz(sum) <= dec_m);       \
+#define EXPQ_IMPL(stype, type, size)                                                                                                              \
+    inline type exp_sat_##type(type VopA, int fixed_point_position)                                                                               \
+    {                                                                                                                                             \
+        type const_one = (type)(1 << (fixed_point_position));                                                                                     \
+        type ln2       = (type)((((0x58B9 >> (14 - fixed_point_position))) + 1) >> 1);                                                            \
+        type inv_ln2   = (type)((((0x38AA >> (14 - fixed_point_position)) + 1) >> 1)) | const_one;                                                \
+        type A         = (type)(((0x7FBA >> (14 - fixed_point_position)) + 1) >> 1);                                                              \
+        type B         = (type)(((0x3FE9 >> (14 - fixed_point_position)) + 1) >> 1);                                                              \
+        type C         = (type)(((0x1693 >> (14 - fixed_point_position)) + 1) >> 1);                                                              \
+        type D         = (type)(((0x0592 >> (14 - fixed_point_position)) + 1) >> 1);                                                              \
+        type m         = MUL_SAT_OP_EXPAND(VopA, inv_ln2, stype, size, fixed_point_position);                                                     \
+        type dec_m     = m >> (type)fixed_point_position;                                                                                         \
+        type alpha     = MUL_SAT_OP_EXPAND(dec_m << (type)fixed_point_position, ln2, stype, size, fixed_point_position);                          \
+        alpha          = CONVERT(abs_diff(VopA, alpha), type);                                                                                    \
+        type sum       = add_sat(MUL_SAT_OP_EXPAND(alpha, D, stype, size, fixed_point_position), C);                                              \
+        sum            = add_sat(MUL_SAT_OP_EXPAND(alpha, sum, stype, size, fixed_point_position), B);                                            \
+        sum            = add_sat(MUL_SAT_OP_EXPAND(alpha, sum, stype, size, fixed_point_position), A);                                            \
+        sum            = add_sat(MUL_SAT_OP_EXPAND(alpha, sum, stype, size, fixed_point_position), const_one);                                    \
+        return select((type)stype##_MAX, select(sum << dec_m, sum >> -dec_m, dec_m < (type)0), clz(sum) > dec_m); /* Saturate result if needed */ \
     }
 
 EXPQ_IMPL(qs8, qs8x16, 16)
+EXPQ_IMPL(qs16, qs16x8, 8)
 EXPQ_IMPL(qs16, qs16x16, 16)
 
 #define EXP_OP_EXPAND_STR(a, type, size, position) exp_sat_##type##x##size((a), (position))
 #define EXP_OP_EXPAND(a, type, size, position) EXP_OP_EXPAND_STR(a, type, size, position)
 
 /** Saturate logarithm of a fixed point vector
+  *
+  * @note Implemented approach uses taylor polynomial to approximate the logarithm function.
   *
   * @param[in] stype the actual scalar data type.
   * @param[in] type  the actual data type.
@@ -332,11 +356,11 @@ EXPQ_IMPL(qs16, qs16x16, 16)
     inline type log_sat_##type(type VopA, int fixed_point_position)                                                                        \
     {                                                                                                                                      \
         type const_one = (type)(1 << (fixed_point_position));                                                                              \
-        type ln2       = (type)(0x58B9 >> (15 - fixed_point_position));                                                                    \
-        type A         = (type)(0x5C0F >> (14 - fixed_point_position));                                                                    \
-        type B         = -(type)(0x56AE >> (15 - fixed_point_position));                                                                   \
-        type C         = (type)(0x2933 >> (15 - fixed_point_position));                                                                    \
-        type D         = -(type)(0x0AA7 >> (15 - fixed_point_position));                                                                   \
+        type ln2       = (type)(0x58B9 >> (15 - fixed_point_position));  /* 1.4384189 */                                                   \
+        type A         = (type)(0x5C0F >> (14 - fixed_point_position));  /* 1.4384189 */                                                   \
+        type B         = -(type)(0x56AE >> (15 - fixed_point_position)); /* -0.6771900 */                                                  \
+        type C         = (type)(0x2933 >> (15 - fixed_point_position));  /* 0.3218538 */                                                   \
+        type D         = -(type)(0x0AA7 >> (15 - fixed_point_position)); /* -0.0832229 */                                                  \
         type inter_a   = select(VopA, DIV_SAT_OP_EXPAND(const_one, VopA, stype, size, fixed_point_position), VopA < const_one);            \
         type shift_val = (type)(15 - stype##_SHIFT) - clz(inter_a >> (type)fixed_point_position);                                          \
         inter_a        = inter_a >> shift_val;                                                                                             \
@@ -346,15 +370,18 @@ EXPQ_IMPL(qs16, qs16x16, 16)
         sum            = add_sat(MUL_SAT_OP_EXPAND(inter_a, sum, stype, size, fixed_point_position), A);                                   \
         sum            = MUL_SAT_OP_EXPAND(inter_a, sum, stype, size, fixed_point_position);                                               \
         sum            = MUL_SAT_OP_EXPAND(add_sat(sum, shift_val << (type)fixed_point_position), ln2, stype, size, fixed_point_position); \
-        return select(select(sum, -sum, VopA < const_one), (type)0, VopA < (type)0);                                                       \
+        return select(select(sum, -sum, VopA < const_one), (type)0, VopA < (type)0); /* Saturate result if needed */                       \
     }
 
 LOGQ_IMPL(qs8, qs8x16, 16)
+LOGQ_IMPL(qs16, qs16x8, 8)
 
 #define LOG_OP_EXPAND_STR(a, type, size, position) log_sat_##type##x##size((a), (position))
 #define LOG_OP_EXPAND(a, type, size, position) LOG_OP_EXPAND_STR(a, type, size, position)
 
 /** Saturate inverse square root of a fixed point vector
+  *
+  * @note Implemented approach uses Newton's method to approximate the inverse square root function.
   *
   * @param[in] stype the actual scalar data type.
   * @param[in] type  the actual data type.
@@ -367,19 +394,52 @@ LOGQ_IMPL(qs8, qs8x16, 16)
     {                                                                                                                                                                                                                                  \
         type const_three = (type)(3 << (fixed_point_position));                                                                                                                                                                        \
         type shift_value = (type)(16 - stype##_SHIFT) - (clz(VopA) + (type)fixed_point_position);                                                                                                                                      \
-        type temp        = select(VopA >> shift_value, VopA << (-shift_value), shift_value < (type)0);                                                                                                                                 \
+        type temp        = select(VopA >> shift_value, select((type)stype##_MAX, VopA << (-shift_value), clz(VopA) > (-shift_value)), shift_value < (type)0);                                                                          \
         type x           = temp;                                                                                                                                                                                                       \
         x                = MUL_SAT_OP_EXPAND(x, sub_sat(const_three, MUL_SAT_OP_EXPAND(MUL_SAT_OP_EXPAND(x, x, stype, size, fixed_point_position), temp, stype, size, fixed_point_position)), stype, size, fixed_point_position) >> 1; \
         x                = MUL_SAT_OP_EXPAND(x, sub_sat(const_three, MUL_SAT_OP_EXPAND(MUL_SAT_OP_EXPAND(x, x, stype, size, fixed_point_position), temp, stype, size, fixed_point_position)), stype, size, fixed_point_position) >> 1; \
         x                = MUL_SAT_OP_EXPAND(x, sub_sat(const_three, MUL_SAT_OP_EXPAND(MUL_SAT_OP_EXPAND(x, x, stype, size, fixed_point_position), temp, stype, size, fixed_point_position)), stype, size, fixed_point_position) >> 1; \
-        type res         = select(x >> (shift_value >> 1), x << ((-shift_value) >> 1), shift_value < (type)0);                                                                                                                         \
-        return select(res, stype##_MAX, res < (type)0);                                                                                                                                                                                \
+        if(sizeof((stype)(1)) > 1) /* Perform more iterations if datatype is QS16 */                                                                                                                                                   \
+        {                                                                                                                                                                                                                              \
+            x = MUL_SAT_OP_EXPAND(x, sub_sat(const_three, MUL_SAT_OP_EXPAND(MUL_SAT_OP_EXPAND(x, x, stype, size, fixed_point_position), temp, stype, size, fixed_point_position)), stype, size, fixed_point_position) >> 1;            \
+            x = MUL_SAT_OP_EXPAND(x, sub_sat(const_three, MUL_SAT_OP_EXPAND(MUL_SAT_OP_EXPAND(x, x, stype, size, fixed_point_position), temp, stype, size, fixed_point_position)), stype, size, fixed_point_position) >> 1;            \
+        }                                                                                                                                                                                                                              \
+        type shift_value2 = select(shift_value >> 1, (-shift_value) >> 1, shift_value < (type)0);                                                                                                                                      \
+        return select(x >> shift_value2, select((type)stype##_MAX, x << shift_value2, clz(x) > shift_value2), shift_value < (type)0); /* Saturate result if needed */                                                                  \
     }
 
 INVSQRTQ_IMPL(qs8, qs8x16, 16)
+INVSQRTQ_IMPL(qs16, qs16x8, 8)
 
 #define INVSQRT_OP_EXPAND_STR(a, type, size, position) invsqrt_sat_##type##x##size((a), (position))
 #define INVSQRT_OP_EXPAND(a, type, size, position) INVSQRT_OP_EXPAND_STR(a, type, size, position)
+
+/** Saturate hyperbolic tangent of a fixed point vector
+  *
+  * tanh(x) = (e^2x - 1)/(e^2x + 1)
+  *
+  * @param[in] stype the actual scalar data type.
+  * @param[in] type  the actual data type.
+  * @param[in] size  the number of the calculated elements.
+  *
+  * @return The result of the fixed point hyperbolic tangent. The result is saturated in case of overflow
+  */
+#define TANHQ_IMPL(stype, type, size)                                                                                                             \
+    inline type tanh_sat_##type(type VopA, int fixed_point_position)                                                                              \
+    {                                                                                                                                             \
+        type const_one = (type)(1 << (fixed_point_position));                                                                                     \
+        type const_two = (type)(2 << (fixed_point_position));                                                                                     \
+        type exp2x     = EXP_OP_EXPAND(MUL_SAT_OP_EXPAND(const_two, VopA, stype, size, fixed_point_position), stype, size, fixed_point_position); \
+        type num       = SUB_SAT_OP_EXPAND(exp2x, const_one, stype, size);                                                                        \
+        type den       = ADD_SAT_OP_EXPAND(exp2x, const_one, stype, size);                                                                        \
+        return DIV_SAT_OP_EXPAND(num, den, stype, size, fixed_point_position);                                                                    \
+    }
+
+TANHQ_IMPL(qs8, qs8x16, 16)
+TANHQ_IMPL(qs16, qs16x8, 8)
+
+#define TANH_OP_EXPAND_STR(a, type, size, position) tanh_sat_##type##x##size((a), (position))
+#define TANH_OP_EXPAND(a, type, size, position) TANH_OP_EXPAND_STR(a, type, size, position)
 
 #define floatx16 float16
 #define float16_TYPE float16

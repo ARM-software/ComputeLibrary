@@ -51,8 +51,8 @@ public:
      * @note If the output tensor is a nullptr, the activation function will be performed in-place
      *
      * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
-     *                          of the activation function. Data types supported: F16/F32.
-     * @param[out]     output   Destination tensor. Data type should match the input data type.
+     *                          of the activation function. Data types supported: QS8/QS16/F16/F32.
+     * @param[out]     output   Destination tensor. Data type supported: same as @p input
      * @param[in]      act_info Activation layer information.
      */
     void configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);

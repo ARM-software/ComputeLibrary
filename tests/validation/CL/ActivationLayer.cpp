@@ -124,7 +124,14 @@ CLTensor compute_activation_layer(bool in_place, const TensorShape &shape, DataT
     {
         int min_bound = 0;
         int max_bound = 0;
-        std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+        if(dt == DataType::QS8)
+        {
+            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+        }
+        else
+        {
+            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int16_t>(act_info.activation(), fixed_point_position);
+        }
         std::uniform_int_distribution<> distribution(min_bound, max_bound);
         library->fill(CLAccessor(src), distribution, 0);
     }
@@ -148,7 +155,7 @@ BOOST_AUTO_TEST_SUITE(CL)
 BOOST_AUTO_TEST_SUITE(ActivationLayer)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, boost::unit_test::data::make({ false, true }) * (SmallShapes() + LargeShapes()) * CNNFloatDataTypes(), in_place, shape, dt)
+BOOST_DATA_TEST_CASE(Configuration, boost::unit_test::data::make({ false, true }) * (SmallShapes() + LargeShapes()) * CNNDataTypes(), in_place, shape, dt)
 {
     // Set fixed point position data type allowed
     const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
@@ -182,7 +189,8 @@ BOOST_DATA_TEST_CASE(Configuration, boost::unit_test::data::make({ false, true }
     }
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const int         step    = 16 / arm_compute::data_size_from_type(dt);
+    const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
     validate(src.info()->padding(), padding);
 
     if(!in_place)
@@ -193,10 +201,11 @@ BOOST_DATA_TEST_CASE(Configuration, boost::unit_test::data::make({ false, true }
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * CNNFloatDataTypes() * ActivationFunctions(), in_place, shape, dt, act_function)
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * CNNFloatDataTypes() * ActivationFunctions() * boost::unit_test::data::make({ 0.5f, 1.f }),
+                     in_place, shape, dt, act_function, alpha_beta)
 {
     // Create activation layer info
-    ActivationLayerInfo act_info(act_function, 1.f, 1.f);
+    ActivationLayerInfo act_info(act_function, alpha_beta, alpha_beta);
 
     // Compute function
     CLTensor dst = compute_activation_layer(in_place, shape, dt, act_info);
@@ -209,10 +218,11 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, boost::unit_test::data::make({ false, true }) * LargeShapes() * CNNFloatDataTypes() * ActivationFunctions(), in_place, shape, dt, act_function)
+BOOST_DATA_TEST_CASE(RunLarge, boost::unit_test::data::make({ false, true }) * LargeShapes() * CNNFloatDataTypes() * ActivationFunctions() * boost::unit_test::data::make({ 0.5f, 1.f }),
+                     in_place, shape, dt, act_function, alpha_beta)
 {
     // Create activation layer info
-    ActivationLayerInfo act_info(act_function, 1.f, 1.f);
+    ActivationLayerInfo act_info(act_function, alpha_beta, alpha_beta);
 
     // Compute function
     CLTensor dst = compute_activation_layer(in_place, shape, dt, act_info);
@@ -223,6 +233,49 @@ BOOST_DATA_TEST_CASE(RunLarge, boost::unit_test::data::make({ false, true }) * L
     // Validate output
     validate(CLAccessor(dst), ref_dst, activation_layer_tolerance(act_function));
 }
+BOOST_AUTO_TEST_SUITE_END()
+
+/** @note We test for fixed point precision [3,5] because [1,2] and [6,7] ranges
+ *        cause overflowing issues in most of the transcendentals functions.
+ */
+BOOST_AUTO_TEST_SUITE(Quantized)
+BOOST_AUTO_TEST_SUITE(QS8)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * ActivationFunctions() * boost::unit_test::data::xrange(3, 6, 1) * boost::unit_test::data::make({ 0.5f, 1.f }),
+                     in_place, shape, act_function, fixed_point_position, alpha_beta)
+{
+    // Create activation layer info
+    ActivationLayerInfo act_info(act_function, alpha_beta, alpha_beta);
+
+    // Compute function
+    CLTensor dst = compute_activation_layer(in_place, shape, DataType::QS8, act_info, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, DataType::QS8, act_info, fixed_point_position);
+
+    // Validate output
+    validate(CLAccessor(dst), ref_dst, activation_layer_tolerance(act_function, fixed_point_position));
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(QS16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * ActivationFunctions() * boost::unit_test::data::xrange(3, 14, 1) * boost::unit_test::data::make({ 0.5f, 1.f }),
+                     in_place, shape, act_function, fixed_point_position, alpha_beta)
+{
+    // Create activation layer info
+    ActivationLayerInfo act_info(act_function, alpha_beta, alpha_beta);
+
+    // Compute function
+    CLTensor dst = compute_activation_layer(in_place, shape, DataType::QS16, act_info, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, DataType::QS16, act_info, fixed_point_position);
+
+    // Validate output
+    validate(CLAccessor(dst), ref_dst, activation_layer_tolerance(act_function, fixed_point_position));
+}
+BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
