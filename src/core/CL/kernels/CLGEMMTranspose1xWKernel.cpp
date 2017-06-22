@@ -40,8 +40,8 @@ using namespace arm_compute;
 
 void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON(output == nullptr);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     TensorShape  output_shape{ input->info()->tensor_shape() };
     const size_t transpose_w = 16 / input->info()->element_size();
@@ -53,6 +53,7 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     const unsigned int num_elems_processed_per_iteration = max_cl_vector_width / data_size_from_type(input->info()->data_type());
     const float        scale_x                           = num_elems_processed_per_iteration;
@@ -69,13 +70,11 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
      *         |a20 a21 a22 a23| = | a00 a01 a02 a03 || a10 a11 a12 a13 || a20 a21 a22 a23 || a30 a31 a32 a33 |
      *         |a30 a31 a32 a33|
      *
-     * If the input data type is F32, the output matrix will have the following shape: [ height * 4, width / 4 ]
-     * If the input data type is F16, the output matrix will have the following shape: [ height * 8, width / 8 ]
+     * The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor)
      */
     // Create kernel
-    std::string data_type_name = lower_string(string_from_data_type(input->info()->data_type()));
-    std::string kernel_name    = "gemm_transpose1x" + val_to_string(num_elems_processed_per_iteration) + "_" + data_type_name;
-    _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    std::string kernel_name = "gemm_transpose1x" + val_to_string(num_elems_processed_per_iteration);
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));

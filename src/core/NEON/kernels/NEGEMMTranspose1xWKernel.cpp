@@ -56,6 +56,7 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
     const float        scale_x                           = num_elems_processed_per_iteration;

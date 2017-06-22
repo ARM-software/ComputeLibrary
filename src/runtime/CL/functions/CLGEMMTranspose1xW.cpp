@@ -21,30 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMINTERLEAVE4X4_H__
-#define __ARM_COMPUTE_CLGEMMINTERLEAVE4X4_H__
+#include "arm_compute/runtime/CL/functions/CLGEMMTranspose1xW.h"
 
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/Types.h"
 
-namespace arm_compute
+using namespace arm_compute;
+
+void CLGEMMTranspose1xW::configure(const ICLTensor *input, ICLTensor *output)
 {
-class ITensor;
-
-/** Basic function to execute CLGEMMInterleave4x4Kernel. This function calls the following OpenCL kernel:
- *
- *  -# @ref CLGEMMInterleave4x4Kernel
- *
- */
-class CLGEMMInterleave4x4 : public ICLSimpleFunction
-{
-public:
-    /** Initialise the kernel's inputs, output
-     *
-     * @param[in]  input  First input tensor. Data types supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32
-     * @param[out] output Output tensor. Data type supported: same as @p input
-     */
-    void configure(const ICLTensor *input, ICLTensor *output);
-};
+    auto k = arm_compute::cpp14::make_unique<CLGEMMTranspose1xWKernel>();
+    k->configure(input, output);
+    _kernel = std::move(k);
 }
-
-#endif /* __ARM_COMPUTE_CLGEMMINTERLEAVE4X4_H__ */

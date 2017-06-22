@@ -54,6 +54,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMInterleave4x4.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowp.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMTranspose1xW.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian3x3.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
 #include "arm_compute/runtime/CL/functions/CLGaussianPyramid.h"

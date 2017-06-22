@@ -38,8 +38,8 @@
  * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
  */
-__kernel void gemm_transpose1x4_f32(IMAGE_DECLARATION(src),
-                                    IMAGE_DECLARATION(dst))
+__kernel void gemm_transpose1x4(IMAGE_DECLARATION(src),
+                                IMAGE_DECLARATION(dst))
 {
     uint x = get_global_id(0);
     uint y = get_global_id(1);
@@ -50,9 +50,9 @@ __kernel void gemm_transpose1x4_f32(IMAGE_DECLARATION(src),
     /* Compute address for Matrix B transposed - destination. X and Y are swapped */
     uint dst_addr_in_bytes = y * 16 + ((x * dst_stride_y + dst_offset_first_element_in_bytes));
 
-    float4 b0 = vload4(0, (__global float *)src.ptr);
+    uint4 b0 = vload4(0, (__global uint *)src.ptr);
 
-    vstore4(b0, 0, (__global float *)(dst_ptr + dst_addr_in_bytes));
+    vstore4(b0, 0, (__global uint *)(dst_ptr + dst_addr_in_bytes));
 }
 
 /** This OpenCL kernel computes the "vector" 1x8 transposition of input matrix
@@ -70,8 +70,8 @@ __kernel void gemm_transpose1x4_f32(IMAGE_DECLARATION(src),
  * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
  */
-__kernel void gemm_transpose1x8_f16(IMAGE_DECLARATION(src),
-                                    IMAGE_DECLARATION(dst))
+__kernel void gemm_transpose1x8(IMAGE_DECLARATION(src),
+                                IMAGE_DECLARATION(dst))
 {
     uint x = get_global_id(0);
     uint y = get_global_id(1);
@@ -82,9 +82,9 @@ __kernel void gemm_transpose1x8_f16(IMAGE_DECLARATION(src),
     /* Compute address for Matrix B transposed - destination. X and Y are swapped */
     uint dst_addr_in_bytes = y * 16 + ((x * dst_stride_y + dst_offset_first_element_in_bytes));
 
-    half8 b0 = vload8(0, (__global half *)src.ptr);
+    ushort8 b0 = vload8(0, (__global ushort *)src.ptr);
 
-    vstore8(b0, 0, (__global half *)(dst_ptr + dst_addr_in_bytes));
+    vstore8(b0, 0, (__global ushort *)(dst_ptr + dst_addr_in_bytes));
 }
 
 /** This OpenCL kernel computes the "vector" 1x16 transposition of input matrix
@@ -102,8 +102,8 @@ __kernel void gemm_transpose1x8_f16(IMAGE_DECLARATION(src),
  * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
  */
-__kernel void gemm_transpose1x16_u8(IMAGE_DECLARATION(src),
-                                    IMAGE_DECLARATION(dst))
+__kernel void gemm_transpose1x16(IMAGE_DECLARATION(src),
+                                 IMAGE_DECLARATION(dst))
 {
     uint x = get_global_id(0);
     uint y = get_global_id(1);

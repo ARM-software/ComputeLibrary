@@ -21,30 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMINTERLEAVE4X4_H__
-#define __ARM_COMPUTE_CLGEMMINTERLEAVE4X4_H__
+#ifndef __ARM_COMPUTE_CLGEMMTRANSPOSE1XW_H__
+#define __ARM_COMPUTE_CLGEMMTRANSPOSE1XW_H__
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
-class ITensor;
-
-/** Basic function to execute CLGEMMInterleave4x4Kernel. This function calls the following OpenCL kernel:
+/** Basic function to execute CLGEMMTranspose1xWKernel. This function calls the following OpenCL kernels:
  *
- *  -# @ref CLGEMMInterleave4x4Kernel
+ *  -# @ref CLGEMMTranspose1xWKernel
  *
  */
-class CLGEMMInterleave4x4 : public ICLSimpleFunction
+class CLGEMMTranspose1xW : public ICLSimpleFunction
 {
 public:
     /** Initialise the kernel's inputs, output
      *
-     * @param[in]  input  First input tensor. Data types supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  First input tensor. Data type supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32/
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
 };
 }
-
-#endif /* __ARM_COMPUTE_CLGEMMINTERLEAVE4X4_H__ */
+#endif /*__ARM_COMPUTE_CLGEMMTRANSPOSE1XW_H__ */
