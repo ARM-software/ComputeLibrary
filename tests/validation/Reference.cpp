@@ -525,6 +525,7 @@ RawTensor Reference::compute_reference_pooling_layer(const TensorShape &shape_in
             max = 1;
             break;
         case DataType::QS8:
+        case DataType::QS16:
             min = -(1 << fixed_point_position);
             max = (1 << fixed_point_position);
             break;
@@ -535,7 +536,7 @@ RawTensor Reference::compute_reference_pooling_layer(const TensorShape &shape_in
     library->fill(ref_src, distribution, 0.0);
 
     // Compute reference
-    ReferenceCPP::pooling_layer(ref_src, ref_dst, pool_info, fixed_point_position);
+    ReferenceCPP::pooling_layer(ref_src, ref_dst, pool_info);
 
     return ref_dst;
 }

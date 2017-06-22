@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_TEST_TENSOR_OPERATIONS_H__
 #define __ARM_COMPUTE_TEST_TENSOR_OPERATIONS_H__
 
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
 #include "tests/Types.h"
@@ -961,8 +960,8 @@ void fully_connected_layer(const Tensor<T> &in, const Tensor<T> &weights, const 
 }
 
 // Pooling layer
-template <typename T>
-void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_info, int fixed_point_position)
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
+void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_info)
 {
     const int   pool_size     = pool_info.pool_size();
     PoolingType type          = pool_info.pool_type();
@@ -1054,31 +1053,15 @@ void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_in
                     hstart     = std::max(hstart, 0);
                     wend       = std::min(wend, w_in);
                     hend       = std::min(hend, h_in);
-                    if(is_floating_point<T>::value)
-                    {
-                        for(int y = hstart; y < hend; ++y)
-                        {
-                            for(int x = wstart; x < wend; ++x)
-                            {
-                                avg_val += in[r * h_in * w_in + y * w_in + x];
-                            }
-                        }
-                        out[r * h_out * w_out + h * pooled_w + w] = avg_val / pool;
-                    }
-                    else
-                    {
-                        static std::array<qint8_t, 10> scale_values_q8 =
-                        { { 0x0, 0x0, 0x40, 0x2A, 0x20, 0x19, 0x15, 0x12, 0x10, 0xE } };
 
-                        for(int y = hstart; y < hend; ++y)
+                    for(int y = hstart; y < hend; ++y)
+                    {
+                        for(int x = wstart; x < wend; ++x)
                         {
-                            for(int x = wstart; x < wend; ++x)
-                            {
-                                avg_val = sqadd_qs8(avg_val, in[r * h_in * w_in + y * w_in + x]);
-                            }
+                            avg_val += in[r * h_in * w_in + y * w_in + x];
                         }
-                        out[r * h_out * w_out + h * pooled_w + w] = sqmul_qs8(avg_val, (scale_values_q8[pool] >> (7 - fixed_point_position)), fixed_point_position);
                     }
+                    out[r * h_out * w_out + h * pooled_w + w] = avg_val / pool;
                 }
             }
         }
@@ -1086,6 +1069,120 @@ void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_in
 }
 
 // Pooling layer
+template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type * = nullptr>
+void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_info)
+{
+    const int   pool_size     = pool_info.pool_size();
+    PoolingType type          = pool_info.pool_type();
+    int         pool_stride_x = 0;
+    int         pool_stride_y = 0;
+    int         pad_x         = 0;
+    int         pad_y         = 0;
+    std::tie(pool_stride_x, pool_stride_y) = pool_info.pad_stride_info().stride();
+    std::tie(pad_x, pad_y)                 = pool_info.pad_stride_info().pad();
+
+    const int w_in = static_cast<int>(in.shape()[0]);
+    const int h_in = static_cast<int>(in.shape()[1]);
+
+    const int w_out = static_cast<int>(out.shape()[0]);
+    const int h_out = static_cast<int>(out.shape()[1]);
+
+    int upper_dims = in.shape().total_size() / (w_in * h_in);
+
+    int pooled_w = 0;
+    int pooled_h = 0;
+    if(pool_info.pad_stride_info().round() == DimensionRoundingType::CEIL)
+    {
+        pooled_w = static_cast<int>(ceil(static_cast<float>(w_in + 2 * pad_x - pool_size) / pool_stride_x)) + 1;
+        pooled_h = static_cast<int>(ceil(static_cast<float>(h_in + 2 * pad_y - pool_size) / pool_stride_y)) + 1;
+    }
+    else
+    {
+        pooled_w = static_cast<int>(floor(static_cast<float>(w_in + 2 * pad_x - pool_size) / pool_stride_x)) + 1;
+        pooled_h = static_cast<int>(floor(static_cast<float>(h_in + 2 * pad_y - pool_size) / pool_stride_y)) + 1;
+    }
+
+    if((pooled_w - 1) * pool_stride_x >= w_in + pad_x)
+    {
+        --pooled_w;
+    }
+    if((pooled_h - 1) * pool_stride_y >= h_in + pad_y)
+    {
+        --pooled_h;
+    }
+
+    if(type == PoolingType::MAX)
+    {
+        for(int r = 0; r < upper_dims; ++r)
+        {
+            for(int h = 0; h < pooled_h; ++h)
+            {
+                for(int w = 0; w < pooled_w; ++w)
+                {
+                    int wstart = w * pool_stride_x - pad_x;
+                    int hstart = h * pool_stride_y - pad_y;
+                    int wend   = std::min(wstart + pool_size, w_in);
+                    int hend   = std::min(hstart + pool_size, h_in);
+                    wstart     = std::max(wstart, 0);
+                    hstart     = std::max(hstart, 0);
+
+                    T max_val = std::numeric_limits<T>::lowest();
+                    for(int y = hstart; y < hend; ++y)
+                    {
+                        for(int x = wstart; x < wend; ++x)
+                        {
+                            T val = in[r * h_in * w_in + y * w_in + x];
+                            if(val > max_val)
+                            {
+                                max_val = val;
+                            }
+                        }
+                    }
+
+                    out[r * h_out * w_out + h * pooled_w + w] = max_val;
+                }
+            }
+        }
+    }
+    else // Average pooling
+    {
+        for(int r = 0; r < upper_dims; ++r)
+        {
+            for(int h = 0; h < pooled_h; ++h)
+            {
+                for(int w = 0; w < pooled_w; ++w)
+                {
+                    int wstart = w * pool_stride_x - pad_x;
+                    int hstart = h * pool_stride_y - pad_y;
+                    int wend   = std::min(wstart + pool_size, w_in + pad_x);
+                    int hend   = std::min(hstart + pool_size, h_in + pad_y);
+                    int pool   = (hend - hstart) * (wend - wstart);
+                    wstart     = std::max(wstart, 0);
+                    hstart     = std::max(hstart, 0);
+                    wend       = std::min(wend, w_in);
+                    hend       = std::min(hend, h_in);
+
+                    using namespace fixed_point_arithmetic;
+
+                    const int            fixed_point_position = in.fixed_point_position();
+                    const fixed_point<T> invpool_fp(1.f / static_cast<float>(pool), fixed_point_position);
+                    fixed_point<T>       avg_val(0, fixed_point_position, true);
+                    for(int y = hstart; y < hend; ++y)
+                    {
+                        for(int x = wstart; x < wend; ++x)
+                        {
+                            const fixed_point<T> in_fp(in[r * h_in * w_in + y * w_in + x], fixed_point_position, true);
+                            avg_val = add(avg_val, in_fp);
+                        }
+                    }
+                    out[r * h_out * w_out + h * pooled_w + w] = mul(avg_val, invpool_fp).raw();
+                }
+            }
+        }
+    }
+}
+
+// ROI Pooling layer
 template <typename T>
 void roi_pooling_layer(const Tensor<T> &in, Tensor<T> &out, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
 {

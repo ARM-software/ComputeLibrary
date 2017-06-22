@@ -65,7 +65,20 @@ inline qint8_t calculate_avg_scale_q8(const Coordinates &id, int pool_size, int 
     const int end_x   = std::min(start_x + pool_size, upper_bound_w);
     const int end_y   = std::min(start_y + pool_size, upper_bound_h);
     const int val     = ((end_y - start_y) * (end_x - start_x));
-    return scale_values_q8[val] >> (7 - fixed_point_position);
+    return sshr_qs8(scale_values_q8[val], (7 - fixed_point_position));
+}
+
+inline qint16_t calculate_avg_scale_q16(const Coordinates &id, int pool_size, int upper_bound_w, int upper_bound_h,
+                                        int pad_x, int pad_y, int stride_x, int stride_y, int fixed_point_position)
+{
+    static std::array<qint16_t, 10> scale_values_q16 =
+    { { 0x0, 0x0, 0x4000, 0x2AAB, 0x2000, 0x199A, 0x1555, 0x1249, 0x1000, 0xE38 } };
+    const int start_x = id.x() * stride_x - pad_x;
+    const int start_y = id.y() * stride_y - pad_y;
+    const int end_x   = std::min(start_x + pool_size, upper_bound_w);
+    const int end_y   = std::min(start_y + pool_size, upper_bound_h);
+    const int val     = ((end_y - start_y) * (end_x - start_x));
+    return sshr_qs16(scale_values_q16[val], (15 - fixed_point_position));
 }
 } // namespace
 
@@ -97,12 +110,14 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     ARM_COMPUTE_UNUSED(supported_pool_sizes);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON(supported_pool_sizes.find(pool_size) == supported_pool_sizes.end());
     ARM_COMPUTE_ERROR_ON(7 == pool_size && input->info()->data_type() != DataType::F32);
     ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
-    ARM_COMPUTE_ERROR_ON(input->info()->data_type() == DataType::QS8 && pool_type == PoolingType::AVG && input->info()->fixed_point_position() > 6);
-    ARM_COMPUTE_ERROR_ON(input->info()->data_type() == DataType::QS8 && pool_stride_x > 2);
+    ARM_COMPUTE_ERROR_ON(is_data_type_fixed_point(input->info()->data_type()) && pool_stride_x > 2);
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
@@ -133,16 +148,31 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
             switch(pool_size)
             {
                 case 2:
-                    num_elems_processed_per_iteration = 8;
+                    num_elems_processed_per_iteration = (pool_stride_x == 2) ? 8 : 15;
                     break;
                 case 3:
-                    num_elems_processed_per_iteration = 7;
+                    num_elems_processed_per_iteration = (pool_stride_x == 2) ? 7 : 14;
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Pooling size not supported");
                     break;
             }
-            num_elems_horizontal_window = 8;
+            num_elems_horizontal_window = (pool_stride_x == 2) ? 8 : 16;
+            break;
+        case DataType::QS16:
+            num_elems_read_per_iteration = 8;
+            switch(pool_size)
+            {
+                case 2:
+                    num_elems_processed_per_iteration = (pool_stride_x == 2) ? 4 : 7;
+                    break;
+                case 3:
+                    num_elems_processed_per_iteration = (pool_stride_x == 2) ? 3 : 6;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Pooling size not supported");
+            }
+            num_elems_horizontal_window = (pool_stride_x == 2) ? 4 : 8;
             break;
 #ifdef ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
@@ -210,6 +240,10 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
             {
                 _func = (PoolingType::AVG == pool_type) ? &NEPoolingLayerKernel::pooling2_q8<PoolingType::AVG> : &NEPoolingLayerKernel::pooling2_q8<PoolingType::MAX>;
             }
+            else if(input->info()->data_type() == DataType::QS16)
+            {
+                _func = (PoolingType::AVG == pool_type) ? &NEPoolingLayerKernel::pooling2_q16<PoolingType::AVG> : &NEPoolingLayerKernel::pooling2_q16<PoolingType::MAX>;
+            }
             else if(input->info()->data_type() == DataType::F16)
             {
                 _func = (PoolingType::AVG == pool_type) ? &NEPoolingLayerKernel::pooling2_f16<PoolingType::AVG> : &NEPoolingLayerKernel::pooling2_f16<PoolingType::MAX>;
@@ -223,6 +257,10 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
             if(input->info()->data_type() == DataType::QS8)
             {
                 _func = (PoolingType::AVG == pool_type) ? &NEPoolingLayerKernel::pooling3_q8<PoolingType::AVG> : &NEPoolingLayerKernel::pooling3_q8<PoolingType::MAX>;
+            }
+            else if(input->info()->data_type() == DataType::QS16)
+            {
+                _func = (PoolingType::AVG == pool_type) ? &NEPoolingLayerKernel::pooling3_q16<PoolingType::AVG> : &NEPoolingLayerKernel::pooling3_q16<PoolingType::MAX>;
             }
             else if(input->info()->data_type() == DataType::F16)
             {
@@ -274,7 +312,8 @@ void NEPoolingLayerKernel::pooling2_q8(const Window &window_input, const Window 
     {
         const auto top_data    = vld1q_qs8(reinterpret_cast<const qint8_t *>(input_top_ptr + input.offset()));
         const auto bottom_data = vld1q_qs8(reinterpret_cast<const qint8_t *>(input_bottom_ptr + input.offset()));
-        qint8x8_t  res         = {};
+        qint8x8_t  lower_res   = {};
+        qint8x8_t  upper_res   = {};
         if(pooling_type == PoolingType::AVG)
         {
             // Calculate scale
@@ -283,14 +322,96 @@ void NEPoolingLayerKernel::pooling2_q8(const Window &window_input, const Window 
 
             // Perform pooling
             const qint8x16_t sum_data = vqaddq_qs8(top_data, bottom_data);
-            res                       = vqmul_qs8(vpadd_s8(vget_low_s8(sum_data), vget_high_s8(sum_data)), scale_vec, fixed_point_position);
+            lower_res                 = vqmul_qs8(vpadd_s8(vget_low_s8(sum_data), vget_high_s8(sum_data)), scale_vec, fixed_point_position);
+            if(pool_stride_x == 1)
+            {
+                const qint8x16_t sum_data_shifted = vextq_s8(sum_data, sum_data, 1);
+                upper_res                         = vqmul_qs8(vpadd_s8(vget_low_s8(sum_data_shifted), vget_high_s8(sum_data_shifted)), scale_vec, fixed_point_position);
+            }
         }
         else
         {
             const qint8x16_t max_data = vmaxq_s8(top_data, bottom_data);
-            res                       = vpmax_s8(vget_low_s8(max_data), vget_high_s8(max_data));
+            lower_res                 = vpmax_s8(vget_low_s8(max_data), vget_high_s8(max_data));
+            if(pool_stride_x == 1)
+            {
+                const qint8x16_t max_data_shifted = vextq_s8(max_data, max_data, 1);
+                upper_res                         = vpmax_s8(vget_low_s8(max_data_shifted), vget_high_s8(max_data_shifted));
+            }
         }
-        vst1_qs8(reinterpret_cast<qint8_t *>(output.ptr()), res);
+        if(pool_stride_x == 1)
+        {
+            const qint8x8x2_t res = vzip_s8(lower_res, upper_res);
+            vst2_s8(reinterpret_cast<qint8_t *>(output.ptr()), res);
+        }
+        else
+        {
+            vst1_qs8(reinterpret_cast<qint8_t *>(output.ptr()), lower_res);
+        }
+    },
+    input, output);
+}
+
+template <PoolingType pooling_type>
+void NEPoolingLayerKernel::pooling2_q16(const Window &window_input, const Window &window)
+{
+    Iterator input(_input, window_input);
+    Iterator output(_output, window);
+
+    const int     fixed_point_position = _input->info()->fixed_point_position();
+    constexpr int pool_size            = 2;
+    int           pool_pad_x           = 0;
+    int           pool_pad_y           = 0;
+    int           pool_stride_x        = 0;
+    int           pool_stride_y        = 0;
+    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
+    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+
+    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
+    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const auto top_data    = vld1q_qs16(reinterpret_cast<const qint16_t *>(input_top_ptr + input.offset()));
+        const auto bottom_data = vld1q_qs16(reinterpret_cast<const qint16_t *>(input_bottom_ptr + input.offset()));
+        qint16x4_t lower_res   = {};
+        qint16x4_t upper_res   = {};
+        if(pooling_type == PoolingType::AVG)
+        {
+            // Calculate scale
+            const qint16_t   scale     = calculate_avg_scale_q16(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y, fixed_point_position);
+            const qint16x4_t scale_vec = vdup_n_qs16(scale);
+
+            // Perform pooling
+            const qint16x8_t sum_data = vqaddq_qs16(top_data, bottom_data);
+            lower_res                 = vqmul_qs16(vpadd_s16(vget_low_s16(sum_data), vget_high_s16(sum_data)), scale_vec, fixed_point_position);
+            if(pool_stride_x == 1)
+            {
+                const qint16x8_t sum_data_shifted = vextq_s16(sum_data, sum_data, 1);
+                upper_res                         = vqmul_qs16(vpadd_s16(vget_low_s16(sum_data_shifted), vget_high_s16(sum_data_shifted)), scale_vec, fixed_point_position);
+            }
+        }
+        else
+        {
+            const qint16x8_t max_data = vmaxq_s16(top_data, bottom_data);
+            lower_res                 = vpmax_s16(vget_low_s16(max_data), vget_high_s16(max_data));
+            if(pool_stride_x == 1)
+            {
+                const qint16x8_t max_data_shifted = vextq_s16(max_data, max_data, 1);
+                upper_res                         = vpmax_s16(vget_low_s16(max_data_shifted), vget_high_s16(max_data_shifted));
+            }
+        }
+        if(pool_stride_x == 1)
+        {
+            const qint16x4x2_t res = vzip_s16(lower_res, upper_res);
+            vst2_s16(reinterpret_cast<qint16_t *>(output.ptr()), res);
+        }
+        else
+        {
+            vst1_qs16(reinterpret_cast<qint16_t *>(output.ptr()), lower_res);
+        }
     },
     input, output);
 }
@@ -464,8 +585,7 @@ void NEPoolingLayerKernel::pooling3_q8(const Window &window_input, const Window 
         if(pooling_type == PoolingType::AVG)
         {
             // Calculate scale
-            const qint8_t   scale     = calculate_avg_scale_q8(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y, fixed_point_position);
-            const qint8x8_t scale_vec = vdup_n_qs8(scale);
+            const qint8_t scale = calculate_avg_scale_q8(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y, fixed_point_position);
 
             // Perform pooling for stride 2
             const qint8x16_t sum_data  = vqaddq_qs8(vqaddq_qs8(top_data, bottom_data), middle_data);
@@ -476,13 +596,16 @@ void NEPoolingLayerKernel::pooling3_q8(const Window &window_input, const Window 
             {
                 const qint8x8x2_t      table      = { { vget_low_s8(final_sum), vget_high_s8(final_sum) } };
                 static const qint8x8_t lookup_val = { 0, 2, 4, 6, 8, 10, 12, 14 };
+                const qint8x8_t        scale_vec  = vdup_n_qs8(scale);
                 res                               = vtbl2_s8(table, lookup_val);
+                res                               = vqmul_qs8(res, scale_vec, fixed_point_position);
+                vst1_qs8(reinterpret_cast<qint8_t *>(output.ptr()), res);
             }
             else
             {
-                res = vget_low_s8(final_sum);
+                const qint8x16_t scale_vec = vdupq_n_qs8(scale);
+                vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), vqmulq_qs8(final_sum, scale_vec, fixed_point_position));
             }
-            res = vqmul_qs8(res, scale_vec, fixed_point_position);
         }
         else
         {
@@ -496,13 +619,83 @@ void NEPoolingLayerKernel::pooling3_q8(const Window &window_input, const Window 
                 const qint8x8x2_t      table      = { { vget_low_s8(final_max), vget_high_s8(final_max) } };
                 static const qint8x8_t lookup_val = { 0, 2, 4, 6, 8, 10, 12, 14 };
                 res                               = vtbl2_s8(table, lookup_val);
+                vst1_qs8(reinterpret_cast<qint8_t *>(output.ptr()), res);
             }
             else
             {
-                res = vget_low_s8(final_max);
+                vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), final_max);
             }
         }
-        vst1_qs8(reinterpret_cast<qint8_t *>(output.ptr()), res);
+    },
+    input, output);
+}
+
+template <PoolingType pooling_type>
+void NEPoolingLayerKernel::pooling3_q16(const Window &window_input, const Window &window)
+{
+    Iterator input(_input, window_input);
+    Iterator output(_output, window);
+
+    const int     fixed_point_position = _input->info()->fixed_point_position();
+    constexpr int pool_size            = 3;
+    int           pool_pad_x           = 0;
+    int           pool_pad_y           = 0;
+    int           pool_stride_x        = 0;
+    int           pool_stride_y        = 0;
+    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
+    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+
+    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
+    const unsigned char *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
+    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 2));
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const auto top_data    = vld1q_qs16(reinterpret_cast<const qint16_t *>(input_top_ptr + input.offset()));
+        const auto middle_data = vld1q_qs16(reinterpret_cast<const qint16_t *>(input_middle_ptr + input.offset()));
+        const auto bottom_data = vld1q_qs16(reinterpret_cast<const qint16_t *>(input_bottom_ptr + input.offset()));
+
+        if(pooling_type == PoolingType::AVG)
+        {
+            // Calculate scale
+            const qint16_t scale = calculate_avg_scale_q16(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y, fixed_point_position);
+
+            // Perform pooling for stride 2
+            const qint16x8_t sum_data  = vqaddq_qs16(vqaddq_qs16(top_data, bottom_data), middle_data);
+            const qint16x8_t sum_data2 = vextq_s16(sum_data, sum_data, 1);
+            const qint16x8_t sum_data3 = vextq_s16(sum_data, sum_data, 2);
+            const qint16x8_t final_sum = vqaddq_qs16(vqaddq_qs16(sum_data, sum_data2), sum_data3);
+            if(pool_stride_x == 2)
+            {
+                const qint16x4_t tmp       = { vgetq_lane_s16(final_sum, 0), vgetq_lane_s16(final_sum, 2), vgetq_lane_s16(final_sum, 4), vgetq_lane_s16(final_sum, 6) };
+                const qint16x4_t scale_vec = vdup_n_qs16(scale);
+                vst1_qs16(reinterpret_cast<qint16_t *>(output.ptr()), vqmul_qs16(tmp, scale_vec, fixed_point_position));
+            }
+            else
+            {
+                const qint16x8_t scale_vec = vdupq_n_qs16(scale);
+                vst1q_qs16(reinterpret_cast<qint16_t *>(output.ptr()), vqmulq_qs16(final_sum, scale_vec, fixed_point_position));
+            }
+        }
+        else
+        {
+            const qint16x8_t max_data  = vmaxq_s16(vmaxq_s16(top_data, bottom_data), middle_data);
+            const qint16x8_t max_data2 = vextq_s16(max_data, max_data, 1);
+            const qint16x8_t max_data3 = vextq_s16(max_data, max_data, 2);
+            const qint16x8_t final_max = vmaxq_s16(vmaxq_s16(max_data, max_data2), max_data3);
+
+            if(pool_stride_x == 2)
+            {
+                const qint16x4_t tmp = { vgetq_lane_s16(final_max, 0), vgetq_lane_s16(final_max, 2), vgetq_lane_s16(final_max, 4), vgetq_lane_s16(final_max, 6) };
+                vst1_qs16(reinterpret_cast<qint16_t *>(output.ptr()), tmp);
+            }
+            else
+            {
+                vst1q_qs16(reinterpret_cast<qint16_t *>(output.ptr()), final_max);
+            }
+        }
     },
     input, output);
 }
@@ -630,6 +823,7 @@ void NEPoolingLayerKernel::run(const Window &window)
     switch(_input->info()->data_type())
     {
         case DataType::QS8:
+        case DataType::QS16:
         case DataType::F16:
         {
             window_x_inc = (pool_stride_x == 2) ? _num_elems_processed_per_iteration * 2 : _num_elems_processed_per_iteration;

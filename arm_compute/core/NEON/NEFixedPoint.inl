@@ -25,8 +25,9 @@
 
 namespace arm_compute
 {
-/**< Exponent polynomial coefficients for 8 bit fixed point (8 elements)
- *  Format is in Q0.7 for all elements */
+/** Exponent polynomial coefficients for 8 bit fixed point (8 elements)
+ *  Format is in Q0.7 for all elements
+ */
 static const std::array<qint8x8_t, 4> exp_tab_qs8 =
 {
     {
@@ -37,8 +38,9 @@ static const std::array<qint8x8_t, 4> exp_tab_qs8 =
     }
 };
 
-/**< Exponent polynomial coefficients for 16 bit fixed point (4 elements)
- *  Format is in Q0.15 for all elements */
+/** Exponent polynomial coefficients for 16 bit fixed point (4 elements)
+ *  Format is in Q0.15 for all elements
+ */
 static const std::array<qint16x4_t, 4> exp_tab_qs16 =
 {
     {
@@ -49,8 +51,9 @@ static const std::array<qint16x4_t, 4> exp_tab_qs16 =
     }
 };
 
-/**< Exponent polynomial coefficients for 8 bit fixed point (16 elements)
- * Format is in Q0.7 for all elements */
+/** Exponent polynomial coefficients for 8 bit fixed point (16 elements)
+ *  Format is in Q0.7 for all elements
+ */
 static const std::array<qint8x16_t, 4> exp_tabq_qs8 =
 {
     {
@@ -61,8 +64,9 @@ static const std::array<qint8x16_t, 4> exp_tabq_qs8 =
     }
 };
 
-/**< Exponent polynomial coefficients for 16 bit fixed point (8 elements)
- * Format is in Q0.15 for all elements */
+/** Exponent polynomial coefficients for 16 bit fixed point (8 elements)
+ *  Format is in Q0.15 for all elements
+ */
 static const std::array<qint16x8_t, 4> exp_tabq_qs16 =
 {
     {
@@ -73,8 +77,9 @@ static const std::array<qint16x8_t, 4> exp_tabq_qs16 =
     }
 };
 
-/**< Logarithm polynomial coefficients for 8 bit fixed point (8 elements)
- * Format is in Q0.7 for all elements except the first one which is in Q1.6 */
+/** Logarithm polynomial coefficients for 8 bit fixed point (8 elements)
+ *  Format is in Q0.7 for all elements except the first one which is in Q1.6
+ */
 static const std::array<qint8x8_t, 4> log_tab_qs8 =
 {
     {
@@ -85,8 +90,9 @@ static const std::array<qint8x8_t, 4> log_tab_qs8 =
     }
 };
 
-/**< Logarithm polynomial coefficients for 16 bit fixed point (8 elements)
- * Format is in Q0.15 for all elements except the first one which is in Q1.14 */
+/** Logarithm polynomial coefficients for 16 bit fixed point (8 elements)
+ *  Format is in Q0.15 for all elements except the first one which is in Q1.14
+ */
 static const std::array<qint16x4_t, 4> log_tab_qs16 =
 {
     {
@@ -97,8 +103,9 @@ static const std::array<qint16x4_t, 4> log_tab_qs16 =
     }
 };
 
-/**< Logarithm polynomial coefficients for 8 bit fixed point (16 elements)
- * Format is in Q0.7 for all elements except the first one which is in Q1.6 */
+/** Logarithm polynomial coefficients for 8 bit fixed point (16 elements)
+ *  Format is in Q0.7 for all elements except the first one which is in Q1.6
+ */
 static const std::array<qint8x16_t, 4> log_tabq_qs8 =
 {
     {
@@ -109,8 +116,9 @@ static const std::array<qint8x16_t, 4> log_tabq_qs8 =
     }
 };
 
-/**< Logarithm polynomial coefficients for 16 bit fixed point (8 elements)
- * Format is in Q0.15 for all elements except the first one which is in Q1.14 */
+/** Logarithm polynomial coefficients for 16 bit fixed point (8 elements)
+ *  Format is in Q0.15 for all elements except the first one which is in Q1.14
+ */
 static const std::array<qint16x8_t, 4> log_tabq_qs16 =
 {
     {

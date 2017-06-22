@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/Error.h"
+
 #include <cmath>
 #include <limits>
 
@@ -57,6 +59,20 @@ inline qint16_t sqshl_qs16(qint16_t a, int shift)
 
     // Saturate the result in case of overflow and cast to qint16_t
     return saturate_convert<qint32_t, qint16_t>(tmp);
+}
+
+inline qint8_t sshr_qs8(qint8_t a, int shift)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(shift == 0, "Shift should not be zero");
+    const qint8_t round_val = 1 << (shift - 1);
+    return sqadd_qs8(a, round_val) >> shift;
+}
+
+inline qint16_t sshr_qs16(qint16_t a, int shift)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(shift == 0, "Shift should not be zero");
+    const qint16_t round_val = 1 << (shift - 1);
+    return sqadd_qs16(a, round_val) >> shift;
 }
 
 inline qint8_t sabs_qs8(qint8_t a)

@@ -286,11 +286,11 @@ void ReferenceCPP::fully_connected_layer(const RawTensor &src, const RawTensor &
 }
 
 // Pooling Layer
-void ReferenceCPP::pooling_layer(const RawTensor &src, RawTensor &dst, PoolingLayerInfo pool_info, int fixed_point_position)
+void ReferenceCPP::pooling_layer(const RawTensor &src, RawTensor &dst, PoolingLayerInfo pool_info)
 {
     const TensorVariant s = TensorFactory::get_tensor(src);
     TensorVariant       d = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(tensor_visitors::pooling_layer_visitor(s, pool_info, fixed_point_position), d);
+    boost::apply_visitor(tensor_visitors::pooling_layer_visitor(s, pool_info), d);
 }
 
 // ROI Pooling Layer

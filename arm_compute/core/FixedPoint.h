@@ -40,6 +40,24 @@ using qint64_t = int64_t; /**< 64 bit fixed point scalar value */
  */
 qint8_t sqshl_qs8(qint8_t a, int shift);
 
+/** 8 bit fixed point scalar shift right
+ *
+ * @param[in] a     First 8 bit fixed point input
+ * @param[in] shift Shift amount (positive only values)
+ *
+ * @return The result of the 8 bit fixed point shift
+ */
+qint8_t sshr_qs8(qint8_t a, int shift);
+
+/** 16 bit fixed point scalar shift right
+ *
+ * @param[in] a     First 16 bit fixed point input
+ * @param[in] shift Shift amount (positive only values)
+ *
+ * @return The result of the 16 bit fixed point shift
+ */
+qint16_t sshr_qs16(qint16_t a, int shift);
+
 /** 16 bit fixed point scalar saturating shift left
  *
  * @param[in] a     First 16 bit fixed point input

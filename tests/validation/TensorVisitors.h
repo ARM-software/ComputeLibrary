@@ -27,6 +27,7 @@
 #include "Tensor.h"
 #include "TensorOperations.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/Lut.h"
 
 #include "boost_wrapper.h"
@@ -258,8 +259,8 @@ private:
 struct pooling_layer_visitor : public boost::static_visitor<>
 {
 public:
-    explicit pooling_layer_visitor(const TensorVariant &in, PoolingLayerInfo pool_info, int fixed_point_position = 0)
-        : _in(in), _pool_info(pool_info), _fixed_point_position(fixed_point_position)
+    explicit pooling_layer_visitor(const TensorVariant &in, PoolingLayerInfo pool_info)
+        : _in(in), _pool_info(pool_info)
     {
     }
 
@@ -267,13 +268,12 @@ public:
     void operator()(Tensor<T> &out) const
     {
         const Tensor<T> &in = boost::get<Tensor<T>>(_in);
-        tensor_operations::pooling_layer(in, out, _pool_info, _fixed_point_position);
+        tensor_operations::pooling_layer(in, out, _pool_info);
     }
 
 private:
     const TensorVariant &_in;
     PoolingLayerInfo     _pool_info;
-    int                  _fixed_point_position;
 };
 
 // ROI Pooling layer

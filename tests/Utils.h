@@ -198,8 +198,11 @@ inline ValidRegion shape_to_valid_region(TensorShape shape, bool border_undefine
         ARM_COMPUTE_ERROR_ON(shape.num_dimensions() < 2);
         anchor.set(0, border_size.left);
         anchor.set(1, border_size.top);
-        shape.set(0, shape.x() - border_size.left - border_size.right);
-        shape.set(1, shape.y() - border_size.top - border_size.bottom);
+        const int x_dim_shape = shape.x() - border_size.left - border_size.right;
+        const int y_dim_shape = shape.y() - border_size.top - border_size.bottom;
+        ARM_COMPUTE_ERROR_ON(x_dim_shape < 0 || y_dim_shape < 0);
+        shape.set(0, x_dim_shape);
+        shape.set(1, y_dim_shape);
     }
     return ValidRegion(std::move(anchor), std::move(shape));
 }

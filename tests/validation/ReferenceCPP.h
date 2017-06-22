@@ -263,12 +263,11 @@ public:
     static void fully_connected_layer(const RawTensor &src, const RawTensor &weights, const RawTensor &bias, RawTensor &dst);
     /** Pooling layer of @p src based on the information from @p pool_info.
      *
-     * @param[in]  src                  Input tensor.
-     * @param[out] dst                  Result tensor.
-     * @param[in]  pool_info            Pooling Layer information.
-     * @param[in]  fixed_point_position Fixed point position. (Optional)
+     * @param[in]  src       Input tensor.
+     * @param[out] dst       Result tensor.
+     * @param[in]  pool_info Pooling Layer information.
      */
-    static void pooling_layer(const RawTensor &src, RawTensor &dst, PoolingLayerInfo pool_info, int fixed_point_position = 0);
+    static void pooling_layer(const RawTensor &src, RawTensor &dst, PoolingLayerInfo pool_info);
     /** ROI Pooling layer of @p src based on the information from @p pool_info and @p rois.
      *
      * @param[in]  src       Input tensor.

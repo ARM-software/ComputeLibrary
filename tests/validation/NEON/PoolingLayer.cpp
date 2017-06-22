@@ -81,6 +81,7 @@ Tensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &sha
             max = 1;
             break;
         case DataType::QS8:
+        case DataType::QS16:
             min = -(1 << fixed_point_position);
             max = (1 << fixed_point_position);
             break;
@@ -168,6 +169,7 @@ BOOST_AUTO_TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Quantized)
+BOOST_AUTO_TEST_SUITE(QS8)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(RandomDataset,
                      RandomPoolingLayerDataset() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(1, 5),
@@ -182,6 +184,24 @@ BOOST_DATA_TEST_CASE(RandomDataset,
     // Validate output
     validate(Accessor(dst), ref_dst, tolerance_q, 0);
 }
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(QS16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RandomDataset,
+                     RandomPoolingLayerDataset() * boost::unit_test::data::make(DataType::QS16) * boost::unit_test::data::xrange(1, 13),
+                     obj, dt, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_pooling_layer(obj.src_shape, obj.dst_shape, dt, obj.info, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_pooling_layer(obj.src_shape, obj.dst_shape, dt, obj.info, fixed_point_position);
+
+    // Validate output
+    validate(Accessor(dst), ref_dst, tolerance_q, 0);
+}
+BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
