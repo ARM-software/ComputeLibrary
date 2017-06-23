@@ -33,7 +33,7 @@ variables = [
     BoolVariable("internal_only", "Enable ARM internal only tests", True),
     BoolVariable("pmu", "Enable PMU counters", False),
     BoolVariable("validation_tests", "Build validation test programs", True),
-    BoolVariable("benchmark_tests", "Build validation test programs", True)
+    BoolVariable("benchmark_tests", "Build benchmark test programs", True)
 ]
 
 # We need a separate set of Variables for the Help message (Otherwise the global variables will get displayed twice)

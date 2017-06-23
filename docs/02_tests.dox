@@ -1,5 +1,5 @@
 /**
-@page tests Test architecture
+@page tests Validation and benchmarks tests
 
 @tableofcontents
 
@@ -8,6 +8,8 @@
 The tests currently make use of Boost (Test and Program options) for validation
 and Google Benchmark for performance runs. Below are instructions about how to
 build these 3rd party libraries.
+
+@note By default the build of the validation and benchmark tests is disabled, to enable it use `validation_tests=1` and `benchmark_tests=1`
 
 @subsection building_boost Building Boost
 

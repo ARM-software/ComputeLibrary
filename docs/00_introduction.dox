@@ -239,73 +239,100 @@ v16.12 Binary preview release
 scons 2.3 or above is required to build the library.
 To see the build options available simply run ```scons -h```:
 
-	debug: Debug (default=0) (0|1)
-		default: 0
-		actual: 0
+	debug: Debug (yes|no)
+		default: False
+		actual: False
 
-	asserts: Enable asserts (This flag is forced to 1 for debug=1) (default=0) (0|1)
-		default: 0
-		actual: 0
+	asserts: Enable asserts (this flag is forced to 1 for debug=1) (yes|no)
+		default: False
+		actual: False
 
-	arch: Target Architecture (default=armv7a) (armv7a|arm64-v8a|arm64-v8.2-a|x86_32|x86_64)
+	arch: Target Architecture (armv7a|arm64-v8a|arm64-v8.2-a|x86_32|x86_64)
 		default: armv7a
 		actual: armv7a
 
-	os: Target OS (default=linux) (linux|android|bare_metal)
+	os: Target OS (linux|android|bare_metal)
 		default: linux
 		actual: linux
 
-	build: Build type: (default=cross_compile) (native|cross_compile)
+	build: Build type (native|cross_compile)
 		default: cross_compile
 		actual: cross_compile
 
-	Werror: Enable/disable the -Werror compilation flag (Default=1) (0|1)
-		default: 1
-		actual: 1
+	examples: Build example programs (yes|no)
+		default: True
+		actual: True
 
-	opencl: Enable OpenCL support(Default=1) (0|1)
-		default: 1
-		actual: 1
+	Werror: Enable/disable the -Werror compilation flag (yes|no)
+		default: True
+		actual: True
 
-	neon: Enable Neon support(Default=0) (0|1)
-		default: 0
-		actual: 0
+	opencl: Enable OpenCL support (yes|no)
+		default: True
+		actual: True
 
-	embed_kernels: Embed OpenCL kernels in library binary(Default=0) (0|1)
-		default: 0
-		actual: 0
-
-	scheduler: Scheduler backend(Default=cpp) (cpp|pthread|openmp)
-		default: cpp
-		actual: cpp
-
-	set_soname: Set the library's soname and shlibversion (Requires SCons 2.4 or above) (yes|no)
-		default: 0
+	neon: Enable Neon support (yes|no)
+		default: False
 		actual: False
+
+	embed_kernels: Embed OpenCL kernels in library binary (yes|no)
+		default: False
+		actual: False
+
+	set_soname: Set the library's soname and shlibversion (requires SCons 2.4 or above) (yes|no)
+		default: False
+		actual: False
+
+	openmp: Enable OpenMP backend (yes|no)
+		default: False
+		actual: False
+
+	cppthreads: Enable C++11 threads backend (yes|no)
+		default: True
+		actual: True
+
+	build_dir: Specify sub-folder for the build ( /path/to/build_dir )
+		default: .
+		actual: .
 
 	extra_cxx_flags: Extra CXX flags to be appended to the build command
 		default:
 		actual:
 
-Debug / asserts:
+	pmu: Enable PMU counters (yes|no)
+		default: False
+		actual: False
+
+	validation_tests: Build validation test programs (yes|no)
+		default: False
+		actual: False
+
+	benchmark_tests: Build benchmark test programs (yes|no)
+		default: False
+		actual: False
+
+@b debug / @b asserts:
  - With debug=1 asserts are enabled, and the library is built with symbols and no optimisations enabled.
  - With debug=0 and asserts=1: Optimisations are enabled and symbols are removed, however all the asserts are still present (This is about 20% slower than the release build)
  - With debug=0 and asserts=0: All optimisations are enable and no validation is performed, if the application misuses the library it is likely to result in a crash. (Only use this mode once you are sure your application is working as expected).
 
-Architecture: The x86_32 and x86_64 targets can only be used with neon=0 and opencl=1.
+@b arch: The x86_32 and x86_64 targets can only be used with neon=0 and opencl=1.
 
-OS: Choose the operating system you are targeting: Linux, Android or bare metal.
+@b os: Choose the operating system you are targeting: Linux, Android or bare metal.
 @note bare metal can only be used for NEON (not OpenCL), only static libraries get built and NEON's multi-threading support is disabled.
 
-Build type: you can either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.
+@b build: you can either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.
 
-Werror: If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue either on Github or by an email to developer@arm.com so that the issue can be addressed).
+@note If you want to natively compile for 32bit on a 64bit ARM device running a 64bit OS then you will have to use cross-compile too.
 
-OpenCL / NEON: Choose which SIMD technology you want to target. (NEON for ARM Cortex-A CPUs or OpenCL for ARM Mali GPUs)
+@b Werror: If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue either on Github or by an email to developer@arm.com so that the issue can be addressed).
 
-embed_kernels: For OpenCL only: set embed_kernels=1 if you want the OpenCL kernels to be built in the library's binaries instead of being read from separate ".cl" files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL kernel files by calling CLKernelLibrary::init(). By default the path is set to "./cl_kernels".
+@b opencl / @b neon: Choose which SIMD technology you want to target. (NEON for ARM Cortex-A CPUs or OpenCL for ARM Mali GPUs)
 
-set_soname: Do you want to build the versioned version of the library ?
+@b embed_kernels: For OpenCL only: set embed_kernels=1 if you want the OpenCL kernels to be built in the library's binaries instead of being read from separate ".cl" files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL kernel files by calling CLKernelLibrary::init(). By default the path is set to "./cl_kernels".
+
+@b set_soname: Do you want to build the versioned version of the library ?
+
 If enabled the library will contain a SONAME and SHLIBVERSION and some symlinks will automatically be created between the objects.
 Example:
   libarm_compute_core.so -> libarm_compute_core.so.1.0.0
@@ -314,7 +341,29 @@ Example:
 
 @note This options is disabled by default as it requires SCons version 2.4 or above.
 
-extra_cxx_flags: Custom CXX flags which will be appended to the end of the build command.
+@b extra_cxx_flags: Custom CXX flags which will be appended to the end of the build command.
+
+@b build_dir: Build the library in a subfolder of the "build" folder. (Allows to build several configurations in parallel).
+
+@b examples: Build or not the examples
+
+@b validation_tests: Enable the build of the validation suite.
+
+@note You will need the Boost Test and Program options headers and libraries to build the validation tests. See @ref building_boost for more information.
+
+@b benchmark_tests: Enable the build of the benchmark tests
+
+@b pmu: Enable the PMU cycle counter to measure execution time in benchmark tests. (Your device needs to support it)
+
+@note You will need the Boost Program options and Google Benchmark headers and libraries to build the benchmark tests. See @ref building_google_benchmark for more information.
+
+@b openmp Build in the OpenMP scheduler for NEON.
+
+@note Only works when building with g++ not clang++
+
+@b cppthreads Build in the C++11 scheduler for NEON.
+
+@sa arm_compute::Scheduler::set
 
 @subsection S3_2_linux Linux
 
