@@ -67,10 +67,12 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     static const std::set<int> supported_pool_sizes = { 2, 3, 7 };
     ARM_COMPUTE_UNUSED(supported_pool_sizes);
 
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON(supported_pool_sizes.find(pool_size) == supported_pool_sizes.end());
     ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
@@ -94,7 +96,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
 
     // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenCL kernel where
     // each thread computes 4 output elements
-    const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3);
+    const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(input->info()->data_type());
 
     int num_elements_read_per_iteration = (pool_size == 7) ? 8 : pool_size;
     if(is_pool3x3_stride_le3)
@@ -120,6 +122,11 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     std::set<std::string> build_opts;
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.emplace(("-DPOOL_" + ((PoolingType::MAX == pool_type) ? std::string("MAX") : std::string("AVG"))));
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    }
+
     build_opts.emplace(("-DSTRIDE_X=" + support::cpp11::to_string(pool_stride_x)));
     if(pool_type == PoolingType::AVG)
     {

@@ -39,21 +39,24 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance_f = 1e-05; /**< Tolerance value for comparing reference's output against implementation's output for float input */
+const float tolerance_qs8  = 3;     /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
+const float tolerance_qs16 = 6;     /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
+const float tolerance_f    = 1e-05; /**< Tolerance value for comparing reference's output against implementation's output for float input */
 
 /** Compute CL pooling layer function.
  *
- * @param[in] shape     Shape of the input and output tensors.
- * @param[in] dt        Data type of input and output tensors.
- * @param[in] pool_info Pooling Layer information.
+ * @param[in] shape                Shape of the input and output tensors.
+ * @param[in] dt                   Data type of input and output tensors.
+ * @param[in] pool_info            Pooling Layer information.
+ * @param[in] fixed_point_position The fixed point position.
  *
  * @return Computed output tensor.
  */
-CLTensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info)
+CLTensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info, int fixed_point_position = 0)
 {
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape_in, dt);
-    CLTensor dst = create_tensor<CLTensor>(shape_out, dt);
+    CLTensor src = create_tensor<CLTensor>(shape_in, dt, 1, fixed_point_position);
+    CLTensor dst = create_tensor<CLTensor>(shape_out, dt, 1, fixed_point_position);
 
     // Create and configure function
     CLPoolingLayer pool;
@@ -67,7 +70,24 @@ CLTensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &s
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    std::uniform_real_distribution<> distribution(-1, 1);
+    // Fill tensors
+    int min = 0;
+    int max = 0;
+    switch(dt)
+    {
+        case DataType::F32:
+            min = -1;
+            max = 1;
+            break;
+        case DataType::QS8:
+        case DataType::QS16:
+            min = -(1 << fixed_point_position);
+            max = (1 << fixed_point_position);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("DataType not supported.");
+    }
+    std::uniform_real_distribution<> distribution(min, max);
     library->fill(CLAccessor(src), distribution, 0);
 
     // Compute function
@@ -111,6 +131,43 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFloatDataTypes() * PoolingType
     // Validate output
     validate(CLAccessor(dst), ref_dst, tolerance_f);
 }
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(Quantized)
+
+BOOST_AUTO_TEST_SUITE(QS8)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RandomDataset,
+                     RandomPoolingLayerDataset() * boost::unit_test::data::xrange(1, 5),
+                     obj, fixed_point_position)
+{
+    // Compute function
+    CLTensor dst = compute_pooling_layer(obj.src_shape, obj.dst_shape, DataType::QS8, obj.info, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_pooling_layer(obj.src_shape, obj.dst_shape, DataType::QS8, obj.info, fixed_point_position);
+
+    // Validate output
+    validate(CLAccessor(dst), ref_dst, tolerance_qs8, 0);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(QS16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RandomDataset,
+                     RandomPoolingLayerDataset() * boost::unit_test::data::xrange(1, 12),
+                     obj, fixed_point_position)
+{
+    // Compute function
+    CLTensor dst = compute_pooling_layer(obj.src_shape, obj.dst_shape, DataType::QS16, obj.info, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_pooling_layer(obj.src_shape, obj.dst_shape, DataType::QS16, obj.info, fixed_point_position);
+
+    // Validate output
+    validate(CLAccessor(dst), ref_dst, tolerance_qs16, 0);
+}
+BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

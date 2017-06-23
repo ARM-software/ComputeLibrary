@@ -290,7 +290,7 @@ MLALQ_SAT_IMPL(qs16x8, qs32x8)
 #define MLAL_SAT_OP_EXPAND_STR(a, b, c, type, size, position) mlal_sat_##type##x##size((a), (b), (c), (position))
 #define MLAL_SAT_OP_EXPAND(a, b, c, type, size, position) MLAL_SAT_OP_EXPAND_STR(a, b, c, type, size, position)
 
-/** Saturate division of two fixed point numbers
+/** Saturate division of two fixed point vectors
   *
   * @param[in] stype the actual scalar data type.
   * @param[in] type  the actual data type.
@@ -298,22 +298,27 @@ MLALQ_SAT_IMPL(qs16x8, qs32x8)
   *
   * @return The result of the fixed point division. The result is saturated in case of overflow
   */
-#define DIVQ_SAT_IMPL(stype, type, itype)                                                                                                                \
-    inline type div_sat_##type(type VopA, type VopB, int fixed_point_position)                                                                           \
-    {                                                                                                                                                    \
-        itype conv_a      = CONVERT((VopA), itype);                                                                                                      \
-        itype denominator = CONVERT((VopB), itype);                                                                                                      \
-        itype numerator   = conv_a << (itype)(fixed_point_position);                                                                                     \
-        itype res         = select(numerator / denominator, select((itype)stype##_MAX, (itype)stype##_MIN, conv_a < (itype)0), denominator == (itype)0); \
-        return CONVERT_SAT((res), type);                                                                                                                 \
+#define DIVQ_SAT_IMPL(stype, type, itype)                                                                                                                                           \
+    inline type div_sat_##type(type VopA, type VopB, int fixed_point_position)                                                                                                      \
+    {                                                                                                                                                                               \
+        itype conv_a      = CONVERT((VopA), itype);                                                                                                                                 \
+        itype denominator = CONVERT((VopB), itype);                                                                                                                                 \
+        itype numerator   = conv_a << (itype)(fixed_point_position);                                                                                                                \
+        itype res         = select((itype)(numerator / denominator), select((itype)stype##_MAX, (itype)stype##_MIN, (itype)(conv_a < (itype)0)), (itype)(denominator == (itype)0)); \
+        return CONVERT_SAT((res), type);                                                                                                                                            \
     }
 
 DIVQ_SAT_IMPL(qs8, qs8x16, qs16x16)
 DIVQ_SAT_IMPL(qs16, qs16x8, qs32x8)
 DIVQ_SAT_IMPL(qs16, qs16x16, qs32x16)
+DIVQ_SAT_IMPL(qs8, qs8, qs16)
+DIVQ_SAT_IMPL(qs16, qs16, qs32)
 
-#define DIV_SAT_OP_EXPAND_STR(a, b, type, size, position) div_sat_##type##x##size((a), (b), (position))
-#define DIV_SAT_OP_EXPAND(a, b, type, size, position) DIV_SAT_OP_EXPAND_STR(a, b, type, size, position)
+#define DIV_SAT_OP_EXPAND_STR(a, b, type, position) div_sat_##type((a), (b), (position))
+#define DIV_SAT_OP_EXPAND(a, b, type, position) DIV_SAT_OP_EXPAND_STR(a, b, type, position)
+
+#define DIV_SAT_OP_VEC_EXPAND_STR(a, b, type, size, position) div_sat_##type##x##size((a), (b), (position))
+#define DIV_SAT_OP_VEC_EXPAND(a, b, type, size, position) DIV_SAT_OP_VEC_EXPAND_STR(a, b, type, size, position)
 
 /** Saturate exponential of a fixed point vector
   *
@@ -372,7 +377,7 @@ EXPQ_IMPL(qs16, qs16x16, 16)
         type B         = -(type)(0x56AE >> (15 - fixed_point_position)); /* -0.6771900 */                                                  \
         type C         = (type)(0x2933 >> (15 - fixed_point_position));  /* 0.3218538 */                                                   \
         type D         = -(type)(0x0AA7 >> (15 - fixed_point_position)); /* -0.0832229 */                                                  \
-        type inter_a   = select(VopA, DIV_SAT_OP_EXPAND(const_one, VopA, stype, size, fixed_point_position), VopA < const_one);            \
+        type inter_a   = select(VopA, DIV_SAT_OP_VEC_EXPAND(const_one, VopA, stype, size, fixed_point_position), VopA < const_one);        \
         type shift_val = (type)(15 - stype##_SHIFT) - clz(inter_a >> (type)fixed_point_position);                                          \
         inter_a        = inter_a >> shift_val;                                                                                             \
         inter_a        = sub_sat(inter_a, const_one);                                                                                      \
@@ -444,7 +449,7 @@ INVSQRTQ_IMPL(qs16, qs16x8, 8)
         type exp2x     = EXP_OP_EXPAND(MUL_SAT_OP_EXPAND(const_two, VopA, stype, size, fixed_point_position), stype, size, fixed_point_position); \
         type num       = SUB_SAT_OP_EXPAND(exp2x, const_one, stype, size);                                                                        \
         type den       = ADD_SAT_OP_EXPAND(exp2x, const_one, stype, size);                                                                        \
-        return DIV_SAT_OP_EXPAND(num, den, stype, size, fixed_point_position);                                                                    \
+        return DIV_SAT_OP_VEC_EXPAND(num, den, stype, size, fixed_point_position);                                                                \
     }
 
 TANHQ_IMPL(qs8, qs8x16, 16)

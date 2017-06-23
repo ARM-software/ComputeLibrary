@@ -23,11 +23,30 @@
  */
 #include "helpers.h"
 
-#ifdef POOL_AVG
+#ifdef FIXED_POINT_POSITION
+
+#include "fixed_point.h"
+
+#if defined(POOL_AVG)
+#define POOL_OP(x, y) add_sat(x, y)
+#else /* POOL_AVG */
+#define POOL_OP(x, y) (max((x), (y)))
+#endif /* POOL_AVG */
+
+#define DIV_OP1(x, y) DIV_SAT_OP_EXPAND((x), y, DATA_TYPE, FIXED_POINT_POSITION)
+#define DIV_OP(x, y) DIV_OP1(x, y << FIXED_POINT_POSITION)
+
+#else /* FIXED_POINT_POSITION */
+
+#if defined(POOL_AVG)
 #define POOL_OP(x, y) ((x) + (y))
 #else /* POOL_AVG */
 #define POOL_OP(x, y) (fmax((x), (y)))
 #endif /* POOL_AVG */
+
+#define DIV_OP(x, y) (x * (1.f / y))
+
+#endif /* FIXED_POINT_POSITION */
 
 #if STRIDE_X == 1
 #define POOLING3x3(res, input, output) POOLING3x3_STRIDE1(res, input, output)
@@ -36,9 +55,6 @@
 #elif STRIDE_X == 3 /* STRIDE_X not equals 1 or 2 */
 #define POOLING3x3(res, input, output) POOLING3x3_STRIDE3(res, input, output)
 #endif /* STRIDE_X == 3 */
-
-#define CONVERT_OP(data_type) convert_##data_type##4
-#define CONVERT_VECTOR4(data_type) CONVERT_OP(data_type)
 
 #define POOLING3x3_STRIDE1(res, input, output)                                                                                               \
     ({                                                                                                                                       \
@@ -142,30 +158,19 @@ DATA_TYPE calculate_avg_scale(const int pool_size, const int upper_bound_w, cons
     const int start_y = get_global_id(1) * stride_y - pad_y;
     const int end_x   = min(start_x + pool_size, upper_bound_w);
     const int end_y   = min(start_y + pool_size, upper_bound_h);
-    return 1.f / ((end_y - start_y) * (end_x - start_x));
-}
-
-VEC_DATA_TYPE(DATA_TYPE, 4)
-calculate_avg_scale4(const int pool_size, const int upper_bound_w, const int upper_bound_h,
-                     const int pad_x, const int pad_y, const int stride_x, const int stride_y)
-{
-    const int4 start_x = ((int4)get_global_id(0) * 4 + (int4)(0, 1, 2, 3)) * (int4)stride_x - (int4)pad_x;
-    const int  start_y = get_global_id(1) * stride_y - pad_y;
-    const int4 end_x   = min(start_x + (int4)pool_size, (int4)upper_bound_w);
-    const int  end_y   = min(start_y + pool_size, upper_bound_h);
-    return (VEC_DATA_TYPE(DATA_TYPE, 4))(1.f) / CONVERT_VECTOR4(DATA_TYPE)(((int4)(end_y - start_y)) * (end_x - start_x));
+    return ((end_y - start_y) * (end_x - start_x));
 }
 
 /** Performs a pooling function of pool size equal to 2.
  *
- * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16/F32;
+ * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note In case of average pooling the following information must be passed at compile time:
  *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QS8/QS16/F16/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -202,7 +207,7 @@ __kernel void pooling_layer_2(
 
     // Divide by pool region in case of average pooling
 #ifdef POOL_AVG
-    res *= calculate_avg_scale(2, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y);
+    res = DIV_OP(res, calculate_avg_scale(2, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
 #endif /* POOL_AVG */
 
     // Store result
@@ -211,14 +216,14 @@ __kernel void pooling_layer_2(
 
 /** Performs a pooling function of pool size equal to 3
  *
- * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16/F32;
+ * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note In case of average pooling the following information must be passed at compile time:
  *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QS8/QS16/F16/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -258,17 +263,32 @@ __kernel void pooling_layer_3(
 
     // Divide by pool region in case of average pooling
 #ifdef POOL_AVG
-    res *= calculate_avg_scale(3, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y);
-#endif //POOL_AVG
+    res = DIV_OP(res, calculate_avg_scale(3, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
+#endif /* POOL_AVG */
 
     // Store result
     *(__global DATA_TYPE *)output.ptr = res;
 }
 
-#if defined(POOLING3x3)
+#if defined(POOLING3x3) && !defined(FIXED_POINT_POSITION)
+
+#define CONVERT_OP(data_type) convert_##data_type##4
+#define CONVERT_VECTOR4(data_type) CONVERT_OP(data_type)
+
+VEC_DATA_TYPE(DATA_TYPE, 4)
+calculate_avg_scale4(const int pool_size, const int upper_bound_w, const int upper_bound_h,
+                     const int pad_x, const int pad_y, const int stride_x, const int stride_y)
+{
+    const int4 start_x = ((int4)get_global_id(0) * 4 + (int4)(0, 1, 2, 3)) * (int4)stride_x - (int4)pad_x;
+    const int  start_y = get_global_id(1) * stride_y - pad_y;
+    const int4 end_x   = min(start_x + (int4)pool_size, (int4)upper_bound_w);
+    const int  end_y   = min(start_y + pool_size, upper_bound_h);
+    return (VEC_DATA_TYPE(DATA_TYPE, 4))(1.f) / CONVERT_VECTOR4(DATA_TYPE)(((int4)(end_y - start_y)) * (end_x - start_x));
+}
+
 /** Performs an optimized pooling function of pool size equal to 3 when the stride_x is less equal than 3
  *
- * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16/F32;
+ * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note In case of average pooling the following information must be passed at compile time:
  *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
@@ -313,18 +333,18 @@ __kernel void pooling_layer_3_optimized(
 
     vstore4(res, 0, (__global DATA_TYPE *)output.ptr);
 }
-#endif // defined(POOLING3x3)
+#endif // defined(POOLING3x3) && !defined(FIXED_POINT_POSITION)
 
 /** Performs a pooling function of pool size equal to 7.
  *
- * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16/F32;
+ * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note In case of average pooling the following information must be passed at compile time:
  *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QS8/QS16/F16/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -389,7 +409,7 @@ __kernel void pooling_layer_7(
 
     // Divide by pool region in case of average pooling
 #ifdef POOL_AVG
-    res *= calculate_avg_scale(7, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y);
+    res = DIV_OP(res, calculate_avg_scale(7, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
 #endif /* POOL_AVG */
 
     // Store result

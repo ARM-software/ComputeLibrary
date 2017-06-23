@@ -29,7 +29,7 @@
 #define MAX_OP(x, y, type, size) MAX_OP_EXPAND(x, y, type, size)
 #define ADD_OP(x, y, type, size) ADD_SAT_OP_EXPAND((x), (y), type, size)
 #define SUB_OP(x, y, type, size) SUB_SAT_OP_EXPAND((x), (y), type, size)
-#define DIV_OP(x, y, type, size) DIV_SAT_OP_EXPAND((x), (y), type, size, FIXED_POINT_POSITION)
+#define DIV_OP(x, y, type, size) DIV_SAT_OP_VEC_EXPAND((x), (y), type, size, FIXED_POINT_POSITION)
 #define EXP_OP(x, type, size) EXP_OP_EXPAND((x), type, size, FIXED_POINT_POSITION)
 
 #define MIN_VAL_EXPAND(type) type##_MIN
