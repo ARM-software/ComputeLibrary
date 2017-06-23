@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__
 #define __ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__
 
+#include "ILutAccessor.h"
 #include "Types.h"
 #include "ValidationUserConfiguration.h"
 
@@ -210,7 +211,25 @@ inline TensorShape calculate_depth_concatenate_shape(std::vector<TensorShape> in
  * @return A vector that contains the requested number of random ROIs
  */
 std::vector<ROI> generate_random_rois(const TensorShape &shape, const ROIPoolingLayerInfo &pool_info, unsigned int num_rois, std::random_device::result_type seed);
+
+/** Helper function to fill the Lut random by a ILutAccessor.
+ *
+ * @param[in,out] table Accessor at the Lut.
+ *
+ */
+template <typename T>
+void fill_lookuptable(T &&table)
+{
+    std::mt19937                                          generator(user_config.seed.get());
+    std::uniform_int_distribution<typename T::value_type> distribution(std::numeric_limits<typename T::value_type>::min(), std::numeric_limits<typename T::value_type>::max());
+
+    for(int i = std::numeric_limits<typename T::value_type>::min(); i <= std::numeric_limits<typename T::value_type>::max(); i++)
+    {
+        table[i] = distribution(generator);
+    }
+}
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif //__ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__
+#endif /* __ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__ */

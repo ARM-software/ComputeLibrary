@@ -34,6 +34,7 @@
 
 using namespace arm_compute::test;
 
+#ifndef DOXYGEN_SKIP_THIS
 namespace arm_compute
 {
 namespace test
@@ -407,17 +408,34 @@ RawTensor Reference::compute_reference_fixed_point_pixel_wise_multiplication(con
     return ref_dst;
 }
 
+template <typename T>
+RawTensor Reference::compute_reference_table_lookup(const TensorShape &shape, DataType dt_inout, std::map<T, T> &lut)
+{
+    // Create reference
+    RawTensor ref_src = library->get(shape, dt_inout);
+    RawTensor ref_dst = library->get(shape, dt_inout);
+    // Fill reference
+    library->fill_tensor_uniform(ref_src, 0);
+
+    // Compute reference
+    ReferenceCPP::table_lookup(ref_src, ref_dst, lut);
+
+    return ref_dst;
+}
+template RawTensor arm_compute::test::validation::Reference::compute_reference_table_lookup<uint8_t>(const TensorShape &shape, DataType dt_inout, std::map<uint8_t, uint8_t> &lut);
+template RawTensor arm_compute::test::validation::Reference::compute_reference_table_lookup<int16_t>(const TensorShape &shape, DataType dt_inout, std::map<int16_t, int16_t> &lut);
+
 RawTensor Reference::compute_reference_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
     // Create reference
-    RawTensor ref_src1 = library->get(shape, DataType::U8);
-    RawTensor ref_dst  = library->get(shape, DataType::U8);
+    RawTensor ref_src = library->get(shape, DataType::U8);
+    RawTensor ref_dst = library->get(shape, DataType::U8);
 
     // Fill reference
-    library->fill_tensor_uniform(ref_src1, 0);
+    library->fill_tensor_uniform(ref_src, 0);
 
     // Compute reference
-    ReferenceCPP::threshold(ref_src1, ref_dst, threshold, false_value, true_value, type, upper);
+    ReferenceCPP::threshold(ref_src, ref_dst, threshold, false_value, true_value, type, upper);
 
     return ref_dst;
 }
@@ -746,3 +764,4 @@ RawTensor Reference::compute_reference_fixed_point_operation(const TensorShape &
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+#endif /* DOXYGEN_SKIP_THIS */

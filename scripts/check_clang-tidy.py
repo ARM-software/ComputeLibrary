@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 import sys
 
 if __name__ == "__main__":
@@ -40,8 +41,10 @@ if __name__ == "__main__":
                    ("Validation.cpp" in line and "parameter 'expected_labels' is unused" in line) or
                    ("Reference.cpp" in line and "parameter 'rois' is unused" in line) or
                    ("Reference.cpp" in line and "parameter 'shapes' is unused" in line) or
+                   ("Reference.cpp" in line and re.search(r"parameter '[^']+' is unused", line)) or
                    ("ReferenceCPP.cpp" in line and "parameter 'rois' is unused" in line) or
                    ("ReferenceCPP.cpp" in line and "parameter 'srcs' is unused" in line) or
+                   ("ReferenceCPP.cpp" in line and re.search(r"parameter '[^']+' is unused", line)) or
                    ("NEGEMMMatrixMultiplyKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                    "3rdparty" in line):
                     continue

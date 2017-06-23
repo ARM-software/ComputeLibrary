@@ -27,6 +27,7 @@
 #include "RawTensor.h"
 #include "Types.h"
 
+#include <map>
 #include <vector>
 
 namespace arm_compute
@@ -251,6 +252,16 @@ public:
      */
     static RawTensor compute_reference_fixed_point_pixel_wise_multiplication(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, float scale, int fixed_point_position,
                                                                              ConvertPolicy convert_policy, RoundingPolicy rounding_policy);
+    /** Compute reference Table Lookup.
+     *
+     * @param[in] shape    Shape of the input and output tensors.
+     * @param[in] dt_inout Data type of input/output tensor.
+     * @param[in] lut      Input lookup table.
+     *
+     * @return Computed raw tensor.
+     */
+    template <typename T>
+    static RawTensor compute_reference_table_lookup(const TensorShape &shape, DataType dt_inout, std::map<T, T> &lut);
     /** Compute reference threshold.
      *
      * @param[in] shape       Shape of the input and output tensors.

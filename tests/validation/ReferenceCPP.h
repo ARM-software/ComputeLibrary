@@ -24,10 +24,10 @@
 #ifndef __ARM_COMPUTE_TEST_REFERENCE_REFERENCE_CPP_H__
 #define __ARM_COMPUTE_TEST_REFERENCE_REFERENCE_CPP_H__
 
+#include "RawTensor.h"
 #include "Reference.h"
 
-#include "RawTensor.h"
-
+#include <map>
 #include <memory>
 #include <ostream>
 #include <vector>
@@ -223,9 +223,17 @@ public:
      * @param[in]  rounding_policy Rounding policy.
      */
     static void fixed_point_pixel_wise_multiplication(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy);
+    /** Table Lookup f@p src to @p dst
+     *
+     * @param[in]  src Input tensor.
+     * @param[out] dst Result tensor.
+     * @param[in]  lut Input lookup table.
+     */
+    template <typename T>
+    static void table_lookup(const RawTensor &src, RawTensor &dst, std::map<T, T> &lut);
     /** Threshold of@p src to @p dst
      *
-     * @param[in]  src         First tensor.
+     * @param[in]  src         Input tensor.
      * @param[out] dst         Result tensor.
      * @param[in]  threshold   Threshold. When the threhold type is RANGE, this is used as the lower threshold.
      * @param[in]  false_value value to set when the condition is not respected.
