@@ -127,8 +127,8 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTyp
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    int               step = 16 / arm_compute::data_size_from_type(dt);
-    const PaddingSize padding(0, PaddingCalculator(shape.x(), step).required_padding(), 0, 0);
+    const int         step    = 16 / arm_compute::data_size_from_type(dt);
+    const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
     validate(src.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }

@@ -111,7 +111,7 @@ void validate_configuration(const Tensor &src1, const Tensor &src2, Tensor &dst,
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, PaddingCalculator(shape.x(), 16).required_padding(), 0, 0);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
     validate(src1.info()->padding(), padding);
     validate(src2.info()->padding(), padding);
     validate(dst.info()->padding(), padding);

@@ -99,24 +99,24 @@ BOOST_DATA_TEST_CASE(Configuration,
                      shape, thrshConf)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor(shape, DataType::U8);
+    Tensor dst = create_tensor(shape, DataType::U8);
 
-    BOOST_TEST(src1.info()->is_resizable());
+    BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());
 
     // Create and configure function
     NEThreshold thrsh;
-    thrsh.configure(&src1, &dst, thrshConf.threshold, thrshConf.false_value, thrshConf.true_value, thrshConf.type, thrshConf.upper);
+    thrsh.configure(&src, &dst, thrshConf.threshold, thrshConf.false_value, thrshConf.true_value, thrshConf.type, thrshConf.upper);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src1.info()->valid_region(), valid_region);
+    validate(src.info()->valid_region(), valid_region);
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, PaddingCalculator(shape.x(), 16).required_padding(), 0, 0);
-    validate(src1.info()->padding(), padding);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }
 

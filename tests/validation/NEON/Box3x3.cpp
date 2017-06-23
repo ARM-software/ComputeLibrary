@@ -112,15 +112,15 @@ BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
     PaddingCalculator calculator(shape.x(), 8);
     calculator.set_border_size(1);
 
-    const PaddingSize write_padding(0, calculator.required_padding(), 0, 0);
+    const PaddingSize dst_padding = calculator.required_padding();
 
     calculator.set_accessed_elements(16);
     calculator.set_access_offset(-1);
 
-    const PaddingSize read_padding(0, calculator.required_padding(), 0, 0);
+    const PaddingSize src_padding = calculator.required_padding();
 
-    validate(src.info()->padding(), read_padding);
-    validate(dst.info()->padding(), write_padding);
+    validate(src.info()->padding(), src_padding);
+    validate(dst.info()->padding(), dst_padding);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))

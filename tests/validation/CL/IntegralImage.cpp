@@ -108,12 +108,9 @@ BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    PaddingCalculator calculator(shape.x(), 16);
-    const PaddingSize src_padding(0, calculator.required_padding(), 0, 0);
-    const PaddingSize dst_padding(0, calculator.required_padding(), 0, 0);
-
-    validate(src.info()->padding(), src_padding);
-    validate(dst.info()->padding(), dst_padding);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))

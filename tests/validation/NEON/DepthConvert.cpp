@@ -116,7 +116,7 @@ void compute_configure_validate(const TensorShape &shape, DataType dt_in, DataTy
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, PaddingCalculator(shape.x(), 16).required_padding(), 0, 0);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
     validate(src.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }
