@@ -49,13 +49,24 @@ namespace tensor_operations
 {
 namespace
 {
+template <class T>
+struct is_floating_point
+    : std::integral_constant < bool,
+      std::is_same<float, typename std::remove_cv<T>::type>::value ||
+#if ARM_COMPUTE_ENABLE_FP16
+      std::is_same<float16_t, typename std::remove_cv<T>::type>::value ||
+#endif
+      std::is_same<double, typename std::remove_cv<T>::type>::value || std::is_same<long double, typename std::remove_cv<T>::type>::value >
+{
+};
+
 bool is_valid_pixel(int i, int min, int max)
 {
     return (i >= min && i < max);
 }
 
 // 3D convolution for floating point type
-template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type * = nullptr>
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
 void convolution3d(const T *in, const T *weights, const T *bias, T *out, int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int8_t fixed_point_position)
 {
     const int half_width_weights  = width_weights / 2;
@@ -525,7 +536,7 @@ void depth_convert<int16_t, int32_t>(const Tensor<int16_t> &in, Tensor<int32_t> 
 }
 
 // Matrix multiplication for floating point type
-template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type * = nullptr>
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
 void gemm(const Tensor<T> &in1, const Tensor<T> &in2, const Tensor<T> &in3, Tensor<T> &out, float alpha, float beta)
 {
     const int M = out.shape().y();
@@ -609,7 +620,7 @@ void pixel_wise_multiplication(const Tensor<T1> &in1, const Tensor<T2> &in2, Ten
     for(int i = 0; i < in1.num_elements(); ++i)
     {
         double val = static_cast<intermediate_type>(in1[i]) * static_cast<intermediate_type>(in2[i]) * static_cast<double>(scale);
-        if(std::is_floating_point<T3>::value)
+        if(is_floating_point<T3>::value)
         {
             out[i] = val;
         }
@@ -705,7 +716,7 @@ void threshold(const Tensor<T> &in, Tensor<T> &out, uint8_t threshold, uint8_t f
 }
 
 // Activation Layer for floating point type
-template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type * = nullptr>
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
 void activation_layer(const Tensor<T> &in, Tensor<T> &out, ActivationLayerInfo act_info)
 {
     const T a = static_cast<T>(act_info.a());
@@ -838,7 +849,7 @@ void batch_normalization_layer(const Tensor<T> &in, Tensor<T> &out, const Tensor
 }
 
 // Batch Normalization Layer for floating point type
-template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type * = nullptr>
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
 void batch_normalization_layer(const Tensor<T> &in, Tensor<T> &out, const Tensor<T> &mean, const Tensor<T> &var, const Tensor<T> &beta, const Tensor<T> &gamma, float epsilon, int fixed_point_position)
 {
     const int cols       = static_cast<int>(in.shape()[0]);
@@ -940,7 +951,7 @@ void fully_connected_layer(const Tensor<T> &in, const Tensor<T> &weights, const 
 }
 
 // Normalization Layer for floating point type
-template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type * = nullptr>
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
 void normalization_layer(const Tensor<T> &in, Tensor<T> &out, NormalizationLayerInfo norm_info)
 {
     const uint32_t norm_size = norm_info.norm_size();
@@ -1235,7 +1246,7 @@ void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_in
                     hstart      = std::max(hstart, 0);
                     wend        = std::min(wend, w_in);
                     hend        = std::min(hend, h_in);
-                    if(std::is_floating_point<T>::value)
+                    if(is_floating_point<T>::value)
                     {
                         for(int y = hstart; y < hend; ++y)
                         {
@@ -1267,7 +1278,7 @@ void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_in
 }
 
 // Softmax Layer
-template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type * = nullptr>
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
 void softmax_layer(const Tensor<T> &in, Tensor<T> &out)
 {
     const int cols       = static_cast<int>(in.shape()[0]);

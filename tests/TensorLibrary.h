@@ -43,6 +43,10 @@
 #include <string>
 #include <type_traits>
 
+#if ARM_COMPUTE_ENABLE_FP16
+#include <arm_fp16.h> // needed for float16_t
+#endif
+
 namespace arm_compute
 {
 namespace test
@@ -494,10 +498,10 @@ void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             fill(tensor, distribution_s64, seed_offset);
             break;
         }
-#ifdef ENABLE_FP16
+#if ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
         {
-            std::uniform_real_distribution<float16_t> distribution_f16(std::numeric_limits<float16_t>::lowest(), std::numeric_limits<float16_t>::max());
+            std::uniform_real_distribution<float> distribution_f16(std::numeric_limits<float16_t>::lowest(), std::numeric_limits<float16_t>::max());
             fill(tensor, distribution_f16, seed_offset);
             break;
         }
@@ -589,11 +593,10 @@ void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             fill(tensor, distribution_s64, seed_offset);
             break;
         }
-#if ENABLE_FP16
+#if ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
         {
-            ARM_COMPUTE_ERROR_ON(!(std::is_same<float16_t, D>::value));
-            std::uniform_real_distribution<float16_t> distribution_f16(low, high);
+            std::uniform_real_distribution<float_t> distribution_f16(low, high);
             fill(tensor, distribution_f16, seed_offset);
             break;
         }

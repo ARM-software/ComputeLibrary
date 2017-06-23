@@ -40,6 +40,10 @@
 #include <cstdint>
 #include <iomanip>
 
+#if ARM_COMPUTE_ENABLE_FP16
+#include <arm_fp16.h> // needed for float16_t
+#endif
+
 namespace arm_compute
 {
 namespace test
@@ -82,7 +86,7 @@ double get_double_data(const void *ptr, DataType data_type)
             return *reinterpret_cast<const uint64_t *>(ptr);
         case DataType::S64:
             return *reinterpret_cast<const int64_t *>(ptr);
-#if ENABLE_FP16
+#if ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
             return *reinterpret_cast<const float16_t *>(ptr);
 #endif
@@ -384,6 +388,8 @@ void validate(const IAccessor &tensor, BorderSize border_size, const BorderMode 
 
 void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned int> expected_labels)
 {
+    ARM_COMPUTE_UNUSED(classified_labels);
+    ARM_COMPUTE_UNUSED(expected_labels);
     BOOST_TEST(expected_labels.size() != 0);
     BOOST_TEST(classified_labels.size() == expected_labels.size());
 

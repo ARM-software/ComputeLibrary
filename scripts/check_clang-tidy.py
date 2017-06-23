@@ -18,6 +18,7 @@ if __name__ == "__main__":
             if "error:" in line:
                 if (("Utils.cpp" in line and "'arm_compute_version.embed' file not found" in line) or
                     ("cl2.hpp" in line and "cast from pointer to smaller type 'cl_context_properties' (aka 'int') loses information" in line) or
+                    ("arm_fp16.h" in line) or
                     ("memory" in line and "cast from pointer to smaller type 'uintptr_t' (aka 'unsigned int') loses information" in line) or
                     "3rdparty" in line):
                     continue
@@ -34,6 +35,8 @@ if __name__ == "__main__":
                    ("NEMinMaxLocationKernel.cpp" in line and "move constructors should be marked noexcept" in line) or
                    ("NEMinMaxLocationKernel.cpp" in line and "move assignment operators should be marked noexcept" in line) or
                    ("PMUCounter.cpp" in line and "consider replacing 'long long' with 'int64'" in line) or
+                   ("Validation.cpp" in line and "parameter 'classified_labels' is unused" in line) or
+                   ("Validation.cpp" in line and "parameter 'expected_labels' is unused" in line) or
                    "3rdparty" in line):
                     continue
 

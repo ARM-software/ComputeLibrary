@@ -56,10 +56,6 @@ else:
     common_env.Append(LIBS = ["arm_compute"])
     arm_compute_lib = arm_compute_so
 
-if env['arch'] == 'arm64-v8.2-a' and ( common_env['validation_tests'] or common_env['benchmark_tests']):
-    print("validation_tests=1 and benchmark_tests=1 are not currently supported for arch=arm64-v8.2-a")
-    Exit(1)
-
 #FIXME Delete before release
 if common_env['internal_only']:
     common_env.Append(CPPDEFINES=['INTERNAL_ONLY'])
