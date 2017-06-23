@@ -53,7 +53,7 @@ public:
     CLConvolutionLayerReshapeWeights();
     /** Set the input and output tensors.
      *
-     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: F32.
+     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/F16/F32.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] output       Destination tensor. Data types supported: Same as @p weights.
      * @param[in]  transpose1xW True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise.
@@ -64,16 +64,16 @@ public:
     void run() override;
 
 private:
-    CLConvolutionLayerWeightsReshapeKernel _weights_reshape_kernel;
-    CLGEMMTranspose1xWKernel               _weights_transposed_kernel;
-    CLTensor                               _weights_reshaped;
-    bool                                   _transpose1xW;
+    CLWeightsReshapeKernel   _weights_reshape_kernel;
+    CLGEMMTranspose1xWKernel _weights_transposed_kernel;
+    CLTensor                 _weights_reshaped;
+    bool                     _transpose1xW;
 };
 
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels:
  *
- * -# @ref CLConvolutionLayerWeightsReshapeKernel (executed only once for each configuration)
- * -# @ref CLGEMMTranspose1xWKernel               (executed only once for each configuration)
+ * -# @ref CLWeightsReshapeKernel (executed only once for each configuration)
+ * -# @ref CLGEMMTranspose1xWKernel (executed only once for each configuration)
  * -# @ref CLIm2ColKernel
  * -# @ref CLGEMMInterleave4x4Kernel
  * -# @ref CLGEMMMatrixMultiplyKernel

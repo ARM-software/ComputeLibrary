@@ -34,32 +34,38 @@
 
 using namespace arm_compute;
 
-CLWeightsReshapeKernel::CLWeightsReshapeKernel(bool is_shared)
-    : _is_shared(is_shared), _input(nullptr), _biases(nullptr), _output(nullptr)
+CLWeightsReshapeKernel::CLWeightsReshapeKernel()
+    : _input(nullptr), _biases(nullptr), _output(nullptr)
 {
 }
 
 void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
-    if(_is_shared)
-    {
-        ARM_COMPUTE_ERROR_ON(input->info()->dimension(4) != (output->info()->dimension(2)));
-        ARM_COMPUTE_ERROR_ON(input->info()->num_dimensions() > 5);
-        ARM_COMPUTE_ERROR_ON(output->info()->num_dimensions() > 3);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR_ON(input->info()->num_dimensions() > 4);
-        ARM_COMPUTE_ERROR_ON(output->info()->num_dimensions() > 2);
-    }
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
+    ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (biases->info()->num_dimensions() != 1));
+    ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (biases->info()->num_dimensions() != 2));
+    ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (biases->info()->dimension(0) != input->info()->tensor_shape()[3]));
+    ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (biases->info()->dimension(0) != input->info()->tensor_shape()[3] || biases->info()->dimension(1) != input->info()->tensor_shape()[4]));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != input->info()->dimension(1));
 
-    // Check biases
-    if(biases != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::F16, DataType::F32);
-    }
+    const DataType dt                   = input->info()->data_type();
+    const int      fixed_point_position = input->info()->fixed_point_position();
+
+    TensorShape output_shape{ input->info()->tensor_shape() };
+    output_shape.collapse(3);
+    const size_t tmp_dim = output_shape[0];
+    output_shape.set(0, output_shape[1]);
+    output_shape.set(1, tmp_dim + (biases != nullptr ? 1 : 0));
+
+    // Output tensor auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, dt, fixed_point_position);
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     _biases = biases;
     _output = output;
@@ -88,43 +94,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     ICLKernel::configure(win);
 }
 
-CLConvolutionLayerWeightsReshapeKernel::CLConvolutionLayerWeightsReshapeKernel()
-    : CLWeightsReshapeKernel(false)
-{
-}
-
-void CLConvolutionLayerWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
-{
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
-
-    Window out_window;
-    out_window.use_tensor_dimensions(_output->info());
-
-    Window in_slice  = window.first_slice_window_3D();
-    Window out_slice = out_window.first_slice_window_2D();
-
-    // Set arguments
-    unsigned idx = 0;
-    add_3D_tensor_argument(idx, _input, in_slice);
-    add_2D_tensor_argument(idx, _output, out_slice);
-    if(_biases != nullptr)
-    {
-        Window biases_slice;
-        biases_slice.set(Window::DimX, Window::Dimension(0, _biases->info()->tensor_shape().x(), 1));
-        add_1D_tensor_argument(idx, _biases, biases_slice);
-    }
-
-    // Run kernel
-    enqueue(queue, *this, in_slice);
-}
-
-CLLocallyConnectedLayerWeightsReshapeKernel::CLLocallyConnectedLayerWeightsReshapeKernel()
-    : CLWeightsReshapeKernel(true)
-{
-}
-
-void CLLocallyConnectedLayerWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);

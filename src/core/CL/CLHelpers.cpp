@@ -80,6 +80,8 @@ std::string get_cl_type_from_data_type(const DataType &dt)
             return "ushort";
         case DataType::S16:
             return "short";
+        case DataType::QS16:
+            return "qs16";
         case DataType::U32:
             return "uint";
         case DataType::S32:

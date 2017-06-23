@@ -39,7 +39,7 @@ class ICLTensor;
 
 /** Basic function to compute the locally connected layer. This function calls the following OpenCL kernels:
  *
- * -# @ref CLLocallyConnectedLayerWeightsReshapeKernel (executed only once for each configuration)
+ * -# @ref CLWeightsReshapeKernel (executed only once for each configuration)
  * -# @ref CLIm2ColKernel
  * -# @ref CLLocallyConnectedMatrixMultiplyKernel
  * -# @ref CLCol2ImKernel
@@ -66,14 +66,14 @@ public:
     void run() override;
 
 private:
-    CLIm2ColKernel                              _input_im2col_kernel;
-    CLLocallyConnectedLayerWeightsReshapeKernel _weights_reshape_kernel;
-    CLLocallyConnectedMatrixMultiplyKernel      _mm_kernel;
-    CLCol2ImKernel                              _output_col2im_kernel;
-    CLTensor                                    _input_im2col_reshaped;
-    CLTensor                                    _weights_reshaped;
-    CLTensor                                    _gemm_output;
-    bool                                        _is_first_run;
+    CLIm2ColKernel                         _input_im2col_kernel;
+    CLWeightsReshapeKernel                 _weights_reshape_kernel;
+    CLLocallyConnectedMatrixMultiplyKernel _mm_kernel;
+    CLCol2ImKernel                         _output_col2im_kernel;
+    CLTensor                               _input_im2col_reshaped;
+    CLTensor                               _weights_reshaped;
+    CLTensor                               _gemm_output;
+    bool                                   _is_first_run;
 };
 }
 #endif /* __ARM_COMPUTE_CLLOCALLYCONNECTEDLAYER_H__ */

@@ -31,11 +31,8 @@ namespace arm_compute
 class CLWeightsReshapeKernel : public ICLKernel
 {
 public:
-    /** Constructor.
-     *
-     * @param[in] is_shared Flag to indicate whether the weights are shared or not.
-     */
-    CLWeightsReshapeKernel(bool is_shared = false);
+    /** Constructor.*/
+    CLWeightsReshapeKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLWeightsReshapeKernel(const CLWeightsReshapeKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -50,7 +47,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
-     *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: F16, F32
+     *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QS8/F16/F32
      * @param[in]  biases The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
      *                    dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
      * @param[out] output The output tensor. Should be a 2D Tensor. Data types supported: Same as @p input
@@ -58,57 +55,12 @@ public:
     void configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output);
 
     // Inherited methods overridden:
-    virtual void run(const Window &window, cl::CommandQueue &queue) = 0;
+    void run(const Window &window, cl::CommandQueue &queue) override;
 
-protected:
-    bool             _is_shared;
+private:
     const ICLTensor *_input;
     const ICLTensor *_biases;
     ICLTensor       *_output;
-};
-
-/** Interface for the weights reshape kernel used by convolution and fully connected layers.
- *
- * Rearranges each 3-dimensional kernel to a single row leading to a matrix with linearized kernels.
- * In combination with the @ref CLIm2ColKernel can transform a convolution into a matrix multiplication.
- *
- * For example assuming a 3D weight kernel of 3x3 dimensions and depth of 2 we have:
- * @f[
- * \left( \begin{array}{ccc}
- * a000 & a001 & a002 \\
- * a010 & a011 & a012 \\
- * a020 & a021 & a022 \\
- * \end{array} \right)
- * \left( \begin{array}{ccc}
- * a100 & a101 & a102 \\
- * a110 & a111 & a112 \\
- * a120 & a121 & a122 \\
- * \end{array} \right)
- * \rightarrow
- * \left( \begin{array}{ccccccccc}
- * a000 & a001 & a002 & a010 & a011 & a012 & a020 & a021 & a022 & a100 & a101 & a102 & a110 & a111 & a112 & a120 & a121 & a122 \\
- * \end{array} \right)
- * @f]
- */
-class CLConvolutionLayerWeightsReshapeKernel : public CLWeightsReshapeKernel
-{
-public:
-    /** Default constructor */
-    CLConvolutionLayerWeightsReshapeKernel();
-
-    // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
-};
-
-/** Interface for the weights reshape kernel used by locally connected layers. */
-class CLLocallyConnectedLayerWeightsReshapeKernel : public CLWeightsReshapeKernel
-{
-public:
-    /** Default constructor */
-    CLLocallyConnectedLayerWeightsReshapeKernel();
-
-    // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
 };
 }
 #endif /*__ARM_COMPUTE_CLWEIGHTSRESHAPEKERNEL_H__ */

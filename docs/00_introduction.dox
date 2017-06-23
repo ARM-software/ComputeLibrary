@@ -205,7 +205,7 @@ v17.02.1 Sources preview
  - New OpenCL kernels / functions:
    - @ref arm_compute::CLLogits1DMaxKernel, @ref arm_compute::CLLogits1DShiftExpSumKernel, @ref arm_compute::CLLogits1DNormKernel / @ref arm_compute::CLSoftmaxLayer
    - @ref arm_compute::CLPoolingLayerKernel / @ref arm_compute::CLPoolingLayer
-   - @ref arm_compute::CLIm2ColKernel, @ref arm_compute::CLCol2ImKernel, @ref arm_compute::CLConvolutionLayerWeightsReshapeKernel / @ref arm_compute::CLConvolutionLayer
+   - @ref arm_compute::CLIm2ColKernel, @ref arm_compute::CLCol2ImKernel, arm_compute::CLConvolutionLayerWeightsReshapeKernel / @ref arm_compute::CLConvolutionLayer
    - @ref arm_compute::CLRemapKernel / @ref arm_compute::CLRemap
    - @ref arm_compute::CLGaussianPyramidHorKernel, @ref arm_compute::CLGaussianPyramidVertKernel / @ref arm_compute::CLGaussianPyramid, @ref arm_compute::CLGaussianPyramidHalf, @ref arm_compute::CLGaussianPyramidOrb
    - @ref arm_compute::CLMinMaxKernel, @ref arm_compute::CLMinMaxLocationKernel / @ref arm_compute::CLMinMaxLocation

@@ -95,7 +95,7 @@ NEWeightsReshapeKernel::NEWeightsReshapeKernel()
 
 void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != input->info()->dimension(1));
 
@@ -108,28 +108,21 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
     output_shape.set(0, output_shape[1]);
     output_shape.set(1, tmp_dim + (bias != nullptr ? 1 : 0));
 
-    // Set data type and shape for output tensor if not yet configured
-    set_data_type_if_unknown(*output->info(), dt);
-    set_fixed_point_position_if_zero(*output->info(), fixed_point_position);
+    // Output tensor auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, dt, fixed_point_position);
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32, DataType::QS8);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     if(bias != nullptr)
     {
-        TensorShape bias_shape{ input->info()->tensor_shape()[3] };
-
-        // Set data type and shape for bias tensor if not yet configured
-        set_data_type_if_unknown(*bias->info(), dt);
-        set_fixed_point_position_if_zero(*bias->info(), fixed_point_position);
-        set_shape_if_empty(*bias->info(), bias_shape);
-
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(bias->info()->tensor_shape(), bias_shape);
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::F16, DataType::F32, DataType::QS8);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, bias);
+        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (bias->info()->num_dimensions() != 1));
+        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (bias->info()->num_dimensions() != 2));
+        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (bias->info()->dimension(0) != input->info()->tensor_shape()[3]));
+        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (bias->info()->dimension(0) != input->info()->tensor_shape()[3] || bias->info()->dimension(1) != input->info()->tensor_shape()[4]));
     }
 
     _input  = input;
