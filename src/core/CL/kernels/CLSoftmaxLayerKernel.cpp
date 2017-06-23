@@ -41,9 +41,9 @@ using namespace arm_compute;
 
 void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     _input  = input;
     _output = output;
@@ -52,7 +52,12 @@ void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
     const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 16);
 
     // Set build options
-    std::set<std::string> build_opts{ "-DUSE_" + string_from_data_type(input->info()->data_type()) };
+    std::set<std::string> build_opts;
+    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        build_opts.emplace(("-DFIXED_POINT_POSITION=" + val_to_string(input->info()->fixed_point_position())));
+    }
 
     // Tell the kernel that the width is not a multiple of 16
     if((input->info()->dimension(0) % max_cl_vector_width) != 0)
@@ -88,11 +93,10 @@ CLLogits1DShiftExpSumKernel::CLLogits1DShiftExpSumKernel()
 
 void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(max, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(sum, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, max, sum);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, max, sum);
 
     _input  = input;
     _max    = max;
@@ -103,7 +107,12 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
     const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 16);
 
     // Set build options
-    std::set<std::string> build_opts{ "-DUSE_" + string_from_data_type(input->info()->data_type()) };
+    std::set<std::string> build_opts;
+    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        build_opts.emplace(("-DFIXED_POINT_POSITION=" + val_to_string(input->info()->fixed_point_position())));
+    }
 
     // Tell the kernel that the width is not a multiple of 16
     if((input->info()->dimension(0) % max_cl_vector_width) != 0)
@@ -161,10 +170,10 @@ CLLogits1DNormKernel::CLLogits1DNormKernel()
 
 void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(sum, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, sum);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, sum, output);
 
     _input  = input;
     _sum    = sum;
@@ -172,7 +181,11 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
 
     // Set build options
     std::set<std::string> build_opts;
-    build_opts.emplace(("-DUSE_" + string_from_data_type(input->info()->data_type())));
+    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        build_opts.emplace(("-DFIXED_POINT_POSITION=" + val_to_string(input->info()->fixed_point_position())));
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("softmax_layer_norm", build_opts));

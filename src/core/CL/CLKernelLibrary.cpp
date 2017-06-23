@@ -353,6 +353,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/fill_border.clembed"
     },
     {
+        "fixed_point.h",
+#include "./cl_kernels/fixed_point.hembed"
+    },
+    {
         "gaussian_pyramid.cl",
 #include "./cl_kernels/gaussian_pyramid.clembed"
     },

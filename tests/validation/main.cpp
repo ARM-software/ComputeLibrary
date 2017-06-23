@@ -62,7 +62,7 @@ struct GlobalFixture
             library = cpp14::make_unique<TensorLibrary>(user_config.path.get());
         }
 
-        std::cout << "Seed: " << library->seed();
+        std::cout << "Seed: " << library->seed() << "\n";
     }
 };
 

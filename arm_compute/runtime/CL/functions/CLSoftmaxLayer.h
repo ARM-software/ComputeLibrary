@@ -49,8 +49,8 @@ public:
     CLSoftmaxLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F16, F32. Number of channels must be 1.
-     * @param[out] output Destination tensor. Matching input type and channel number.
+     * @param[in]  input  Source tensor. Data types supported: QS8/F16/F32
+     * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
 

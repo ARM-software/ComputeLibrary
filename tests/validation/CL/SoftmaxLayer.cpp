@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "CL/CLAccessor.h"
+#include "CL/Helper.h"
 #include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
@@ -34,9 +34,9 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/CLTensorAllocator.h"
+#include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
 
 #include "boost_wrapper.h"
 
@@ -45,7 +45,7 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
+using namespace arm_compute::test::cl;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -55,7 +55,7 @@ const float tolerance = 0.000001f;
 /** Tolerance for fixed point operations */
 const float tolerance_fixed_point = 2.f;
 
-/** Compute Neon softmax layer function.
+/** Compute OpenCL softmax layer function.
  *
  * @param[in] shape                Shape of the input and output tensors.
  * @param[in] dt                   Shape Data type of tensors.
@@ -63,14 +63,14 @@ const float tolerance_fixed_point = 2.f;
  *
  * @return Computed output tensor.
  */
-Tensor compute_softmax_layer(const TensorShape &shape, DataType dt, int fixed_point_position = 0)
+CLTensor compute_softmax_layer(const TensorShape &shape, DataType dt, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    CLTensor src = create_tensor(shape, dt, 1, fixed_point_position);
+    CLTensor dst = create_tensor(shape, dt, 1, fixed_point_position);
 
     // Create and configure function
-    NESoftmaxLayer smx_layer;
+    CLSoftmaxLayer smx_layer;
     smx_layer.configure(&src, &dst);
 
     // Allocate tensors
@@ -84,13 +84,13 @@ Tensor compute_softmax_layer(const TensorShape &shape, DataType dt, int fixed_po
     if(arm_compute::is_data_type_float(dt))
     {
         std::uniform_real_distribution<> distribution(-1000.f, 1000.f);
-        library->fill(NEAccessor(src), distribution, 0);
+        library->fill(CLAccessor(src), distribution, 0);
     }
     else
     {
         int                             one_fixed = 1 << fixed_point_position;
         std::uniform_int_distribution<> distribution(-one_fixed, one_fixed);
-        library->fill(NEAccessor(src), distribution, 0);
+        library->fill(CLAccessor(src), distribution, 0);
     }
 
     // Compute function
@@ -101,7 +101,7 @@ Tensor compute_softmax_layer(const TensorShape &shape, DataType dt, int fixed_po
 } // namespace
 
 #ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
+BOOST_AUTO_TEST_SUITE(CL)
 BOOST_AUTO_TEST_SUITE(SoftmaxLayer)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
@@ -111,14 +111,14 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTyp
     int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    CLTensor src = create_tensor(shape, dt, 1, fixed_point_position);
+    CLTensor dst = create_tensor(shape, dt, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());
 
     // Create and configure function
-    NESoftmaxLayer smx_layer;
+    CLSoftmaxLayer smx_layer;
     smx_layer.configure(&src, &dst);
 
     // Validate valid region
@@ -127,8 +127,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTyp
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const int         step    = 16 / arm_compute::data_size_from_type(dt);
-    const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
     validate(src.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }
@@ -138,43 +137,42 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFloatDataTypes(), shape, dt)
 {
     // Compute function
-    Tensor dst = compute_softmax_layer(shape, dt);
+    CLTensor dst = compute_softmax_layer(shape, dt);
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance);
+    validate(CLAccessor(dst), ref_dst, tolerance);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * CNNFloatDataTypes(), shape, dt)
 {
     // Compute function
-    Tensor dst = compute_softmax_layer(shape, dt);
+    CLTensor dst = compute_softmax_layer(shape, dt);
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance);
+    validate(CLAccessor(dst), ref_dst, tolerance);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(Quantized)
-// Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFixedPointDataTypes() * boost::unit_test::data::xrange(1, 6),
                      shape, dt, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_softmax_layer(shape, dt, fixed_point_position);
+    CLTensor dst = compute_softmax_layer(shape, dt, fixed_point_position);
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(CLAccessor(dst), ref_dst, tolerance_fixed_point);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -182,13 +180,13 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * CNNFixedPointDataTypes() * boost:
                      shape, dt, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_softmax_layer(shape, dt, fixed_point_position);
+    CLTensor dst = compute_softmax_layer(shape, dt, fixed_point_position);
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(CLAccessor(dst), ref_dst, tolerance_fixed_point);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 #endif
 
     std::cout << "Using " << user_config.threads << " CPU " << (user_config.threads == 1 ? "thread" : "threads") << "\n";
-    std::cout << "Seed: " << library->seed();
+    std::cout << "Seed: " << library->seed() << "\n";
     arm_compute::Scheduler::get().set_num_threads(user_config.threads);
 
     ::benchmark::RunSpecifiedBenchmarks();

@@ -26,6 +26,8 @@
 
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
 
+#define EXPAND(x) x
+
 #define CLAMP(x, min_val, max_val) min(max(x, min_val), max_val)
 
 #define VEC_DATA_TYPE_STR(type, size) type##size

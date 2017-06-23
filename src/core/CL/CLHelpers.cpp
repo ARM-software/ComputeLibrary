@@ -72,6 +72,8 @@ std::string get_cl_type_from_data_type(const DataType &dt)
     {
         case DataType::U8:
             return "uchar";
+        case DataType::QS8:
+            return "qs8";
         case DataType::S8:
             return "char";
         case DataType::U16:

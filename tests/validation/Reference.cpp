@@ -629,7 +629,7 @@ RawTensor Reference::compute_reference_softmax_layer(const TensorShape &shape, D
     // Fill reference
     if(arm_compute::is_data_type_float(dt))
     {
-        std::uniform_real_distribution<> distribution(-10, 10);
+        std::uniform_real_distribution<> distribution(-1000.f, 1000.f);
         library->fill(ref_src, distribution, 0);
     }
     else
