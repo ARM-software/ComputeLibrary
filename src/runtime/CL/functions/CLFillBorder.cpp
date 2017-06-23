@@ -33,6 +33,6 @@ using namespace arm_compute;
 void CLFillBorder::configure(ICLTensor *tensor, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value)
 {
     auto k = arm_compute::cpp14::make_unique<CLFillBorderKernel>();
-    k->configure(tensor, border_width, border_mode, constant_border_value);
+    k->configure(tensor, BorderSize(border_width), border_mode, constant_border_value);
     _kernel = std::move(k);
 }

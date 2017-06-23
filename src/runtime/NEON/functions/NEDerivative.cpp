@@ -42,7 +42,7 @@ void NEDerivative::configure(ITensor *input, ITensor *output_x, ITensor *output_
     ARM_COMPUTE_ERROR_ON((output_x == nullptr) && (output_y == nullptr));
 
     _kernel.configure(input, output_x, output_y, border_mode == BorderMode::UNDEFINED);
-    _border_handler.configure(input, 1, border_mode, PixelValue(constant_border_value));
+    _border_handler.configure(input, BorderSize(1), border_mode, PixelValue(constant_border_value));
 }
 
 void NEDerivative::run()

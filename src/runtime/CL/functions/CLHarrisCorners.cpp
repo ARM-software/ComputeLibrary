@@ -100,8 +100,8 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     }
 
     // Configure border filling before harris score
-    _border_gx.configure(&_gx, block_size / 2, border_mode, constant_border_value);
-    _border_gy.configure(&_gy, block_size / 2, border_mode, constant_border_value);
+    _border_gx.configure(&_gx, BorderSize(block_size / 2), border_mode, constant_border_value);
+    _border_gy.configure(&_gy, BorderSize(block_size / 2), border_mode, constant_border_value);
 
     // Normalization factor
     const float norm_factor               = 1.0f / (255.0f * pow(4.0f, gradient_size / 2) * block_size);

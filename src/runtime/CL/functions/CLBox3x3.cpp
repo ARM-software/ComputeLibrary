@@ -36,5 +36,5 @@ void CLBox3x3::configure(ICLTensor *input, ICLTensor *output, BorderMode border_
     auto k = arm_compute::cpp14::make_unique<CLBox3x3Kernel>();
     k->configure(input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
-    _border_handler.configure(input, 1, border_mode, PixelValue(constant_border_value));
+    _border_handler.configure(input, BorderSize(1), border_mode, PixelValue(constant_border_value));
 }

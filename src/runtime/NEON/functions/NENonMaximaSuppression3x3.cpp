@@ -38,10 +38,10 @@ void NENonMaximaSuppression3x3::configure(ITensor *input, ITensor *output, Borde
 
     if(border_mode != BorderMode::UNDEFINED)
     {
-        _border_handler.configure(input, 1, BorderMode::CONSTANT, 0);
+        _border_handler.configure(input, BorderSize(1), BorderMode::CONSTANT, 0);
     }
     else
     {
-        _border_handler.configure(input, 1, BorderMode::UNDEFINED, 0);
+        _border_handler.configure(input, BorderSize(1), BorderMode::UNDEFINED, 0);
     }
 }

@@ -121,6 +121,13 @@ void validate(const IAccessor &tensor, BorderSize border_size, const BorderMode 
  * - All values should match
  */
 void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned int> expected_labels);
+
+/** Validate float value.
+ *
+ * - All values should match
+ */
+void validate(float target, float ref, float tolerance_abs_error = std::numeric_limits<float>::epsilon(), float tolerance_relative_error = 0.0001f);
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

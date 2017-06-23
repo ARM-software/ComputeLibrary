@@ -37,7 +37,7 @@ using namespace arm_compute;
 
 BorderSize CLBox3x3Kernel::border_size() const
 {
-    return 1;
+    return BorderSize(1);
 }
 
 void CLBox3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, bool border_undefined)

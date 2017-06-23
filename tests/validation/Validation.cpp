@@ -393,7 +393,7 @@ void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned 
     }
 }
 
-void validate(float target, float ref, float tolerance_abs_error = std::numeric_limits<float>::epsilon(), float tolerance_relative_error = 0.0001f)
+void validate(float target, float ref, float tolerance_abs_error, float tolerance_relative_error)
 {
     const bool equal = is_equal(target, ref, tolerance_abs_error, tolerance_relative_error);
 
