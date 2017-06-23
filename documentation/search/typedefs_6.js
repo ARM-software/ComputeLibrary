@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['lkinternalkeypointarray',['LKInternalKeypointArray',['../namespacearm__compute.xhtml#a681c120e2188371794ec3a59768c64ab',1,'arm_compute']]]
+  ['floatarray',['FloatArray',['../namespacearm__compute.xhtml#a6e06029aa1b68c0cdeb80656cc9353fe',1,'arm_compute']]],
+  ['fullyconnectedlayerdataset',['FullyConnectedLayerDataset',['../namespacearm__compute_1_1test.xhtml#ad41fe013a10729c8790f3d30bfeac8f1',1,'arm_compute::test']]]
 ];

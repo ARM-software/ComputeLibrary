@@ -1,0 +1,6 @@
+<map id="PoolingLayerDataObject" name="PoolingLayerDataObject">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_pooling_layer_info.xhtml" title="Pooling Layer Information class. " alt="" coords="5,171,124,197"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_tensor_shape.xhtml" title="Shape of a tensor. " alt="" coords="149,171,247,197"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions\&lt; size_t \&gt;" alt="" coords="123,95,273,121"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality. " alt="" coords="137,5,259,32"/>
+</map>

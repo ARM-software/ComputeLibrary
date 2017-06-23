@@ -76,5 +76,5 @@ void NEHOGGradient::run()
     _derivative.run();
 
     // Run magnitude/phase kernel
-    NEScheduler::get().multithread(_mag_phase.get());
+    NEScheduler::get().schedule(_mag_phase.get(), Window::DimY);
 }

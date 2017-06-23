@@ -29,6 +29,8 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/HOG.h"
 
+#include <memory>
+
 namespace arm_compute
 {
 /** CPU implementation of multi HOG data-object */

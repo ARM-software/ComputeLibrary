@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['tensor3d',['Tensor3D',['../helpers_8h.xhtml#a1a857bfe99727c6051e9a3ee285d70f6',1,'helpers.h']]]
+  ['make_5fsigned_5fconditional_5ft',['make_signed_conditional_t',['../namespacearm__compute_1_1test_1_1traits.xhtml#a381020121bcfd7b20c6bc4ecb807caa1',1,'arm_compute::test::traits']]],
+  ['measurementsmap',['MeasurementsMap',['../classarm__compute_1_1test_1_1benchmark_1_1_profiler.xhtml#ab9ddc98666376697dd8845d4eef4f77d',1,'arm_compute::test::benchmark::Profiler']]]
 ];

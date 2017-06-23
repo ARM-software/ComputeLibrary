@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_size2_d.xhtml" title="Class for specifying the size of an image or rectangle. " alt="" coords="5,5,71,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1_generic_dataset.xhtml" title="GenericDataset\&lt; GEMMData\lObject, 32 \&gt;" alt="" coords="5,23,200,65"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_goog_le_net_g_e_m_m_dataset1.xhtml" title="GoogLeNetGEMMDataset1" alt="" coords="248,5,431,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1_goog_le_net_g_e_m_m_dataset2.xhtml" title="GoogLeNetGEMMDataset2" alt="" coords="248,56,431,83"/>
 </map>

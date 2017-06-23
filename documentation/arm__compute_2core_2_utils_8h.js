@@ -10,8 +10,9 @@ var arm__compute_2core_2_utils_8h =
     [ "DIV_CEIL", "arm__compute_2core_2_utils_8h.xhtml#a12705a88669cb9fb90451ebe0db53c41", null ],
     [ "element_size_from_data_type", "arm__compute_2core_2_utils_8h.xhtml#a34b06c0cd94808a77b697e79880b84b0", null ],
     [ "floor_to_multiple", "arm__compute_2core_2_utils_8h.xhtml#a6959e681668a37a9242d2aae4e8b4375", null ],
+    [ "is_data_type_fixed_point", "arm__compute_2core_2_utils_8h.xhtml#ab6bb62694ae8369d18a9c9687040975e", null ],
     [ "is_data_type_float", "arm__compute_2core_2_utils_8h.xhtml#af5982a092e9eb743fce2d6392bdd8897", null ],
-    [ "lower_string", "arm__compute_2core_2_utils_8h.xhtml#ab72adf11888176ec19224deef7b1a7dc", null ],
+    [ "lower_string", "arm__compute_2core_2_utils_8h.xhtml#a532fb45c0261724a4c2e755cfd3a44e6", null ],
     [ "max_consecutive_elements_display_width", "arm__compute_2core_2_utils_8h.xhtml#ac3f2de3a35ff8d9a47b5b793637784e7", null ],
     [ "max_consecutive_elements_display_width_impl", "arm__compute_2core_2_utils_8h.xhtml#aaecee617b967dd96f27d2f36732fb68e", null ],
     [ "num_channels_from_format", "arm__compute_2core_2_utils_8h.xhtml#ab14153fb809c18823af3c9c8bc4286cb", null ],
@@ -31,5 +32,6 @@ var arm__compute_2core_2_utils_8h =
     [ "string_from_interpolation_policy", "arm__compute_2core_2_utils_8h.xhtml#ade34f5e72f050fd3665f3294dfb15850", null ],
     [ "string_from_matrix_pattern", "arm__compute_2core_2_utils_8h.xhtml#a018795ab2489d17309e158ff5c060ab1", null ],
     [ "string_from_non_linear_filter_function", "arm__compute_2core_2_utils_8h.xhtml#a14831547f57ecf5f0deef888ad41ad30", null ],
+    [ "string_from_norm_type", "arm__compute_2core_2_utils_8h.xhtml#afb5698af5404d5d11e3516c87b6e7041", null ],
     [ "val_to_string", "arm__compute_2core_2_utils_8h.xhtml#ae350823b5c93227dc33f1105ece06d68", null ]
 ];

@@ -65,8 +65,8 @@ public:
 private:
     /** Common signature for all the specialised absolute difference functions
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8, S16.
-     * @param[in]  input2 An input tensor. Data types supported: U8, S16.
+     * @param[in]  input1 An input tensor. Data types supported: U8/S16.
+     * @param[in]  input2 An input tensor. Data types supported: U8/S16.
      * @param[out] output The output tensor, Data types supported: U8 (Only if both inputs are U8), S16.
      * @param[in]  window Region on which to execute the kernel.
      */

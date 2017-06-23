@@ -17,6 +17,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NEArithmeticSubtraction.h", "_n_e_arithmetic_subtraction_8h.xhtml", [
       [ "NEArithmeticSubtraction", "classarm__compute_1_1_n_e_arithmetic_subtraction.xhtml", "classarm__compute_1_1_n_e_arithmetic_subtraction" ]
     ] ],
+    [ "NEBatchNormalizationLayer.h", "_n_e_batch_normalization_layer_8h.xhtml", [
+      [ "NEBatchNormalizationLayer", "classarm__compute_1_1_n_e_batch_normalization_layer.xhtml", "classarm__compute_1_1_n_e_batch_normalization_layer" ]
+    ] ],
     [ "NEBitwiseAnd.h", "_n_e_bitwise_and_8h.xhtml", [
       [ "NEBitwiseAnd", "classarm__compute_1_1_n_e_bitwise_and.xhtml", "classarm__compute_1_1_n_e_bitwise_and" ]
     ] ],
@@ -46,7 +49,11 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NEConvolution.h", "_n_e_convolution_8h.xhtml", "_n_e_convolution_8h" ],
     [ "NEConvolutionLayer.h", "_n_e_convolution_layer_8h.xhtml", [
+      [ "NEConvolutionLayerReshapeWeights", "classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_n_e_convolution_layer_reshape_weights" ],
       [ "NEConvolutionLayer", "classarm__compute_1_1_n_e_convolution_layer.xhtml", "classarm__compute_1_1_n_e_convolution_layer" ]
+    ] ],
+    [ "NEDepthConcatenate.h", "_n_e_depth_concatenate_8h.xhtml", [
+      [ "NEDepthConcatenate", "classarm__compute_1_1_n_e_depth_concatenate.xhtml", "classarm__compute_1_1_n_e_depth_concatenate" ]
     ] ],
     [ "NEDepthConvert.h", "_n_e_depth_convert_8h.xhtml", [
       [ "NEDepthConvert", "classarm__compute_1_1_n_e_depth_convert.xhtml", "classarm__compute_1_1_n_e_depth_convert" ]
@@ -56,6 +63,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NEDilate.h", "_n_e_dilate_8h.xhtml", [
       [ "NEDilate", "classarm__compute_1_1_n_e_dilate.xhtml", "classarm__compute_1_1_n_e_dilate" ]
+    ] ],
+    [ "NEDirectConvolutionLayer.h", "_n_e_direct_convolution_layer_8h.xhtml", [
+      [ "NEDirectConvolutionLayer", "classarm__compute_1_1_n_e_direct_convolution_layer.xhtml", "classarm__compute_1_1_n_e_direct_convolution_layer" ]
     ] ],
     [ "NEEqualizeHistogram.h", "_n_e_equalize_histogram_8h.xhtml", [
       [ "NEEqualizeHistogram", "classarm__compute_1_1_n_e_equalize_histogram.xhtml", "classarm__compute_1_1_n_e_equalize_histogram" ]
@@ -70,6 +80,7 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
       [ "NEFillBorder", "classarm__compute_1_1_n_e_fill_border.xhtml", "classarm__compute_1_1_n_e_fill_border" ]
     ] ],
     [ "NEFullyConnectedLayer.h", "_n_e_fully_connected_layer_8h.xhtml", [
+      [ "NEFullyConnectedLayerReshapeWeights", "classarm__compute_1_1_n_e_fully_connected_layer_reshape_weights.xhtml", "classarm__compute_1_1_n_e_fully_connected_layer_reshape_weights" ],
       [ "NEFullyConnectedLayer", "classarm__compute_1_1_n_e_fully_connected_layer.xhtml", "classarm__compute_1_1_n_e_fully_connected_layer" ]
     ] ],
     [ "NEGaussian3x3.h", "_n_e_gaussian3x3_8h.xhtml", [
@@ -121,6 +132,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NELaplacianReconstruct.h", "_n_e_laplacian_reconstruct_8h.xhtml", [
       [ "NELaplacianReconstruct", "classarm__compute_1_1_n_e_laplacian_reconstruct.xhtml", "classarm__compute_1_1_n_e_laplacian_reconstruct" ]
+    ] ],
+    [ "NELocallyConnectedLayer.h", "_n_e_locally_connected_layer_8h.xhtml", [
+      [ "NELocallyConnectedLayer", "classarm__compute_1_1_n_e_locally_connected_layer.xhtml", "classarm__compute_1_1_n_e_locally_connected_layer" ]
     ] ],
     [ "NEMagnitude.h", "_n_e_magnitude_8h.xhtml", [
       [ "NEMagnitude", "classarm__compute_1_1_n_e_magnitude.xhtml", "classarm__compute_1_1_n_e_magnitude" ]

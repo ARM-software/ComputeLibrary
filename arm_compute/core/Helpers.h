@@ -24,13 +24,14 @@
 #ifndef __ARM_COMPUTE_HELPERS_H__
 #define __ARM_COMPUTE_HELPERS_H__
 
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/Steps.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
-
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -43,11 +44,10 @@ namespace arm_compute
 {
 class IKernel;
 class ITensor;
-class TensorInfo;
+class ITensorInfo;
 
 namespace cpp14
 {
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
 template <class T>
 struct _Unique_if
 {
@@ -84,12 +84,43 @@ make_unique(size_t n)
 template <class T, class... Args>
 typename _Unique_if<T>::_Known_bound
 make_unique(Args &&...) = delete;
-#endif /* DOXYGEN_SKIP_THIS */
-}
 }
 
-namespace
+template <typename T>
+struct enable_bitwise_ops
 {
+    static constexpr bool value = false;
+};
+
+template <typename T>
+typename std::enable_if<enable_bitwise_ops<T>::value, T>::type operator&(T lhs, T rhs)
+{
+    using underlying_type = typename std::underlying_type<T>::type;
+    return static_cast<T>(static_cast<underlying_type>(lhs) & static_cast<underlying_type>(rhs));
+}
+
+namespace traits
+{
+/** Check if a type T is contained in a tuple Tuple of types */
+template <typename T, typename Tuple>
+struct is_contained;
+
+template <typename T>
+struct is_contained<T, std::tuple<>> : std::false_type
+{
+};
+
+template <typename T, typename... Ts>
+struct is_contained<T, std::tuple<T, Ts...>> : std::true_type
+{
+};
+
+template <typename T, typename U, typename... Ts>
+struct is_contained<T, std::tuple<U, Ts...>> : is_contained<T, std::tuple<Ts...>>
+{
+};
+}
+
 /** Computes bilinear interpolation using the pointer to the top-left pixel and the pixel's distance between
  * the real coordinates and the smallest following integer coordinates.
  *
@@ -215,10 +246,7 @@ inline I foldl(F &&func, I &&initial, T &&value, Vs &&... values)
 {
     return foldl(std::forward<F>(func), func(std::forward<I>(initial), std::forward<T>(value)), std::forward<Vs>(values)...);
 }
-}
 
-namespace arm_compute
-{
 /** Iterator updated by @ref execute_window_loop for each window element */
 class Iterator
 {
@@ -334,7 +362,7 @@ bool update_window_and_padding(Window &win, Ts &&... patterns)
  *
  * @return The maximum window the kernel can be executed on.
  */
-Window calculate_max_window(const TensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+Window calculate_max_window(const ITensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
 
 /** Calculate the maximum window used by a horizontal kernel for a given tensor shape and border setting
  *
@@ -345,7 +373,17 @@ Window calculate_max_window(const TensorInfo &info, const Steps &steps = Steps()
  *
  * @return The maximum window the kernel can be executed on.
  */
-Window calculate_max_window_horizontal(const TensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+Window calculate_max_window_horizontal(const ITensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+
+/** Calculate the maximum window for a given tensor shape and border setting. The window will also includes the border.
+ *
+ * @param[in] info        Tensor info object defining the shape of the object for which the window is created.
+ * @param[in] steps       (Optional) Number of elements processed for each step.
+ * @param[in] border_size (Optional) Border size. The border region will be included in the window.
+ *
+ * @return The maximum window the kernel can be executed on.
+ */
+Window calculate_max_enlarged_window(const ITensorInfo &info, const Steps &steps = Steps(), BorderSize border_size = BorderSize());
 
 /** Intersect multiple valid regions.
  *
@@ -386,7 +424,7 @@ ValidRegion intersect_valid_regions(Ts &&... regions)
  *         calculated based on the tensor shape and the strides of lower dimensions.
  */
 template <typename T, typename... Ts>
-inline Strides compute_strides(const TensorInfo &info, T stride_x, Ts &&... fixed_strides)
+inline Strides compute_strides(const ITensorInfo &info, T stride_x, Ts &&... fixed_strides)
 {
     const TensorShape &shape = info.tensor_shape();
 
@@ -408,11 +446,62 @@ inline Strides compute_strides(const TensorInfo &info, T stride_x, Ts &&... fixe
  * @return Strides object based on element size and tensor shape.
  */
 template <typename... Ts>
-inline Strides compute_strides(const TensorInfo &info)
+inline Strides compute_strides(const ITensorInfo &info)
 {
     return compute_strides(info, info.element_size());
 }
-}
+
+/* Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.
+ *
+ * @param[in,out] info                 Tensor info used to check and assign.
+ * @param[in]     shape                New shape.
+ * @param[in]     num_channels         New number of channels.
+ * @param[in]     data_type            New data type
+ * @param[in]     fixed_point_position New fixed point position
+ *
+ * @return True if the tensor info has been initialized
+ */
+bool auto_init_if_empty(ITensorInfo &info, const TensorShape &shape, int num_channels, DataType data_type, int fixed_point_position);
+
+/* Set the shape to the specified value if the current assignment is empty.
+ *
+ * @param[in,out] info  Tensor info used to check and assign.
+ * @param[in]     shape New shape.
+ *
+ * @return True if the shape has been changed.
+ */
+bool set_shape_if_empty(ITensorInfo &info, const TensorShape &shape);
+
+/* Set the format, data type and number of channels to the specified value if
+ * the current data type is unknown.
+ *
+ * @param[in,out] info   Tensor info used to check and assign.
+ * @param[in]     format New format.
+ *
+ * @return True if the format has been changed.
+ */
+bool set_format_if_unknown(ITensorInfo &info, Format format);
+
+/* Set the data type and number of channels to the specified value if
+ * the current data type is unknown.
+ *
+ * @param[in,out] info      Tensor info used to check and assign.
+ * @param[in]     data_type New data type.
+ *
+ * @return True if the data type has been changed.
+ */
+bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
+
+/* Set the fixed point position to the specified value if
+ * the current fixed point position is 0 and the data type is QS8 or QS16
+ *
+ * @param[in,out] info                 Tensor info used to check and assign.
+ * @param[in]     fixed_point_position New fixed point position
+ *
+ * @return True if the fixed point position has been changed.
+ */
+bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position);
+} // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"
 #endif /*__ARM_COMPUTE_HELPERS_H__ */

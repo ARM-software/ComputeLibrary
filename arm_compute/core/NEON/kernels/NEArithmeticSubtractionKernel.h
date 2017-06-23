@@ -50,9 +50,9 @@ public:
 
     /** Initialise the kernel's input, output and border mode.
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8, S16, F32
-     * @param[in]  input2 An input tensor. Data types supported: U8, S16, F32  (only if @p input1 is F32).
-     * @param[out] output The output tensor. Data types supported: U8 (Only if both inputs are U8), S16, F32 (only if both inputs are F32).
+     * @param[in]  input1 An input tensor. Data types supported: U8/S16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/S16/F32  (only if @p input1 is F32).
+     * @param[out] output The output tensor. Data types supported: U8 (Only if both inputs are U8), S16/F32 (only if both inputs are F32).
      * @param[in]  policy Overflow policy.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);

@@ -38,7 +38,6 @@ namespace arm_compute
 class Strides : public Dimensions<size_t>
 {
 public:
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
     /** Constructor to initialize the strides.
      *
      * @param[in] strides Values to initialize the strides.
@@ -48,7 +47,6 @@ public:
         : Dimensions{ strides... }
     {
     }
-#endif
     /** Allow instances of this class to be copy constructed */
     constexpr Strides(const Strides &) = default;
     /** Allow instances of this class to be copied */

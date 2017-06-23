@@ -62,8 +62,10 @@ enum class DataType
     UNKNOWN,
     U8,
     S8,
+    QS8,
     U16,
     S16,
+    QS16,
     U32,
     S32,
     U64,
@@ -182,6 +184,14 @@ struct BorderSize
         return size;
     }
 
+    void limit(const BorderSize &limit)
+    {
+        top    = std::min(top, limit.top);
+        right  = std::min(right, limit.right);
+        bottom = std::min(bottom, limit.bottom);
+        left   = std::min(left, limit.left);
+    }
+
     unsigned int top;
     unsigned int right;
     unsigned int bottom;
@@ -223,7 +233,8 @@ enum class ThresholdType
 enum class RoundingPolicy
 {
     TO_ZERO,        /**< Truncates the least significand values that are lost in operations. */
-    TO_NEAREST_EVEN /**< Rounds to nearest even output value */
+    TO_NEAREST_UP,  /**< Rounds to nearest value; half rounds up */
+    TO_NEAREST_EVEN /**< Rounds to nearest value; half rounds to nearest even */
 };
 
 /** Termination criteria */
@@ -326,17 +337,17 @@ enum class NonLinearFilterFunction : unsigned
 /** The normalization type used for the normalization layer */
 enum class NormType
 {
-    IN_MAP,   /* Normalization applied within the same map */
-    CROSS_MAP /* Normalization applied cross maps */
+    IN_MAP_1D, /**< Normalization applied within the same map in 1D region */
+    IN_MAP_2D, /**< Normalization applied within the same map in 2D region */
+    CROSS_MAP  /**< Normalization applied cross maps */
 };
 
 /** Normalization type for Histogram of Oriented Gradients (HOG) */
 enum class HOGNormType
 {
-    L2_NORM,    /**< L2-norm */
-    L2HYS_NORM, /**< L2-norm followed by clipping */
-    L1_NORM,    /**< L1 norm */
-    L1SQRT_NORM /**< L1 norm with SQRT */
+    L2_NORM    = 1, /**< L2-norm */
+    L2HYS_NORM = 2, /**< L2-norm followed by clipping */
+    L1_NORM    = 3  /**< L1 norm */
 };
 
 /** Detection window used for the object detection. The detection window keeps the following information:
@@ -497,7 +508,7 @@ class NormalizationLayerInfo
 public:
     /** Default Constructor
      *
-     * @param[in] type      The normalization type. Can be @ref NormType::IN_MAP or NORM_TYPE::CROSS_MAP
+     * @param[in] type      The normalization type. Can be @ref NormType::IN_MAP_1D, @ref NormType::IN_MAP_2D or @ref NORM_TYPE::CROSS_MAP
      * @param[in] norm_size The normalization size is the number of elements to normalize across. Defaults to 5.
      * @param[in] alpha     Alpha parameter used by normalization equation. Defaults to 0.0001.
      * @param[in] beta      Beta parameter used by normalization equation. Defaults to 0.5.
@@ -527,12 +538,17 @@ public:
     {
         return _kappa;
     }
-    /** Return the scaling factor of the normalization function. If kappa is not 1 then [Krichevksy 2012] normalization scaling is specified.
+    /** Return the scaling factor of the normalization function. If kappa is not
+     * 1 then [Krichevksy 2012] normalization scaling is specified. Scaling
+     * factor takes into account the total number of elements used for the
+     * normalization, so in case of 2 dimensions this is _norm_size^2.
+     *
      * @return The normalization scaling factor.
      */
     float scale_coeff() const
     {
-        return (_kappa == 1.f) ? (_alpha / _norm_size) : _alpha;
+        const uint32_t size = (_type == NormType::IN_MAP_2D) ? _norm_size * _norm_size : _norm_size;
+        return (_kappa == 1.f) ? (_alpha / size) : _alpha;
     }
 
 private:
@@ -541,6 +557,38 @@ private:
     float    _alpha;
     float    _beta;
     float    _kappa;
+};
+
+/** Convolution Layer Weights Information class */
+class WeightsInfo
+{
+public:
+    WeightsInfo()
+        : _are_reshaped(false), _kernel_size(0)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] are_reshaped True if the weights have been reshaped
+     * @param[in] kernel_size  The size of the kernel.
+     */
+    WeightsInfo(bool are_reshaped, unsigned int kernel_size)
+        : _are_reshaped(are_reshaped), _kernel_size(kernel_size)
+    {
+    }
+
+    bool are_reshaped() const
+    {
+        return _are_reshaped;
+    };
+    unsigned int kernel_size() const
+    {
+        return _kernel_size;
+    }
+
+private:
+    const bool         _are_reshaped;
+    const unsigned int _kernel_size;
 };
 
 /** IO formatting information class*/

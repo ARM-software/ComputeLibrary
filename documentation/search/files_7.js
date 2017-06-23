@@ -1,9 +1,13 @@
 var searchData=
 [
-  ['harris_5fcorners_2ecl',['harris_corners.cl',['../harris__corners_8cl.xhtml',1,'']]],
-  ['helpers_2eh',['Helpers.h',['../_helpers_8h.xhtml',1,'(Global Namespace)'],['../helpers_8h.xhtml',1,'(Global Namespace)']]],
-  ['helpers_2einl',['Helpers.inl',['../_helpers_8inl.xhtml',1,'']]],
-  ['histogram_2ecl',['histogram.cl',['../histogram_8cl.xhtml',1,'']]],
-  ['hog_2eh',['HOG.h',['../_h_o_g_8h.xhtml',1,'']]],
-  ['hoginfo_2eh',['HOGInfo.h',['../_h_o_g_info_8h.xhtml',1,'']]]
+  ['gaussian_5fpyramid_2ecl',['gaussian_pyramid.cl',['../gaussian__pyramid_8cl.xhtml',1,'']]],
+  ['gemm_2ecl',['gemm.cl',['../gemm_8cl.xhtml',1,'']]],
+  ['gemm_2ecpp',['GEMM.cpp',['../benchmark_2_n_e_o_n_2_g_e_m_m_8cpp.xhtml',1,'']]],
+  ['gemm_2ecpp',['GEMM.cpp',['../validation_2_n_e_o_n_2_g_e_m_m_8cpp.xhtml',1,'']]],
+  ['gemm_2ecpp',['GEMM.cpp',['../benchmark_2_c_l_2_g_e_m_m_8cpp.xhtml',1,'']]],
+  ['gemm_2eh',['GEMM.h',['../_c_l_2_g_e_m_m_8h.xhtml',1,'']]],
+  ['gemm_2eh',['GEMM.h',['../_n_e_o_n_2_g_e_m_m_8h.xhtml',1,'']]],
+  ['gemmdataset_2eh',['GEMMDataset.h',['../_g_e_m_m_dataset_8h.xhtml',1,'']]],
+  ['genericdataset_2eh',['GenericDataset.h',['../_generic_dataset_8h.xhtml',1,'']]],
+  ['globals_2eh',['Globals.h',['../_globals_8h.xhtml',1,'']]]
 ];

@@ -34,11 +34,6 @@ using namespace arm_compute;
 
 void NEGEMMTranspose1xW::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != input->info()->dimension(1) * 4);
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(1) != std::ceil(input->info()->dimension(0) / 4.0f));
     auto k = arm_compute::cpp14::make_unique<NEGEMMTranspose1xWKernel>();
     k->configure(input, output);
     _kernel = std::move(k);

@@ -33,8 +33,8 @@ using namespace arm_compute;
 
 void NEDepthConvert::configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::U16, DataType::S16, DataType::U32, DataType::S32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::U16, DataType::S16, DataType::U32, DataType::S32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QS8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QS8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F32);
     ARM_COMPUTE_ERROR_ON(input == output);
     ARM_COMPUTE_ERROR_ON(input->info()->data_type() == output->info()->data_type());
 

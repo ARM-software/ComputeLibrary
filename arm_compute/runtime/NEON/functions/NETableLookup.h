@@ -37,9 +37,9 @@ class NETableLookup : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]  input  First tensor input. Data types supported: U8 and S16
+     * @param[in]  input  First tensor input. Data types supported: U8/S16
      * @param[in]  lut    Input lookup table.
-     * @param[out] output Output tensor. Data types supported: U8 and S16.
+     * @param[out] output Output tensor. Data types supported: same as @p input
      */
     void configure(const ITensor *input, const ILut *lut, ITensor *output);
 };

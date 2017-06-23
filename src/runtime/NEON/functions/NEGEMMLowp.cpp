@@ -49,14 +49,14 @@ void NEGEMMLowp::configure(const ITensor *a, const ITensor *b, ITensor *output, 
     ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(1) != output->info()->dimension(1), "The C matrix must have the same number of rows as the matrix A");
     ARM_COMPUTE_ERROR_ON_MSG(b->info()->dimension(0) != output->info()->dimension(0), "The C matrix must have the same number of columns as the matrix C");
 
-    /* The interleaved output matrix will have the following shape: [ a_height * 4, a_width / 4 ] */
+    /* The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ] */
     TensorShape shape_tmp_a = a->info()->tensor_shape();
     shape_tmp_a.set(0, a->info()->dimension(0) * 4);
     shape_tmp_a.set(1, std::ceil(a->info()->dimension(1) / 4.f));
 
     TensorShape shape_tmp_b = b->info()->tensor_shape();
-    shape_tmp_b.set(0, b->info()->dimension(1) * 4);
-    shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / 4.f));
+    shape_tmp_b.set(0, b->info()->dimension(1) * 16);
+    shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / 16.f));
 
     TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type());
     TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type());
@@ -74,11 +74,11 @@ void NEGEMMLowp::configure(const ITensor *a, const ITensor *b, ITensor *output, 
 void NEGEMMLowp::run()
 {
     /* Run interleave kernel */
-    NEScheduler::get().multithread(&_interleave_kernel);
+    NEScheduler::get().schedule(&_interleave_kernel, Window::DimY);
 
     /* Run transpose kernel */
-    NEScheduler::get().multithread(&_transpose_kernel);
+    NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
 
     /* Run matrix multiply kernel */
-    NEScheduler::get().multithread(&_mm_kernel);
+    NEScheduler::get().schedule(&_mm_kernel, Window::DimY);
 }

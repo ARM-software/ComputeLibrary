@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_ICLKERNEL_H__
 #define __ARM_COMPUTE_ICLKERNEL_H__
 
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/IKernel.h"
 
@@ -98,6 +99,24 @@ public:
         _kernel.setArg(idx++, value);
     }
 
+    /** Set the targeted GPU architecture
+     *
+     * @param[in] target The targeted GPU architecture
+     */
+    void set_target(GPUTarget target);
+
+    /** Set the targeted GPU architecture according to the CL device
+     *
+     * @param[in] device A CL device
+     */
+    void set_target(cl::Device &device);
+
+    /** Get the targeted GPU architecture
+     *
+     * @return The targeted GPU architecture.
+     */
+    GPUTarget get_target() const;
+
 private:
     /** Add the passed tensor's parameters to the object's kernel's arguments starting from the index idx.
      *
@@ -117,6 +136,7 @@ private:
 protected:
     cl::Kernel  _kernel;   /**< OpenCL kernel to run */
     cl::NDRange _lws_hint; /**< Local workgroup size hint for the OpenCL kernel */
+    GPUTarget   _target;   /**< The targeted GPU */
 };
 
 /** Add the kernel to the command queue with the given window.

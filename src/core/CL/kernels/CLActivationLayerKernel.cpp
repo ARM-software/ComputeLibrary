@@ -37,9 +37,15 @@ using namespace arm_compute;
 
 void CLActivationLayerKernel::configure(const ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S16, DataType::U16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S16, DataType::U16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     // Set build options
     std::set<std::string> build_opts;
@@ -54,5 +60,5 @@ void CLActivationLayerKernel::configure(const ICLTensor *input, ICLTensor *outpu
 
     // Make sure _kernel is initialized before calling the parent's configure
     constexpr unsigned int num_elems_processed_per_iteration = 16;
-    ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
+    ICLSimple3DKernel::configure(input, output, num_elems_processed_per_iteration);
 }

@@ -30,7 +30,7 @@
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Utils.h"
 
 namespace arm_compute
@@ -160,7 +160,7 @@ public:
      * @param[in] info            Tensor information to copy the dimensions from.
      * @param[in] first_dimension Only copy dimensions which are greater or equal to this value.
      */
-    void use_tensor_dimensions(const TensorInfo *info, size_t first_dimension = Window::DimX);
+    void use_tensor_dimensions(const ITensorInfo *info, size_t first_dimension = Window::DimX);
 
     /** Shift the values of a given dimension by the given shift_value
      *
@@ -168,6 +168,14 @@ public:
      * @param[in] shift_value Value to shift the start and end values of.
      */
     void shift(size_t dimension, int shift_value);
+
+    /** Adjust the start or end of a given dimension by the given value
+     *
+     * @param[in] dimension    The dimension to adjust
+     * @param[in] adjust_value The adjusted value.
+     * @param[in] is_at_start  The flag to indicate whether adjust the start or end of the dimension.
+     */
+    void adjust(size_t dimension, int adjust_value, bool is_at_start);
 
     /** Scale the values of a given dimension by the given scale_value
      *
@@ -272,6 +280,18 @@ public:
     bool slide_window_slice_3D(Window &slice) const
     {
         return slide_window_slice<3>(slice);
+    }
+    /** Slide the passed 4D window slice.
+     *
+     * If slice contains the last slice then it will remain unchanged and false will be returned.
+     *
+     * @param[in,out] slice Current slice, to be updated to the next slice.
+     *
+     * @return true if slice contains a new slice, false if slice already contained the last slice
+     */
+    bool slide_window_slice_4D(Window &slice) const
+    {
+        return slide_window_slice<4>(slice);
     }
     /** Sets the ID of the thread that the window is associated with.
      *

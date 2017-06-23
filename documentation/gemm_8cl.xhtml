@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: src/core/CL/cl_kernels/gemm.cl File Reference</title>
+<title>Compute Library: src/core/CL/cl_kernels/gemm.cl File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.xhtml"><span>Files</span></a></li>
@@ -241,7 +242,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="gemm_8cl_source.xhtml#l00290">290</a> of file <a class="el" href="gemm_8cl_source.xhtml">gemm.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00073">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00067">CONVERT_TO_VECTOR_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00049">IMAGE_DECLARATION</a>, <a class="el" href="helpers_8h_source.xhtml#l00201">offset()</a>, <a class="el" href="helpers_8h_source.xhtml#l00089">Vector::ptr</a>, and <a class="el" href="helpers_8h_source.xhtml#l00097">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00073">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00067">CONVERT_TO_VECTOR_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00049">IMAGE_DECLARATION</a>, <a class="el" href="helpers_8h_source.xhtml#l00201">offset()</a>, <a class="el" href="helpers_8h_source.xhtml#l00089">Vector::ptr</a>, <a class="el" href="helpers_8h_source.xhtml#l00097">Image::ptr</a>, and <a class="el" href="helpers_8h_source.xhtml#l00057">TENSOR3D_DECLARATION</a>.</p>
 <div class="fragment"><div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;{</div><div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a>  accum  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(accum);</div><div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    <a class="code" href="struct_vector.xhtml">Vector</a> biases = <a class="code" href="helpers_8h.xhtml#a527bfdf5eeb306f1cf01c4a8e29f38e0">CONVERT_TO_VECTOR_STRUCT</a>(biases);</div><div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;</div><div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;    half8 accum_value  = vload8(0, (__global half *)accum.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div><div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    half8 biases_value = vload8(0, (__global half *)biases.<a class="code" href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div><div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;    accum_value        = biases_value + accum_value;</div><div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;</div><div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;    <span class="comment">// Store result in the accummulate buffer</span></div><div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;    vstore8(accum_value, 0, (__global half *)accum.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div><div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;}</div><div class="ttc" id="struct_vector_xhtml"><div class="ttname"><a href="struct_vector.xhtml">Vector</a></div><div class="ttdoc">Structure to hold Vector information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00087">helpers.h:87</a></div></div>
 <div class="ttc" id="helpers_8h_xhtml_a527bfdf5eeb306f1cf01c4a8e29f38e0"><div class="ttname"><a href="helpers_8h.xhtml#a527bfdf5eeb306f1cf01c4a8e29f38e0">CONVERT_TO_VECTOR_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_VECTOR_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00067">helpers.h:67</a></div></div>
 <div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00073">helpers.h:73</a></div></div>
@@ -1030,7 +1031,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="gemm_8cl.xhtml">gemm.cl</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:04 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -47,12 +47,14 @@ NEFillBorderKernel::NEFillBorderKernel()
 
 void NEFillBorderKernel::configure(ITensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(tensor, 1, DataType::U8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(tensor, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F32);
 
     _tensor                = tensor;
     _border_size           = border_size;
     _mode                  = border_mode;
     _constant_border_value = constant_border_value;
+
+    _border_size.limit(tensor->info()->padding());
 
     Window win;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -81,10 +83,15 @@ void NEFillBorderKernel::run(const Window &window)
                 case DataType::U8:
                     fill_constant_value_single_channel<uint8_t>(window);
                     break;
+                case DataType::QS8:
+                case DataType::S8:
+                    fill_constant_value_single_channel<int8_t>(window);
+                    break;
                 case DataType::U16:
                     fill_constant_value_single_channel<uint16_t>(window);
                     break;
                 case DataType::S16:
+                case DataType::QS16:
                     fill_constant_value_single_channel<int16_t>(window);
                     break;
                 case DataType::U32:
@@ -109,10 +116,15 @@ void NEFillBorderKernel::run(const Window &window)
                 case DataType::U8:
                     fill_replicate_single_channel<uint8_t>(window);
                     break;
+                case DataType::QS8:
+                case DataType::S8:
+                    fill_replicate_single_channel<int8_t>(window);
+                    break;
                 case DataType::U16:
                     fill_replicate_single_channel<uint16_t>(window);
                     break;
                 case DataType::S16:
+                case DataType::QS16:
                     fill_replicate_single_channel<int16_t>(window);
                     break;
                 case DataType::U32:

@@ -179,11 +179,20 @@ NETransposeKernel::NETransposeKernel()
 
 void NETransposeKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    TensorShape  output_shape{ input->info()->tensor_shape() };
+    const size_t w_out = input->info()->dimension(1);
+    const size_t h_out = input->info()->dimension(0);
+    output_shape.set(0, w_out);
+    output_shape.set(1, h_out);
+
+    // Output tensor auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != output->info()->dimension(1));
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != output->info()->dimension(0));
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
     _input  = input;
     _output = output;

@@ -79,6 +79,7 @@ private:
     size_t                 _block_stride_height;
     size_t                 _detection_window_width;
     size_t                 _detection_window_height;
+    size_t                 _max_num_detection_windows;
     std::mutex             _mutex;
 };
 }

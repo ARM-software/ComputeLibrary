@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: NEHOGMultiDetection Class Reference</title>
+<title>Compute Library: NEHOGMultiDetection Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.xhtml"><span>Files</span></a></li>
@@ -162,7 +163,7 @@ Public Member Functions</h2></td></tr>
 <li><a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml">NEHOGOrientationBinningKernel</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml">NEHOGBlockNormalizationKernel</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector.xhtml">NEHOGDetector</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_h_o_g_non_maxima_suppression_kernel.xhtml">NEHOGNonMaximaSuppressionKernel</a> (executed if non_maxima_suppression == true)</li>
+<li><a class="el" href="classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel.xhtml">CPPDetectionWindowNonMaximaSuppressionKernel</a> (executed if non_maxima_suppression == true)</li>
 </ol>
 <dl class="section note"><dt>Note</dt><dd>This implementation works if all the <a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> data-objects within the <a class="el" href="classarm__compute_1_1_i_multi_h_o_g.xhtml" title="Interface for storing multiple HOG data-objects. ">IMultiHOG</a> container have the same:<ol type="1">
 <li>Phase type</li>
@@ -288,7 +289,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Input tensor. Data type supported: U8 (Written to only for <code>border_mode</code> != UNDEFINED) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">multi_hog</td><td>Container of multiple <a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> data object. Each <a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> data object describes one <a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> model to detect. This container should store the <a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> data-objects in descending or ascending cell_size width order. This will help to understand if the <a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> descriptor computation can be skipped for some <a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> data-objects </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">detection_windows</td><td><a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of <a class="el" href="structarm__compute_1_1_detection_window.xhtml">DetectionWindow</a> used for locating the detected objects </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">detection_windows</td><td><a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of <a class="el" href="struct_detection_window.xhtml">DetectionWindow</a> used for locating the detected objects </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">detection_window_strides</td><td><a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> used to specify the distance in pixels between 2 consecutive detection windows in x and y directions for each <a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> data-object The dimension of this array must be the same of multi_hog-&gt;num_models() The i-th detection_window_stride of this array must be multiple of the block_stride stored in the i-th multi_hog array </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">border_mode</td><td>Border mode to use. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">constant_border_value</td><td>(Optional) Constant value to use for borders if border_mode is set to CONSTANT. </td></tr>
@@ -353,7 +354,7 @@ Public Member Functions</h2></td></tr>
 <li>Multi-threading is used for the kernels which are parallelisable.</li>
 <li>By default std::thread::hardware_concurrency() threads are used.</li>
 </ul>
-<dl class="section note"><dt>Note</dt><dd><a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#ae9dc1846ff1612778bbac85d46344aef">CPPScheduler::force_number_of_threads()</a> can be used to manually set the number of threads</dd></dl>
+<dl class="section note"><dt>Note</dt><dd><a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#ae64eebaa07f4d2da6cc2ba538c3cb095">CPPScheduler::set_num_threads()</a> can be used to manually set the number of threads</dd></dl>
 <p>For OpenCL kernels:</p><ul>
 <li>All the kernels are enqueued on the queue associated with <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml" title="Provides global access to a CL context and command queue. ">CLScheduler</a>.</li>
 <li>The queue is then flushed.</li>
@@ -373,7 +374,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_h_o_g_multi_detection.xhtml">NEHOGMultiDetection</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

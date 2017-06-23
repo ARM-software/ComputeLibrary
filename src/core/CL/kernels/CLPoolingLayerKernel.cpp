@@ -131,7 +131,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
         };
 
         // Set static kernel arguments
-        unsigned int idx = 2 * num_arguments_per_2D_tensor();
+        unsigned int idx = 2 * num_arguments_per_3D_tensor();
         _kernel.setArg<cl_int2>(idx++, max_dims);
         _kernel.setArg<cl_int2>(idx++, strides);
         _kernel.setArg<cl_int2>(idx++, paddings);
@@ -161,7 +161,7 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
 
-    Window slice = window.first_slice_window_2D();
+    Window slice = window.first_slice_window_3D();
 
     do
     {
@@ -172,9 +172,9 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
 
         // Set inputs
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input, in_slice);
-        add_2D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, _input, in_slice);
+        add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window.slide_window_slice_3D(slice));
 }

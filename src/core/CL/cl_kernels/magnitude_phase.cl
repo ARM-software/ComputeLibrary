@@ -57,10 +57,9 @@ inline VEC_DATA_TYPE(DATA_TYPE, 16) magnitude_l2(int16 a, int16 b)
  */
 inline uchar16 phase_unsigned(VEC_DATA_TYPE(DATA_TYPE, 16) a, VEC_DATA_TYPE(DATA_TYPE, 16) b)
 {
-    float16 arct = atan2pi(convert_float16(b), convert_float16(a));
-    arct         = select(arct, arct + 2, arct < 0.0f);
-
-    return convert_uchar16(convert_int16(mad(arct, 90, 0.5f)) & 0xFFu);
+    float16 angle_deg_f32 = atan2pi(convert_float16(b), convert_float16(a)) * (float16)180.0f;
+    angle_deg_f32         = select(angle_deg_f32, (float16)180.0f + angle_deg_f32, angle_deg_f32 < (float16)0.0f);
+    return convert_uchar16(angle_deg_f32);
 }
 
 /** Calculates signed phase between two inputs.

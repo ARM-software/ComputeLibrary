@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: arm_compute/core/CL/CLHelpers.h File Reference</title>
+<title>Compute Library: arm_compute/core/CL/CLHelpers.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.xhtml"><span>Files</span></a></li>
@@ -113,16 +114,25 @@ $(document).ready(function(){initNavTree('_c_l_helpers_8h.xhtml','');});
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Data Structures</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">CLHelpers.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;string&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="_open_c_l_8h_source.xhtml">arm_compute/core/CL/OpenCL.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml">arm_compute/core/Helpers.h</a>&quot;</code><br />
+<code>#include &lt;string&gt;</code><br />
 </div>
 <p><a href="_c_l_helpers_8h_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml">enable_bitwise_ops&lt; arm_compute::GPUTarget &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable operation operations on GPUTarget enumerations.  <a href="structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
@@ -133,6 +143,23 @@ Functions</h2></td></tr>
 <tr class="memitem:ab04905b0c6c0e4091160561eae870101"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ab04905b0c6c0e4091160561eae870101">get_cl_type_from_data_type</a> (const DataType &amp;dt)</td></tr>
 <tr class="memdesc:ab04905b0c6c0e4091160561eae870101"><td class="mdescLeft">&#160;</td><td class="mdescRight">Translates a tensor data type to the appropriate OpenCL type.  <a href="namespacearm__compute.xhtml#ab04905b0c6c0e4091160561eae870101">More...</a><br /></td></tr>
 <tr class="separator:ab04905b0c6c0e4091160561eae870101"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afab814721e78cbfc34e7e7fe2874fa56"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#afab814721e78cbfc34e7e7fe2874fa56">string_from_target</a> (GPUTarget target)</td></tr>
+<tr class="memdesc:afab814721e78cbfc34e7e7fe2874fa56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Translates a given gpu device target to string.  <a href="namespacearm__compute.xhtml#afab814721e78cbfc34e7e7fe2874fa56">More...</a><br /></td></tr>
+<tr class="separator:afab814721e78cbfc34e7e7fe2874fa56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35fb9d1dde1b976f4b7d361aabcc7c0d"><td class="memTemplParams" colspan="2">template&lt;typename Kernel , typename... T&gt; </td></tr>
+<tr class="memitem:a35fb9d1dde1b976f4b7d361aabcc7c0d"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; Kernel &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a35fb9d1dde1b976f4b7d361aabcc7c0d">create_configure_kernel</a> (T &amp;&amp;...args)</td></tr>
+<tr class="memdesc:a35fb9d1dde1b976f4b7d361aabcc7c0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create and return a unique_ptr pointed to a CL kernel object It also calls the kernel's configuration.  <a href="namespacearm__compute.xhtml#a35fb9d1dde1b976f4b7d361aabcc7c0d">More...</a><br /></td></tr>
+<tr class="separator:a35fb9d1dde1b976f4b7d361aabcc7c0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc72c95941485d8a068fa38372308574"><td class="memTemplParams" colspan="2">template&lt;typename Kernel &gt; </td></tr>
+<tr class="memitem:abc72c95941485d8a068fa38372308574"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; Kernel &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#abc72c95941485d8a068fa38372308574">create_kernel</a> ()</td></tr>
+<tr class="memdesc:abc72c95941485d8a068fa38372308574"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create and return a unique_ptr pointed to a CL kernel object.  <a href="namespacearm__compute.xhtml#abc72c95941485d8a068fa38372308574">More...</a><br /></td></tr>
+<tr class="separator:abc72c95941485d8a068fa38372308574"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d0143bdde8255313aae6ac020dd629c"><td class="memItemLeft" align="right" valign="top">GPUTarget&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a9d0143bdde8255313aae6ac020dd629c">get_target_from_device</a> (cl::Device &amp;device)</td></tr>
+<tr class="memdesc:a9d0143bdde8255313aae6ac020dd629c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to get the GPU target from CL device.  <a href="namespacearm__compute.xhtml#a9d0143bdde8255313aae6ac020dd629c">More...</a><br /></td></tr>
+<tr class="separator:a9d0143bdde8255313aae6ac020dd629c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a351d5c39dec88af98a671da1c43fd6"><td class="memItemLeft" align="right" valign="top">GPUTarget&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a4a351d5c39dec88af98a671da1c43fd6">get_arch_from_target</a> (GPUTarget target)</td></tr>
+<tr class="memdesc:a4a351d5c39dec88af98a671da1c43fd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to get the GPU arch.  <a href="namespacearm__compute.xhtml#a4a351d5c39dec88af98a671da1c43fd6">More...</a><br /></td></tr>
+<tr class="separator:a4a351d5c39dec88af98a671da1c43fd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -140,7 +167,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1633709b037eda5b8477677909f78129.xhtml">CL</a></li><li class="navelem"><a class="el" href="_c_l_helpers_8h.xhtml">CLHelpers.h</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:04 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: NEGEMMMatrixAdditionKernel Class Reference</title>
+<title>Compute Library: NEGEMMMatrixAdditionKernel Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.xhtml"><span>Files</span></a></li>
@@ -149,9 +150,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:adc1be2dee3a4aeeb959cf2ec7aec7657"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml">NEGEMMMatrixAdditionKernel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#adc1be2dee3a4aeeb959cf2ec7aec7657">operator=</a> (<a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml">NEGEMMMatrixAdditionKernel</a> &amp;&amp;)=default</td></tr>
 <tr class="memdesc:adc1be2dee3a4aeeb959cf2ec7aec7657"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow instances of this class to be moved.  <a href="#adc1be2dee3a4aeeb959cf2ec7aec7657">More...</a><br /></td></tr>
 <tr class="separator:adc1be2dee3a4aeeb959cf2ec7aec7657"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8163692a08f9f6f0c29844a00b1ae934"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a8163692a08f9f6f0c29844a00b1ae934">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const float beta)</td></tr>
-<tr class="memdesc:a8163692a08f9f6f0c29844a00b1ae934"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input and output.  <a href="#a8163692a08f9f6f0c29844a00b1ae934">More...</a><br /></td></tr>
-<tr class="separator:a8163692a08f9f6f0c29844a00b1ae934"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd3df2f9251266926538e4c020652996"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#abd3df2f9251266926538e4c020652996">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, float beta)</td></tr>
+<tr class="memdesc:abd3df2f9251266926538e4c020652996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input and output.  <a href="#abd3df2f9251266926538e4c020652996">More...</a><br /></td></tr>
+<tr class="separator:abd3df2f9251266926538e4c020652996"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8fd12b95bdde3f93db96bc9b1598db69"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>) override</td></tr>
 <tr class="memdesc:a8fd12b95bdde3f93db96bc9b1598db69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the kernel on the passed window.  <a href="#a8fd12b95bdde3f93db96bc9b1598db69">More...</a><br /></td></tr>
 <tr class="separator:a8fd12b95bdde3f93db96bc9b1598db69"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -277,7 +278,7 @@ This stage is used to finalize the GEMM result and it is computed if and only if
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a8163692a08f9f6f0c29844a00b1ae934"></a>
+<a class="anchor" id="abd3df2f9251266926538e4c020652996"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -296,7 +297,7 @@ This stage is used to finalize the GEMM result and it is computed if and only if
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const float&#160;</td>
+          <td class="paramtype">float&#160;</td>
           <td class="paramname"><em>beta</em>&#160;</td>
         </tr>
         <tr>
@@ -311,7 +312,7 @@ This stage is used to finalize the GEMM result and it is computed if and only if
 <dl class="section note"><dt>Note</dt><dd>The input and output tensor must have the same dimensions</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor (Matrix C). Data types supported: F32, F16. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor (Matrix C). Data types supported: QS8/F16/F32 </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">output</td><td>Output tensor. If this kernel is used to finalize the GEMM result, output contains the result obtained by the kernel <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml">NEGEMMMatrixMultiplyKernel</a>. Data type supported: the same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Weight of matrix C </td></tr>
   </table>
@@ -419,7 +420,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml">NEGEMMMatrixAdditionKernel</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

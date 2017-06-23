@@ -25,7 +25,7 @@
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 
 #include "arm_compute/core/Types.h"
-#include "test_helpers/Utils.h"
+#include "utils/Utils.h"
 
 #include <cstring>
 #include <iostream>
@@ -148,5 +148,5 @@ void main_neon_copy_objects(int argc, const char **argv)
  */
 int main(int argc, const char **argv)
 {
-    return test_helpers::run_example(argc, argv, main_neon_copy_objects);
+    return utils::run_example(argc, argv, main_neon_copy_objects);
 }

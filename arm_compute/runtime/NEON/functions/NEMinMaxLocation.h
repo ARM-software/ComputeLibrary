@@ -48,7 +48,7 @@ public:
     NEMinMaxLocation();
     /** Initialise the kernel's inputs and outputs.
      *
-     * @param[in]  input     Input image. Data types supported: U8 or S16.
+     * @param[in]  input     Input image. Data types supported: U8/S16.
      * @param[out] min       Minimum value of image.
      * @param[out] max       Maximum value of image.
      * @param[out] min_loc   (Optional) Array of minimum value locations.

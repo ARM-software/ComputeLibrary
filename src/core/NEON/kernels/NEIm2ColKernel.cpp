@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -38,6 +39,112 @@
 
 using namespace arm_compute;
 
+namespace
+{
+template <typename T, bool has_pads>
+inline void linearize_volume(const uint8_t *const in_ptr,
+                             T                   *out_ptr,
+                             bool                 has_bias,
+                             int                  top_left_x,
+                             int                  top_left_y,
+                             int                  kernel_size,
+                             int                  kernel_depth,
+                             int                  input_w,
+                             int                  input_h,
+                             int                  input_stride_x,
+                             int                  input_stride_y,
+                             int                  input_stride_z,
+                             int                  fixed_point_position)
+{
+    const int kernel_size2 = kernel_size * kernel_size;
+    const int x_e          = top_left_x + kernel_size;
+    const int y_e          = top_left_y + kernel_size;
+
+    // Linearize volume
+    int d = 0;
+    // This for loop linearize a volume with 3 slices. This allows:
+    // 1) to reduce the iterations of the outer for loop "d"
+    // 2) to have an optimized im2col for the first convolution layer where usually we have 3 IFMs
+    for(; d <= (kernel_depth - 3); d += 3)
+    {
+        for(int y = top_left_y; y < y_e; ++y)
+        {
+            if((y < 0 || y >= input_h) && has_pads)
+            {
+                // All the values will be zeros
+                for(int x = top_left_x; x < x_e; ++x, ++out_ptr)
+                {
+                    *(out_ptr + 0 * kernel_size2) = 0;
+                    *(out_ptr + 1 * kernel_size2) = 0;
+                    *(out_ptr + 2 * kernel_size2) = 0;
+                }
+            }
+            else
+            {
+                for(int x = top_left_x; x < x_e; ++x, ++out_ptr)
+                {
+                    if((x < 0 || x >= input_w) && has_pads)
+                    {
+                        *(out_ptr + 0 * kernel_size2) = 0;
+                        *(out_ptr + 1 * kernel_size2) = 0;
+                        *(out_ptr + 2 * kernel_size2) = 0;
+                    }
+                    else
+                    {
+                        *(out_ptr + 0 * kernel_size2) = *(reinterpret_cast<const T *>(in_ptr + ((d + 0) * input_stride_z + y * input_stride_y + x * input_stride_x)));
+                        *(out_ptr + 1 * kernel_size2) = *(reinterpret_cast<const T *>(in_ptr + ((d + 1) * input_stride_z + y * input_stride_y + x * input_stride_x)));
+                        *(out_ptr + 2 * kernel_size2) = *(reinterpret_cast<const T *>(in_ptr + ((d + 2) * input_stride_z + y * input_stride_y + x * input_stride_x)));
+                    }
+                }
+            }
+        }
+        out_ptr += 2 * kernel_size2;
+    }
+
+    // Left over
+    for(; d < kernel_depth; d++)
+    {
+        for(int y = top_left_y; y < y_e; ++y)
+        {
+            if((y < 0 || y >= input_h) && has_pads)
+            {
+                // All the values will be zeros
+                memset(out_ptr, 0, kernel_size * sizeof(T));
+                out_ptr += kernel_size;
+            }
+            else
+            {
+                for(int x = top_left_x; x < x_e; ++x, ++out_ptr)
+                {
+                    if((x < 0 || x >= input_w) && has_pads)
+                    {
+                        *out_ptr = 0;
+                    }
+                    else
+                    {
+                        *out_ptr = *(reinterpret_cast<const T *>(in_ptr + (d * input_stride_z + y * input_stride_y + x * input_stride_x)));
+                    }
+                }
+            }
+        }
+    }
+
+    // Append 1 if the convolution layer has biases
+    if(has_bias)
+    {
+        if(std::is_same<T, arm_compute::qint8_t>::value)
+        {
+            *out_ptr = scvt_qs8_f32(1.0f, fixed_point_position);
+        }
+        else
+        {
+            *out_ptr = static_cast<T>(1);
+        }
+    }
+}
+} // namespace
+
+template <typename T, bool has_pads>
 void NEIm2ColKernel::run_generic(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -84,36 +191,27 @@ void NEIm2ColKernel::run_generic(const Window &window)
 
         // Get pointers
         const uint8_t *const input_ptr  = in.ptr();
-        auto                 output_ptr = reinterpret_cast<float *>(out.ptr());
+        auto                 output_ptr = reinterpret_cast<T *>(out.ptr());
 
         // Linearize volume
-        for(int d = 0; d < kernel_depth; ++d)
-        {
-            for(int y = top_left_y, y_e = top_left_y + static_cast<int>(_kernel_size); y < y_e; ++y)
-            {
-                for(int x = top_left_x, x_e = top_left_x + static_cast<int>(_kernel_size); x < x_e; ++x, ++output_ptr)
-                {
-                    if(x < 0 || x >= input_w || y < 0 || y >= input_h)
-                    {
-                        *output_ptr = 0.f;
-                    }
-                    else
-                    {
-                        *output_ptr = *(reinterpret_cast<const float *>(input_ptr + (d * input_stride_z + y * input_stride_y + x * input_stride_x)));
-                    }
-                }
-            }
-        }
-
-        // Add bias
-        if(_has_bias)
-        {
-            *output_ptr = 1;
-        }
+        linearize_volume<T, has_pads>(input_ptr,
+                                      output_ptr,
+                                      _has_bias,
+                                      top_left_x,
+                                      top_left_y,
+                                      static_cast<int>(_kernel_size),
+                                      kernel_depth,
+                                      input_w,
+                                      input_h,
+                                      input_stride_x,
+                                      input_stride_y,
+                                      input_stride_z,
+                                      _input->info()->fixed_point_position());
     },
     in, out);
 }
 
+template <typename T>
 void NEIm2ColKernel::run_reduced(const Window &window)
 {
     const size_t in_width   = _input->info()->dimension(0);
@@ -148,7 +246,14 @@ void NEIm2ColKernel::run_reduced(const Window &window)
         // Add bias
         if(_has_bias)
         {
-            *(reinterpret_cast<float *>(out_ptr) + out_width - 1) = 1.0f;
+            if(std::is_same<T, arm_compute::qint8_t>::value)
+            {
+                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = scvt_qs8_f32(1.0f, _input->info()->fixed_point_position());
+            }
+            else
+            {
+                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = static_cast<T>(1);
+            }
         }
     }
     while(in_window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_1D(out_slice));
@@ -161,8 +266,9 @@ NEIm2ColKernel::NEIm2ColKernel()
 
 void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<unsigned int, unsigned int> convolved_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
     _input          = input;
     _output         = output;
@@ -185,11 +291,33 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<
 
     if(run_img2col_reduced)
     {
-        _func = &NEIm2ColKernel::run_reduced;
+        switch(_input->info()->data_type())
+        {
+            case DataType::F32:
+                _func = &NEIm2ColKernel::run_reduced<float>;
+                break;
+            case DataType::QS8:
+                _func = &NEIm2ColKernel::run_reduced<qint8_t>;
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Data type not supported");
+                break;
+        }
     }
     else
     {
-        _func = &NEIm2ColKernel::run_generic;
+        switch(_input->info()->data_type())
+        {
+            case DataType::F32:
+                _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<float, false> : &NEIm2ColKernel::run_generic<float, true>;
+                break;
+            case DataType::QS8:
+                _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<qint8_t, false> : &NEIm2ColKernel::run_generic<qint8_t, true>;
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Data type not supported");
+                break;
+        }
         window.set(Window::DimX, Window::Dimension(0, _convolved_dims.first, 1));
         window.set(Window::DimY, Window::Dimension(0, _convolved_dims.second, 1));
         window.set(Window::DimZ, Window::Dimension(0, 1, 1));

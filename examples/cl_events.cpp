@@ -25,10 +25,10 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "test_helpers/Utils.h"
+#include "utils/Utils.h"
 
 using namespace arm_compute;
-using namespace test_helpers;
+using namespace utils;
 
 void main_cl_events(int argc, const char **argv)
 {
@@ -110,5 +110,5 @@ void main_cl_events(int argc, const char **argv)
  */
 int main(int argc, const char **argv)
 {
-    return test_helpers::run_example(argc, argv, main_cl_events);
+    return utils::run_example(argc, argv, main_cl_events);
 }

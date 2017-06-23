@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: CLFullyConnectedLayer Class Reference</title>
+<title>Compute Library: CLFullyConnectedLayer Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.xhtml"><span>Files</span></a></li>
@@ -137,9 +138,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1ac038a6808c0f16eede67dc0372b8d3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml#a1ac038a6808c0f16eede67dc0372b8d3">CLFullyConnectedLayer</a> ()</td></tr>
 <tr class="memdesc:a1ac038a6808c0f16eede67dc0372b8d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a1ac038a6808c0f16eede67dc0372b8d3">More...</a><br /></td></tr>
 <tr class="separator:a1ac038a6808c0f16eede67dc0372b8d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a359533338d3ce0b6e598796ca2f3d938"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml#a359533338d3ce0b6e598796ca2f3d938">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, bool transpose_weights=true)</td></tr>
-<tr class="memdesc:a359533338d3ce0b6e598796ca2f3d938"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a359533338d3ce0b6e598796ca2f3d938">More...</a><br /></td></tr>
-<tr class="separator:a359533338d3ce0b6e598796ca2f3d938"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55e5ebb7cdabf8bf197698453543dfb5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml#a55e5ebb7cdabf8bf197698453543dfb5">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, bool transpose_weights=true, bool are_weights_reshaped=false)</td></tr>
+<tr class="memdesc:a55e5ebb7cdabf8bf197698453543dfb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a55e5ebb7cdabf8bf197698453543dfb5">More...</a><br /></td></tr>
+<tr class="separator:a55e5ebb7cdabf8bf197698453543dfb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -153,15 +154,14 @@ Public Member Functions</h2></td></tr>
 <p>This function calls the following OpenCL kernels:</p>
 <ol type="1">
 <li><a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml">CLIm2ColKernel</a> (called when the input comes from a convolutional layer)</li>
-<li><a class="el" href="classarm__compute_1_1_c_l_transpose_kernel.xhtml">CLTransposeKernel</a> (if <code>transpose_weights</code> is set to true) (called once)</li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml">NEGEMMTranspose1xWKernel</a> (called once if we have a multi-batch input)</li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel.xhtml">NEGEMMInterleave4x4Kernel</a> (called if we have a multi-batch input)</li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml">NEGEMMMatrixMultiplyKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer_reshape_weights.xhtml">CLFullyConnectedLayerReshapeWeights</a> (if <code>are_weights_reshaped</code> is set to false) (called once)</li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a> (called if we have a multi-batch input)</li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">CLGEMMMatrixMultiplyKernel</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">CLGEMMMatrixAccumulateBiasesKernel</a> (if <code>biases</code> is not equal to nullptr)</li>
 </ol>
 <dl class="section note"><dt>Note</dt><dd>The fully connected layer accepts "weights" tensors only with 2 dimensions. </dd></dl>
 
-<p>Definition at line <a class="el" href="_c_l_fully_connected_layer_8h_source.xhtml#l00050">50</a> of file <a class="el" href="_c_l_fully_connected_layer_8h_source.xhtml">CLFullyConnectedLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="_c_l_fully_connected_layer_8h_source.xhtml#l00081">81</a> of file <a class="el" href="_c_l_fully_connected_layer_8h_source.xhtml">CLFullyConnectedLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a1ac038a6808c0f16eede67dc0372b8d3"></a>
 <div class="memitem">
@@ -181,7 +181,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a359533338d3ce0b6e598796ca2f3d938"></a>
+<a class="anchor" id="a55e5ebb7cdabf8bf197698453543dfb5"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -213,7 +213,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>transpose_weights</em> = <code>true</code>&#160;</td>
+          <td class="paramname"><em>transpose_weights</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>are_weights_reshaped</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -226,11 +232,12 @@ Public Member Functions</h2></td></tr>
 <p>Set the input and output tensors. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data type supported: F16, F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data type supported: F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. The weights must be 2 dimensional. Data type supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Bias tensor. It can be nullptr. Data type supported:Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">transpose_weights</td><td>(Optional) Transpose weights if true. Defaults to true. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">are_weights_reshaped</td><td>(Optional) Reshape the weights tensor if false. Defaults to false. </td></tr>
   </table>
   </dd>
 </dl>
@@ -263,7 +270,7 @@ Public Member Functions</h2></td></tr>
 <li>Multi-threading is used for the kernels which are parallelisable.</li>
 <li>By default std::thread::hardware_concurrency() threads are used.</li>
 </ul>
-<dl class="section note"><dt>Note</dt><dd><a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#ae9dc1846ff1612778bbac85d46344aef">CPPScheduler::force_number_of_threads()</a> can be used to manually set the number of threads</dd></dl>
+<dl class="section note"><dt>Note</dt><dd><a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#ae64eebaa07f4d2da6cc2ba538c3cb095">CPPScheduler::set_num_threads()</a> can be used to manually set the number of threads</dd></dl>
 <p>For OpenCL kernels:</p><ul>
 <li>All the kernels are enqueued on the queue associated with <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml" title="Provides global access to a CL context and command queue. ">CLScheduler</a>.</li>
 <li>The queue is then flushed.</li>
@@ -283,7 +290,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml">CLFullyConnectedLayer</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:04 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

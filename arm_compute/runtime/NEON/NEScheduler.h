@@ -24,10 +24,10 @@
 #ifndef __ARM_COMPUTE_NESCHEDULER_H__
 #define __ARM_COMPUTE_NESCHEDULER_H__
 
-#include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "arm_compute/runtime/Scheduler.h"
 
 namespace arm_compute
 {
-using NEScheduler = CPPScheduler;
+using NEScheduler = Scheduler;
 }
 #endif /*__ARM_COMPUTE_NESCHEDULER_H__ */

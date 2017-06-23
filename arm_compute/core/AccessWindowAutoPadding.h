@@ -32,7 +32,7 @@
 namespace arm_compute
 {
 class Window;
-class TensorInfo;
+class ITensorInfo;
 
 /** Dummy access window.
  *
@@ -51,7 +51,7 @@ public:
      *
      * @param[in,out] info Tensor info of the accessed kernel.
      */
-    AccessWindowAutoPadding(TensorInfo *info);
+    AccessWindowAutoPadding(ITensorInfo *info);
     AccessWindowAutoPadding(const AccessWindowAutoPadding &) = delete;
     AccessWindowAutoPadding &operator=(const AccessWindowAutoPadding &) = delete;
     AccessWindowAutoPadding(AccessWindowAutoPadding &&)                 = default;
@@ -70,7 +70,7 @@ public:
     ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
 
 private:
-    TensorInfo *_info;
+    ITensorInfo *_info;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_ACCESS_WINDOW_AUTO_PADDING_H__*/

@@ -24,8 +24,12 @@
 #ifndef __ARM_COMPUTE_CLSCHEDULER_H__
 #define __ARM_COMPUTE_CLSCHEDULER_H__
 
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
@@ -50,7 +54,7 @@ public:
     void default_init()
     {
         CLKernelLibrary::get().init("./cl_kernels/", cl::Context::getDefault(), cl::Device::getDefault());
-        init(cl::Context::getDefault(), cl::CommandQueue::getDefault());
+        init(cl::Context::getDefault(), cl::CommandQueue::getDefault(), cl::Device::getDefault());
     }
     /** Schedule the execution of the passed kernel if possible.
      *
@@ -63,11 +67,14 @@ public:
      *
      * @param[in] context A CL context.
      * @param[in] queue   A CL command queue.
+     * @param[in] device  A CL device.
      */
-    void init(cl::Context context = cl::Context::getDefault(), cl::CommandQueue queue = cl::CommandQueue::getDefault())
+    void init(cl::Context context = cl::Context::getDefault(), cl::CommandQueue queue = cl::CommandQueue::getDefault(),
+              cl::Device device = cl::Device::getDefault())
     {
         _context = std::move(context);
         _queue   = std::move(queue);
+        _target  = get_target_from_device(device);
     }
 
     /** Accessor for the associated CL context.
@@ -97,6 +104,15 @@ public:
         return _queue;
     }
 
+    /** Get the target GPU.
+     *
+     * @return The target GPU.
+     */
+    GPUTarget target() const
+    {
+        return _target;
+    }
+
     /** Accessor to set the CL command queue to be used by the scheduler.
      *
      * @param[in] queue A CL command queue.
@@ -104,6 +120,15 @@ public:
     void set_queue(cl::CommandQueue queue)
     {
         _queue = std::move(queue);
+    }
+
+    /** Accessor to set target GPU to be used by the scheduler.
+     *
+     * @param[in] target The target GPU.
+     */
+    void set_target(GPUTarget target)
+    {
+        _target = target;
     }
 
     /** Blocks until all commands in the associated command queue have finished. */
@@ -127,6 +152,7 @@ public:
 private:
     cl::Context      _context;
     cl::CommandQueue _queue;
+    GPUTarget        _target;
 };
 }
 #endif /* __ARM_COMPUTE_CLSCHEDULER_H__ */

@@ -48,6 +48,30 @@
  */
 #define ARM_COMPUTE_UNUSED(var) (void)(var)
 
+#ifdef ARM_COMPUTE_DEBUG_ENABLED
+/** Print the given message
+ *
+ * @param[in] ... Message to display
+ */
+#define ARM_COMPUTE_INFO(...) ::arm_compute::debug(__func__, __FILE__, __LINE__, __VA_ARGS__) // NOLINT
+/** If the condition is true, the given message is printed
+ *
+ * @param[in] cond Condition to evaluate.
+ * @param[in] ...  Message to print if cond is false.
+ */
+#define ARM_COMPUTE_INFO_ON_MSG(cond, ...) \
+    do                                     \
+    {                                      \
+        if(cond)                           \
+        {                                  \
+            ARM_COMPUTE_INFO(__VA_ARGS__); \
+        }                                  \
+    } while(0)
+#else /* ARM_COMPUTE_DEBUG_ENABLED */
+#define ARM_COMPUTE_INFO_ON_MSG(cond, ...)
+#define ARM_COMPUTE_INFO(...)
+#endif /* ARM_COMPUTE_DEBUG_ENABLED */
+
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
 /** If the condition is true, the given message is printed and an exception is thrown
  *
@@ -121,6 +145,16 @@ namespace arm_compute
  * @param[in] ...      Variable number of arguments of the message.
  */
 [[noreturn]] void error(const char *function, const char *file, const int line, const char *msg, ...);
+
+/** Print a debug message
+ *
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] msg      Message to display before aborting.
+ * @param[in] ...      Variable number of arguments of the message.
+ */
+void debug(const char *function, const char *file, const int line, const char *msg, ...);
 }
 
 #endif /* __ARM_COMPUTE_ERROR_H__ */

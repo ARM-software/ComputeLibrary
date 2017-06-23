@@ -23,12 +23,12 @@
  */
 #include "arm_compute/core/AccessWindowAutoPadding.h"
 
-#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Window.h"
 
 using namespace arm_compute;
 
-AccessWindowAutoPadding::AccessWindowAutoPadding(TensorInfo *info)
+AccessWindowAutoPadding::AccessWindowAutoPadding(ITensorInfo *info)
     : _info(info)
 {
 }

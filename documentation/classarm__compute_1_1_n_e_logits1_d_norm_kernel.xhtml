@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: NELogits1DNormKernel Class Reference</title>
+<title>Compute Library: NELogits1DNormKernel Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.xhtml"><span>Files</span></a></li>
@@ -182,7 +183,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for calculating the final step of the Softmax Layer where each logit value is multiplied by the inverse of the sum of the logits. </p>
 
-<p>Definition at line <a class="el" href="_n_e_softmax_layer_kernel_8h_source.xhtml#l00094">94</a> of file <a class="el" href="_n_e_softmax_layer_kernel_8h_source.xhtml">NESoftmaxLayerKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_softmax_layer_kernel_8h_source.xhtml#l00099">99</a> of file <a class="el" href="_n_e_softmax_layer_kernel_8h_source.xhtml">NESoftmaxLayerKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="afa2a1794ff29695536321c2430e6dcad"></a>
 <div class="memitem">
@@ -312,7 +313,7 @@ Public Member Functions</h2></td></tr>
 <p>Set the input and output tensors. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: QS8, F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">sum</td><td>Sum tensor. The number of dimensions should be dim(input)-1. Data types supported: same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: same as <code>input</code>. </td></tr>
   </table>
@@ -420,7 +421,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_logits1_d_norm_kernel.xhtml">NELogits1DNormKernel</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

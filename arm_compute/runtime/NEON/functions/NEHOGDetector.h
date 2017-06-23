@@ -40,6 +40,8 @@ class NEHOGDetector : public INESimpleFunction
 public:
     /** Initialise the kernel's input, output, HOG data object, detection window stride, threshold and index class
      *
+     * @attention The function does not reset the number of values in @ref IDetectionWindowArray so it is caller's responsibility to clear it.
+     *
      * @param[in]  input                   Input tensor. It is the output of @ref NEHOGDescriptor. Data type supported: F32
      * @param[in]  hog                     HOG data-object that describes the HOG descriptor
      * @param[out] detection_windows       Array of @ref DetectionWindow used to store the detected objects

@@ -47,11 +47,10 @@ public:
     NENormalizationLayerKernel &operator=(NENormalizationLayerKernel &&) = default;
     /** Default destructor */
     ~NENormalizationLayerKernel() = default;
-
     /** Set the input and output tensors.
      *
      * @param[in]  input         Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                           and an optional 4th dimension for batch of inputs. Data types supported: F32.
+     *                           and an optional 4th dimension for batch of inputs. Data types supported: QS8/F32.
      * @param[in]  input_squared Source with each element has been squared. 3 lower dims represent a single input with dimensions [width, height, IFM],
      *                           Data type supported: same as @p input
      * @param[out] output        Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
@@ -64,17 +63,34 @@ public:
     BorderSize border_size() const override;
 
 private:
-    /** Function to perform normalization depending on the given templates dimension.
+    /** Function to perform normalization depending on the given template
+     *  dimension. The second template parameter specifies whether the
+     *  normalization has to be 1D or 2D.
      *
-     * @note Only normalization across X and Z is currently supported and tested.
+     * @note Only supported normalizations are:
+     *  - 1D over X or Z
+     *  - 2D over X and Y
      *
-     * @param window Region on which to execute the kernel.
+     * @param[in] window Region on which to execute the kernel.
      */
-    template <unsigned int dim>
+    template <unsigned int dim, bool do_2D_norm>
     void normalize(const Window &window);
+
+    /** Function to perform normalization for fixed-point values depending on
+     * the given template dimension. The second template parameter specifies
+     * whether the normalization has to be 1D or 2D.
+     *
+     * @note Only supported normalizations are:
+     *  - 1D over X or Z
+     *  - 2D over X and Y
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    template <unsigned int dim, bool do_2D_norm>
+    void normalize_fixed_point(const Window &window);
     /** Common signature for all the specialised normalization functions
      *
-     * @param window  Region on which to execute the kernel.
+     * @param[in] window Region on which to execute the kernel.
      */
     using NormalizationFunction = void (NENormalizationLayerKernel::*)(const Window &window);
 

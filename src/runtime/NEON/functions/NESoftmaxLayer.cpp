@@ -32,21 +32,22 @@
 using namespace arm_compute;
 
 NESoftmaxLayer::NESoftmaxLayer()
-    : _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _fill_border_kernel(), _fill_border_kernel_sum(), _max(), _sum(), _tmp()
+    : _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _fill_border_kernel(), _max(), _sum(), _tmp()
 {
 }
 
 void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::F32);
 
     // Create intermediate tensors shapes
-    _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type()));
+    TensorInfo tensor_info_tmp(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
+    _tmp.allocator()->init(tensor_info_tmp);
 
     TensorShape shape = input->info()->tensor_shape();
     shape.set(0, 1);
-    TensorInfo tensor_info_max_sum(shape, input->info()->num_channels(), input->info()->data_type());
+    TensorInfo tensor_info_max_sum(shape, input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
     _max.allocator()->init(tensor_info_max_sum);
     _sum.allocator()->init(tensor_info_max_sum);
 
@@ -55,9 +56,6 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
     _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum);
     _norm_kernel.configure(&_tmp, &_sum, output);
     _fill_border_kernel.configure(input, _max_kernel.border_size(), BorderMode::CONSTANT, PixelValue(-FLT_MAX));
-    // Fill the border around tmp buffer with sensible negative value.
-    // This avoids exp(-FLT_MAX) which will lead to -inf and destroy the calculation of sum when input is not a multiple of processed elements
-    _fill_border_kernel_sum.configure(input, _shift_exp_sum_kernel.border_size(), BorderMode::CONSTANT, PixelValue(-50.f));
 
     // Allocate intermediate tensors
     _tmp.allocator()->allocate();
@@ -67,9 +65,8 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
 
 void NESoftmaxLayer::run()
 {
-    NEScheduler::get().multithread(&_fill_border_kernel);
-    NEScheduler::get().multithread(&_max_kernel);
-    NEScheduler::get().multithread(&_fill_border_kernel_sum);
-    NEScheduler::get().multithread(&_shift_exp_sum_kernel);
-    NEScheduler::get().multithread(&_norm_kernel);
+    NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
+    NEScheduler::get().schedule(&_max_kernel, Window::DimY);
+    NEScheduler::get().schedule(&_shift_exp_sum_kernel, Window::DimY);
+    NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
 }

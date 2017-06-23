@@ -17,8 +17,10 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
     ] ],
     [ "Dimensions.h", "_dimensions_8h.xhtml", "_dimensions_8h" ],
     [ "Error.h", "_error_8h.xhtml", "_error_8h" ],
-    [ "Helpers.h", "_helpers_8h.xhtml", "_helpers_8h" ],
-    [ "Helpers.inl", "_helpers_8inl.xhtml", null ],
+    [ "FixedPoint.h", "arm__compute_2core_2_fixed_point_8h.xhtml", "arm__compute_2core_2_fixed_point_8h" ],
+    [ "FixedPoint.inl", "_fixed_point_8inl.xhtml", "_fixed_point_8inl" ],
+    [ "Helpers.h", "arm__compute_2core_2_helpers_8h.xhtml", "arm__compute_2core_2_helpers_8h" ],
+    [ "Helpers.inl", "_helpers_8inl.xhtml", "_helpers_8inl" ],
     [ "HOGInfo.h", "_h_o_g_info_8h.xhtml", [
       [ "HOGInfo", "classarm__compute_1_1_h_o_g_info.xhtml", "classarm__compute_1_1_h_o_g_info" ]
     ] ],
@@ -51,6 +53,9 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
     [ "ITensor.h", "_i_tensor_8h.xhtml", [
       [ "ITensor", "classarm__compute_1_1_i_tensor.xhtml", "classarm__compute_1_1_i_tensor" ]
     ] ],
+    [ "ITensorInfo.h", "_i_tensor_info_8h.xhtml", [
+      [ "ITensorInfo", "classarm__compute_1_1_i_tensor_info.xhtml", "classarm__compute_1_1_i_tensor_info" ]
+    ] ],
     [ "MultiImageInfo.h", "_multi_image_info_8h.xhtml", [
       [ "MultiImageInfo", "classarm__compute_1_1_multi_image_info.xhtml", "classarm__compute_1_1_multi_image_info" ]
     ] ],
@@ -69,13 +74,16 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
     [ "Strides.h", "_strides_8h.xhtml", [
       [ "Strides", "classarm__compute_1_1_strides.xhtml", "classarm__compute_1_1_strides" ]
     ] ],
+    [ "SubTensorInfo.h", "_sub_tensor_info_8h.xhtml", [
+      [ "SubTensorInfo", "classarm__compute_1_1_sub_tensor_info.xhtml", "classarm__compute_1_1_sub_tensor_info" ]
+    ] ],
     [ "TensorInfo.h", "_tensor_info_8h.xhtml", [
       [ "TensorInfo", "classarm__compute_1_1_tensor_info.xhtml", "classarm__compute_1_1_tensor_info" ]
     ] ],
     [ "TensorShape.h", "_tensor_shape_8h.xhtml", [
       [ "TensorShape", "classarm__compute_1_1_tensor_shape.xhtml", "classarm__compute_1_1_tensor_shape" ]
     ] ],
-    [ "Types.h", "_types_8h.xhtml", "_types_8h" ],
+    [ "Types.h", "arm__compute_2core_2_types_8h.xhtml", "arm__compute_2core_2_types_8h" ],
     [ "Utils.h", "arm__compute_2core_2_utils_8h.xhtml", "arm__compute_2core_2_utils_8h" ],
     [ "Validate.h", "_validate_8h.xhtml", "_validate_8h" ],
     [ "Window.h", "_window_8h.xhtml", [

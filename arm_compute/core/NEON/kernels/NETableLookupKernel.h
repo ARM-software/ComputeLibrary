@@ -47,7 +47,7 @@ public:
     NETableLookupKernel &operator=(NETableLookupKernel &&) = default;
     /** Initialise the kernel's input, lut and output.
      *
-     * @param[in]  input  An input tensor. Data types supported: U8, S16.
+     * @param[in]  input  An input tensor. Data types supported: U8/S16.
      * @param[in]  lut    The input LUT.
      * @param[out] output The output tensor. Data types supported: same as @p input
      */

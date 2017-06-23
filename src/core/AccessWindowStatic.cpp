@@ -24,12 +24,12 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Window.h"
 
 using namespace arm_compute;
 
-AccessWindowStatic::AccessWindowStatic(TensorInfo *info, int start_x, int start_y, int end_x, int end_y)
+AccessWindowStatic::AccessWindowStatic(ITensorInfo *info, int start_x, int start_y, int end_x, int end_y)
     : _info(info), _start_x(start_x), _start_y(start_y), _end_x(end_x), _end_y(end_y)
 {
 }
@@ -39,7 +39,7 @@ ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, Valid
     ARM_COMPUTE_UNUSED(border_undefined);
     ARM_COMPUTE_UNUSED(border_size);
 
-    return compute_valid_region(window, std::move(input_valid_region));
+    return compute_valid_region(window, input_valid_region);
 }
 
 ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, ValidRegion input_valid_region) const
@@ -55,12 +55,18 @@ ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, Valid
     // Start of the valid region is equal to the start of the static access but
     // never outside of the tensor.
     anchor.set(0, std::max<int>(0, _start_x));
-    anchor.set(1, std::max<int>(0, _start_y));
+    if(_info->num_dimensions() > 1)
+    {
+        anchor.set(1, std::max<int>(0, _start_y));
+    }
 
     // End of the valid region is equal to the end of the static access but
     // never outside of the tensor.
     shape.set(0, std::min<int>(_end_x, _info->tensor_shape()[0]));
-    shape.set(1, std::min<int>(_end_y, _info->tensor_shape()[1]));
+    if(_info->num_dimensions() > 1)
+    {
+        shape.set(1, std::min<int>(_end_y, _info->tensor_shape()[1]));
+    }
 
     // For higher dimension use the intersection of the window size and the
     // valid region of the input

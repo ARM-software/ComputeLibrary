@@ -1,12 +1,9 @@
 var searchData=
 [
-  ['accesswindowautopadding',['AccessWindowAutoPadding',['../classarm__compute_1_1_access_window_auto_padding.xhtml',1,'arm_compute']]],
-  ['accesswindowhorizontal',['AccessWindowHorizontal',['../classarm__compute_1_1_access_window_horizontal.xhtml',1,'arm_compute']]],
-  ['accesswindowrectangle',['AccessWindowRectangle',['../classarm__compute_1_1_access_window_rectangle.xhtml',1,'arm_compute']]],
-  ['accesswindowstatic',['AccessWindowStatic',['../classarm__compute_1_1_access_window_static.xhtml',1,'arm_compute']]],
-  ['accesswindowtranspose',['AccessWindowTranspose',['../classarm__compute_1_1_access_window_transpose.xhtml',1,'arm_compute']]],
-  ['accesswindowvertical',['AccessWindowVertical',['../classarm__compute_1_1_access_window_vertical.xhtml',1,'arm_compute']]],
-  ['activationlayerinfo',['ActivationLayerInfo',['../classarm__compute_1_1_activation_layer_info.xhtml',1,'arm_compute']]],
-  ['array',['Array',['../classarm__compute_1_1_array.xhtml',1,'arm_compute']]],
-  ['array_3c_20nelkinternalkeypoint_20_3e',['Array&lt; NELKInternalKeypoint &gt;',['../classarm__compute_1_1_array.xhtml',1,'arm_compute']]]
+  ['_5funique_5fif',['_Unique_if',['../structarm__compute_1_1test_1_1cpp14_1_1___unique__if.xhtml',1,'arm_compute::test::cpp14']]],
+  ['_5funique_5fif',['_Unique_if',['../structarm__compute_1_1cpp14_1_1___unique__if.xhtml',1,'arm_compute::cpp14']]],
+  ['_5funique_5fif_3c_20t_5b_5d_3e',['_Unique_if&lt; T[]&gt;',['../structarm__compute_1_1cpp14_1_1___unique__if_3_01_t[]_4.xhtml',1,'arm_compute::cpp14']]],
+  ['_5funique_5fif_3c_20t_5b_5d_3e',['_Unique_if&lt; T[]&gt;',['../structarm__compute_1_1test_1_1cpp14_1_1___unique__if_3_01_t[]_4.xhtml',1,'arm_compute::test::cpp14']]],
+  ['_5funique_5fif_3c_20t_5bn_5d_3e',['_Unique_if&lt; T[N]&gt;',['../structarm__compute_1_1cpp14_1_1___unique__if_3_01_t[_n]_4.xhtml',1,'arm_compute::cpp14']]],
+  ['_5funique_5fif_3c_20t_5bn_5d_3e',['_Unique_if&lt; T[N]&gt;',['../structarm__compute_1_1test_1_1cpp14_1_1___unique__if_3_01_t[_n]_4.xhtml',1,'arm_compute::test::cpp14']]]
 ];

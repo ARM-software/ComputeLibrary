@@ -39,7 +39,7 @@ public:
     NELogits1DMaxKernel();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8, F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
@@ -49,7 +49,11 @@ public:
     BorderSize border_size() const override;
 
 private:
-    BorderSize _border_size;
+    using Logits1DMaxFunction = void(const ITensor *in, ITensor *out, const Window &window);
+
+private:
+    Logits1DMaxFunction *_func;
+    BorderSize           _border_size;
 };
 
 /** Interface for shifting the logits values around the max value and exponentiating the result */
@@ -68,10 +72,9 @@ public:
     NELogits1DShiftExpSumKernel &operator=(NELogits1DShiftExpSumKernel &&) = default;
     /** Default destructor */
     ~NELogits1DShiftExpSumKernel() = default;
-
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8, F32.
      * @param[in]  max    Max values tensor. Data types supported: same as @p input.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      * @param[out] sum    Sum of 1D logits tensor. Data types supported: same as @p input.
@@ -80,14 +83,16 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window) override;
-    BorderSize border_size() const override;
 
 private:
-    const ITensor *_input;
-    const ITensor *_max;
-    ITensor       *_output;
-    ITensor       *_sum;
-    BorderSize     _border_size;
+    using Logits1DShiftExpSumFunction = void(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window);
+
+private:
+    Logits1DShiftExpSumFunction *_func;
+    const ITensor               *_input;
+    const ITensor               *_max;
+    ITensor                     *_output;
+    ITensor                     *_sum;
 };
 
 /** Interface for calculating the final step of the Softmax Layer where each logit value is multiplied by the inverse of the sum of the logits. */
@@ -106,10 +111,9 @@ public:
     NELogits1DNormKernel &operator=(NELogits1DNormKernel &&) = default;
     /** Default destructor */
     ~NELogits1DNormKernel() = default;
-
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8, F32.
      * @param[in]  sum    Sum tensor. The number of dimensions should be dim(input)-1. Data types supported: same as @p input.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      */
@@ -119,9 +123,13 @@ public:
     void run(const Window &window) override;
 
 private:
-    const ITensor *_input;
-    const ITensor *_sum;
-    ITensor       *_output;
+    using Logits1DNormFunction = void(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window);
+
+private:
+    Logits1DNormFunction *_func;
+    const ITensor        *_input;
+    const ITensor        *_sum;
+    ITensor              *_output;
 };
 }
 #endif /*__ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H__ */

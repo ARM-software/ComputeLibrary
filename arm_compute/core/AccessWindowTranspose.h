@@ -32,7 +32,7 @@
 namespace arm_compute
 {
 class Window;
-class TensorInfo;
+class ITensorInfo;
 
 /** Implementation of a XY-transpose access pattern. */
 class AccessWindowTranspose : public AccessWindowRectangle

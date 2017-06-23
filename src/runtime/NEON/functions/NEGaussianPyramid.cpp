@@ -108,8 +108,8 @@ void NEGaussianPyramidHalf::run()
     for(unsigned int i = 0; i < num_levels - 1; ++i)
     {
         _border_handler[i].run(_border_handler[i].window());
-        NEScheduler::get().multithread(_horizontal_reduction.get() + i);
-        NEScheduler::get().multithread(_vertical_reduction.get() + i);
+        NEScheduler::get().schedule(_horizontal_reduction.get() + i, Window::DimY);
+        NEScheduler::get().schedule(_vertical_reduction.get() + i, Window::DimY);
     }
 }
 
@@ -178,6 +178,6 @@ void NEGaussianPyramidOrb::run()
     for(unsigned int i = 0; i < num_levels - 1; ++i)
     {
         _gaus5x5[i].run();
-        NEScheduler::get().multithread(_scale_nearest.get() + i);
+        NEScheduler::get().schedule(_scale_nearest.get() + i, Window::DimY);
     }
 }

@@ -28,7 +28,7 @@
 using namespace arm_compute;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue()
+    : _context(), _queue(), _target(GPUTarget::MIDGARD)
 {
 }
 

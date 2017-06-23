@@ -31,7 +31,7 @@
 
 namespace arm_compute
 {
-class TensorInfo;
+class ITensorInfo;
 
 /** Basic implementation of the tensor interface */
 class Tensor : public ITensor
@@ -52,9 +52,9 @@ public:
     TensorAllocator *allocator();
 
     // Inherited methods overridden:
-    TensorInfo *info() const override;
-    TensorInfo *info() override;
-    uint8_t    *buffer() const override;
+    ITensorInfo *info() const override;
+    ITensorInfo *info() override;
+    uint8_t     *buffer() const override;
 
 private:
     mutable TensorAllocator _allocator; /**< Instance of the basic CPU allocator.*/

@@ -38,7 +38,6 @@ namespace arm_compute
 class TensorShape : public Dimensions<size_t>
 {
 public:
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
     /** Constructor to initialize the tensor shape.
      *
      * @param[in] dims Values to initialize the dimensions.
@@ -47,10 +46,15 @@ public:
     TensorShape(Ts... dims)
         : Dimensions{ dims... }
     {
-        // Initialize empty dimensions to 1
-        std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
+        // Initialize unspecified dimensions to 1
+        if(_num_dimensions > 0)
+        {
+            std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
+        }
+
+        // Correct number dimensions to ignore trailing dimensions of size 1
+        apply_dimension_correction();
     }
-#endif
     /** Allow instances of this class to be copy constructed */
     TensorShape(const TensorShape &) = default;
     /** Allow instances of this class to be copied */
@@ -61,15 +65,47 @@ public:
     TensorShape &operator=(TensorShape &&) = default;
     /** Default destructor */
     ~TensorShape() = default;
+
+    /** Accessor to set the value of one of the dimensions.
+     *
+     * @param[in] dimension Dimension for which the value is set.
+     * @param[in] value     Value to be set for the dimension.
+     */
+    void set(size_t dimension, size_t value)
+    {
+        ARM_COMPUTE_ERROR_ON(value < 1);
+
+        // Make sure all empty dimensions are filled with 1
+        std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
+
+        // Set the specified dimension and increase the number of dimensions if
+        // necessary
+        Dimensions::set(dimension, value);
+
+        // Correct number dimensions to ignore trailing dimensions of size 1
+        apply_dimension_correction();
+    }
+
+    /** Collapse the first n dimensions.
+     *
+     * @param[in] first Dimensions into which the following @p n are collapsed.
+     * @param[in] n     Number of dimensions to collapse into @p first.
+     */
+    void collapse(size_t n, size_t first = 0)
+    {
+        Dimensions::collapse(n, first);
+
+        // Make sure all empty dimensions are filled with 1
+        std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
+    }
+
     /** Collapses all dimensions to a single linear total size.
      *
      * @return The total tensor size in terms of elements.
      */
     size_t total_size() const
     {
-        const size_t size = std::accumulate(_id.begin(), _id.end(), 1, std::multiplies<size_t>());
-        ARM_COMPUTE_ERROR_ON(0 == size);
-        return size;
+        return std::accumulate(_id.begin(), _id.end(), 1, std::multiplies<size_t>());
     }
     /** Collapses given dimension and above.
      *
@@ -81,9 +117,24 @@ public:
      */
     size_t total_size_upper(size_t dimension) const
     {
-        const size_t size = std::accumulate(_id.begin() + dimension, _id.end(), 1, std::multiplies<size_t>());
-        ARM_COMPUTE_ERROR_ON(0 == size);
-        return size;
+        return std::accumulate(_id.begin() + dimension, _id.end(), 1, std::multiplies<size_t>());
+    }
+
+private:
+    /** Remove trailing dimensions of size 1 from the reported number of dimensions. */
+    void apply_dimension_correction()
+    {
+        for(int i = static_cast<int>(_num_dimensions) - 1; i >= 0; --i)
+        {
+            if(_id[i] == 1)
+            {
+                --_num_dimensions;
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 };
 }

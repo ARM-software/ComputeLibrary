@@ -66,7 +66,7 @@ public:
 
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input          The input tensor to convert. Data types supported: F32
+     * @param[in]  input          The input tensor to convert. Data types supported: U8/S8/QS8/U16/S16/QS16/F16/U32/S32/F32
      * @param[out] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                            while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in]  convolved_dims Output convolved dimensions.
@@ -77,8 +77,22 @@ public:
     void run(const Window &window) override;
 
 private:
-    const ITensor *_input;
-    ITensor       *_output;
+    /** Template function to run the col2im
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <typename T>
+    void run_col2im(const Window &window);
+
+    /** Common signature for all the specialised col2im functions
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    using Col2ImFunctionPtr = void (NECol2ImKernel::*)(const Window &window);
+
+    Col2ImFunctionPtr _func;
+    const ITensor    *_input;
+    ITensor          *_output;
     std::pair<unsigned int, unsigned int> _convolved_dims;
 };
 }

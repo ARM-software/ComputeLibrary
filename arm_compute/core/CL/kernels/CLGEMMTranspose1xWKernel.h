@@ -76,6 +76,9 @@ public:
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+
+    // Inherited methods overridden:
+    void run(const Window &window, cl::CommandQueue &queue) override;
 };
 }
 #endif /* __ARM_COMPUTE_CLGEMMTRANSPOSE1XWKERNEL_H__ */

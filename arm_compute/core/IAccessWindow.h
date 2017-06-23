@@ -33,7 +33,7 @@
 namespace arm_compute
 {
 class Window;
-class TensorInfo;
+class ITensorInfo;
 
 /** Decrease @p required in steps of @p step until it's less than @p available.
  *
@@ -112,7 +112,7 @@ public:
      * @param[in]     width  Number of elements that are accessed in X direction.
      * @param[in]     height Number of elements that are accessed in Y direction.
      */
-    AccessWindowRectangle(TensorInfo *info, int x, int y, int width, int height)
+    AccessWindowRectangle(ITensorInfo *info, int x, int y, int width, int height)
         : AccessWindowRectangle(info, x, y, width, height, 1.f, 1.f)
     {
     }
@@ -129,7 +129,7 @@ public:
      * @param[in]     scale_x Ratio along the X direction between the window used by the execute_window_loop and the rectangular access pattern defined
      * @param[in]     scale_y Ratio along the Y direction between the window used by the execute_window_loop and the rectangular access pattern defined
      */
-    AccessWindowRectangle(TensorInfo *info, int x, int y, int width, int height, float scale_x, float scale_y)
+    AccessWindowRectangle(ITensorInfo *info, int x, int y, int width, int height, float scale_x, float scale_y)
         : _info(info), _x(x), _y(y), _width(width), _height(height), _scale_x(scale_x), _scale_y(scale_y)
     {
         ARM_COMPUTE_ERROR_ON(width < 0);
@@ -171,13 +171,13 @@ public:
     bool update_padding_if_needed(const Window &window) const override;
 
 protected:
-    TensorInfo *_info;
-    int         _x;
-    int         _y;
-    int         _width;
-    int         _height;
-    float       _scale_x;
-    float       _scale_y;
+    ITensorInfo *_info;
+    int          _x;
+    int          _y;
+    int          _width;
+    int          _height;
+    float        _scale_x;
+    float        _scale_y;
 };
 
 /** Implementation of a column access pattern. */
@@ -193,7 +193,7 @@ public:
      * @param[in]     height  Number of elements that are accessed in Y direction.
      * @param[in]     scale_y Ratio along the Y direction between the window used by the execute_window_loop and the rectangular access pattern defined
      */
-    AccessWindowVertical(TensorInfo *info, int y, int height, float scale_y = 1.f)
+    AccessWindowVertical(ITensorInfo *info, int y, int height, float scale_y = 1.f)
         : AccessWindowRectangle(info, 0, y, 1, height, 1.f, scale_y)
     {
         ARM_COMPUTE_ERROR_ON(height < 0);
@@ -214,7 +214,7 @@ public:
      * @param[in]     width   Number of elements that are accessed in X direction.
      * @param[in]     scale_x Ratio along the X direction between the window used by the execute_window_loop and the rectangular access pattern defined
      */
-    AccessWindowHorizontal(TensorInfo *info, int x, int width, float scale_x = 1.f)
+    AccessWindowHorizontal(ITensorInfo *info, int x, int width, float scale_x = 1.f)
         : AccessWindowRectangle(info, x, 0, width, 1, scale_x, 1.f)
     {
         ARM_COMPUTE_ERROR_ON(width < 0);

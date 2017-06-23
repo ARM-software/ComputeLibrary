@@ -24,7 +24,7 @@
 #include "arm_compute/core/AccessWindowTranspose.h"
 
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Window.h"
 
 using namespace arm_compute;

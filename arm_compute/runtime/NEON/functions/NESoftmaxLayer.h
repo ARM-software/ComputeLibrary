@@ -50,7 +50,7 @@ public:
     NESoftmaxLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8/F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      */
     void configure(ITensor *input, ITensor *output);
@@ -63,7 +63,6 @@ private:
     NELogits1DShiftExpSumKernel _shift_exp_sum_kernel;
     NELogits1DNormKernel        _norm_kernel;
     NEFillBorderKernel          _fill_border_kernel;
-    NEFillBorderKernel          _fill_border_kernel_sum;
     Tensor                      _max;
     Tensor                      _sum;
     Tensor                      _tmp;

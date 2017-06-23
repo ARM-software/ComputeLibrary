@@ -51,6 +51,8 @@ using clRetainKernel_func            = cl_int (*)(cl_kernel kernel);
 using clCreateBuffer_func            = cl_mem (*)(cl_context, cl_mem_flags, size_t, void *, cl_int *);
 using clCreateProgramWithSource_func = cl_program (*)(cl_context, cl_uint, const char **, const size_t *, cl_int *);
 using clReleaseKernel_func           = cl_int (*)(cl_kernel kernel);
+using clGetDeviceInfo_func           = cl_int (*)(cl_device_id, cl_device_info, size_t, void *, size_t *);
+using clGetDeviceIDs_func            = cl_int (*)(cl_platform_id, cl_device_type, cl_uint, cl_device_id *, cl_uint *);
 
 class CLSymbols
 {
@@ -88,6 +90,8 @@ private:
             clRetainCommandQueue      = reinterpret_cast<clRetainCommandQueue_func>(dlsym(handle, "clRetainCommandQueue"));
             clEnqueueUnmapMemObject   = reinterpret_cast<clEnqueueUnmapMemObject_func>(dlsym(handle, "clEnqueueUnmapMemObject"));
             clReleaseMemObject        = reinterpret_cast<clReleaseMemObject_func>(dlsym(handle, "clReleaseMemObject"));
+            clGetDeviceInfo           = reinterpret_cast<clGetDeviceInfo_func>(dlsym(handle, "clGetDeviceInfo"));
+            clGetDeviceIDs            = reinterpret_cast<clGetDeviceIDs_func>(dlsym(handle, "clGetDeviceIDs"));
             dlclose(handle);
         }
     }
@@ -123,6 +127,8 @@ public:
     clRetainCommandQueue_func      clRetainCommandQueue      = nullptr;
     clEnqueueUnmapMemObject_func   clEnqueueUnmapMemObject   = nullptr;
     clReleaseMemObject_func        clReleaseMemObject        = nullptr;
+    clGetDeviceInfo_func           clGetDeviceInfo           = nullptr;
+    clGetDeviceIDs_func            clGetDeviceIDs            = nullptr;
 };
 
 bool arm_compute::opencl_is_available()
@@ -538,6 +544,40 @@ cl_int clReleaseKernel(cl_kernel kernel)
     if(func != nullptr)
     {
         return func(kernel);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clGetDeviceIDs(cl_platform_id platform,
+                      cl_device_type device_type,
+                      cl_uint        num_entries,
+                      cl_device_id *devices,
+                      cl_uint       *num_devices)
+{
+    auto func = CLSymbols::get().clGetDeviceIDs;
+    if(func != nullptr)
+    {
+        return func(platform, device_type, num_entries, devices, num_devices);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clGetDeviceInfo(cl_device_id   device,
+                       cl_device_info param_name,
+                       size_t         param_value_size,
+                       void          *param_value,
+                       size_t        *param_value_size_ret)
+{
+    auto func = CLSymbols::get().clGetDeviceInfo;
+    if(func != nullptr)
+    {
+        return func(device, param_name, param_value_size, param_value, param_value_size_ret);
     }
     else
     {

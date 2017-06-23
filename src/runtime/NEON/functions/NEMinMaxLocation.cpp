@@ -43,8 +43,8 @@ void NEMinMaxLocation::run()
     _min_max.reset();
 
     /* Run min max kernel */
-    NEScheduler::get().multithread(&_min_max);
+    NEScheduler::get().schedule(&_min_max, Window::DimY);
 
     /* Run min max location */
-    NEScheduler::get().multithread(&_min_max_loc);
+    NEScheduler::get().schedule(&_min_max_loc, Window::DimY);
 }

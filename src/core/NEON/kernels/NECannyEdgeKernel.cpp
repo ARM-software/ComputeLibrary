@@ -725,6 +725,16 @@ void edge_trace_recursive_U8_U8(uint8_t *__restrict in, uint8_t *__restrict out,
 
 void NEGradientFP16Kernel::configure(const ITensor *gx, const ITensor *gy, ITensor *magnitude, ITensor *phase, int32_t norm_type)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(gx, gy, magnitude, phase);
+
+    set_shape_if_empty(*magnitude->info(), gx->info()->tensor_shape());
+    set_shape_if_empty(*phase->info(), gx->info()->tensor_shape());
+
+    Format magnitude_format = gx->info()->data_type() == DataType::S16 ? Format::U16 : Format::U32;
+    set_format_if_unknown(*magnitude->info(), magnitude_format);
+    set_format_if_unknown(*phase->info(), Format::U8);
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(gx, gy, magnitude, phase);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gx, 1, DataType::S16, DataType::S32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gy, 1, DataType::S16, DataType::S32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(magnitude, 1, DataType::U16, DataType::U32);
@@ -1604,11 +1614,21 @@ NEGradientKernel::NEGradientKernel()
 
 void NEGradientKernel::configure(const ITensor *gx, const ITensor *gy, ITensor *magnitude, ITensor *phase, int32_t norm_type)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(gx, gy, magnitude, phase);
+
+    set_shape_if_empty(*magnitude->info(), gx->info()->tensor_shape());
+    set_shape_if_empty(*phase->info(), gx->info()->tensor_shape());
+
+    Format magnitude_format = gx->info()->data_type() == DataType::S16 ? Format::U16 : Format::U32;
+    set_format_if_unknown(*magnitude->info(), magnitude_format);
+    set_format_if_unknown(*phase->info(), Format::U8);
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(gx, gy, magnitude, phase);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gx, 1, DataType::S16, DataType::S32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gy, 1, DataType::S16, DataType::S32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(magnitude, 1, DataType::U16, DataType::U32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(phase, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_MSG(element_size_from_data_type(gx->info()->data_type()) != element_size_from_data_type(gy->info()->data_type()), "Gx and Gy must have the same element size");
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(gx, gy);
     ARM_COMPUTE_ERROR_ON_MSG(element_size_from_data_type(gx->info()->data_type()) != element_size_from_data_type(magnitude->info()->data_type()), "Magnitude must have the same element size as Gx and Gy");
 
     _gx        = gx;
@@ -1687,9 +1707,18 @@ BorderSize NEEdgeNonMaxSuppressionKernel::border_size() const
 void NEEdgeNonMaxSuppressionKernel::configure(const ITensor *magnitude, const ITensor *phase, ITensor *output,
                                               int32_t upper_thr, int32_t lower_thr, bool border_undefined)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(magnitude, phase, output);
+
+    set_shape_if_empty(*output->info(), magnitude->info()->tensor_shape());
+
+    set_format_if_unknown(*phase->info(), Format::U8);
+    set_format_if_unknown(*output->info(), Format::U8);
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(magnitude, phase, output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(magnitude, 1, DataType::U16, DataType::U32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(phase, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(phase, output);
 
     _magnitude = magnitude;
     _phase     = phase;
@@ -1765,8 +1794,17 @@ bool NEEdgeTraceKernel::is_parallelisable() const
 
 void NEEdgeTraceKernel::configure(ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    set_shape_if_empty(*output->info(), input->info()->tensor_shape());
+
+    set_format_if_unknown(*input->info(), Format::U8);
+    set_format_if_unknown(*output->info(), Format::U8);
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
     _input  = input;
     _output = output;

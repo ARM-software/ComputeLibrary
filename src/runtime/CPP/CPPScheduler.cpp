@@ -35,14 +35,6 @@
 
 using namespace arm_compute;
 
-#ifdef NO_MULTI_THREADING
-namespace
-{
-void delete_threads(Thread *t)
-{
-}
-}
-#else  /* NO_MULTI_THREADING */
 class arm_compute::Thread
 {
 public:
@@ -162,7 +154,6 @@ void delete_threads(Thread *t)
     delete[] t;
 }
 } // namespace
-#endif /* NO_MULTI_THREADING */
 
 CPPScheduler &CPPScheduler::get()
 {
@@ -170,49 +161,39 @@ CPPScheduler &CPPScheduler::get()
     return scheduler;
 }
 
+unsigned int CPPScheduler::num_threads() const
+{
+    return _num_threads;
+}
+
 CPPScheduler::CPPScheduler()
-    : _num_threads(0), _threads(nullptr, delete_threads)
+    : _num_threads(std::thread::hardware_concurrency()),
+      _threads(std::unique_ptr<Thread[], void(*)(Thread *)>(new Thread[std::thread::hardware_concurrency() - 1], delete_threads))
 {
-    force_number_of_threads(0);
 }
 
-void CPPScheduler::force_number_of_threads(int num_threads)
+void CPPScheduler::set_num_threads(unsigned int num_threads)
 {
-#ifdef NO_MULTI_THREADING
-    ARM_COMPUTE_ERROR_ON(num_threads > 1);
-    _num_threads = 1;
-#else  /* NO_MULTI_THREADING */
-    _num_threads = num_threads > 0 ? num_threads : std::thread::hardware_concurrency();
-    ARM_COMPUTE_ERROR_ON(_num_threads < 1);
-
-    if(_num_threads > 1)
-    {
-        _threads = std::unique_ptr<Thread[], void (*)(Thread *)>(new Thread[_num_threads - 1], delete_threads);
-    }
-    else
-    {
-        _threads = nullptr;
-    }
-#endif /* NO_MULTI_THREADING */
+    const unsigned int num_cores = std::thread::hardware_concurrency();
+    _num_threads                 = num_threads == 0 ? num_cores : num_threads;
 }
 
-void CPPScheduler::multithread(ICPPKernel *kernel, const size_t split_dimension)
+void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 
     /** [Scheduler example] */
-    const Window &max_window     = kernel->window();
-    const int     num_iterations = max_window.num_iterations(split_dimension);
-    int           num_threads    = std::min(num_iterations, _num_threads);
+    const Window      &max_window     = kernel->window();
+    const unsigned int num_iterations = max_window.num_iterations(split_dimension);
+    const unsigned int num_threads    = std::min(num_iterations, _num_threads);
 
     if(!kernel->is_parallelisable() || 1 == num_threads)
     {
         kernel->run(max_window);
     }
-#ifndef NO_MULTI_THREADING
     else
     {
-        for(int t = 0; t < num_threads; ++t)
+        for(unsigned int t = 0; t < num_threads; ++t)
         {
             Window win = max_window.split_window(split_dimension, t, num_threads);
             win.set_thread_id(t);
@@ -230,7 +211,7 @@ void CPPScheduler::multithread(ICPPKernel *kernel, const size_t split_dimension)
 
         try
         {
-            for(int t = 1; t < num_threads; ++t)
+            for(unsigned int t = 1; t < num_threads; ++t)
             {
                 _threads[t - 1].wait();
             }
@@ -240,6 +221,5 @@ void CPPScheduler::multithread(ICPPKernel *kernel, const size_t split_dimension)
             std::cout << "Caught system_error with code " << e.code() << " meaning " << e.what() << '\n';
         }
     }
-#endif /* NO_MULTI_THREADING */
     /** [Scheduler example] */
 }

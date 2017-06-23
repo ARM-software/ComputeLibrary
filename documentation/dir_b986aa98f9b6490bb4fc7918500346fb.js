@@ -6,11 +6,17 @@ var dir_b986aa98f9b6490bb4fc7918500346fb =
       [ "CLDistribution1D", "classarm__compute_1_1_c_l_distribution1_d.xhtml", "classarm__compute_1_1_c_l_distribution1_d" ]
     ] ],
     [ "CLFunctions.h", "_c_l_functions_8h.xhtml", null ],
+    [ "CLHOG.h", "_c_l_h_o_g_8h.xhtml", [
+      [ "CLHOG", "classarm__compute_1_1_c_l_h_o_g.xhtml", "classarm__compute_1_1_c_l_h_o_g" ]
+    ] ],
     [ "CLLut.h", "_c_l_lut_8h.xhtml", [
       [ "CLLut", "classarm__compute_1_1_c_l_lut.xhtml", "classarm__compute_1_1_c_l_lut" ]
     ] ],
     [ "CLLutAllocator.h", "_c_l_lut_allocator_8h.xhtml", [
       [ "CLLutAllocator", "classarm__compute_1_1_c_l_lut_allocator.xhtml", "classarm__compute_1_1_c_l_lut_allocator" ]
+    ] ],
+    [ "CLMultiHOG.h", "_c_l_multi_h_o_g_8h.xhtml", [
+      [ "CLMultiHOG", "classarm__compute_1_1_c_l_multi_h_o_g.xhtml", "classarm__compute_1_1_c_l_multi_h_o_g" ]
     ] ],
     [ "CLMultiImage.h", "_c_l_multi_image_8h.xhtml", [
       [ "CLMultiImage", "classarm__compute_1_1_c_l_multi_image.xhtml", "classarm__compute_1_1_c_l_multi_image" ]
@@ -20,6 +26,9 @@ var dir_b986aa98f9b6490bb4fc7918500346fb =
     ] ],
     [ "CLScheduler.h", "_c_l_scheduler_8h.xhtml", [
       [ "CLScheduler", "classarm__compute_1_1_c_l_scheduler.xhtml", "classarm__compute_1_1_c_l_scheduler" ]
+    ] ],
+    [ "CLSubTensor.h", "_c_l_sub_tensor_8h.xhtml", [
+      [ "CLSubTensor", "classarm__compute_1_1_c_l_sub_tensor.xhtml", "classarm__compute_1_1_c_l_sub_tensor" ]
     ] ],
     [ "CLTensor.h", "_c_l_tensor_8h.xhtml", "_c_l_tensor_8h" ],
     [ "CLTensorAllocator.h", "_c_l_tensor_allocator_8h.xhtml", [

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['image_5fdeclaration',['IMAGE_DECLARATION',['../helpers_8h.xhtml#a22f42fcf2077d951271df83b55c1a71a',1,'helpers.h']]]
+  ['flt_5fscale',['FLT_SCALE',['../optical__flow__pyramid__lk_8cl.xhtml#a1852457538f524c42f96b66882bd9b35',1,'optical_flow_pyramid_lk.cl']]]
 ];

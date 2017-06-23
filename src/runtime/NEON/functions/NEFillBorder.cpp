@@ -35,5 +35,5 @@ void NEFillBorder::configure(ITensor *input, unsigned int border_width, BorderMo
 
 void NEFillBorder::run()
 {
-    NEScheduler::get().multithread(&_border_handler, Window::DimZ);
+    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
 }

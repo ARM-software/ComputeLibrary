@@ -1,10 +1,7 @@
 var searchData=
 [
-  ['x0',['X0',['../sobel__filter_8cl.xhtml#a8476f4a8de2c191433342c9ce896986a',1,'sobel_filter.cl']]],
-  ['x1',['X1',['../sobel__filter_8cl.xhtml#a1964818ccd90a6173ea48cecb652feeb',1,'sobel_filter.cl']]],
-  ['x2',['X2',['../sobel__filter_8cl.xhtml#a79ae03a0214cb30e57b9e8835f2a0019',1,'sobel_filter.cl']]],
-  ['x3',['X3',['../sobel__filter_8cl.xhtml#adb6fd3d004959525c6a684b82ef50860',1,'sobel_filter.cl']]],
-  ['x4',['X4',['../sobel__filter_8cl.xhtml#a0f79fa7387c308a89a30682d905aa40a',1,'sobel_filter.cl']]],
-  ['x5',['X5',['../sobel__filter_8cl.xhtml#a921884524c9038883b25f03d3bd1b078',1,'sobel_filter.cl']]],
-  ['x6',['X6',['../sobel__filter_8cl.xhtml#a0e11bba5150b8ae2a8831f6f4532e352',1,'sobel_filter.cl']]]
+  ['vatomic_5finc16',['VATOMIC_INC16',['../histogram_8cl.xhtml#a2c8a35cfde24ca7728709200962e1a91',1,'histogram.cl']]],
+  ['vec_5fdata_5ftype',['VEC_DATA_TYPE',['../helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f',1,'helpers.h']]],
+  ['vec_5fdata_5ftype_5fstr',['VEC_DATA_TYPE_STR',['../helpers_8h.xhtml#ae802822defb0fa3a7f74f98e324696cb',1,'helpers.h']]],
+  ['vector_5fdeclaration',['VECTOR_DECLARATION',['../helpers_8h.xhtml#a40a6eb9f2a7712f08d6bb8ff6c9e6ca7',1,'helpers.h']]]
 ];

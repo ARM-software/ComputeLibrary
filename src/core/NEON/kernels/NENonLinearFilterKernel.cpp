@@ -36,8 +36,8 @@
 #include <tuple>
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 const uint8x16_t zero_u8 = vdupq_n_u8(0);
@@ -419,9 +419,6 @@ void NENonLinearFilterKernel::fill_mask(uint8_t *mask, int cols, int rows, Matri
     }
 }
 
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
-namespace arm_compute
-{
 template <>
 void NENonLinearFilterKernel::median_filter_box<3, 3>(const Window &win)
 {
@@ -507,8 +504,6 @@ void NENonLinearFilterKernel::median_filter_box<5, 5>(const Window &win)
     },
     input, output);
 }
-} // namespace arm_compute
-#endif
 
 template <int mask_w, int mask_h>
 void NENonLinearFilterKernel::min_filter_box(const Window &win)
@@ -588,9 +583,6 @@ void NENonLinearFilterKernel::max_filter_box(const Window &win)
     input, output);
 }
 
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
-namespace arm_compute
-{
 template <>
 void NENonLinearFilterKernel::median_filter_cross<3, 3>(const Window &win)
 {
@@ -656,8 +648,6 @@ void NENonLinearFilterKernel::median_filter_cross<5, 5>(const Window &win)
     },
     input, output);
 }
-} // namespace arm_compute
-#endif
 
 template <int mask_w, int mask_h>
 void NENonLinearFilterKernel::min_filter_cross(const Window &win)
@@ -751,9 +741,6 @@ void NENonLinearFilterKernel::max_filter_cross(const Window &win)
     input, output);
 }
 
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
-namespace arm_compute
-{
 template <>
 void NENonLinearFilterKernel::median_filter_disk<5, 5>(const Window &win)
 {
@@ -878,8 +865,6 @@ void NENonLinearFilterKernel::max_filter_disk<5, 5>(const Window &win)
     },
     input, output);
 }
-} // namespace arm_compute
-#endif
 
 template <int mask_w, int mask_h>
 void NENonLinearFilterKernel::non_linear_filter_generic(const Window &win)
@@ -1021,3 +1006,4 @@ void NENonLinearFilterKernel::run(const Window &window)
             break;
     }
 }
+} // namespace arm_compute

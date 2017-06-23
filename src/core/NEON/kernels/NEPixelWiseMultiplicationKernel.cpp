@@ -27,6 +27,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
@@ -61,7 +62,6 @@ inline int32x4_t scale255_S32_S32(int32x4_t in)
 {
     // Scale
     const float32x4_t tmp = vmulq_f32(vcvtq_f32_s32(in), scale255_constant_f32q);
-
     // Round to nearest (round half up)
     // Add +0.5 for all values
     // Afterwards vcvt rounds toward zero
@@ -125,6 +125,25 @@ void mul_U8_U8_U8_n(const void *__restrict input1_ptr, const void *__restrict in
 }
 
 template <bool is_scale255, bool is_sat>
+void mul_QS8_QS8_QS8_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int n, int fixed_point_position)
+{
+    // n is the exponent of the scaling factor, that is scale = 1/2^n. Currently, we only support scaling factor equal to 1 => n = 0.
+    ARM_COMPUTE_ERROR_ON_MSG(n != 0, "Scaling factor different than 1 not supported for 8-bit fixed-point pixel-wise multiplication");
+    ARM_COMPUTE_UNUSED(n);
+
+    const auto input1 = static_cast<const qint8_t *__restrict>(input1_ptr);
+    const auto input2 = static_cast<const qint8_t *__restrict>(input2_ptr);
+    const auto output = static_cast<qint8_t *__restrict>(output_ptr);
+
+    const qint8x16_t ta1 = vld1q_qs8(input1);
+    const qint8x16_t ta2 = vld1q_qs8(input2);
+
+    qint8x16_t res = (is_sat) ? vqmulq_qs8(ta1, ta2, fixed_point_position) : vmulq_qs8(ta1, ta2, fixed_point_position);
+
+    vst1q_s8(output, res);
+}
+
+template <bool is_scale255, bool is_sat>
 inline int16x8_t mul_S16_S16_S16_n_loop(const int16x8_t &input1, const int16x8_t &input2, int n)
 {
     int32x4_t       tmp1_high = vmovl_s16(vget_high_s16(input1));
@@ -142,17 +161,28 @@ inline int16x8_t mul_S16_S16_S16_n_loop(const int16x8_t &input1, const int16x8_t
     }
     else
     {
+        // Right shift amount
         const int32x4_t vn = vdupq_n_s32(-n);
-
+        // Left shift amount
+        const int32x4_t vnl = vdupq_n_s32(n);
+        // Calculate conversion bit
+        const uint32x4_t tmp1_high_u  = vreinterpretq_u32_s32(tmp1_high);
+        const uint32x4_t tmp1_low_u   = vreinterpretq_u32_s32(tmp1_low);
+        const uint32x4_t sign_high    = vshrq_n_u32(tmp1_high_u, 31);
+        const uint32x4_t sign_low     = vshrq_n_u32(tmp1_low_u, 31);
+        const int32x4_t  sign_high_s  = vreinterpretq_s32_u32(sign_high);
+        const int32x4_t  sign_low_s   = vreinterpretq_s32_u32(sign_low);
+        const int32x4_t  convert_high = vsubq_s32(vshlq_s32(sign_high_s, vnl), sign_high_s);
+        const int32x4_t  convert_low  = vsubq_s32(vshlq_s32(sign_low_s, vnl), sign_low_s);
         if(is_sat)
         {
-            tmp1_high = vqshlq_s32(tmp1_high, vn);
-            tmp1_low  = vqshlq_s32(tmp1_low, vn);
+            tmp1_high = vqshlq_s32(vaddq_s32(tmp1_high, convert_high), vn);
+            tmp1_low  = vqshlq_s32(vaddq_s32(tmp1_low, convert_low), vn);
         }
         else
         {
-            tmp1_high = vshlq_s32(tmp1_high, vn);
-            tmp1_low  = vshlq_s32(tmp1_low, vn);
+            tmp1_high = vshlq_s32(vaddq_s32(tmp1_high, convert_high), vn);
+            tmp1_low  = vshlq_s32(vaddq_s32(tmp1_low, convert_low), vn);
         }
     }
 
@@ -297,17 +327,23 @@ void mul_U8_S16_S16_n(const void *__restrict input1_ptr, const void *__restrict 
 } // namespace
 
 NEPixelWiseMultiplicationKernel::NEPixelWiseMultiplicationKernel()
-    : _func_float(nullptr), _func_int(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _scale{ 0 }, _scale_exponent{ 0 }
+    : _func_float(nullptr), _func_int(nullptr), _func_q_int(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _scale{ 0 }, _scale_exponent{ 0 }
 {
 }
 
 void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::S16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::S16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QS8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::QS8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QS8, DataType::S16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->data_type() == DataType::U8 && (input1->info()->data_type() != DataType::U8 || input2->info()->data_type() != DataType::U8),
                              "Output can only be U8 if both inputs are U8");
+    if(output->info()->data_type() == DataType::QS8 || input1->info()->data_type() == DataType::QS8 || output->info()->data_type() == DataType::QS8)
+    {
+        // All data types must be QS8
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input1, input2, output);
+    }
 
     _input1         = input1;
     _input2         = input2;
@@ -315,13 +351,14 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
     _scale          = scale;
     _scale_exponent = 0;
     _func_int       = nullptr;
+    _func_q_int     = nullptr;
     _func_float     = nullptr;
 
     bool is_scale_255 = false;
     // Check and validate scaling factor
     if(std::abs(scale - scale255_constant) < 0.00001f)
     {
-        ARM_COMPUTE_ERROR_ON(rounding_policy != RoundingPolicy::TO_NEAREST_EVEN);
+        ARM_COMPUTE_ERROR_ON(rounding_policy != RoundingPolicy::TO_NEAREST_UP && rounding_policy != RoundingPolicy::TO_NEAREST_EVEN);
         ARM_COMPUTE_UNUSED(rounding_policy);
 
         is_scale_255 = true;
@@ -409,6 +446,17 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
             _func_int = is_sat ? &mul_U8_U8_S16_n<false, true> : &mul_U8_U8_S16_n<false, false>;
         }
     }
+    else if(DataType::QS8 == dt_input1 && DataType::QS8 == dt_input2 && DataType::QS8 == dt_output)
+    {
+        if(is_scale_255)
+        {
+            _func_q_int = is_sat ? &mul_QS8_QS8_QS8_n<true, true> : &mul_QS8_QS8_QS8_n<true, false>;
+        }
+        else
+        {
+            _func_q_int = is_sat ? &mul_QS8_QS8_QS8_n<false, true> : &mul_QS8_QS8_QS8_n<false, false>;
+        }
+    }
     else if(DataType::F32 == dt_input1 && DataType::F32 == dt_input2 && DataType::F32 == dt_output)
     {
         _func_float = &mul_F32_F32_F32_n<false, false>;
@@ -452,6 +500,15 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window)
         execute_window_loop(window, [&](const Coordinates & id)
         {
             (*_func_int)(input1.ptr(), input2.ptr(), output.ptr(), _scale_exponent);
+        },
+        input1, input2, output);
+    }
+    else if(_func_q_int != nullptr)
+    {
+        int fixed_point_position = _input1->info()->fixed_point_position();
+        execute_window_loop(window, [&](const Coordinates & id)
+        {
+            (*_func_q_int)(input1.ptr(), input2.ptr(), output.ptr(), _scale_exponent, fixed_point_position);
         },
         input1, input2, output);
     }

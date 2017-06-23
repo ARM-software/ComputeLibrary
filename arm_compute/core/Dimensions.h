@@ -44,7 +44,6 @@ public:
     /** Number of dimensions the tensor has */
     static constexpr size_t num_max_dimensions = MAX_DIMS;
 
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
     /** Constructor to initialize the tensor shape.
      *
      * @param[in] dims Values to initialize the dimensions.
@@ -54,17 +53,19 @@ public:
         : _id{ { dims... } }, _num_dimensions{ sizeof...(dims) }
     {
     }
-#endif
+
     /** Allow instances of this class to be copy constructed */
     Dimensions(const Dimensions &) = default;
+
     /** Allow instances of this class to be copied */
     Dimensions &operator=(const Dimensions &) = default;
+
     /** Allow instances of this class to be move constructed */
     Dimensions(Dimensions &&) = default;
+
     /** Allow instances of this class to be moved */
     Dimensions &operator=(Dimensions &&) = default;
-    /** Pure virtual destructor */
-    virtual ~Dimensions() = 0;
+
     /** Accessor to set the value of one of the dimensions.
      *
      * @param[in] dimension Dimension for which the value is set.
@@ -105,15 +106,34 @@ public:
         return _id[dimension];
     }
     /** Returns the effective dimensionality of the tensor */
-    inline unsigned int num_dimensions() const
+    unsigned int num_dimensions() const
     {
         return _num_dimensions;
     }
 
     /** Set number of dimensions */
-    inline void set_num_dimensions(size_t num_dimensions)
+    void set_num_dimensions(size_t num_dimensions)
     {
         _num_dimensions = num_dimensions;
+    }
+
+    /** Collapse dimensions.
+     *
+     * @param[in] first Dimensions into which the following @p n are collapsed.
+     * @param[in] n     Number of dimensions to collapse into @p first.
+     */
+    void collapse(size_t n, size_t first = 0)
+    {
+        ARM_COMPUTE_ERROR_ON(first + n > _id.size());
+
+        // Collapse dimensions into the first
+        _id[first] = std::accumulate(_id.cbegin() + first, _id.cbegin() + first + n, 1, std::multiplies<T>());
+        // Shift the remaining dimensions down
+        std::copy(_id.begin() + first + n, _id.end(), _id.begin() + first + 1);
+        // Reduce the number of dimensions
+        _num_dimensions -= n - 1;
+        // Fill the now empty dimensions with zero
+        std::fill(_id.begin() + _num_dimensions, _id.end(), 0);
     }
 
     /** Returns a read/write iterator that points to the first element in the dimension array. */
@@ -148,13 +168,11 @@ public:
     }
 
 protected:
+    /** Protected destructor. */
+    ~Dimensions() = default;
+
     std::array<T, num_max_dimensions> _id;
     size_t _num_dimensions{ 0 };
 };
-
-template <typename T>
-inline Dimensions<T>::~Dimensions()
-{
-}
 }
 #endif /*__ARM_COMPUTE_DIMENSIONS_H__*/

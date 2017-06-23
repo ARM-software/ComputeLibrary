@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['validregion',['ValidRegion',['../structarm__compute_1_1_valid_region.xhtml',1,'arm_compute']]],
-  ['vector',['Vector',['../struct_vector.xhtml',1,'']]]
+  ['ompscheduler',['OMPScheduler',['../classarm__compute_1_1_o_m_p_scheduler.xhtml',1,'arm_compute']]]
 ];

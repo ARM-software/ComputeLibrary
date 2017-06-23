@@ -34,8 +34,8 @@
 #include "arm_compute/runtime/CL/functions/CLSobel3x3.h"
 #include "arm_compute/runtime/CL/functions/CLSobel5x5.h"
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
-#include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "arm_compute/runtime/Scheduler.h"
 
 #include <cmath>
 #include <utility>
@@ -148,7 +148,7 @@ void CLHarrisCorners::run()
 
     // Run corner candidate kernel
     _nonmax.map(true);
-    CPPScheduler::get().multithread(&_candidates);
+    Scheduler::get().schedule(&_candidates, Window::DimY);
     _nonmax.unmap();
 
     _corners->map(CLScheduler::get().queue(), true);

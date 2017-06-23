@@ -5,6 +5,7 @@ var structarm__compute_1_1_border_size =
     [ "BorderSize", "structarm__compute_1_1_border_size.xhtml#a44089024084b73c5b83e509518df48e0", null ],
     [ "BorderSize", "structarm__compute_1_1_border_size.xhtml#a10a8505b7c7458d1f60cac844d42e023", null ],
     [ "empty", "structarm__compute_1_1_border_size.xhtml#adffbf97e7b8b64e7cf32f0254cddf3c4", null ],
+    [ "limit", "structarm__compute_1_1_border_size.xhtml#a00ac5d6334fe3217b4ef49ea8dc61fb0", null ],
     [ "operator*", "structarm__compute_1_1_border_size.xhtml#a19da960d23eca69f8e65d52c741147e2", null ],
     [ "operator*=", "structarm__compute_1_1_border_size.xhtml#ac2ed52112076ed0fd2aab3fbfb758837", null ],
     [ "uniform", "structarm__compute_1_1_border_size.xhtml#a3057c6687da7d7d5674dcc49eba5736c", null ],

@@ -24,14 +24,14 @@
 #ifndef __ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__
 #define __ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__
 
-#include "arm_compute/core/CL/ICLSimple2DKernel.h"
+#include "arm_compute/core/CL/ICLSimple3DKernel.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
 /** Interface for the activation layer kernel. */
-class CLActivationLayerKernel : public ICLSimple2DKernel
+class CLActivationLayerKernel : public ICLSimple3DKernel
 {
 public:
     /** Set the input and output tensor.

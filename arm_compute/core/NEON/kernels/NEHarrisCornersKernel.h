@@ -57,7 +57,7 @@ public:
 public:
     /** Setup the kernel parameters
      *
-     * @param[in]  input1           Source image (gradient X). Data types supported: S16, S32
+     * @param[in]  input1           Source image (gradient X). Data types supported: S16/S32
      * @param[in]  input2           Source image (gradient Y). Data types supported: same as @ input1
      * @param[out] output           Destination image (harris score). Data types supported: F32
      * @param[in]  norm_factor      Normalization factor to use accordingly with the gradient size (Must be different from 0)

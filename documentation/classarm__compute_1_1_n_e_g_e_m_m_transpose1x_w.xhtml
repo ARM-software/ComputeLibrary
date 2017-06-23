@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: NEGEMMTranspose1xW Class Reference</title>
+<title>Compute Library: NEGEMMTranspose1xW Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.xhtml"><span>Files</span></a></li>
@@ -121,7 +122,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_g_e_m_m_tran
 </div><!--header-->
 <div class="contents">
 
-<p>Basic function to execute <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml" title="NEON kernel which transposes the elements of a matrix in chunks of 1x4 if the input data type is F32 ...">NEGEMMTranspose1xWKernel</a>.  
+<p>Basic function to execute <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml" title="NEON kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / ele...">NEGEMMTranspose1xWKernel</a>.  
  <a href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w.xhtml#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_n_e_g_e_m_m_transpose1x_w_8h_source.xhtml">NEGEMMTranspose1xW.h</a>&gt;</code></p>
@@ -150,7 +151,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Basic function to execute <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml" title="NEON kernel which transposes the elements of a matrix in chunks of 1x4 if the input data type is F32 ...">NEGEMMTranspose1xWKernel</a>. </p>
+<div class="textblock"><p>Basic function to execute <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml" title="NEON kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / ele...">NEGEMMTranspose1xWKernel</a>. </p>
 <p>This function calls the following NEON kernels:</p>
 <ol type="1">
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml">NEGEMMTranspose1xWKernel</a> </li>
@@ -185,7 +186,7 @@ Public Member Functions</h2></td></tr>
 <p>Initialise the kernel's inputs, output. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>First input tensor. Data type supported: F32, F16, U8. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>First input tensor. Data type supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32/ </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data type supported: same as <code>input</code> </td></tr>
   </table>
   </dd>
@@ -202,7 +203,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w.xhtml">NEGEMMTranspose1xW</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

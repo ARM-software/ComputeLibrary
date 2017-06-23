@@ -41,11 +41,18 @@ using namespace arm_compute;
 void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    TensorShape  output_shape{ input->info()->tensor_shape() };
+    const size_t transpose_w = 16 / input->info()->element_size();
+    output_shape.set(0, input->info()->dimension(1) * transpose_w);
+    output_shape.set(1, static_cast<size_t>(std::ceil((input->info()->dimension(0) / static_cast<float>(transpose_w)))));
+
+    // Output tensor auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(static_cast<float>(input->info()->dimension(0)) / 16.0f)) && (input->info()->data_type() == DataType::U8));
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(static_cast<float>(input->info()->dimension(0)) / 8.0f)) && (input->info()->data_type() == DataType::F16));
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) != std::ceil(static_cast<float>(input->info()->dimension(0)) / 4.0f)) && (input->info()->data_type() == DataType::F32));
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
     _input                                               = input;
     _output                                              = output;
@@ -96,4 +103,27 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
+}
+
+void CLGEMMTranspose1xWKernel::run(const Window &window, cl::CommandQueue &queue)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+
+    // Output is transposed
+    Window out_window(window);
+    out_window.set(Window::DimX, window.y());
+    out_window.set(Window::DimY, window.x());
+
+    Window in_slice  = window.first_slice_window_2D();
+    Window out_slice = out_window.first_slice_window_2D();
+
+    do
+    {
+        unsigned int idx = 0;
+        add_2D_tensor_argument(idx, _input, in_slice);
+        add_2D_tensor_argument(idx, _output, out_slice);
+        enqueue(queue, *this, in_slice, _lws_hint);
+    }
+    while(window.slide_window_slice_2D(in_slice) && out_window.slide_window_slice_2D(out_slice));
 }

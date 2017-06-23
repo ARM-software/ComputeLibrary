@@ -121,13 +121,13 @@ __kernel void normalization_layer_cross_map(TENSOR3D_DECLARATION(input),
  * @param[in]  kappa                                       Kappa parameter in the normalization equation
  * @param[in]  radius                                      Number of elements on the right or left side to normalize across
  */
-__kernel void normalization_layer_in_map(TENSOR3D_DECLARATION(input),
-                                         TENSOR3D_DECLARATION(squared_input),
-                                         TENSOR3D_DECLARATION(output),
-                                         float coeff,
-                                         float beta,
-                                         float kappa,
-                                         uint  radius)
+__kernel void normalization_layer_in_map_1D(TENSOR3D_DECLARATION(input),
+                                            TENSOR3D_DECLARATION(squared_input),
+                                            TENSOR3D_DECLARATION(output),
+                                            float coeff,
+                                            float beta,
+                                            float kappa,
+                                            uint  radius)
 {
     Tensor3D in         = CONVERT_TO_TENSOR3D_STRUCT(input);
     Tensor3D squared_in = CONVERT_TO_TENSOR3D_STRUCT(squared_input);

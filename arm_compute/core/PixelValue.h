@@ -101,6 +101,7 @@ public:
             uint8_t  rgbx[4]; /**< 4 channels: RGBX8888 */
             float    f32;     /**< Single channel float 32 */
             uint8_t  u8;      /**< Single channel U8 */
+            int8_t   s8;      /**< Single channel S8 */
             uint16_t u16;     /**< Single channel U16 */
             int16_t  s16;     /**< Single channel S16 */
             uint32_t u32;     /**< Single channel U32 */
@@ -113,6 +114,14 @@ public:
     void get(uint8_t &v) const
     {
         v = value.u8;
+    }
+    /** Interpret the pixel value as a S8
+     *
+     * @param[out] v Returned value
+     */
+    void get(int8_t &v) const
+    {
+        v = value.s8;
     }
     /** Interpret the pixel value as a U16
      *

@@ -1,4 +1,27 @@
 var searchData=
 [
-  ['bitwise_5fop_2ecl',['bitwise_op.cl',['../bitwise__op_8cl.xhtml',1,'']]]
+  ['absdiff_2ecl',['absdiff.cl',['../absdiff_8cl.xhtml',1,'']]],
+  ['absolutedifference_2ecpp',['AbsoluteDifference.cpp',['../_absolute_difference_8cpp.xhtml',1,'']]],
+  ['accesswindowautopadding_2eh',['AccessWindowAutoPadding.h',['../_access_window_auto_padding_8h.xhtml',1,'']]],
+  ['accesswindowstatic_2eh',['AccessWindowStatic.h',['../_access_window_static_8h.xhtml',1,'']]],
+  ['accesswindowtranspose_2eh',['AccessWindowTranspose.h',['../_access_window_transpose_8h.xhtml',1,'']]],
+  ['accumulate_2ecl',['accumulate.cl',['../accumulate_8cl.xhtml',1,'']]],
+  ['accumulate_2ecpp',['Accumulate.cpp',['../_accumulate_8cpp.xhtml',1,'']]],
+  ['accumulatesquared_2ecpp',['AccumulateSquared.cpp',['../_accumulate_squared_8cpp.xhtml',1,'']]],
+  ['accumulateweighted_2ecpp',['AccumulateWeighted.cpp',['../_accumulate_weighted_8cpp.xhtml',1,'']]],
+  ['activation_5flayer_2ecl',['activation_layer.cl',['../activation__layer_8cl.xhtml',1,'']]],
+  ['activationfunctiondataset_2eh',['ActivationFunctionDataset.h',['../_activation_function_dataset_8h.xhtml',1,'']]],
+  ['activationlayer_2ecpp',['ActivationLayer.cpp',['../benchmark_2_c_l_2_activation_layer_8cpp.xhtml',1,'']]],
+  ['activationlayer_2ecpp',['ActivationLayer.cpp',['../validation_2_n_e_o_n_2_activation_layer_8cpp.xhtml',1,'']]],
+  ['activationlayer_2ecpp',['ActivationLayer.cpp',['../benchmark_2_n_e_o_n_2_activation_layer_8cpp.xhtml',1,'']]],
+  ['activationlayer_2eh',['ActivationLayer.h',['../_activation_layer_8h.xhtml',1,'']]],
+  ['activationlayerdataset_2eh',['ActivationLayerDataset.h',['../_activation_layer_dataset_8h.xhtml',1,'']]],
+  ['alexnet_2ecpp',['AlexNet.cpp',['../_c_l_2_alex_net_8cpp.xhtml',1,'']]],
+  ['alexnet_2ecpp',['AlexNet.cpp',['../_n_e_o_n_2_alex_net_8cpp.xhtml',1,'']]],
+  ['alexnet_2eh',['AlexNet.h',['../benchmark_2system__tests_2common_2_alex_net_8h.xhtml',1,'']]],
+  ['alexnet_2eh',['AlexNet.h',['../model__objects_2_alex_net_8h.xhtml',1,'']]],
+  ['arithmetic_5fop_2ecl',['arithmetic_op.cl',['../arithmetic__op_8cl.xhtml',1,'']]],
+  ['arithmeticaddition_2ecpp',['ArithmeticAddition.cpp',['../_arithmetic_addition_8cpp.xhtml',1,'']]],
+  ['arithmeticsubtraction_2ecpp',['ArithmeticSubtraction.cpp',['../_arithmetic_subtraction_8cpp.xhtml',1,'']]],
+  ['array_2eh',['Array.h',['../_array_8h.xhtml',1,'']]]
 ];

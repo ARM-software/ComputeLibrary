@@ -153,10 +153,10 @@ void NECannyEdge::run()
     _border_mag_gradient.run(_border_mag_gradient.window());
 
     // Run gradient
-    NEScheduler::get().multithread(_gradient.get());
+    NEScheduler::get().schedule(_gradient.get(), Window::DimY);
 
     // Run non-maxima suppression
-    NEScheduler::get().multithread(&_non_max_suppr);
+    NEScheduler::get().schedule(&_non_max_suppr, Window::DimY);
 
     ARM_COMPUTE_ERROR_ON(_output->buffer() == nullptr);
     memset(_output->buffer(), 0, _output->info()->total_size());

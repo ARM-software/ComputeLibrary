@@ -24,10 +24,10 @@
 #ifndef __ARM_COMPUTE_NEHOGMULTIDETECTION_H__
 #define __ARM_COMPUTE_NEHOGMULTIDETECTION_H__
 
+#include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/IMultiHOG.h"
 #include "arm_compute/core/NEON/kernels/NEHOGDescriptorKernel.h"
-#include "arm_compute/core/NEON/kernels/NEHOGNonMaximaSuppressionKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEHOGDetector.h"
 #include "arm_compute/runtime/NEON/functions/NEHOGGradient.h"
@@ -41,7 +41,7 @@ namespace arm_compute
  * -# @ref NEHOGOrientationBinningKernel
  * -# @ref NEHOGBlockNormalizationKernel
  * -# @ref NEHOGDetector
- * -# @ref NEHOGNonMaximaSuppressionKernel (executed if non_maxima_suppression == true)
+ * -# @ref CPPDetectionWindowNonMaximaSuppressionKernel (executed if non_maxima_suppression == true)
  *
  * @note This implementation works if all the HOG data-objects within the IMultiHOG container have the same:
  *       -# Phase type
@@ -85,20 +85,20 @@ public:
     void run() override;
 
 private:
-    NEHOGGradient                                    _gradient_kernel;
-    std::unique_ptr<NEHOGOrientationBinningKernel[]> _orient_bin_kernel;
-    std::unique_ptr<NEHOGBlockNormalizationKernel[]> _block_norm_kernel;
-    std::unique_ptr<NEHOGDetector[]>                 _hog_detect_kernel;
-    std::unique_ptr<NEHOGNonMaximaSuppressionKernel> _non_maxima_kernel;
-    std::unique_ptr<Tensor[]>                        _hog_space;
-    std::unique_ptr<Tensor[]>                        _hog_norm_space;
-    IDetectionWindowArray                           *_detection_windows;
-    Tensor                                           _mag;
-    Tensor                                           _phase;
-    bool                                             _non_maxima_suppression;
-    size_t                                           _num_orient_bin_kernel;
-    size_t                                           _num_block_norm_kernel;
-    size_t                                           _num_hog_detect_kernel;
+    NEHOGGradient                                                 _gradient_kernel;
+    std::unique_ptr<NEHOGOrientationBinningKernel[]>              _orient_bin_kernel;
+    std::unique_ptr<NEHOGBlockNormalizationKernel[]>              _block_norm_kernel;
+    std::unique_ptr<NEHOGDetector[]>                              _hog_detect_kernel;
+    std::unique_ptr<CPPDetectionWindowNonMaximaSuppressionKernel> _non_maxima_kernel;
+    std::unique_ptr<Tensor[]>                                     _hog_space;
+    std::unique_ptr<Tensor[]>                                     _hog_norm_space;
+    IDetectionWindowArray                                        *_detection_windows;
+    Tensor                                                        _mag;
+    Tensor                                                        _phase;
+    bool                                                          _non_maxima_suppression;
+    size_t                                                        _num_orient_bin_kernel;
+    size_t                                                        _num_block_norm_kernel;
+    size_t                                                        _num_hog_detect_kernel;
 };
 }
 

@@ -64,7 +64,7 @@ public:
 protected:
     NEGaussian5x5HorKernel  _kernel_hor;     /**< kernel for horizontal pass */
     NEGaussian5x5VertKernel _kernel_vert;    /**< kernel for vertical pass */
-    Tensor                  _tmp;            /** temporary buffer for output of horizontal pass */
+    Tensor                  _tmp;            /**< temporary buffer for output of horizontal pass */
     NEFillBorderKernel      _border_handler; /**< kernel to handle tensor borders */
 };
 }

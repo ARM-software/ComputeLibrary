@@ -37,7 +37,6 @@ namespace arm_compute
 class Coordinates : public Dimensions<int>
 {
 public:
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
     /** Constructor to initialize the coordinates.
      *
      * @param[in] coords Values to initialize the dimensions.
@@ -47,7 +46,6 @@ public:
         : Dimensions{ coords... }
     {
     }
-#endif
     /** Allow instances of this class to be copy constructed */
     constexpr Coordinates(const Coordinates &) = default;
     /** Allow instances of this class to be copied */

@@ -39,8 +39,8 @@ void ITensor::copy_from(const ITensor &src)
         return;
     }
 
-    const TensorInfo *src_info = src.info();
-    TensorInfo       *dst_info = this->info();
+    const ITensorInfo *src_info = src.info();
+    ITensorInfo       *dst_info = this->info();
 
     ARM_COMPUTE_ERROR_ON(src_info->num_dimensions() > dst_info->num_dimensions());
     ARM_COMPUTE_ERROR_ON(src_info->num_channels() != dst_info->num_channels());

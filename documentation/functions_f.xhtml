@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: Data Fields</title>
+<title>Compute Library: Data Fields</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.xhtml"><span>Files</span></a></li>
@@ -89,7 +90,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li class="current"><a href="functions.xhtml"><span>All</span></a></li>
       <li><a href="functions_func.xhtml"><span>Functions</span></a></li>
       <li><a href="functions_vars.xhtml"><span>Variables</span></a></li>
+      <li><a href="functions_type.xhtml"><span>Typedefs</span></a></li>
       <li><a href="functions_enum.xhtml"><span>Enumerations</span></a></li>
+      <li><a href="functions_eval.xhtml"><span>Enumerator</span></a></li>
+      <li><a href="functions_rela.xhtml"><span>Related&#160;Functions</span></a></li>
     </ul>
   </div>
   <div id="navrow4" class="tabs3">
@@ -159,8 +163,30 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 <li>f32
 : <a class="el" href="classarm__compute_1_1_pixel_value.xhtml#a7d886905c667c4e8e91251b6a3a98f39">PixelValue</a>
 </li>
+<li>false_value
+: <a class="el" href="classarm__compute_1_1test_1_1_threshold_data_object.xhtml#a8f9511319a4bb3d68d21804f420a8700">ThresholdDataObject</a>
+</li>
+<li>fc_layer
+: <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_fully_connected_layer.xhtml#aef95e5f9152f736f58d6de6f5890a75f">FullyConnectedLayer&lt; DataSet, TensorType, Accessor, Function, dt &gt;</a>
+</li>
+<li>fill()
+: <a class="el" href="classarm__compute_1_1test_1_1_tensor_library.xhtml#a80a7b5ae084bf22b91bc5f68a06711c0">TensorLibrary</a>
+</li>
 <li>fill_image()
-: <a class="el" href="classtest__helpers_1_1_p_p_m_loader.xhtml#a1672610b872bef30d0dc2333a0ffc402">PPMLoader</a>
+: <a class="el" href="classarm__compute_1_1utils_1_1_p_p_m_loader.xhtml#a1672610b872bef30d0dc2333a0ffc402">PPMLoader</a>
+</li>
+<li>fill_layer_data()
+: <a class="el" href="classarm__compute_1_1test_1_1_tensor_library.xhtml#ad85dc4c57a27c44d114c573b9a80bad6">TensorLibrary</a>
+</li>
+<li>fill_random()
+: <a class="el" href="classarm__compute_1_1test_1_1model__objects_1_1_alex_net.xhtml#a3b778cda9ac3fad08e7217edbcb942e0">AlexNet&lt; ITensorType, TensorType, SubTensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction, dt, fixed_point_position &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1model__objects_1_1_le_net5.xhtml#a3b778cda9ac3fad08e7217edbcb942e0">LeNet5&lt; TensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, FullyConnectedLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;</a>
+</li>
+<li>fill_tensor_uniform()
+: <a class="el" href="classarm__compute_1_1test_1_1_tensor_library.xhtml#abb6f25295592e886976520216187eed7">TensorLibrary</a>
+</li>
+<li>find()
+: <a class="el" href="classarm__compute_1_1test_1_1_tensor_cache.xhtml#ab9838ae8ffe3b1f98e1330d3ee260f98">TensorCache</a>
 </li>
 <li>first_slice_window_1D()
 : <a class="el" href="classarm__compute_1_1_window.xhtml#a3676505cf898acf69de5cd1724ae9330">Window</a>
@@ -171,21 +197,66 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 <li>first_slice_window_3D()
 : <a class="el" href="classarm__compute_1_1_window.xhtml#a76441f1deaa44bcc1a3b402680ed646b">Window</a>
 </li>
-<li>fixed_point_pos()
-: <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#aac568c9183b365ddb66417b54ab8bf3d">TensorInfo</a>
+<li>fixed_one()
+: <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr.xhtml#a9c4b593f19fb9053fd52697eaa30c5d7">constant_expr&lt; T &gt;</a>
 </li>
-<li>force_number_of_threads()
-: <a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#ae9dc1846ff1612778bbac85d46344aef">CPPScheduler</a>
+<li>fixed_point()
+: <a class="el" href="classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#ad9fb776e0556cf222c31feb9f372ea32">fixed_point&lt; T &gt;</a>
+</li>
+<li>fixed_point_operation()
+: <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_reference_c_p_p.xhtml#aa72a69edbdb11aaa12f83881e038f1d5">ReferenceCPP</a>
+</li>
+<li>fixed_point_operation_visitor()
+: <a class="el" href="structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fixed__point__operation__visitor.xhtml#a05d2d5024a44a12f31eaedb4c045061c">fixed_point_operation_visitor</a>
+</li>
+<li>fixed_point_pixel_wise_multiplication()
+: <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_reference_c_p_p.xhtml#aa07ff8d0956d3fb1a0ff2223d8ab7a93">ReferenceCPP</a>
+</li>
+<li>fixed_point_pixel_wise_multiplication_visitor()
+: <a class="el" href="structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fixed__point__pixel__wise__multiplication__visitor.xhtml#ae347a7e4d8d15797909d5ffaae062f37">fixed_point_pixel_wise_multiplication_visitor</a>
+</li>
+<li>fixed_point_position()
+: <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#ab21a362740e892b6e913bd8db03b0e67">ITensorInfo</a>
+, <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SubTensorInfo</a>
+, <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">TensorInfo</a>
+, <a class="el" href="classarm__compute_1_1test_1_1cl_1_1_c_l_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">CLAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#ab21a362740e892b6e913bd8db03b0e67">IAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1neon_1_1_n_e_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">NEAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml#a16bb8940c9d6aff998db9bd0ba011ffe">RawTensor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_tensor.xhtml#a16bb8940c9d6aff998db9bd0ba011ffe">Tensor&lt; T &gt;</a>
+</li>
+<li>fixed_step()
+: <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr.xhtml#a125e978e1d6df0f6d9f738b0c580f980">constant_expr&lt; T &gt;</a>
+</li>
+<li>FixedPointDataTypes()
+: <a class="el" href="classarm__compute_1_1test_1_1_fixed_point_data_types.xhtml#a2fafd58581678f0ad1ffc819bb9271d1">FixedPointDataTypes</a>
+</li>
+<li>FloatDataTypes()
+: <a class="el" href="classarm__compute_1_1test_1_1_float_data_types.xhtml#a5e0057b8236a828f8559f8160511ddcd">FloatDataTypes</a>
 </li>
 <li>format()
-: <a class="el" href="classarm__compute_1_1_multi_image_info.xhtml#a0c875a3203d902e2ad6bc3045355e69e">MultiImageInfo</a>
+: <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">ITensorInfo</a>
+, <a class="el" href="classarm__compute_1_1_multi_image_info.xhtml#a0c875a3203d902e2ad6bc3045355e69e">MultiImageInfo</a>
 , <a class="el" href="classarm__compute_1_1_pyramid_info.xhtml#a0c875a3203d902e2ad6bc3045355e69e">PyramidInfo</a>
-, <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a0c875a3203d902e2ad6bc3045355e69e">TensorInfo</a>
+, <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SubTensorInfo</a>
+, <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">TensorInfo</a>
+, <a class="el" href="classarm__compute_1_1test_1_1cl_1_1_c_l_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">CLAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">IAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1neon_1_1_n_e_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">NEAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml#a0c875a3203d902e2ad6bc3045355e69e">RawTensor</a>
 </li>
 <li>free()
-: <a class="el" href="classarm__compute_1_1_c_l_tensor_allocator.xhtml#a1468b0adb6ec3f9d38aa7d60b8a91974">CLTensorAllocator</a>
+: <a class="el" href="classarm__compute_1_1_c_l_h_o_g.xhtml#a1468b0adb6ec3f9d38aa7d60b8a91974">CLHOG</a>
+, <a class="el" href="classarm__compute_1_1_c_l_tensor_allocator.xhtml#a1468b0adb6ec3f9d38aa7d60b8a91974">CLTensorAllocator</a>
+, <a class="el" href="classarm__compute_1_1_i_c_l_h_o_g.xhtml#a1781eecaabd2bc97d074437d01b2c683">ICLHOG</a>
 , <a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#a1781eecaabd2bc97d074437d01b2c683">ITensorAllocator</a>
 , <a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#a1468b0adb6ec3f9d38aa7d60b8a91974">TensorAllocator</a>
+</li>
+<li>fully_connected_layer()
+: <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_reference_c_p_p.xhtml#a69eb15dea2a0579d8c33e2b9e07a2fb1">ReferenceCPP</a>
+</li>
+<li>fully_connected_layer_visitor()
+: <a class="el" href="structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fully__connected__layer__visitor.xhtml#a5f9bbb7aa8db60b6a259ef1145c3e048">fully_connected_layer_visitor</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -193,7 +264,7 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

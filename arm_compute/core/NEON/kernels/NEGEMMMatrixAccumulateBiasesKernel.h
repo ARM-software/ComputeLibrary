@@ -47,7 +47,7 @@ public:
     ~NEGEMMMatrixAccumulateBiasesKernel() = default;
     /** Set the accumulate buffer and the biases of the kernel.
      *
-     * @param[in, out] accum  The accumulate tensor to convert. Data type supported: F32
+     * @param[in, out] accum  The accumulate tensor to convert. Data type supported: QS8/F32
      * @param[in]      biases The shared biases tensor to append. It must be 1D Tensor. Data type supported: Same as @p input
      */
     void configure(ITensor *accum, const ITensor *biases);

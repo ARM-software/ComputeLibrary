@@ -34,7 +34,7 @@
 namespace arm_compute
 {
 class Window;
-class TensorInfo;
+class ITensorInfo;
 
 /** Implementation of a static rectangular access pattern.
  *
@@ -54,7 +54,7 @@ public:
      * @param[in]     end_x   End of the access in X direction.
      * @param[in]     end_y   End of the access in Y direction.
      */
-    AccessWindowStatic(TensorInfo *info, int start_x, int start_y, int end_x, int end_y);
+    AccessWindowStatic(ITensorInfo *info, int start_x, int start_y, int end_x, int end_y);
 
     AccessWindowStatic(const AccessWindowStatic &) = delete;
     AccessWindowStatic &operator=(const AccessWindowStatic &) = delete;
@@ -82,11 +82,11 @@ public:
     bool update_padding_if_needed(const Window &window) const override;
     ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
 
-    TensorInfo *_info;
-    int         _start_x;
-    int         _start_y;
-    int         _end_x;
-    int         _end_y;
+    ITensorInfo *_info;
+    int          _start_x;
+    int          _start_y;
+    int          _end_x;
+    int          _end_y;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_IACCESS_WINDOW_STATIC_H__*/

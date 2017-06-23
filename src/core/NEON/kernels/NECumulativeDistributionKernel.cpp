@@ -47,6 +47,26 @@ bool NECumulativeDistributionKernel::is_parallelisable() const
     return false;
 }
 
+void NECumulativeDistributionKernel::configure(const IImage *input, const IDistribution1D *distribution, IDistribution1D *cumulative_sum, ILut *output)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, distribution, cumulative_sum, output);
+    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
+
+    set_format_if_unknown(*input->info(), Format::U8);
+
+    ARM_COMPUTE_ERROR_ON(distribution->num_bins() != cumulative_sum->num_bins());
+    ARM_COMPUTE_ERROR_ON(distribution->num_bins() != output->num_elements());
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON(input->info()->data_type() != output->type());
+
+    _input          = input;
+    _distribution   = distribution;
+    _cumulative_sum = cumulative_sum;
+    _output         = output;
+
+    INEKernel::configure(calculate_max_window(*input->info()));
+}
+
 void NECumulativeDistributionKernel::run(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -87,20 +107,4 @@ void NECumulativeDistributionKernel::run(const Window &window)
             output[x] = lround((cumulative_sum[x] - cd_min) / diff * 255.0f);
         }
     }
-}
-
-void NECumulativeDistributionKernel::configure(const IImage *input, const IDistribution1D *distribution, IDistribution1D *cumulative_sum, ILut *output)
-{
-    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON(nullptr == distribution);
-    ARM_COMPUTE_ERROR_ON(nullptr == cumulative_sum);
-    ARM_COMPUTE_ERROR_ON(nullptr == output);
-
-    _input          = input;
-    _distribution   = distribution;
-    _cumulative_sum = cumulative_sum;
-    _output         = output;
-
-    INEKernel::configure(calculate_max_window(*input->info()));
 }

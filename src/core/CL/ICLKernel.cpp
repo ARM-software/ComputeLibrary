@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/CL/ICLKernel.h"
 
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -30,6 +31,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include <cstddef>
 
@@ -59,7 +61,7 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
 }
 
 ICLKernel::ICLKernel()
-    : _kernel(nullptr), _lws_hint(cl::Range_128_1)
+    : _kernel(nullptr), _lws_hint(cl::Range_128_1), _target(CLScheduler::get().target())
 {
 }
 
@@ -78,10 +80,9 @@ template <unsigned int dimension_size>
 void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, const Window &window)
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
-    ARM_COMPUTE_ERROR_ON_WINDOW_DIMENSIONS_GTE(window, tensor->info()->num_dimensions());
 
-    const TensorInfo *info    = tensor->info();
-    const Strides    &strides = info->strides_in_bytes();
+    const ITensorInfo *info    = tensor->info();
+    const Strides     &strides = info->strides_in_bytes();
 
     // Calculate offset to the start of the window
     unsigned int offset_first_element = info->offset_first_element_in_bytes();
@@ -135,4 +136,19 @@ unsigned int ICLKernel::num_arguments_per_2D_tensor() const
 unsigned int ICLKernel::num_arguments_per_3D_tensor() const
 {
     return num_arguments_per_tensor<3>();
+}
+
+void ICLKernel::set_target(cl::Device &device)
+{
+    _target = get_target_from_device(device);
+}
+
+void ICLKernel::set_target(GPUTarget target)
+{
+    _target = target;
+}
+
+GPUTarget ICLKernel::get_target() const
+{
+    return _target;
 }

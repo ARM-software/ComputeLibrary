@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['load_5fand_5fset_5fmask',['LOAD_AND_SET_MASK',['../fast__corners_8cl.xhtml#a9da9e257c05fa101dacfaaedd305f5bb',1,'fast_corners.cl']]]
+  ['hysteresis_5flocal_5fstack_5fl1',['hysteresis_local_stack_L1',['../canny_8cl.xhtml#a242e5ec23ae26cd2dfa5eab5ae68a0f1',1,'canny.cl']]],
+  ['hysteresis_5flocal_5fstack_5fl2',['hysteresis_local_stack_L2',['../canny_8cl.xhtml#aa55093fb165fb76898efb3ba80f62bae',1,'canny.cl']]]
 ];

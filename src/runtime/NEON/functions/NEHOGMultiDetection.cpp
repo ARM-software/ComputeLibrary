@@ -115,7 +115,7 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
     _orient_bin_kernel = arm_compute::cpp14::make_unique<NEHOGOrientationBinningKernel[]>(_num_orient_bin_kernel);
     _block_norm_kernel = arm_compute::cpp14::make_unique<NEHOGBlockNormalizationKernel[]>(_num_block_norm_kernel);
     _hog_detect_kernel = arm_compute::cpp14::make_unique<NEHOGDetector[]>(_num_hog_detect_kernel);
-    _non_maxima_kernel = arm_compute::cpp14::make_unique<NEHOGNonMaximaSuppressionKernel>();
+    _non_maxima_kernel = arm_compute::cpp14::make_unique<CPPDetectionWindowNonMaximaSuppressionKernel>();
     _hog_space         = arm_compute::cpp14::make_unique<Tensor[]>(_num_orient_bin_kernel);
     _hog_norm_space    = arm_compute::cpp14::make_unique<Tensor[]>(_num_block_norm_kernel);
 
@@ -208,13 +208,13 @@ void NEHOGMultiDetection::run()
     // Run orientation binning kernel
     for(size_t i = 0; i < _num_orient_bin_kernel; ++i)
     {
-        NEScheduler::get().multithread(_orient_bin_kernel.get() + i);
+        NEScheduler::get().schedule(_orient_bin_kernel.get() + i, Window::DimY);
     }
 
     // Run block normalization kernel
     for(size_t i = 0; i < _num_block_norm_kernel; ++i)
     {
-        NEScheduler::get().multithread(_block_norm_kernel.get() + i);
+        NEScheduler::get().schedule(_block_norm_kernel.get() + i, Window::DimY);
     }
 
     // Run HOG detector kernel

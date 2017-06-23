@@ -1,12 +1,13 @@
 var classarm__compute_1_1_dimensions =
 [
+    [ "Dimensions", "classarm__compute_1_1_dimensions.xhtml#aa521fcebc508ef8447da413cc64d020a", null ],
     [ "Dimensions", "classarm__compute_1_1_dimensions.xhtml#a0d3c59537291735849c740364496a41c", null ],
     [ "Dimensions", "classarm__compute_1_1_dimensions.xhtml#aa2c609345b3b6fa8da2486f75fff8ed8", null ],
-    [ "~Dimensions", "classarm__compute_1_1_dimensions.xhtml#ab5908ac7ee6593782fd6ec6caa0b70ff", null ],
     [ "begin", "classarm__compute_1_1_dimensions.xhtml#ab2878b67ca384a699c1270900b31290b", null ],
     [ "begin", "classarm__compute_1_1_dimensions.xhtml#aeade0eaf149acac842e98d99d37e39c7", null ],
     [ "cbegin", "classarm__compute_1_1_dimensions.xhtml#a4498730adaf901d945c12841df994bba", null ],
     [ "cend", "classarm__compute_1_1_dimensions.xhtml#adf9b6d55d708c285d58511a780e937fc", null ],
+    [ "collapse", "classarm__compute_1_1_dimensions.xhtml#a8e15e87871211f98c2b566137e38ef99", null ],
     [ "end", "classarm__compute_1_1_dimensions.xhtml#ac684b52c6197edff9cccb3abd1e41f59", null ],
     [ "end", "classarm__compute_1_1_dimensions.xhtml#a819e633cd63b404cf9938bc6e755c170", null ],
     [ "num_dimensions", "classarm__compute_1_1_dimensions.xhtml#a0f59f175e7682c7ed5f4ea30ef687834", null ],

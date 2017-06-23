@@ -50,9 +50,9 @@ public:
     /** Initialise the kernel's inputs, output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
-     * @note GEMM: The tensors a, b, c, d must have the same data type. All are either F32 or F16. You should not mix data types when calling this function.
+     * @note GEMM: The tensors a, b, c, d must have the same data type. You should not mix data types when calling this function.
      *
-     * @param[in]  a     First input tensor  (Matrix A or Vector A). Data type supported: F32, F16.
+     * @param[in]  a     First input tensor  (Matrix A or Vector A). Data type supported: QS8/F16/F32
      * @param[in]  b     Second input tensor (Matrix B). Data type supported: same as @p a
      * @param[in]  c     Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a
      * @param[out] d     Output tensor. Data type supported: same as @p a

@@ -35,11 +35,11 @@ class ITensor;
 class NEArithmeticSubtraction : public INESimpleFunction
 {
 public:
-    /** Initialise the kernel's inputs, output and convertion policy.
+    /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in]  input1 First tensor input. Data types supported: U8 or S16.
-     * @param[in]  input2 Second tensor input. Data types supported: U8 or S16.
-     * @param[out] output Output tensor. Data types supported: U8 or S16.
+     * @param[in]  input1 First tensor input. Data types supported: U8/S16.
+     * @param[in]  input2 Second tensor input. Data types supported: U8/S16.
+     * @param[out] output Output tensor. Data types supported: U8/S16.
      * @param[in]  policy Policy to use to handle overflow.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);

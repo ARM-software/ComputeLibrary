@@ -49,7 +49,7 @@ public:
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in,out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
-     * @param[out]    output                Destination tensor, Data types supported: U8 or S16.
+     * @param[out]    output                Destination tensor, Data types supported: U8/S16.
      * @param[in]     conv                  Matrix_size x matrix_size S16 coefficients structured as a row-major 2D array in a linear buffer.
      * @param[in]     scale                 Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
      * @param[in]     border_mode           Strategy to use for borders.

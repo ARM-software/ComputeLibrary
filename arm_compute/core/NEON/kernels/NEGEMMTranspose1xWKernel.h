@@ -30,9 +30,9 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel which transposes the elements of a matrix in chunks of 1x4 if the input data type is F32 or in chunks of 1x8 if the input data type is F16.
+/** NEON kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor)
  *
- * Following an example of how the transposition1xW works when the input data type is F32
+ * Following an example of how the transposition1xW works when the input data is F32
  *
  * @f[
  * \left( \begin{array}{cccc}
@@ -62,8 +62,7 @@ class ITensor;
  * \end{array} \right)
  * @f]
  *
- * @note If the input data type is F32, the output matrix will have the following shape: [ height * 4, width / 4 ]
- * @note If the input data type is F16, the output matrix will have the following shape: [ height * 8, width / 8 ]
+ * @note The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor)
  *
  */
 class NEGEMMTranspose1xWKernel : public INESimpleKernel
@@ -71,7 +70,7 @@ class NEGEMMTranspose1xWKernel : public INESimpleKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: F32, 16.
+     * @param[in]  input  Input tensor. Data types supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32
      * @param[out] output Output tensor. Data type supported: same as @p input.
      */
     void configure(const ITensor *input, ITensor *output);

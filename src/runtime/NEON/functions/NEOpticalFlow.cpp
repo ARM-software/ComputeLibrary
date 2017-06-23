@@ -113,7 +113,7 @@ void NEOpticalFlow::run()
         // Run Scharr kernel
         _func_scharr[level - 1].run();
 
-        /* Run Lucas-Kanade kernel */
-        NEScheduler::get().multithread(_kernel_tracker.get() + level - 1, Window::DimX);
+        // Run Lucas-Kanade kernel
+        NEScheduler::get().schedule(_kernel_tracker.get() + level - 1, Window::DimX);
     }
 }

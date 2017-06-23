@@ -26,10 +26,10 @@
 #include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
-#include "test_helpers/Utils.h"
+#include "utils/Utils.h"
 
 using namespace arm_compute;
-using namespace test_helpers;
+using namespace utils;
 
 /** Example demonstrating how to use both CL and NEON functions in the same pipeline
  *
@@ -122,5 +122,5 @@ void main_neoncl_scale_median_gaussian(int argc, const char **argv)
  */
 int main(int argc, const char **argv)
 {
-    return test_helpers::run_example(argc, argv, main_neoncl_scale_median_gaussian);
+    return utils::run_example(argc, argv, main_neoncl_scale_median_gaussian);
 }

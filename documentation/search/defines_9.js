@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['phase_5fop',['PHASE_OP',['../magnitude__phase_8cl.xhtml#a4434551334149479f843f87424bbb8c8',1,'magnitude_phase.cl']]],
-  ['pool_5fop',['POOL_OP',['../pooling__layer_8cl.xhtml#a482ef7d59a5f474ca126e737c7f0978a',1,'pooling_layer.cl']]]
+  ['load_5fand_5fset_5fmask',['LOAD_AND_SET_MASK',['../fast__corners_8cl.xhtml#a9da9e257c05fa101dacfaaedd305f5bb',1,'fast_corners.cl']]]
 ];

@@ -51,39 +51,84 @@ inline float16x8_t harris_score(float16x8_t gx2, float16x8_t gy2, float16x8_t gx
 {
     static const float16x8_t zero = vdupq_n_f16(0.f);
 
-    /* Trace^2 */
+    // Trace^2
     float16x8_t trace2 = vaddq_f16(gx2, gy2);
     trace2             = vmulq_f16(trace2, trace2);
 
-    /* Det(A) */
+    // Det(A)
     float16x8_t det = vmulq_f16(gx2, gy2);
     det             = vfmsq_f16(det, gxgy, gxgy);
 
-    /* Det(A) - sensitivity * trace^2 */
+    // Det(A) - sensitivity * trace^2
     const float16x8_t mc = vfmsq_f16(det, vdupq_n_f16(sensitivity), trace2);
 
-    /* mc > strength_thresh */
+    // mc > strength_thresh
     const uint16x8_t mask = vcgtq_f16(mc, vdupq_n_f16(strength_thresh));
 
     return vbslq_f16(mask, mc, zero);
 }
 
 template <size_t block_size>
-inline void harris_score_FLOAT_FLOAT_FLOAT(float16x8_t low_gx, float16x8_t low_gy, float16x8_t high_gx, float16x8_t high_gy, float16x8_t &gx2, float16x8_t &gy2, float16x8_t &gxgy,
-                                           float norm_factor)
+inline void harris_score1xN_FLOAT_FLOAT_FLOAT(float16x8_t low_gx, float16x8_t low_gy, float16x8_t high_gx, float16x8_t high_gy, float16x8_t &gx2, float16x8_t &gy2, float16x8_t &gxgy,
+                                              float norm_factor)
 {
     const float16x8_t norm_factor_fp16 = vdupq_n_f16(norm_factor);
 
-    /* Normalize */
+    // Normalize
     low_gx  = vmulq_f16(low_gx, norm_factor_fp16);
     low_gy  = vmulq_f16(low_gy, norm_factor_fp16);
     high_gx = vmulq_f16(high_gx, norm_factor_fp16);
     high_gy = vmulq_f16(high_gy, norm_factor_fp16);
 
-    for(size_t i = 0; i < block_size; ++i)
+    float16x8_t gx = vextq_f16(low_gx, high_gx, 0);
+    float16x8_t gy = vextq_f16(low_gy, high_gy, 0);
+
+    gx2  = vfmaq_f16(gx2, gx, gx);
+    gy2  = vfmaq_f16(gy2, gy, gy);
+    gxgy = vfmaq_f16(gxgy, gx, gy);
+
+    gx = vextq_f16(low_gx, high_gx, 1);
+    gy = vextq_f16(low_gy, high_gy, 1);
+
+    gx2  = vfmaq_f16(gx2, gx, gx);
+    gy2  = vfmaq_f16(gy2, gy, gy);
+    gxgy = vfmaq_f16(gxgy, gx, gy);
+
+    gx = vextq_f16(low_gx, high_gx, 2);
+    gy = vextq_f16(low_gy, high_gy, 2);
+
+    gx2  = vfmaq_f16(gx2, gx, gx);
+    gy2  = vfmaq_f16(gy2, gy, gy);
+    gxgy = vfmaq_f16(gxgy, gx, gy);
+
+    if(block_size > 3)
     {
-        const float16x8_t gx = vextq_f16(low_gx, high_gx, i);
-        const float16x8_t gy = vextq_f16(low_gy, high_gy, i);
+        gx = vextq_f16(low_gx, high_gx, 3);
+        gy = vextq_f16(low_gy, high_gy, 3);
+
+        gx2  = vfmaq_f16(gx2, gx, gx);
+        gy2  = vfmaq_f16(gy2, gy, gy);
+        gxgy = vfmaq_f16(gxgy, gx, gy);
+
+        gx = vextq_f16(low_gx, high_gx, 4);
+        gy = vextq_f16(low_gy, high_gy, 4);
+
+        gx2  = vfmaq_f16(gx2, gx, gx);
+        gy2  = vfmaq_f16(gy2, gy, gy);
+        gxgy = vfmaq_f16(gxgy, gx, gy);
+    }
+
+    if(block_size == 7)
+    {
+        gx = vextq_f16(low_gx, high_gx, 5);
+        gy = vextq_f16(low_gy, high_gy, 5);
+
+        gx2  = vfmaq_f16(gx2, gx, gx);
+        gy2  = vfmaq_f16(gy2, gy, gy);
+        gxgy = vfmaq_f16(gxgy, gx, gy);
+
+        gx = vextq_f16(low_gx, high_gx, 6);
+        gy = vextq_f16(low_gy, high_gy, 6);
 
         gx2  = vfmaq_f16(gx2, gx, gx);
         gy2  = vfmaq_f16(gy2, gy, gy);
@@ -101,7 +146,7 @@ inline void harris_score_S16_S16_FLOAT(const void *__restrict in1_ptr, const voi
     const int16_t *gy_ptr_1 = gy_ptr_0 + 8;
     const auto     output   = static_cast<float *__restrict>(out_ptr);
 
-    /* Gx^2, Gy^2 and Gx*Gy */
+    // Gx^2, Gy^2 and Gx*Gy
     float16x8_t gx2  = vdupq_n_f16(0.0f);
     float16x8_t gy2  = vdupq_n_f16(0.0f);
     float16x8_t gxgy = vdupq_n_f16(0.0f);
@@ -112,19 +157,19 @@ inline void harris_score_S16_S16_FLOAT(const void *__restrict in1_ptr, const voi
         const float16x8_t high_gx = vcvtq_f16_s16(vld1q_s16(gx_ptr_1));
         const float16x8_t low_gy  = vcvtq_f16_s16(vld1q_s16(gy_ptr_0));
         const float16x8_t high_gy = vcvtq_f16_s16(vld1q_s16(gy_ptr_1));
-        harris_score_FLOAT_FLOAT_FLOAT<block_size>(low_gx, low_gy, high_gx, high_gy, gx2, gy2, gxgy, norm_factor);
+        harris_score1xN_FLOAT_FLOAT_FLOAT<block_size>(low_gx, low_gy, high_gx, high_gy, gx2, gy2, gxgy, norm_factor);
 
-        /* Update gx and gy pointer */
+        // Update gx and gy pointer
         gx_ptr_0 += in_stride;
         gy_ptr_0 += in_stride;
         gx_ptr_1 += in_stride;
         gy_ptr_1 += in_stride;
     }
 
-    /* Calculate harris score */
+    // Calculate harris score
     const float16x8_t mc = harris_score(gx2, gy2, gxgy, sensitivity, strength_thresh);
 
-    /* Store score */
+    // Store score
     vst1q_f32(output + 0, vcvt_f32_f16(vget_low_f16(mc)));
     vst1q_f32(output + 4, vcvt_f32_f16(vget_high_f16(mc)));
 }
@@ -143,7 +188,7 @@ inline void harris_score_S32_S32_FLOAT(const void *__restrict in1_ptr, const voi
     const int32_t *gy_ptr_2 = gy_ptr_0 + 8;
     const auto     output   = static_cast<float *__restrict>(out_ptr);
 
-    /* Gx^2, Gy^2 and Gx*Gy */
+    // Gx^2, Gy^2 and Gx*Gy
     float16x8_t gx2  = zero;
     float16x8_t gy2  = zero;
     float16x8_t gxgy = zero;
@@ -158,9 +203,9 @@ inline void harris_score_S32_S32_FLOAT(const void *__restrict in1_ptr, const voi
                                                 vcvt_f16_f32(vcvtq_f32_s32(vld1q_s32(gy_ptr_1))));
         const float16x8_t high_gy = vcombine_f16(vcvt_f16_f32(vcvtq_f32_s32(vld1q_s32(gy_ptr_2))),
                                                  vget_low_f16(zero));
-        harris_score_FLOAT_FLOAT_FLOAT<block_size>(low_gx, low_gy, high_gx, high_gy, gx2, gy2, gxgy, norm_factor);
+        harris_score1xN_FLOAT_FLOAT_FLOAT<block_size>(low_gx, low_gy, high_gx, high_gy, gx2, gy2, gxgy, norm_factor);
 
-        /* Update gx and gy pointer */
+        // Update gx and gy pointer
         gx_ptr_0 += in_stride;
         gy_ptr_0 += in_stride;
         gx_ptr_1 += in_stride;
@@ -169,10 +214,10 @@ inline void harris_score_S32_S32_FLOAT(const void *__restrict in1_ptr, const voi
         gy_ptr_2 += in_stride;
     }
 
-    /* Calculate harris score */
+    // Calculate harris score
     const float16x8_t mc = harris_score(gx2, gy2, gxgy, sensitivity, strength_thresh);
 
-    /* Store score */
+    // Store score
     vst1q_f32(output + 0, vcvt_f32_f16(vget_low_f16(mc)));
     vst1q_f32(output + 4, vcvt_f32_f16(vget_high_f16(mc)));
 }
@@ -193,7 +238,7 @@ inline void harris_score_S32_S32_FLOAT<7>(const void *__restrict in1_ptr, const 
     const int32_t *gy_ptr_3 = gy_ptr_0 + 12;
     const auto     output   = static_cast<float *__restrict>(out_ptr);
 
-    /* Gx^2, Gy^2 and Gx*Gy */
+    // Gx^2, Gy^2 and Gx*Gy
     float16x8_t gx2  = zero;
     float16x8_t gy2  = zero;
     float16x8_t gxgy = zero;
@@ -208,9 +253,9 @@ inline void harris_score_S32_S32_FLOAT<7>(const void *__restrict in1_ptr, const 
                                                 vcvt_f16_f32(vcvtq_f32_s32(vld1q_s32(gy_ptr_1))));
         const float16x8_t high_gy = vcombine_f16(vcvt_f16_f32(vcvtq_f32_s32(vld1q_s32(gy_ptr_2))),
                                                  vcvt_f16_f32(vcvtq_f32_s32(vld1q_s32(gy_ptr_3))));
-        harris_score_FLOAT_FLOAT_FLOAT<7>(low_gx, low_gy, high_gx, high_gy, gx2, gy2, gxgy, norm_factor);
+        harris_score1xN_FLOAT_FLOAT_FLOAT<7>(low_gx, low_gy, high_gx, high_gy, gx2, gy2, gxgy, norm_factor);
 
-        /* Update gx and gy pointer */
+        // Update gx and gy pointer
         gx_ptr_0 += in_stride;
         gy_ptr_0 += in_stride;
         gx_ptr_1 += in_stride;
@@ -219,10 +264,10 @@ inline void harris_score_S32_S32_FLOAT<7>(const void *__restrict in1_ptr, const 
         gy_ptr_2 += in_stride;
     }
 
-    /* Calculate harris score */
+    // Calculate harris score
     const float16x8_t mc = harris_score(gx2, gy2, gxgy, sensitivity, strength_thresh);
 
-    /* Store score */
+    // Store score
     vst1q_f32(output + 0, vcvt_f32_f16(vget_low_f16(mc)));
     vst1q_f32(output + 4, vcvt_f32_f16(vget_high_f16(mc)));
 }
@@ -328,18 +373,18 @@ namespace
 {
 inline float32x4_t harris_score(float32x4_t gx2, float32x4_t gy2, float32x4_t gxgy, float32x4_t sensitivity, float32x4_t strength_thresh)
 {
-    /* Trace^2 */
+    // Trace^2
     float32x4_t trace2 = vaddq_f32(gx2, gy2);
     trace2             = vmulq_f32(trace2, trace2);
 
-    /* Det(A) */
+    // Det(A)
     float32x4_t det = vmulq_f32(gx2, gy2);
     det             = vmlsq_f32(det, gxgy, gxgy);
 
-    /* Det(A) - sensitivity * trace^2 */
+    // Det(A) - sensitivity * trace^2
     const float32x4_t mc = vmlsq_f32(det, sensitivity, trace2);
 
-    /* mc > strength_thresh */
+    // mc > strength_thresh
     const uint32x4_t mask = vcgtq_f32(mc, strength_thresh);
 
     return vbslq_f32(mask, mc, vdupq_n_f32(0.0f));
@@ -348,7 +393,7 @@ inline float32x4_t harris_score(float32x4_t gx2, float32x4_t gy2, float32x4_t gx
 inline void harris_score1x3_FLOAT_FLOAT_FLOAT(float32x4_t low_gx, float32x4_t low_gy, float32x4_t high_gx, float32x4_t high_gy, float32x4_t &gx2, float32x4_t &gy2, float32x4_t &gxgy,
                                               float32x4_t norm_factor)
 {
-    /* Normalize */
+    // Normalize
     low_gx  = vmulq_f32(low_gx, norm_factor);
     low_gy  = vmulq_f32(low_gy, norm_factor);
     high_gx = vmulq_f32(high_gx, norm_factor);
@@ -361,17 +406,17 @@ inline void harris_score1x3_FLOAT_FLOAT_FLOAT(float32x4_t low_gx, float32x4_t lo
     const float32x4_t r_gx = vextq_f32(low_gx, high_gx, 2);
     const float32x4_t r_gy = vextq_f32(low_gy, high_gy, 2);
 
-    /* Gx*Gx*/
+    // Gx*Gx
     gx2 = vmlaq_f32(gx2, l_gx, l_gx);
     gx2 = vmlaq_f32(gx2, m_gx, m_gx);
     gx2 = vmlaq_f32(gx2, r_gx, r_gx);
 
-    /* Gy*Gy*/
+    // Gy*Gy
     gy2 = vmlaq_f32(gy2, l_gy, l_gy);
     gy2 = vmlaq_f32(gy2, m_gy, m_gy);
     gy2 = vmlaq_f32(gy2, r_gy, r_gy);
 
-    /* Gx*Gy */
+    // Gx*Gy
     gxgy = vmlaq_f32(gxgy, l_gx, l_gy);
     gxgy = vmlaq_f32(gxgy, m_gx, m_gy);
     gxgy = vmlaq_f32(gxgy, r_gx, r_gy);
@@ -380,53 +425,53 @@ inline void harris_score1x3_FLOAT_FLOAT_FLOAT(float32x4_t low_gx, float32x4_t lo
 inline void harris_score1x5_FLOAT_FLOAT_FLOAT(float32x4_t low_gx, float32x4_t low_gy, float32x4_t high_gx, float32x4_t high_gy, float32x4_t &gx2, float32x4_t &gy2, float32x4_t &gxgy,
                                               float32x4_t norm_factor)
 {
-    /* Normalize */
+    // Normalize
     low_gx  = vmulq_f32(low_gx, norm_factor);
     low_gy  = vmulq_f32(low_gy, norm_factor);
     high_gx = vmulq_f32(high_gx, norm_factor);
     high_gy = vmulq_f32(high_gy, norm_factor);
 
-    /* L2 values  */
+    // L2 values
     float32x4_t gx = low_gx;
     float32x4_t gy = low_gy;
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* L1 values  */
+    // L1 values
     gx = vextq_f32(low_gx, high_gx, 1);
     gy = vextq_f32(low_gy, high_gy, 1);
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* M values  */
+    // M values
     gx = vextq_f32(low_gx, high_gx, 2);
     gy = vextq_f32(low_gy, high_gy, 2);
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* R1 values  */
+    // R1 values
     gx = vextq_f32(low_gx, high_gx, 3);
     gy = vextq_f32(low_gy, high_gy, 3);
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* R2 values  */
+    // R2 values
     gx = high_gx;
     gy = high_gy;
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
@@ -435,81 +480,81 @@ inline void harris_score1x5_FLOAT_FLOAT_FLOAT(float32x4_t low_gx, float32x4_t lo
 inline void harris_score1x7_FLOAT_FLOAT_FLOAT(float32x4_t low_gx, float32x4_t low_gy, float32x4_t high_gx, float32x4_t high_gy, float32x4_t high_gx1, float32x4_t high_gy1, float32x4_t &gx2,
                                               float32x4_t &gy2, float32x4_t &gxgy, float32x4_t norm_factor)
 {
-    /* Normalize */
+    // Normalize
     low_gx  = vmulq_f32(low_gx, norm_factor);
     low_gy  = vmulq_f32(low_gy, norm_factor);
     high_gx = vmulq_f32(high_gx, norm_factor);
     high_gy = vmulq_f32(high_gy, norm_factor);
 
-    /* L3 values  */
+    // L3 values
     float32x4_t gx = low_gx;
     float32x4_t gy = low_gy;
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* L2 values  */
+    // L2 values
     gx = vextq_f32(low_gx, high_gx, 1);
     gy = vextq_f32(low_gy, high_gy, 1);
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* L1 values  */
+    // L1 values
     gx = vextq_f32(low_gx, high_gx, 2);
     gy = vextq_f32(low_gy, high_gy, 2);
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* M values  */
+    // M values
     gx = vextq_f32(low_gx, high_gx, 3);
     gy = vextq_f32(low_gy, high_gy, 3);
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* R1 values  */
+    // R1 values
     gx = high_gx;
     gy = high_gy;
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* Change tmp_low and tmp_high for calculating R2 and R3 values */
+    // Change tmp_low and tmp_high for calculating R2 and R3 values
     low_gx  = high_gx;
     low_gy  = high_gy;
     high_gx = high_gx1;
     high_gy = high_gy1;
 
-    /* Normalize */
+    // Normalize
     high_gx = vmulq_f32(high_gx, norm_factor);
     high_gy = vmulq_f32(high_gy, norm_factor);
 
-    /* R2 values  */
+    // R2 values
     gx = vextq_f32(low_gx, high_gx, 1);
     gy = vextq_f32(low_gy, high_gy, 1);
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
 
-    /* R3 values  */
+    // R3 values
     gx = vextq_f32(low_gx, high_gx, 2);
     gy = vextq_f32(low_gy, high_gy, 2);
 
-    /* Accumulate */
+    // Accumulate
     gx2  = vmlaq_f32(gx2, gx, gx);
     gy2  = vmlaq_f32(gy2, gy, gy);
     gxgy = vmlaq_f32(gxgy, gx, gy);
@@ -525,7 +570,7 @@ inline void harris_score3x3_S16_S16_FLOAT(const void *__restrict input1_ptr, con
     const int16_t *gy_ptr_1 = gy_ptr_0 + 4;
     const auto     output   = static_cast<float *__restrict>(output_ptr);
 
-    /* Gx^2, Gy^2 and Gx*Gy */
+    // Gx^2, Gy^2 and Gx*Gy
     float32x4x2_t gx2 =
     {
         {
@@ -548,7 +593,7 @@ inline void harris_score3x3_S16_S16_FLOAT(const void *__restrict input1_ptr, con
         }
     };
 
-    /* Row0 */
+    // Row0
     int16x8x2_t tmp_gx =
     {
         {
@@ -579,7 +624,7 @@ inline void harris_score3x3_S16_S16_FLOAT(const void *__restrict input1_ptr, con
     high_gy = vcvtq_f32_s32(vmovl_s16(vget_high_s16(tmp_gy.val[1])));
     harris_score1x3_FLOAT_FLOAT_FLOAT(low_gx, low_gy, high_gx, high_gy, gx2.val[1], gy2.val[1], gxgy.val[1], norm_factor);
 
-    /* Row1 */
+    // Row1
     tmp_gx.val[0] = vld1q_s16(gx_ptr_0);
     tmp_gy.val[0] = vld1q_s16(gy_ptr_0);
     tmp_gx.val[1] = vld1q_s16(gx_ptr_1);
@@ -597,7 +642,7 @@ inline void harris_score3x3_S16_S16_FLOAT(const void *__restrict input1_ptr, con
     high_gy = vcvtq_f32_s32(vmovl_s16(vget_high_s16(tmp_gy.val[1])));
     harris_score1x3_FLOAT_FLOAT_FLOAT(low_gx, low_gy, high_gx, high_gy, gx2.val[1], gy2.val[1], gxgy.val[1], norm_factor);
 
-    /* Row2 */
+    // Row2
     tmp_gx.val[0] = vld1q_s16(gx_ptr_0 + input_stride);
     tmp_gy.val[0] = vld1q_s16(gy_ptr_0 + input_stride);
     tmp_gx.val[1] = vld1q_s16(gx_ptr_1 + input_stride);
@@ -615,7 +660,7 @@ inline void harris_score3x3_S16_S16_FLOAT(const void *__restrict input1_ptr, con
     high_gy = vcvtq_f32_s32(vmovl_s16(vget_high_s16(tmp_gy.val[1])));
     harris_score1x3_FLOAT_FLOAT_FLOAT(low_gx, low_gy, high_gx, high_gy, gx2.val[1], gy2.val[1], gxgy.val[1], norm_factor);
 
-    /* Calculate harris score */
+    // Calculate harris score
     const float32x4x2_t mc =
     {
         {
@@ -624,7 +669,7 @@ inline void harris_score3x3_S16_S16_FLOAT(const void *__restrict input1_ptr, con
         }
     };
 
-    /* Store score */
+    // Store score
     vst1q_f32(output + 0, mc.val[0]);
     vst1q_f32(output + 4, mc.val[1]);
 }
@@ -643,7 +688,7 @@ inline void harris_score3x3_S32_S32_FLOAT(const void *__restrict input1_ptr, con
     float32x4_t    norm_factor     = vdupq_n_f32(in_norm_factor);
     float32x4_t    strength_thresh = vdupq_n_f32(in_strength_thresh);
 
-    /* Gx^2, Gy^2 and Gx*Gy */
+    // Gx^2, Gy^2 and Gx*Gy
     float32x4x2_t gx2 =
     {
         {
@@ -666,7 +711,7 @@ inline void harris_score3x3_S32_S32_FLOAT(const void *__restrict input1_ptr, con
         }
     };
 
-    /* Row0 */
+    // Row0
     float32x4_t low_gx  = vcvtq_f32_s32(vld1q_s32(gx_ptr_0 - input_stride));
     float32x4_t low_gy  = vcvtq_f32_s32(vld1q_s32(gy_ptr_0 - input_stride));
     float32x4_t high_gx = vcvtq_f32_s32(vld1q_s32(gx_ptr_1 - input_stride));
@@ -679,7 +724,7 @@ inline void harris_score3x3_S32_S32_FLOAT(const void *__restrict input1_ptr, con
     high_gy = vcvtq_f32_s32(vld1q_s32(gy_ptr_2 - input_stride));
     harris_score1x3_FLOAT_FLOAT_FLOAT(low_gx, low_gy, high_gx, high_gy, gx2.val[1], gy2.val[1], gxgy.val[1], norm_factor);
 
-    /* Row1 */
+    // Row1
     low_gx  = vcvtq_f32_s32(vld1q_s32(gx_ptr_0));
     low_gy  = vcvtq_f32_s32(vld1q_s32(gy_ptr_0));
     high_gx = vcvtq_f32_s32(vld1q_s32(gx_ptr_1));
@@ -692,7 +737,7 @@ inline void harris_score3x3_S32_S32_FLOAT(const void *__restrict input1_ptr, con
     high_gy = vcvtq_f32_s32(vld1q_s32(gy_ptr_2));
     harris_score1x3_FLOAT_FLOAT_FLOAT(low_gx, low_gy, high_gx, high_gy, gx2.val[1], gy2.val[1], gxgy.val[1], norm_factor);
 
-    /* Row2 */
+    // Row2
     low_gx  = vcvtq_f32_s32(vld1q_s32(gx_ptr_0 + input_stride));
     low_gy  = vcvtq_f32_s32(vld1q_s32(gy_ptr_0 + input_stride));
     high_gx = vcvtq_f32_s32(vld1q_s32(gx_ptr_1 + input_stride));
@@ -705,7 +750,7 @@ inline void harris_score3x3_S32_S32_FLOAT(const void *__restrict input1_ptr, con
     high_gy = vcvtq_f32_s32(vld1q_s32(gy_ptr_2 + input_stride));
     harris_score1x3_FLOAT_FLOAT_FLOAT(low_gx, low_gy, high_gx, high_gy, gx2.val[1], gy2.val[1], gxgy.val[1], norm_factor);
 
-    /* Calculate harris score */
+    // Calculate harris score
     const float32x4x2_t mc =
     {
         {
@@ -714,7 +759,7 @@ inline void harris_score3x3_S32_S32_FLOAT(const void *__restrict input1_ptr, con
         }
     };
 
-    /* Store score */
+    // Store score
     vst1q_f32(output + 0, mc.val[0]);
     vst1q_f32(output + 4, mc.val[1]);
 }
@@ -728,7 +773,7 @@ inline void harris_score5x5_S16_S16_FLOAT(const void *__restrict input1_ptr, con
     const int16_t *gy_ptr_1 = gy_ptr_0 + 4;
     const auto     output   = static_cast<float *__restrict>(output_ptr);
 
-    /* Gx^2, Gy^2 and Gx*Gy */
+    // Gx^2, Gy^2 and Gx*Gy
     float32x4x2_t gx2 =
     {
         {
@@ -783,14 +828,14 @@ inline void harris_score5x5_S16_S16_FLOAT(const void *__restrict input1_ptr, con
         high_gy = vcvtq_f32_s32(vmovl_s16(vget_high_s16(tmp_gy.val[1])));
         harris_score1x5_FLOAT_FLOAT_FLOAT(low_gx, low_gy, high_gx, high_gy, gx2.val[1], gy2.val[1], gxgy.val[1], norm_factor);
 
-        /* Update gx and gy pointer */
+        // Update gx and gy pointer
         gx_ptr_0 += input_stride;
         gy_ptr_0 += input_stride;
         gx_ptr_1 += input_stride;
         gy_ptr_1 += input_stride;
     }
 
-    /* Calculate harris score */
+    // Calculate harris score
     const float32x4x2_t mc =
     {
         {
@@ -799,7 +844,7 @@ inline void harris_score5x5_S16_S16_FLOAT(const void *__restrict input1_ptr, con
         }
     };
 
-    /* Store score */
+    // Store score
     vst1q_f32(output + 0, mc.val[0]);
     vst1q_f32(output + 4, mc.val[1]);
 }
@@ -816,7 +861,7 @@ inline void harris_score5x5_S32_S32_FLOAT(const void *__restrict input1_ptr, con
     const int32_t *gy_ptr_2 = gy_ptr_0 + 8;
     const auto     output   = static_cast<float *__restrict>(output_ptr);
 
-    /* Gx^2, Gy^2 and Gx*Gy */
+    // Gx^2, Gy^2 and Gx*Gy
     float32x4x2_t gx2 =
     {
         {
@@ -856,7 +901,7 @@ inline void harris_score5x5_S32_S32_FLOAT(const void *__restrict input1_ptr, con
         const float32x4_t high_gy_1 = vcvtq_f32_s32(vld1q_s32(gy_ptr_2));
         harris_score1x5_FLOAT_FLOAT_FLOAT(low_gx_1, low_gy_1, high_gx_1, high_gy_1, gx2.val[1], gy2.val[1], gxgy.val[1], norm_factor);
 
-        /* Update gx and gy pointer */
+        // Update gx and gy pointer
         gx_ptr_0 += input_stride;
         gy_ptr_0 += input_stride;
         gx_ptr_1 += input_stride;
@@ -865,7 +910,7 @@ inline void harris_score5x5_S32_S32_FLOAT(const void *__restrict input1_ptr, con
         gy_ptr_2 += input_stride;
     }
 
-    /* Calculate harris score */
+    // Calculate harris score
     const float32x4x2_t mc =
     {
         {
@@ -874,7 +919,7 @@ inline void harris_score5x5_S32_S32_FLOAT(const void *__restrict input1_ptr, con
         }
     };
 
-    /* Store score */
+    // Store score
     vst1q_f32(output + 0, mc.val[0]);
     vst1q_f32(output + 4, mc.val[1]);
 }
@@ -888,7 +933,7 @@ inline void harris_score7x7_S16_S16_FLOAT(const void *__restrict input1_ptr, con
     const int16_t *gy_ptr_1 = gy_ptr_0 + 8;
     const auto     output   = static_cast<float *__restrict>(output_ptr);
 
-    /* Gx^2, Gy^2 and Gx*Gy */
+    // Gx^2, Gy^2 and Gx*Gy
     float32x4_t gx2             = vdupq_n_f32(0.0f);
     float32x4_t gy2             = vdupq_n_f32(0.0f);
     float32x4_t gxgy            = vdupq_n_f32(0.0f);
@@ -911,17 +956,17 @@ inline void harris_score7x7_S16_S16_FLOAT(const void *__restrict input1_ptr, con
         float32x4_t high_gy1 = vcvtq_f32_s32(vmovl_s16(tmp1_gy));
         harris_score1x7_FLOAT_FLOAT_FLOAT(low_gx, low_gy, high_gx, high_gy, high_gx1, high_gy1, gx2, gy2, gxgy, norm_factor);
 
-        /* Update gx and gy pointer */
+        // Update gx and gy pointer
         gx_ptr_0 += input_stride;
         gy_ptr_0 += input_stride;
         gx_ptr_1 += input_stride;
         gy_ptr_1 += input_stride;
     }
 
-    /* Calculate harris score */
+    // Calculate harris score
     const float32x4_t mc = harris_score(gx2, gy2, gxgy, sensitivity, strength_thresh);
 
-    /* Store score */
+    // Store score
     vst1q_f32(output, mc);
 }
 
@@ -936,7 +981,7 @@ inline void harris_score7x7_S32_S32_FLOAT(const void *__restrict input1_ptr, con
     const int32_t *gy_ptr_2 = gy_ptr_1 + 4;
     const auto     output   = static_cast<float *__restrict>(output_ptr);
 
-    /* Gx^2, Gy^2 and Gx*Gy */
+    // Gx^2, Gy^2 and Gx*Gy
     float32x4_t gx2             = vdupq_n_f32(0.0f);
     float32x4_t gy2             = vdupq_n_f32(0.0f);
     float32x4_t gxgy            = vdupq_n_f32(0.0f);
@@ -954,7 +999,7 @@ inline void harris_score7x7_S32_S32_FLOAT(const void *__restrict input1_ptr, con
         const float32x4_t high_gy1 = vcvtq_f32_s32(vld1q_s32(gy_ptr_2));
         harris_score1x7_FLOAT_FLOAT_FLOAT(low_gx, low_gy, high_gx, high_gy, high_gx1, high_gy1, gx2, gy2, gxgy, norm_factor);
 
-        /* Update gx and gy pointer */
+        // Update gx and gy pointer
         gx_ptr_0 += input_stride;
         gy_ptr_0 += input_stride;
         gx_ptr_1 += input_stride;
@@ -963,10 +1008,10 @@ inline void harris_score7x7_S32_S32_FLOAT(const void *__restrict input1_ptr, con
         gy_ptr_2 += input_stride;
     }
 
-    /* Calculate harris score */
+    // Calculate harris score
     const float32x4_t mc = harris_score(gx2, gy2, gxgy, sensitivity, strength_thresh);
 
-    /* Store score */
+    // Store score
     vst1q_f32(output, mc);
 }
 

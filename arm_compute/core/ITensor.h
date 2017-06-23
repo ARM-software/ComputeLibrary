@@ -40,12 +40,12 @@ public:
      *
      * @return A pointer to the tensor's metadata.
      */
-    virtual TensorInfo *info() const = 0;
+    virtual ITensorInfo *info() const = 0;
     /** Interface to be implemented by the child class to return the tensor's metadata
      *
      * @return A pointer to the tensor's metadata.
      */
-    virtual TensorInfo *info() = 0;
+    virtual ITensorInfo *info() = 0;
     /** Default virtual destructor */
     virtual ~ITensor() = default;
     /** Interface to be implemented by the child class to return a pointer to CPU memory

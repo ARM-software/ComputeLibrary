@@ -36,10 +36,41 @@
 
 namespace arm_compute
 {
+/** Basic function to reshape the weights of Fully Connected layer with NEON. This function calls the following kernels:
+ *
+ *  -# @ref NETransposeKernel        (if @p transpose_weights is set to true)
+ *  -# @ref NEGEMMTranspose1xWKernel (if @p is_batched_fc_layer is set to true)
+ *
+ * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
+ */
+class NEFullyConnectedLayerReshapeWeights : public IFunction
+{
+public:
+    /** Constructor */
+    NEFullyConnectedLayerReshapeWeights();
+    /** Set the input and output tensors.
+     *
+     * @param[in]  input               Weights tensor. The weights must be 2 dimensional. Data types supported: QS8/F32.
+     * @param[out] output              Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  transpose_weights   True if the weights must be transposed. Data types supported: Same as @p weights.
+     * @param[in]  is_batched_fc_layer True if it is a batched fully connected layer
+     */
+    void configure(const ITensor *input, ITensor *output, bool transpose_weights, bool is_batched_fc_layer);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    NETransposeKernel        _transpose_kernel;
+    NEGEMMTranspose1xWKernel _transpose1xW_kernel;
+    Tensor                   _transpose_output;
+    bool                     _transpose_weights;
+    bool                     _is_batched_fc_layer;
+};
+
 /** Basic function to compute a Fully Connected layer on NEON. This function calls the following NEON kernels:
- *  -# @ref NEIm2ColKernel (called when the input comes from a convolutional layer)
- *  -# @ref NETransposeKernel (if @p transpose_weights flag is set to true) (called once)
- *  -# @ref NEGEMMTranspose1xWKernel (called once if we have a multi-batch input)
+ *  -# @ref NEIm2ColKernel                      (called when the input comes from a convolutional layer)
+ *  -# @ref NEFullyConnectedLayerReshapeWeights (if @p are_weights_reshaped flag is set to false) (called once)
  *  -# @ref NEGEMMInterleave4x4Kernel (called if we have a multi-batch input)
  *  -# @ref NEGEMMMatrixMultiplyKernel
  *  -# @ref NEGEMMMatrixAccumulateBiasesKernel (if @p biases is not equal to nullptr)
@@ -53,13 +84,14 @@ public:
     NEFullyConnectedLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input             Source tensor. Data type supported: F32.
-     * @param[in]  weights           Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input.
-     * @param[in]  biases            Bias tensor. Can be nullptr. Data type supported:Same as @p input.
-     * @param[out] output            Destination tensor. Data type supported: Same as @p input.
-     * @param[in]  transpose_weights (Optional) Transpose weights if true. Defaults to true.
+     * @param[in]  input                Source tensor. Data type supported: QS8/F32.
+     * @param[in]  weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input.
+     * @param[in]  biases               Bias tensor. Can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output               Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  transpose_weights    (Optional) Transpose the weights tensor if true. Defaults to true.
+     * @param[in]  are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
      */
-    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose_weights = true);
+    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose_weights = true, bool are_weights_reshaped = false);
 
     //Inherited methods override
     void run() override;
@@ -70,21 +102,18 @@ private:
     void configure_conv_fc_wb(const ITensor *input, const ITensor *weights, ITensor *output);
     void configure_conv_fc_nb(const ITensor *input, const ITensor *weights, ITensor *output);
 
-    NEIm2ColKernel                     _im2col_kernel;
-    NETransposeKernel                  _transpose_kernel;
-    NEGEMMTranspose1xWKernel           _transpose1xW_kernel;
-    NEGEMMInterleave4x4Kernel          _interleave4x4_kernel;
-    NEGEMMMatrixMultiplyKernel         _mm_kernel;
-    NEGEMMMatrixAccumulateBiasesKernel _accumulate_biases_kernel;
-    Tensor                             _im2col_output;
-    Tensor                             _interleave4x4_output;
-    Tensor                             _transpose_output;
-    Tensor                             _transpose1xW_output;
-    bool                               _is_first_run;
-    bool                               _transpose_weights;
-    bool                               _fc_after_conv;
-    bool                               _batched_fc_layer;
-    bool                               _accumulate_biases;
+    NEIm2ColKernel                      _im2col_kernel;
+    NEFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
+    NEGEMMInterleave4x4Kernel           _interleave4x4_kernel;
+    NEGEMMMatrixMultiplyKernel          _mm_kernel;
+    NEGEMMMatrixAccumulateBiasesKernel  _accumulate_biases_kernel;
+    Tensor                              _im2col_output;
+    Tensor                              _interleave4x4_output;
+    Tensor                              _reshape_weights_output;
+    bool                                _are_weights_reshaped;
+    bool                                _is_fc_after_conv;
+    bool                                _is_batched_fc_layer;
+    bool                                _accumulate_biases;
 };
 }
 #endif /* __ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H__ */

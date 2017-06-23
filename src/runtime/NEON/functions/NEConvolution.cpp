@@ -98,12 +98,12 @@ void                   NEConvolutionSquare<matrix_size>::run()
 
     if(_is_separable)
     {
-        NEScheduler::get().multithread(&_kernel_hor);
-        NEScheduler::get().multithread(&_kernel_vert);
+        NEScheduler::get().schedule(&_kernel_hor, Window::DimY);
+        NEScheduler::get().schedule(&_kernel_vert, Window::DimY);
     }
     else
     {
-        NEScheduler::get().multithread(&_kernel);
+        NEScheduler::get().schedule(&_kernel, Window::DimY);
     }
 }
 

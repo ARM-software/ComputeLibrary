@@ -63,6 +63,8 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
     ARM_COMPUTE_ERROR_ON(tensor->info()->num_channels() != 1);
 
+    border_size.limit(tensor->info()->padding());
+
     // If there is no border: early exit
     if(border_size.empty() || border_mode == BorderMode::UNDEFINED)
     {

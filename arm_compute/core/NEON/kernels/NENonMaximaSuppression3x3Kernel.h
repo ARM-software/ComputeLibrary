@@ -54,7 +54,7 @@ public:
 
     /** Initialise the kernel's sources, destinations and border mode.
      *
-     * @param[in]  input            Source tensor. Data types supported: U8, F32
+     * @param[in]  input            Source tensor. Data types supported: U8/F32
      * @param[out] output           Destination tensor. Data types supported: same as @p input
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
@@ -86,7 +86,7 @@ class NENonMaximaSuppression3x3FP16Kernel : public NENonMaximaSuppression3x3Kern
 public:
     /** Initialise the kernel's sources, destinations and border mode.
      *
-     * @param[in]  input            Source tensor. Data types supported: U8, F32.
+     * @param[in]  input            Source tensor. Data types supported: U8/F32.
      * @param[out] output           Destination tensor. Data types supported: same as @p input
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */

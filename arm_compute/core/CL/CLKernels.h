@@ -30,6 +30,7 @@
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLArithmeticSubtractionKernel.h"
+#include "arm_compute/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseAndKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseNotKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseOrKernel.h"
@@ -41,7 +42,7 @@
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
 #include "arm_compute/core/CL/kernels/CLColorConvertKernel.h"
 #include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"
-#include "arm_compute/core/CL/kernels/CLConvolutionLayerWeightsReshapeKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthConcatenateKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConvertKernel.h"
 #include "arm_compute/core/CL/kernels/CLDerivativeKernel.h"
 #include "arm_compute/core/CL/kernels/CLDilateKernel.h"
@@ -62,6 +63,7 @@
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLIntegralImageKernel.h"
 #include "arm_compute/core/CL/kernels/CLLKTrackerKernel.h"
+#include "arm_compute/core/CL/kernels/CLLocallyConnectedMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLMagnitudePhaseKernel.h"
 #include "arm_compute/core/CL/kernels/CLMeanStdDevKernel.h"
 #include "arm_compute/core/CL/kernels/CLMedian3x3Kernel.h"
@@ -83,5 +85,6 @@
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
 #include "arm_compute/core/CL/kernels/CLWarpAffineKernel.h"
 #include "arm_compute/core/CL/kernels/CLWarpPerspectiveKernel.h"
+#include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 
 #endif /* __ARM_COMPUTE_CLKERNELS_H__ */

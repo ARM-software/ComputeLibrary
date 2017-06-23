@@ -31,35 +31,99 @@
 
 using namespace arm_compute;
 
+CLFullyConnectedLayerReshapeWeights::CLFullyConnectedLayerReshapeWeights()
+    : _transpose_kernel(), _transpose1xW_kernel(), _transpose_output(), _transpose_weights(false), _is_batched_fc_layer(false)
+{
+}
+
+void CLFullyConnectedLayerReshapeWeights::configure(const ICLTensor *input, ICLTensor *output, bool transpose_weights, bool is_batched_fc_layer)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+    ARM_COMPUTE_ERROR_ON(input->info()->num_dimensions() != 2);
+    ARM_COMPUTE_ERROR_ON((transpose_weights == false) && (is_batched_fc_layer == false));
+
+    const DataType dt                   = input->info()->data_type();
+    const int      fixed_point_position = input->info()->fixed_point_position();
+
+    _transpose_weights   = transpose_weights;
+    _is_batched_fc_layer = is_batched_fc_layer;
+
+    // Check if we need to transpose the weights
+    if(_transpose_weights)
+    {
+        if(_is_batched_fc_layer)
+        {
+            // Initialize the output tensor for transpose
+            TensorShape shape_transposed(input->info()->dimension(1), input->info()->dimension(0));
+            _transpose_output.allocator()->init(TensorInfo(shape_transposed, 1, dt, fixed_point_position));
+            _transpose_kernel.configure(input, &_transpose_output);
+
+            // Configure transpose 1xW kernel
+            _transpose1xW_kernel.configure(&_transpose_output, output);
+
+            // Allocate temporary tensor used for transposing the weights
+            _transpose_output.allocator()->allocate();
+        }
+        else
+        {
+            _transpose_kernel.configure(input, output);
+        }
+    }
+    else
+    {
+        if(_is_batched_fc_layer)
+        {
+            // Configure transpose 1xW kernel
+            _transpose1xW_kernel.configure(input, output);
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR("Configuration transpose_weights=false & is_batched_fc_layer=false not supported");
+        }
+    }
+}
+
+void CLFullyConnectedLayerReshapeWeights::run()
+{
+    if(_transpose_weights)
+    {
+        CLScheduler::get().enqueue(_transpose_kernel, _is_batched_fc_layer);
+    }
+    if(_is_batched_fc_layer)
+    {
+        CLScheduler::get().enqueue(_transpose1xW_kernel);
+    }
+}
+
 CLFullyConnectedLayer::CLFullyConnectedLayer()
-    : _im2col_kernel(), _transpose_kernel(), _transpose1xW_kernel(), _interleave4x4_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(), _interleave4x4_output(), _transpose_output(),
-      _transpose1xW_output(), _is_first_run(true), _transpose_weights(true), _fc_after_conv(true), _batched_fc_layer(false), _accumulate_biases(false)
+    : _im2col_kernel(), _reshape_weights_kernel(), _interleave4x4_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(), _interleave4x4_output(), _reshape_weights_output(),
+      _are_weights_reshaped(true), _is_fc_after_conv(true), _is_batched_fc_layer(false), _accumulate_biases(false)
 {
 }
 
 void CLFullyConnectedLayer::configure_conv_fc_wb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(1) != (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2)));
+    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2) * (16 / weights->info()->element_size())));
+
+    const DataType dt                   = input->info()->data_type();
+    const int      fixed_point_position = input->info()->fixed_point_position();
 
     // If the fully connected layer is called after a convolution layer, the input tensor must be linearized
 
     // Initialize output tensor for im2col
     TensorShape shape_im2col;
-    shape_im2col.set(0, weights->info()->dimension(1));
+    shape_im2col.set(0, input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2));
     shape_im2col.set(1, input->info()->dimension(3));
     shape_im2col.set(2, input->info()->dimension(4));
     shape_im2col.set(3, input->info()->dimension(5));
-    _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, input->info()->data_type()));
+    _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, dt, fixed_point_position));
 
     // Initialize output tensor for interleave 4x4
     TensorShape shape_interleaved = _im2col_output.info()->tensor_shape();
     shape_interleaved.set(0, shape_interleaved.x() * 4);
     shape_interleaved.set(1, std::ceil(static_cast<float>(shape_interleaved.y()) / 4));
-    _interleave4x4_output.allocator()->init(TensorInfo(shape_interleaved, 1, input->info()->data_type()));
-
-    // Initialize output tensor for transpose 1xW
-    TensorShape shape_transposed1xW(weights->info()->dimension(1) * 4, static_cast<size_t>(std::ceil(weights->info()->dimension(0) / 4.f)));
-    _transpose1xW_output.allocator()->init(TensorInfo(shape_transposed1xW, 1, weights->info()->data_type()));
+    _interleave4x4_output.allocator()->init(TensorInfo(shape_interleaved, 1, dt, fixed_point_position));
 
     // Configure im2col kernel
     _im2col_kernel.configure(input, &_im2col_output, std::make_pair(1, 1), PadStrideInfo(1, 1, 0, 0), false);
@@ -67,55 +131,49 @@ void CLFullyConnectedLayer::configure_conv_fc_wb(const ICLTensor *input, const I
     // Configure interleave4x4 kernel
     _interleave4x4_kernel.configure(&_im2col_output, &_interleave4x4_output);
 
-    // Configure transpose 1xW kernel
-    _transpose1xW_kernel.configure(weights, &_transpose1xW_output);
-
     // Configure matrix multiply kernel
-    _mm_kernel.configure(&_interleave4x4_output, &_transpose1xW_output, output, 1.0f);
+    _mm_kernel.configure(&_interleave4x4_output, weights, output, 1.0f);
 
     // Allocate the tensors once all the configure methods have been called
     _im2col_output.allocator()->allocate();
     _interleave4x4_output.allocator()->allocate();
-    _transpose1xW_output.allocator()->allocate();
 }
 
 void CLFullyConnectedLayer::configure_fc_fc_wb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
 {
+    const DataType dt                   = input->info()->data_type();
+    const int      fixed_point_position = input->info()->fixed_point_position();
+
     // Initialize output tensor for interleave 4x4
     TensorShape shape_interleaved = input->info()->tensor_shape();
     shape_interleaved.set(0, shape_interleaved.x() * 4);
     shape_interleaved.set(1, std::ceil(static_cast<float>(shape_interleaved.y()) / 4));
-    _interleave4x4_output.allocator()->init(TensorInfo(shape_interleaved, 1, input->info()->data_type()));
-
-    // Initialize output tensor for transpose 1xW
-    TensorShape shape_transposed1xW(weights->info()->dimension(1) * 4, static_cast<size_t>(std::ceil(weights->info()->dimension(0) / 4.f)));
-    _transpose1xW_output.allocator()->init(TensorInfo(shape_transposed1xW, 1, weights->info()->data_type()));
+    _interleave4x4_output.allocator()->init(TensorInfo(shape_interleaved, 1, dt, fixed_point_position));
 
     // Configure interleave4x4 kernel
     _interleave4x4_kernel.configure(input, &_interleave4x4_output);
 
-    // Configure transpose 1xW kernel
-    _transpose1xW_kernel.configure(weights, &_transpose1xW_output);
-
     // Configure matrix multiply kernel
-    _mm_kernel.configure(&_interleave4x4_output, &_transpose1xW_output, output, 1.0f);
+    _mm_kernel.configure(&_interleave4x4_output, weights, output, 1.0f);
 
     // Allocate the tensors once all the configure methods have been called
     _interleave4x4_output.allocator()->allocate();
-    _transpose1xW_output.allocator()->allocate();
 }
 
 void CLFullyConnectedLayer::configure_conv_fc_nb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON((weights->info()->dimension(1) != (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))));
 
+    const DataType dt                   = input->info()->data_type();
+    const int      fixed_point_position = input->info()->fixed_point_position();
+
     // If the fully connected layer is called after a convolution layer, the input tensor must be linearized
 
     // Initialize output tensor for im2col
     TensorShape shape_im2col;
-    shape_im2col.set(0, weights->info()->dimension(1));
+    shape_im2col.set(0, input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2));
     shape_im2col.set(1, 1);
-    _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, input->info()->data_type()));
+    _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, dt, fixed_point_position));
 
     // Configure im2col kernel
     _im2col_kernel.configure(input, &_im2col_output, std::make_pair(1, 1), PadStrideInfo(1, 1, 0, 0), false);
@@ -135,20 +193,20 @@ void CLFullyConnectedLayer::configure_fc_fc_nb(const ICLTensor *input, const ICL
     _mm_kernel.configure(input, weights, output, 1.0f);
 }
 
-void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose_weights)
+void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose_weights, bool are_weights_reshaped)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() != 2);
 
-    const ICLTensor *weights_to_use = weights;
+    const DataType dt                   = input->info()->data_type();
+    const int      fixed_point_position = input->info()->fixed_point_position();
 
-    _is_first_run      = true;
-    _transpose_weights = transpose_weights;
-    _fc_after_conv     = true;
-    _batched_fc_layer  = false;
-    _accumulate_biases = false;
+    _are_weights_reshaped = are_weights_reshaped;
+    _is_fc_after_conv     = true;
+    _is_batched_fc_layer  = false;
+    _accumulate_biases    = false;
 
     if(biases != nullptr)
     {
@@ -160,17 +218,6 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
         _accumulate_biases_kernel.configure(output, biases);
     }
 
-    // Check if we need to transpose the weights
-    if(_transpose_weights)
-    {
-        // Initialize the output tensor for transpose
-        TensorShape shape_transposed(weights->info()->dimension(1), weights->info()->dimension(0));
-        _transpose_output.allocator()->init(TensorInfo(shape_transposed, 1, weights->info()->data_type()));
-        _transpose_kernel.configure(weights, &_transpose_output);
-
-        weights_to_use = &_transpose_output;
-    }
-
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
     //  2) Fully Connected layer -> Fully Connected layer without batches
@@ -178,15 +225,54 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
     //  4) Fully Connected layer -> Fully Connected layer with batches
 
     // Check if we have a fully connected layer with batches
-    _batched_fc_layer = (output->info()->dimension(1) > 1);
+    _is_batched_fc_layer = (output->info()->dimension(1) > 1);
 
-    if(_batched_fc_layer)
+    const ICLTensor *weights_to_use = weights;
+
+    if(!are_weights_reshaped)
     {
-        _fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(input->info()->tensor_shape().cbegin() + 3,
-                                                                               input->info()->tensor_shape().cend(),
-                                                                               output->info()->tensor_shape().cbegin() + 1));
+        if((transpose_weights || _is_batched_fc_layer))
+        {
+            weights_to_use = &_reshape_weights_output;
 
-        if(_fc_after_conv)
+            if(transpose_weights)
+            {
+                if(_is_batched_fc_layer)
+                {
+                    const float transpose_width = 16.0f / input->info()->element_size();
+                    TensorShape shape_wt(weights->info()->dimension(0) * static_cast<unsigned int>(transpose_width), static_cast<unsigned int>(std::ceil(weights->info()->dimension(1) / transpose_width)));
+                    TensorInfo  info_wt(shape_wt, 1, dt, fixed_point_position);
+                    _reshape_weights_output.allocator()->init(info_wt);
+                }
+                else
+                {
+                    TensorShape shape_wt(weights->info()->dimension(1), weights->info()->dimension(0));
+                    TensorInfo  info_wt(shape_wt, 1, dt, fixed_point_position);
+                    _reshape_weights_output.allocator()->init(info_wt);
+                }
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR_ON(!_is_batched_fc_layer);
+
+                const float transpose_width = 16.0f / input->info()->element_size();
+                TensorShape shape_wt(weights->info()->dimension(1) * static_cast<unsigned int>(transpose_width), static_cast<unsigned int>(std::ceil(weights->info()->dimension(0) / transpose_width)));
+                TensorInfo  info_wt(shape_wt, 1, dt, fixed_point_position);
+                _reshape_weights_output.allocator()->init(info_wt);
+            }
+
+            // Reshape the weights
+            _reshape_weights_kernel.configure(weights, &_reshape_weights_output, transpose_weights, _is_batched_fc_layer);
+        }
+    }
+
+    if(_is_batched_fc_layer)
+    {
+        _is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(input->info()->tensor_shape().cbegin() + 3,
+                                                                                  input->info()->tensor_shape().cend(),
+                                                                                  output->info()->tensor_shape().cbegin() + 1));
+
+        if(_is_fc_after_conv)
         {
             // Fully Connected layer after a Convolution Layer with batches
             configure_conv_fc_wb(input, weights_to_use, output);
@@ -199,9 +285,10 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
     }
     else
     {
-        _fc_after_conv = (weights_to_use->info()->dimension(1) == (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2)));
+        // In case of not batched fully connected layer, the weights will not be reshaped using transposed1xW
+        _is_fc_after_conv = ((weights_to_use->info()->dimension(1)) == (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2)));
 
-        if(_fc_after_conv)
+        if(_is_fc_after_conv)
         {
             // Fully Connected layer after a Convolution Layer without batches
             configure_conv_fc_nb(input, weights_to_use, output);
@@ -213,39 +300,34 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
         }
     }
 
-    // Allocate the transpose tensor if the transpose_weights flag is true and once all the configure methods have been called
-    if(_transpose_weights)
+    // Allocate the transpose tensor if the are_weights_reshaped flag is false and once all the configure methods have been called
+    if(!are_weights_reshaped)
     {
-        _transpose_output.allocator()->allocate();
+        if(transpose_weights || _is_batched_fc_layer)
+        {
+            // Allocate the tensor for the weights reshaped
+            _reshape_weights_output.allocator()->allocate();
+        }
     }
 }
 
 void CLFullyConnectedLayer::run()
 {
-    // The reshape of the weights happens only once
-    if(_is_first_run)
+    // Reshape of the weights (happens only once)
+    if(!_are_weights_reshaped)
     {
-        _is_first_run = false;
-
-        if(_transpose_weights)
-        {
-            CLScheduler::get().enqueue(_transpose_kernel);
-        }
-
-        if(_batched_fc_layer)
-        {
-            CLScheduler::get().enqueue(_transpose1xW_kernel);
-        }
+        _are_weights_reshaped = true;
+        _reshape_weights_kernel.run();
     }
 
     // Linearize input if it comes from a convolutional layer
-    if(_fc_after_conv)
+    if(_is_fc_after_conv)
     {
         CLScheduler::get().enqueue(_im2col_kernel, false);
     }
 
     // Interleave input
-    if(_batched_fc_layer)
+    if(_is_batched_fc_layer)
     {
         CLScheduler::get().enqueue(_interleave4x4_kernel, false);
     }

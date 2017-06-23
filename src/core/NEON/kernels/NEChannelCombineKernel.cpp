@@ -51,13 +51,33 @@ _is_parallelizable(true)
 
 void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *plane1, const ITensor *plane2, const ITensor *plane3, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON(nullptr == output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(plane0, plane1, plane2, output);
     ARM_COMPUTE_ERROR_ON(plane0 == output);
     ARM_COMPUTE_ERROR_ON(plane1 == output);
     ARM_COMPUTE_ERROR_ON(plane2 == output);
+
+    set_format_if_unknown(*plane0->info(), Format::U8);
+    set_format_if_unknown(*plane1->info(), Format::U8);
+    set_format_if_unknown(*plane2->info(), Format::U8);
+
+    if(plane3 != nullptr)
+    {
+        set_format_if_unknown(*plane3->info(), Format::U8);
+    }
+
+    set_shape_if_empty(*output->info(), plane0->info()->tensor_shape());
+
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane0, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane1, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane2, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::RGB888, Format::RGBA8888, Format::UYVY422, Format::YUYV422);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(plane0, plane1, plane2);
+
+    if(plane3 != nullptr)
+    {
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(plane0, plane3);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(plane0, plane3);
+    }
 
     const Format &output_format = output->info()->format();
 
@@ -102,6 +122,14 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
             break;
     }
 
+    TensorShape subsampled_shape_plane1{ plane0->info()->tensor_shape() };
+    subsampled_shape_plane1.set(0, subsampled_shape_plane1[0] / _x_subsampling[1]);
+    TensorShape subsampled_shape_plane2{ plane0->info()->tensor_shape() };
+    subsampled_shape_plane2.set(0, subsampled_shape_plane2[0] / _x_subsampling[2]);
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(plane1->info()->tensor_shape(), subsampled_shape_plane1);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(plane2->info()->tensor_shape(), subsampled_shape_plane2);
+
     Window win = calculate_max_window(*plane0->info(), Steps(_num_elems_processed_per_iteration));
 
     AccessWindowHorizontal output_access(output->info(), 0, _num_elems_processed_per_iteration);
@@ -134,14 +162,55 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
 
 void NEChannelCombineKernel::configure(const IImage *plane0, const IImage *plane1, const IImage *plane2, IMultiImage *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(plane0, plane1, plane2, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane0);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane1);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane2);
-    ARM_COMPUTE_ERROR_ON(nullptr == output);
+
+    set_format_if_unknown(*plane0->info(), Format::U8);
+    set_format_if_unknown(*plane1->info(), Format::U8);
+    set_format_if_unknown(*plane2->info(), Format::U8);
+
+    set_shape_if_empty(*output->plane(0)->info(), plane0->info()->tensor_shape());
+
+    switch(output->info()->format())
+    {
+        case Format::NV12:
+        case Format::NV21:
+        case Format::IYUV:
+        {
+            TensorShape subsampled_shape = plane0->info()->tensor_shape();
+            subsampled_shape.set(0, subsampled_shape[0] / 2);
+            subsampled_shape.set(1, subsampled_shape[1] / 2);
+
+            set_shape_if_empty(*output->plane(1)->info(), subsampled_shape);
+
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->plane(1)->info()->tensor_shape(), subsampled_shape);
+
+            if(output->info()->format() == Format::IYUV)
+            {
+                set_shape_if_empty(*output->plane(2)->info(), subsampled_shape);
+
+                ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->plane(2)->info()->tensor_shape(), subsampled_shape);
+            }
+            break;
+        }
+        case Format::YUV444:
+            set_shape_if_empty(*output->plane(1)->info(), plane0->info()->tensor_shape());
+            set_shape_if_empty(*output->plane(2)->info(), plane0->info()->tensor_shape());
+
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(plane1, plane2, output->plane(1), output->plane(2));
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported format");
+    }
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(plane0, output->plane(0));
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane0, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane1, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane2, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::NV12, Format::NV21, Format::IYUV, Format::YUV444);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(plane0, plane1, plane2);
 
     _planes[0]                            = plane0;
     _planes[1]                            = plane1;

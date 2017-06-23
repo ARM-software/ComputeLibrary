@@ -90,12 +90,12 @@ void NEFastCorners::run()
 {
     _border_handler.run(_border_handler.window());
 
-    NEScheduler::get().multithread(&_fast_corners_kernel);
+    NEScheduler::get().schedule(&_fast_corners_kernel, Window::DimY);
 
     if(_non_max)
     {
-        NEScheduler::get().multithread(&_nonmax_kernel);
+        NEScheduler::get().schedule(&_nonmax_kernel, Window::DimY);
     }
 
-    NEScheduler::get().multithread(&_fill_kernel);
+    NEScheduler::get().schedule(&_fill_kernel, Window::DimY);
 }

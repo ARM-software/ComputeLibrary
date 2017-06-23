@@ -84,7 +84,7 @@ void arm_compute::error_on_window_dimensions_gte(const char *function, const cha
 
     for(unsigned int i = max_dim; i < arm_compute::Coordinates::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_ERROR_ON_LOC_MSG(win[i].start() != 0 || win[i].end() != 1,
+        ARM_COMPUTE_ERROR_ON_LOC_MSG(win[i].start() != 0 || win[i].end() != win[i].step(),
                                      function, file, line,
                                      "Maximum number of dimensions expected %u but dimension %u is not empty", max_dim, i);
     }
@@ -171,4 +171,45 @@ void arm_compute::error_on_unconfigured_kernel(const char *function, const char 
     ARM_COMPUTE_ERROR_ON_LOC_MSG((kernel->window().x().start() == kernel->window().x().end()) && (kernel->window().x().end() == 0),
                                  function, file, line,
                                  "This kernel hasn't been configured.");
+}
+
+void arm_compute::error_on_invalid_subtensor(const char *function, const char *file, const int line,
+                                             const TensorShape &parent_shape, const Coordinates &coords, const TensorShape &shape)
+{
+    ARM_COMPUTE_UNUSED(function);
+    ARM_COMPUTE_UNUSED(file);
+    ARM_COMPUTE_UNUSED(line);
+    ARM_COMPUTE_UNUSED(parent_shape);
+    ARM_COMPUTE_UNUSED(coords);
+    ARM_COMPUTE_UNUSED(shape);
+
+    // Subtensor should not index in x, y dimensions.
+    ARM_COMPUTE_ERROR_ON_LOC(((coords.x() != 0) && (coords.y() != 0)), function, file, line);
+    // Subtensor shape should match parent tensor in x, y dimensions.
+    ARM_COMPUTE_ERROR_ON_LOC(((parent_shape.x() != shape.x()) && (parent_shape.y() != parent_shape.y())), function, file, line);
+
+    // Check dimensions
+    for(unsigned int i = 0; i < TensorShape::num_max_dimensions; ++i)
+    {
+        ARM_COMPUTE_ERROR_ON_LOC(((coords[i] >= static_cast<int>(parent_shape[i])) || (coords[i] + static_cast<int>(shape[i]) > static_cast<int>(parent_shape[i]))),
+                                 function, file, line);
+    }
+}
+
+void arm_compute::error_on_invalid_subtensor_valid_region(const char *function, const char *file, const int line,
+                                                          const ValidRegion &parent_valid_region, const ValidRegion &valid_region)
+{
+    ARM_COMPUTE_UNUSED(function);
+    ARM_COMPUTE_UNUSED(file);
+    ARM_COMPUTE_UNUSED(line);
+    ARM_COMPUTE_UNUSED(parent_valid_region);
+    ARM_COMPUTE_UNUSED(valid_region);
+
+    // Check valid regions
+    for(unsigned int d = 0; d < TensorShape::num_max_dimensions; ++d)
+    {
+        ARM_COMPUTE_ERROR_ON_LOC((parent_valid_region.anchor[d] > valid_region.anchor[d]), function, file, line);
+        ARM_COMPUTE_ERROR_ON_LOC((parent_valid_region.anchor[d] + static_cast<int>(parent_valid_region.shape[d])) < (valid_region.anchor[d] + static_cast<int>(valid_region.shape[d])),
+                                 function, file, line);
+    }
 }

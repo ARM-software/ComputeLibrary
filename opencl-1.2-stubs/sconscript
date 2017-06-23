@@ -1,8 +1,0 @@
-Import('env')
-Import('build_library')
-
-opencl = build_library('OpenCL', "opencl_stubs.c", [], False)
-alias = Alias('opencl', opencl)
-Default(alias)
-
-Export('opencl')

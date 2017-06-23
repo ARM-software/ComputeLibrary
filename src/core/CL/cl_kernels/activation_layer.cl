@@ -35,21 +35,25 @@
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
  * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the source image
  * @param[out] output_ptr                           Pointer to the destination image. Supported data types: F16, F32
  * @param[in]  output_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  output_stride_y                      Stride of the destination image in Y dimension (in bytes)
  * @param[in]  output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
  */
 __kernel void activation_layer(
-    IMAGE_DECLARATION(input),
-    IMAGE_DECLARATION(output))
+    TENSOR3D_DECLARATION(input),
+    TENSOR3D_DECLARATION(output))
 {
     // Get pixels pointer
-    Image input  = CONVERT_TO_IMAGE_STRUCT(input);
-    Image output = CONVERT_TO_IMAGE_STRUCT(output);
+    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 
     // Load data
     VEC_DATA_TYPE(DATA_TYPE, 16)

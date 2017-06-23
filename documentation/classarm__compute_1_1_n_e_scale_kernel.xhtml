@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: NEScaleKernel Class Reference</title>
+<title>Compute Library: NEScaleKernel Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.xhtml"><span>Files</span></a></li>
@@ -365,11 +366,11 @@ Public Member Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>dx, dy and offsets have the same dimensions (width and height) of the output tensor</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: U8 or S16. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: U8/S16. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dx</td><td>Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dy</td><td>Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">offsets</td><td>Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: U8 or S16. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: U8/S16. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Interpolation type to use </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">border_undefined</td><td>True if the border mode is undefined. False if it's replicate or constant. </td></tr>
   </table>
@@ -477,7 +478,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml">NEScaleKernel</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

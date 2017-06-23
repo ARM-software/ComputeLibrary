@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: NEGEMMTranspose1xWKernel Class Reference</title>
+<title>Compute Library: NEGEMMTranspose1xWKernel Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.xhtml"><span>Files</span></a></li>
@@ -121,7 +122,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_g_e_m_m_tran
 </div><!--header-->
 <div class="contents">
 
-<p>NEON kernel which transposes the elements of a matrix in chunks of 1x4 if the input data type is F32 or in chunks of 1x8 if the input data type is F16.  
+<p>NEON kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor)  
  <a href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_n_e_g_e_m_m_transpose1x_w_kernel_8h_source.xhtml">NEGEMMTranspose1xWKernel.h</a>&gt;</code></p>
@@ -181,8 +182,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>NEON kernel which transposes the elements of a matrix in chunks of 1x4 if the input data type is F32 or in chunks of 1x8 if the input data type is F16. </p>
-<p>Following an example of how the transposition1xW works when the input data type is F32</p>
+<div class="textblock"><p>NEON kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor) </p>
+<p>Following an example of how the transposition1xW works when the input data is F32</p>
 <p class="formulaDsp">
 \[ \left( \begin{array}{cccc} a00 &amp; a01 &amp; a02 &amp; a03 \\ a10 &amp; a11 &amp; a12 &amp; a13 \\ a20 &amp; a21 &amp; a22 &amp; a23 \\ a30 &amp; a31 &amp; a32 &amp; a33 \\ \end{array} \right) \rightarrow \left( \begin{array}{ccccccccccccccccc} a00 &amp; a01 &amp; a02 &amp; a03 &amp; a10 &amp; a11 &amp; a12 &amp; a13 &amp; a20 &amp; a21 &amp; a22 &amp; a23 &amp; a30 &amp; a31 &amp; a32 &amp; a33 \\ \end{array} \right) \]
 </p>
@@ -190,11 +191,9 @@ Public Member Functions</h2></td></tr>
 <p class="formulaDsp">
 \[ \left( \begin{array}{cccccccc} a00 &amp; a01 &amp; a02 &amp; a03 &amp; a04 &amp; a05 &amp; a06 &amp; a7 \\ a10 &amp; a11 &amp; a12 &amp; a13 &amp; a14 &amp; a15 &amp; a16 &amp; 17 \\ a20 &amp; a21 &amp; a22 &amp; a23 &amp; a24 &amp; a25 &amp; a26 &amp; 27 \\ a30 &amp; a31 &amp; a32 &amp; a33 &amp; a34 &amp; a35 &amp; a36 &amp; 37 \\ \end{array} \right) \rightarrow \left( \begin{array}{cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc} a00 &amp; a01 &amp; a02 &amp; a03 &amp; a04 &amp; a05 &amp; a06 &amp; a07 &amp; a10 &amp; a11 &amp; a12 &amp; a13 &amp; a14 &amp; a15 &amp; a16 &amp; a17 &amp; a20 &amp; a21 &amp; a22 &amp; a23 &amp; a24 &amp; a25 &amp; a26 &amp; a27 &amp; a30 &amp; a31 &amp; a32 &amp; a33 &amp; a34 &amp; a35 &amp; a36 &amp; a37\\ \end{array} \right) \]
 </p>
-<dl class="section note"><dt>Note</dt><dd>If the input data type is F32, the output matrix will have the following shape: [ height * 4, width / 4 ] </dd>
-<dd>
-If the input data type is F16, the output matrix will have the following shape: [ height * 8, width / 8 ] </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor) </dd></dl>
 
-<p>Definition at line <a class="el" href="_n_e_g_e_m_m_transpose1x_w_kernel_8h_source.xhtml#l00069">69</a> of file <a class="el" href="_n_e_g_e_m_m_transpose1x_w_kernel_8h_source.xhtml">NEGEMMTranspose1xWKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_g_e_m_m_transpose1x_w_kernel_8h_source.xhtml#l00068">68</a> of file <a class="el" href="_n_e_g_e_m_m_transpose1x_w_kernel_8h_source.xhtml">NEGEMMTranspose1xWKernel.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a83a344e60eb7db895953a942abf16628"></a>
 <div class="memitem">
@@ -223,7 +222,7 @@ If the input data type is F16, the output matrix will have the following shape: 
 <p>Initialise the kernel's input and output. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor. Data types supported: F32, 16. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor. Data types supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32 </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data type supported: same as <code>input</code>. </td></tr>
   </table>
   </dd>
@@ -278,7 +277,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml">NEGEMMTranspose1xWKernel</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

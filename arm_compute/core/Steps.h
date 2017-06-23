@@ -40,7 +40,6 @@ namespace arm_compute
 class Steps : public Dimensions<unsigned int>
 {
 public:
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
     /** Constructor to initialize the steps.
      *
      * @param[in] steps Values to initialize the steps.
@@ -52,7 +51,6 @@ public:
         // Initialize empty dimensions to 1
         std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
     }
-#endif
     /** Allow instances of this class to be copy constructed */
     constexpr Steps(const Steps &) = default;
     /** Allow instances of this class to be copied */

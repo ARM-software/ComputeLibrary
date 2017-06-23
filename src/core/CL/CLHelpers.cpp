@@ -22,9 +22,47 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/CLHelpers.h"
-
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
+
+#include <map>
+#include <vector>
+
+namespace
+{
+arm_compute::GPUTarget get_bifrost_target(const std::string &name)
+{
+    arm_compute::GPUTarget target = arm_compute::GPUTarget::MIDGARD;
+
+    if(name == "G7")
+    {
+        target = arm_compute::GPUTarget::G70;
+    }
+
+    return target;
+}
+
+arm_compute::GPUTarget get_midgard_target(const std::string &name)
+{
+    arm_compute::GPUTarget target = arm_compute::GPUTarget::MIDGARD;
+
+    if(name == "T6")
+    {
+        target = arm_compute::GPUTarget::T600;
+    }
+    else if(name == "T7")
+    {
+        target = arm_compute::GPUTarget::T700;
+    }
+    else if(name == "T8")
+    {
+        target = arm_compute::GPUTarget::T800;
+    }
+
+    return target;
+}
+} // namespace
 
 namespace arm_compute
 {
@@ -56,5 +94,72 @@ std::string get_cl_type_from_data_type(const DataType &dt)
             ARM_COMPUTE_ERROR("Unsupported input data type.");
             return "";
     }
+}
+
+const std::string &string_from_target(GPUTarget target)
+{
+    static std::map<GPUTarget, const std::string> gpu_target_map =
+    {
+        { GPUTarget::MIDGARD, "midgard" },
+        { GPUTarget::BIFROST, "bifrost" },
+        { GPUTarget::T600, "t600" },
+        { GPUTarget::T700, "t700" },
+        { GPUTarget::T800, "t800" },
+        { GPUTarget::G70, "g70" }
+    };
+
+    return gpu_target_map[target];
+}
+
+GPUTarget get_target_from_device(cl::Device &device)
+{
+    const std::string name_mali("Mali-");
+    GPUTarget         target{ GPUTarget::MIDGARD };
+
+    size_t            name_size = 0;
+    std::vector<char> name;
+
+    // Query device name size
+    cl_int err = clGetDeviceInfo(device.get(), CL_DEVICE_NAME, 0, nullptr, &name_size);
+    ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (name_size == 0), "clGetDeviceInfo failed to return valid information");
+    // Resize vector
+    name.resize(name_size);
+    // Query device name
+    err = clGetDeviceInfo(device.get(), CL_DEVICE_NAME, name_size, name.data(), nullptr);
+    ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetDeviceInfo failed to return valid information");
+    ARM_COMPUTE_UNUSED(err);
+
+    std::string name_str(name.begin(), name.end());
+    auto        pos = name_str.find(name_mali);
+
+    if(pos != std::string::npos)
+    {
+        ARM_COMPUTE_ERROR_ON_MSG((pos + name_mali.size() + 2) > name_str.size(), "Device name is shorter than expected.");
+        std::string sub_name = name_str.substr(pos + name_mali.size(), 2);
+
+        if(sub_name[0] == 'G')
+        {
+            target = get_bifrost_target(sub_name);
+        }
+        else if(sub_name[0] == 'T')
+        {
+            target = get_midgard_target(sub_name);
+        }
+        else
+        {
+            ARM_COMPUTE_INFO("Mali GPU unknown. Target is set to the default one.");
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_INFO("Can't find valid Mali GPU. Target is set to the default one.");
+    }
+
+    return target;
+}
+
+GPUTarget get_arch_from_target(GPUTarget target)
+{
+    return (target & GPUTarget::GPU_ARCH_MASK);
 }
 } // namespace arm_compute

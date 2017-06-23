@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: arm_compute/core/Helpers.inl File Reference</title>
+<title>Compute Library: arm_compute/core/Helpers.inl File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.xhtml"><span>Files</span></a></li>
@@ -112,6 +113,9 @@ $(document).ready(function(){initNavTree('_helpers_8inl.xhtml','');});
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">Helpers.inl File Reference</div>  </div>
 </div><!--header-->
@@ -122,13 +126,48 @@ $(document).ready(function(){initNavTree('_helpers_8inl.xhtml','');});
 <code>#include &lt;numeric&gt;</code><br />
 </div>
 <p><a href="_helpers_8inl_source.xhtml">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:aceaaf77291e83ca0dfaed677c93ce350"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aceaaf77291e83ca0dfaed677c93ce350">delta_bilinear_c1u8</a> (const uint8_t *pixel_ptr, size_t stride, float dx, float dy)</td></tr>
+<tr class="memdesc:aceaaf77291e83ca0dfaed677c93ce350"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes bilinear interpolation using the pointer to the top-left pixel and the pixel's distance between the real coordinates and the smallest following integer coordinates.  <a href="namespacearm__compute.xhtml#aceaaf77291e83ca0dfaed677c93ce350">More...</a><br /></td></tr>
+<tr class="separator:aceaaf77291e83ca0dfaed677c93ce350"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49560b7b7e0095fd7501b0a6d7042f2b"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a49560b7b7e0095fd7501b0a6d7042f2b">pixel_bilinear_c1u8</a> (const uint8_t *first_pixel_ptr, size_t stride, float x, float y)</td></tr>
+<tr class="memdesc:a49560b7b7e0095fd7501b0a6d7042f2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the pixel at (x,y) using bilinear interpolation.  <a href="namespacearm__compute.xhtml#a49560b7b7e0095fd7501b0a6d7042f2b">More...</a><br /></td></tr>
+<tr class="separator:a49560b7b7e0095fd7501b0a6d7042f2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c3fa3051dcd3570157d121b6cb0e56a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a7c3fa3051dcd3570157d121b6cb0e56a">pixel_bilinear_c1u8_clamp</a> (const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float x, float y)</td></tr>
+<tr class="memdesc:a7c3fa3051dcd3570157d121b6cb0e56a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the pixel at (x,y) using bilinear interpolation by clamping when out of borders.  <a href="namespacearm__compute.xhtml#a7c3fa3051dcd3570157d121b6cb0e56a">More...</a><br /></td></tr>
+<tr class="separator:a7c3fa3051dcd3570157d121b6cb0e56a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7b3af731907e85fcaf72555c446176b"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ab7b3af731907e85fcaf72555c446176b">pixel_area_c1u8_clamp</a> (const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float wr, float hr, int x, int y)</td></tr>
+<tr class="memdesc:ab7b3af731907e85fcaf72555c446176b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the pixel at (x,y) using area interpolation by clamping when out of borders.  <a href="namespacearm__compute.xhtml#ab7b3af731907e85fcaf72555c446176b">More...</a><br /></td></tr>
+<tr class="separator:ab7b3af731907e85fcaf72555c446176b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c0dcc38187027dcb89cd9724bc5a823"><td class="memTemplParams" colspan="2">template&lt;typename L , typename... Ts&gt; </td></tr>
+<tr class="memitem:a6c0dcc38187027dcb89cd9724bc5a823"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a6c0dcc38187027dcb89cd9724bc5a823">execute_window_loop</a> (const Window &amp;w, L &amp;&amp;lambda_function, Ts &amp;&amp;...iterators)</td></tr>
+<tr class="memdesc:a6c0dcc38187027dcb89cd9724bc5a823"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterate through the passed window, automatically adjusting the iterators and calling the lambda_functino for each element.  <a href="namespacearm__compute.xhtml#a6c0dcc38187027dcb89cd9724bc5a823">More...</a><br /></td></tr>
+<tr class="separator:a6c0dcc38187027dcb89cd9724bc5a823"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c9627ac3d73a67e9312c2c9740ff0a3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a1c9627ac3d73a67e9312c2c9740ff0a3">auto_init_if_empty</a> (ITensorInfo &amp;info, const TensorShape &amp;shape, int num_channels, DataType data_type, int fixed_point_position)</td></tr>
+<tr class="separator:a1c9627ac3d73a67e9312c2c9740ff0a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d1a839c51134b2ae171a2264c541b6f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a9d1a839c51134b2ae171a2264c541b6f">set_shape_if_empty</a> (ITensorInfo &amp;info, const TensorShape &amp;shape)</td></tr>
+<tr class="separator:a9d1a839c51134b2ae171a2264c541b6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8076ba239b6681067b6cfea7f773a39f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a8076ba239b6681067b6cfea7f773a39f">set_format_if_unknown</a> (ITensorInfo &amp;info, Format format)</td></tr>
+<tr class="separator:a8076ba239b6681067b6cfea7f773a39f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad19446be52c2c162fa678b9ae236f445"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ad19446be52c2c162fa678b9ae236f445">set_data_type_if_unknown</a> (ITensorInfo &amp;info, DataType data_type)</td></tr>
+<tr class="separator:ad19446be52c2c162fa678b9ae236f445"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0894ed18ca6f55d6053882676cc2c95c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a0894ed18ca6f55d6053882676cc2c95c">set_fixed_point_position_if_zero</a> (ITensorInfo &amp;info, int fixed_point_position)</td></tr>
+<tr class="separator:a0894ed18ca6f55d6053882676cc2c95c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="_helpers_8inl.xhtml">Helpers.inl</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:04 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

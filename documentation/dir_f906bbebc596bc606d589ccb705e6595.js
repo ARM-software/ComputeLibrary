@@ -17,6 +17,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLArithmeticSubtractionKernel.h", "_c_l_arithmetic_subtraction_kernel_8h.xhtml", [
       [ "CLArithmeticSubtractionKernel", "classarm__compute_1_1_c_l_arithmetic_subtraction_kernel.xhtml", "classarm__compute_1_1_c_l_arithmetic_subtraction_kernel" ]
     ] ],
+    [ "CLBatchNormalizationLayerKernel.h", "_c_l_batch_normalization_layer_kernel_8h.xhtml", [
+      [ "CLBatchNormalizationLayerKernel", "classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml", "classarm__compute_1_1_c_l_batch_normalization_layer_kernel" ]
+    ] ],
     [ "CLBitwiseAndKernel.h", "_c_l_bitwise_and_kernel_8h.xhtml", [
       [ "CLBitwiseAndKernel", "classarm__compute_1_1_c_l_bitwise_and_kernel.xhtml", "classarm__compute_1_1_c_l_bitwise_and_kernel" ]
     ] ],
@@ -50,8 +53,8 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
       [ "CLColorConvertKernel", "classarm__compute_1_1_c_l_color_convert_kernel.xhtml", "classarm__compute_1_1_c_l_color_convert_kernel" ]
     ] ],
     [ "CLConvolutionKernel.h", "_c_l_convolution_kernel_8h.xhtml", "_c_l_convolution_kernel_8h" ],
-    [ "CLConvolutionLayerWeightsReshapeKernel.h", "_c_l_convolution_layer_weights_reshape_kernel_8h.xhtml", [
-      [ "CLConvolutionLayerWeightsReshapeKernel", "classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml", "classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel" ]
+    [ "CLDepthConcatenateKernel.h", "_c_l_depth_concatenate_kernel_8h.xhtml", [
+      [ "CLDepthConcatenateKernel", "classarm__compute_1_1_c_l_depth_concatenate_kernel.xhtml", "classarm__compute_1_1_c_l_depth_concatenate_kernel" ]
     ] ],
     [ "CLDepthConvertKernel.h", "_c_l_depth_convert_kernel_8h.xhtml", [
       [ "CLDepthConvertKernel", "classarm__compute_1_1_c_l_depth_convert_kernel.xhtml", "classarm__compute_1_1_c_l_depth_convert_kernel" ]
@@ -108,6 +111,13 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
       [ "CLHistogramKernel", "classarm__compute_1_1_c_l_histogram_kernel.xhtml", "classarm__compute_1_1_c_l_histogram_kernel" ],
       [ "CLHistogramBorderKernel", "classarm__compute_1_1_c_l_histogram_border_kernel.xhtml", "classarm__compute_1_1_c_l_histogram_border_kernel" ]
     ] ],
+    [ "CLHOGDescriptorKernel.h", "_c_l_h_o_g_descriptor_kernel_8h.xhtml", [
+      [ "CLHOGOrientationBinningKernel", "classarm__compute_1_1_c_l_h_o_g_orientation_binning_kernel.xhtml", "classarm__compute_1_1_c_l_h_o_g_orientation_binning_kernel" ],
+      [ "CLHOGBlockNormalizationKernel", "classarm__compute_1_1_c_l_h_o_g_block_normalization_kernel.xhtml", "classarm__compute_1_1_c_l_h_o_g_block_normalization_kernel" ]
+    ] ],
+    [ "CLHOGDetectorKernel.h", "_c_l_h_o_g_detector_kernel_8h.xhtml", [
+      [ "CLHOGDetectorKernel", "classarm__compute_1_1_c_l_h_o_g_detector_kernel.xhtml", "classarm__compute_1_1_c_l_h_o_g_detector_kernel" ]
+    ] ],
     [ "CLIm2ColKernel.h", "_c_l_im2_col_kernel_8h.xhtml", [
       [ "CLIm2ColKernel", "classarm__compute_1_1_c_l_im2_col_kernel.xhtml", "classarm__compute_1_1_c_l_im2_col_kernel" ]
     ] ],
@@ -116,6 +126,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
       [ "CLIntegralImageVertKernel", "classarm__compute_1_1_c_l_integral_image_vert_kernel.xhtml", "classarm__compute_1_1_c_l_integral_image_vert_kernel" ]
     ] ],
     [ "CLLKTrackerKernel.h", "_c_l_l_k_tracker_kernel_8h.xhtml", "_c_l_l_k_tracker_kernel_8h" ],
+    [ "CLLocallyConnectedMatrixMultiplyKernel.h", "_c_l_locally_connected_matrix_multiply_kernel_8h.xhtml", [
+      [ "CLLocallyConnectedMatrixMultiplyKernel", "classarm__compute_1_1_c_l_locally_connected_matrix_multiply_kernel.xhtml", "classarm__compute_1_1_c_l_locally_connected_matrix_multiply_kernel" ]
+    ] ],
     [ "CLMagnitudePhaseKernel.h", "_c_l_magnitude_phase_kernel_8h.xhtml", [
       [ "CLMagnitudePhaseKernel", "classarm__compute_1_1_c_l_magnitude_phase_kernel.xhtml", "classarm__compute_1_1_c_l_magnitude_phase_kernel" ]
     ] ],
@@ -183,5 +196,10 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLWarpPerspectiveKernel.h", "_c_l_warp_perspective_kernel_8h.xhtml", [
       [ "CLWarpPerspectiveKernel", "classarm__compute_1_1_c_l_warp_perspective_kernel.xhtml", "classarm__compute_1_1_c_l_warp_perspective_kernel" ]
+    ] ],
+    [ "CLWeightsReshapeKernel.h", "_c_l_weights_reshape_kernel_8h.xhtml", [
+      [ "CLWeightsReshapeKernel", "classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml", "classarm__compute_1_1_c_l_weights_reshape_kernel" ],
+      [ "CLConvolutionLayerWeightsReshapeKernel", "classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml", "classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel" ],
+      [ "CLLocallyConnectedLayerWeightsReshapeKernel", "classarm__compute_1_1_c_l_locally_connected_layer_weights_reshape_kernel.xhtml", "classarm__compute_1_1_c_l_locally_connected_layer_weights_reshape_kernel" ]
     ] ]
 ];

@@ -29,6 +29,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
+#include <algorithm>
 #include <arm_neon.h>
 #include <cstdint>
 #include <map>
@@ -284,11 +285,23 @@ NEArithmeticSubtractionKernel::NEArithmeticSubtractionKernel()
 
 void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+
+    set_shape_if_empty(*output->info(), input1->info()->tensor_shape());
+
+    if(input1->info()->data_type() == DataType::S16 || input2->info()->data_type() == DataType::S16)
+    {
+        set_format_if_unknown(*output->info(), Format::S16);
+    }
+    else if(input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32)
+    {
+        set_format_if_unknown(*output->info(), Format::F32);
+    }
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input1, input2, output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::S16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::S16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::F32);
-
-    /* If one of the inputs is 16bit then the output must be 16bit too: */
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->data_type() == DataType::U8 && (input1->info()->data_type() != DataType::U8 || input2->info()->data_type() != DataType::U8),
                              "Output can only be U8 if both inputs are U8");
 

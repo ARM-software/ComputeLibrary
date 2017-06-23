@@ -1,9 +1,10 @@
 var searchData=
 [
-  ['magnitude_5fphase_2ecl',['magnitude_phase.cl',['../magnitude__phase_8cl.xhtml',1,'']]],
-  ['mean_5fstddev_2ecl',['mean_stddev.cl',['../mean__stddev_8cl.xhtml',1,'']]],
-  ['minmaxloc_2ecl',['minmaxloc.cl',['../minmaxloc_8cl.xhtml',1,'']]],
-  ['multihog_2eh',['MultiHOG.h',['../_multi_h_o_g_8h.xhtml',1,'']]],
-  ['multiimage_2eh',['MultiImage.h',['../_multi_image_8h.xhtml',1,'']]],
-  ['multiimageinfo_2eh',['MultiImageInfo.h',['../_multi_image_info_8h.xhtml',1,'']]]
+  ['lenet5_2ecpp',['LeNet5.cpp',['../_c_l_2_le_net5_8cpp.xhtml',1,'']]],
+  ['lenet5_2ecpp',['LeNet5.cpp',['../_n_e_o_n_2_le_net5_8cpp.xhtml',1,'']]],
+  ['lenet5_2eh',['LeNet5.h',['../benchmark_2system__tests_2common_2_le_net5_8h.xhtml',1,'']]],
+  ['lenet5_2eh',['LeNet5.h',['../model__objects_2_le_net5_8h.xhtml',1,'']]],
+  ['log_5fqs8_2ecpp',['Log_QS8.cpp',['../_log___q_s8_8cpp.xhtml',1,'']]],
+  ['lut_2eh',['Lut.h',['../_lut_8h.xhtml',1,'']]],
+  ['lutallocator_2eh',['LutAllocator.h',['../_lut_allocator_8h.xhtml',1,'']]]
 ];

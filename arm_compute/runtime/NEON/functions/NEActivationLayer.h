@@ -41,7 +41,7 @@ class NEActivationLayer : public INESimpleFunction
 public:
     /** Set the input and output tensor.
      *
-     * @param[in]  input           Source tensor. Data type supported: F32.
+     * @param[in]  input           Source tensor. Data type supported: QS8/F32.
      * @param[out] output          Destination tensor. Data type supported: same as @p input
      * @param[in]  activation_info Activation layer parameters.
      */

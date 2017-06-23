@@ -24,6 +24,8 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/AccessWindowTranspose.h"
+
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -106,7 +108,16 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
 
         // Create kernel
         std::string data_type_name = lower_string(string_from_data_type(input0->info()->data_type()));
-        _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(("gemm_mm_" + data_type_name), build_opts));
+
+        if(data_type_name == "f32")
+        {
+            GPUTarget arch_target = get_arch_from_target(get_target());
+            _kernel               = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_mm_f32_" + string_from_target(arch_target), build_opts));
+        }
+        else
+        {
+            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_mm_" + data_type_name, build_opts));
+        }
 
         // Configure window kernel
         const unsigned int     num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input0->info()->data_type());
@@ -115,7 +126,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
         AccessWindowRectangle input0_access(input0->info(), 0, 0, num_elems_processed_per_iteration_y, 1, 1.f, 0.25f);
-        AccessWindowRectangle input1_access(input1->info(), 0, 0, num_elems_processed_per_iteration_x, 1);
+        AccessWindowTranspose input1_access(input1->info(), 0, 0, num_elems_processed_per_iteration_x, 1, 0.f, 0.25f);
         AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
 
         update_window_and_padding(win, input0_access, input1_access, output_access);

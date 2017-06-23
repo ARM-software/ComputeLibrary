@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: NEHOGDetectorKernel Class Reference</title>
+<title>Compute Library: NEHOGDetectorKernel Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.xhtml"><span>Files</span></a></li>
@@ -332,7 +333,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor which stores the <a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> descriptor obtained with <a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml">NEHOGOrientationBinningKernel</a>. Data type supported: F32. Number of channels supported: equal to the number of histogram bins per block </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">hog</td><td><a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> data object used by <a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml">NEHOGOrientationBinningKernel</a> and <a class="el" href="classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml">NEHOGBlockNormalizationKernel</a> </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">detection_windows</td><td><a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of <a class="el" href="structarm__compute_1_1_detection_window.xhtml">DetectionWindow</a>. This array stores all the detected objects </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">detection_windows</td><td><a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of <a class="el" href="struct_detection_window.xhtml">DetectionWindow</a>. This array stores all the detected objects </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">detection_window_stride</td><td>Distance in pixels between 2 consecutive detection windows in x and y directions. It must be multiple of the hog-&gt;info()-&gt;block_stride() </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>(Optional) Threshold for the distance between features and SVM classifying plane </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">idx_class</td><td>(Optional) Index of the class used for evaluating which class the detection window belongs to </td></tr>
@@ -441,7 +442,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml">NEHOGDetectorKernel</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:05 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

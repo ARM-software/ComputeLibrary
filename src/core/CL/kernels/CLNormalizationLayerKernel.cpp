@@ -50,6 +50,7 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, const ICLTens
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S16, DataType::U16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
+    ARM_COMPUTE_ERROR_ON_MSG(norm_info.type() == NormType::IN_MAP_2D, "2D In-Map Normalization not implemented");
 
     // Set build options
     std::set<std::string> build_opts;
@@ -59,11 +60,12 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, const ICLTens
     _squared_input = squared_input;
     _output        = output;
 
-    const bool is_in_map = (norm_info.type() == NormType::IN_MAP);
-    _border_size         = (is_in_map) ? BorderSize(0, 3) : BorderSize(0);
+    const bool         is_in_map    = (norm_info.type() == NormType::IN_MAP_1D);
+    const unsigned int border_width = is_in_map ? std::min(norm_info.norm_size() / 2, 3U) : 0;
+    _border_size                    = BorderSize(0, border_width);
 
     // Create kernel
-    std::string kernel_name = (norm_info.type() == NormType::IN_MAP) ? "normalization_layer_in_map" : "normalization_layer_cross_map";
+    std::string kernel_name = (norm_info.type() == NormType::IN_MAP_1D) ? "normalization_layer_in_map_1D" : "normalization_layer_cross_map";
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Set kernel static arguments

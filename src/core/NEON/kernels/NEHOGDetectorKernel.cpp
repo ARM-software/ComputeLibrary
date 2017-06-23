@@ -35,13 +35,13 @@ using namespace arm_compute;
 
 NEHOGDetectorKernel::NEHOGDetectorKernel()
     : _input(nullptr), _detection_windows(), _hog_descriptor(nullptr), _bias(0.0f), _threshold(0.0f), _idx_class(0), _num_bins_per_descriptor_x(0), _num_blocks_per_descriptor_y(0), _block_stride_width(0),
-      _block_stride_height(0), _detection_window_width(0), _detection_window_height(0), _mutex()
+      _block_stride_height(0), _detection_window_width(0), _detection_window_height(0), _max_num_detection_windows(0), _mutex()
 {
 }
 
 void NEHOGDetectorKernel::configure(const ITensor *input, const IHOG *hog, IDetectionWindowArray *detection_windows, const Size2D &detection_window_stride, float threshold, uint16_t idx_class)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F32);
     ARM_COMPUTE_ERROR_ON(hog == nullptr);
     ARM_COMPUTE_ERROR_ON(detection_windows == nullptr);
     ARM_COMPUTE_ERROR_ON((detection_window_stride.width % hog->info()->block_stride().width) != 0);
@@ -63,6 +63,9 @@ void NEHOGDetectorKernel::configure(const ITensor *input, const IHOG *hog, IDete
     _block_stride_height         = block_stride.height;
     _detection_window_width      = detection_window_size.width;
     _detection_window_height     = detection_window_size.height;
+    _max_num_detection_windows   = detection_windows->max_num_values();
+
+    ARM_COMPUTE_ERROR_ON((_num_bins_per_descriptor_x * _num_blocks_per_descriptor_y + 1) != hog->info()->descriptor_size());
 
     // Get the number of blocks along the x and y directions of the input tensor
     const ValidRegion &valid_region = input->info()->valid_region();
@@ -81,8 +84,8 @@ void NEHOGDetectorKernel::configure(const ITensor *input, const IHOG *hog, IDete
     win.set(Window::DimX, Window::Dimension(0, floor_to_multiple(num_blocks_x - num_blocks_per_detection_window_x, window_step_x), window_step_x));
     win.set(Window::DimY, Window::Dimension(0, floor_to_multiple(num_blocks_y - num_blocks_per_detection_window_y, window_step_y), window_step_y));
 
-    const unsigned int num_elems_read_per_iteration = _num_bins_per_descriptor_x;
-    const unsigned int num_rows_read_per_iteration  = _num_blocks_per_descriptor_y;
+    constexpr unsigned int num_elems_read_per_iteration = 1;
+    const unsigned int     num_rows_read_per_iteration  = _num_blocks_per_descriptor_y;
 
     update_window_and_padding(win, AccessWindowRectangle(input->info(), 0, 0, num_elems_read_per_iteration, num_rows_read_per_iteration));
 
@@ -163,17 +166,20 @@ void NEHOGDetectorKernel::run(const Window &window)
 
         if(score > _threshold)
         {
-            DetectionWindow win;
-            win.x         = (id.x() * _block_stride_width);
-            win.y         = (id.y() * _block_stride_height);
-            win.width     = _detection_window_width;
-            win.height    = _detection_window_height;
-            win.idx_class = _idx_class;
-            win.score     = score;
+            if(_detection_windows->num_values() < _max_num_detection_windows)
+            {
+                DetectionWindow win;
+                win.x         = (id.x() * _block_stride_width);
+                win.y         = (id.y() * _block_stride_height);
+                win.width     = _detection_window_width;
+                win.height    = _detection_window_height;
+                win.idx_class = _idx_class;
+                win.score     = score;
 
-            std::unique_lock<std::mutex> lock(_mutex);
-            _detection_windows->push_back(win);
-            lock.unlock();
+                std::unique_lock<std::mutex> lock(_mutex);
+                _detection_windows->push_back(win);
+                lock.unlock();
+            }
         }
     },
     in);

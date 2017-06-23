@@ -44,8 +44,11 @@ NEColorConvertKernel::NEColorConvertKernel()
 
 void NEColorConvertKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    set_shape_if_empty(*output->info(), input->info()->tensor_shape());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
     unsigned int num_elems_processed_per_iteration = 0;
 
@@ -137,8 +140,12 @@ void NEColorConvertKernel::configure(const ITensor *input, ITensor *output)
 
 void NEColorConvertKernel::configure(const IMultiImage *input, IImage *output)
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
+
+    set_shape_if_empty(*output->info(), input->plane(0)->info()->tensor_shape());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input->plane(0), output);
 
     unsigned int num_elems_processed_per_iteration = 0;
 
@@ -241,7 +248,49 @@ void NEColorConvertKernel::configure(const IMultiImage *input, IImage *output)
 
 void NEColorConvertKernel::configure(const IImage *input, IMultiImage *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
+
+    set_shape_if_empty(*output->plane(0)->info(), input->info()->tensor_shape());
+
+    switch(output->info()->format())
+    {
+        case Format::NV12:
+        {
+            TensorShape subsampled_shape = input->info()->tensor_shape();
+            subsampled_shape.set(0, subsampled_shape[0] / 2);
+            subsampled_shape.set(1, subsampled_shape[1] / 2);
+
+            set_shape_if_empty(*output->plane(1)->info(), subsampled_shape);
+
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(subsampled_shape, output->plane(1)->info()->tensor_shape());
+            break;
+        }
+        case Format::IYUV:
+        {
+            TensorShape subsampled_shape = input->info()->tensor_shape();
+            subsampled_shape.set(0, subsampled_shape[0] / 2);
+            subsampled_shape.set(1, subsampled_shape[1] / 2);
+
+            set_shape_if_empty(*output->plane(1)->info(), subsampled_shape);
+            set_shape_if_empty(*output->plane(2)->info(), subsampled_shape);
+
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(subsampled_shape, output->plane(1)->info()->tensor_shape());
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(subsampled_shape, output->plane(2)->info()->tensor_shape());
+            break;
+        }
+        case Format::YUV444:
+            set_shape_if_empty(*output->plane(1)->info(), input->info()->tensor_shape());
+            set_shape_if_empty(*output->plane(2)->info(), input->info()->tensor_shape());
+
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output->plane(1));
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output->plane(2));
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not supported");
+    }
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output->plane(0));
 
     unsigned int num_elems_processed_per_iteration = 0;
 
@@ -372,6 +421,50 @@ void NEColorConvertKernel::configure(const IImage *input, IMultiImage *output)
 
 void NEColorConvertKernel::configure(const IMultiImage *input, IMultiImage *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON(input == output);
+
+    set_shape_if_empty(*output->plane(0)->info(), input->plane(0)->info()->tensor_shape());
+
+    switch(output->info()->format())
+    {
+        case Format::NV12:
+        {
+            TensorShape subsampled_shape = input->plane(0)->info()->tensor_shape();
+            subsampled_shape.set(0, subsampled_shape[0] / 2);
+            subsampled_shape.set(1, subsampled_shape[1] / 2);
+
+            set_shape_if_empty(*output->plane(1)->info(), subsampled_shape);
+
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(subsampled_shape, output->plane(1)->info()->tensor_shape());
+            break;
+        }
+        case Format::IYUV:
+        {
+            TensorShape subsampled_shape = input->plane(0)->info()->tensor_shape();
+            subsampled_shape.set(0, subsampled_shape[0] / 2);
+            subsampled_shape.set(1, subsampled_shape[1] / 2);
+
+            set_shape_if_empty(*output->plane(1)->info(), subsampled_shape);
+            set_shape_if_empty(*output->plane(2)->info(), subsampled_shape);
+
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(subsampled_shape, output->plane(1)->info()->tensor_shape());
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(subsampled_shape, output->plane(2)->info()->tensor_shape());
+            break;
+        }
+        case Format::YUV444:
+            set_shape_if_empty(*output->plane(1)->info(), input->plane(0)->info()->tensor_shape());
+            set_shape_if_empty(*output->plane(2)->info(), input->plane(0)->info()->tensor_shape());
+
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input->plane(0), output->plane(1));
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input->plane(0), output->plane(2));
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not supported");
+    }
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input->plane(0), output->plane(0));
+
     switch(input->info()->format())
     {
         case Format::NV12:

@@ -17,6 +17,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLArithmeticSubtraction.h", "_c_l_arithmetic_subtraction_8h.xhtml", [
       [ "CLArithmeticSubtraction", "classarm__compute_1_1_c_l_arithmetic_subtraction.xhtml", "classarm__compute_1_1_c_l_arithmetic_subtraction" ]
     ] ],
+    [ "CLBatchNormalizationLayer.h", "_c_l_batch_normalization_layer_8h.xhtml", [
+      [ "CLBatchNormalizationLayer", "classarm__compute_1_1_c_l_batch_normalization_layer.xhtml", "classarm__compute_1_1_c_l_batch_normalization_layer" ]
+    ] ],
     [ "CLBitwiseAnd.h", "_c_l_bitwise_and_8h.xhtml", [
       [ "CLBitwiseAnd", "classarm__compute_1_1_c_l_bitwise_and.xhtml", "classarm__compute_1_1_c_l_bitwise_and" ]
     ] ],
@@ -46,7 +49,11 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLConvolution.h", "_c_l_convolution_8h.xhtml", "_c_l_convolution_8h" ],
     [ "CLConvolutionLayer.h", "_c_l_convolution_layer_8h.xhtml", [
+      [ "CLConvolutionLayerReshapeWeights", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights" ],
       [ "CLConvolutionLayer", "classarm__compute_1_1_c_l_convolution_layer.xhtml", "classarm__compute_1_1_c_l_convolution_layer" ]
+    ] ],
+    [ "CLDepthConcatenate.h", "_c_l_depth_concatenate_8h.xhtml", [
+      [ "CLDepthConcatenate", "classarm__compute_1_1_c_l_depth_concatenate.xhtml", "classarm__compute_1_1_c_l_depth_concatenate" ]
     ] ],
     [ "CLDepthConvert.h", "_c_l_depth_convert_8h.xhtml", [
       [ "CLDepthConvert", "classarm__compute_1_1_c_l_depth_convert.xhtml", "classarm__compute_1_1_c_l_depth_convert" ]
@@ -70,6 +77,7 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLFillBorder", "classarm__compute_1_1_c_l_fill_border.xhtml", "classarm__compute_1_1_c_l_fill_border" ]
     ] ],
     [ "CLFullyConnectedLayer.h", "_c_l_fully_connected_layer_8h.xhtml", [
+      [ "CLFullyConnectedLayerReshapeWeights", "classarm__compute_1_1_c_l_fully_connected_layer_reshape_weights.xhtml", "classarm__compute_1_1_c_l_fully_connected_layer_reshape_weights" ],
       [ "CLFullyConnectedLayer", "classarm__compute_1_1_c_l_fully_connected_layer.xhtml", "classarm__compute_1_1_c_l_fully_connected_layer" ]
     ] ],
     [ "CLGaussian3x3.h", "_c_l_gaussian3x3_8h.xhtml", [
@@ -96,6 +104,18 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLHarrisCorners", "classarm__compute_1_1_c_l_harris_corners.xhtml", "classarm__compute_1_1_c_l_harris_corners" ]
     ] ],
     [ "CLHistogram.h", "_c_l_histogram_8h.xhtml", "_c_l_histogram_8h" ],
+    [ "CLHOGDescriptor.h", "_c_l_h_o_g_descriptor_8h.xhtml", [
+      [ "CLHOGDescriptor", "classarm__compute_1_1_c_l_h_o_g_descriptor.xhtml", "classarm__compute_1_1_c_l_h_o_g_descriptor" ]
+    ] ],
+    [ "CLHOGDetector.h", "_c_l_h_o_g_detector_8h.xhtml", [
+      [ "CLHOGDetector", "classarm__compute_1_1_c_l_h_o_g_detector.xhtml", "classarm__compute_1_1_c_l_h_o_g_detector" ]
+    ] ],
+    [ "CLHOGGradient.h", "_c_l_h_o_g_gradient_8h.xhtml", [
+      [ "CLHOGGradient", "classarm__compute_1_1_c_l_h_o_g_gradient.xhtml", "classarm__compute_1_1_c_l_h_o_g_gradient" ]
+    ] ],
+    [ "CLHOGMultiDetection.h", "_c_l_h_o_g_multi_detection_8h.xhtml", [
+      [ "CLHOGMultiDetection", "classarm__compute_1_1_c_l_h_o_g_multi_detection.xhtml", "classarm__compute_1_1_c_l_h_o_g_multi_detection" ]
+    ] ],
     [ "CLIntegralImage.h", "_c_l_integral_image_8h.xhtml", [
       [ "CLIntegralImage", "classarm__compute_1_1_c_l_integral_image.xhtml", "classarm__compute_1_1_c_l_integral_image" ]
     ] ],
@@ -104,6 +124,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLLaplacianReconstruct.h", "_c_l_laplacian_reconstruct_8h.xhtml", [
       [ "CLLaplacianReconstruct", "classarm__compute_1_1_c_l_laplacian_reconstruct.xhtml", "classarm__compute_1_1_c_l_laplacian_reconstruct" ]
+    ] ],
+    [ "CLLocallyConnectedLayer.h", "_c_l_locally_connected_layer_8h.xhtml", [
+      [ "CLLocallyConnectedLayer", "classarm__compute_1_1_c_l_locally_connected_layer.xhtml", "classarm__compute_1_1_c_l_locally_connected_layer" ]
     ] ],
     [ "CLMagnitude.h", "_c_l_magnitude_8h.xhtml", [
       [ "CLMagnitude", "classarm__compute_1_1_c_l_magnitude.xhtml", "classarm__compute_1_1_c_l_magnitude" ]

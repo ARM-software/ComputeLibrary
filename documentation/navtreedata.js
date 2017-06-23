@@ -1,10 +1,8 @@
 var NAVTREE =
 [
-  [ "ARM Compute Library", "index.xhtml", [
-    [ "Documentation", "index.xhtml", [
-      [ "Introduction", "index.xhtml#S0_introduction", [
-        [ "Contact / Support", "index.xhtml#S0_1_contact", null ]
-      ] ],
+  [ "Compute Library", "index.xhtml", [
+    [ "Introduction", "index.xhtml", [
+      [ "Contact / Support", "index.xhtml#S0_1_contact", null ],
       [ "File organisation", "index.xhtml#S1_file_organisation", null ],
       [ "Release versions and changelog", "index.xhtml#S2_versions_changelog", [
         [ "Release versions", "index.xhtml#S2_1_versions", null ],
@@ -21,35 +19,52 @@ var NAVTREE =
           [ "How to manually build the examples ?", "index.xhtml#S3_3_2_examples", null ]
         ] ],
         [ "The OpenCL stub library", "index.xhtml#S3_4_cl_stub_library", null ]
+      ] ]
+    ] ],
+    [ "Library architecture", "architecture.xhtml", [
+      [ "Core vs Runtime libraries", "architecture.xhtml#S4_1", null ],
+      [ "Windows, kernels, multi-threading and functions", "architecture.xhtml#S4_2_windows_kernels_mt_functions", [
+        [ "Windows", "architecture.xhtml#S4_2_1_windows", null ],
+        [ "Kernels", "architecture.xhtml#S4_2_2", null ],
+        [ "Multi-threading", "architecture.xhtml#S4_2_3", null ],
+        [ "Functions", "architecture.xhtml#S4_2_4", null ],
+        [ "OpenCL Scheduler and kernel library", "architecture.xhtml#S4_4_1_cl_scheduler", null ],
+        [ "OpenCL events and synchronization", "architecture.xhtml#S4_4_2_events_sync", null ],
+        [ "OpenCL / NEON interoperability", "architecture.xhtml#S4_4_2_cl_neon", null ]
       ] ],
-      [ "Library Architecture", "index.xhtml#S4_architecture", [
-        [ "Core vs Runtime libraries", "index.xhtml#S4_1", null ],
-        [ "Windows, kernels, multi-threading and functions", "index.xhtml#S4_2_windows_kernels_mt_functions", [
-          [ "Windows", "index.xhtml#S4_2_1_windows", null ],
-          [ "Kernels", "index.xhtml#S4_2_2", null ],
-          [ "Multi-threading", "index.xhtml#S4_2_3", null ],
-          [ "Functions", "index.xhtml#S4_2_4", null ],
-          [ "OpenCL Scheduler and kernel library", "index.xhtml#S4_4_1_cl_scheduler", null ],
-          [ "OpenCL events and synchronisation", "index.xhtml#S4_4_2_events_sync", null ],
-          [ "OpenCL / NEON interoperability", "index.xhtml#S4_4_2_cl_neon", null ]
+      [ "Algorithms", "architecture.xhtml#S4_5_algorithms", null ],
+      [ "Images, padding, border modes and tensors", "architecture.xhtml#S4_6_images_tensors", [
+        [ "Padding and border modes", "architecture.xhtml#S4_6_1_padding_and_border", [
+          [ "Padding", "architecture.xhtml#padding", null ],
+          [ "Valid regions", "architecture.xhtml#valid_region", null ]
         ] ],
-        [ "Algorithms", "index.xhtml#S4_5_algorithms", null ],
-        [ "Images, padding, border modes and tensors", "index.xhtml#S4_6_images_tensors", [
-          [ "Padding and border modes", "index.xhtml#S4_6_1_padding_and_border", [
-            [ "Padding", "index.xhtml#padding", null ],
-            [ "Valid regions", "index.xhtml#valid_region", null ]
-          ] ],
-          [ "Tensors", "index.xhtml#S4_6_2_tensors", null ],
-          [ "Images and Tensors description conventions", "index.xhtml#S4_6_3_description_conventions", null ],
-          [ "Working with Images and Tensors using iterators", "index.xhtml#S4_6_4_working_with_objects", null ]
+        [ "Tensors", "architecture.xhtml#S4_6_2_tensors", null ],
+        [ "Images and Tensors description conventions", "architecture.xhtml#S4_6_3_description_conventions", null ],
+        [ "Working with Images and Tensors using iterators", "architecture.xhtml#S4_6_4_working_with_objects", null ]
+      ] ]
+    ] ],
+    [ "Validation and benchmarks tests", "tests.xhtml", [
+      [ "Building dependencies", "tests.xhtml#building_test_dependencies", [
+        [ "Building Boost", "tests.xhtml#building_boost", null ],
+        [ "Building Google Benchmark", "tests.xhtml#building_google_benchmark", null ]
+      ] ],
+      [ "Running tests", "tests.xhtml#tests_running_tests", [
+        [ "Benchmarking", "tests.xhtml#tests_running_tests_benchmarking", [
+          [ "Filter tests", "tests.xhtml#tests_running_tests_benchmarking_filter", null ],
+          [ "Runtime", "tests.xhtml#tests_running_tests_benchmarking_runtime", null ],
+          [ "Verbosity", "tests.xhtml#tests_running_tests_benchmarking_verbosity", null ]
+        ] ],
+        [ "Validation", "tests.xhtml#tests_running_tests_validation", [
+          [ "Filter tests", "tests.xhtml#tests_running_tests_validation_filter", null ],
+          [ "Verbosity", "tests.xhtml#tests_running_tests_validation_verbosity", null ]
         ] ]
       ] ]
     ] ],
     [ "Namespaces", null, [
       [ "Namespace List", "namespaces.xhtml", "namespaces" ],
       [ "Namespace Members", "namespacemembers.xhtml", [
-        [ "All", "namespacemembers.xhtml", null ],
-        [ "Functions", "namespacemembers_func.xhtml", null ],
+        [ "All", "namespacemembers.xhtml", "namespacemembers_dup" ],
+        [ "Functions", "namespacemembers_func.xhtml", "namespacemembers_func" ],
         [ "Variables", "namespacemembers_vars.xhtml", null ],
         [ "Typedefs", "namespacemembers_type.xhtml", null ],
         [ "Enumerations", "namespacemembers_enum.xhtml", null ]
@@ -63,7 +78,10 @@ var NAVTREE =
         [ "All", "functions.xhtml", "functions_dup" ],
         [ "Functions", "functions_func.xhtml", "functions_func" ],
         [ "Variables", "functions_vars.xhtml", null ],
-        [ "Enumerations", "functions_enum.xhtml", null ]
+        [ "Typedefs", "functions_type.xhtml", null ],
+        [ "Enumerations", "functions_enum.xhtml", null ],
+        [ "Enumerator", "functions_eval.xhtml", null ],
+        [ "Related Functions", "functions_rela.xhtml", null ]
       ] ]
     ] ],
     [ "Files", null, [
@@ -81,22 +99,30 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"_access_window_auto_padding_8h.xhtml",
-"_c_l_pooling_layer_kernel_8h_source.xhtml",
-"_n_e_color_convert_helper_8inl.xhtml",
-"_open_c_l_8h.xhtml#ae7c96c1469662004d842704e2ff076fb",
-"channel__extract_8cl_source.xhtml",
-"classarm__compute_1_1_c_l_convolution_layer_weights_reshape_kernel.xhtml#ae0214c82efeb2ed2d6e4c0311ed19778",
-"classarm__compute_1_1_c_l_histogram_kernel.xhtml#aa829a82c818f626213fd9bc071609261",
-"classarm__compute_1_1_c_l_scharr3x3_kernel.xhtml#abce0bd975f2f2ea4b70aedd72685edc1",
-"classarm__compute_1_1_i_c_l_lut.xhtml#a8740c6498dafc80428e500a056135bf1",
-"classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#a6501ef61f473949fc980b4ada8e18bad",
-"classarm__compute_1_1_n_e_fill_border_kernel.xhtml#acfb02d08dc643683c69a86b220e30574",
-"classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69",
-"classarm__compute_1_1_n_e_sobel7x7_vert_kernel.xhtml#a119c48528fa6440b33a4e25c9825d07f",
-"color__convert_8cl.xhtml#a18ef3b2b70de9af3e4386b2a07f2cd36",
-"helpers_8h.xhtml",
-"struct_internal_keypoint.xhtml#ad0da36b2558901e21e7a30f6c227a45e"
+"_absolute_difference_8cpp.xhtml",
+"_c_l_harris_corners_8h.xhtml",
+"_helpers_8inl.xhtml#a8076ba239b6681067b6cfea7f773a39f",
+"_n_e_erode_kernel_8h_source.xhtml",
+"_n_e_laplacian_reconstruct_8h_source.xhtml",
+"_tensor_operations_8h.xhtml#a6b46cf712c2bf1e96eef20c6b1b816f5",
+"arm__compute_2core_2_types_8h.xhtml#a1fece1bd804e64f39f602d1c3969849a",
+"cl__events_8cpp_source.xhtml",
+"classarm__compute_1_1_c_l_convolution_rectangle.xhtml",
+"classarm__compute_1_1_c_l_h_o_g_descriptor.xhtml",
+"classarm__compute_1_1_c_l_multi_h_o_g.xhtml#a88dcfbbdb14ffc930e0f3e1eaf5b9d86",
+"classarm__compute_1_1_c_p_p_corner_candidates_kernel.xhtml#a4a5bcfcb1a9a25daecc442af866f0632",
+"classarm__compute_1_1_i_multi_image.xhtml#a38261214e277cba5b90dd1ffe31170e0",
+"classarm__compute_1_1_n_e_canny_edge.xhtml",
+"classarm__compute_1_1_n_e_g_e_m_m_interleave4x4.xhtml",
+"classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml#a541f8b17ae7011090ec7129487e61d04",
+"classarm__compute_1_1_n_e_table_lookup_kernel.xhtml#a07bb7672d1a33bacdb6d6c03329be8bc",
+"classarm__compute_1_1_tensor_info.xhtml#aaee6555ace43b03173844b1a228a3fc3",
+"classarm__compute_1_1test_1_1_program_options.xhtml",
+"classarm__compute_1_1test_1_1neon_1_1_n_e_accessor.xhtml#a2df95f7046b81e69a1265a42202ea068",
+"functions_u.xhtml",
+"namespacemembers_r.xhtml",
+"structarm__compute_1_1_rectangle.xhtml",
+"tests_2validation_2_fixed_point_8h.xhtml#ae115fc750a92fb6a5e094998b56fcc56"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

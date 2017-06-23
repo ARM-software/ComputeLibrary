@@ -199,13 +199,13 @@ void NEHarrisCorners::run()
     _border_gy.run(_border_gy.window());
 
     // Run harris score kernel
-    NEScheduler::get().multithread(_harris_score.get());
+    NEScheduler::get().schedule(_harris_score.get(), Window::DimY);
 
     // Run non-maxima suppression
     _non_max_suppr.run();
 
     // Run corner candidate kernel
-    NEScheduler::get().multithread(&_candidates);
+    NEScheduler::get().schedule(&_candidates, Window::DimY);
 
     // Run sort & euclidean distance
     _sort_euclidean.run(_sort_euclidean.window());

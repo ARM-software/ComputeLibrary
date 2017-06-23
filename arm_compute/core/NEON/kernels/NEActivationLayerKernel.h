@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_NEACTIVATIONLAYERKERNEL_H__
 #define __ARM_COMPUTE_NEACTIVATIONLAYERKERNEL_H__
 
+#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/NEON/INESimpleKernel.h"
 
 namespace arm_compute
@@ -46,7 +47,7 @@ public:
     NEActivationLayerKernel &operator=(NEActivationLayerKernel &&) = default;
     /** Set the input and output tensor.
      *
-     * @param[in]  input           Source tensor. Data types supported: F32.
+     * @param[in]  input           Source tensor. Data types supported: QS8/F32.
      * @param[out] output          Destination tensor. Data type supported: same as @p input
      * @param[in]  activation_info Activation layer information.
      */
@@ -66,8 +67,14 @@ private:
      *
      *  @param[in] window Region on which to execute the kernel
      */
-    template <ActivationLayerInfo::ActivationFunction F>
-    void activation(const Window &window);
+    template <ActivationLayerInfo::ActivationFunction F, typename T>
+    typename std::enable_if<std::is_same<T, float>::value, void>::type activation(const Window &window);
+    /** Function to apply an activation function on a tensor.
+     *
+     *  @param[in] window Region on which to execute the kernel
+     */
+    template <ActivationLayerInfo::ActivationFunction F, typename T>
+    typename std::enable_if<std::is_same<T, qint8_t>::value, void>::type activation(const Window &window);
 
 private:
     ActivationFunctionExecutorPtr _func;

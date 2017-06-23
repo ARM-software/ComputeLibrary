@@ -36,8 +36,8 @@
 #include <climits>
 #include <cstddef>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 NEMinMaxKernel::NEMinMaxKernel()
     : _func(), _input(nullptr), _min(), _max(), _min_init(), _max_init(), _mtx()
 {
@@ -190,7 +190,6 @@ bool NEMinMaxLocationKernel::is_parallelisable() const
     return false;
 }
 
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
 template <unsigned int...>
 struct index_seq
 {
@@ -210,10 +209,7 @@ struct gen_index_seq<0u, S...> : index_seq<S...>
 {
     using type = index_seq<S...>;
 };
-#endif /* DOXYGEN_SKIP_THIS */
 
-namespace arm_compute
-{
 template <class T, unsigned int... N>
 struct NEMinMaxLocationKernel::create_func_table<T, index_seq<N...>>
 {
@@ -225,7 +221,6 @@ const NEMinMaxLocationKernel::MinMaxLocFunction NEMinMaxLocationKernel::create_f
 {
     &NEMinMaxLocationKernel::minmax_loc<T, bool(N & 8), bool(N & 4), bool(N & 2), bool(N & 1)>...
 };
-} // namespace arm_compute
 
 void NEMinMaxLocationKernel::configure(const IImage *input, int32_t *min, int32_t *max,
                                        ICoordinates2DArray *min_loc, ICoordinates2DArray *max_loc,
@@ -363,3 +358,4 @@ void NEMinMaxLocationKernel::minmax_loc(const Window &win)
         }
     }
 }
+} // namespace arm_compute

@@ -41,7 +41,7 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, Norm
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
 
-    TensorInfo tensor_info(input->info()->tensor_shape(), 1, input->info()->data_type());
+    TensorInfo tensor_info(input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
     _input_squared.allocator()->init(tensor_info);
 
     // Configure kernels
@@ -55,7 +55,7 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, Norm
 
 void NENormalizationLayer::run()
 {
-    NEScheduler::get().multithread(&_multiply_kernel);
-    NEScheduler::get().multithread(&_border_handler);
-    NEScheduler::get().multithread(&_norm_kernel);
+    NEScheduler::get().schedule(&_multiply_kernel, Window::DimY);
+    NEScheduler::get().schedule(&_border_handler, Window::DimY);
+    NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
 }

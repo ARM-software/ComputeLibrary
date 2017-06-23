@@ -43,4 +43,14 @@ typedef struct Keypoint
     float error;           /**< A tracking method specific error. Initialized to 0 by corner detectors. */
 } Keypoint;
 
+/** Detection window struct */
+typedef struct DetectionWindow
+{
+    ushort x;         /**< Top-left x coordinate */
+    ushort y;         /**< Top-left y coordinate */
+    ushort width;     /**< Width of the detection window */
+    ushort height;    /**< Height of the detection window */
+    ushort idx_class; /**< Index of the class */
+    float  score;     /**< Confidence value for the detection window */
+} DetectionWindow;
 #endif // ARM_COMPUTE_TYPES_H

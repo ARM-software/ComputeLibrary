@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: arm_compute/core/NEON/NEMath.h File Reference</title>
+<title>Compute Library: arm_compute/core/NEON/NEMath.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.xhtml"><span>Files</span></a></li>
@@ -114,13 +115,13 @@ $(document).ready(function(){initNavTree('_n_e_math_8h.xhtml','');});
 <div class="header">
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">NEMath.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;arm_neon.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="_n_e_math_8inl_source.xhtml">arm_compute/core/NEON/NEMath.inl</a>&quot;</code><br />
 </div>
 <p><a href="_n_e_math_8h_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -131,34 +132,27 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ab8970d7aed07d8649f5e3088455948b8"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ab8970d7aed07d8649f5e3088455948b8">vinvsqrtq_f32</a> (float32x4_t x)</td></tr>
-<tr class="memdesc:ab8970d7aed07d8649f5e3088455948b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate inverse square root.  <a href="namespacearm__compute.xhtml#ab8970d7aed07d8649f5e3088455948b8">More...</a><br /></td></tr>
-<tr class="separator:ab8970d7aed07d8649f5e3088455948b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae1cdb8bbcb3f7ce5d3469f42f19d37a6"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ae1cdb8bbcb3f7ce5d3469f42f19d37a6">vinvq_f32</a> (const float32x4_t &amp;x)</td></tr>
-<tr class="memdesc:ae1cdb8bbcb3f7ce5d3469f42f19d37a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate reciprocal.  <a href="namespacearm__compute.xhtml#ae1cdb8bbcb3f7ce5d3469f42f19d37a6">More...</a><br /></td></tr>
-<tr class="separator:ae1cdb8bbcb3f7ce5d3469f42f19d37a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac91f64208cebf2177a6be3a40ecebca8"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ac91f64208cebf2177a6be3a40ecebca8">vtaylor_polyq_f32</a> (const float32x4_t &amp;x, const std::array&lt; float32x4_t, 8 &gt; &amp;coeffs)</td></tr>
-<tr class="memdesc:ac91f64208cebf2177a6be3a40ecebca8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a 7th degree polynomial approximation using Estrin's method.  <a href="namespacearm__compute.xhtml#ac91f64208cebf2177a6be3a40ecebca8">More...</a><br /></td></tr>
-<tr class="separator:ac91f64208cebf2177a6be3a40ecebca8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa197f574e5effe492aa8034651467eb3"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aa197f574e5effe492aa8034651467eb3">vexpq_f32</a> (const float32x4_t &amp;x)</td></tr>
-<tr class="memdesc:aa197f574e5effe492aa8034651467eb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate exponential.  <a href="namespacearm__compute.xhtml#aa197f574e5effe492aa8034651467eb3">More...</a><br /></td></tr>
-<tr class="separator:aa197f574e5effe492aa8034651467eb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4082e6868f902da08483e54ec07484c8"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a4082e6868f902da08483e54ec07484c8">vlogq_f32</a> (const float32x4_t &amp;x)</td></tr>
-<tr class="memdesc:a4082e6868f902da08483e54ec07484c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate logarithm.  <a href="namespacearm__compute.xhtml#a4082e6868f902da08483e54ec07484c8">More...</a><br /></td></tr>
-<tr class="separator:a4082e6868f902da08483e54ec07484c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9598330b2406691ce6580f7506e62168"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a9598330b2406691ce6580f7506e62168">vtanhq_f32</a> (const float32x4_t &amp;val)</td></tr>
-<tr class="memdesc:a9598330b2406691ce6580f7506e62168"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate hyperbolic tangent.  <a href="namespacearm__compute.xhtml#a9598330b2406691ce6580f7506e62168">More...</a><br /></td></tr>
-<tr class="separator:a9598330b2406691ce6580f7506e62168"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0dbcd09c015bda4ab290b957d7bd6c7"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ae0dbcd09c015bda4ab290b957d7bd6c7">vpowq_f32</a> (const float32x4_t &amp;val, const float32x4_t &amp;n)</td></tr>
-<tr class="memdesc:ae0dbcd09c015bda4ab290b957d7bd6c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate n power of a number.  <a href="namespacearm__compute.xhtml#ae0dbcd09c015bda4ab290b957d7bd6c7">More...</a><br /></td></tr>
-<tr class="separator:ae0dbcd09c015bda4ab290b957d7bd6c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a869945609357fa552d94eb16f7aad4e9"><td class="memItemLeft" align="right" valign="top">const std::array&lt; float32x4_t, 8 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a869945609357fa552d94eb16f7aad4e9">exp_tab</a></td></tr>
-<tr class="separator:a869945609357fa552d94eb16f7aad4e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48fb9cf404e8f7043235bf14105c9793"><td class="memItemLeft" align="right" valign="top">const std::array&lt; float32x4_t, 8 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a48fb9cf404e8f7043235bf14105c9793">log_tab</a></td></tr>
-<tr class="separator:a48fb9cf404e8f7043235bf14105c9793"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e27db6b9692c4c2013653e276af654d"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a2e27db6b9692c4c2013653e276af654d">vinvsqrtq_f32</a> (float32x4_t x)</td></tr>
+<tr class="memdesc:a2e27db6b9692c4c2013653e276af654d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate inverse square root.  <a href="namespacearm__compute.xhtml#a2e27db6b9692c4c2013653e276af654d">More...</a><br /></td></tr>
+<tr class="separator:a2e27db6b9692c4c2013653e276af654d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8f459d5899b79c00fb4042a5b3470fb"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ac8f459d5899b79c00fb4042a5b3470fb">vinvq_f32</a> (float32x4_t x)</td></tr>
+<tr class="memdesc:ac8f459d5899b79c00fb4042a5b3470fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate reciprocal.  <a href="namespacearm__compute.xhtml#ac8f459d5899b79c00fb4042a5b3470fb">More...</a><br /></td></tr>
+<tr class="separator:ac8f459d5899b79c00fb4042a5b3470fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fa76a98dce5ed1b655ff840f2ce6e57"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a4fa76a98dce5ed1b655ff840f2ce6e57">vtaylor_polyq_f32</a> (float32x4_t x, const std::array&lt; float32x4_t, 8 &gt; &amp;coeffs)</td></tr>
+<tr class="memdesc:a4fa76a98dce5ed1b655ff840f2ce6e57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a 7th degree polynomial approximation using Estrin's method.  <a href="namespacearm__compute.xhtml#a4fa76a98dce5ed1b655ff840f2ce6e57">More...</a><br /></td></tr>
+<tr class="separator:a4fa76a98dce5ed1b655ff840f2ce6e57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade3ef16de304661943c900ac9a47d28f"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ade3ef16de304661943c900ac9a47d28f">vexpq_f32</a> (float32x4_t x)</td></tr>
+<tr class="memdesc:ade3ef16de304661943c900ac9a47d28f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate exponential.  <a href="namespacearm__compute.xhtml#ade3ef16de304661943c900ac9a47d28f">More...</a><br /></td></tr>
+<tr class="separator:ade3ef16de304661943c900ac9a47d28f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37a3e03a22ad160a2e9e5c133607e020"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a37a3e03a22ad160a2e9e5c133607e020">vlogq_f32</a> (float32x4_t x)</td></tr>
+<tr class="memdesc:a37a3e03a22ad160a2e9e5c133607e020"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate logarithm.  <a href="namespacearm__compute.xhtml#a37a3e03a22ad160a2e9e5c133607e020">More...</a><br /></td></tr>
+<tr class="separator:a37a3e03a22ad160a2e9e5c133607e020"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7845701adefdb1adafc98ca3c4918c2e"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a7845701adefdb1adafc98ca3c4918c2e">vtanhq_f32</a> (float32x4_t val)</td></tr>
+<tr class="memdesc:a7845701adefdb1adafc98ca3c4918c2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate hyperbolic tangent.  <a href="namespacearm__compute.xhtml#a7845701adefdb1adafc98ca3c4918c2e">More...</a><br /></td></tr>
+<tr class="separator:a7845701adefdb1adafc98ca3c4918c2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45c3c1474c3e3ec31ec13efaf6acd261"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a45c3c1474c3e3ec31ec13efaf6acd261">vpowq_f32</a> (float32x4_t val, float32x4_t n)</td></tr>
+<tr class="memdesc:a45c3c1474c3e3ec31ec13efaf6acd261"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate n power of a number.  <a href="namespacearm__compute.xhtml#a45c3c1474c3e3ec31ec13efaf6acd261">More...</a><br /></td></tr>
+<tr class="separator:a45c3c1474c3e3ec31ec13efaf6acd261"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -166,7 +160,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_315f6cf1ec0b2df3ae747ff8286a19f5.xhtml">NEON</a></li><li class="navelem"><a class="el" href="_n_e_math_8h.xhtml">NEMath.h</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:04 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

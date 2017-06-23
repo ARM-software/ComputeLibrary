@@ -36,7 +36,7 @@ public:
      * - Multi-threading is used for the kernels which are parallelisable.
      * - By default std::thread::hardware_concurrency() threads are used.
      *
-     * @note @ref CPPScheduler::force_number_of_threads() can be used to manually set the number of threads
+     * @note @ref CPPScheduler::set_num_threads() can be used to manually set the number of threads
      *
      * For OpenCL kernels:
      * - All the kernels are enqueued on the queue associated with CLScheduler.

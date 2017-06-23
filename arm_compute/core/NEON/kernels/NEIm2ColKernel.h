@@ -72,7 +72,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input          The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                            while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F32
+     *                            while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/F32
      * @param[out] output         The output tensor. Data types supported: Same as @p input
      * @param[in]  convolved_dims The convolved output dimensions.
      * @param[in]  conv_info      Contains padding and stride information described in @ref PadStrideInfo.
@@ -84,15 +84,17 @@ public:
     void run(const Window &window) override;
 
 private:
-    /** Run the im2col used for the convolution layer case
+    /** Template function to run the im2col optimised for the fully connected layer case
      *
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
+    template <typename T>
     void run_reduced(const Window &window);
-    /** Run the im2col optimised for the fully connected layer case
+    /** Template function to run the im2col used for the convolution layer case
      *
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
+    template <typename T, bool has_pads>
     void run_generic(const Window &window);
     /** Common signature for all the specialised im2col functions
      *

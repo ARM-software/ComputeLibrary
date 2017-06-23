@@ -56,9 +56,19 @@ NEBitwiseOrKernel::NEBitwiseOrKernel()
 
 void NEBitwiseOrKernel::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+
+    set_shape_if_empty(*output->info(), input1->info()->tensor_shape());
+
+    set_format_if_unknown(*output->info(), Format::U8);
+    set_format_if_unknown(*input1->info(), Format::U8);
+    set_format_if_unknown(*input2->info(), Format::U8);
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input1, input2, output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2, output);
 
     _input1 = input1;
     _input2 = input2;

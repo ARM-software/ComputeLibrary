@@ -46,7 +46,6 @@ void cell_width_lt8(const int16_t *__restrict mag_row_ptr, const uint8_t *__rest
     static const int32x4_t   zero_s32     = vdupq_n_s32(0);
     static const int32x4_t   one_s32      = vdupq_n_s32(1);
     const int32x4_t          num_bins_s32 = vdupq_n_s32(num_bins);
-    const int32x4_t          max_hidx_s32 = vdupq_n_s32(num_bins - 1);
 
     memset(output_ptr, 0, sizeof(float) * num_bins);
 
@@ -70,14 +69,10 @@ void cell_width_lt8(const int16_t *__restrict mag_row_ptr, const uint8_t *__rest
             // Compute histogram index.
             int32x4_t hidx_s32 = vcvtq_s32_f32(phase_f32);
 
-            // Check if the histogram index is equal to num_bins. If so, replace the index with max_hidx
-            uint32x4_t mask = vceqq_s32(hidx_s32, num_bins_s32);
-            hidx_s32        = vbslq_s32(mask, max_hidx_s32, hidx_s32);
-
             // Compute magnitude weights (w0 and w1)
             const float32x4_t hidx_f32 = vcvtq_f32_s32(hidx_s32);
 
-            // w1 = phase_f32 - hidx_s32
+            // w1 = phase_f32 - hidx_f32
             const float32x4_t w1_f32 = vsubq_f32(phase_f32, hidx_f32);
 
             // w0 = 1.0 - w1
@@ -88,6 +83,10 @@ void cell_width_lt8(const int16_t *__restrict mag_row_ptr, const uint8_t *__rest
             const float32x4_t mag_w1_f32 = vmulq_f32(mag_f32, w1_f32);
 
             // Weighted vote between 2 bins
+
+            // Check if the histogram index is equal to num_bins. If so, replace the index with 0
+            uint32x4_t mask = vceqq_s32(hidx_s32, num_bins_s32);
+            hidx_s32        = vbslq_s32(mask, zero_s32, hidx_s32);
 
             // Bin 0
             *(output_ptr + vgetq_lane_s32(hidx_s32, 0)) += vgetq_lane_f32(mag_w0_f32, 0);
@@ -108,11 +107,12 @@ void cell_width_lt8(const int16_t *__restrict mag_row_ptr, const uint8_t *__rest
             *(output_ptr + vgetq_lane_s32(hidx_s32, 3)) += vgetq_lane_f32(mag_w1_f32, 3);
         }
 
-        for(; xc < static_cast<int32_t>(cell_width); xc++)
+        for(; xc < static_cast<int32_t>(cell_width); ++xc)
         {
             const float phase_value = *(phase_row_ptr + xc + yc * phase_stride) * phase_scale + 0.5f;
             const float mag_value   = *(mag_row_ptr + xc + yc * mag_stride);
-            const float w1          = phase_value - std::floor(phase_value);
+
+            const float w1 = phase_value - std::floor(phase_value);
 
             // The quantised phase is the histogram index [0, num_bins - 1] - Round
             // Check limit of histogram index. If hidx == num_bins, hidx = 0
@@ -120,7 +120,7 @@ void cell_width_lt8(const int16_t *__restrict mag_row_ptr, const uint8_t *__rest
 
             // Weighted vote between 2 bins
             *(output_ptr + hidx) += mag_value * (1.0f - w1);
-            *(output_ptr + ((hidx + 1) % num_bins)) += mag_value * w1;
+            *(output_ptr + ((hidx + 1) % (num_bins))) += mag_value * w1;
         }
     }
 }
@@ -329,6 +329,7 @@ void l2_norm(const float *__restrict input_row_ptr, float *__restrict output_ptr
             vst1q_f32(&output_ptr[xc + 12 + yc * num_bins_block_x], input_value.val[3]);
         }
 
+        // Compute left over
         for(; xc < static_cast<int32_t>(num_bins_block_x); xc++)
         {
             const float input_value = hist_ptr[xc];
@@ -416,7 +417,8 @@ void l2hys_norm(const float *__restrict input_row_ptr, float *__restrict output_
             vst1q_f32(&output_ptr[xc + 12 + yc * num_bins_block_x], input_value.val[3]);
         }
 
-        for(; xc < static_cast<int32_t>(num_bins_block_x); xc++)
+        // Compute left over
+        for(; xc < static_cast<int32_t>(num_bins_block_x); ++xc)
         {
             const float input_value = hist_ptr[xc];
 
@@ -431,9 +433,9 @@ void l2hys_norm(const float *__restrict input_row_ptr, float *__restrict output_
     sum += vgetq_lane_f32(sum_f32, 2);
     sum += vgetq_lane_f32(sum_f32, 3);
 
-    float             scale           = 1.0f / (std::sqrt(sum) + num_bins_block * 0.1f);
-    float32x4_t       scale_f32       = vdupq_n_f32(scale);
-    const float32x4_t thres_l2hys_f32 = vdupq_n_f32(l2_hyst_threshold);
+    float             scale                 = 1.0f / (std::sqrt(sum) + num_bins_block * 0.1f);
+    float32x4_t       scale_f32             = vdupq_n_f32(scale);
+    const float32x4_t l2_hyst_threshold_f32 = vdupq_n_f32(l2_hyst_threshold);
 
     // Reset sum
     sum_f32 = vdupq_n_f32(0.0f);
@@ -460,10 +462,10 @@ void l2hys_norm(const float *__restrict input_row_ptr, float *__restrict output_
         input_value.val[3] = vmulq_f32(input_value.val[3], scale_f32);
 
         // Clip input_value if over _threshold_l2hys
-        input_value.val[0] = vminq_f32(input_value.val[0], thres_l2hys_f32);
-        input_value.val[1] = vminq_f32(input_value.val[1], thres_l2hys_f32);
-        input_value.val[2] = vminq_f32(input_value.val[2], thres_l2hys_f32);
-        input_value.val[3] = vminq_f32(input_value.val[3], thres_l2hys_f32);
+        input_value.val[0] = vminq_f32(input_value.val[0], l2_hyst_threshold_f32);
+        input_value.val[1] = vminq_f32(input_value.val[1], l2_hyst_threshold_f32);
+        input_value.val[2] = vminq_f32(input_value.val[2], l2_hyst_threshold_f32);
+        input_value.val[3] = vminq_f32(input_value.val[3], l2_hyst_threshold_f32);
 
         // Compute input_value^2
         sum_f32 = vmlaq_f32(sum_f32, input_value.val[0], input_value.val[0]);
@@ -742,7 +744,6 @@ void NEHOGBlockNormalizationKernel::configure(const ITensor *input, ITensor *out
         case HOGNormType::L1_NORM:
             _func = &l1_norm;
             break;
-        case HOGNormType::L1SQRT_NORM:
         default:
             ARM_COMPUTE_ERROR_ON("Normalisation type not supported");
             break;
@@ -773,11 +774,11 @@ void NEHOGBlockNormalizationKernel::run(const Window &window)
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    // Get number of element per block
-    const size_t num_elem_block = _output->info()->num_channels();
+    // Get number of bins per block
+    const size_t num_bins_per_block = _output->info()->num_channels();
 
     // Number of bins on the same row of the block
-    const int32_t num_bins_block_x = _num_cells_per_block.width * _num_bins;
+    const int32_t num_bins_per_block_x = _num_cells_per_block.width * _num_bins;
 
     const size_t input_stride = _input->info()->strides_in_bytes()[Window::DimY] / data_size_from_type(_input->info()->data_type());
 
@@ -795,7 +796,7 @@ void NEHOGBlockNormalizationKernel::run(const Window &window)
         const auto out_row_ptr   = reinterpret_cast<float *>(out.ptr());
 
         // Execute normalization function
-        (*_func)(input_row_ptr, out_row_ptr, input_stride, _num_cells_per_block.height, num_bins_block_x, num_elem_block, _l2_hyst_threshold);
+        (*_func)(input_row_ptr, out_row_ptr, input_stride, _num_cells_per_block.height, num_bins_per_block_x, num_bins_per_block, _l2_hyst_threshold);
     },
     in, out);
 }

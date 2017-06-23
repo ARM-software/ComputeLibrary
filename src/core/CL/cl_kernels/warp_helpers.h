@@ -32,8 +32,8 @@
  */
 inline const float8 clamp_to_border(float8 coords, const float width, const float height)
 {
-    const float4 clamped_x = clamp(coords.even, -1.0, width);
-    const float4 clamped_y = clamp(coords.odd, -1.0, height);
+    const float4 clamped_x = clamp(coords.even, -1.0f, width);
+    const float4 clamped_y = clamp(coords.odd, -1.0f, height);
     return (float8)(clamped_x.s0, clamped_y.s0, clamped_x.s1, clamped_y.s1, clamped_x.s2, clamped_y.s2, clamped_x.s3, clamped_y.s3);
 }
 

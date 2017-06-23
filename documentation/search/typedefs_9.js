@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['size2darray',['Size2DArray',['../namespacearm__compute.xhtml#abd445adaaca7913c9344c90dc8c76358',1,'arm_compute']]]
+  ['lkinternalkeypointarray',['LKInternalKeypointArray',['../namespacearm__compute.xhtml#a681c120e2188371794ec3a59768c64ab',1,'arm_compute']]]
 ];

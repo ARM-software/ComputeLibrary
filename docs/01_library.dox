@@ -1,0 +1,250 @@
+namespace arm_compute
+{
+/** 
+@page architecture Library architecture
+
+@tableofcontents
+
+@section S4_1 Core vs Runtime libraries
+
+The Core library is a low level collection of algorithms implementations, it is designed to be embedded in existing projects and applications:
+
+- It doesn't allocate any memory (All the memory allocations/mappings have to be handled by the caller).
+- It doesn't perform any kind of multi-threading (but provide information to the caller about how the workload can be split).
+
+The Runtime library is a very basic wrapper around the Core library which can be used for quick prototyping, it is basic in the sense that:
+
+- It allocates images and tensors by using standard malloc().
+- It multi-threads NEON code in a very basic way using a very simple pool of threads.
+- For OpenCL it uses the default CLScheduler command queue for all mapping operations and kernels.
+
+For maximum performance, it is expected that the users would re-implement an equivalent to the runtime library which suits better their needs (With a more clever multi-threading strategy, load-balancing between NEON and OpenCL, etc.)
+
+@section S4_2_windows_kernels_mt_functions Windows, kernels, multi-threading and functions
+
+@subsection S4_2_1_windows Windows
+
+A @ref Window represents a workload to execute, it can handle up to @ref Coordinates::num_max_dimensions dimensions.
+Each dimension is defined by a start, end and step.
+
+It can split into subwindows as long as *all* the following rules remain true for all the dimensions:
+
+- max[n].start() <= sub[n].start() < max[n].end()
+- sub[n].start() < sub[n].end() <= max[n].end()
+- max[n].step() == sub[n].step()
+- (sub[n].start() - max[n].start()) % max[n].step() == 0
+- (sub[n].end() - sub[n].start()) % max[n].step() == 0
+
+@subsection S4_2_2 Kernels
+
+Each implementation of the @ref IKernel interface (base class of all the kernels in the core library) works in the same way:
+
+OpenCL kernels:
+
+@code{.cpp}
+// Initialize the CLScheduler with the default context and default command queue
+// Implicitly initializes the CLKernelLibrary to use ./cl_kernels as location for OpenCL kernels files and sets a default device for which OpenCL programs are built.
+CLScheduler::get().default_init();
+
+cl::CommandQueue q = CLScheduler::get().queue();
+//Create a kernel object:
+MyKernel kernel;
+// Initialize the kernel with the input/output and options you want to use:
+kernel.configure( input, output, option0, option1);
+// Retrieve the execution window of the kernel:
+const Window& max_window = kernel.window();
+// Run the whole kernel in the current thread:
+kernel.run( q, max_window ); // Enqueue the kernel to process the full window on the default queue
+
+// Wait for the processing to complete:
+q.finish();
+@endcode
+
+NEON / CPP kernels:
+
+@code{.cpp}
+//Create a kernel object:
+MyKernel kernel;
+// Initialize the kernel with the input/output and options you want to use:
+kernel.configure( input, output, option0, option1);
+// Retrieve the execution window of the kernel:
+const Window& max_window = kernel.window();
+// Run the whole kernel in the current thread:
+kernel.run( max_window ); // Run the kernel on the full window
+@endcode
+
+@subsection S4_2_3 Multi-threading
+
+The previous section shows how to run a NEON / CPP kernel in the current thread, however if your system has several CPU cores, you will probably want the kernel to use several cores. Here is how this can be done:
+
+@snippet src/runtime/CPP/CPPScheduler.cpp Scheduler example
+
+This is the very basic implementation used in the NEON runtime library by all the NEON functions.
+
+@sa CPPScheduler.
+
+@note Some kernels like for example @ref NEHistogramKernel need some local temporary buffer to perform their calculations. In order to avoid memory corruption between threads, the local buffer must be of size: ```memory_needed_per_thread * num_threads``` and each subwindow must be initialized by calling @ref Window::set_thread_id() with a unique thread_id between 0 and num_threads.
+
+@subsection S4_2_4 Functions
+
+Functions will automatically allocate the temporary buffers mentioned above, and will automatically multi-thread kernels' executions using the very basic scheduler described in the previous section.
+
+Simple functions only call a single kernel (e.g @ref NEConvolution3x3), while more complex ones consist of several kernels pipelined together (e.g @ref NEGaussianPyramid, @ref NEHarrisCorners). Check their documentation to find out which kernels are used by each function.
+
+@code{.cpp}
+//Create a function object:
+MyFunction function;
+// Initialize the function with the input/output and options you want to use:
+function.configure( input, output, option0, option1);
+// Execute the function:
+function.run();
+@endcode
+
+@warning The Compute Library requires Mali OpenCL DDK r8p0 or higher (OpenCL kernels are compiled using the -cl-arm-non-uniform-work-group-size flag)
+
+@note All OpenCL functions and objects in the runtime library use the command queue associated with CLScheduler for all operations, a real implementation would be expected to use different queues for mapping operations and kernels in order to reach a better GPU utilization.
+
+@subsection S4_4_1_cl_scheduler OpenCL Scheduler and kernel library
+
+The Compute Library runtime uses a single command queue and context for all the operations.
+
+The user can get / set this context and command queue through CLScheduler's interface.
+
+The user can get / set the target GPU device through the CLScheduler's interface.
+
+@attention Make sure the application is using the same context as the library as in OpenCL it is forbidden to share objects across contexts. This is done by calling @ref CLScheduler::init() or @ref CLScheduler::default_init() at the beginning of your application.
+
+@attention Make sure the scheduler's target is not changed after function classes are created.
+
+All OpenCL kernels used by the library are built and stored in @ref CLKernelLibrary.
+If the library is compiled with embed_kernels=0 the application can set the path to the OpenCL kernels by calling @ref CLKernelLibrary::init(), by default the path is set to "./cl_kernels"
+
+@subsection S4_4_2_events_sync OpenCL events and synchronization
+
+In order to block until all the jobs in the CLScheduler's command queue are done executing the user can call @ref CLScheduler::sync() or create a sync event using @ref CLScheduler::enqueue_sync_event()
+
+For example:
+@snippet cl_events.cpp OpenCL events
+
+@subsection S4_4_2_cl_neon OpenCL / NEON interoperability
+
+You can mix OpenCL and NEON kernels and functions. However it is the user's responsibility to handle the mapping/unmapping of OpenCL objects, for example:
+
+@snippet neoncl_scale_median_gaussian.cpp NEON / OpenCL Interop
+
+@sa main_neoncl_scale_median_gaussian
+
+@section S4_5_algorithms Algorithms
+
+All algorithms in this library have been implemented following the [OpenVX 1.1 specifications](https://www.khronos.org/registry/vx/specs/1.1/html/). Please refer to the Khronos documentation for more information.
+
+@section S4_6_images_tensors Images, padding, border modes and tensors
+
+Most kernels and functions in the library process images, however, in order to be future proof most of the kernels actually accept tensors. See below for more information about how they are related.
+
+@attention Each memory object can be written by only one kernel, however it can be read by several kernels. Writing to the same object from several kernels will result in undefined behavior. The kernel writing to an object must be configured before the kernel(s) reading from it.
+
+@subsection S4_6_1_padding_and_border Padding and border modes
+
+Several algorithms require a neighborhood around the current pixel to compute it's value. This means the algorithm will not be able to process the borders of the image unless you give it more information about how those border pixels should be processed. The @ref BorderMode enum is used for this purpose.
+
+You have 3 types of @ref BorderMode :
+
+- @ref BorderMode::UNDEFINED : Neighbor pixels outside of the image are treated as undefined. As a result all the pixels which are on the border will have a value which is undefined.
+- @ref BorderMode::REPLICATE : Neighbor pixels outside of the image are treated as having the same value as the closest valid pixel.
+- @ref BorderMode::CONSTANT : Neighbor pixels outside of the image are treated as having the same constant value. (The user can choose what this value should be).
+
+Moreover both OpenCL and NEON use vector loads and stores instructions to access the data in buffers, so in order to avoid having special cases to handle for the borders all the images and tensors used in this library must be padded.
+
+@subsubsection padding Padding
+
+There are different ways padding can be calculated:
+
+- Accurate padding:
+
+@snippet neon_convolution.cpp Accurate padding
+
+@note It's important to call allocate @b after the function is configured: if the image / tensor is already allocated then the function will shrink its execution window instead of increasing the padding. (See below for more details).
+
+- Manual padding / no padding / auto padding: You can allocate your images / tensors up front (before configuring your functions). In that case the function will use whatever padding is available and will shrink its execution window if there isn't enough padding available (which translates into a smaller valid region for the output). See also @ref valid_region).
+If you don't want to manually set the padding but still want to allocate your objects upfront then you can use auto_padding. It guarantees that the allocation will have enough padding to run any of the provided functions.
+
+@code{.cpp}
+Image     src, dst;
+
+// Use auto padding for the input:
+src.info()->init_auto_padding(TensorShape(640u,480u), Format::U8);
+
+// Use manual padding for the destination image
+dst.info()->init(src.info()->tensor_shape(), Format::U8, strides_in_bytes, offset_first_element_in_bytes, total_size_in_bytes);
+
+// Allocate all the images
+src.allocator()->allocate();
+dst.allocator()->allocate();
+// Fill the input image with the content of the PPM image if a filename was provided:
+fill_image(src);
+
+NEGaussian3x3 gauss;
+
+// Apply a Gaussian 3x3 filter to the source image (Note: if the padding provided is not enough then the execution window and valid region of the output will be shrunk)
+gauss.configure(&src, &dst, BorderMode::UNDEFINED);
+
+//Execute the functions:
+gauss.run();
+@endcode
+
+@warning Some kernels need up to 3 neighbor values to calculate the value of a given pixel. Therefore, to be safe, we use a 4-pixel padding all around the image. In addition, some kernels read and write up to 32 pixels at the same time. To cover that case as well we add an extra 32 pixels of padding at the end of each row. As a result auto padded buffers waste a lot of memory and are less cache friendly. It is therefore recommended to use accurate padding or manual padding wherever possible.
+
+@subsubsection valid_region Valid regions
+
+Some kernels (like edge detectors for example) need to read values of neighboring pixels to calculate the value of a given pixel, it is therefore not possible to calculate the values of the pixels on the edges.
+
+Another case is: if a kernel processes 8 pixels per iteration and the image's dimensions are not a multiple of 8 and not enough padding is available then the kernel will not be able to process the pixels near the right edge. As a result these pixels will be left undefined.
+
+In order to know which pixels have been calculated, each kernel sets a valid region for each output image or tensor. See also @ref TensorInfo::valid_region(), @ref ValidRegion
+
+@subsection S4_6_2_tensors Tensors
+
+Tensors are multi-dimensional arrays with a maximum of @ref Coordinates::num_max_dimensions dimensions.
+
+Depending on the number of dimensions tensors can be interpreted as various objects. A scalar can be represented as a zero-dimensional tensor and a vector of numbers can be represented as an one-dimensional tensor. Further, an image is actually just a 2D tensor, a 3D tensor can be seen as an array of images and a 4D tensor as a 2D array of images, etc.
+
+@note Most algorithms process images (i.e a 2D slice of the tensor), therefore only padding along the X and Y axes is required (2D slices can be stored contiguously in memory).
+
+@subsection S4_6_3_description_conventions Images and Tensors description conventions
+
+Image objects are defined by a @ref Format and dimensions expressed as [width, height, batch]
+
+Tensors are defined by a @ref DataType plus a number of channels (Always expected to be 1 for now) and their dimensions are expressed as [width, height, feature_maps, batch].
+
+In other words, the lower three dimensions of a tensor specify a single input in [width, height, feature_maps], while any other specified dimension represents a batch in the appropriate dimension space.
+For example, a tensor with dimensions [128, 128, 64, 16] represents a 1D batch space with 16 batches of 128 elements in width and height and 64 feature maps each.
+Each kernel specifies the expected layout of each of its tensors in its documentation.
+
+@note Unless specified otherwise in the kernel's or function's documentation all tensors and images parameters passed must have identical dimensions.
+
+@note Unless specified otherwise in the kernel's or function's documentation the number of channels for tensors is expected to be 1 (For images, the number of channels is inferred from the @ref Format).
+
+@attention Regardless of the @ref DataType used by a tensor the @ref ITensor::buffer() method will always return a uint8_t pointer, and all the metadata in @ref TensorInfo will be expressed in bytes. It is the user's responsibility to cast the pointer to the correct type.
+
+For example, to read the element located at the coordinates (x,y) of a float tensor:
+
+@code{.cpp}
+float value = *reinterpret_cast<float*>(input.buffer() + input.info()->offset_element_in_bytes(Coordinates(x,y)));
+@endcode
+
+@subsection S4_6_4_working_with_objects Working with Images and Tensors using iterators
+
+The library provides some iterators to access objects' data.
+Iterators are created by associating a data object (An image or a tensor for example) with an iteration window.
+
+Iteration windows are defined by an array of dimensions, each of which consists of a start, end and step.
+
+The @ref execute_window_loop function takes an execution window, a lambda function and one or more iterators.
+It will iterate through every element of the execution window and for each element it will update the iterators accordingly and call the lambda function.
+
+Here are a couple of examples of how to use the iterators to fill / read tensors:
+
+@snippet examples/neon_copy_objects.cpp Copy objects example
+*/
+} // namespace arm_compute

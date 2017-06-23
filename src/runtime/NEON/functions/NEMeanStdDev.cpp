@@ -43,5 +43,5 @@ void NEMeanStdDev::run()
     _global_sum         = 0;
     _global_sum_squared = 0;
 
-    NEScheduler::get().multithread(&_mean_stddev_kernel);
+    NEScheduler::get().schedule(&_mean_stddev_kernel, Window::DimY);
 }

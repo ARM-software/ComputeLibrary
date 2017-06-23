@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
@@ -44,26 +45,31 @@ NEGEMMMatrixAccumulateBiasesKernel::NEGEMMMatrixAccumulateBiasesKernel()
 
 void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor *biases)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::QS8, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
     ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() != 1);
 
     _biases = biases;
     _accum  = accum;
 
-    constexpr unsigned int num_elems_processed_per_iteration = 4;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
     Window win = calculate_max_window(*accum->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic output_access(biases->info(), 0, 0, biases->info()->dimension(0), biases->info()->dimension(1));
+    AccessWindowStatic biases_access(biases->info(), 0, 0, biases->info()->dimension(0), biases->info()->dimension(1));
 
     update_window_and_padding(win,
                               AccessWindowHorizontal(accum->info(), 0, num_elems_processed_per_iteration),
-                              output_access);
+                              biases_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), accum->info()->tensor_shape()));
+    AccessWindowHorizontal output_access(accum->info(), 0, num_elems_processed_per_iteration);
+
+    // Set the valid region for the accum tensor
+    Coordinates coord;
+    coord.set_num_dimensions(accum->info()->num_dimensions());
+    output_access.set_valid_region(win, ValidRegion(coord, accum->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
@@ -80,12 +86,43 @@ void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window)
     Iterator in0_out(_accum, window);
     Iterator in1(_biases, win_biases);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    switch(_accum->info()->data_type())
     {
-        const float32x4_t accum  = vld1q_f32(reinterpret_cast<const float *>(in0_out.ptr()));
-        const float32x4_t biases = vld1q_f32(reinterpret_cast<const float *>(in1.ptr()));
+        case DataType::F32:
+        {
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const float32x4x4_t accum  = vld4q_f32(reinterpret_cast<const float *>(in0_out.ptr()));
+                const float32x4x4_t biases = vld4q_f32(reinterpret_cast<const float *>(in1.ptr()));
+                const float32x4x4_t res =
+                {
+                    {
+                        vaddq_f32(accum.val[0], biases.val[0]),
+                        vaddq_f32(accum.val[1], biases.val[1]),
+                        vaddq_f32(accum.val[2], biases.val[2]),
+                        vaddq_f32(accum.val[3], biases.val[3])
+                    }
+                };
 
-        vst1q_f32(reinterpret_cast<float *>(in0_out.ptr()), vaddq_f32(accum, biases));
-    },
-    in0_out, in1);
+                vst4q_f32(reinterpret_cast<float *>(in0_out.ptr()), res);
+            },
+            in0_out, in1);
+            break;
+        }
+        case DataType::QS8:
+        {
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const qint8x16_t accum  = vld1q_qs8(reinterpret_cast<const qint8_t *>(in0_out.ptr()));
+                const qint8x16_t biases = vld1q_qs8(reinterpret_cast<const qint8_t *>(in1.ptr()));
+
+                vst1q_qs8(reinterpret_cast<qint8_t *>(in0_out.ptr()), vqaddq_qs8(accum, biases));
+            },
+            in0_out, in1);
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("Data type not supported");
+            break;
+    }
 }

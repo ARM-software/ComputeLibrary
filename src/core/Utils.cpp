@@ -23,6 +23,8 @@
  */
 #include "arm_compute/core/Utils.h"
 
+#include "arm_compute/core/FixedPoint.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -128,8 +130,10 @@ const std::string &arm_compute::string_from_data_type(DataType dt)
         { DataType::UNKNOWN, "UNKNOWN" },
         { DataType::S8, "S8" },
         { DataType::U8, "U8" },
+        { DataType::QS8, "QS8" },
         { DataType::S16, "S16" },
         { DataType::U16, "U16" },
+        { DataType::QS16, "QS16" },
         { DataType::S32, "S32" },
         { DataType::U32, "U32" },
         { DataType::S64, "S64" },
@@ -210,10 +214,23 @@ const std::string &arm_compute::string_from_border_mode(BorderMode border_mode)
     return border_mode_map[border_mode];
 }
 
-std::string arm_compute::lower_string(std::string val)
+const std::string &arm_compute::string_from_norm_type(NormType type)
 {
-    std::transform(val.begin(), val.end(), val.begin(), ::tolower);
-    return val;
+    static std::map<NormType, const std::string> norm_type_map =
+    {
+        { NormType::IN_MAP_1D, "IN_MAP_1D" },
+        { NormType::IN_MAP_2D, "IN_MAP_2D" },
+        { NormType::CROSS_MAP, "CROSS_MAP" },
+    };
+
+    return norm_type_map[type];
+}
+
+std::string arm_compute::lower_string(const std::string &val)
+{
+    std::string res = val;
+    std::transform(res.begin(), res.end(), res.begin(), ::tolower);
+    return res;
 }
 
 const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height, unsigned int kernel_size,
@@ -259,6 +276,10 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
         case DataType::U8:
             print_consecutive_elements_impl<uint8_t>(s, ptr, n, stream_width, element_delim);
             break;
+        case DataType::QS8:
+        case DataType::S8:
+            print_consecutive_elements_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n, stream_width, element_delim);
+            break;
         case DataType::U16:
             print_consecutive_elements_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n, stream_width, element_delim);
             break;
@@ -287,6 +308,9 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
     {
         case DataType::U8:
             return max_consecutive_elements_display_width_impl<uint8_t>(s, ptr, n);
+        case DataType::QS8:
+        case DataType::S8:
+            return max_consecutive_elements_display_width_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n);
         case DataType::U16:
             return max_consecutive_elements_display_width_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n);
         case DataType::S16:

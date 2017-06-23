@@ -52,11 +52,11 @@ void NEEqualizeHistogram::configure(const IImage *input, IImage *output)
 void NEEqualizeHistogram::run()
 {
     // Calculate histogram of input.
-    NEScheduler::get().multithread(&_histogram_kernel);
+    NEScheduler::get().schedule(&_histogram_kernel, Window::DimY);
 
     // Calculate cumulative distribution of histogram and create LUT.
     _cd_histogram_kernel.run(_cd_histogram_kernel.window());
 
     // Map input to output using created LUT.
-    NEScheduler::get().multithread(&_map_histogram_kernel);
+    NEScheduler::get().schedule(&_map_histogram_kernel, Window::DimY);
 }

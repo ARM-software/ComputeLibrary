@@ -54,5 +54,5 @@ void NEHistogram::configure(const IImage *input, IDistribution1D *output)
 void NEHistogram::run()
 {
     // Calculate histogram of input.
-    NEScheduler::get().multithread(&_histogram_kernel);
+    NEScheduler::get().schedule(&_histogram_kernel, Window::DimY);
 }

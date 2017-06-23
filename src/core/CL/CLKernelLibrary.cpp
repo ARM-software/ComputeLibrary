@@ -124,6 +124,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "channel_extract_YUYV422", "channel_extract.cl" },
     { "combine_gradients_L1", "canny.cl" },
     { "combine_gradients_L2", "canny.cl" },
+    { "concatenate_depth", "concatenate.cl" },
     { "convolution_rectangle", "convolution_rectangle.cl" },
     { "col2im", "convolution_layer.cl" },
     { "convolution3x3_static", "convolution3x3.cl" },
@@ -159,9 +160,11 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_ma_f32", "gemm.cl" },
     { "gemm_mm_u8", "gemm.cl" },
     { "gemm_mm_f16", "gemm.cl" },
-    { "gemm_mm_f32", "gemm.cl" },
+    { "gemm_mm_f32_midgard", "gemm.cl" },
+    { "gemm_mm_f32_bifrost", "gemm.cl" },
     { "gemm_vm_f16", "gemm.cl" },
     { "gemm_vm_f32", "gemm.cl" },
+    { "gemm_lc_vm_f32", "gemm.cl" },
     { "gemm_transpose1x16_u8", "gemm.cl" },
     { "gemm_transpose1x8_f16", "gemm.cl" },
     { "gemm_transpose1x4_f32", "gemm.cl" },
@@ -172,6 +175,9 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "hist_border_kernel_fixed", "histogram.cl" },
     { "hist_local_kernel", "histogram.cl" },
     { "hist_local_kernel_fixed", "histogram.cl" },
+    { "hog_block_normalization", "hog.cl" },
+    { "hog_detector", "hog.cl" },
+    { "hog_orientation_binning", "hog.cl" },
     { "hysteresis", "canny.cl" },
     { "im2col_generic", "convolution_layer.cl" },
     { "im2col_reduced", "convolution_layer.cl" },
@@ -199,7 +205,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "non_linear_filter_disk5x5", "non_linear_filter5x5.cl" },
     { "non_max_suppression", "nonmax.cl" },
     { "normalization_layer_cross_map", "normalization_layer.cl" },
-    { "normalization_layer_in_map", "normalization_layer.cl" },
+    { "normalization_layer_in_map_1D", "normalization_layer.cl" },
+    { "batchnormalization_layer", "batchnormalization_layer.cl" },
     { "NV12_to_IYUV_bt709", "color_convert.cl" },
     { "NV12_to_RGB888_bt709", "color_convert.cl" },
     { "NV12_to_RGBA8888_bt709", "color_convert.cl" },
@@ -290,6 +297,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/channel_extract.clembed"
     },
     {
+        "concatenate.cl",
+#include "./cl_kernels/concatenate.clembed"
+    },
+    {
         "color_convert.cl",
 #include "./cl_kernels/color_convert.clembed"
     },
@@ -362,6 +373,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/histogram.clembed"
     },
     {
+        "hog.cl",
+#include "./cl_kernels/hog.clembed"
+    },
+    {
         "integral_image.cl",
 #include "./cl_kernels/integral_image.clembed"
     },
@@ -396,6 +411,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "normalization_layer.cl",
 #include "./cl_kernels/normalization_layer.clembed"
+    },
+    {
+        "batchnormalization_layer.cl",
+#include "./cl_kernels/batchnormalization_layer.clembed"
     },
     {
         "optical_flow_pyramid_lk.cl",

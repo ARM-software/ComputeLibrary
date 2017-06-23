@@ -46,10 +46,9 @@ public:
     NEPoolingLayerKernel &operator=(NEPoolingLayerKernel &&) = default;
     /** Default destructor */
     ~NEPoolingLayerKernel() = default;
-
     /** Set the input and output tensors.
      *
-     * @param[in]  input     Source tensor. Data types supported: F32.
+     * @param[in]  input     Source tensor. Data types supported: QS8/F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
@@ -66,14 +65,28 @@ private:
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type>
-    void pooling2(const Window &window_input, const Window &window);
+    void pooling2_f32(const Window &window_input, const Window &window);
+    /** Function to perform 2x2 pooling for 8bit fixed point.
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type>
+    void pooling2_q8(const Window &window_input, const Window &window);
     /** Function to perform 3x3 pooling.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type>
-    void pooling3(const Window &window_input, const Window &window);
+    void pooling3_f32(const Window &window_input, const Window &window);
+    /** Function to perform 3x3 pooling for 8bit fixed point.
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type>
+    void pooling3_q8(const Window &window_input, const Window &window);
     /** Common signature for all the specialised Pooling functions
      *
      * @param[in] window_input Input region on which to execute the kernel.
@@ -86,6 +99,7 @@ private:
     const ITensor   *_input;
     ITensor         *_output;
     PoolingLayerInfo _pool_info;
+    int              _num_elems_processed_per_iteration;
     BorderSize       _border_size;
 };
 }

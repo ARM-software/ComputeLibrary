@@ -24,10 +24,10 @@
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 
 #include "arm_compute/core/Types.h"
-#include "test_helpers/Utils.h"
+#include "utils/Utils.h"
 
 using namespace arm_compute;
-using namespace test_helpers;
+using namespace utils;
 
 /** Gaussian 3x3 matrix
  */
@@ -113,5 +113,5 @@ void main_neon_convolution(int argc, const char **argv)
  */
 int main(int argc, const char **argv)
 {
-    return test_helpers::run_example(argc, argv, main_neon_convolution);
+    return utils::run_example(argc, argv, main_neon_convolution);
 }

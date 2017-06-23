@@ -45,21 +45,27 @@ void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
-    _input                                               = input;
-    _output                                              = output;
-    const unsigned int num_elems_processed_per_iteration = input->info()->dimension(0);
+    _input  = input;
+    _output = output;
+
+    // The kernel loops over all elements in steps of 16
+    const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 16);
 
     // Set build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DUSE_" + string_from_data_type(input->info()->data_type())));
-    build_opts.emplace(((num_elems_processed_per_iteration % max_cl_vector_width) != 0) ? "-DNON_MULTIPLE_OF_16" : "");
+    std::set<std::string> build_opts{ "-DUSE_" + string_from_data_type(input->info()->data_type()) };
+
+    // Tell the kernel that the width is not a multiple of 16
+    if((input->info()->dimension(0) % max_cl_vector_width) != 0)
+    {
+        build_opts.emplace("-DNON_MULTIPLE_OF_16");
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("softmax_layer_max", build_opts));
 
     // Set fixed arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
-    _kernel.setArg<cl_uint>(idx++, num_elems_processed_per_iteration);
+    _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
 
     // Configure kernel window
     constexpr unsigned int num_elems_written_per_iteration = 1;
@@ -88,23 +94,29 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(sum, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, max, sum);
 
-    _input                                               = input;
-    _max                                                 = max;
-    _output                                              = output;
-    _sum                                                 = sum;
-    const unsigned int num_elems_processed_per_iteration = input->info()->dimension(0);
+    _input  = input;
+    _max    = max;
+    _output = output;
+    _sum    = sum;
+
+    // The kernel loops over all elements in steps of 16
+    const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 16);
 
     // Set build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DUSE_" + string_from_data_type(input->info()->data_type())));
-    build_opts.emplace(((num_elems_processed_per_iteration % max_cl_vector_width) != 0) ? "-DNON_MULTIPLE_OF_16" : "");
+    std::set<std::string> build_opts{ "-DUSE_" + string_from_data_type(input->info()->data_type()) };
+
+    // Tell the kernel that the width is not a multiple of 16
+    if((input->info()->dimension(0) % max_cl_vector_width) != 0)
+    {
+        build_opts.emplace("-DNON_MULTIPLE_OF_16");
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("softmax_layer_shift_exp_sum", build_opts));
 
     // Set fixed arguments
     unsigned int idx = 4 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
-    _kernel.setArg<cl_uint>(idx++, num_elems_processed_per_iteration);
+    _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
@@ -190,10 +202,13 @@ void CLLogits1DNormKernel::run(const Window &window, cl::CommandQueue &queue)
 
     do
     {
+        Window sum_slice = slice;
+        sum_slice.set(Window::DimX, Window::Dimension(0, 1, 1));
+
         unsigned int idx = 0;
         // Set inputs
         add_2D_tensor_argument(idx, _input, slice);
-        add_2D_tensor_argument(idx, _sum, slice);
+        add_2D_tensor_argument(idx, _sum, sum_slice);
         add_2D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
     }

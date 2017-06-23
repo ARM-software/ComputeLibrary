@@ -27,7 +27,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace
+namespace arm_compute
 {
 inline uint8_t delta_bilinear_c1u8(const uint8_t *pixel_ptr, size_t stride, float dx, float dy)
 {
@@ -122,11 +122,7 @@ inline uint8_t pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stri
     // Return average
     return sum / (x_elements * y_elements);
 }
-}
 
-#ifndef DOXYGEN_SKIP_THIS /* Doxygen gets confused by the templates and can't match the implementation to the declaration */
-namespace arm_compute
-{
 template <size_t dimension>
 struct IncrementIterators
 {
@@ -141,6 +137,11 @@ struct IncrementIterators
     static void unroll(T &&it)
     {
         it.increment(dimension);
+        // End of recursion
+    }
+
+    static void unroll()
+    {
         // End of recursion
     }
 };
@@ -189,7 +190,7 @@ inline Iterator::Iterator(const ITensor *tensor, const Window &win)
     : Iterator()
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
-    const TensorInfo *info = tensor->info();
+    const ITensorInfo *info = tensor->info();
     ARM_COMPUTE_ERROR_ON(info == nullptr);
     const Strides &strides = info->strides_in_bytes();
 
@@ -244,5 +245,62 @@ inline void Iterator::reset(const size_t dimension)
         _dims[n]._dim_start = _dims[dimension]._dim_start;
     }
 }
+
+inline bool auto_init_if_empty(ITensorInfo &info, const TensorShape &shape, int num_channels, DataType data_type, int fixed_point_position)
+{
+    if(info.tensor_shape().total_size() == 0)
+    {
+        info.set_data_type(data_type);
+        info.set_tensor_shape(shape);
+        info.set_num_channels(num_channels);
+        info.set_fixed_point_position(fixed_point_position);
+        return true;
+    }
+
+    return false;
 }
-#endif /* DOXYGEN_SKIP_THIS */
+
+inline bool set_shape_if_empty(ITensorInfo &info, const TensorShape &shape)
+{
+    if(info.tensor_shape().total_size() == 0)
+    {
+        info.set_tensor_shape(shape);
+        return true;
+    }
+
+    return false;
+}
+
+inline bool set_format_if_unknown(ITensorInfo &info, Format format)
+{
+    if(info.data_type() == DataType::UNKNOWN)
+    {
+        info.set_format(format);
+        return true;
+    }
+
+    return false;
+}
+
+inline bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type)
+{
+    if(info.data_type() == DataType::UNKNOWN)
+    {
+        info.set_data_type(data_type);
+        return true;
+    }
+
+    return false;
+}
+
+inline bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position)
+{
+    if(info.fixed_point_position() == 0 && (info.data_type() == DataType::QS8 || info.data_type() == DataType::QS16))
+    {
+        info.set_fixed_point_position(fixed_point_position);
+        return true;
+    }
+
+    return false;
+}
+} // namespace arm_compute

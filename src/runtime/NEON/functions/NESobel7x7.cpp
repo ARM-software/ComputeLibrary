@@ -76,6 +76,6 @@ void NESobel7x7::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
 void NESobel7x7::run()
 {
     _border_handler.run(_border_handler.window());
-    NEScheduler::get().multithread(&_sobel_hor);
-    NEScheduler::get().multithread(&_sobel_vert);
+    NEScheduler::get().schedule(&_sobel_hor, Window::DimY);
+    NEScheduler::get().schedule(&_sobel_vert, Window::DimY);
 }

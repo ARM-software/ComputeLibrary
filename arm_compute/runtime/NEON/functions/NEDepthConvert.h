@@ -48,17 +48,18 @@ public:
      * Input format must be different than output format.
      *
      * Valid conversions Input -> Output :
-     *    U8 -> U16, S16, U32, S32
-     *    U16 -> U8, U32, S32
-     *    S16 -> U8, U32, S32
-     *    U32 -> U8, U16, S16
-     *    S32 -> U8, U16, S16
+     *    QS8 -> F32
+     *    U8 -> U16, S16, S32
+     *    U16 -> U8, U32
+     *    S16 -> U8, S32
+     *    F32 -> QS8
      *
      *
-     * @param[in]  input  The input tensor to convert. Data type supported: U8, U16, S16, U32 or S32.
-     * @param[out] output The output tensor. Data type supported: U8, U16, S16, U32 or S32.
+     * @param[in]  input  The input tensor to convert. Data type supported: QS8/U8/U16/S16/F32.
+     * @param[out] output The output tensor. Data type supported: QS8/U8/U16/S16/U32/S32/F32.
      * @param[in]  policy Conversion policy.
      * @param[in]  shift  Value for down/up conversions. Must be 0 <= shift < 8.
+     *                    It is not used on fixed point conversion.
      */
     void configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift);
 };

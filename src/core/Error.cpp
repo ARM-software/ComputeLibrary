@@ -25,6 +25,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <iostream>
 #include <stdexcept>
 
 void arm_compute::error(const char *function, const char *file, const int line, const char *msg, ...)
@@ -37,4 +38,15 @@ void arm_compute::error(const char *function, const char *file, const int line, 
     va_end(args);
 
     throw std::runtime_error(std::string(out));
+}
+
+void arm_compute::debug(const char *function, const char *file, const int line, const char *msg, ...)
+{
+    char    out[512];
+    va_list args;
+    va_start(args, msg);
+    int offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
+    vsnprintf(out + offset, sizeof(out) - offset, msg, args);
+    va_end(args);
+    std::cout << std::string(out) << std::endl;
 }

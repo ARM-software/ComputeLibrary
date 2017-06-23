@@ -41,11 +41,26 @@ void CLIntegralImageHorKernel::configure(const ICLTensor *input, ICLTensor *outp
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32);
 
+    _input  = input;
+    _output = output;
+
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("integral_horizontal"));
 
-    // Configure kernel
-    ICLSimple2DKernel::configure(input, output, input->info()->dimension(0));
+    // Configure kernel window
+    const unsigned int num_elems_processed_per_iteration = input->info()->dimension(0);
+    const unsigned int num_elems_accessed_per_iteration  = ceil_to_multiple(num_elems_processed_per_iteration, 16);
+
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_accessed_per_iteration);
+
+    update_window_and_padding(win,
+                              AccessWindowHorizontal(input->info(), 0, num_elems_accessed_per_iteration),
+                              output_access);
+
+    output_access.set_valid_region(win, input->info()->valid_region());
+
+    ICLKernel::configure(win);
 }
 
 CLIntegralImageVertKernel::CLIntegralImageVertKernel()

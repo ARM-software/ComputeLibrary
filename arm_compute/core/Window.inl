@@ -50,6 +50,21 @@ inline void Window::shift(const size_t dimension, const int shift_value)
     d                    = Window::Dimension(d.start() + shift_value, d.end() + shift_value, d.step());
 }
 
+inline void Window::adjust(size_t dimension, int adjust_value, bool is_at_start)
+{
+    ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
+    Window::Dimension &d = _dims[dimension];
+
+    if(is_at_start)
+    {
+        d = Window::Dimension(d.start() + adjust_value, d.end(), d.step());
+    }
+    else
+    {
+        d = Window::Dimension(d.start(), d.end() + adjust_value, d.step());
+    }
+}
+
 inline void Window::scale(const size_t dimension, float scale_value)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
@@ -157,7 +172,7 @@ inline Window          Window::first_slice_window() const
     return slice;
 }
 
-inline void Window::use_tensor_dimensions(const TensorInfo *info, const size_t first_dimension)
+inline void Window::use_tensor_dimensions(const ITensorInfo *info, const size_t first_dimension)
 {
     for(unsigned int n = first_dimension; n < info->num_dimensions(); ++n)
     {

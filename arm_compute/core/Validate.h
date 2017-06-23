@@ -37,6 +37,82 @@
 
 namespace arm_compute
 {
+namespace detail
+{
+/* Check whether two dimension objects differ.
+ *
+ * @param[in] dim1      First object to be compared.
+ * @param[in] dim2      Second object to be compared.
+ * @param[in] upper_dim The dimension from which to check.
+ *
+ * @return Return true if the two objects are different.
+ */
+template <typename T>
+inline bool have_different_dimensions(const Dimensions<T> &dim1, const Dimensions<T> &dim2, unsigned int upper_dim)
+{
+    for(unsigned int i = upper_dim; i < arm_compute::Dimensions<T>::num_max_dimensions; ++i)
+    {
+        if(dim1[i] != dim2[i])
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/** Functor to compare two @ref Dimensions objects and throw an error on mismatch.
+ *
+ * @param[in] dim      Object to compare against.
+ * @param[in] function Function in which the error occured.
+ * @param[in] file     File in which the error occured.
+ * @param[in] line     Line in which the error occured.
+ */
+template <typename T>
+class compare_dimension
+{
+public:
+    compare_dimension(const Dimensions<T> &dim, const char *function, const char *file, int line)
+        : _dim{ dim }, _function{ function }, _file{ file }, _line{ line }
+    {
+    }
+
+    /** Compare the given object against the stored one.
+     *
+     * @param[in] dim To be compared object.
+     */
+    void operator()(const Dimensions<T> &dim)
+    {
+        ARM_COMPUTE_ERROR_ON_LOC_MSG(have_different_dimensions(_dim, dim, 0), _function, _file, _line,
+                                     "Objects have different dimensions");
+    }
+
+private:
+    const Dimensions<T> &_dim;
+    const char *const    _function;
+    const char *const    _file;
+    const int            _line;
+};
+} // namespace detail
+/** Throw an error if one of the pointers is a nullptr.
+ *
+ *  @param[in] function Function in which the error occurred.
+ *  @param[in] file     Name of the file where the error occurred.
+ *  @param[in] line     Line on which the error occurred.
+ *  @param[in] pointers Pointers to check against nullptr.
+ */
+template <typename... Ts>
+void error_on_nullptr(const char *function, const char *file, const int line, Ts &&... pointers)
+{
+    auto is_nullptr = [&](const void *ptr)
+    {
+        ARM_COMPUTE_ERROR_ON_LOC(ptr == nullptr, function, file, line);
+    };
+
+    for_each(is_nullptr, std::forward<Ts>(pointers)...);
+}
+#define ARM_COMPUTE_ERROR_ON_NULLPTR(...) ::arm_compute::error_on_nullptr(__func__, __FILE__, __LINE__, __VA_ARGS__)
+
 /** Throw an error if the passed window is invalid.
  *
  * The subwindow is invalid if:
@@ -99,27 +175,28 @@ void error_on_window_dimensions_gte(const char *function, const char *file, cons
                                     const Window &win, unsigned int max_dim);
 #define ARM_COMPUTE_ERROR_ON_WINDOW_DIMENSIONS_GTE(w, md) ::arm_compute::error_on_window_dimensions_gte(__func__, __FILE__, __LINE__, w, md)
 
-/* Check whether two tensors have different shapes.
+/** Throw an error if the passed dimension objects differ.
  *
- * @param[in] tensor_1 First tensor to be compared
- * @param[in] tensor_2 Second tensor to be compared
- *
- * @return Return true if the two tensors have different shapes
+ *  @param[in] function Function in which the error occurred.
+ *  @param[in] file     Name of the file where the error occurred.
+ *  @param[in] line     Line on which the error occurred.
+ *  @param[in] dim1     The first object to be compared.
+ *  @param[in] dim2     The second object to be compared.
+ *  @param[in] dims     (Optional) Further allowed objects.
  */
-inline bool have_different_shapes(const ITensor *tensor_1, const ITensor *tensor_2)
+template <typename T, typename... Ts>
+void error_on_mismatching_dimensions(const char *function, const char *file, int line,
+                                     const Dimensions<T> &dim1, const Dimensions<T> &dim2, Ts &&... dims)
 {
-    for(size_t i = 0; i < arm_compute::Coordinates::num_max_dimensions; ++i)
-    {
-        if(tensor_1->info()->dimension(i) != tensor_2->info()->dimension(i))
-        {
-            return true;
-        }
-    }
+    ARM_COMPUTE_UNUSED(function);
+    ARM_COMPUTE_UNUSED(file);
+    ARM_COMPUTE_UNUSED(line);
 
-    return false;
+    for_each(detail::compare_dimension<T>(dim1, function, file, line), dim2, std::forward<Ts>(dims)...);
 }
+#define ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(...) ::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__)
 
-/** Throw an error if the passed two tensors have different shapes
+/** Throw an error if the passed two tensors have different shapes from the given dimension
  *
  *  @param[in] function Function in which the error occurred.
  *  @param[in] file     Name of the file where the error occurred.
@@ -132,18 +209,36 @@ template <typename... Ts>
 void error_on_mismatching_shapes(const char *function, const char *file, const int line,
                                  const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
 {
+    error_on_mismatching_shapes(function, file, line, 0U, tensor_1, tensor_2, std::forward<Ts>(tensors)...);
+}
+
+/** Throw an error if the passed two tensors have different shapes from the given dimension
+ *
+ *  @param[in] function  Function in which the error occurred.
+ *  @param[in] file      Name of the file where the error occurred.
+ *  @param[in] line      Line on which the error occurred.
+ *  @param[in] upper_dim The dimension from which to check.
+ *  @param[in] tensor_1  The first tensor to be compared.
+ *  @param[in] tensor_2  The second tensor to be compared.
+ *  @param[in] tensors   (Optional) Further allowed tensors.
+ */
+template <typename... Ts>
+void error_on_mismatching_shapes(const char *function, const char *file, const int line,
+                                 unsigned int upper_dim, const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
+{
     ARM_COMPUTE_UNUSED(function);
     ARM_COMPUTE_UNUSED(file);
     ARM_COMPUTE_UNUSED(line);
-    ARM_COMPUTE_UNUSED(tensor_1);
-    ARM_COMPUTE_UNUSED(tensor_2);
 
-    const std::array<const ITensor *, sizeof...(Ts)> tensors_array{ { std::forward<Ts>(tensors)... } };
+    const std::array < const ITensor *, 2 + sizeof...(Ts) > tensors_array{ { tensor_1, tensor_2, std::forward<Ts>(tensors)... } };
     ARM_COMPUTE_UNUSED(tensors_array);
 
-    ARM_COMPUTE_ERROR_ON_LOC_MSG(have_different_shapes(tensor_1, tensor_2) || std::any_of(tensors_array.begin(), tensors_array.end(), [&](const ITensor * tensor)
+    ARM_COMPUTE_ERROR_ON_LOC(tensors_array.cbegin() == nullptr, function, file, line);
+
+    ARM_COMPUTE_ERROR_ON_LOC_MSG(std::any_of(std::next(tensors_array.cbegin()), tensors_array.cend(), [&](const ITensor * tensor)
     {
-        return have_different_shapes(tensor_1, tensor);
+        ARM_COMPUTE_ERROR_ON_LOC(tensor == nullptr, function, file, line);
+        return detail::have_different_dimensions((*tensors_array.cbegin())->info()->tensor_shape(), tensor->info()->tensor_shape(), upper_dim);
     }),
     function, file, line, "Tensors have different shapes");
 }
@@ -182,6 +277,55 @@ void error_on_mismatching_data_types(const char *function, const char *file, con
 }
 
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(...) ::arm_compute::error_on_mismatching_data_types(__func__, __FILE__, __LINE__, __VA_ARGS__)
+
+/** Throw an error if the passed tensors have different fixed point data types or different fixed point positions
+ *
+ * @note: If the first tensor doesn't have fixed point data type, the function returns without throwing an error
+ *
+ *  @param[in] function Function in which the error occurred.
+ *  @param[in] file     Name of the file where the error occurred.
+ *  @param[in] line     Line on which the error occurred.
+ *  @param[in] tensor_1 The first tensor to be compared.
+ *  @param[in] tensor_2 The second tensor to be compared.
+ *  @param[in] tensors  (Optional) Further allowed tensors.
+ */
+template <typename... Ts>
+void error_on_mismatching_fixed_point(const char *function, const char *file, const int line,
+                                      const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
+{
+    ARM_COMPUTE_UNUSED(function);
+    ARM_COMPUTE_UNUSED(file);
+    ARM_COMPUTE_UNUSED(line);
+    ARM_COMPUTE_UNUSED(tensor_1);
+    ARM_COMPUTE_UNUSED(tensor_2);
+
+    DataType &&first_data_type            = tensor_1->info()->data_type();
+    const int  first_fixed_point_position = tensor_1->info()->fixed_point_position();
+    ARM_COMPUTE_UNUSED(first_data_type);
+    ARM_COMPUTE_UNUSED(first_fixed_point_position);
+
+    if((first_data_type != DataType::QS8) && (first_data_type != DataType::QS16))
+    {
+        return;
+    }
+
+    const std::array < const ITensor *, 1 + sizeof...(Ts) > tensors_array{ { tensor_2, std::forward<Ts>(tensors)... } };
+    ARM_COMPUTE_UNUSED(tensors_array);
+
+    ARM_COMPUTE_ERROR_ON_LOC_MSG(std::any_of(tensors_array.begin(), tensors_array.end(), [&](const ITensor * tensor)
+    {
+        return tensor->info()->data_type() != first_data_type;
+    }),
+    function, file, line, "Tensors have different fixed point data types");
+
+    ARM_COMPUTE_ERROR_ON_LOC_MSG(std::any_of(tensors_array.begin(), tensors_array.end(), [&](const ITensor * tensor)
+    {
+        return tensor->info()->fixed_point_position() != first_fixed_point_position;
+    }),
+    function, file, line, "Tensors have different fixed point positions");
+}
+
+#define ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(...) ::arm_compute::error_on_mismatching_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__)
 
 /** Throw an error if the format of the passed tensor/multi-image does not match any of the formats provided.
  *
@@ -229,7 +373,7 @@ void error_on_data_type_not_in(const char *function, const char *file, const int
 {
     ARM_COMPUTE_ERROR_ON_LOC(tensor == nullptr, function, file, line);
 
-    DataType &&tensor_dt = tensor->info()->data_type();
+    const DataType &tensor_dt = tensor->info()->data_type(); //NOLINT
     ARM_COMPUTE_UNUSED(tensor_dt);
 
     ARM_COMPUTE_ERROR_ON_LOC(tensor_dt == DataType::UNKNOWN, function, file, line);
@@ -343,5 +487,77 @@ void error_on_invalid_multi_hog(const char *function, const char *file, const in
 void error_on_unconfigured_kernel(const char *function, const char *file, const int line,
                                   const IKernel *kernel);
 #define ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(k) ::arm_compute::error_on_unconfigured_kernel(__func__, __FILE__, __LINE__, k)
+
+/** Throw an error if if the coordinates and shape of the subtensor are within the parent tensor.
+ *
+ * @param[in] function     Function in which the error occurred.
+ * @param[in] file         Name of the file where the error occurred.
+ * @param[in] line         Line on which the error occurred.
+ * @param[in] parent_shape Parent tensor shape
+ * @param[in] coords       Coordinates inside the parent tensor where the first element of the subtensor is
+ * @param[in] shape        Shape of the subtensor
+ */
+void error_on_invalid_subtensor(const char *function, const char *file, const int line,
+                                const TensorShape &parent_shape, const Coordinates &coords, const TensorShape &shape);
+#define ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(p, c, s) ::arm_compute::error_on_invalid_subtensor(__func__, __FILE__, __LINE__, p, c, s)
+
+/** Throw an error if the valid region of a subtensor is not inside the valid region of the parent tensor.
+ *
+ * @param[in] function            Function in which the error occurred.
+ * @param[in] file                Name of the file where the error occurred.
+ * @param[in] line                Line on which the error occurred.
+ * @param[in] parent_valid_region Parent valid region.
+ * @param[in] valid_region        Valid region of subtensor.
+ */
+void error_on_invalid_subtensor_valid_region(const char *function, const char *file, const int line,
+                                             const ValidRegion &parent_valid_region, const ValidRegion &valid_region);
+#define ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(pv, sv) ::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv)
+
+/** Throw an error if the input fixed-point positions are different.
+ *
+ *  @param[in] function Function in which the error occurred.
+ *  @param[in] file     Name of the file where the error occurred.
+ *  @param[in] line     Line on which the error occurred.
+ *  @param[in] tensor_1 The first tensor to be compared.
+ *  @param[in] tensor_2 The second tensor to be compared.
+ *  @param[in] tensors  (Optional) Further allowed tensors.
+ */
+template <typename... Ts>
+void error_on_mismatching_fixed_point_position(const char *function, const char *file, const int line,
+                                               const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
+{
+    const std::array < const ITensor *, 1 + sizeof...(Ts) > tensors_array{ { tensor_2, std::forward<Ts>(tensors)... } };
+    ARM_COMPUTE_UNUSED(tensors_array);
+
+    ARM_COMPUTE_ERROR_ON_LOC_MSG(std::any_of(tensors_array.begin(), tensors_array.end(), [&](const ITensor * tensor)
+    {
+        return tensor->info()->fixed_point_position() != tensor_1->info()->fixed_point_position();
+    }),
+    function, file, line, "Tensors have different fixed-point positions");
+}
+#define ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(...) ::arm_compute::error_on_mismatching_fixed_point_position(__func__, __FILE__, __LINE__, __VA_ARGS__)
+
+/** Throw an error if the fixed-point value is not representable in the specified Q format.
+ *
+ *  @param[in] function Function in which the error occurred.
+ *  @param[in] file     Name of the file where the error occurred.
+ *  @param[in] line     Line on which the error occurred.
+ *  @param[in] value    The floating point value to be checked.
+ *  @param[in] tensor   Input tensor that has information on data type and fixed-point position.
+ */
+template <typename... Ts>
+void error_on_value_not_representable_in_fixed_point(const char *function, const char *file, int line,
+                                                     float value, const ITensor *tensor)
+{
+    const int          fixed_point_position = tensor->info()->fixed_point_position();
+    const DataType     dt                   = tensor->info()->data_type();
+    const unsigned int q_max_range          = 0xFFFFFFFFu >> (((sizeof(unsigned int) - element_size_from_data_type(dt)) * 8) + 1);
+    const float        max_range            = q_max_range / (static_cast<float>(1 << fixed_point_position));
+    ARM_COMPUTE_UNUSED(max_range);
+
+    ARM_COMPUTE_ERROR_ON_LOC_MSG(value > max_range, function, file, line,
+                                 "Value %f is not representable in %s with fixed-point position %d", value, string_from_data_type(dt).c_str(), fixed_point_position);
+}
+#define ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(...) ::arm_compute::error_on_value_not_representable_in_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__)
 }
 #endif /* __ARM_COMPUTE_VALIDATE_H__*/

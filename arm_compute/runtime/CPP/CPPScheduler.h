@@ -24,35 +24,28 @@
 #ifndef __ARM_COMPUTE_CPPSCHEDULER_H__
 #define __ARM_COMPUTE_CPPSCHEDULER_H__
 
-#include <cstddef>
+#include "arm_compute/runtime/IScheduler.h"
+
 #include <memory>
 
 namespace arm_compute
 {
-class ICPPKernel;
 class Thread;
 
-/** Pool of threads to automatically split a kernel's execution among several threads. */
-class CPPScheduler
+/** C++11 implementation of a pool of threads to automatically split a kernel's execution among several threads. */
+class CPPScheduler : public IScheduler
 {
-private:
-    /** Constructor: create a pool of threads. */
-    CPPScheduler();
-
 public:
-    /** Force the re-creation of the pool of threads to use the specified number of threads.
+    /** Sets the number of threads the scheduler will use to run the kernels.
      *
-     * @param[in] num_threads If set to 0, then std::thread::hardware_concurrency() threads will be used, otherwise the number of threads specified.
+     * @param[in] num_threads If set to 0, then the maximum number of threads supported by C++11 will be used, otherwise the number of threads specified.
      */
-    void force_number_of_threads(int num_threads);
+    void set_num_threads(unsigned int num_threads) override;
     /** Returns the number of threads that the CPPScheduler has in his pool.
      *
      * @return Number of threads available in CPPScheduler.
      */
-    int num_threads() const
-    {
-        return _num_threads;
-    }
+    unsigned int num_threads() const override;
     /** Access the scheduler singleton
      *
      * @return The scheduler
@@ -65,12 +58,15 @@ public:
      * - The scheduler has been initialized with only one thread.
      *
      * @param[in] kernel          Kernel to execute.
-     * @param[in] split_dimension Dimension along which to split the kernel's execution window (By default 1/Y)
+     * @param[in] split_dimension Dimension along which to split the kernel's execution window.
      */
-    void multithread(ICPPKernel *kernel, size_t split_dimension = 1);
+    void schedule(ICPPKernel *kernel, unsigned int split_dimension) override;
 
 private:
-    int _num_threads;
+    /** Constructor: create a pool of threads. */
+    CPPScheduler();
+
+    unsigned int _num_threads;
     std::unique_ptr<Thread[], void (*)(Thread *)> _threads;
 };
 }

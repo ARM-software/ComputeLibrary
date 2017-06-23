@@ -92,8 +92,8 @@ void NEHOGDescriptor::run()
     _gradient.run();
 
     // Run orientation binning kernel
-    NEScheduler::get().multithread(&_orient_bin);
+    NEScheduler::get().schedule(&_orient_bin, Window::DimY);
 
     // Run block normalization kernel
-    NEScheduler::get().multithread(&_block_norm);
+    NEScheduler::get().schedule(&_block_norm, Window::DimY);
 }

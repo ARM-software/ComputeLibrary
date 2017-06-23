@@ -40,9 +40,25 @@ void NEIntegralImageKernel::configure(const ITensor *input, ITensor *output)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32);
 
+    _input  = input;
+    _output = output;
+
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
-    INESimpleKernel::configure(input, output, num_elems_processed_per_iteration);
+    // Configure kernel window
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    // The kernel is effectively reading 17 values from -1 as it loads 16
+    // starting at -1 and also 16 starting at 0
+    AccessWindowRectangle  output_read_access(output->info(), -1, -1, num_elems_processed_per_iteration + 1, 1);
+    AccessWindowHorizontal output_write_access(output->info(), 0, num_elems_processed_per_iteration);
+
+    update_window_and_padding(win,
+                              AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
+                              output_read_access, output_write_access);
+
+    output_write_access.set_valid_region(win, input->info()->valid_region());
+
+    IKernel::configure(win);
 }
 
 BorderSize NEIntegralImageKernel::border_size() const

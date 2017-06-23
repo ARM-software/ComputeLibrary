@@ -30,12 +30,12 @@ Tensor::Tensor()
 {
 }
 
-TensorInfo *Tensor::info() const
+ITensorInfo *Tensor::info() const
 {
     return &_allocator.info();
 }
 
-TensorInfo *Tensor::info()
+ITensorInfo *Tensor::info()
 {
     return &_allocator.info();
 }

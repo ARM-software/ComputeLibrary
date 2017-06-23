@@ -44,36 +44,53 @@
  * @param[in]  bias_ptr                           Pointer to the bias tensor. Same as input
  * @param[in]  bias_stride_x                      Stride of the bias tensor in X dimension (in bytes)
  * @param[in]  bias_step_x                        bias_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  bias_stride_y                      Stride of the bias tensor in Y dimension (in bytes)
- * @param[in]  bias_step_y                        bias_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  bias_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[in]  width                              The width of the input tensor
  * @param[in]  height                             The height of the input tensor
+ * @param[in]  depth                              The depth of the input tensor
+ * @param[in]  total_filters                      Total number of filters. 4th dimension of the weights matrix
  */
 __kernel void reshape_to_columns(
     TENSOR3D_DECLARATION(src),
     IMAGE_DECLARATION(dst),
 #if defined HAS_BIAS
-    IMAGE_DECLARATION(bias),
+    VECTOR_DECLARATION(bias),
 #endif
-    uint width, uint height)
+    uint width, uint height, uint depth, uint total_filters)
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+    Tensor3D src            = CONVERT_TO_TENSOR3D_STRUCT(src);
+    bool     is_last_thread = (get_global_id(0) == (get_global_size(0) - 1) && get_global_id(1) == (get_global_size(1) - 1) && get_global_id(2) == (get_global_size(2) - 1));
 
-    __global uchar *tmp_out_ptr = dst_ptr + dst_offset_first_element_in_bytes + get_global_id(0) * dst_stride_y
-                                  + get_global_id(1) * width * dst_stride_y + get_global_id(2) * width * height * dst_stride_y;
+    __global uchar *tmp_src_ptr = src.ptr;
+    __global uchar *tmp_dst_ptr = dst_ptr + dst_offset_first_element_in_bytes + get_global_id(0) * dst_stride_y + get_global_id(1) * width * dst_stride_y + get_global_id(
+                                      2) * width * height * dst_stride_y;
+#if defined         HAS_BIAS
+    __global uchar *tmp_bias_ptr = bias_ptr + bias_offset_first_element_in_bytes;
+#endif
 
-    *((__global DATA_TYPE *)tmp_out_ptr) = *((__global DATA_TYPE *)src.ptr);
+    if(is_last_thread)
+    {
+        for(uint i = 0; i < total_filters; ++i)
+        {
+            *((__global DATA_TYPE *)tmp_dst_ptr) = *((__global DATA_TYPE *)tmp_src_ptr);
 
 #if defined HAS_BIAS
-    // If it is the last thread in the 3 dimensional workgroup
-    if(get_global_id(0) == (get_global_size(0) - 1) && get_global_id(1) == (get_global_size(1) - 1) && get_global_id(2) == (get_global_size(2) - 1))
-    {
-        tmp_out_ptr += dst_stride_y;
-        *((__global DATA_TYPE *)tmp_out_ptr) = *((__global DATA_TYPE *)(bias_ptr + bias_offset_first_element_in_bytes));
-    }
-
+            *((__global DATA_TYPE *)(tmp_dst_ptr + dst_stride_y)) = *((__global DATA_TYPE *)(tmp_bias_ptr));
+            tmp_bias_ptr += bias_stride_x;
 #endif
+            tmp_src_ptr += depth * src_stride_z;
+            tmp_dst_ptr += dst_stride_x;
+        }
+    }
+    else
+    {
+        for(uint i = 0; i < total_filters; ++i)
+        {
+            *((__global DATA_TYPE *)tmp_dst_ptr) = *((__global DATA_TYPE *)tmp_src_ptr);
+            tmp_src_ptr += depth * src_stride_z;
+            tmp_dst_ptr += dst_stride_x;
+        }
+    }
 }
 
 /** This kernel performs a reshaping of the input tensor to a tensor used to perform convolution using GEMM.

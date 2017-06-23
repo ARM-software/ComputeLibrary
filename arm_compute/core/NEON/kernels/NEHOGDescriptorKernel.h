@@ -53,7 +53,7 @@ public:
      *
      * @param[in]  input_magnitude Input tensor which stores the magnitude of the gradient for each pixel. Data type supported: S16.
      * @param[in]  input_phase     Input tensor which stores the phase of the gradient for each pixel. Data type supported: U8
-     * @param[out] output          Output tensor which stores the local HOG for each cell. DataType supported: F32. Number of channels supported: equal to the number of histogram bins per cell
+     * @param[out] output          Output tensor which stores the local HOG for each cell. Data type supported: F32. Number of channels supported: equal to the number of histogram bins per cell
      * @param[in]  hog_info        HOG's metadata
      */
     void configure(const ITensor *input_magnitude, const ITensor *input_phase, ITensor *output, const HOGInfo *hog_info);

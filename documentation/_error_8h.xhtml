@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.11"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>ARM Compute Library: arm_compute/core/Error.h File Reference</title>
+<title>Compute Library: arm_compute/core/Error.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -39,8 +39,8 @@
  <tbody>
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
-   <div id="projectname">ARM Compute Library
-   &#160;<span id="projectnumber">17.05</span>
+   <div id="projectname">Compute Library
+   &#160;<span id="projectnumber">v17.06</span>
    </div>
   </td>
  </tr>
@@ -55,6 +55,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.xhtml"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.xhtml"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.xhtml"><span>Namespaces</span></a></li>
       <li><a href="annotated.xhtml"><span>Data&#160;Structures</span></a></li>
       <li class="current"><a href="files.xhtml"><span>Files</span></a></li>
@@ -139,6 +140,10 @@ Macros</h2></td></tr>
 <tr class="memitem:a4103adbb45806b2f2002d44b91d0d206"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(var)&#160;&#160;&#160;(void)(var)</td></tr>
 <tr class="memdesc:a4103adbb45806b2f2002d44b91d0d206"><td class="mdescLeft">&#160;</td><td class="mdescRight">To avoid unused variables warnings.  <a href="#a4103adbb45806b2f2002d44b91d0d206">More...</a><br /></td></tr>
 <tr class="separator:a4103adbb45806b2f2002d44b91d0d206"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a89ba1af4a8a70df25753e354d41641"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_error_8h.xhtml#a8a89ba1af4a8a70df25753e354d41641">ARM_COMPUTE_INFO_ON_MSG</a>(cond, ...)</td></tr>
+<tr class="separator:a8a89ba1af4a8a70df25753e354d41641"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0ebdb75cd00c490fadb20f25b67ec90"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_error_8h.xhtml#ae0ebdb75cd00c490fadb20f25b67ec90">ARM_COMPUTE_INFO</a>(...)</td></tr>
+<tr class="separator:ae0ebdb75cd00c490fadb20f25b67ec90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5bbdcf574d3f5e412fa6a1117911e67b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(cond, ...)</td></tr>
 <tr class="separator:a5bbdcf574d3f5e412fa6a1117911e67b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b62e396a1789909dadda61ea4cda96f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_error_8h.xhtml#a1b62e396a1789909dadda61ea4cda96f">ARM_COMPUTE_ERROR_ON_LOC_MSG</a>(cond,  func,  file,  line, ...)</td></tr>
@@ -157,6 +162,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a568b0fbfa3d903099d9c9f7b6acf188d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a568b0fbfa3d903099d9c9f7b6acf188d">error</a> (const char *function, const char *file, const int line, const char *msg,...)</td></tr>
 <tr class="memdesc:a568b0fbfa3d903099d9c9f7b6acf188d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print an error message then throw an std::runtime_error.  <a href="namespacearm__compute.xhtml#a568b0fbfa3d903099d9c9f7b6acf188d">More...</a><br /></td></tr>
 <tr class="separator:a568b0fbfa3d903099d9c9f7b6acf188d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5930b66fce0674d707fbf4f2dfcacc8f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a5930b66fce0674d707fbf4f2dfcacc8f">debug</a> (const char *function, const char *file, const int line, const char *msg,...)</td></tr>
+<tr class="memdesc:a5930b66fce0674d707fbf4f2dfcacc8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print a debug message.  <a href="namespacearm__compute.xhtml#a5930b66fce0674d707fbf4f2dfcacc8f">More...</a><br /></td></tr>
+<tr class="separator:a5930b66fce0674d707fbf4f2dfcacc8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a class="anchor" id="a50048c593c53405cca5b0d69dfe25554"></a>
@@ -189,7 +197,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00093">93</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
+<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00117">117</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
 
 </div>
 </div>
@@ -217,7 +225,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00031">31</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
 
-<p>Referenced by <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00098">arm_compute::data_size_from_type()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00195">arm_compute::data_type_from_format()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00169">arm_compute::element_size_from_data_type()</a>, <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00140">PPMLoader::fill_image()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00283">arm_compute::num_planes_from_format()</a>, <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00092">PPMLoader::open()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00131">arm_compute::pixel_size_from_format()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00236">arm_compute::plane_idx_from_channel()</a>, and <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00243">test_helpers::save_to_ppm()</a>.</p>
+<p>Referenced by <a class="el" href="_tensor_operations_8h_source.xhtml#l00296">arm_compute::test::validation::tensor_operations::accumulate_squared()</a>, <a class="el" href="_tensor_operations_8h_source.xhtml#l00314">arm_compute::test::validation::tensor_operations::accumulate_weighted()</a>, <a class="el" href="_tensor_operations_8h_source.xhtml#l00686">arm_compute::test::validation::tensor_operations::activation_layer()</a>, <a class="el" href="_reference_8cpp_source.xhtml#l00555">Reference::compute_reference_fixed_point_operation()</a>, <a class="el" href="_reference_8cpp_source.xhtml#l00499">Reference::compute_reference_pooling_layer()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00099">arm_compute::data_size_from_type()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00201">arm_compute::data_type_from_format()</a>, <a class="el" href="_tensor_operations_8h_source.xhtml#l00414">arm_compute::test::validation::tensor_operations::depth_convert()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00172">arm_compute::element_size_from_data_type()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00142">PPMLoader::fill_image()</a>, <a class="el" href="_tensor_library_8h_source.xhtml#l00437">TensorLibrary::fill_tensor_uniform()</a>, <a class="el" href="_tensor_operations_8h_source.xhtml#l01319">arm_compute::test::validation::tensor_operations::fixed_point_operation()</a>, <a class="el" href="_tensor_factory_8h_source.xhtml#l00058">TensorFactory::get_tensor()</a>, <a class="el" href="_v_x_helpers_8h_source.xhtml#l00043">arm_compute::test::validation::vx::get_vximage_format()</a>, <a class="el" href="_raw_tensor_8cpp_source.xhtml#l00124">RawTensor::num_channels()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00289">arm_compute::num_planes_from_format()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00094">PPMLoader::open()</a>, <a class="el" href="_tensor_visitors_8h_source.xhtml#l00168">fixed_point_pixel_wise_multiplication_visitor::operator()()</a>, <a class="el" href="_tensor_visitors_8h_source.xhtml#l00354">fixed_point_operation_visitor::operator()()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00069">arm_compute::operator&lt;&lt;()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00134">arm_compute::pixel_size_from_format()</a>, <a class="el" href="_tensor_operations_8h_source.xhtml#l00579">arm_compute::test::validation::tensor_operations::pixel_wise_multiplication()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00242">arm_compute::plane_idx_from_channel()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00245">arm_compute::utils::save_to_ppm()</a>, <a class="el" href="tests_2_utils_8h_source.xhtml#l00526">arm_compute::test::store_value_with_data_type()</a>, and <a class="el" href="_tensor_operations_8h_source.xhtml#l00651">arm_compute::test::validation::tensor_operations::threshold()</a>.</p>
 
 </div>
 </div>
@@ -294,9 +302,9 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00100">100</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
+<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00124">124</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00217">AccessWindowHorizontal::AccessWindowHorizontal()</a>, <a class="el" href="_i_access_window_8h_source.xhtml#l00132">AccessWindowRectangle::AccessWindowRectangle()</a>, <a class="el" href="_i_access_window_8h_source.xhtml#l00196">AccessWindowVertical::AccessWindowVertical()</a>, <a class="el" href="_i_access_window_8h_source.xhtml#l00047">arm_compute::adjust_down()</a>, <a class="el" href="_i_access_window_8h_source.xhtml#l00063">arm_compute::adjust_up()</a>, <a class="el" href="_i_array_8h_source.xhtml#l00117">IArray&lt; NELKInternalKeypoint &gt;::at()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00042">arm_compute::ceil_to_multiple()</a>, <a class="el" href="_c_l_array_8h_source.xhtml#l00075">CLArray&lt; T &gt;::cl_buffer()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00550">arm_compute::colorconvert_iyuv_to_nv12()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00445">arm_compute::colorconvert_iyuv_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00737">arm_compute::colorconvert_iyuv_to_yuv4()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00591">arm_compute::colorconvert_nv12_to_iyuv()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00389">arm_compute::colorconvert_nv12_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00686">arm_compute::colorconvert_nv12_to_yuv4()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00825">arm_compute::colorconvert_rgb_to_iyuv()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00789">arm_compute::colorconvert_rgb_to_nv12()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00303">arm_compute::colorconvert_rgb_to_rgbx()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00862">arm_compute::colorconvert_rgb_to_yuv4()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00327">arm_compute::colorconvert_rgbx_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00633">arm_compute::colorconvert_yuyv_to_iyuv()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00502">arm_compute::colorconvert_yuyv_to_nv12()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00351">arm_compute::colorconvert_yuyv_to_rgb()</a>, <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00140">PPMLoader::fill_image()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00050">arm_compute::floor_to_multiple()</a>, <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00123">PPMLoader::init_image()</a>, <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00092">PPMLoader::open()</a>, <a class="el" href="_dimensions_8h_source.xhtml#l00102">Dimensions&lt; size_t &gt;::operator[]()</a>, <a class="el" href="_i_array_8h_source.xhtml#l00078">IArray&lt; NELKInternalKeypoint &gt;::push_back()</a>, <a class="el" href="_i_array_8h_source.xhtml#l00128">IArray&lt; NELKInternalKeypoint &gt;::resize()</a>, <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00243">test_helpers::save_to_ppm()</a>, <a class="el" href="_window_8inl_source.xhtml#l00053">Window::scale()</a>, <a class="el" href="_dimensions_8h_source.xhtml#l00073">Dimensions&lt; size_t &gt;::set()</a>, <a class="el" href="_window_8inl_source.xhtml#l00040">Window::set()</a>, <a class="el" href="_window_8inl_source.xhtml#l00062">Window::set_dimension_step()</a>, <a class="el" href="_window_8inl_source.xhtml#l00046">Window::shift()</a>, <a class="el" href="_window_8inl_source.xhtml#l00085">Window::split_window()</a>, <a class="el" href="_tensor_shape_8h_source.xhtml#l00068">TensorShape::total_size()</a>, <a class="el" href="_tensor_shape_8h_source.xhtml#l00082">TensorShape::total_size_upper()</a>, and <a class="el" href="_window_8inl_source.xhtml#l00068">Window::validate()</a>.</p>
+<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00217">AccessWindowHorizontal::AccessWindowHorizontal()</a>, <a class="el" href="_i_access_window_8h_source.xhtml#l00132">AccessWindowRectangle::AccessWindowRectangle()</a>, <a class="el" href="_i_access_window_8h_source.xhtml#l00196">AccessWindowVertical::AccessWindowVertical()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00068">ReferenceCPP::accumulate()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00077">ReferenceCPP::accumulate_squared()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00086">ReferenceCPP::accumulate_weighted()</a>, <a class="el" href="_window_8inl_source.xhtml#l00053">Window::adjust()</a>, <a class="el" href="_i_access_window_8h_source.xhtml#l00047">arm_compute::adjust_down()</a>, <a class="el" href="_i_access_window_8h_source.xhtml#l00063">arm_compute::adjust_up()</a>, <a class="el" href="_i_array_8h_source.xhtml#l00117">IArray&lt; NELKInternalKeypoint &gt;::at()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00086">SubTensorInfo::auto_padding()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00113">ReferenceCPP::bitwise_and()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00143">ReferenceCPP::bitwise_not()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00123">ReferenceCPP::bitwise_or()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00133">ReferenceCPP::bitwise_xor()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00152">ReferenceCPP::box3x3()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00043">arm_compute::ceil_to_multiple()</a>, <a class="el" href="_c_l_array_8h_source.xhtml#l00075">CLArray&lt; T &gt;::cl_buffer()</a>, <a class="el" href="_dimensions_8h_source.xhtml#l00125">Dimensions&lt; size_t &gt;::collapse()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00550">arm_compute::colorconvert_iyuv_to_nv12()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00445">arm_compute::colorconvert_iyuv_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00737">arm_compute::colorconvert_iyuv_to_yuv4()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00591">arm_compute::colorconvert_nv12_to_iyuv()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00389">arm_compute::colorconvert_nv12_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00686">arm_compute::colorconvert_nv12_to_yuv4()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00825">arm_compute::colorconvert_rgb_to_iyuv()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00789">arm_compute::colorconvert_rgb_to_nv12()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00303">arm_compute::colorconvert_rgb_to_rgbx()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00862">arm_compute::colorconvert_rgb_to_yuv4()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00327">arm_compute::colorconvert_rgbx_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00633">arm_compute::colorconvert_yuyv_to_iyuv()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00502">arm_compute::colorconvert_yuyv_to_nv12()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00351">arm_compute::colorconvert_yuyv_to_rgb()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00131">SubTensorInfo::data_type()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00032">arm_compute::delta_bilinear_c1u8()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00112">SubTensorInfo::element_size()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00142">PPMLoader::fill_image()</a>, <a class="el" href="_tensor_library_8h_source.xhtml#l00524">TensorLibrary::fill_tensor_uniform()</a>, <a class="el" href="_tensor_operations_8h_source.xhtml#l00617">arm_compute::test::validation::tensor_operations::fixed_point_pixel_wise_multiplication()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00107">SubTensorInfo::fixed_point_position()</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00051">arm_compute::floor_to_multiple()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00136">SubTensorInfo::format()</a>, <a class="el" href="_tensor_operations_8h_source.xhtml#l00899">arm_compute::test::validation::tensor_operations::fully_connected_layer()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00151">SubTensorInfo::has_padding()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00215">Iterator::increment()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00125">PPMLoader::init_image()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00060">ReferenceCPP::integral_image()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00156">SubTensorInfo::is_resizable()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00189">Iterator::Iterator()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00121">SubTensorInfo::num_channels()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00101">SubTensorInfo::offset_first_element_in_bytes()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00094">PPMLoader::open()</a>, <a class="el" href="_dimensions_8h_source.xhtml#l00103">Dimensions&lt; size_t &gt;::operator[]()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00146">SubTensorInfo::padding()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00081">arm_compute::pixel_area_c1u8_clamp()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00052">arm_compute::pixel_bilinear_c1u8()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00065">arm_compute::pixel_bilinear_c1u8_clamp()</a>, <a class="el" href="_i_array_8h_source.xhtml#l00078">IArray&lt; NELKInternalKeypoint &gt;::push_back()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00237">Iterator::reset()</a>, <a class="el" href="_i_array_8h_source.xhtml#l00128">IArray&lt; NELKInternalKeypoint &gt;::resize()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00245">arm_compute::utils::save_to_ppm()</a>, <a class="el" href="_window_8inl_source.xhtml#l00068">Window::scale()</a>, <a class="el" href="_dimensions_8h_source.xhtml#l00074">Dimensions&lt; size_t &gt;::set()</a>, <a class="el" href="_tensor_shape_8h_source.xhtml#l00074">TensorShape::set()</a>, <a class="el" href="_window_8inl_source.xhtml#l00040">Window::set()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00065">SubTensorInfo::set_data_type()</a>, <a class="el" href="_window_8inl_source.xhtml#l00077">Window::set_dimension_step()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00080">SubTensorInfo::set_fixed_point_position()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00075">SubTensorInfo::set_format()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00161">SubTensorInfo::set_is_resizable()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00070">SubTensorInfo::set_num_channels()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00170">SubTensorInfo::set_valid_region()</a>, <a class="el" href="tests_2_utils_8h_source.xhtml#l00466">arm_compute::test::shape_to_valid_region_undefined_border()</a>, <a class="el" href="_window_8inl_source.xhtml#l00046">Window::shift()</a>, <a class="el" href="_window_8inl_source.xhtml#l00100">Window::split_window()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00096">SubTensorInfo::strides_in_bytes()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00126">SubTensorInfo::tensor_shape()</a>, <a class="el" href="_reference_c_p_p_8cpp_source.xhtml#l00199">ReferenceCPP::threshold()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00141">SubTensorInfo::total_size()</a>, and <a class="el" href="_window_8inl_source.xhtml#l00083">Window::validate()</a>.</p>
 
 </div>
 </div>
@@ -347,9 +355,9 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00110">110</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
+<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00134">134</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_validate_8h_source.xhtml#l00292">arm_compute::error_on_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00227">arm_compute::error_on_data_type_not_in()</a>, and <a class="el" href="_validate_8h_source.xhtml#l00196">arm_compute::error_on_format_not_in()</a>.</p>
+<p>Referenced by <a class="el" href="_validate_8h_source.xhtml#l00436">arm_compute::error_on_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00371">arm_compute::error_on_data_type_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00340">arm_compute::error_on_format_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00226">arm_compute::error_on_mismatching_shapes()</a>, and <a class="el" href="_validate_8h_source.xhtml#l00105">arm_compute::error_on_nullptr()</a>.</p>
 
 </div>
 </div>
@@ -395,9 +403,9 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00092">92</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
+<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00116">116</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_validate_8h_source.xhtml#l00259">arm_compute::error_on_data_type_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00227">arm_compute::error_on_data_type_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00196">arm_compute::error_on_format_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00162">arm_compute::error_on_mismatching_data_types()</a>, and <a class="el" href="_validate_8h_source.xhtml#l00132">arm_compute::error_on_mismatching_shapes()</a>.</p>
+<p>Referenced by <a class="el" href="_validate_8h_source.xhtml#l00403">arm_compute::error_on_data_type_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00371">arm_compute::error_on_data_type_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00340">arm_compute::error_on_format_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00257">arm_compute::error_on_mismatching_data_types()</a>, <a class="el" href="_validate_8h_source.xhtml#l00293">arm_compute::error_on_mismatching_fixed_point()</a>, <a class="el" href="_validate_8h_source.xhtml#l00526">arm_compute::error_on_mismatching_fixed_point_position()</a>, <a class="el" href="_validate_8h_source.xhtml#l00226">arm_compute::error_on_mismatching_shapes()</a>, <a class="el" href="_validate_8h_source.xhtml#l00549">arm_compute::error_on_value_not_representable_in_fixed_point()</a>, and <a class="el" href="_validate_8h_source.xhtml#l00084">compare_dimension&lt; T &gt;::operator()()</a>.</p>
 
 </div>
 </div>
@@ -425,9 +433,55 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00091">91</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
+<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00115">115</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
 
-<p>Referenced by <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00140">PPMLoader::fill_image()</a>, <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00092">PPMLoader::open()</a>, and <a class="el" href="_utils_8cpp_source.xhtml#l00138">test_helpers::parse_ppm_header()</a>.</p>
+<p>Referenced by <a class="el" href="tests_2_utils_8h_source.xhtml#l00640">arm_compute::test::coord2index()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00142">PPMLoader::fill_image()</a>, <a class="el" href="_tensor_operations_8h_source.xhtml#l00617">arm_compute::test::validation::tensor_operations::fixed_point_pixel_wise_multiplication()</a>, <a class="el" href="tests_2_utils_8h_source.xhtml#l00611">arm_compute::test::index2coord()</a>, <a class="el" href="tests_2_utils_8h_source.xhtml#l00658">arm_compute::test::is_in_valid_region()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00094">PPMLoader::open()</a>, <a class="el" href="utils_2_utils_8cpp_source.xhtml#l00140">arm_compute::utils::parse_ppm_header()</a>, and <a class="el" href="_c_l_2_g_e_m_m_8h_source.xhtml#l00047">GEMM&lt; DataSet, TensorType, Accessor, Function, data_type &gt;::SetUp()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ae0ebdb75cd00c490fadb20f25b67ec90"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ARM_COMPUTE_INFO</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00072">72</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a8a89ba1af4a8a70df25753e354d41641"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ARM_COMPUTE_INFO_ON_MSG</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">cond, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00071">71</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
 
 </div>
 </div>
@@ -456,7 +510,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_error_8h_source.xhtml#l00049">49</a> of file <a class="el" href="_error_8h_source.xhtml">Error.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_validate_8h_source.xhtml#l00292">arm_compute::error_on_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00259">arm_compute::error_on_data_type_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00227">arm_compute::error_on_data_type_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00196">arm_compute::error_on_format_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00162">arm_compute::error_on_mismatching_data_types()</a>, <a class="el" href="_validate_8h_source.xhtml#l00132">arm_compute::error_on_mismatching_shapes()</a>, <a class="el" href="test__helpers_2_utils_8h_source.xhtml#l00140">PPMLoader::fill_image()</a>, <a class="el" href="neon__copy__objects_8cpp_source.xhtml#l00035">main_neon_copy_objects()</a>, and <a class="el" href="_utils_8cpp_source.xhtml#l00138">test_helpers::parse_ppm_header()</a>.</p>
+<p>Referenced by <a class="el" href="_validate_8h_source.xhtml#l00436">arm_compute::error_on_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00403">arm_compute::error_on_data_type_channel_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00371">arm_compute::error_on_data_type_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00340">arm_compute::error_on_format_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00257">arm_compute::error_on_mismatching_data_types()</a>, <a class="el" href="_validate_8h_source.xhtml#l00188">arm_compute::error_on_mismatching_dimensions()</a>, <a class="el" href="_validate_8h_source.xhtml#l00293">arm_compute::error_on_mismatching_fixed_point()</a>, <a class="el" href="_validate_8h_source.xhtml#l00526">arm_compute::error_on_mismatching_fixed_point_position()</a>, <a class="el" href="_validate_8h_source.xhtml#l00226">arm_compute::error_on_mismatching_shapes()</a>, <a class="el" href="_validate_8h_source.xhtml#l00549">arm_compute::error_on_value_not_representable_in_fixed_point()</a>, <a class="el" href="utils_2_utils_8h_source.xhtml#l00142">PPMLoader::fill_image()</a>, <a class="el" href="neon__cnn_8cpp_source.xhtml#l00032">main_cnn()</a>, <a class="el" href="neon__copy__objects_8cpp_source.xhtml#l00035">main_neon_copy_objects()</a>, and <a class="el" href="utils_2_utils_8cpp_source.xhtml#l00140">arm_compute::utils::parse_ppm_header()</a>.</p>
 
 </div>
 </div>
@@ -466,7 +520,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="_error_8h.xhtml">Error.h</a></li>
-    <li class="footer">Generated on Wed May 3 2017 17:20:04 for ARM Compute Library by
+    <li class="footer">Generated on Fri Jun 23 2017 15:44:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>
