@@ -495,23 +495,23 @@ To cross-compile the library in asserts mode, with OpenCL only support, for Andr
 
 The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.
 
-@note The following command lines assume the arm_compute binaries are present in the current directory or in the system library path.
+@note The following command lines assume the arm_compute and libOpenCL binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.
 
 Once you've got your Android standalone toolchain built and added to your path you can do the following:
 
 To cross compile a NEON example:
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/neon_convolution.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o neon_convolution_arm -static-libstdc++ -pie
+	arm-linux-androideabi-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o neon_convolution_arm -static-libstdc++ -pie
 	#64 bit:
-	aarch64-linux-android-g++ examples/neon_convolution.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o neon_convolution_aarch64 -static-libstdc++ -pie
+	aarch64-linux-android-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o neon_convolution_aarch64 -static-libstdc++ -pie
 
 To cross compile an OpenCL example:
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/cl_convolution.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL
+	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL
 	#64 bit:
-	aarch64-linux-android-g++ examples/cl_convolution.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL
+	aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL
 
 @note Due to some issues in older versions of the Mali OpenCL DDK (<= r13p0), we recommend to link arm_compute statically on Android.
 
