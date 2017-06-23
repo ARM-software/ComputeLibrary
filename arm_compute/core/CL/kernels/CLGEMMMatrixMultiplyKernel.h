@@ -53,7 +53,7 @@ public:
     CLGEMMMatrixMultiplyKernel &operator=(CLGEMMMatrixMultiplyKernel &&) = default;
     /** Initialise the kernel's input, output and alpha
      *
-     * @param[in]  input0 Input tensor containing the interleaved Matrix A or the vector A. Data types supported: F16/F32
+     * @param[in]  input0 Input tensor containing the interleaved Matrix A or the vector A. Data types supported: QS8/F16/F32
      * @param[in]  input1 Input tensor containing the transposed Matrix B if the first input tensor A is not a vector.
      *                    If the output tensor is a vector, input1 must contain the matrix B not reshaped. Data type supported: same as @p input0
      * @param[out] output Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0

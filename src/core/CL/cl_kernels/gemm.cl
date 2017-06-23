@@ -21,17 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "fixed_point.h"
 #include "helpers.h"
 
 /** This OpenCL kernel computes the "vector" 1x4 transposition of input matrix
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U32/S32/F32
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: F32
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -57,13 +58,13 @@ __kernel void gemm_transpose1x4(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel computes the "vector" 1x8 transposition of input matrix
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F16
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U16/S16/QS16/F16
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: F16
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -89,13 +90,13 @@ __kernel void gemm_transpose1x8(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel computes the "vector" 1x16 transposition of input matrix
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8/QS8
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: U8
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -127,7 +128,7 @@ __kernel void gemm_transpose1x16(IMAGE_DECLARATION(src),
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: U32/S32/F32
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -162,13 +163,13 @@ __kernel void gemm_interleave4x4_32bit(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel reshapes the input matrix transposing each 4x4 block and interleaving the values
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U16/S16/F16
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U16/S16/QS16/F16
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: U16/S16/F16
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -203,13 +204,13 @@ __kernel void gemm_interleave4x4_16bit(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel reshapes the input matrix transposing each 4x4 block and interleaving the values
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8/QS8
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: U8/S8
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -250,13 +251,13 @@ __kernel void gemm_interleave4x4_8bit(IMAGE_DECLARATION(src),
  *
  * @note The data type must be passed at compile time -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  *
- * @param[in, out] accum_ptr                            Pointer to the accumulate tensor. Supported data type: F32
+ * @param[in, out] accum_ptr                            Pointer to the accumulate tensor. Supported data type: U8/S8/QS8/U16/S16/F16/U32/S32/F32
  * @param[in]      accum_stride_x                       Stride of the accmulate tensor in X dimension (in bytes)
  * @param[in]      accum_step_x                         accum_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]      accum_stride_y                       Stride of the accumlulate tensor in Y dimension (in bytes)
  * @param[in]      accum_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]      accum_offset_first_element_in_bytes  The offset of the first element in the accumulate tensor
- * @param[in]      biases_ptr                           Pointer to the biases vector. Same as input.
+ * @param[in]      biases_ptr                           Pointer to the biases vector. Same as @p accum_ptr
  * @param[in]      biases_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]      biases_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]      biases_offset_first_element_in_bytes The offset of the first element in the destination tensor
@@ -282,7 +283,7 @@ __kernel void gemm_accumulate_biases(
 
 #if(defined WIDTH_MATRIX_B)
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
- *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_u8 and @ref gemm_transpose1x16_u8 before running the matrix multiplication
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_8bit and @ref gemm_transpose1x16 before running the matrix multiplication
  *
  * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_MATRIX_B
  *
@@ -292,13 +293,13 @@ __kernel void gemm_accumulate_biases(
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported formats: U8
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported formats: same as @p src0_ptr
  * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported formats: U8
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported formats: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
@@ -388,7 +389,7 @@ __kernel void gemm_mm_u8(IMAGE_DECLARATION(src0),
 
 #if(defined WIDTH_MATRIX_B && defined ALPHA)
 /** This OpenCL kernel is optimised for Midgard. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
- *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_f32 and @ref gemm_transpose1x4_f32 before running the matrix multiplication
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
  * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_MATRIX_B and -DALPHA
  *
@@ -398,13 +399,13 @@ __kernel void gemm_mm_u8(IMAGE_DECLARATION(src0),
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
  * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: F32
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
@@ -487,7 +488,7 @@ __kernel void gemm_mm_f32_midgard(IMAGE_DECLARATION(src0),
 }
 
 /** This OpenCL kernel is optimised for Bifrost. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
- *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_f32 and @ref gemm_transpose1x4_f32 before running the matrix multiplication
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
  * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_MATRIX_B and -DALPHA
  *
@@ -497,13 +498,13 @@ __kernel void gemm_mm_f32_midgard(IMAGE_DECLARATION(src0),
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
  * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: F32
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
@@ -697,7 +698,7 @@ __kernel void gemm_mm_f32_bifrost(IMAGE_DECLARATION(src0),
 }
 
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
- *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_f16 and @ref gemm_transpose1x8_f16 before running the matrix multiplication
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
  *
  * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_MATRIX_B and -DALPHA
  *
@@ -707,13 +708,13 @@ __kernel void gemm_mm_f32_bifrost(IMAGE_DECLARATION(src0),
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: F16
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
  * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: F16
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
@@ -795,6 +796,100 @@ __kernel void gemm_mm_f16(IMAGE_DECLARATION(src0),
     vstore8(c30, 0, (__global half *)(offset(&dst, 0, 3)));
 }
 
+#if(defined FIXED_POINT_POSITION)
+/** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in 8 bit fixed point precision
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_8bit and @ref gemm_transpose1x16 before running the matrix multiplication
+ *
+ * @attention The width of matrix B, the alpha's value and fixed point position need to be passed at compile time using -DWIDTH_MATRIX_B -DALPHA and -DFIXED_POINT_POSITION
+ *
+ * @note: ALPHA must be passed in 8 bit fixed point format
+ *
+ * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: QS8
+ * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ */
+__kernel void gemm_mm_qs8(IMAGE_DECLARATION(src0),
+                          IMAGE_DECLARATION(src1),
+                          IMAGE_DECLARATION(dst))
+{
+    /* src_addr.s0 = address of matrix A */
+    /* src_addr.s1 = address of matrix B */
+
+    /* Compute address for matrix A and B */
+    int2 src_addr = (int2)(get_global_id(1), get_global_id(0)) * (int2)((src0_stride_y),
+                                                                        (src1_stride_y));
+
+    /* Add offset_first_element_in_bytes */
+    src_addr = src_addr + ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
+
+    /* Compute end row address for matrix B */
+    int end_row_mtx_b = src_addr.s1 + WIDTH_MATRIX_B;
+
+    /* Reset accumulators */
+    short8 c00 = 0.0f;
+    short8 c10 = 0.0f;
+    short8 c20 = 0.0f;
+    short8 c30 = 0.0f;
+    short8 c01 = 0.0f;
+    short8 c11 = 0.0f;
+    short8 c21 = 0.0f;
+    short8 c31 = 0.0f;
+
+    /* This for loop performs 1 accumulation for each iteration */
+    for(; src_addr.s1 <= (end_row_mtx_b - 16); src_addr += (int2)(4, 16))
+    {
+        /* Load values from matrix A (interleaved) and matrix B (transposed) */
+        char4  a0 = vload4(0, ((__global char *)src0_ptr) + src_addr.s0);
+        char16 b0 = vload16(0, ((__global char *)src1_ptr) + src_addr.s1);
+
+        c00 = mlal_sat_qs8x8(c00, (char8)a0.s0, b0.s01234567, FIXED_POINT_POSITION);
+        c10 = mlal_sat_qs8x8(c10, (char8)a0.s1, b0.s01234567, FIXED_POINT_POSITION);
+        c20 = mlal_sat_qs8x8(c20, (char8)a0.s2, b0.s01234567, FIXED_POINT_POSITION);
+        c30 = mlal_sat_qs8x8(c30, (char8)a0.s3, b0.s01234567, FIXED_POINT_POSITION);
+
+        c01 = mlal_sat_qs8x8(c01, (char8)a0.s0, b0.s89ABCDEF, FIXED_POINT_POSITION);
+        c11 = mlal_sat_qs8x8(c11, (char8)a0.s1, b0.s89ABCDEF, FIXED_POINT_POSITION);
+        c21 = mlal_sat_qs8x8(c21, (char8)a0.s2, b0.s89ABCDEF, FIXED_POINT_POSITION);
+        c31 = mlal_sat_qs8x8(c31, (char8)a0.s3, b0.s89ABCDEF, FIXED_POINT_POSITION);
+    }
+
+    /* Compute destination address */
+    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+
+    /* Multiply by the weight of matrix product */
+    char16 c00_qs8 = convert_char16_sat((short16)(c00, c01));
+    char16 c10_qs8 = convert_char16_sat((short16)(c10, c11));
+    char16 c20_qs8 = convert_char16_sat((short16)(c20, c21));
+    char16 c30_qs8 = convert_char16_sat((short16)(c30, c31));
+
+    c00_qs8 = mul_sat_qs8x16(c00_qs8, (char16)ALPHA, FIXED_POINT_POSITION);
+    c10_qs8 = mul_sat_qs8x16(c10_qs8, (char16)ALPHA, FIXED_POINT_POSITION);
+    c20_qs8 = mul_sat_qs8x16(c20_qs8, (char16)ALPHA, FIXED_POINT_POSITION);
+    c30_qs8 = mul_sat_qs8x16(c30_qs8, (char16)ALPHA, FIXED_POINT_POSITION);
+
+    /* Store 16x4 block */
+    vstore16(c00_qs8, 0, (__global char *)(offset(&dst, 0, 0)));
+    vstore16(c10_qs8, 0, (__global char *)(offset(&dst, 0, 1)));
+    vstore16(c20_qs8, 0, (__global char *)(offset(&dst, 0, 2)));
+    vstore16(c30_qs8, 0, (__global char *)(offset(&dst, 0, 3)));
+}
+#endif // (defined FIXED_POINT_POSITION)
+
 #if(defined WIDTH_VECTOR_A)
 /** This OpenCL kernel computes the vector by matrix multiplication between the vector A (src0) and matrix B (src1)
  *
@@ -808,13 +903,13 @@ __kernel void gemm_mm_f16(IMAGE_DECLARATION(src0),
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
  * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: F32
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
@@ -874,13 +969,13 @@ __kernel void gemm_vm_f32(IMAGE_DECLARATION(src0),
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: F16
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
  * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: F16
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
@@ -931,6 +1026,92 @@ __kernel void gemm_vm_f16(IMAGE_DECLARATION(src0),
 
     vstore8(acc, 0, (__global half *)(offset(&dst, 0, 0)));
 }
+
+#if(defined FIXED_POINT_POSITION)
+/** This OpenCL kernel computes the vector by matrix multiplication between the vector A (src0) and matrix B (src1) in 8 bit fixed point
+ *
+ * @attention The width of vector A, the width of matrix B, the alpha's value and the fixed point position need to be passed at compile time using -DWIDTH_VECTOR_A -DWIDTH_MATRIX_B, -DALPHA and -DFIXED_POINT_POSITION
+ *
+ * @attention The input vector A and matrix B must not be reshaped
+ *
+ * @note: ALPHA must be passed in 8 bit fixed point format
+ *
+ * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: QS8
+ * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ */
+__kernel void gemm_vm_qs8(IMAGE_DECLARATION(src0),
+                          IMAGE_DECLARATION(src1),
+                          IMAGE_DECLARATION(dst))
+{
+    int idx = get_global_id(0) * 16;
+
+    /* Compute the address for the vector A and matrix B */
+    int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
+    src_addr.s1 += idx;
+
+    int end_row_vec_a = src_addr.s0 + WIDTH_VECTOR_A;
+
+    short8 acc0 = 0;
+    short8 acc1 = 0;
+
+    /* This for loop performs 4 accumulations per iteration */
+    for(; src_addr.s0 <= (end_row_vec_a - 4); src_addr += (int2)(4, 4 * src1_stride_y))
+    {
+        char4  a0 = vload4(0, (__global char *)(src0_ptr + src_addr.s0));
+        char16 b0 = vload16(0, (__global char *)(src1_ptr + src_addr.s1 + 0 * src1_stride_y));
+        char16 b1 = vload16(0, (__global char *)(src1_ptr + src_addr.s1 + 1 * src1_stride_y));
+        char16 b2 = vload16(0, (__global char *)(src1_ptr + src_addr.s1 + 2 * src1_stride_y));
+        char16 b3 = vload16(0, (__global char *)(src1_ptr + src_addr.s1 + 3 * src1_stride_y));
+
+        acc0 = mlal_sat_qs8x8(acc0, (char8)a0.s0, b0.s01234567, FIXED_POINT_POSITION);
+        acc0 = mlal_sat_qs8x8(acc0, (char8)a0.s1, b1.s01234567, FIXED_POINT_POSITION);
+        acc0 = mlal_sat_qs8x8(acc0, (char8)a0.s2, b2.s01234567, FIXED_POINT_POSITION);
+        acc0 = mlal_sat_qs8x8(acc0, (char8)a0.s3, b3.s01234567, FIXED_POINT_POSITION);
+
+        acc1 = mlal_sat_qs8x8(acc1, (char8)a0.s0, b0.s89ABCDEF, FIXED_POINT_POSITION);
+        acc1 = mlal_sat_qs8x8(acc1, (char8)a0.s1, b1.s89ABCDEF, FIXED_POINT_POSITION);
+        acc1 = mlal_sat_qs8x8(acc1, (char8)a0.s2, b2.s89ABCDEF, FIXED_POINT_POSITION);
+        acc1 = mlal_sat_qs8x8(acc1, (char8)a0.s3, b3.s89ABCDEF, FIXED_POINT_POSITION);
+    }
+
+    /* Left-over accumulations */
+    for(; src_addr.s0 < end_row_vec_a; src_addr += (int2)(1, src1_stride_y))
+    {
+        char   a0 = *((__global char *)(src0_ptr + src_addr.s0));
+        char16 b0 = vload16(0, (__global char *)(src1_ptr + src_addr.s1));
+
+        acc0 = mlal_sat_qs8x8(acc0, (char8)a0, b0.s01234567, FIXED_POINT_POSITION);
+        acc1 = mlal_sat_qs8x8(acc1, (char8)a0, b0.s89ABCDEF, FIXED_POINT_POSITION);
+    }
+
+    /* Compute destination address */
+    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+
+    /* Multiply by the weight of matrix product */
+    char16 acc_qs8 = convert_char16_sat((short16)(acc0, acc1));
+
+    acc_qs8 = mul_sat_qs8x16(acc_qs8, (char16)ALPHA, FIXED_POINT_POSITION);
+
+    /* Store 16 values */
+    vstore16(acc_qs8, 0, (__global char *)(offset(&dst, 0, 0)));
+}
+#endif /* #if(defined FIXED_POINT_POSITION) */
 #endif /* (defined WIDTH_VECTOR_A) */
 #endif /* (defined WIDTH_MATRIX_B && defined ALPHA) */
 
@@ -945,7 +1126,7 @@ __kernel void gemm_vm_f16(IMAGE_DECLARATION(src0),
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: F32
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -974,13 +1155,15 @@ __kernel void gemm_ma_f32(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
  *
+ * @attention The beta's value need to be passed at compile time using -DBETA
+ *
  * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F16
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: F16
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -1006,6 +1189,47 @@ __kernel void gemm_ma_f16(IMAGE_DECLARATION(src),
     /* Store final result in axb matrix */
     vstore8(out, 0, (__global half *)dst.ptr);
 }
+
+#if(defined FIXED_POINT_POSITION)
+/** This OpenCL kernel performs the in-place matrix addition between 2 matrices in 8 bit fixed point taking into account that the second matrix might be weighted by a scalar value beta:
+ *
+ * @attention The beta's value and the fixed point position need to be passed at compile time using -DBETA and -DFIXED_POINT_POSITION
+ *
+ * @note: BETA must be passed in 8 bit fixed point format
+ *
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: QS8
+ * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
+ */
+__kernel void gemm_ma_qs8(IMAGE_DECLARATION(src),
+                          IMAGE_DECLARATION(dst))
+{
+    /* Compute source and destination addresses */
+    Image src = CONVERT_TO_IMAGE_STRUCT(src);
+    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+
+    /* Load values from A x B */
+    char16 alpha_ab = vload16(0, (__global char *)dst.ptr);
+
+    /* Load values from Matrix C */
+    char16 c = vload16(0, (__global char *)src.ptr);
+
+    /* Computes alpha * axb + beta * c */
+    char16 out = mla_sat_qs8x16(alpha_ab, (char16)BETA, c, FIXED_POINT_POSITION);
+
+    /* Store final result in axb matrix */
+    vstore16(out, 0, (__global char *)dst.ptr);
+}
+#endif /* #if(defined FIXED_POINT_POSITION) */
 #endif /* (defined BETA) */
 
 #if(defined WIDTH_VECTOR_A)
@@ -1021,7 +1245,7 @@ __kernel void gemm_ma_f16(IMAGE_DECLARATION(src),
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
  * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
@@ -1029,7 +1253,7 @@ __kernel void gemm_ma_f16(IMAGE_DECLARATION(src),
  * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  src1_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: F32
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)

@@ -44,12 +44,10 @@ NEGEMM::NEGEMM()
 void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F32, DataType::F16, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(b, 1, DataType::F32, DataType::F16, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(d, 1, DataType::F32, DataType::F16, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, d);
 
     if(c != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(c, 1, DataType::F32, DataType::F16, DataType::QS8);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, c);
         ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(1) != c->info()->dimension(1), "The C matrix must have the same number of rows as the matrix A");
         ARM_COMPUTE_ERROR_ON_MSG(b->info()->dimension(0) != c->info()->dimension(0), "The C matrix must have the same number of columns as the matrix B");
@@ -57,7 +55,6 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
         ARM_COMPUTE_ERROR_ON_MSG(c->info()->dimension(1) != d->info()->dimension(1), "The C matrix must have the same number of columns as the output matrix");
     }
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, d);
     ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(0) != b->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
 
     // Check if the first input tensor is a vector. If so, all the kernels for reshaping the tensors can be skipped

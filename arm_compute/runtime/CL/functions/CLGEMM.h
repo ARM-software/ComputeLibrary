@@ -36,7 +36,7 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Basic function to execute GEMM on OpenCL. Data types supported: F32, F16. This function calls the following OpenCL kernels:
+/** Basic function to execute GEMM on OpenCL. This function calls the following OpenCL kernels:
  *
  *  -# @ref CLGEMMInterleave4x4Kernel (if the output tensor is a matrix)
  *  -# @ref CLGEMMTranspose1xWKernel (if the output tensor is a matrix)
@@ -53,11 +53,11 @@ public:
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
      *
-     * @note All tensors must have the same data type. Data types supported: F32, F16
+     * @note All tensors must have the same data type.
      *
      * @note Whilst the first input tensor can be a vector, the second input tensor must be at least a matrix
      *
-     * @param[in]  a      First input tensor  (Matrix or Vector A). Data types supported: F32, F16
+     * @param[in]  a      First input tensor  (Matrix or Vector A). Data types supported: QS8/F16/F32
      * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a.
      * @param[in]  c      Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
      * @param[out] output Output tensor. Data type supported: same as @p a

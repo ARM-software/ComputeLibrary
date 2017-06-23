@@ -25,12 +25,12 @@
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/AccessWindowTranspose.h"
-
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
@@ -50,10 +50,10 @@ CLGEMMMatrixMultiplyKernel::CLGEMMMatrixMultiplyKernel()
 
 void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, float alpha)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QS8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
+
     if(output->info()->dimension(1) == 1)
     {
         ARM_COMPUTE_ERROR_ON(input0->info()->dimension(0) != input1->info()->dimension(1));
@@ -74,7 +74,8 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
 
     std::ostringstream mm_arguments;
     mm_arguments << "-DWIDTH_MATRIX_B=" << input1->info()->dimension(0) << " ";
-    mm_arguments << "-DALPHA=" << alpha << " ";
+    mm_arguments << "-DALPHA=" << (input0->info()->data_type() == DataType::QS8 ? scvt_qs8_f32(alpha, input0->info()->fixed_point_position()) : alpha) << " ";
+    mm_arguments << "-DFIXED_POINT_POSITION=" << input0->info()->fixed_point_position() << " ";
     std::set<std::string> build_opts;
 
     // Check if the output tensor is a vector. If so,the kernel runs the vector-matrix multiplication
@@ -98,7 +99,9 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
 
         update_window_and_padding(win, input0_access, input1_access, output_access);
 
-        output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+        Coordinates coord;
+        coord.set_num_dimensions(output->info()->num_dimensions());
+        output_access.set_valid_region(win, ValidRegion(coord, output->info()->tensor_shape()));
 
         ICLKernel::configure(win);
     }

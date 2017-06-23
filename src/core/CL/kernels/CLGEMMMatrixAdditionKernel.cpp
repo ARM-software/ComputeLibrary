@@ -28,6 +28,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
@@ -40,10 +41,9 @@ CLGEMMMatrixAdditionKernel::CLGEMMMatrixAdditionKernel()
 {
 }
 
-void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *output, const float beta)
+void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *output, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != output->info()->dimension(0));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != output->info()->dimension(1));
@@ -53,7 +53,8 @@ void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *ou
     const unsigned int num_elems_processed_per_iteration = max_cl_vector_width / data_size_from_type(input->info()->data_type());
 
     std::ostringstream ma_arguments;
-    ma_arguments << "-DBETA=" << beta;
+    ma_arguments << "-DBETA=" << (input->info()->data_type() == DataType::QS8 ? scvt_qs8_f32(beta, input->info()->fixed_point_position()) : beta) << " ";
+    ma_arguments << "-DFIXED_POINT_POSITION=" << input->info()->fixed_point_position();
     std::set<std::string> build_opts;
     build_opts.emplace(ma_arguments.str());
 

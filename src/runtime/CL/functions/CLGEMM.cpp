@@ -45,13 +45,11 @@ CLGEMM::CLGEMM()
 
 void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F32, DataType::F16);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(b, 1, DataType::F32, DataType::F16);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32, DataType::F16);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, output);
 
     if(c != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(c, 1, DataType::F32, DataType::F16);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, c);
         ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(1) != c->info()->dimension(1), "The C matrix must have the same number of rows as the matrix A");
         ARM_COMPUTE_ERROR_ON_MSG(b->info()->dimension(0) != c->info()->dimension(0), "The C matrix must have the same number of columns as the matrix C");
@@ -59,7 +57,6 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         ARM_COMPUTE_ERROR_ON_MSG(c->info()->dimension(1) != output->info()->dimension(1), "The C matrix must have the same number of columns as the output matrix");
     }
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, output);
     ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(0) != b->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
 
     // Check if the first input tensor is a vector. If so, all the kernels for reshaping the tensors can be skipped
@@ -73,25 +70,14 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         shape_tmp_a.set(0, a->info()->dimension(0) * 4);
         shape_tmp_a.set(1, std::ceil(a->info()->dimension(1) / 4.0f));
 
-        if(DataType::F32 == a->info()->data_type())
-        {
-            shape_tmp_b.set(0, b->info()->dimension(1) * 4);
-            shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / 4.0f));
-        }
-        else if(DataType::F16 == a->info()->data_type())
-        {
-            shape_tmp_b.set(0, b->info()->dimension(1) * 8);
-            shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / 8.0f));
-        }
-        else
-        {
-            ARM_COMPUTE_ERROR("DataType not supported");
-        }
+        const unsigned int transpose_w = max_cl_vector_width / data_size_from_type(b->info()->data_type());
+        shape_tmp_b.set(0, b->info()->dimension(1) * transpose_w);
+        shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / static_cast<float>(transpose_w)));
 
-        TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type());
+        TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type(), a->info()->fixed_point_position());
         _tmp_a.allocator()->init(info_a);
 
-        TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type());
+        TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type(), b->info()->fixed_point_position());
         _tmp_b.allocator()->init(info_b);
 
         // Configure interleave kernel

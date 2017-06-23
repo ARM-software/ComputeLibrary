@@ -82,9 +82,9 @@ TYPE_ALIAS(short, qs16)
 
 /* Computes max of fixed point types.
  *
- * @param[in] type is the actual data type.
+ * @param[in] type the actual data type.
  *
- * @return The result of the fixed point vector maximum.
+ * @return The result of the fixed point maximum.
  */
 #define MAXQ_IMPL(type)                          \
     inline type max_##type(type VopA, type VopB) \
@@ -103,9 +103,9 @@ MAXQ_IMPL(qs8x16)
 
 /* Computes saturated addition of fixed point types.
  *
- * @param[in] type is the actual data type.
+ * @param[in] type the actual data type.
  *
- * @return The result of the fixed point vector addition. The result is saturated in case of overflow
+ * @return The result of the fixed point addition. The result is saturated in case of overflow
  */
 #define ADDQ_SAT_IMPL(type)                          \
     inline type add_sat_##type(type VopA, type VopB) \
@@ -124,9 +124,9 @@ ADDQ_SAT_IMPL(qs8x16)
 
 /* Computes saturated subtraction of fixed point types.
  *
- * @param[in] type is the actual data type.
+ * @param[in] type the actual data type.
  *
- * @return The result of the fixed point vector subtraction. The result is saturated in case of overflow
+ * @return The result of the fixed point subtraction. The result is saturated in case of overflow
  */
 #define SUBQ_SAT_IMPL(type)                          \
     inline type sub_sat_##type(type VopA, type VopB) \
@@ -143,12 +143,12 @@ SUBQ_SAT_IMPL(qs8x16)
 #define SUB_SAT_OP_EXPAND_STR(a, b, type, size) sub_sat_##type##x##size((a), (b))
 #define SUB_SAT_OP_EXPAND(a, b, type, size) SUB_SAT_OP_EXPAND_STR(a, b, type, size)
 
-/* Saturate multiply of two fixed point vectors
+/* Saturate multiply of two fixed point numbers
  *
- * @param[in] type  is the actual data type.
- * @param[in] itype is the intermediate data type.
+ * @param[in] type  the actual data type.
+ * @param[in] itype the intermediate data type.
  *
- * @return The result of the fixed point vector subtraction. The result is saturated in case of overflow
+ * @return The result of the fixed point multiplication. The result is saturated in case of overflow
  */
 #define MULQ_SAT_IMPL(type, itype)                                                            \
     inline type mul_sat_##type(type VopA, type VopB, int fixed_point_position)                \
@@ -163,11 +163,50 @@ MULQ_SAT_IMPL(qs8x16, qs16x16)
 #define MUL_SAT_OP_EXPAND_STR(a, b, type, size, position) mul_sat_##type##x##size((a), (b), (position))
 #define MUL_SAT_OP_EXPAND(a, b, type, size, position) MUL_SAT_OP_EXPAND_STR(a, b, type, size, position)
 
-/** Saturate division of two fixed point vectors
+/* Saturate multiply-accumulate
+ *
+ * @param[in] type  the actual data type.
+ * @param[in] itype the intermediate data type.
+ *
+ * @return The result of the fixed point multiply-accumulate. The result is saturated in case of overflow
+ */
+#define MLAQ_SAT_IMPL(type, itype)                                                                                 \
+    type mla_sat_##type(type VopA, type VopB, type VopC, int fixed_point_position)                                 \
+    {                                                                                                              \
+        itype res = mad_sat(CONVERT(VopB, itype), CONVERT(VopC, itype), (itype)(1 << (fixed_point_position - 1))); \
+        return add_sat(VopA, CONVERT_SAT(res >> (itype)fixed_point_position, type));                               \
+    }
+
+MLAQ_SAT_IMPL(qs8x8, qs16x8)
+MLAQ_SAT_IMPL(qs8x16, qs16x16)
+
+#define MLA_SAT_OP_EXPAND_STR(a, b, c, type, size, position) mla_sat_##type##x##size((a), (b), (c), (position))
+#define MLA_SAT_OP_EXPAND(a, b, c, type, size, position) MLA_SAT_OP_EXPAND_STR(a, b, c, type, size, position)
+
+/* Saturate multiply-accumulate long
+ *
+ * @param[in] type  the actual data type.
+ * @param[in] itype the intermediate data type.
+ *
+ * @return The result of the fixed point multiply-accumulate long. The result is saturated in case of overflow
+ */
+#define MLALQ_SAT_IMPL(type, itype)                                                                                \
+    itype mlal_sat_##type(itype VopA, type VopB, type VopC, int fixed_point_position)                              \
+    {                                                                                                              \
+        itype res = mad_sat(CONVERT(VopB, itype), CONVERT(VopC, itype), (itype)(1 << (fixed_point_position - 1))); \
+        return add_sat(VopA, res >> (itype)fixed_point_position);                                                  \
+    }
+
+MLALQ_SAT_IMPL(qs8x8, qs16x8)
+
+#define MLAL_SAT_OP_EXPAND_STR(a, b, c, type, size, position) mlal_sat_##type##x##size((a), (b), (c), (position))
+#define MLAL_SAT_OP_EXPAND(a, b, c, type, size, position) MLAL_SAT_OP_EXPAND_STR(a, b, c, type, size, position)
+
+/** Saturate division of two fixed point numbers
   *
-  * @param[in] stype is the actual scalar data type.
-  * @param[in] type  is the actual data type.
-  * @param[in] itype is the intermediate data type.
+  * @param[in] stype the actual scalar data type.
+  * @param[in] type  the actual data type.
+  * @param[in] itype the intermediate data type.
   *
   * @return The result of the fixed point division. The result is saturated in case of overflow
   */
