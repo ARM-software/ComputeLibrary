@@ -248,6 +248,8 @@ __kernel void gemm_interleave4x4_8bit(IMAGE_DECLARATION(src),
 
 /** This kernel accumulates each row with the biases vector
  *
+ * @note The data type must be passed at compile time -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
+ *
  * @param[in, out] accum_ptr                            Pointer to the accumulate tensor. Supported data type: F32
  * @param[in]      accum_stride_x                       Stride of the accmulate tensor in X dimension (in bytes)
  * @param[in]      accum_step_x                         accum_stride_x * number of elements along X processed per workitem(in bytes)
@@ -259,48 +261,24 @@ __kernel void gemm_interleave4x4_8bit(IMAGE_DECLARATION(src),
  * @param[in]      biases_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]      biases_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
-__kernel void gemm_accumulate_biases_f32(
+#if(defined DATA_TYPE)
+__kernel void gemm_accumulate_biases(
     IMAGE_DECLARATION(accum),
     VECTOR_DECLARATION(biases))
 {
     Image  accum  = CONVERT_TO_IMAGE_STRUCT(accum);
     Vector biases = CONVERT_TO_VECTOR_STRUCT(biases);
 
-    float4 accum_value  = vload4(0, (__global float *)accum.ptr);
-    float4 biases_value = vload4(0, (__global float *)biases.ptr);
-    accum_value         = biases_value + accum_value;
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    accum_value = vload16(0, (__global DATA_TYPE *)accum.ptr);
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    biases_value = vload16(0, (__global DATA_TYPE *)biases.ptr);
+    accum_value  = biases_value + accum_value;
 
     // Store result in the accummulate buffer
-    vstore4(accum_value, 0, (__global float *)accum.ptr);
+    vstore16(accum_value, 0, (__global DATA_TYPE *)accum.ptr);
 }
-
-/** This kernel accumulates each row with the biases vector
- *
- * @param[in, out] accum_ptr                            Pointer to the accumulate tensor. Supported data type: F16
- * @param[in]      accum_stride_x                       Stride of the accumulate tensor in X dimension (in bytes)
- * @param[in]      accum_step_x                         accum_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      accum_stride_y                       Stride of the accumlulate tensor in Y dimension (in bytes)
- * @param[in]      accum_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]      accum_offset_first_element_in_bytes  The offset of the first element in the accumulate tensor
- * @param[in]      biases_ptr                           Pointer to the biases vector. Same as input.
- * @param[in]      biases_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]      biases_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      biases_offset_first_element_in_bytes The offset of the first element in the destination tensor
- */
-__kernel void gemm_accumulate_biases_f16(
-    IMAGE_DECLARATION(accum),
-    VECTOR_DECLARATION(biases))
-{
-    Image  accum  = CONVERT_TO_IMAGE_STRUCT(accum);
-    Vector biases = CONVERT_TO_VECTOR_STRUCT(biases);
-
-    half8 accum_value  = vload8(0, (__global half *)accum.ptr);
-    half8 biases_value = vload8(0, (__global half *)biases.ptr);
-    accum_value        = biases_value + accum_value;
-
-    // Store result in the accummulate buffer
-    vstore8(accum_value, 0, (__global half *)accum.ptr);
-}
+#endif // defined DATA_TYPE
 
 #if(defined WIDTH_MATRIX_B)
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
