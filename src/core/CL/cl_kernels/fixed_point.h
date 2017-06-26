@@ -471,4 +471,16 @@ CONVERTQ_DOWN_SAT_IMPL(float16, qs16x16)
 CONVERTQ_UP_IMPL(qs8x16, float16)
 CONVERTQ_UP_IMPL(qs16x16, float16)
 
+#define SQCVT_SAT_IMPL(type)                                                                    \
+    inline type sqcvt_##type##_sat(float a, int fixed_point_position)                           \
+    {                                                                                           \
+        return CONVERT_SAT((a * (1 << fixed_point_position) + ((a < 0) ? -0.5f : 0.5f)), type); \
+    }
+
+SQCVT_SAT_IMPL(qs8)
+SQCVT_SAT_IMPL(qs16)
+
+#define SQCVT_SAT_OP_EXPAND_STR(a, type, position) sqcvt_##type##_sat((a), (position))
+#define SQCVT_SAT_OP_EXPAND(a, type, position) SQCVT_SAT_OP_EXPAND_STR((a), type, position)
+
 #endif // ARM_COMPUTE_FIXED_POINT_H

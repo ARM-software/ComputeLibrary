@@ -505,7 +505,14 @@ RawTensor Reference::compute_reference_batch_normalization_layer(const TensorSha
     {
         int min_bound = 0;
         int max_bound = 0;
-        std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<int8_t>(fixed_point_position);
+        if(dt == DataType::QS8)
+        {
+            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<int8_t>(fixed_point_position);
+        }
+        else
+        {
+            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<int16_t>(fixed_point_position);
+        }
         std::uniform_int_distribution<> distribution(min_bound, max_bound);
         std::uniform_int_distribution<> distribution_var(0, max_bound);
         library->fill(ref_src, distribution, 0);

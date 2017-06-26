@@ -50,7 +50,7 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input   Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, FM]. Data types supported: F32.
+     * @param[in]  input   Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, FM]. Data types supported: QS8/QS16/F32.
      * @param[out] output  Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
      *                     The rest are optional and used for representing batches.
      * @param[in]  mean    Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input

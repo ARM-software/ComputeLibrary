@@ -21,29 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/NEAccessor.h"
+#include "CL/CLAccessor.h"
+#include "Globals.h"
+#include "TensorLibrary.h"
 #include "TypePrinter.h"
+#include "Utils.h"
 #include "dataset/BatchNormalizationLayerDataset.h"
-#include "tests/Globals.h"
-#include "tests/Utils.h"
 #include "tests/validation/Helpers.h"
 #include "validation/Datasets.h"
 #include "validation/Reference.h"
 #include "validation/Validation.h"
 
-#include "arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/TensorAllocator.h"
 
 #include <random>
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
+using namespace arm_compute::test::cl;
 using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance_f = 1e-05; /**< Tolerance value for comparing reference's output against floating point implementation's output */
-const float tolerance_q = 3;     /**< Tolerance value for comparing reference's output against quantized implementation's output */
+const float tolerance_f    = 1e-05; /**< Tolerance value for comparing reference's output against floating point implementation's output */
+const float tolerance_qs8  = 3;     /**< Tolerance value for comparing reference's output against quantized implementation's output */
+const float tolerance_qs16 = 6;     /**< Tolerance value for comparing reference's output against quantized implementation's output */
 
 /** Compute Neon batch normalization function.
  *
@@ -53,18 +59,18 @@ const float tolerance_q = 3;     /**< Tolerance value for comparing reference's 
  *
  * @return Computed output tensor.
  */
-Tensor compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position = 0)
+CLTensor compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src   = create_tensor<Tensor>(shape0, dt, 1, fixed_point_position);
-    Tensor dst   = create_tensor<Tensor>(shape0, dt, 1, fixed_point_position);
-    Tensor mean  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
-    Tensor var   = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
-    Tensor beta  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
-    Tensor gamma = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
+    CLTensor src   = create_tensor<CLTensor>(shape0, dt, 1, fixed_point_position);
+    CLTensor dst   = create_tensor<CLTensor>(shape0, dt, 1, fixed_point_position);
+    CLTensor mean  = create_tensor<CLTensor>(shape1, dt, 1, fixed_point_position);
+    CLTensor var   = create_tensor<CLTensor>(shape1, dt, 1, fixed_point_position);
+    CLTensor beta  = create_tensor<CLTensor>(shape1, dt, 1, fixed_point_position);
+    CLTensor gamma = create_tensor<CLTensor>(shape1, dt, 1, fixed_point_position);
 
     // Create and configure function
-    NEBatchNormalizationLayer norm;
+    CLBatchNormalizationLayer norm;
     norm.configure(&src, &dst, &mean, &var, &beta, &gamma, epsilon);
 
     // Allocate tensors
@@ -90,11 +96,11 @@ Tensor compute_reference_batch_normalization_layer(const TensorShape &shape0, co
         std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<float>();
         std::uniform_real_distribution<> distribution(min_bound, max_bound);
         std::uniform_real_distribution<> distribution_var(0, max_bound);
-        library->fill(NEAccessor(src), distribution, 0);
-        library->fill(NEAccessor(mean), distribution, 1);
-        library->fill(NEAccessor(var), distribution_var, 0);
-        library->fill(NEAccessor(beta), distribution, 3);
-        library->fill(NEAccessor(gamma), distribution, 4);
+        library->fill(CLAccessor(src), distribution, 0);
+        library->fill(CLAccessor(mean), distribution, 1);
+        library->fill(CLAccessor(var), distribution_var, 0);
+        library->fill(CLAccessor(beta), distribution, 3);
+        library->fill(CLAccessor(gamma), distribution, 4);
     }
     else
     {
@@ -110,11 +116,11 @@ Tensor compute_reference_batch_normalization_layer(const TensorShape &shape0, co
         }
         std::uniform_int_distribution<> distribution(min_bound, max_bound);
         std::uniform_int_distribution<> distribution_var(0, max_bound);
-        library->fill(NEAccessor(src), distribution, 0);
-        library->fill(NEAccessor(mean), distribution, 1);
-        library->fill(NEAccessor(var), distribution_var, 0);
-        library->fill(NEAccessor(beta), distribution, 3);
-        library->fill(NEAccessor(gamma), distribution, 4);
+        library->fill(CLAccessor(src), distribution, 0);
+        library->fill(CLAccessor(mean), distribution, 1);
+        library->fill(CLAccessor(var), distribution_var, 0);
+        library->fill(CLAccessor(beta), distribution, 3);
+        library->fill(CLAccessor(gamma), distribution, 4);
     }
 
     // Compute function
@@ -125,22 +131,22 @@ Tensor compute_reference_batch_normalization_layer(const TensorShape &shape0, co
 } // namespace
 
 #ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
+BOOST_AUTO_TEST_SUITE(CL)
 BOOST_AUTO_TEST_SUITE(BatchNormalizationLayer)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, RandomBatchNormalizationLayerDataset() * (boost::unit_test::data::make(DataType::F32) + boost::unit_test::data::make(DataType::QS8)), obj, dt)
+BOOST_DATA_TEST_CASE(Configuration, RandomBatchNormalizationLayerDataset() * boost::unit_test::data::make({ DataType::QS8, DataType::QS16, DataType::F32 }), obj, dt)
 {
     // Set fixed point position data type allowed
     int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
-    Tensor src   = create_tensor<Tensor>(obj.shape0, dt, 1, fixed_point_position);
-    Tensor dst   = create_tensor<Tensor>(obj.shape0, dt, 1, fixed_point_position);
-    Tensor mean  = create_tensor<Tensor>(obj.shape1, dt, 1, fixed_point_position);
-    Tensor var   = create_tensor<Tensor>(obj.shape1, dt, 1, fixed_point_position);
-    Tensor beta  = create_tensor<Tensor>(obj.shape1, dt, 1, fixed_point_position);
-    Tensor gamma = create_tensor<Tensor>(obj.shape1, dt, 1, fixed_point_position);
+    CLTensor src   = create_tensor<CLTensor>(obj.shape0, dt, 1, fixed_point_position);
+    CLTensor dst   = create_tensor<CLTensor>(obj.shape0, dt, 1, fixed_point_position);
+    CLTensor mean  = create_tensor<CLTensor>(obj.shape1, dt, 1, fixed_point_position);
+    CLTensor var   = create_tensor<CLTensor>(obj.shape1, dt, 1, fixed_point_position);
+    CLTensor beta  = create_tensor<CLTensor>(obj.shape1, dt, 1, fixed_point_position);
+    CLTensor gamma = create_tensor<CLTensor>(obj.shape1, dt, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());
@@ -150,7 +156,7 @@ BOOST_DATA_TEST_CASE(Configuration, RandomBatchNormalizationLayerDataset() * (bo
     BOOST_TEST(gamma.info()->is_resizable());
 
     // Create and configure function
-    NEBatchNormalizationLayer norm;
+    CLBatchNormalizationLayer norm;
     norm.configure(&src, &dst, &mean, &var, &beta, &gamma, obj.epsilon);
 
     // Validate valid region
@@ -171,33 +177,52 @@ BOOST_DATA_TEST_CASE(Random,
                      obj, dt)
 {
     // Compute function
-    Tensor dst = compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon);
+    CLTensor dst = compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon);
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f, 0);
+    validate(CLAccessor(dst), ref_dst, tolerance_f, 0);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(Quantized)
+
+BOOST_AUTO_TEST_SUITE(QS8)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(Random,
                      RandomBatchNormalizationLayerDataset() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(1, 6),
                      obj, dt, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
+    CLTensor dst = compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_q, 0);
+    validate(CLAccessor(dst), ref_dst, tolerance_qs8, 0);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(QS16)
+BOOST_DATA_TEST_CASE(Random,
+                     RandomBatchNormalizationLayerDataset() * boost::unit_test::data::make(DataType::QS16) * boost::unit_test::data::xrange(1, 14),
+                     obj, dt, fixed_point_position)
+{
+    // Compute function
+    CLTensor dst = compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
+
+    // Validate output
+    validate(CLAccessor(dst), ref_dst, tolerance_qs16, 0);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 #endif /* DOXYGEN_SKIP_THIS */

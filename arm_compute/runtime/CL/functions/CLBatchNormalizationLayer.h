@@ -47,7 +47,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input   Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                     The rest are optional and used for representing batches. Data types supported: F32.
+     *                     The rest are optional and used for representing batches. Data types supported: QS8/QS16/F32.
      * @param[in]  mean    Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in]  var     Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in]  gamma   Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input

@@ -768,7 +768,7 @@ struct functions
             x2                            = shift_right(mul(x2, three_minus_dx), 1);
         }
 
-        return (shift < 0) ? shift_left(x2, -shift >> 1) : shift_right(x2, shift >> 1);
+        return (shift < 0) ? shift_left(x2, (-shift) >> 1) : shift_right(x2, shift >> 1);
     }
     /** Calculate the hyperbolic tangent of a fixed point number
      *
