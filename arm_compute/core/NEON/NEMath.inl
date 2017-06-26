@@ -85,8 +85,10 @@ inline float32x4_t vtaylor_polyq_f32(float32x4_t x, const std::array<float32x4_t
 
 inline float32x4_t vexpq_f32(float32x4_t x)
 {
-    static const float32x4_t CONST_LN2     = vdupq_n_f32(0.6931471805f); // ln(2)
-    static const float32x4_t CONST_INV_LN2 = vdupq_n_f32(1.4426950408f); // 1/ln(2)
+    static const float32x4_t CONST_LN2          = vdupq_n_f32(0.6931471805f); // ln(2)
+    static const float32x4_t CONST_INV_LN2      = vdupq_n_f32(1.4426950408f); // 1/ln(2)
+    static const float32x4_t CONST_0            = vdupq_n_f32(0.f);
+    static const int32x4_t   CONST_NEGATIVE_126 = vdupq_n_s32(-126);
 
     // Perform range reduction [-log(2),log(2)]
     int32x4_t   m   = vcvtq_s32_f32(vmulq_f32(x, CONST_INV_LN2));
@@ -96,7 +98,8 @@ inline float32x4_t vexpq_f32(float32x4_t x)
     float32x4_t poly = vtaylor_polyq_f32(val, exp_tab);
 
     // Reconstruct
-    poly = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(poly), vshlq_n_s32(m, 23)));
+    poly = vreinterpretq_f32_s32(vqaddq_s32(vreinterpretq_s32_f32(poly), vqshlq_n_s32(m, 23)));
+    poly = vbslq_f32(vcltq_s32(m, CONST_NEGATIVE_126), CONST_0, poly);
 
     return poly;
 }
