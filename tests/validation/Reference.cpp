@@ -698,6 +698,7 @@ RawTensor Reference::compute_reference_pooling_layer(const TensorShape &shape_in
     switch(dt)
     {
         case DataType::F32:
+        case DataType::F16:
             min = -1;
             max = 1;
             break;

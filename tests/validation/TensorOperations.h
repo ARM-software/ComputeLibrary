@@ -44,6 +44,26 @@
 #include <string>
 #include <vector>
 
+#if ARM_COMPUTE_ENABLE_FP16
+//Beware! most std templates acting on types don't work with the data type float16_t
+namespace std
+{
+template <>
+class numeric_limits<float16_t>
+{
+public:
+    static float16_t lowest()
+    {
+        return -std::numeric_limits<float>::max(); // -inf
+    };
+    static float16_t max()
+    {
+        return std::numeric_limits<float>::max(); // +inf
+    };
+};
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
 namespace arm_compute
 {
 namespace test
@@ -1476,7 +1496,7 @@ void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_in
                     {
                         for(int x = wstart; x < wend; ++x)
                         {
-                            T val = in[r * h_in * w_in + y * w_in + x];
+                            const T val = in[r * h_in * w_in + y * w_in + x];
                             if(val > max_val)
                             {
                                 max_val = val;

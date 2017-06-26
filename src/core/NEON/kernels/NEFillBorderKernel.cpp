@@ -33,6 +33,10 @@
 #include <algorithm>
 #include <cstdint>
 
+#if ARM_COMPUTE_ENABLE_FP16
+#include <arm_fp16.h> // needed for float16_t
+#endif                /* ARM_COMPUTE_ENABLE_FP16 */
+
 using namespace arm_compute;
 
 namespace arm_compute
@@ -47,7 +51,7 @@ NEFillBorderKernel::NEFillBorderKernel()
 
 void NEFillBorderKernel::configure(ITensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(tensor, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(tensor, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::U16, DataType::S16, DataType::F16, DataType::U32, DataType::S32, DataType::F32);
 
     _tensor                = tensor;
     _border_size           = border_size;
@@ -100,6 +104,12 @@ void NEFillBorderKernel::run(const Window &window)
                 case DataType::S32:
                     fill_constant_value_single_channel<int32_t>(window);
                     break;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+                case DataType::F16:
+                    static_assert(sizeof(float16_t) == 2, "Float16_t must be 16 bit");
+                    fill_constant_value_single_channel<float16_t>(window);
+                    break;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
                 case DataType::F32:
                     static_assert(sizeof(float) == 4, "Float must be 32 bit");
                     fill_constant_value_single_channel<float>(window);
@@ -133,6 +143,12 @@ void NEFillBorderKernel::run(const Window &window)
                 case DataType::S32:
                     fill_replicate_single_channel<int32_t>(window);
                     break;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+                case DataType::F16:
+                    static_assert(sizeof(float16_t) == 2, "Float16_t must be 16 bit");
+                    fill_replicate_single_channel<float16_t>(window);
+                    break;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
                 case DataType::F32:
                     static_assert(sizeof(float) == 4, "Float must be 32 bit");
                     fill_replicate_single_channel<float>(window);

@@ -39,8 +39,11 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance_q = 0;     /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
-const float tolerance_f = 1e-05; /**< Tolerance value for comparing reference's output against implementation's output for float input */
+const float tolerance_q   = 0;     /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
+const float tolerance_f32 = 1e-05; /**< Tolerance value for comparing reference's output against implementation's output for float input */
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const float tolerance_f16 = 0.001f; /**< Tolerance value for comparing reference's output against half precision floating point implementation's output */
+#endif                              /* ARM_COMPUTE_ENABLE_FP16 */
 
 /** Compute Neon pooling layer function.
  *
@@ -73,6 +76,7 @@ Tensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &sha
     switch(dt)
     {
         case DataType::F32:
+        case DataType::F16:
             min = -1;
             max = 1;
             break;
@@ -123,7 +127,7 @@ BOOST_DATA_TEST_CASE(RandomDataset,
     RawTensor ref_dst = Reference::compute_reference_pooling_layer(obj.src_shape, obj.dst_shape, dt, obj.info);
 
     // Validate output
-    validate(Accessor(dst), ref_dst, tolerance_f, 0);
+    validate(Accessor(dst), ref_dst, tolerance_f32, 0);
 }
 
 BOOST_DATA_TEST_CASE(RunSmall7x7,
@@ -140,9 +144,28 @@ BOOST_DATA_TEST_CASE(RunSmall7x7,
     RawTensor ref_dst = Reference::compute_reference_pooling_layer(src_shape, dst_shape, dt, pool_info);
 
     // Validate output
-    validate(Accessor(dst), ref_dst, tolerance_f, 0);
+    validate(Accessor(dst), ref_dst, tolerance_f32, 0);
 }
 BOOST_AUTO_TEST_SUITE_END()
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RandomDataset,
+                     RandomPoolingLayerDataset() * boost::unit_test::data::make(DataType::F16),
+                     obj, dt)
+{
+    // Compute function
+    Tensor dst = compute_pooling_layer(obj.src_shape, obj.dst_shape, dt, obj.info);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_pooling_layer(obj.src_shape, obj.dst_shape, dt, obj.info);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst, tolerance_f16, 0);
+}
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Quantized)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
