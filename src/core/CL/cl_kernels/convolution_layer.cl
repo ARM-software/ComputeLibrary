@@ -27,7 +27,7 @@
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  *
- * @param[in]  src_ptr                            Pointer to the source tensor. Supported data types: F16, F32
+ * @param[in]  src_ptr                            Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -35,13 +35,13 @@
  * @param[in]  src_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                         src_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out] dst_ptr                            Pointer to the destination tensor. Same as input
+ * @param[out] dst_ptr                            Pointer to the destination tensor. Same as @p src_ptr
  * @param[in]  dst_stride_x                       Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                       Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
- * @param[in]  bias_ptr                           Pointer to the bias tensor. Same as input
+ * @param[in]  bias_ptr                           Pointer to the bias tensor. Same as @p src_ptr
  * @param[in]  bias_stride_x                      Stride of the bias tensor in X dimension (in bytes)
  * @param[in]  bias_step_x                        bias_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  bias_offset_first_element_in_bytes The offset of the first element in the source tensor
@@ -93,12 +93,13 @@ __kernel void reshape_to_columns(
     }
 }
 
+#if(defined CONVOLVED_WIDTH && defined STRIDE_X && defined STRIDE_Y && defined PAD_X && defined PAD_Y && defined KERNEL_WIDTH && defined KERNEL_HEIGHT && defined KERNEL_DEPTH && SRC_WIDTH && SRC_HEIGHT)
 /** This kernel performs a reshaping of the input tensor to a tensor used to perform convolution using GEMM.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16, F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -106,48 +107,36 @@ __kernel void reshape_to_columns(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: F16, F32
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in]  kernel_size                       The convolution kernel size
- * @param[in]  kernel_depth                      The kernel depth
- * @param[in]  width                             The output tensor width
- * @param[in]  input_dims                        The input tensor dimensions
- * @param[in]  strides                           The strides of the im2col operation
- * @param[in]  paddings                          The input tensor paddings
  */
 __kernel void im2col_generic(
     TENSOR3D_DECLARATION(src),
-    IMAGE_DECLARATION(dst),
-    int  kernel_size,
-    int  kernel_depth,
-    int  width,
-    int2 input_dims,
-    int2 strides,
-    int2 paddings)
+    IMAGE_DECLARATION(dst))
 {
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Image    dst = CONVERT_TO_IMAGE_STRUCT_NO_STEP(dst);
 
     // Determine output index
-    uint     idx               = (get_global_id(1) * width + get_global_id(0)) * dst.stride_y;
+    uint     idx               = (get_global_id(1) * CONVOLVED_WIDTH + get_global_id(0)) * dst.stride_y;
     __global uchar *output_ptr = dst.ptr + idx;
 
     // Determine current input index
-    const int top_left_x = get_global_id(0) * strides.x - paddings.x;
-    const int top_left_y = get_global_id(1) * strides.y - paddings.y;
+    const int top_left_x = get_global_id(0) * STRIDE_X - PAD_X;
+    const int top_left_y = get_global_id(1) * STRIDE_Y - PAD_Y;
 
     // Linearize convolution elements
-    for(int d = 0; d < kernel_depth; ++d)
+    for(int d = 0; d < KERNEL_DEPTH; ++d)
     {
-        for(int y = top_left_y, y_e = top_left_y + kernel_size; y < y_e; ++y)
+        for(int y = top_left_y, y_e = top_left_y + KERNEL_HEIGHT; y < y_e; ++y)
         {
-            for(int x = top_left_x, x_e = top_left_x + kernel_size; x < x_e; ++x, output_ptr += dst.stride_x)
+            for(int x = top_left_x, x_e = top_left_x + KERNEL_WIDTH; x < x_e; ++x, output_ptr += dst.stride_x)
             {
-                if(x < 0 || x >= input_dims.x || y < 0 || y >= input_dims.y)
+                if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
                 {
                     *((__global DATA_TYPE *)output_ptr) = 0;
                 }
@@ -160,21 +149,22 @@ __kernel void im2col_generic(
     }
 
 #if defined HAS_BIAS
-    *((__global DATA_TYPE *)output_ptr) = 1;
+    *((__global DATA_TYPE *)output_ptr) = (DATA_TYPE)1;
 #endif
 }
+#endif //(defined CONVOLVED_WIDTH && defined STRIDE_X && defined STRIDE_Y && defined PAD_X && defined PAD_Y && defined KERNEL_WIDTH && defined KERNEL_HEIGHT && defined KERNEL_DEPTH && SRC_WIDTH && SRC_HEIGHT)
 
 /** This kernel performs a reshaping of the output of the convolution layer.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16, F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: F16, F32
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
@@ -202,7 +192,7 @@ __kernel void col2im(
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note In case biases will be added in late stage, -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16, F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -210,7 +200,7 @@ __kernel void col2im(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Same as input.
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor

@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 
 #include "arm_compute/core/PixelValue.h"
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -40,16 +41,13 @@ CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights()
 
 void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose1xW)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(weights, biases, output);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(weights, output);
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
 
     if(biases != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::F32);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
         ARM_COMPUTE_ERROR_ON(biases->info()->dimension(0) != weights->info()->dimension(3));
         ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
@@ -98,8 +96,6 @@ CLConvolutionLayer::CLConvolutionLayer()
 void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
     ARM_COMPUTE_ERROR_ON(!weights_info.are_reshaped() && weights->info()->dimension(2) != input->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
@@ -191,7 +187,7 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     _gemm_output.allocator()->init(TensorInfo(shape_gemm, 1, input->info()->data_type()));
 
     // Configure kernels
-    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, std::make_pair(conv_w, conv_h), conv_info, _has_bias);
+    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
 
     if(_is_fully_connected_convolution)

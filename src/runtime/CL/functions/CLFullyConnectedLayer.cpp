@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
@@ -126,7 +127,7 @@ void CLFullyConnectedLayer::configure_conv_fc_wb(const ICLTensor *input, const I
     _interleave4x4_output.allocator()->init(TensorInfo(shape_interleaved, 1, dt, fixed_point_position));
 
     // Configure im2col kernel
-    _im2col_kernel.configure(input, &_im2col_output, std::make_pair(1, 1), PadStrideInfo(1, 1, 0, 0), false);
+    _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
 
     // Configure interleave4x4 kernel
     _interleave4x4_kernel.configure(&_im2col_output, &_interleave4x4_output);
@@ -176,7 +177,7 @@ void CLFullyConnectedLayer::configure_conv_fc_nb(const ICLTensor *input, const I
     _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, dt, fixed_point_position));
 
     // Configure im2col kernel
-    _im2col_kernel.configure(input, &_im2col_output, std::make_pair(1, 1), PadStrideInfo(1, 1, 0, 0), false);
+    _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
 
     // Configure matrix multiply kernel
     _mm_kernel.configure(&_im2col_output, weights, output, 1.0f);

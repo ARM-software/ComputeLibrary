@@ -61,8 +61,12 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());
+
     // The CLCol2ImKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+
     ICLKernel::configure(win);
 }
 

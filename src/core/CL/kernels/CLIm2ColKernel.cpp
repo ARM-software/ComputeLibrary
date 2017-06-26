@@ -29,8 +29,10 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 #include <tuple>
@@ -38,14 +40,14 @@
 using namespace arm_compute;
 
 CLIm2ColKernel::CLIm2ColKernel()
-    : _input(nullptr), _output(nullptr), _convolved_dims(), _conv_info(), _kernel_size(0), _num_elems_processed_per_iteration(1), _run_func(nullptr)
+    : _input(nullptr), _output(nullptr), _convolved_dims(), _num_elems_processed_per_iteration(1), _run_func(nullptr)
 {
 }
 
-void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims, const PadStrideInfo &conv_info, bool has_bias)
+void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
     _input  = input;
     _output = output;
@@ -70,44 +72,23 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
 
     if(!run_img2col_reduced)
     {
-        _convolved_dims                    = convolved_dims;
-        _conv_info                         = conv_info;
-        _kernel_size                       = std::sqrt((output->info()->dimension(0) - (has_bias ? 1 : 0)) / input->info()->dimension(2));
+        _convolved_dims = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
+                                            kernel_dims.width, kernel_dims.height,
+                                            conv_info);
         _num_elems_processed_per_iteration = output->info()->dimension(0);
 
+        build_opts.emplace("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
+        build_opts.emplace("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
+        build_opts.emplace("-DKERNEL_DEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
+        build_opts.emplace("-DCONVOLVED_WIDTH=" + support::cpp11::to_string(_convolved_dims.first));
+        build_opts.emplace("-DSTRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
+        build_opts.emplace("-DSTRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
+        build_opts.emplace("-DPAD_X=" + support::cpp11::to_string(conv_info.pad().first));
+        build_opts.emplace("-DPAD_Y=" + support::cpp11::to_string(conv_info.pad().second));
+        build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+        build_opts.emplace("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
+
         _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("im2col_generic", build_opts));
-
-        // Create static kernel arguments
-        const cl_int2 input_dims =
-        {
-            {
-                static_cast<cl_int>(input->info()->dimension(0)),
-                static_cast<cl_int>(input->info()->dimension(1)),
-            }
-        };
-        const cl_int2 strides =
-        {
-            {
-                stride_x,
-                stride_y,
-            }
-        };
-        const cl_int2 paddings =
-        {
-            {
-                pad_x,
-                pad_y,
-            }
-        };
-
-        // Set static kernel arguments
-        unsigned int idx = num_arguments_per_2D_tensor() + num_arguments_per_3D_tensor();
-        _kernel.setArg<cl_int>(idx++, _kernel_size);
-        _kernel.setArg<cl_int>(idx++, input->info()->dimension(2) /* depth */);
-        _kernel.setArg<cl_int>(idx++, _convolved_dims.first /* output width */);
-        _kernel.setArg<cl_int2>(idx++, input_dims);
-        _kernel.setArg<cl_int2>(idx++, strides);
-        _kernel.setArg<cl_int2>(idx++, paddings);
 
         _run_func = &CLIm2ColKernel::run_generic;
     }
@@ -135,13 +116,6 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
-
-    int pad_x    = 0;
-    int pad_y    = 0;
-    int stride_x = 0;
-    int stride_y = 0;
-    std::tie(pad_x, pad_y)       = _conv_info.pad();
-    std::tie(stride_x, stride_y) = _conv_info.stride();
 
     // Get initial windows
     Window slice     = window.first_slice_window_3D();

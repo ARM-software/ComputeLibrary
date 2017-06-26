@@ -73,7 +73,7 @@ template <unsigned int Size>
 using ConvolutionLayerDataset = GenericDataset<ConvolutionLayerDataObject, Size>;
 
 /** Data set containing small convolution layer shapes */
-class SmallConvolutionLayerDataset final : public ConvolutionLayerDataset<3>
+class SmallConvolutionLayerDataset final : public ConvolutionLayerDataset<6>
 {
 public:
     SmallConvolutionLayerDataset()
@@ -81,7 +81,10 @@ public:
     {
         ConvolutionLayerDataObject{ TensorShape(23U, 27U, 5U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(11U, 25U, 21U), PadStrideInfo(2, 1, 0, 0) },
         ConvolutionLayerDataObject{ TensorShape(33U, 27U, 7U), TensorShape(5U, 5U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U), PadStrideInfo(3, 2, 1, 0) },
-        ConvolutionLayerDataObject{ TensorShape(17U, 31U, 2U, 7U), TensorShape(5U, 5U, 2U, 19U), TensorShape(19U), TensorShape(15U, 15U, 19U, 7U), PadStrideInfo(1, 2, 1, 1) }
+        ConvolutionLayerDataObject{ TensorShape(17U, 31U, 2U, 7U), TensorShape(5U, 5U, 2U, 19U), TensorShape(19U), TensorShape(15U, 15U, 19U, 7U), PadStrideInfo(1, 2, 1, 1) },
+        ConvolutionLayerDataObject{ TensorShape(23U, 27U, 5U), TensorShape(3U, 1U, 5U, 21U), TensorShape(21U), TensorShape(11U, 27U, 21U), PadStrideInfo(2, 1, 0, 0) },
+        ConvolutionLayerDataObject{ TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 11U, 16U), PadStrideInfo(3, 2, 1, 0) },
+        ConvolutionLayerDataObject{ TensorShape(17U, 31U, 2U, 7U), TensorShape(5U, 3U, 2U, 19U), TensorShape(19U), TensorShape(15U, 16U, 19U, 7U), PadStrideInfo(1, 2, 1, 1) }
     }
     {
     }

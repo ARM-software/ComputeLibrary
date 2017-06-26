@@ -100,7 +100,7 @@ void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor 
     _gemm_output.allocator()->init(TensorInfo(shape_gemm, 1, input->info()->data_type()));
 
     // Configure kernels
-    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, std::make_pair(conv_w, conv_h), conv_info, _has_bias);
+    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(conv_w, conv_h), conv_info, _has_bias);
     _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
     _mm_kernel.configure(&_input_im2col_reshaped, &_weights_reshaped, &_gemm_output);
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));

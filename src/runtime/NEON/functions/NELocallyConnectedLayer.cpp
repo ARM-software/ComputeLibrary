@@ -65,10 +65,13 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
     std::tie(stride_x, stride_y) = conv_info.stride();
     std::tie(pad_x, pad_y)       = conv_info.pad();
 
+    const unsigned int kernel_width  = weights->info()->dimension(0);
+    const unsigned int kernel_height = weights->info()->dimension(1);
+
     // Get convolved dimensions
     unsigned int conv_w = 0;
     unsigned int conv_h = 0;
-    std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0), weights->info()->dimension(1),
+    std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_width, kernel_height,
                                                  conv_info);
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
@@ -100,7 +103,7 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
     _gemm_output.allocator()->init(TensorInfo(shape_gemm, 1, input->info()->data_type()));
 
     // Configure kernels
-    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, std::make_pair(conv_w, conv_h), conv_info, _has_bias);
+    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
     _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
     _mm_kernel.configure(&_input_im2col_reshaped, &_weights_reshaped, &_gemm_output);
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
