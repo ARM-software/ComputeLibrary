@@ -542,21 +542,17 @@ inline DataType data_type_for_convolution_matrix(const int16_t *conv, size_t siz
 
 /** Returns expected width and height of output scaled tensor depending on dimensions rounding mode.
  *
- * @param[in] width       Width of input tensor (Number of columns)
- * @param[in] height      Height of input tensor (Number of rows)
- * @param[in] kernel_size Kernel size.
- * @param[in] stride_x    Stride of the operation in the x dimension.
- * @param[in] stride_y    Stride of the operation in the y dimension.
- * @param[in] pad_x       Padding size in the x dimension.
- * @param[in] pad_y       Padding size in the y dimension.
- * @param[in] round_type  Dimensions rounding mode.
+ * @param[in] width           Width of input tensor (Number of columns)
+ * @param[in] height          Height of input tensor (Number of rows)
+ * @param[in] kernel_width    Kernel width.
+ * @param[in] kernel_height   Kernel height.
+ * @param[in] pad_stride_info Pad and stride information.
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
-const std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height, unsigned int kernel_size,
-                                                              unsigned int stride_x, unsigned int stride_y,
-                                                              unsigned int pad_x, unsigned int pad_y,
-                                                              DimensionRoundingType round_type);
+const std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height,
+                                                              unsigned int kernel_width, unsigned int kernel_height,
+                                                              const PadStrideInfo &pad_stride_info);
 
 /** Convert a tensor format into a string.
  *

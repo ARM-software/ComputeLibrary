@@ -563,32 +563,42 @@ private:
 class WeightsInfo
 {
 public:
+    /** Default constructor */
     WeightsInfo()
-        : _are_reshaped(false), _kernel_size(0)
+        : _are_reshaped(false), _kernel_width(0), _kernel_height(0)
     {
     }
     /** Constructor
      *
-     * @param[in] are_reshaped True if the weights have been reshaped
-     * @param[in] kernel_size  The size of the kernel.
+     * @param[in] are_reshaped  True if the weights have been reshaped
+     * @param[in] kernel_width  Kernel width.
+     * @param[in] kernel_height Kernel height.
      */
-    WeightsInfo(bool are_reshaped, unsigned int kernel_size)
-        : _are_reshaped(are_reshaped), _kernel_size(kernel_size)
+    WeightsInfo(bool are_reshaped, unsigned int kernel_width, unsigned int kernel_height)
+        : _are_reshaped(are_reshaped), _kernel_width(kernel_width), _kernel_height(kernel_height)
     {
     }
-
+    /** Flag which specifies if the weights tensor has been reshaped.
+     *
+     * @return True if the weights tensors has been reshaped
+     */
     bool are_reshaped() const
     {
         return _are_reshaped;
     };
-    unsigned int kernel_size() const
+    /** Return the width and height of the kernel
+     *
+     * @return The width and height of the kernel
+     */
+    std::pair<unsigned int, unsigned int> kernel_size() const
     {
-        return _kernel_size;
+        return std::make_pair(_kernel_width, _kernel_height);
     }
 
 private:
     const bool         _are_reshaped;
-    const unsigned int _kernel_size;
+    const unsigned int _kernel_width;
+    const unsigned int _kernel_height;
 };
 
 /** IO formatting information class*/

@@ -52,16 +52,15 @@ BorderSize CLPoolingLayerKernel::border_size() const
 
 void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info)
 {
-    int                   pool_pad_x      = 0;
-    int                   pool_pad_y      = 0;
-    int                   pool_stride_x   = 0;
-    int                   pool_stride_y   = 0;
-    unsigned int          pooled_w        = 0;
-    unsigned int          pooled_h        = 0;
-    const PoolingType     pool_type       = pool_info.pool_type();
-    const int             pool_size       = pool_info.pool_size();
-    const PadStrideInfo   pad_stride_info = pool_info.pad_stride_info();
-    DimensionRoundingType pool_round      = pad_stride_info.round();
+    int                 pool_pad_x      = 0;
+    int                 pool_pad_y      = 0;
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
+    unsigned int        pooled_w        = 0;
+    unsigned int        pooled_h        = 0;
+    const PoolingType   pool_type       = pool_info.pool_type();
+    const int           pool_size       = pool_info.pool_size();
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
@@ -78,9 +77,8 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
                                                      input->info()->dimension(1),
                                                      pool_size,
-                                                     pool_stride_x, pool_stride_y,
-                                                     pool_pad_x, pool_pad_y,
-                                                     pool_round);
+                                                     pool_size,
+                                                     pool_info.pad_stride_info());
     ARM_COMPUTE_UNUSED(pooled_w);
     ARM_COMPUTE_UNUSED(pooled_h);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pooled_w) || (output->info()->dimension(1) != pooled_h));

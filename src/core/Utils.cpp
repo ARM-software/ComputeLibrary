@@ -233,22 +233,25 @@ std::string arm_compute::lower_string(const std::string &val)
     return res;
 }
 
-const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height, unsigned int kernel_size,
-                                                                           unsigned int stride_x, unsigned int stride_y,
-                                                                           unsigned int pad_x, unsigned int pad_y,
-                                                                           DimensionRoundingType round_type)
+const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height,
+                                                                           unsigned int kernel_width, unsigned int kernel_height,
+                                                                           const PadStrideInfo &pad_stride_info)
 {
-    unsigned int w = 0;
-    unsigned int h = 0;
-    switch(round_type)
+    const unsigned int pad_x    = pad_stride_info.pad().first;
+    const unsigned int pad_y    = pad_stride_info.pad().second;
+    const unsigned int stride_x = pad_stride_info.stride().first;
+    const unsigned int stride_y = pad_stride_info.stride().second;
+    unsigned int       w        = 0;
+    unsigned int       h        = 0;
+    switch(pad_stride_info.round())
     {
         case DimensionRoundingType::FLOOR:
-            w = static_cast<unsigned int>(std::floor((static_cast<float>(width + 2 * pad_x - kernel_size) / stride_x) + 1));
-            h = static_cast<unsigned int>(std::floor((static_cast<float>(height + 2 * pad_y - kernel_size) / stride_y) + 1));
+            w = static_cast<unsigned int>(std::floor((static_cast<float>(width + 2 * pad_x - kernel_width) / stride_x) + 1));
+            h = static_cast<unsigned int>(std::floor((static_cast<float>(height + 2 * pad_y - kernel_height) / stride_y) + 1));
             break;
         case DimensionRoundingType::CEIL:
-            w = static_cast<unsigned int>(std::ceil((static_cast<float>(width + 2 * pad_x - kernel_size) / stride_x) + 1));
-            h = static_cast<unsigned int>(std::ceil((static_cast<float>(height + 2 * pad_y - kernel_size) / stride_y) + 1));
+            w = static_cast<unsigned int>(std::ceil((static_cast<float>(width + 2 * pad_x - kernel_width) / stride_x) + 1));
+            h = static_cast<unsigned int>(std::ceil((static_cast<float>(height + 2 * pad_y - kernel_height) / stride_y) + 1));
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported rounding type");

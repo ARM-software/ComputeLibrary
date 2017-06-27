@@ -68,8 +68,8 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
     // Get convolved dimensions
     unsigned int conv_w = 0;
     unsigned int conv_h = 0;
-    std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0),
-                                                 stride_x, stride_y, pad_x, pad_y, conv_info.round());
+    std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0), weights->info()->dimension(1),
+                                                 conv_info);
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(4) != (conv_w * conv_h), "Weights shape does not match the expected one");

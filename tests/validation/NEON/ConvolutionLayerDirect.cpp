@@ -116,9 +116,8 @@ TensorShape get_output_shape(TensorShape in_shape, TensorShape kernel_shape, con
     const std::pair<unsigned int, unsigned int> scaled_dims = arm_compute::scaled_dimensions(in_shape.x(),
                                                                                              in_shape.y(),
                                                                                              kernel_shape.x(),
-                                                                                             conv_info.stride().first, conv_info.stride().second,
-                                                                                             conv_info.pad().first, conv_info.pad().second,
-                                                                                             conv_info.round());
+                                                                                             kernel_shape.y(),
+                                                                                             conv_info);
     out_shape.set(0, scaled_dims.first);
     out_shape.set(1, scaled_dims.second);
     out_shape.set(2, kernel_shape[3]);

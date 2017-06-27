@@ -127,9 +127,10 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     unsigned int conv_w = 0;
     unsigned int conv_h = 0;
 
-    const unsigned int kernel_width = _are_weights_reshaped ? weights_info.kernel_size() : weights->info()->dimension(0);
-    std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_width,
-                                                 stride_x, stride_y, pad_x, pad_y, conv_info.round());
+    const unsigned int kernel_width  = _are_weights_reshaped ? weights_info.kernel_size().first : weights->info()->dimension(0);
+    const unsigned int kernel_height = _are_weights_reshaped ? weights_info.kernel_size().second : weights->info()->dimension(1);
+    std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_width, kernel_height,
+                                                 conv_info);
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
     // Check if its a "fully connected" convolution

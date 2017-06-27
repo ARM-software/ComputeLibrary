@@ -82,9 +82,8 @@ TensorShape get_output_shape(TensorShape in_shape, const PoolingLayerInfo &pool_
     const std::pair<unsigned int, unsigned int> scaled_dims = arm_compute::scaled_dimensions(in_shape.x(),
                                                                                              in_shape.y(),
                                                                                              pool_info.pool_size(),
-                                                                                             pool_info.pad_stride_info().stride().first, pool_info.pad_stride_info().stride().second,
-                                                                                             pool_info.pad_stride_info().pad().first, pool_info.pad_stride_info().pad().second,
-                                                                                             pool_info.pad_stride_info().round());
+                                                                                             pool_info.pool_size(),
+                                                                                             pool_info.pad_stride_info());
     out_shape.set(0, scaled_dims.first);
     out_shape.set(1, scaled_dims.second);
     return out_shape;
