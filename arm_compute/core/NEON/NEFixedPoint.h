@@ -176,6 +176,14 @@ void vst1q_qs8(qint8_t *addr, qint8x16_t b);
 */
 void vst1q_qs16(qint16_t *addr, qint16x8_t b);
 
+/** Store two 16 bit fixed point vector to memory (8x2 elements)
+*
+* @param[in] addr Memory address where the 16 bit fixed point vectors should be stored
+* @param[in] b    16 bit fixed point vectors to store
+*
+*/
+void vst2q_qs16(qint16_t *addr, qint16x8x2_t b);
+
 /** 16 bit fixed point vector saturating narrow (8 elements)
  *
  * @param[in] a 16 bit fixed point vector to convert
@@ -1122,7 +1130,7 @@ qint16x8_t vqinvsqrtq_qs16(qint16x8_t a, int fixed_point_position);
  *
  * @return The calculated Hyperbolic Tangent.
  */
-qint8x8_t vtanh_qs8(qint8x8_t a, int fixed_point_position);
+qint8x8_t vqtanh_qs8(qint8x8_t a, int fixed_point_position);
 
 /** Calculate hyperbolic tangent for fixed point 16 bit (4 elements)
  *
@@ -1131,7 +1139,7 @@ qint8x8_t vtanh_qs8(qint8x8_t a, int fixed_point_position);
  *
  * @return The calculated Hyperbolic Tangent.
  */
-qint16x4_t vtanh_qs16(qint16x4_t a, int fixed_point_position);
+qint16x4_t vqtanh_qs16(qint16x4_t a, int fixed_point_position);
 
 /** Calculate hyperbolic tangent for fixed point 8bit (16 elements)
  *
@@ -1140,7 +1148,16 @@ qint16x4_t vtanh_qs16(qint16x4_t a, int fixed_point_position);
  *
  * @return The calculated Hyperbolic Tangent.
  */
-qint8x16_t vtanhq_qs8(qint8x16_t a, int fixed_point_position);
+qint8x16_t vqtanhq_qs8(qint8x16_t a, int fixed_point_position);
+
+/** Calculate hyperbolic tangent for fixed point 16bit (8 elements)
+ *
+ * @param[in] a                    16 bit fixed point input vector
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The calculated Hyperbolic Tangent.
+ */
+qint16x8_t vqtanhq_qs16(qint16x8_t a, int fixed_point_position);
 
 /** Calculate saturating n power for fixed point 8bit (16 elements).
  *
@@ -1162,15 +1179,6 @@ qint8x8_t vqpowq_qs8(qint8x8_t a, qint8x16_t b, int fixed_point_position);
  * @return The lane-by-lane maximum -> float32x4x2
  */
 float32x4x2_t vmax2q_f32(float32x4x2_t a, float32x4x2_t b);
-
-/** Calculate hyperbolic tangent for fixed point 8bit (8 elements)
- *
- * @param[in] a                    16 bit fixed point input vector
- * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
- *
- * @return The calculated Hyperbolic Tangent.
- */
-qint16x8_t vtanhq_qs16(qint16x8_t a, int fixed_point_position);
 }
 #include "arm_compute/core/NEON/NEFixedPoint.inl"
 #endif /* __ARM_COMPUTE_NEFIXEDPOINT_H__ */

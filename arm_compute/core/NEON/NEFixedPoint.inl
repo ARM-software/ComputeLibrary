@@ -200,6 +200,11 @@ inline void vst1q_qs16(qint16_t *addr, qint16x8_t b)
     vst1q_s16(addr, b);
 }
 
+inline void vst2q_qs16(qint16_t *addr, qint16x8x2_t b)
+{
+    vst2q_s16(addr, b);
+}
+
 inline qint8x8_t vqmovn_qs16(qint16x8_t a)
 {
     return vqmovn_s16(a);
@@ -1641,15 +1646,15 @@ inline qint8x8_t vqinvsqrt_qs8(qint8x8_t a, int fixed_point_position)
     const qint8x8_t const_three = vdup_n_s8(3 << fixed_point_position);
 
     // Find shift value. Number must be in (0.5, 2) range.
-    qint8x8_t shift_value = vneg_s8(vqsub_s8(vdup_n_s8(8), vqadd_s8(vclz_s8(a), vdup_n_s8(fixed_point_position))));
+    qint8x8_t shift_value = vqneg_s8(vqsub_s8(vdup_n_s8(8), vqadd_s8(vclz_s8(a), vdup_n_s8(fixed_point_position))));
 
     // Add one when the shift value is negative in order to get the correct result when we shift right with 1
     qint8x8_t temp         = vqsub_s8(vdup_n_s8(8), vqadd_s8(vclz_s8(a), vdup_n_s8(fixed_point_position)));
     uint8x8_t temp_ltz     = vclt_s8(temp, vdup_n_qs8(0));
     temp                   = vbsl_s8(temp_ltz, vqadd_s8(temp, vdup_n_s8(1)), temp);
-    qint8x8_t shift_value2 = vneg_s8(vshr_n_s8(temp, 1));
+    qint8x8_t shift_value2 = vqneg_s8(vshr_n_s8(temp, 1));
 
-    temp = vshl_s8(a, shift_value);
+    temp = vqshl_s8(a, shift_value);
 
     // Initial guess
     qint8x8_t x = temp;
@@ -1660,7 +1665,7 @@ inline qint8x8_t vqinvsqrt_qs8(qint8x8_t a, int fixed_point_position)
     x = vshr_n_s8(vqmul_qs8(x, vqsub_s8(const_three, vqmul_qs8(temp, vqmul_qs8(x, x, fixed_point_position), fixed_point_position)), fixed_point_position), 1);
     x = vshr_n_s8(vqmul_qs8(x, vqsub_s8(const_three, vqmul_qs8(temp, vqmul_qs8(x, x, fixed_point_position), fixed_point_position)), fixed_point_position), 1);
 
-    return vshl_s8(x, shift_value2);
+    return vqshl_s8(x, shift_value2);
 }
 
 inline qint16x4_t vqinvsqrt_qs16(qint16x4_t a, int fixed_point_position)
@@ -1668,15 +1673,15 @@ inline qint16x4_t vqinvsqrt_qs16(qint16x4_t a, int fixed_point_position)
     const qint16x4_t const_three = vdup_n_s16(3 << fixed_point_position);
 
     // Find shift value. Number must be in (0.5, 2) range.
-    qint16x4_t shift_value = vneg_s16(vqsub_s16(vdup_n_s16(16), vqadd_s16(vclz_s16(a), vdup_n_s16(fixed_point_position))));
+    qint16x4_t shift_value = vqneg_s16(vqsub_s16(vdup_n_s16(16), vqadd_s16(vclz_s16(a), vdup_n_s16(fixed_point_position))));
 
     // Add one when the shift value is negative in order to get the correct result when we shift right with 1
     qint16x4_t temp         = vqsub_s16(vdup_n_s16(16), vqadd_s16(vclz_s16(a), vdup_n_s16(fixed_point_position)));
     uint16x4_t temp_ltz     = vclt_s16(temp, vdup_n_qs16(0));
     temp                    = vbsl_s16(temp_ltz, vqadd_s16(temp, vdup_n_s16(1)), temp);
-    qint16x4_t shift_value2 = vneg_s16(vshr_n_s16(temp, 1));
+    qint16x4_t shift_value2 = vqneg_s16(vshr_n_s16(temp, 1));
 
-    temp = vshl_s16(a, shift_value);
+    temp = vqshl_s16(a, shift_value);
 
     // Initial guess
     qint16x4_t x = temp;
@@ -1753,15 +1758,15 @@ inline qint8x16_t vqinvsqrtq_qs8(qint8x16_t a, int fixed_point_position)
     const qint8x16_t const_three = vdupq_n_s8(3 << fixed_point_position);
 
     // Find shift value. Number must be in (0.5, 2) range.
-    qint8x16_t shift_value = vnegq_s8(vqsubq_s8(vdupq_n_s8(8), vqaddq_s8(vclzq_s8(a), vdupq_n_s8(fixed_point_position))));
+    qint8x16_t shift_value = vqnegq_s8(vqsubq_s8(vdupq_n_s8(8), vqaddq_s8(vclzq_s8(a), vdupq_n_s8(fixed_point_position))));
 
     // Add one when the shift value is negative in order to get the correct result when we shift right with 1
     qint8x16_t temp         = vqsubq_s8(vdupq_n_s8(8), vqaddq_s8(vclzq_s8(a), vdupq_n_s8(fixed_point_position)));
     uint8x16_t temp_ltz     = vcltq_s8(temp, vdupq_n_qs8(0));
     temp                    = vbslq_s8(temp_ltz, vqaddq_s8(temp, vdupq_n_s8(1)), temp);
-    qint8x16_t shift_value2 = vnegq_s8(vshrq_n_s8(temp, 1));
+    qint8x16_t shift_value2 = vqnegq_s8(vshrq_n_s8(temp, 1));
 
-    temp = vshlq_s8(a, shift_value);
+    temp = vqshlq_s8(a, shift_value);
 
     // Initial guess
     qint8x16_t x = temp;
@@ -1780,13 +1785,13 @@ inline qint16x8_t vqinvsqrtq_qs16(qint16x8_t a, int fixed_point_position)
     const qint16x8_t const_three = vdupq_n_s16(3 << fixed_point_position);
 
     // Find shift value. Number must be in (0.5, 2) range.
-    qint16x8_t shift_value = vnegq_s16(vqsubq_s16(vdupq_n_s16(16), vqaddq_s16(vclzq_s16(a), vdupq_n_s16(fixed_point_position))));
+    qint16x8_t shift_value = vqnegq_s16(vqsubq_s16(vdupq_n_s16(16), vqaddq_s16(vclzq_s16(a), vdupq_n_s16(fixed_point_position))));
 
     // Add one when the shift value is negative in order to get the correct result when we shift right with 1
     qint16x8_t temp         = vqsubq_s16(vdupq_n_s16(16), vqaddq_s16(vclzq_s16(a), vdupq_n_s16(fixed_point_position)));
     uint16x8_t temp_ltz     = vcltq_s16(temp, vdupq_n_qs16(0));
     temp                    = vbslq_s16(temp_ltz, vqaddq_s16(temp, vdupq_n_s16(1)), temp);
-    qint16x8_t shift_value2 = vnegq_s16(vshrq_n_s16(temp, 1));
+    qint16x8_t shift_value2 = vqnegq_s16(vshrq_n_s16(temp, 1));
 
     temp = vqshlq_s16(a, shift_value);
 
@@ -1804,7 +1809,7 @@ inline qint16x8_t vqinvsqrtq_qs16(qint16x8_t a, int fixed_point_position)
     return vqshlq_s16(x, shift_value2);
 }
 
-inline qint8x8_t vtanh_qs8(qint8x8_t a, int fixed_point_position)
+inline qint8x8_t vqtanh_qs8(qint8x8_t a, int fixed_point_position)
 {
     const qint8x8_t const_one = vdup_n_s8(1 << fixed_point_position);
     const qint8x8_t const_two = vdup_n_s8(2 << fixed_point_position);
@@ -1817,7 +1822,7 @@ inline qint8x8_t vtanh_qs8(qint8x8_t a, int fixed_point_position)
     return tanh;
 }
 
-inline qint16x4_t vtanh_qs16(qint16x4_t a, int fixed_point_position)
+inline qint16x4_t vqtanh_qs16(qint16x4_t a, int fixed_point_position)
 {
     const qint16x4_t const_one = vdup_n_s16(1 << fixed_point_position);
     const qint16x4_t const_two = vdup_n_s16(2 << fixed_point_position);
@@ -1830,7 +1835,7 @@ inline qint16x4_t vtanh_qs16(qint16x4_t a, int fixed_point_position)
     return tanh;
 }
 
-inline qint8x16_t vtanhq_qs8(qint8x16_t a, int fixed_point_position)
+inline qint8x16_t vqtanhq_qs8(qint8x16_t a, int fixed_point_position)
 {
     const qint8x16_t const_one = vdupq_n_s8(1 << fixed_point_position);
     const qint8x16_t const_two = vdupq_n_s8(2 << fixed_point_position);
@@ -1839,6 +1844,19 @@ inline qint8x16_t vtanhq_qs8(qint8x16_t a, int fixed_point_position)
     qint8x16_t num   = vqsubq_qs8(exp2x, const_one);
     qint8x16_t den   = vqaddq_qs8(exp2x, const_one);
     qint8x16_t tanh  = vqmulq_qs8(num, vqrecipq_qs8(den, fixed_point_position), fixed_point_position);
+
+    return tanh;
+}
+
+inline qint16x8_t vqtanhq_qs16(qint16x8_t a, int fixed_point_position)
+{
+    const qint16x8_t const_one = vdupq_n_s16(1 << fixed_point_position);
+    const qint16x8_t const_two = vdupq_n_s16(2 << fixed_point_position);
+
+    qint16x8_t exp2x = vqexpq_qs16(vqmulq_qs16(const_two, a, fixed_point_position), fixed_point_position);
+    qint16x8_t num   = vqsubq_qs16(exp2x, const_one);
+    qint16x8_t den   = vqaddq_qs16(exp2x, const_one);
+    qint16x8_t tanh  = vqmulq_qs16(num, vqrecipq_qs16(den, fixed_point_position), fixed_point_position);
 
     return tanh;
 }
@@ -1858,18 +1876,5 @@ inline float32x4x2_t vmax2q_f32(float32x4x2_t a, float32x4x2_t b)
         }
     };
     return res;
-}
-
-inline qint16x8_t vtanhq_qs16(qint16x8_t a, int fixed_point_position)
-{
-    const qint16x8_t const_one = vdupq_n_s16(1 << fixed_point_position);
-    const qint16x8_t const_two = vdupq_n_s16(2 << fixed_point_position);
-
-    qint16x8_t exp2x = vqexpq_qs16(vqmulq_qs16(const_two, a, fixed_point_position), fixed_point_position);
-    qint16x8_t num   = vqsubq_qs16(exp2x, const_one);
-    qint16x8_t den   = vqaddq_qs16(exp2x, const_one);
-    qint16x8_t tanh  = vqmulq_qs16(num, vqrecipq_qs16(den, fixed_point_position), fixed_point_position);
-
-    return tanh;
 }
 }

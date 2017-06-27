@@ -251,7 +251,16 @@ qint16_t sdiv_qs16(qint16_t a, qint16_t b, int fixed_point_position);
 *
 * @return The result of the 8 bit fixed point exponential.
 */
-qint8_t sexp_qs8(qint8_t a, int fixed_point_position);
+qint8_t sqexp_qs8(qint8_t a, int fixed_point_position);
+
+/** 16 bit fixed point scalar exponential
+*
+* @param[in] a                    16 bit fixed point input
+* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+*
+* @return The result of the 16 bit fixed point exponential.
+*/
+qint16_t sqexp_qs16(qint16_t a, int fixed_point_position);
 
 /** 16 bit fixed point scalar exponential
 *

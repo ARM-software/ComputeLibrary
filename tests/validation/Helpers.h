@@ -90,7 +90,7 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
             break;
         case ActivationLayerInfo::ActivationFunction::SQRT:
             // Reduce range as sqrt should take a non-negative number
-            bounds.first = (is_float) ? 0 : 1 << (fixed_point_position);
+            bounds.first = (is_float) ? 0 : 1;
             break;
         default:
             break;

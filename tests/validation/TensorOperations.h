@@ -930,7 +930,7 @@ void activation_layer(const Tensor<T> &in, Tensor<T> &out, ActivationLayerInfo a
                 out[i] = mul(x, x).raw();
                 break;
             case ActivationLayerInfo::ActivationFunction::TANH:
-                out[i] = tanh(x).raw();
+                out[i] = mul(a, tanh(mul(b, x))).raw();
                 break;
             default:
                 ARM_COMPUTE_ERROR("Activation function not recognised");

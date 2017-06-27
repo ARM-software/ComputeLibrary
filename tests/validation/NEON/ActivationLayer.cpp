@@ -193,10 +193,11 @@ BOOST_DATA_TEST_CASE(Configuration, boost::unit_test::data::make({ false, true }
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * CNNFloatDataTypes() * ActivationFunctions(), in_place, shape, dt, act_function)
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * CNNFloatDataTypes() * ActivationFunctions() * boost::unit_test::data::make({ 0.5f, 1.f }),
+                     in_place, shape, dt, act_function, alpha_beta)
 {
     // Create activation layer info
-    ActivationLayerInfo act_info(act_function, 1.f, 1.f);
+    ActivationLayerInfo act_info(act_function, alpha_beta, alpha_beta);
 
     // Compute function
     Tensor dst = compute_activation_layer(in_place, shape, dt, act_info);
@@ -209,10 +210,11 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, boost::unit_test::data::make({ false, true }) * LargeShapes() * CNNFloatDataTypes() * ActivationFunctions(), in_place, shape, dt, act_function)
+BOOST_DATA_TEST_CASE(RunLarge, boost::unit_test::data::make({ false, true }) * LargeShapes() * CNNFloatDataTypes() * ActivationFunctions() * boost::unit_test::data::make({ 0.5f, 1.f }),
+                     in_place, shape, dt, act_function, alpha_beta)
 {
     // Create activation layer info
-    ActivationLayerInfo act_info(act_function, 1.f, 1.f);
+    ActivationLayerInfo act_info(act_function, alpha_beta, alpha_beta);
 
     // Compute function
     Tensor dst = compute_activation_layer(in_place, shape, dt, act_info);
@@ -229,12 +231,13 @@ BOOST_AUTO_TEST_SUITE_END()
  *        cause overflowing issues in most of the transcendentals functions.
  */
 BOOST_AUTO_TEST_SUITE(Quantized)
+BOOST_AUTO_TEST_SUITE(QS8)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * ActivationFunctions() * boost::unit_test::data::xrange(3, 6, 1),
-                     in_place, shape, act_function, fixed_point_position)
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * ActivationFunctions() * boost::unit_test::data::xrange(3, 6, 1) * boost::unit_test::data::make({ 0.5f, 1.f }),
+                     in_place, shape, act_function, fixed_point_position, alpha_beta)
 {
     // Create activation layer info
-    ActivationLayerInfo act_info(act_function, 1.f, 1.f);
+    ActivationLayerInfo act_info(act_function, alpha_beta, alpha_beta);
 
     // Compute function
     Tensor dst = compute_activation_layer(in_place, shape, DataType::QS8, act_info, fixed_point_position);
@@ -245,6 +248,27 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
     // Validate output
     validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(act_function, fixed_point_position));
 }
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(QS16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * ActivationFunctions() * boost::unit_test::data::xrange(3, 6, 1) * boost::unit_test::data::make({ 0.5f, 1.f }),
+                     in_place, shape, act_function, fixed_point_position, alpha_beta)
+{
+    // Create activation layer info
+    ActivationLayerInfo act_info(act_function, alpha_beta, alpha_beta);
+
+    // Compute function
+    Tensor dst = compute_activation_layer(in_place, shape, DataType::QS16, act_info, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, DataType::QS16, act_info, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(act_function, fixed_point_position));
+}
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
