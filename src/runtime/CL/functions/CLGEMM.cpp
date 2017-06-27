@@ -101,6 +101,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         _transpose_kernel.configure(b, &_tmp_b);
 
         // Configure matrix multiply kernel
+        _mm_kernel.set_target(CLScheduler::get().target());
         _mm_kernel.configure(&_tmp_a, &_tmp_b, output, alpha);
 
         // Allocate intermediate tensors

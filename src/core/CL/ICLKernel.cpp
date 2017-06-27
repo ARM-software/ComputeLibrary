@@ -31,7 +31,6 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include <cstddef>
 
@@ -61,7 +60,7 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
 }
 
 ICLKernel::ICLKernel()
-    : _kernel(nullptr), _lws_hint(cl::Range_128_1), _target(CLScheduler::get().target())
+    : _kernel(nullptr), _lws_hint(cl::Range_128_1), _target(GPUTarget::MIDGARD)
 {
 }
 
