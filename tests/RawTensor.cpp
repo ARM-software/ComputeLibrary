@@ -131,6 +131,7 @@ int RawTensor::num_channels() const
         case Format::U16:
         case Format::S32:
         case Format::U32:
+        case Format::F32:
             return 1;
         case Format::RGB888:
             return 3;

@@ -70,6 +70,31 @@ void ReferenceCPP::sobel_5x5(RawTensor &src, RawTensor &dst_x, RawTensor &dst_y,
     tensor_operations::sobel_5x5(s, dx, dy, border_mode, constant_border_value);
 }
 
+// Harris corners
+void ReferenceCPP::harris_corners(RawTensor &src, RawTensor &Gx, RawTensor &Gy, const RawTensor &candidates, const RawTensor &non_maxima, float threshold, float min_dist, float sensitivity,
+                                  int32_t gradient_size, int32_t block_size, KeyPointArray &corners, BorderMode border_mode, uint8_t constant_border_value)
+{
+    ARM_COMPUTE_ERROR_ON(src.data_type() != DataType::U8 || (Gx.data_type() != DataType::S16 && Gx.data_type() != DataType::S32) || (Gy.data_type() != DataType::S16 && Gy.data_type() != DataType::S32)
+                         || candidates.data_type() != DataType::F32 || non_maxima.data_type() != DataType::F32);
+
+    Tensor<uint8_t> s(src.shape(), src.data_type(), src.fixed_point_position(), reinterpret_cast<const uint8_t *>(src.data()));
+    Tensor<float>   c(candidates.shape(), candidates.data_type(), candidates.fixed_point_position(), const_cast<float *>(reinterpret_cast<const float *>(candidates.data())));  // NOLINT
+    Tensor<float>   nm(non_maxima.shape(), non_maxima.data_type(), non_maxima.fixed_point_position(), const_cast<float *>(reinterpret_cast<const float *>(non_maxima.data()))); // NOLINT
+
+    if(gradient_size == 7)
+    {
+        Tensor<int32_t> gx(Gx.shape(), Gx.data_type(), Gx.fixed_point_position(), reinterpret_cast<int32_t *>(Gx.data()));
+        Tensor<int32_t> gy(Gy.shape(), Gy.data_type(), Gy.fixed_point_position(), reinterpret_cast<int32_t *>(Gy.data()));
+        tensor_operations::harris_corners(s, gx, gy, c, nm, threshold, min_dist, sensitivity, gradient_size, block_size, corners, border_mode, constant_border_value);
+    }
+    else
+    {
+        Tensor<int16_t> gx(Gx.shape(), Gx.data_type(), Gx.fixed_point_position(), reinterpret_cast<int16_t *>(Gx.data()));
+        Tensor<int16_t> gy(Gy.shape(), Gy.data_type(), Gy.fixed_point_position(), reinterpret_cast<int16_t *>(Gy.data()));
+        tensor_operations::harris_corners(s, gx, gy, c, nm, threshold, min_dist, sensitivity, gradient_size, block_size, corners, border_mode, constant_border_value);
+    }
+}
+
 // Minimum maximum location
 void ReferenceCPP::min_max_location(const RawTensor &src, void *min, void *max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count)
 {

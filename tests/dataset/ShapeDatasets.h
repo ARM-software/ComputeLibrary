@@ -107,7 +107,7 @@ class Small2DShapes final : public ShapeDataset<2>
 {
 public:
     Small2DShapes()
-        : ShapeDataset(TensorShape(5U, 5U),
+        : ShapeDataset(TensorShape(17U, 17U),
                        TensorShape(640U, 480U))
     {
     }

@@ -56,6 +56,7 @@ std::pair<RawTensor, RawTensor> Reference::compute_reference_sobel_3x3(const Ten
 
     return std::make_pair(ref_dst_x, ref_dst_y);
 }
+
 std::pair<RawTensor, RawTensor> Reference::compute_reference_sobel_5x5(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference
@@ -83,6 +84,28 @@ void Reference::compute_reference_min_max_location(const TensorShape &shape, Dat
     // Compute reference
     ReferenceCPP::min_max_location(ref_src, min, max, min_loc, max_loc, min_count, max_count);
 }
+
+KeyPointArray Reference::compute_reference_harris_corners(const TensorShape &shape, float threshold, float min_dist, float sensitivity,
+                                                          int32_t gradient_size, int32_t block_size, BorderMode border_mode, uint8_t constant_border_value)
+{
+    // Create reference
+    RawTensor ref_src(shape, Format::U8);
+    RawTensor raw_Gx(shape, (gradient_size == 7) ? Format::S32 : Format::S16);
+    RawTensor raw_Gy(shape, (gradient_size == 7) ? Format::S32 : Format::S16);
+    RawTensor raw_candidates(shape, Format::F32);
+    RawTensor raw_non_maxima(shape, Format::F32);
+
+    KeyPointArray corners(shape.total_size());
+
+    // Fill reference
+    library->fill_tensor_uniform(ref_src, 0);
+
+    // Compute reference
+    ReferenceCPP::harris_corners(ref_src, raw_Gx, raw_Gy, raw_candidates, raw_non_maxima, threshold, min_dist, sensitivity, gradient_size, block_size, corners, border_mode, constant_border_value);
+
+    return corners;
+}
+
 std::pair<float, float> Reference::compute_reference_mean_and_standard_deviation(const TensorShape &shape)
 {
     // Create reference
@@ -100,6 +123,7 @@ std::pair<float, float> Reference::compute_reference_mean_and_standard_deviation
 
     return std::make_pair(mean, std_dev);
 }
+
 RawTensor Reference::compute_reference_integral_image(const TensorShape &shape)
 {
     // Create reference
@@ -114,6 +138,7 @@ RawTensor Reference::compute_reference_integral_image(const TensorShape &shape)
 
     return ref_dst;
 }
+
 RawTensor Reference::compute_reference_absolute_difference(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out)
 {
     // Create reference

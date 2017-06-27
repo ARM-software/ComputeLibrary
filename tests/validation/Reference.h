@@ -59,6 +59,21 @@ public:
      * @return Computed raw tensors along x and y axis.
      */
     static std::pair<RawTensor, RawTensor> compute_reference_sobel_5x5(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value);
+    /** Compute reference Harris corners.
+     *
+     * @param[in] shape                 Shape of input tensor
+     * @param[in] threshold             Minimum threshold with which to eliminate Harris Corner scores (computed using the normalized Sobel kernel).
+     * @param[in] min_dist              Radial Euclidean distance for the euclidean distance stage
+     * @param[in] sensitivity           Sensitivity threshold k from the Harris-Stephens equation
+     * @param[in] gradient_size         The gradient window size to use on the input. The implementation supports 3, 5, and 7
+     * @param[in] block_size            The block window size used to compute the Harris Corner score. The implementation supports 3, 5, and 7.
+     * @param[in] border_mode           Border mode to use
+     * @param[in] constant_border_value Constant value to use for borders if border_mode is set to CONSTANT.
+     *
+     * @return Computed corners' keypoints.
+     */
+    static KeyPointArray compute_reference_harris_corners(const TensorShape &shape, float threshold, float min_dist, float sensitivity,
+                                                          int32_t gradient_size, int32_t block_size, BorderMode border_mode, uint8_t constant_border_value);
     /** Compute min max location.
      *
      * @param[in]  shape     Shape of the input tensors.

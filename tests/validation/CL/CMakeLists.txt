@@ -39,6 +39,7 @@ set(arm_compute_test_validation_OPENCL_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/Threshold.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectConvolutionLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/MeanStdDev.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/HarrisCorners.cpp
 )
 
 add_library(arm_compute_test_validation_OPENCL OBJECT

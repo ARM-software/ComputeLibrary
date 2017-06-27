@@ -64,6 +64,25 @@ public:
      *
      */
     static void sobel_5x5(RawTensor &src, RawTensor &dst_x, RawTensor &dst_y, BorderMode border_mode, uint8_t constant_border_value);
+    /** Function to compute reference Harris corners.
+     *
+     * @param[in]  src                   Input tensor
+     * @param[in]  Gx                    Tensor used to compute Sobel along the x axis
+     * @param[in]  Gy                    Tensor used to compute Sobel along the y axis
+     * @param[in]  candidates            Tensor used to store candidate corners
+     * @param[in]  non_maxima            Tensor used to store non_maxima suppressed candidate corners
+     * @param[in]  threshold             Minimum threshold with which to eliminate Harris Corner scores (computed using the normalized Sobel kernel).
+     * @param[in]  min_dist              Radial Euclidean distance for the euclidean distance stage
+     * @param[in]  sensitivity           Sensitivity threshold k from the Harris-Stephens equation
+     * @param[in]  gradient_size         The gradient window size to use on the input. The implementation supports 3, 5, and 7
+     * @param[in]  block_size            The block window size used to compute the Harris Corner score. The implementation supports 3, 5, and 7.
+     * @param[out] corners               Array of keypoints to store the results.
+     * @param[in]  border_mode           Border mode to use
+     * @param[in]  constant_border_value Constant value to use for borders if border_mode is set to CONSTANT.
+     *
+     */
+    static void harris_corners(RawTensor &src, RawTensor &Gx, RawTensor &Gy, const RawTensor &candidates, const RawTensor &non_maxima, float threshold, float min_dist, float sensitivity,
+                               int32_t gradient_size, int32_t block_size, KeyPointArray &corners, BorderMode border_mode, uint8_t constant_border_value);
     /** Function to compute the min max values and their location in a tensor.
      *
      * @param[in]  src       Input tensor.

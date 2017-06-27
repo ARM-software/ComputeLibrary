@@ -47,6 +47,7 @@ set(arm_compute_test_validation_NEON_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/FullyConnectedLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Gaussian3x3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GEMM.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/HarrisCorners.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/IntegralImage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/NormalizationLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PixelWiseMultiplication.cpp

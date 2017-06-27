@@ -66,7 +66,7 @@ public:
 
         ARM_COMPUTE_ERROR_ON(ptr == nullptr);
 
-        return ptr[offset];
+        return ptr[offset]; // NOLINT
     }
 
     int num_elements() const

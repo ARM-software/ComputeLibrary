@@ -26,6 +26,7 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/FixedPoint.h"
+#include "arm_compute/core/IArray.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "tests/IAccessor.h"
@@ -39,6 +40,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iomanip>
+#include <vector>
 
 namespace arm_compute
 {
@@ -434,6 +436,27 @@ void validate(float target, float ref, float tolerance_abs_error, float toleranc
     BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
     BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
     BOOST_TEST(equal);
+}
+
+void validate(IArray<KeyPoint> &target, IArray<KeyPoint> &ref)
+{
+    BOOST_TEST(target.num_values() == ref.num_values());
+
+    for(size_t i = 0; i < target.num_values(); ++i)
+    {
+        KeyPoint *ref_val = std::find_if(ref.buffer(), ref.buffer() + ref.num_values(), [&target, i](KeyPoint key)
+        {
+            return key.x == target.at(i).x && key.y == target.at(i).y;
+        });
+
+        BOOST_TEST(ref_val != ref.buffer() + ref.num_values());
+        BOOST_TEST(target.at(i).tracking_status == ref_val->tracking_status);
+
+        validate(target.at(i).strength, ref_val->strength);
+        validate(target.at(i).scale, ref_val->scale);
+        validate(target.at(i).orientation, ref_val->orientation);
+        validate(target.at(i).error, ref_val->error);
+    }
 }
 } // namespace validation
 } // namespace test

@@ -105,8 +105,8 @@ void vector_matrix_multiply(const T *in, const T *weights, const T *bias, T *out
 }
 
 // Return a tensor element at a specified coordinate with different border modes
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-T tensor_elem_at(const Tensor<T> &in, Coordinates &coord, BorderMode border_mode, T constant_border_value)
+template <typename T>
+T tensor_elem_at(const Tensor<T> &in, Coordinates coord, BorderMode border_mode, T constant_border_value)
 {
     const int x      = coord.x();
     const int y      = coord.y();
@@ -120,17 +120,14 @@ T tensor_elem_at(const Tensor<T> &in, Coordinates &coord, BorderMode border_mode
         {
             coord.set(0, std::max(0, std::min(x, width - 1)));
             coord.set(1, std::max(0, std::min(y, height - 1)));
-            return in[coord2index(in.shape(), coord)];
         }
         else
         {
             return constant_border_value;
         }
     }
-    else
-    {
-        return in[coord2index(in.shape(), coord)];
-    }
+
+    return in[coord2index(in.shape(), coord)];
 }
 
 /** Apply 2D spatial filter on a single element of @p in at coordinates @p coord
@@ -207,6 +204,209 @@ void sobel_5x5(Tensor<T1> &in, Tensor<T2> &out_x, Tensor<T2> &out_y, BorderMode 
 
         apply_2d_spatial_filter(id, in, out_x, TensorShape(5U, 5U), sobel_x.data(), 1.f, border_mode, constant_border_value);
         apply_2d_spatial_filter(id, in, out_y, TensorShape(5U, 5U), sobel_y.data(), 1.f, border_mode, constant_border_value);
+    }
+}
+
+// Sobel 7x7
+template <typename T1, typename T2>
+void sobel_7x7(Tensor<T1> &in, Tensor<T2> &out_x, Tensor<T2> &out_y, BorderMode border_mode, uint8_t constant_border_value)
+{
+    const std::array<int8_t, 49> sobel_x{ {
+            -1, -4, -5, 0, 5, 4, 1,
+            -6, -24, -30, 0, 30, 24, 6,
+            -15, -60, -75, 0, 75, 60, 15,
+            -20, -80, -100, 0, 100, 80, 20,
+            -15, -60, -75, 0, 75, 60, 15,
+            -6, -24, -30, 0, 30, 24, 6,
+            -1, -4, -5, 0, 5, 4, 1
+        } };
+
+    const std::array<int8_t, 49> sobel_y{ {
+            -1, -6, -15, -20, -15, -6, -1,
+            -4, -24, -60, -80, -60, -24, -4,
+            -5, -30, -75, -100, -75, -30, -5,
+            0, 0, 0, 0, 0, 0, 0,
+            5, 30, 75, 100, 75, 30, 5,
+            4, 24, 60, 80, 60, 24, 4,
+            1, 6, 15, 20, 15, 6, 1
+        } };
+
+    for(int element_idx = 0; element_idx < in.num_elements(); ++element_idx)
+    {
+        const Coordinates id = index2coord(in.shape(), element_idx);
+
+        apply_2d_spatial_filter(id, in, out_x, TensorShape(7U, 7U), sobel_x.data(), 1.f, border_mode, constant_border_value);
+        apply_2d_spatial_filter(id, in, out_y, TensorShape(7U, 7U), sobel_y.data(), 1.f, border_mode, constant_border_value);
+    }
+}
+
+template <typename T>
+void non_maxima_suppression_3x3(Tensor<T> &in, Tensor<T> &out, BorderMode border_mode)
+{
+    for(int i = 0; i < in.num_elements(); ++i)
+    {
+        Coordinates coord = index2coord(in.shape(), i);
+        int         x     = coord.x();
+        int         y     = coord.y();
+
+        if(in[i] >= tensor_elem_at(in, Coordinates(x - 1, y - 1), border_mode, 0.f) && in[i] >= tensor_elem_at(in, Coordinates(x, y - 1), border_mode, 0.f)
+           && in[i] >= tensor_elem_at(in, Coordinates(x + 1, y - 1), border_mode, 0.f) && in[i] >= tensor_elem_at(in, Coordinates(x - 1, y), border_mode, 0.f)
+           && in[i] > tensor_elem_at(in, Coordinates(x + 1, y), border_mode, 0.f) && in[i] > tensor_elem_at(in, Coordinates(x - 1, y + 1), border_mode, 0.f)
+           && in[i] > tensor_elem_at(in, Coordinates(x, y + 1), border_mode, 0.f) && in[i] > tensor_elem_at(in, Coordinates(x + 1, y + 1), border_mode, 0.f))
+        {
+            out[i] = in[i];
+        }
+        else
+        {
+            out[i] = 0;
+        }
+    }
+}
+
+// Harris corners
+template <typename T1, typename T2, typename T3>
+void harris_corners(Tensor<T1> &in, Tensor<T2> &Gx, Tensor<T2> &Gy, Tensor<T3> &candidates, Tensor<T3> &non_maxima, float threshold, float min_dist, float sensitivity,
+                    int32_t gradient_size, int32_t block_size, KeyPointArray &corners, BorderMode border_mode, uint8_t constant_border_value)
+{
+    ARM_COMPUTE_ERROR_ON(block_size != 3 && block_size != 5 && block_size != 7);
+
+    ValidRegion valid_region = shape_to_valid_region(candidates.shape());
+    float       norm_factor  = 0.f;
+
+    // Sobel
+    switch(gradient_size)
+    {
+        case 3:
+            sobel_3x3(in, Gx, Gy, border_mode, constant_border_value);
+            norm_factor = 1.f / (4 * 255 * block_size);
+            break;
+        case 5:
+            sobel_5x5(in, Gx, Gy, border_mode, constant_border_value);
+            norm_factor = 1.f / (16 * 255 * block_size);
+            break;
+        case 7:
+            sobel_7x7(in, Gx, Gy, border_mode, constant_border_value);
+            norm_factor = 1.f / (64 * 255 * block_size);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Gradient size not supported.");
+    }
+
+    //Calculate scores
+    for(int i = 0; i < in.num_elements(); ++i)
+    {
+        Coordinates in_coord = index2coord(in.shape(), i);
+
+        float Gx2 = 0;
+        float Gy2 = 0;
+        float Gxy = 0;
+
+        // Calculate Gx^2, Gy^2 and Gxy within the given window
+        for(int y = in_coord.y() - block_size / 2; y <= in_coord.y() + block_size / 2; ++y)
+        {
+            for(int x = in_coord.x() - block_size / 2; x <= in_coord.x() + block_size / 2; ++x)
+            {
+                Coordinates block_coord(x, y);
+
+                float norm_gx = tensor_elem_at(Gx, block_coord, border_mode, static_cast<T2>(constant_border_value)) * norm_factor;
+                float norm_gy = tensor_elem_at(Gy, block_coord, border_mode, static_cast<T2>(constant_border_value)) * norm_factor;
+
+                Gx2 += std::pow(norm_gx, 2);
+                Gy2 += std::pow(norm_gy, 2);
+                Gxy += norm_gx * norm_gy;
+            }
+        }
+
+        float trace2   = std::pow(Gx2 + Gy2, 2);
+        float det      = Gx2 * Gy2 - std::pow(Gxy, 2);
+        float response = det - sensitivity * trace2;
+
+        if(response > threshold)
+        {
+            candidates[i] = response;
+        }
+        else
+        {
+            candidates[i] = 0.f;
+        }
+    }
+
+    // Update valid region and remove candidates on borders for border_mode == UNDEFINED
+    if(border_mode == BorderMode::UNDEFINED)
+    {
+        valid_region = shape_to_valid_region(candidates.shape(), true, BorderSize((gradient_size / 2) + (block_size / 2)));
+
+        for(int i = 0; i < candidates.num_elements(); ++i)
+        {
+            if(!is_in_valid_region(valid_region, index2coord(candidates.shape(), i)))
+            {
+                candidates[i] = 0.f;
+            }
+        }
+    }
+
+    // Suppress non-maxima candidates
+    non_maxima_suppression_3x3(candidates, non_maxima, border_mode != BorderMode::UNDEFINED ? BorderMode::CONSTANT : BorderMode::UNDEFINED);
+    if(border_mode == BorderMode::UNDEFINED)
+    {
+        valid_region = shape_to_valid_region(non_maxima.shape(), true, BorderSize((gradient_size / 2) + (block_size / 2) + 1));
+    }
+
+    // Create vector of candidate corners
+    KeyPointArray candidates_vector(corners.max_num_values());
+    for(int i = 0; i < non_maxima.num_elements(); ++i)
+    {
+        Coordinates coord = index2coord(non_maxima.shape(), i);
+
+        if(non_maxima[i] != 0.f && is_in_valid_region(valid_region, coord))
+        {
+            KeyPoint corner;
+            corner.x               = coord.x();
+            corner.y               = coord.y();
+            corner.tracking_status = 1;
+            corner.strength        = non_maxima[i];
+
+            corner.scale       = 0.f;
+            corner.orientation = 0.f;
+            corner.error       = 0.f;
+
+            candidates_vector.push_back(corner);
+        }
+    }
+
+    // If there are any candidates, sort them by strength and add them to the output corners vector if there are no stronger corners within the given euclidean radius
+    if(candidates_vector.num_values() > 0)
+    {
+        std::sort(candidates_vector.buffer(), candidates_vector.buffer() + candidates_vector.num_values(), [](KeyPoint a, KeyPoint b)
+        {
+            return a.strength > b.strength;
+        });
+        corners.push_back(candidates_vector.at(0));
+
+        for(size_t j = 0; j < candidates_vector.num_values(); ++j)
+        {
+            bool    found = false;
+            int32_t x     = candidates_vector.at(j).x;
+            int32_t y     = candidates_vector.at(j).y;
+
+            for(size_t i = 0; i < corners.num_values(); ++i)
+            {
+                int32_t corners_x = corners.at(i).x;
+                int32_t corners_y = corners.at(i).y;
+
+                // Euclidean distance
+                if(std::sqrt((std::pow(x - corners_x, 2) + std::pow(y - corners_y, 2))) < min_dist)
+                {
+                    found = true;
+                }
+            }
+
+            // If no stronger corners within the given euclidean radius
+            if(!found)
+            {
+                corners.push_back(candidates_vector.at(j));
+            }
+        }
     }
 }
 

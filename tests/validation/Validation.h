@@ -181,6 +181,12 @@ void validate_min_max_loc(T min, T ref_min, T max, T ref_max,
         BOOST_TEST(same_coords != ref_max_loc.buffer() + max_count);
     }
 }
+
+/** Validate KeyPoint arrays.
+ *
+ * - All values should match
+ */
+void validate(IArray<KeyPoint> &target, IArray<KeyPoint> &ref);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -57,10 +57,7 @@ inline void check_corner(float x, float y, float strength, InternalKeypoint *out
 
 inline void corner_candidates(const float *__restrict input, InternalKeypoint *__restrict output, int32_t x, int32_t y, int32_t *num_corner_candidates, std::mutex *corner_candidates_mutex)
 {
-    check_corner(x + 0, y, *(input + 0), output, num_corner_candidates, corner_candidates_mutex);
-    check_corner(x + 1, y, *(input + 1), output, num_corner_candidates, corner_candidates_mutex);
-    check_corner(x + 2, y, *(input + 2), output, num_corner_candidates, corner_candidates_mutex);
-    check_corner(x + 3, y, *(input + 3), output, num_corner_candidates, corner_candidates_mutex);
+    check_corner(x, y, *input, output, num_corner_candidates, corner_candidates_mutex);
 }
 } // namespace
 
@@ -86,7 +83,7 @@ void CPPCornerCandidatesKernel::configure(const IImage *input, InternalKeypoint 
     _output                = output;
     _num_corner_candidates = num_corner_candidates;
 
-    const unsigned int num_elems_processed_per_iteration = 4;
+    const unsigned int num_elems_processed_per_iteration = 1;
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));

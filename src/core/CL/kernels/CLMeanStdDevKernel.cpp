@@ -88,8 +88,7 @@ void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffe
     constexpr unsigned int num_elems_processed_per_iteration_x = 8;
     const unsigned int     num_elems_processed_per_iteration_y = input->info()->dimension(1);
 
-    _border_size = BorderSize(std::max(static_cast<int>(num_elems_processed_per_iteration_x) - static_cast<int>(input->info()->dimension(0)),
-                                       static_cast<int>(input->info()->dimension(0) % num_elems_processed_per_iteration_x)));
+    _border_size = BorderSize(ceil_to_multiple(input->info()->dimension(0), num_elems_processed_per_iteration_x) - input->info()->dimension(0));
 
     Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);

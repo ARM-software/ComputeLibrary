@@ -110,8 +110,7 @@ void NEMeanStdDevKernel::configure(const IImage *input, float *mean, uint64_t *g
 
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
-    _border_size = BorderSize(std::max(static_cast<int>(num_elems_processed_per_iteration) - static_cast<int>(input->info()->dimension(0)),
-                                       static_cast<int>(input->info()->dimension(0) % num_elems_processed_per_iteration)));
+    _border_size = BorderSize(ceil_to_multiple(input->info()->dimension(0), num_elems_processed_per_iteration) - input->info()->dimension(0));
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
