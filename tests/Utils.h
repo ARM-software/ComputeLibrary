@@ -475,25 +475,6 @@ inline ValidRegion shape_to_valid_region(TensorShape shape, bool border_undefine
     return ValidRegion(std::move(anchor), std::move(shape));
 }
 
-/** Create a valid region covering the tensor shape with UNDEFINED border mode and specified border size.
- *
- * @param[in] shape       Shape used as size of the valid region.
- * @param[in] border_size Border size used to specify the region to exclude.
- *
- * @return A valid region starting at (@p border_size.left, @p border_size.top, ...) with reduced size of @p shape.
- */
-inline ValidRegion shape_to_valid_region_undefined_border(TensorShape shape, BorderSize border_size)
-{
-    ARM_COMPUTE_ERROR_ON(shape.num_dimensions() < 2);
-    Coordinates anchor;
-    anchor.set(std::max<int>(0, shape.num_dimensions() - 1), 0);
-    anchor.set(0, border_size.left);
-    anchor.set(1, border_size.top);
-    shape.set(0, shape.x() - border_size.left - border_size.right);
-    shape.set(1, shape.y() - border_size.top - border_size.bottom);
-    return ValidRegion(std::move(anchor), shape);
-}
-
 /** Write the value after casting the pointer according to @p data_type.
  *
  * @warning The type of the value must match the specified data type.

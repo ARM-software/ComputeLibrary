@@ -52,6 +52,9 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
+constexpr unsigned int filter_size = 3;              /** Size of the kernel/filter in number of elements. */
+constexpr BorderSize   border_size(filter_size / 2); /** Border size of the kernel/filter around its central element. */
+
 /** Compute Neon gaussian3x3 filter.
  *
  * @param[in] shape                 Shape of the input and output tensors.
@@ -107,7 +110,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * BorderMode
 
     // Validate valid region
     const ValidRegion src_valid_region = shape_to_valid_region(shape);
-    const ValidRegion dst_valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(1));
+    const ValidRegion dst_valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size);
     validate(src.info()->valid_region(), src_valid_region);
     validate(dst.info()->valid_region(), dst_valid_region);
 
@@ -141,7 +144,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * BorderModes(), shape, border_mode
     RawTensor ref_dst = Reference::compute_reference_gaussian3x3(shape, border_mode, border_value);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(1)));
+    validate(NEAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size));
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -158,7 +161,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * BorderModes(), shape, border_mode
     RawTensor ref_dst = Reference::compute_reference_gaussian3x3(shape, border_mode, border_value);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(1)));
+    validate(NEAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -125,11 +125,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes())
 
     // Validate valid region
     const ValidRegion src_valid_region = shape_to_valid_region(shape);
-    ValidRegion       dst_valid_region = shape_to_valid_region(shape);
-    if(border_mode == BorderMode::UNDEFINED)
-    {
-        dst_valid_region = shape_to_valid_region_undefined_border(shape, BorderSize(half_mask_size));
-    }
+    const ValidRegion dst_valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(half_mask_size));
 
     validate(src.info()->valid_region(), src_valid_region);
     validate(dst.info()->valid_region(), dst_valid_region);
@@ -171,11 +167,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes()
     RawTensor ref_dst = Reference::compute_reference_non_linear_filter(shape, function, mask_size, pattern, mask, border_mode, constant_border_value);
 
     // Calculate valid region
-    ValidRegion valid_region = shape_to_valid_region(shape);
-    if(border_mode == BorderMode::UNDEFINED)
-    {
-        valid_region = shape_to_valid_region_undefined_border(shape, BorderSize(static_cast<int>(mask_size / 2)));
-    }
+    const ValidRegion valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(static_cast<int>(mask_size / 2)));
 
     // Validate output
     validate(NEAccessor(dst), ref_dst, valid_region);
@@ -202,11 +194,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes()
     RawTensor ref_dst = Reference::compute_reference_non_linear_filter(shape, function, mask_size, pattern, mask, border_mode, constant_border_value);
 
     // Calculate valid region
-    ValidRegion valid_region = shape_to_valid_region(shape);
-    if(border_mode == BorderMode::UNDEFINED)
-    {
-        valid_region = shape_to_valid_region_undefined_border(shape, BorderSize(static_cast<int>(mask_size / 2)));
-    }
+    const ValidRegion valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(static_cast<int>(mask_size / 2)));
 
     // Validate output
     validate(NEAccessor(dst), ref_dst, valid_region);

@@ -53,6 +53,9 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
+constexpr unsigned int filter_size = 5;              /** Size of the kernel/filter in number of elements. */
+constexpr BorderSize   border_size(filter_size / 2); /** Border size of the kernel/filter around its central element. */
+
 /** Compute CL Sobel 5x5 function.
  *
  * @param[in] shape                 Shape of the input and output tensors.
@@ -121,11 +124,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * BorderMode
 
     // Validate valid region
     const ValidRegion src_valid_region = shape_to_valid_region(shape);
-    ValidRegion       dst_valid_region = shape_to_valid_region(shape);
-    if(border_mode == BorderMode::UNDEFINED)
-    {
-        dst_valid_region = shape_to_valid_region_undefined_border(shape, BorderSize(2));
-    }
+    const ValidRegion dst_valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size);
 
     validate(src.info()->valid_region(), src_valid_region);
     validate(dst_x.info()->valid_region(), dst_valid_region);
@@ -168,11 +167,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * BorderModes(), shape, border_mode
     std::pair<RawTensor, RawTensor> ref_dst = Reference::compute_reference_sobel_5x5(shape, border_mode, constant_border_value);
 
     // Calculate valid region
-    ValidRegion valid_region = shape_to_valid_region(shape);
-    if(border_mode == BorderMode::UNDEFINED)
-    {
-        valid_region = shape_to_valid_region_undefined_border(shape, BorderSize(2));
-    }
+    const ValidRegion valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size);
 
     // Validate output
     validate(CLAccessor(dst.first), ref_dst.first, valid_region);
@@ -199,11 +194,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * BorderModes(), shape, border_mode
     std::pair<RawTensor, RawTensor> ref_dst = Reference::compute_reference_sobel_5x5(shape, border_mode, constant_border_value);
 
     // Calculate valid region
-    ValidRegion valid_region = shape_to_valid_region(shape);
-    if(border_mode == BorderMode::UNDEFINED)
-    {
-        valid_region = shape_to_valid_region_undefined_border(shape, BorderSize(2));
-    }
+    const ValidRegion valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size);
 
     // Validate output
     validate(CLAccessor(dst.first), ref_dst.first, valid_region);

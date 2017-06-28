@@ -716,7 +716,7 @@ template <typename T>
 void non_linear_filter(const Tensor<T> &in, Tensor<T> &out, NonLinearFilterFunction function, unsigned int mask_size,
                        MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value)
 {
-    ARM_COMPUTE_ERROR_ON(MatrixPattern::OTHER == pattern && nullptr == mask);
+    ARM_COMPUTE_ERROR_ON(pattern == MatrixPattern::OTHER && mask == nullptr);
 
     using intermediate_type = typename common_promoted_signed_type<T>::intermediate_type;
 
@@ -725,11 +725,7 @@ void non_linear_filter(const Tensor<T> &in, Tensor<T> &out, NonLinearFilterFunct
     std::vector<intermediate_type> vals(sq_mask_size);
     intermediate_type              current_value = 0;
 
-    ValidRegion valid_region = shape_to_valid_region(in.shape());
-    if(border_mode == BorderMode::UNDEFINED)
-    {
-        valid_region = shape_to_valid_region_undefined_border(in.shape(), BorderSize(half_mask_size));
-    }
+    const ValidRegion valid_region = shape_to_valid_region(in.shape(), border_mode == BorderMode::UNDEFINED, BorderSize(half_mask_size));
 
     for(int element_idx = 0, count = 0, index = 0; element_idx < in.num_elements(); ++element_idx, count = 0, index = 0)
     {
