@@ -161,14 +161,10 @@ CPPScheduler &CPPScheduler::get()
     return scheduler;
 }
 
-unsigned int CPPScheduler::num_threads() const
-{
-    return _num_threads;
-}
-
 CPPScheduler::CPPScheduler()
     : _num_threads(std::thread::hardware_concurrency()),
-      _threads(std::unique_ptr<Thread[], void(*)(Thread *)>(new Thread[std::thread::hardware_concurrency() - 1], delete_threads))
+      _threads(std::unique_ptr<Thread[], void(*)(Thread *)>(new Thread[std::thread::hardware_concurrency() - 1], delete_threads)),
+      _target(CPUTarget::INTRINSICS)
 {
 }
 
@@ -176,6 +172,21 @@ void CPPScheduler::set_num_threads(unsigned int num_threads)
 {
     const unsigned int num_cores = std::thread::hardware_concurrency();
     _num_threads                 = num_threads == 0 ? num_cores : num_threads;
+}
+
+unsigned int CPPScheduler::num_threads() const
+{
+    return _num_threads;
+}
+
+void CPPScheduler::set_target(CPUTarget target)
+{
+    _target = target;
+}
+
+CPUTarget CPPScheduler::target() const
+{
+    return _target;
 }
 
 void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)

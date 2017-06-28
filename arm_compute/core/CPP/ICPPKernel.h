@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_ICPPKERNEL_H__
 #define __ARM_COMPUTE_ICPPKERNEL_H__
 
+#include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/IKernel.h"
 
 namespace arm_compute
@@ -48,6 +49,18 @@ public:
      * @param[in] window Region on which to execute the kernel. (Must be a region of the window returned by window())
      */
     virtual void run(const Window &window) = 0;
+
+    /** Sets the target CPU architecture.
+     *
+     * @param[in] target CPU target.
+     */
+    void set_target(CPUTarget target)
+    {
+        _target = target;
+    }
+
+protected:
+    CPUTarget _target{ CPUTarget::INTRINSICS };
 };
 }
 #endif /*__ARM_COMPUTE_ICPPKERNEL_H__ */
