@@ -45,6 +45,9 @@ namespace
 {
 const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 const float tolerance_q   = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const float tolerance_f16 = 0.01f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+#endif                             /*ARM_COMPUTE_ENABLE_FP16*/
 
 Tensor compute_fully_connected_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
                                      bool transpose_weights, int fixed_point_position)
@@ -82,7 +85,7 @@ Tensor compute_fully_connected_layer(const TensorShape &input_shape, const Tenso
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    if(dt == DataType::F32)
+    if(dt == DataType::F16 || dt == DataType::F32)
     {
         std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
         library->fill(NEAccessor(src), distribution, 0);
@@ -152,6 +155,25 @@ BOOST_DATA_TEST_CASE(Configuration,
     validate(bias.info()->valid_region(), bias_valid_region);
     validate(dst.info()->valid_region(), dst_valid_region);
 }
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall,
+                     SmallFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::F16 }),
+                     fc_set, dt)
+{
+    // Compute function
+    Tensor dst = compute_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, 0);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, 0);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst, tolerance_f16);
+}
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))

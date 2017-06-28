@@ -45,7 +45,7 @@ NEGEMMMatrixAccumulateBiasesKernel::NEGEMMMatrixAccumulateBiasesKernel()
 
 void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor *biases)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::QS16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(biases, accum);
     ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() != 1);
@@ -109,6 +109,27 @@ void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window)
             in0_out, in1);
             break;
         }
+#ifdef ARM_COMPUTE_ENABLE_FP16
+        case DataType::F16:
+        {
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const float16x8x2_t accum  = vld2q_f16(reinterpret_cast<const float16_t *>(in0_out.ptr()));
+                const float16x8x2_t biases = vld2q_f16(reinterpret_cast<const float16_t *>(in1.ptr()));
+                const float16x8x2_t res =
+                {
+                    {
+                        vaddq_f16(accum.val[0], biases.val[0]),
+                        vaddq_f16(accum.val[1], biases.val[1])
+                    }
+                };
+
+                vst2q_f16(reinterpret_cast<float16_t *>(in0_out.ptr()), res);
+            },
+            in0_out, in1);
+            break;
+        }
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         case DataType::QS8:
         {
             execute_window_loop(window, [&](const Coordinates & id)
