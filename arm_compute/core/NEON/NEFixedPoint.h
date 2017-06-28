@@ -46,6 +46,7 @@ using qint16x8_t   = int16x8_t;   /**< 16 bit fixed point vector with 8 elements
 using qint16x8x2_t = int16x8x2_t; /**< 16 bit fixed point vector with 16 elements */
 using qint16x8x3_t = int16x8x3_t; /**< 16 bit fixed point vector with 24 elements */
 using qint16x8x4_t = int16x8x4_t; /**< 16 bit fixed point vector with 32 elements */
+using qint32x2_t   = int32x2_t;   /**< 32 bit fixed point vector with 2 elements */
 using qint32x4_t   = int32x4_t;   /**< 32 bit fixed point vector with 4 elements */
 
 /** Get the lower half of a 16 elements vector

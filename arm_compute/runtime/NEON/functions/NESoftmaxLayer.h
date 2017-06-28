@@ -50,7 +50,7 @@ public:
     NESoftmaxLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      */
     void configure(ITensor *input, ITensor *output);

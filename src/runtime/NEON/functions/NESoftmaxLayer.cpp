@@ -38,7 +38,7 @@ NESoftmaxLayer::NESoftmaxLayer()
 
 void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F32);
 
     // Create intermediate tensors shapes
     TensorInfo tensor_info_tmp(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
@@ -54,7 +54,7 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
     _max_kernel.configure(input, &_max);
     _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum);
     _norm_kernel.configure(&_tmp, &_sum, output);
-    _fill_border_kernel.configure(input, _max_kernel.border_size(), BorderMode::CONSTANT, PixelValue(-FLT_MAX));
+    _fill_border_kernel.configure(input, _max_kernel.border_size(), BorderMode::REPLICATE);
 
     // Allocate intermediate tensors
     _tmp.allocator()->allocate();

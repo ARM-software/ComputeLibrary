@@ -90,11 +90,20 @@ inline qint8_t sqadd_qs8(qint8_t a, qint8_t b)
 
 inline qint16_t sqadd_qs16(qint16_t a, qint16_t b)
 {
-    // We need to store the temporary result in qint16_t otherwise we cannot evaluate the overflow
+    // We need to store the temporary result in qint32_t otherwise we cannot evaluate the overflow
     qint32_t tmp = (static_cast<qint32_t>(a) + static_cast<qint32_t>(b));
 
     // Saturate the result in case of overflow and cast to qint16_t
     return saturate_convert<qint32_t, qint16_t>(tmp);
+}
+
+inline qint32_t sqadd_qs32(qint32_t a, qint32_t b)
+{
+    // We need to store the temporary result in qint64_t otherwise we cannot evaluate the overflow
+    qint64_t tmp = (static_cast<qint64_t>(a) + static_cast<qint64_t>(b));
+
+    // Saturate the result in case of overflow and cast to qint32_t
+    return saturate_convert<qint64_t, qint32_t>(tmp);
 }
 
 inline qint8_t ssub_qs8(qint8_t a, qint8_t b)
@@ -387,5 +396,11 @@ inline qint8_t sqmovn_qs16(qint16_t a)
 {
     // Saturate the result in case of overflow and cast to qint8_t
     return saturate_convert<qint16_t, qint8_t>(a);
+}
+
+inline qint16_t sqmovn_qs32(qint32_t a)
+{
+    // Saturate the result in case of overflow and cast to qint16_t
+    return saturate_convert<qint32_t, qint16_t>(a);
 }
 }

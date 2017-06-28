@@ -29,6 +29,7 @@ namespace arm_compute
 using qint8_t  = int8_t;  /**< 8 bit fixed point scalar value */
 using qint16_t = int16_t; /**< 16 bit fixed point scalar value */
 using qint32_t = int32_t; /**< 32 bit fixed point scalar value */
+using qint64_t = int64_t; /**< 64 bit fixed point scalar value */
 
 /** 8 bit fixed point scalar saturating shift left
  *
@@ -99,6 +100,15 @@ qint8_t sqadd_qs8(qint8_t a, qint8_t b);
  * @return The result of the 16 bit fixed point addition. The result is saturated in case of overflow
  */
 qint16_t sqadd_qs16(qint16_t a, qint16_t b);
+
+/** 32 bit fixed point scalar saturating add
+ *
+ * @param[in] a First 32 bit fixed point input
+ * @param[in] b Second 32 bit fixed point input
+ *
+ * @return The result of the 32 bit fixed point addition. The result is saturated in case of overflow
+ */
+qint32_t sqadd_qs32(qint32_t a, qint32_t b);
 
 /** 8 bit fixed point scalar subtraction
  *
@@ -332,6 +342,14 @@ qint16_t sqcvt_qs16_f32(float a, int fixed_point_position);
  * @return The narrowing conversion to 8 bit
  */
 qint8_t sqmovn_qs16(qint16_t a);
+
+/** Scalar saturating move and narrow.
+ *
+ * @param[in] a Input to convert to 16 bit fixed point
+ *
+ * @return The narrowing conversion to 16 bit
+ */
+qint16_t sqmovn_qs32(qint32_t a);
 }
 #include "arm_compute/core/FixedPoint.inl"
 #endif /* __ARM_COMPUTE_FIXEDPOINT_H__ */
