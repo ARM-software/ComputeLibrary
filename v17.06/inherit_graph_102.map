@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1_program_options.xhtml" title="Defines available commandline arguments and allows to parse them. " alt="" coords="5,31,121,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1performance_1_1_performance_program_options.xhtml" title="Subclass of ProgramOptions that adds performance specific options. " alt="" coords="169,5,360,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1validation_1_1_validation_program_options.xhtml" title="Subclass of ProgramOptions that adds validation specific options. " alt="" coords="178,56,351,83"/>
+</map>

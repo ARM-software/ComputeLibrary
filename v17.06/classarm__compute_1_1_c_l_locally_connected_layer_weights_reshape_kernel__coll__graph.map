@@ -1,0 +1,5 @@
+<map id="CLLocallyConnectedLayerWeightsReshapeKernel" name="CLLocallyConnectedLayerWeightsReshapeKernel">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml" title="CLWeightsReshapeKernel" alt="" coords="29,155,205,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="77,80,157,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="85,5,148,32"/>
+</map>
