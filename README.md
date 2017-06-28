@@ -1,6 +1,10 @@
 
 Please report issues here: https://github.com/ARM-software/ComputeLibrary/issues
 
+Related projects:
+
+- [Caffe on Compute Library](https://github.com/OAID/caffeOnACL)
+
 Documentation available here:
 
 - [v17.06](https://arm-software.github.io/ComputeLibrary/v17.06/)
