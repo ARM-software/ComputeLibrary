@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/Array.h"
 
 #include <algorithm>
+#include <vector>
 
 namespace arm_compute
 {

@@ -26,6 +26,7 @@
 
 #include "RawTensor.h"
 #include "Types.h"
+#include <vector>
 
 #include <vector>
 

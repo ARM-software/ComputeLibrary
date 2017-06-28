@@ -39,6 +39,7 @@ if __name__ == "__main__":
                    ("Validation.cpp" in line and "parameter 'expected_labels' is unused" in line) or
                    ("Reference.cpp" in line and "parameter 'rois' is unused" in line) or
                    ("ReferenceCPP.cpp" in line and "parameter 'rois' is unused" in line) or
+                   ("NEGEMMMatrixMultiplyKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                    "3rdparty" in line):
                     continue
 

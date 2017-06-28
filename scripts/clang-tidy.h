@@ -1,5 +1,30 @@
 #include <arm_neon.h>
 
+inline float16x8_t vmulq_lane_f16 (float16x8_t, float16x4_t, const int)
+{
+  return vdupq_n_f16(0);
+}
+
+inline float16x4_t vmul_f16 (float16x4_t, float16x4_t)
+{
+  return vdup_n_u16(0);
+}
+
+inline float16x4_t vadd_f16 (float16x4_t, float16x4_t)
+{
+  return vdup_n_u16(0);
+}
+
+inline float16x4_t vmul_lane_f16 (float16x4_t, float16x4_t, const int)
+{
+  return vdup_n_u16(0);
+}
+
+inline float16x4_t vmul_n_f16 (float16x4_t, float16_t)
+{
+  return vdup_n_u16(0);
+}
+
 inline float16x8_t vcvtq_f16_u16(uint16x8_t)
 {
   return vdupq_n_f16(0);

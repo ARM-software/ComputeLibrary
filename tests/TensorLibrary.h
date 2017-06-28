@@ -505,7 +505,7 @@ void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             fill(tensor, distribution_f16, seed_offset);
             break;
         }
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         case DataType::F32:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number

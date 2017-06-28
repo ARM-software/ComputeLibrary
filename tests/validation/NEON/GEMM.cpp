@@ -77,7 +77,7 @@ Tensor compute_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    if(dt == DataType::F32)
+    if(dt == DataType::F16 || dt == DataType::F32)
     {
         std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
         library->fill(NEAccessor(src1), distribution, 0);
@@ -136,6 +136,24 @@ BOOST_DATA_TEST_CASE(Configuration,
     validate(src3.info()->valid_region(), src3_valid_region);
     validate(dst.info()->valid_region(), dst_valid_region);
 }
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(SmallGEMM, SmallGEMMDataset() * boost::unit_test::data::make(DataType::F16),
+                     gemm_set, dt)
+{
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt);
+
+    // Compute function
+    Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+}
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))

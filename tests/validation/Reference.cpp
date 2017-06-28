@@ -335,7 +335,7 @@ RawTensor Reference::compute_reference_gemm(const TensorShape &src_shape1, const
     RawTensor dst  = library->get(dst_shape, dt, 1, fixed_point_position);
 
     // Fill reference
-    if(dt == DataType::F32)
+    if(dt == DataType::F16 || dt == DataType::F32)
     {
         std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
         library->fill(src1, distribution, 0);
