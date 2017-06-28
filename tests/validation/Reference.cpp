@@ -506,7 +506,7 @@ RawTensor Reference::compute_reference_convolution_layer(const TensorShape &inpu
     RawTensor ref_dst     = library->get(output_shape, dt, 1, fixed_point_position);
 
     // Fill reference
-    if(dt == DataType::F32)
+    if(dt == DataType::F16 || dt == DataType::F32)
     {
         std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
         library->fill(ref_src, distribution, 0);

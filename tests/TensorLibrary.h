@@ -501,7 +501,7 @@ void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
 #if ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
         {
-            std::uniform_real_distribution<float> distribution_f16(std::numeric_limits<float16_t>::lowest(), std::numeric_limits<float16_t>::max());
+            std::uniform_real_distribution<float> distribution_f16(-1000.f, 1000.f);
             fill(tensor, distribution_f16, seed_offset);
             break;
         }

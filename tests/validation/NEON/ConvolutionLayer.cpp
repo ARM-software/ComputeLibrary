@@ -42,7 +42,10 @@ using namespace arm_compute::test::validation;
 namespace
 {
 const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-const float tolerance_qs8 = 3.0f;   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const float tolerance_f16 = 0.01f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+#endif
+const float tolerance_qs8 = 3.0f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
 
 Tensor compute_convolution_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
                                  const PadStrideInfo &conv_info, int fixed_point_position)
@@ -69,7 +72,7 @@ Tensor compute_convolution_layer(const TensorShape &input_shape, const TensorSha
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    if(dt == DataType::F32)
+    if(dt == DataType::F16 || dt == DataType::F32)
     {
         std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
         library->fill(NEAccessor(src), distribution, 0);
@@ -144,7 +147,7 @@ BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
     RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(NEAccessor(dst), ref_dst, tolerance_f16);
 }
 BOOST_AUTO_TEST_SUITE_END()
 #endif

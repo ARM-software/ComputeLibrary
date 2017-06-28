@@ -639,6 +639,7 @@ template <bool multiply_alpha>
 void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, float alpha)
 {
 #ifdef ARM_COMPUTE_ENABLE_FP16
+
     const size_t in_b_stride = input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type());
     const size_t out_stride  = output->info()->strides_in_bytes()[1] / data_size_from_type(output->info()->data_type());
 
