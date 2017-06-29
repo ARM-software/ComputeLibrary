@@ -381,4 +381,34 @@ INVSQRTQ_IMPL(qs8, qs8x16, 16)
 #define INVSQRT_OP_EXPAND_STR(a, type, size, position) invsqrt_sat_##type##x##size((a), (position))
 #define INVSQRT_OP_EXPAND(a, type, size, position) INVSQRT_OP_EXPAND_STR(a, type, size, position)
 
+#define floatx16 float16
+#define float16_TYPE float16
+
+#define CONVERTQ_DOWN_IMPL(in_type, out_type)                                                                                      \
+    inline out_type convert_##out_type##_##in_type(in_type a, int fixed_point_position)                                            \
+    {                                                                                                                              \
+        return CONVERT(a * (1 << fixed_point_position) + select((in_type)-0.5, (in_type)0.5, isgreater(a, (in_type)0)), out_type); \
+    }
+
+CONVERTQ_DOWN_IMPL(float16, qs8x16)
+CONVERTQ_DOWN_IMPL(float16, qs16x16)
+
+#define CONVERTQ_DOWN_SAT_IMPL(in_type, out_type)                                                                                      \
+    inline out_type convert_##out_type##_##in_type##_sat(in_type a, int fixed_point_position)                                          \
+    {                                                                                                                                  \
+        return CONVERT_SAT(a * (1 << fixed_point_position) + select((in_type)-0.5, (in_type)0.5, isgreater(a, (in_type)0)), out_type); \
+    }
+
+CONVERTQ_DOWN_SAT_IMPL(float16, qs8x16)
+CONVERTQ_DOWN_SAT_IMPL(float16, qs16x16)
+
+#define CONVERTQ_UP_IMPL(in_type, out_type)                                             \
+    inline out_type convert_##out_type##_##in_type(in_type a, int fixed_point_position) \
+    {                                                                                   \
+        return CONVERT(a, out_type) / (1 << fixed_point_position);                      \
+    }
+
+CONVERTQ_UP_IMPL(qs8x16, float16)
+CONVERTQ_UP_IMPL(qs16x16, float16)
+
 #endif // ARM_COMPUTE_FIXED_POINT_H
