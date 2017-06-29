@@ -23,9 +23,9 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEMagnitude.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEMagnitudePhaseKernel.h"
 #include "arm_compute/core/Types.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -35,13 +35,13 @@ void NEMagnitude::configure(const ITensor *input1, const ITensor *input2, ITenso
 {
     if(use_fp16)
     {
-        auto k = arm_compute::cpp14::make_unique<NEMagnitudePhaseFP16Kernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
+        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseFP16Kernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
         k->configure(input1, input2, output, nullptr);
         _kernel = std::move(k);
     }
     else
     {
-        auto k = arm_compute::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
+        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
         k->configure(input1, input2, output, nullptr);
         _kernel = std::move(k);
     }

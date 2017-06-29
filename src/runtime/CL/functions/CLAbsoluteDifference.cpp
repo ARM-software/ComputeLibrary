@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLAbsoluteDifference.h"
 
 #include "arm_compute/core/CL/kernels/CLAbsoluteDifferenceKernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 void CLAbsoluteDifference::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLAbsoluteDifferenceKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLAbsoluteDifferenceKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }

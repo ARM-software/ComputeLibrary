@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEHarrisCorners.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEHarrisCornersKernel.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -35,6 +34,7 @@
 #include "arm_compute/runtime/NEON/functions/NESobel5x5.h"
 #include "arm_compute/runtime/NEON/functions/NESobel7x7.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 #include <utility>
@@ -73,28 +73,28 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
     _score.allocator()->init(tensor_info_score);
     _nonmax.allocator()->init(tensor_info_score);
 
-    _corners_list = arm_compute::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
+    _corners_list = arm_compute::support::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
 
     // Set/init Sobel kernel accordingly with gradient_size
     switch(gradient_size)
     {
         case 3:
         {
-            auto k = arm_compute::cpp14::make_unique<NESobel3x3>();
+            auto k = arm_compute::support::cpp14::make_unique<NESobel3x3>();
             k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 5:
         {
-            auto k = arm_compute::cpp14::make_unique<NESobel5x5>();
+            auto k = arm_compute::support::cpp14::make_unique<NESobel5x5>();
             k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 7:
         {
-            auto k = arm_compute::cpp14::make_unique<NESobel7x7>();
+            auto k = arm_compute::support::cpp14::make_unique<NESobel7x7>();
             k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
@@ -112,21 +112,21 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
         {
             case 3:
             {
-                auto k = arm_compute::cpp14::make_unique<NEHarrisScoreFP16Kernel<3>>();
+                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreFP16Kernel<3>>();
                 k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
                 _harris_score = std::move(k);
             }
             break;
             case 5:
             {
-                auto k = arm_compute::cpp14::make_unique<NEHarrisScoreFP16Kernel<5>>();
+                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreFP16Kernel<5>>();
                 k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
                 _harris_score = std::move(k);
             }
             break;
             case 7:
             {
-                auto k = arm_compute::cpp14::make_unique<NEHarrisScoreFP16Kernel<7>>();
+                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreFP16Kernel<7>>();
                 k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
                 _harris_score = std::move(k);
             }
@@ -141,21 +141,21 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
         {
             case 3:
             {
-                auto k = arm_compute::cpp14::make_unique<NEHarrisScoreKernel<3>>();
+                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreKernel<3>>();
                 k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
                 _harris_score = std::move(k);
             }
             break;
             case 5:
             {
-                auto k = arm_compute::cpp14::make_unique<NEHarrisScoreKernel<5>>();
+                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreKernel<5>>();
                 k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
                 _harris_score = std::move(k);
             }
             break;
             case 7:
             {
-                auto k = arm_compute::cpp14::make_unique<NEHarrisScoreKernel<7>>();
+                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreKernel<7>>();
                 k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
                 _harris_score = std::move(k);
             }

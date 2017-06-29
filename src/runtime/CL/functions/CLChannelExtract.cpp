@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLChannelExtract.h"
 
 #include "arm_compute/core/CL/kernels/CLChannelExtractKernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,14 +32,14 @@ using namespace arm_compute;
 
 void CLChannelExtract::configure(const ICLTensor *input, Channel channel, ICLTensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLChannelExtractKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLChannelExtractKernel>();
     k->configure(input, channel, output);
     _kernel = std::move(k);
 }
 
 void CLChannelExtract::configure(const ICLMultiImage *input, Channel channel, ICLImage *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLChannelExtractKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLChannelExtractKernel>();
     k->configure(input, channel, output);
     _kernel = std::move(k);
 }

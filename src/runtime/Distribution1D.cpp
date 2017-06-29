@@ -24,14 +24,14 @@
 #include "arm_compute/runtime/Distribution1D.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <cstdint>
 
 using namespace arm_compute;
 
 Distribution1D::Distribution1D(size_t num_bins, int32_t offset, uint32_t range)
-    : IDistribution1D(num_bins, offset, range), _data(arm_compute::cpp14::make_unique<uint32_t[]>(num_bins))
+    : IDistribution1D(num_bins, offset, range), _data(arm_compute::support::cpp14::make_unique<uint32_t[]>(num_bins))
 {
 }
 

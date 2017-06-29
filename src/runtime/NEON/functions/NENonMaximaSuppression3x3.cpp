@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NENonMaximaSuppression3x3.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NENonMaximaSuppression3x3Kernel.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 void NENonMaximaSuppression3x3::configure(ITensor *input, ITensor *output, BorderMode border_mode)
 {
-    auto k = arm_compute::cpp14::make_unique<NENonMaximaSuppression3x3Kernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NENonMaximaSuppression3x3Kernel>();
     k->configure(input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
 

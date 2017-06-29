@@ -28,6 +28,7 @@
 #include "Tensor.h"
 #include "Types.h"
 #include "Utils.h"
+#include "support/ToolchainSupport.h"
 
 #include "FixedPoint.h"
 #include "Types.h"
@@ -257,7 +258,7 @@ void apply_2d_spatial_filter(Coordinates coord, const Tensor<T1> &in, Tensor<T3>
     }
     coord.set(0, x);
     coord.set(1, y);
-    const double rounded_val = cpp11::trunc(val * static_cast<double>(scale));
+    const double rounded_val = support::cpp11::trunc(val * static_cast<double>(scale));
     out[coord2index(in.shape(), coord)] = saturate_cast<T3>(rounded_val);
 }
 } // namespace
@@ -790,13 +791,13 @@ void pixel_wise_multiplication(const Tensor<T1> &in1, const Tensor<T2> &in2, Ten
             switch(rounding_policy)
             {
                 case(RoundingPolicy::TO_ZERO):
-                    rounded_val = cpp11::trunc(val);
+                    rounded_val = support::cpp11::trunc(val);
                     break;
                 case(RoundingPolicy::TO_NEAREST_UP):
-                    rounded_val = cpp11::round_half_up(val);
+                    rounded_val = round_half_up(val);
                     break;
                 case(RoundingPolicy::TO_NEAREST_EVEN):
-                    rounded_val = cpp11::round_half_even(val);
+                    rounded_val = round_half_even(val);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Unsupported rounding policy");

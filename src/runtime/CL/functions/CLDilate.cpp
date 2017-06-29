@@ -24,8 +24,8 @@
 #include "arm_compute/runtime/CL/functions/CLDilate.h"
 
 #include "arm_compute/core/CL/kernels/CLDilateKernel.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -33,7 +33,7 @@ using namespace arm_compute;
 
 void CLDilate::configure(ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = arm_compute::cpp14::make_unique<CLDilateKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLDilateKernel>();
     k->configure(input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
     _border_handler.configure(input, BorderSize(1), border_mode, PixelValue(constant_border_value));

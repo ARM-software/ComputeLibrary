@@ -24,6 +24,7 @@
 #include "WallClockTimer.h"
 
 #include "Utils.h"
+#include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {
@@ -49,7 +50,7 @@ void WallClockTimer::stop()
 std::unique_ptr<Instrument::IMeasurement> WallClockTimer::get_measurement() const
 {
     const std::chrono::duration<float, std::milli> delta = _stop - _start;
-    return ::arm_compute::test::cpp14::make_unique<Instrument::Measurement<float>>(delta.count());
+    return support::cpp14::make_unique<Instrument::Measurement<float>>(delta.count());
 }
 } // namespace benchmark
 } // namespace test

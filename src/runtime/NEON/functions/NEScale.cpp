@@ -32,6 +32,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 #include <cstddef>
@@ -116,7 +117,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         policy = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
 
-    auto k = arm_compute::cpp14::make_unique<NEScaleKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEScaleKernel>();
 
     // Check if the border mode is UNDEFINED
     const bool border_undefined = border_mode == BorderMode::UNDEFINED;

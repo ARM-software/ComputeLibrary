@@ -24,10 +24,11 @@
 #include "arm_compute/runtime/NEON/functions/NEHOGMultiDetection.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -112,12 +113,12 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
     _num_block_norm_kernel  = input_block_norm.size(); // Number of NEHOGBlockNormalizationKernel kernels to compute
     _num_hog_detect_kernel  = input_hog_detect.size(); // Number of NEHOGDetector functions to compute
 
-    _orient_bin_kernel = arm_compute::cpp14::make_unique<NEHOGOrientationBinningKernel[]>(_num_orient_bin_kernel);
-    _block_norm_kernel = arm_compute::cpp14::make_unique<NEHOGBlockNormalizationKernel[]>(_num_block_norm_kernel);
-    _hog_detect_kernel = arm_compute::cpp14::make_unique<NEHOGDetector[]>(_num_hog_detect_kernel);
-    _non_maxima_kernel = arm_compute::cpp14::make_unique<CPPDetectionWindowNonMaximaSuppressionKernel>();
-    _hog_space         = arm_compute::cpp14::make_unique<Tensor[]>(_num_orient_bin_kernel);
-    _hog_norm_space    = arm_compute::cpp14::make_unique<Tensor[]>(_num_block_norm_kernel);
+    _orient_bin_kernel = arm_compute::support::cpp14::make_unique<NEHOGOrientationBinningKernel[]>(_num_orient_bin_kernel);
+    _block_norm_kernel = arm_compute::support::cpp14::make_unique<NEHOGBlockNormalizationKernel[]>(_num_block_norm_kernel);
+    _hog_detect_kernel = arm_compute::support::cpp14::make_unique<NEHOGDetector[]>(_num_hog_detect_kernel);
+    _non_maxima_kernel = arm_compute::support::cpp14::make_unique<CPPDetectionWindowNonMaximaSuppressionKernel>();
+    _hog_space         = arm_compute::support::cpp14::make_unique<Tensor[]>(_num_orient_bin_kernel);
+    _hog_norm_space    = arm_compute::support::cpp14::make_unique<Tensor[]>(_num_block_norm_kernel);
 
     // Allocate tensors for magnitude and phase
     TensorInfo info_mag(shape_img, Format::S16);

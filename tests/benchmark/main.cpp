@@ -30,6 +30,7 @@
 #include "WallClockTimer.h"
 
 #include "benchmark/benchmark_api.h"
+#include "support/ToolchainSupport.h"
 
 #ifdef OPENCL
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -78,11 +79,11 @@ int main(int argc, char **argv)
 
     if(user_config.seed.is_set())
     {
-        library = cpp14::make_unique<TensorLibrary>(user_config.path.get(), user_config.seed);
+        library = arm_compute::support::cpp14::make_unique<TensorLibrary>(user_config.path.get(), user_config.seed);
     }
     else
     {
-        library = cpp14::make_unique<TensorLibrary>(user_config.path.get());
+        library = arm_compute::support::cpp14::make_unique<TensorLibrary>(user_config.path.get());
     }
 
 #ifdef OPENCL

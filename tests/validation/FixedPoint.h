@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_TEST_VALIDATION_FIXEDPOINT_H__
 
 #include "Utils.h"
+#include "support/ToolchainSupport.h"
 
 #include <cassert>
 #include <cstdint>
@@ -147,7 +148,7 @@ public:
      * @param[in] p   Fixed point precision
      */
     fixed_point(std::string str, uint8_t p)
-        : _value(detail::constant_expr<T>::to_fixed(arm_compute::test::cpp11::stof(str), p)), _fixed_point_position(p)
+        : _value(detail::constant_expr<T>::to_fixed(support::cpp11::stof(str), p)), _fixed_point_position(p)
     {
         assert(p > 0 && p < std::numeric_limits<T>::digits);
     }

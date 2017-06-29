@@ -25,14 +25,14 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 void CLGEMMTranspose1xW::configure(const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLGEMMTranspose1xWKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLGEMMTranspose1xWKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

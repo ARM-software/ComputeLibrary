@@ -25,11 +25,11 @@
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/CL/CLArray.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -114,12 +114,12 @@ void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_h
     _num_block_norm_kernel  = input_block_norm.size(); // Number of CLHOGBlockNormalizationKernel kernels to compute
     _num_hog_detect_kernel  = input_hog_detect.size(); // Number of CLHOGDetector functions to compute
 
-    _orient_bin_kernel = arm_compute::cpp14::make_unique<CLHOGOrientationBinningKernel[]>(_num_orient_bin_kernel);
-    _block_norm_kernel = arm_compute::cpp14::make_unique<CLHOGBlockNormalizationKernel[]>(_num_block_norm_kernel);
-    _hog_detect_kernel = arm_compute::cpp14::make_unique<CLHOGDetector[]>(_num_hog_detect_kernel);
-    _non_maxima_kernel = arm_compute::cpp14::make_unique<CPPDetectionWindowNonMaximaSuppressionKernel>();
-    _hog_space         = arm_compute::cpp14::make_unique<CLTensor[]>(_num_orient_bin_kernel);
-    _hog_norm_space    = arm_compute::cpp14::make_unique<CLTensor[]>(_num_block_norm_kernel);
+    _orient_bin_kernel = arm_compute::support::cpp14::make_unique<CLHOGOrientationBinningKernel[]>(_num_orient_bin_kernel);
+    _block_norm_kernel = arm_compute::support::cpp14::make_unique<CLHOGBlockNormalizationKernel[]>(_num_block_norm_kernel);
+    _hog_detect_kernel = arm_compute::support::cpp14::make_unique<CLHOGDetector[]>(_num_hog_detect_kernel);
+    _non_maxima_kernel = arm_compute::support::cpp14::make_unique<CPPDetectionWindowNonMaximaSuppressionKernel>();
+    _hog_space         = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_orient_bin_kernel);
+    _hog_norm_space    = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_block_norm_kernel);
 
     // Allocate tensors for magnitude and phase
     TensorInfo info_mag(shape_img, Format::S16);

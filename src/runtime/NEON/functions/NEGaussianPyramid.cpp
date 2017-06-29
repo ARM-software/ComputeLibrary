@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEGaussianPyramid.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/kernels/NEGaussianPyramidKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
@@ -36,6 +35,7 @@
 #include "arm_compute/runtime/Pyramid.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "support/ToolchainSupport.h"
 
 #include <cstddef>
 
@@ -68,9 +68,9 @@ void NEGaussianPyramidHalf::configure(const ITensor *input, IPyramid *pyramid, B
 
     if(num_levels > 1)
     {
-        _border_handler       = arm_compute::cpp14::make_unique<NEFillBorderKernel[]>(num_levels - 1);
-        _horizontal_reduction = arm_compute::cpp14::make_unique<NEGaussianPyramidHorKernel[]>(num_levels - 1);
-        _vertical_reduction   = arm_compute::cpp14::make_unique<NEGaussianPyramidVertKernel[]>(num_levels - 1);
+        _border_handler       = arm_compute::support::cpp14::make_unique<NEFillBorderKernel[]>(num_levels - 1);
+        _horizontal_reduction = arm_compute::support::cpp14::make_unique<NEGaussianPyramidHorKernel[]>(num_levels - 1);
+        _vertical_reduction   = arm_compute::support::cpp14::make_unique<NEGaussianPyramidVertKernel[]>(num_levels - 1);
 
         // Apply half scale to the X dimension of the tensor shape
         TensorShape tensor_shape = pyramid->info()->tensor_shape();
@@ -135,9 +135,9 @@ void NEGaussianPyramidOrb::configure(const ITensor *input, IPyramid *pyramid, Bo
 
     if(num_levels > 1)
     {
-        _gaus5x5       = arm_compute::cpp14::make_unique<NEGaussian5x5[]>(num_levels - 1);
-        _scale_nearest = arm_compute::cpp14::make_unique<NEScaleKernel[]>(num_levels - 1);
-        _offsets       = arm_compute::cpp14::make_unique<Image[]>(num_levels - 1);
+        _gaus5x5       = arm_compute::support::cpp14::make_unique<NEGaussian5x5[]>(num_levels - 1);
+        _scale_nearest = arm_compute::support::cpp14::make_unique<NEScaleKernel[]>(num_levels - 1);
+        _offsets       = arm_compute::support::cpp14::make_unique<Image[]>(num_levels - 1);
 
         PyramidInfo pyramid_info(num_levels - 1, SCALE_PYRAMID_ORB, pyramid->info()->tensor_shape(), Format::U8);
         _tmp.init(pyramid_info);

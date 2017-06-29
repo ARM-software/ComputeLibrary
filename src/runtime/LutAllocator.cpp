@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/LutAllocator.h"
 
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -39,7 +39,7 @@ uint8_t *LutAllocator::data() const
 
 void LutAllocator::allocate()
 {
-    _buffer = arm_compute::cpp14::make_unique<uint8_t[]>(size());
+    _buffer = arm_compute::support::cpp14::make_unique<uint8_t[]>(size());
 }
 
 uint8_t *LutAllocator::lock()

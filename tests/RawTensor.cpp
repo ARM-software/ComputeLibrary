@@ -26,6 +26,7 @@
 #include "Utils.h"
 
 #include "arm_compute/core/Utils.h"
+#include "support/ToolchainSupport.h"
 
 #include <algorithm>
 #include <array>
@@ -43,7 +44,7 @@ RawTensor::RawTensor(TensorShape shape, Format format, int fixed_point_position)
       _format(format),
       _fixed_point_position(fixed_point_position)
 {
-    _buffer = ::arm_compute::test::cpp14::make_unique<BufferType[]>(size());
+    _buffer = support::cpp14::make_unique<BufferType[]>(size());
 }
 
 RawTensor::RawTensor(TensorShape shape, DataType data_type, int num_channels, int fixed_point_position)
@@ -53,7 +54,7 @@ RawTensor::RawTensor(TensorShape shape, DataType data_type, int num_channels, in
       _num_channels(num_channels),
       _fixed_point_position(fixed_point_position)
 {
-    _buffer = ::arm_compute::test::cpp14::make_unique<BufferType[]>(size());
+    _buffer = support::cpp14::make_unique<BufferType[]>(size());
 }
 
 RawTensor::RawTensor(const RawTensor &tensor)
@@ -62,7 +63,7 @@ RawTensor::RawTensor(const RawTensor &tensor)
       _format(tensor.format()),
       _fixed_point_position(tensor.fixed_point_position())
 {
-    _buffer = ::arm_compute::test::cpp14::make_unique<BufferType[]>(tensor.size());
+    _buffer = support::cpp14::make_unique<BufferType[]>(tensor.size());
     std::copy(tensor.data(), tensor.data() + size(), _buffer.get());
 }
 

@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NEOpticalFlow.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/kernels/NELKTrackerKernel.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -34,6 +33,7 @@
 #include "arm_compute/runtime/Pyramid.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -65,10 +65,10 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
 
     const float pyr_scale = old_pyramid->info()->scale();
 
-    _func_scharr    = arm_compute::cpp14::make_unique<NEScharr3x3[]>(_num_levels);
-    _kernel_tracker = arm_compute::cpp14::make_unique<NELKTrackerKernel[]>(_num_levels);
-    _scharr_gx      = arm_compute::cpp14::make_unique<Tensor[]>(_num_levels);
-    _scharr_gy      = arm_compute::cpp14::make_unique<Tensor[]>(_num_levels);
+    _func_scharr    = arm_compute::support::cpp14::make_unique<NEScharr3x3[]>(_num_levels);
+    _kernel_tracker = arm_compute::support::cpp14::make_unique<NELKTrackerKernel[]>(_num_levels);
+    _scharr_gx      = arm_compute::support::cpp14::make_unique<Tensor[]>(_num_levels);
+    _scharr_gy      = arm_compute::support::cpp14::make_unique<Tensor[]>(_num_levels);
 
     _old_points_internal = LKInternalKeypointArray(old_points->num_values());
     _new_points_internal = LKInternalKeypointArray(old_points->num_values());

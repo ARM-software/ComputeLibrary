@@ -26,12 +26,12 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLSobel3x3.h"
 #include "arm_compute/runtime/CL/functions/CLSobel5x5.h"
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -86,19 +86,19 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     // Configure/Init sobelNxN
     if(gradient_size == 3)
     {
-        auto k = arm_compute::cpp14::make_unique<CLSobel3x3>();
+        auto k = arm_compute::support::cpp14::make_unique<CLSobel3x3>();
         k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 5)
     {
-        auto k = arm_compute::cpp14::make_unique<CLSobel5x5>();
+        auto k = arm_compute::support::cpp14::make_unique<CLSobel5x5>();
         k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 7)
     {
-        auto k = arm_compute::cpp14::make_unique<CLSobel7x7>();
+        auto k = arm_compute::support::cpp14::make_unique<CLSobel7x7>();
         k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }

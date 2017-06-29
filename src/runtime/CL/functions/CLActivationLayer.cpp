@@ -24,13 +24,13 @@
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
-    auto k = arm_compute::cpp14::make_unique<CLActivationLayerKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>();
     k->configure(input, output, act_info);
     _kernel = std::move(k);
 }

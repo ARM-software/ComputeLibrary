@@ -25,6 +25,7 @@
 
 #include "TypePrinter.h"
 #include "Utils.h"
+#include "support/ToolchainSupport.h"
 #include "validation/Validation.h"
 #include "validation/ValidationUserConfiguration.h"
 
@@ -52,7 +53,7 @@ BOOST_AUTO_TEST_SUITE(FixedPoint)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(FixedPointQS8Inputs, boost::unit_test::data::make(func_names) * boost::unit_test::data::xrange(1, 7), func_name, frac_bits)
 {
-    const std::string base_file_name = user_config.path.get() + "/dumps/" + func_name + "_Q8." + cpp11::to_string(frac_bits);
+    const std::string base_file_name = user_config.path.get() + "/dumps/" + func_name + "_Q8." + support::cpp11::to_string(frac_bits);
     std::ifstream     inputs_file{ base_file_name + ".in", std::ios::binary | std::ios::in };
 
     BOOST_TEST_INFO(base_file_name + ".in");
@@ -84,7 +85,7 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 BOOST_DATA_TEST_CASE(FixedPointQS8Outputs, (boost::unit_test::data::make(func_names) * boost::unit_test::data::xrange(1, 7)) ^ (boost::unit_test::data::make({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 8, 13, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 32, 67 })),
                      func_name, frac_bits, expected_failures)
 {
-    const std::string base_file_name = user_config.path.get() + "/dumps/" + func_name + "_Q8." + cpp11::to_string(frac_bits);
+    const std::string base_file_name = user_config.path.get() + "/dumps/" + func_name + "_Q8." + support::cpp11::to_string(frac_bits);
     std::ifstream     inputs_file{ base_file_name + ".in", std::ios::binary | std::ios::in };
     std::ifstream     reference_file{ base_file_name + ".out", std::ios::binary | std::ios::in };
 

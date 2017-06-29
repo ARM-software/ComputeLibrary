@@ -26,7 +26,6 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLLKTrackerKernel.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/CL/CLPyramid.h"
@@ -34,6 +33,7 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLScharr3x3.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -70,21 +70,21 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
     const int   old_values_list_length = list_length * window_dimension * window_dimension;
 
     // Create kernels and tensors
-    _tracker_init_kernel   = arm_compute::cpp14::make_unique<CLLKTrackerInitKernel[]>(_num_levels);
-    _tracker_stage0_kernel = arm_compute::cpp14::make_unique<CLLKTrackerStage0Kernel[]>(_num_levels);
-    _tracker_stage1_kernel = arm_compute::cpp14::make_unique<CLLKTrackerStage1Kernel[]>(_num_levels);
-    _func_scharr           = arm_compute::cpp14::make_unique<CLScharr3x3[]>(_num_levels);
-    _scharr_gx             = arm_compute::cpp14::make_unique<CLTensor[]>(_num_levels);
-    _scharr_gy             = arm_compute::cpp14::make_unique<CLTensor[]>(_num_levels);
+    _tracker_init_kernel   = arm_compute::support::cpp14::make_unique<CLLKTrackerInitKernel[]>(_num_levels);
+    _tracker_stage0_kernel = arm_compute::support::cpp14::make_unique<CLLKTrackerStage0Kernel[]>(_num_levels);
+    _tracker_stage1_kernel = arm_compute::support::cpp14::make_unique<CLLKTrackerStage1Kernel[]>(_num_levels);
+    _func_scharr           = arm_compute::support::cpp14::make_unique<CLScharr3x3[]>(_num_levels);
+    _scharr_gx             = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_levels);
+    _scharr_gy             = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_levels);
 
     // Create internal keypoint arrays
-    _old_points_internal = arm_compute::cpp14::make_unique<CLLKInternalKeypointArray>(list_length);
+    _old_points_internal = arm_compute::support::cpp14::make_unique<CLLKInternalKeypointArray>(list_length);
     _old_points_internal->resize(list_length);
-    _new_points_internal = arm_compute::cpp14::make_unique<CLLKInternalKeypointArray>(list_length);
+    _new_points_internal = arm_compute::support::cpp14::make_unique<CLLKInternalKeypointArray>(list_length);
     _new_points_internal->resize(list_length);
-    _coefficient_table = arm_compute::cpp14::make_unique<CLCoefficientTableArray>(list_length);
+    _coefficient_table = arm_compute::support::cpp14::make_unique<CLCoefficientTableArray>(list_length);
     _coefficient_table->resize(list_length);
-    _old_values = arm_compute::cpp14::make_unique<CLOldValueArray>(old_values_list_length);
+    _old_values = arm_compute::support::cpp14::make_unique<CLOldValueArray>(old_values_list_length);
     _old_values->resize(old_values_list_length);
     _new_points->resize(list_length);
 

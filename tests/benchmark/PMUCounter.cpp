@@ -24,6 +24,7 @@
 #include "PMUCounter.h"
 
 #include "Utils.h"
+#include "support/ToolchainSupport.h"
 
 #define _GNU_SOURCE 1
 #include <asm/unistd.h>
@@ -89,7 +90,7 @@ void CycleCounter::stop()
 
 std::unique_ptr<Instrument::IMeasurement> CycleCounter::get_measurement() const
 {
-    return ::arm_compute::test::cpp14::make_unique<Instrument::Measurement<long long>>(_cycles);
+    return support::cpp14::make_unique<Instrument::Measurement<long long>>(_cycles);
 }
 
 InstructionCounter::InstructionCounter()

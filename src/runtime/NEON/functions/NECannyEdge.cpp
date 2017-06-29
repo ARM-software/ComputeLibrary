@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NECannyEdge.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/kernels/NECannyEdgeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
@@ -35,6 +34,7 @@
 #include "arm_compute/runtime/NEON/functions/NESobel5x5.h"
 #include "arm_compute/runtime/NEON/functions/NESobel7x7.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "support/ToolchainSupport.h"
 
 #include <cstring>
 #include <utility>
@@ -85,19 +85,19 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     // Configure/Init sobelNxN
     if(gradient_size == 3)
     {
-        auto k = arm_compute::cpp14::make_unique<NESobel3x3>();
+        auto k = arm_compute::support::cpp14::make_unique<NESobel3x3>();
         k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 5)
     {
-        auto k = arm_compute::cpp14::make_unique<NESobel5x5>();
+        auto k = arm_compute::support::cpp14::make_unique<NESobel5x5>();
         k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 7)
     {
-        auto k = arm_compute::cpp14::make_unique<NESobel7x7>();
+        auto k = arm_compute::support::cpp14::make_unique<NESobel7x7>();
         k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
@@ -109,13 +109,13 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     // Configure gradient
     if(use_fp16)
     {
-        auto k = arm_compute::cpp14::make_unique<NEGradientFP16Kernel>();
+        auto k = arm_compute::support::cpp14::make_unique<NEGradientFP16Kernel>();
         k->configure(&_gx, &_gy, &_magnitude, &_phase, norm_type);
         _gradient = std::move(k);
     }
     else
     {
-        auto k = arm_compute::cpp14::make_unique<NEGradientKernel>();
+        auto k = arm_compute::support::cpp14::make_unique<NEGradientKernel>();
         k->configure(&_gx, &_gy, &_magnitude, &_phase, norm_type);
         _gradient = std::move(k);
     }

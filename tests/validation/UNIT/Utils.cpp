@@ -32,7 +32,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::cpp11;
 using namespace arm_compute::test::validation;
 
 #ifndef DOXYGEN_SKIP_THIS
@@ -43,14 +42,14 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 BOOST_DATA_TEST_CASE(RoundHalfUp, boost::unit_test::data::make({ 1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f }) ^ boost::unit_test::data::make({ 1.f, 1.f, 2.f, 3.f, 3.f, -3.f, -3.f, -4.f, -4.f, -4.f }),
                      value, result)
 {
-    BOOST_TEST(cpp11::round_half_up(value) == result);
+    BOOST_TEST(round_half_up(value) == result);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RoundHalfEven, boost::unit_test::data::make({ 1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f }) ^ boost::unit_test::data::make({ 1.f, 1.f, 2.f, 2.f, 3.f, -3.f, -4.f, -4.f, -4.f, -4.f }),
                      value, result)
 {
-    BOOST_TEST(cpp11::round_half_even(value) == result);
+    BOOST_TEST(round_half_even(value) == result);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))

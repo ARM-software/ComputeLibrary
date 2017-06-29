@@ -25,12 +25,12 @@
 
 #include "arm_compute/core/CL/ICLHOG.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 CLMultiHOG::CLMultiHOG(size_t num_models)
-    : _num_models(num_models), _model(arm_compute::cpp14::make_unique<CLHOG[]>(_num_models))
+    : _num_models(num_models), _model(arm_compute::support::cpp14::make_unique<CLHOG[]>(_num_models))
 {
 }
 

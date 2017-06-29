@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEChannelCombine.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEChannelCombineKernel.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,14 +32,14 @@ using namespace arm_compute;
 
 void NEChannelCombine::configure(const ITensor *plane0, const ITensor *plane1, const ITensor *plane2, const ITensor *plane3, ITensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEChannelCombineKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEChannelCombineKernel>();
     k->configure(plane0, plane1, plane2, plane3, output);
     _kernel = std::move(k);
 }
 
 void NEChannelCombine::configure(const IImage *plane0, const IImage *plane1, const IImage *plane2, IMultiImage *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEChannelCombineKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEChannelCombineKernel>();
     k->configure(plane0, plane1, plane2, output);
     _kernel = std::move(k);
 }

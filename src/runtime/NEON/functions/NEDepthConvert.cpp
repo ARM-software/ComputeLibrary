@@ -24,8 +24,9 @@
 #include "arm_compute/runtime/NEON/functions/NEDepthConvert.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEDepthConvertKernel.h"
+#include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -38,7 +39,7 @@ void NEDepthConvert::configure(const ITensor *input, ITensor *output, ConvertPol
     ARM_COMPUTE_ERROR_ON(input == output);
     ARM_COMPUTE_ERROR_ON(input->info()->data_type() == output->info()->data_type());
 
-    auto k = arm_compute::cpp14::make_unique<NEDepthConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEDepthConvertKernel>();
     k->configure(input, output, policy, shift);
     _kernel = std::move(k);
 }

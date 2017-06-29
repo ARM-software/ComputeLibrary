@@ -26,13 +26,13 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -40,7 +40,7 @@ using namespace arm_compute;
 
 void CLConvolution3x3::configure(ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = arm_compute::cpp14::make_unique<CLConvolution3x3Kernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLConvolution3x3Kernel>();
     k->configure(input, output, conv, scale, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
@@ -107,7 +107,7 @@ template class arm_compute::CLConvolutionSquare<9>;
 
 void CLConvolutionRectangle::configure(ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t rows, uint32_t cols, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = arm_compute::cpp14::make_unique<CLConvolutionRectangleKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLConvolutionRectangleKernel>();
     k->configure(input, output, conv, rows, cols, scale, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));

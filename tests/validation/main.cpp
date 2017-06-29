@@ -28,6 +28,7 @@
 #include "Utils.h"
 #include "ValidationProgramOptions.h"
 #include "ValidationUserConfiguration.h"
+#include "support/ToolchainSupport.h"
 
 #include "arm_compute/runtime/Scheduler.h"
 
@@ -55,11 +56,11 @@ struct GlobalFixture
     {
         if(user_config.seed.is_set())
         {
-            library = cpp14::make_unique<TensorLibrary>(user_config.path.get(), user_config.seed);
+            library = arm_compute::support::cpp14::make_unique<TensorLibrary>(user_config.path.get(), user_config.seed);
         }
         else
         {
-            library = cpp14::make_unique<TensorLibrary>(user_config.path.get());
+            library = arm_compute::support::cpp14::make_unique<TensorLibrary>(user_config.path.get());
         }
 
         std::cout << "Seed: " << library->seed() << "\n";

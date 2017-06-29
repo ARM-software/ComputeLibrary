@@ -27,7 +27,6 @@
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -36,6 +35,7 @@
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "arm_compute/runtime/Scheduler.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 #include <utility>
@@ -69,28 +69,28 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     _score.allocator()->init(info_f32);
     _nonmax.allocator()->init(info_f32);
 
-    _corners_list = arm_compute::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
+    _corners_list = arm_compute::support::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
 
     /* Set/init Sobel kernel accordingly with gradient_size */
     switch(gradient_size)
     {
         case 3:
         {
-            auto k = arm_compute::cpp14::make_unique<CLSobel3x3>();
+            auto k = arm_compute::support::cpp14::make_unique<CLSobel3x3>();
             k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 5:
         {
-            auto k = arm_compute::cpp14::make_unique<CLSobel5x5>();
+            auto k = arm_compute::support::cpp14::make_unique<CLSobel5x5>();
             k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 7:
         {
-            auto k = arm_compute::cpp14::make_unique<CLSobel7x7>();
+            auto k = arm_compute::support::cpp14::make_unique<CLSobel7x7>();
             k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;

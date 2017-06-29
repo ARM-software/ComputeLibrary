@@ -24,13 +24,13 @@
 #include "arm_compute/runtime/MultiHOG.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IMultiHOG.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 MultiHOG::MultiHOG(size_t num_models)
-    : _num_models(num_models), _model(arm_compute::cpp14::make_unique<HOG[]>(_num_models))
+    : _num_models(num_models), _model(arm_compute::support::cpp14::make_unique<HOG[]>(_num_models))
 {
 }
 

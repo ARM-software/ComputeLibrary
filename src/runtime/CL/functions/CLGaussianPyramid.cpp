@@ -27,11 +27,11 @@
 #include "arm_compute/core/CL/kernels/CLGaussianPyramidKernel.h"
 #include "arm_compute/core/CL/kernels/CLScaleKernel.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/ToolchainSupport.h"
 
 #include "arm_compute/runtime/CL/CLPyramid.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -70,9 +70,9 @@ void CLGaussianPyramidHalf::configure(ICLTensor *input, CLPyramid *pyramid, Bord
 
     if(num_levels > 1)
     {
-        _border_handler       = arm_compute::cpp14::make_unique<CLFillBorderKernel[]>(num_levels - 1);
-        _horizontal_reduction = arm_compute::cpp14::make_unique<CLGaussianPyramidHorKernel[]>(num_levels - 1);
-        _vertical_reduction   = arm_compute::cpp14::make_unique<CLGaussianPyramidVertKernel[]>(num_levels - 1);
+        _border_handler       = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(num_levels - 1);
+        _horizontal_reduction = arm_compute::support::cpp14::make_unique<CLGaussianPyramidHorKernel[]>(num_levels - 1);
+        _vertical_reduction   = arm_compute::support::cpp14::make_unique<CLGaussianPyramidVertKernel[]>(num_levels - 1);
 
         // Apply half scale to the X dimension of the tensor shape
         TensorShape tensor_shape = pyramid->info()->tensor_shape();
@@ -141,8 +141,8 @@ void CLGaussianPyramidOrb::configure(ICLTensor *input, CLPyramid *pyramid, Borde
 
     if(num_levels > 1)
     {
-        _gauss5x5      = arm_compute::cpp14::make_unique<CLGaussian5x5[]>(num_levels - 1);
-        _scale_nearest = arm_compute::cpp14::make_unique<CLScaleKernel[]>(num_levels - 1);
+        _gauss5x5      = arm_compute::support::cpp14::make_unique<CLGaussian5x5[]>(num_levels - 1);
+        _scale_nearest = arm_compute::support::cpp14::make_unique<CLScaleKernel[]>(num_levels - 1);
 
         PyramidInfo pyramid_info(num_levels - 1, SCALE_PYRAMID_ORB, pyramid->info()->tensor_shape(), Format::U8);
 

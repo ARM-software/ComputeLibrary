@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEColorConvert.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEColorConvertKernel.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,28 +32,28 @@ using namespace arm_compute;
 
 void NEColorConvert::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEColorConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEColorConvertKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
 
 void NEColorConvert::configure(const IMultiImage *input, IImage *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEColorConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEColorConvertKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
 
 void NEColorConvert::configure(const IImage *input, IMultiImage *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEColorConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEColorConvertKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
 
 void NEColorConvert::configure(const IMultiImage *input, IMultiImage *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEColorConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEColorConvertKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

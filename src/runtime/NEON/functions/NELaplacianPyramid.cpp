@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/NEON/functions/NELaplacianPyramid.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
@@ -33,6 +32,7 @@
 #include "arm_compute/runtime/NEON/functions/NEGaussian5x5.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussianPyramid.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -86,8 +86,8 @@ void NELaplacianPyramid::configure(const ITensor *input, IPyramid *pyramid, ITen
     // Create Gaussian Pyramid function
     _gaussian_pyr_function.configure(input, &_gauss_pyr, border_mode, constant_border_value);
 
-    _convf = arm_compute::cpp14::make_unique<NEGaussian5x5[]>(_num_levels);
-    _subf  = arm_compute::cpp14::make_unique<NEArithmeticSubtraction[]>(_num_levels);
+    _convf = arm_compute::support::cpp14::make_unique<NEGaussian5x5[]>(_num_levels);
+    _subf  = arm_compute::support::cpp14::make_unique<NEArithmeticSubtraction[]>(_num_levels);
 
     for(unsigned int i = 0; i < _num_levels; ++i)
     {

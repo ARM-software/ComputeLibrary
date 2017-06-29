@@ -23,9 +23,9 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEErode.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEErodeKernel.h"
 #include "arm_compute/core/PixelValue.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -33,7 +33,7 @@ using namespace arm_compute;
 
 void NEErode::configure(ITensor *input, ITensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = arm_compute::cpp14::make_unique<NEErodeKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEErodeKernel>();
     k->configure(input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));

@@ -27,10 +27,10 @@
 #include "arm_compute/core/CL/kernels/CLDepthConcatenateKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -47,8 +47,8 @@ void CLDepthConcatenate::configure(std::vector<ICLTensor *> inputs_vector, ICLTe
 
     unsigned int depth_offset = 0;
 
-    _concat_kernels_vector  = arm_compute::cpp14::make_unique<CLDepthConcatenateKernel[]>(_num_inputs);
-    _border_handlers_vector = arm_compute::cpp14::make_unique<CLFillBorderKernel[]>(_num_inputs);
+    _concat_kernels_vector  = arm_compute::support::cpp14::make_unique<CLDepthConcatenateKernel[]>(_num_inputs);
+    _border_handlers_vector = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(_num_inputs);
 
     for(unsigned int i = 0; i < _num_inputs; i++)
     {

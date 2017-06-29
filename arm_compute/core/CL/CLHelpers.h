@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <string>
 
@@ -70,7 +71,7 @@ const std::string &string_from_target(GPUTarget target);
 template <typename Kernel, typename... T>
 std::unique_ptr<Kernel> create_configure_kernel(T &&... args)
 {
-    std::unique_ptr<Kernel> k = arm_compute::cpp14::make_unique<Kernel>();
+    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
     k->configure(std::forward<T>(args)...);
     return k;
 }
@@ -82,7 +83,7 @@ std::unique_ptr<Kernel> create_configure_kernel(T &&... args)
 template <typename Kernel>
 std::unique_ptr<Kernel> create_kernel()
 {
-    std::unique_ptr<Kernel> k = arm_compute::cpp14::make_unique<Kernel>();
+    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
     return k;
 }
 

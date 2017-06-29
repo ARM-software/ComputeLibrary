@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEThreshold.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEThresholdKernel.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 void NEThreshold::configure(const ITensor *input, ITensor *output, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
-    auto k = arm_compute::cpp14::make_unique<NEThresholdKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEThresholdKernel>();
     k->configure(input, output, threshold, false_value, true_value, type, upper);
     _kernel = std::move(k);
 }

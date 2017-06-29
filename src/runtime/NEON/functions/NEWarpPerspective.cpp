@@ -24,8 +24,9 @@
 #include "arm_compute/runtime/NEON/functions/NEWarpPerspective.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEWarpKernel.h"
+#include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -41,14 +42,14 @@ void NEWarpPerspective::configure(ITensor *input, ITensor *output, const float *
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
         {
-            auto k = arm_compute::cpp14::make_unique<NEWarpPerspectiveKernel<InterpolationPolicy::NEAREST_NEIGHBOR>>();
+            auto k = arm_compute::support::cpp14::make_unique<NEWarpPerspectiveKernel<InterpolationPolicy::NEAREST_NEIGHBOR>>();
             k->configure(input, output, matrix, border_mode, constant_border_value);
             _kernel = std::move(k);
             break;
         }
         case InterpolationPolicy::BILINEAR:
         {
-            auto k = arm_compute::cpp14::make_unique<NEWarpPerspectiveKernel<InterpolationPolicy::BILINEAR>>();
+            auto k = arm_compute::support::cpp14::make_unique<NEWarpPerspectiveKernel<InterpolationPolicy::BILINEAR>>();
             k->configure(input, output, matrix, border_mode, constant_border_value);
             _kernel = std::move(k);
             break;
