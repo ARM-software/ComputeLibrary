@@ -58,8 +58,8 @@ public:
         shape.set(shape.num_dimensions(), batches);
 
         // Create tensors
-        src = create_tensor(shape, dt, 1, fixed_point_position);
-        dst = create_tensor(shape, dt, 1, fixed_point_position);
+        src = create_tensor<TensorType>(shape, dt, 1, fixed_point_position);
+        dst = create_tensor<TensorType>(shape, dt, 1, fixed_point_position);
 
         // Create and configure function
         norm_layer = std::unique_ptr<Function>(new Function());

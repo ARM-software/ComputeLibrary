@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
@@ -57,10 +56,10 @@ Tensor compute_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2
                     const TensorShape &out_shape, float alpha, float beta, DataType dt, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src1 = create_tensor(src_shape1, dt, 1, fixed_point_position);
-    Tensor src2 = create_tensor(src_shape2, dt, 1, fixed_point_position);
-    Tensor src3 = create_tensor(src_shape3, dt, 1, fixed_point_position);
-    Tensor dst  = create_tensor(out_shape, dt, 1, fixed_point_position);
+    Tensor src1 = create_tensor<Tensor>(src_shape1, dt, 1, fixed_point_position);
+    Tensor src2 = create_tensor<Tensor>(src_shape2, dt, 1, fixed_point_position);
+    Tensor src3 = create_tensor<Tensor>(src_shape3, dt, 1, fixed_point_position);
+    Tensor dst  = create_tensor<Tensor>(out_shape, dt, 1, fixed_point_position);
 
     // Create and configure function
     NEGEMM gemm;
@@ -112,10 +111,10 @@ BOOST_DATA_TEST_CASE(Configuration,
     int fixed_point_position = (dt == DataType::F32) ? 0 : 3;
 
     // Create tensors
-    Tensor src1 = create_tensor(gemm_set.shape_a, dt, 1, fixed_point_position);
-    Tensor src2 = create_tensor(gemm_set.shape_b, dt, 1, fixed_point_position);
-    Tensor src3 = create_tensor(gemm_set.shape_c, dt, 1, fixed_point_position);
-    Tensor dst  = create_tensor(gemm_set.shape_d, dt, 1, fixed_point_position);
+    Tensor src1 = create_tensor<Tensor>(gemm_set.shape_a, dt, 1, fixed_point_position);
+    Tensor src2 = create_tensor<Tensor>(gemm_set.shape_b, dt, 1, fixed_point_position);
+    Tensor src3 = create_tensor<Tensor>(gemm_set.shape_c, dt, 1, fixed_point_position);
+    Tensor dst  = create_tensor<Tensor>(gemm_set.shape_d, dt, 1, fixed_point_position);
 
     BOOST_TEST(src1.info()->is_resizable());
     BOOST_TEST(src2.info()->is_resizable());

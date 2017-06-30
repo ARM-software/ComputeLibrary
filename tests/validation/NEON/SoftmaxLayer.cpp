@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -66,8 +65,8 @@ const float tolerance_fixed_point = 2.f;
 Tensor compute_softmax_layer(const TensorShape &shape, DataType dt, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
 
     // Create and configure function
     NESoftmaxLayer smx_layer;
@@ -111,8 +110,8 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTyp
     int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

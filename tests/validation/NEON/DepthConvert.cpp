@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -64,8 +63,8 @@ namespace
 Tensor compute_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, dt_in, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt_out, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, dt_in, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, dt_out, 1, fixed_point_position);
 
     // Create and configure function
     NEDepthConvert depth_convert;
@@ -100,8 +99,8 @@ Tensor compute_depth_convert(const TensorShape &shape, DataType dt_in, DataType 
 void compute_configure_validate(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, dt_in, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt_out, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, dt_in, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, dt_out, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

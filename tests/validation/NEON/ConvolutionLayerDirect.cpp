@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
@@ -69,10 +68,10 @@ Tensor compute_convolution_layer(const TensorShape &src_shape, const TensorShape
                                  DataType dt, PadStrideInfo conv_info, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src     = create_tensor(src_shape, dt, 1, fixed_point_position);
-    Tensor weights = create_tensor(weights_shape, dt, 1, fixed_point_position);
-    Tensor bias    = create_tensor(bias_shape, dt, 1, fixed_point_position);
-    Tensor dst     = create_tensor(dst_shape, dt, 1, fixed_point_position);
+    Tensor src     = create_tensor<Tensor>(src_shape, dt, 1, fixed_point_position);
+    Tensor weights = create_tensor<Tensor>(weights_shape, dt, 1, fixed_point_position);
+    Tensor bias    = create_tensor<Tensor>(bias_shape, dt, 1, fixed_point_position);
+    Tensor dst     = create_tensor<Tensor>(dst_shape, dt, 1, fixed_point_position);
 
     // Create and configure function
     NEDirectConvolutionLayer conv_layer;

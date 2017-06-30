@@ -59,10 +59,10 @@ public:
         dst_shape.set(3 /* batch */, batches);
 
         // Create tensors
-        src     = create_tensor(src_shape, dt, 1, fixed_point_position);
-        weights = create_tensor(conv_obj.weights_shape, dt, 1, fixed_point_position);
-        bias    = create_tensor(conv_obj.bias_shape, dt, 1, fixed_point_position);
-        dst     = create_tensor(dst_shape, dt, 1, fixed_point_position);
+        src     = create_tensor<TensorType>(src_shape, dt, 1, fixed_point_position);
+        weights = create_tensor<TensorType>(conv_obj.weights_shape, dt, 1, fixed_point_position);
+        bias    = create_tensor<TensorType>(conv_obj.bias_shape, dt, 1, fixed_point_position);
+        dst     = create_tensor<TensorType>(dst_shape, dt, 1, fixed_point_position);
 
         // Create and configure function
         conv_layer = std::unique_ptr<Function>(new Function());

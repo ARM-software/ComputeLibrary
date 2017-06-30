@@ -23,7 +23,6 @@
  */
 
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -60,8 +59,8 @@ namespace
 Tensor compute_integral_image(const TensorShape &shape)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U32);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U32);
 
     // Create integral image configure function
     NEIntegralImage integral_image;
@@ -92,8 +91,8 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U32);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U32);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

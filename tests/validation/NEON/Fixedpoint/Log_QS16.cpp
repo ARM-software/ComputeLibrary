@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
@@ -60,8 +59,8 @@ const float tolerance = 7.0f; /**< Tolerance value for comparing reference's out
 Tensor compute_log_qs16(const TensorShape &shape, int fixed_point_position)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::QS16, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, DataType::QS16, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, DataType::QS16, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::QS16, 1, fixed_point_position);
 
     constexpr unsigned int num_elems_processed_per_iteration = 8;
     Window                 window                            = calculate_max_window(*src.info(), Steps(num_elems_processed_per_iteration));

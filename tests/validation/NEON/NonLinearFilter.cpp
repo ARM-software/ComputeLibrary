@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -69,8 +68,8 @@ Tensor compute_non_linear_filter(const TensorShape &shape, NonLinearFilterFuncti
                                  uint8_t constant_border_value)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U8);
 
     // Create and configure function
     NENonLinearFilter filter;
@@ -113,8 +112,8 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes())
     const auto half_mask_size = static_cast<int>(mask_size / 2);
 
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U8);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

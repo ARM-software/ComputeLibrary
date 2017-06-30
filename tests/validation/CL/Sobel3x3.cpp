@@ -23,7 +23,6 @@
  */
 
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -67,9 +66,9 @@ constexpr BorderSize   border_size(filter_size / 2); /** Border size of the kern
 std::pair<CLTensor, CLTensor> compute_sobel_3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create tensors
-    CLTensor src   = create_tensor(shape, DataType::U8);
-    CLTensor dst_x = create_tensor(shape, DataType::S16);
-    CLTensor dst_y = create_tensor(shape, DataType::S16);
+    CLTensor src   = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst_x = create_tensor<CLTensor>(shape, DataType::S16);
+    CLTensor dst_y = create_tensor<CLTensor>(shape, DataType::S16);
 
     src.info()->set_format(Format::U8);
     dst_x.info()->set_format(Format::S16);
@@ -106,9 +105,9 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * BorderModes(), shape, border_mode)
 {
     // Create tensors
-    CLTensor src   = create_tensor(shape, DataType::U8);
-    CLTensor dst_x = create_tensor(shape, DataType::S16);
-    CLTensor dst_y = create_tensor(shape, DataType::S16);
+    CLTensor src   = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst_x = create_tensor<CLTensor>(shape, DataType::S16);
+    CLTensor dst_y = create_tensor<CLTensor>(shape, DataType::S16);
 
     src.info()->set_format(Format::U8);
     dst_x.info()->set_format(Format::S16);

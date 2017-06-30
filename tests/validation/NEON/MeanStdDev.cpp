@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -59,7 +58,7 @@ namespace
 std::pair<float, float> compute_mean_and_standard_deviation(const TensorShape &shape)
 {
     // Create tensor
-    Tensor src = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
 
     // Create output variables
     float mean    = 0.f;
@@ -92,7 +91,7 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 BOOST_DATA_TEST_CASE(Configuration, Small2DShapes() + Large2DShapes(), shape)
 {
     // Create tensor
-    Tensor src = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
 
     // Create output variables
     float mean    = 0.f;

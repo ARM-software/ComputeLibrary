@@ -25,7 +25,6 @@ include_directories(${CMAKE_SOURCE_DIR}/../include)
 
 set(arm_compute_test_validation_OPENCL_SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/CL/CLAccessor.h
-    ${CMAKE_SOURCE_DIR}/CL/Helper.h
     ${CMAKE_CURRENT_SOURCE_DIR}/CLFixture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/CLFixture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BitwiseAnd.cpp

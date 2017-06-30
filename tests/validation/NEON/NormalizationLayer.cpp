@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TypePrinter.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "validation/Datasets.h"
 #include "validation/Reference.h"
 #include "validation/Validation.h"
@@ -70,8 +71,8 @@ float normalization_layer_tolerance(DataType dt)
 Tensor compute_normalization_layer(const TensorShape &shape, DataType dt, NormalizationLayerInfo norm_info, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
 
     // Create and configure function
     NENormalizationLayer norm;

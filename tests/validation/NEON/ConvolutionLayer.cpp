@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TypePrinter.h"
 #include "dataset/ConvolutionLayerDataset.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "validation/Datasets.h"
 #include "validation/Reference.h"
 #include "validation/Validation.h"
@@ -51,10 +52,10 @@ Tensor compute_convolution_layer(const TensorShape &input_shape, const TensorSha
                                  const PadStrideInfo &conv_info, int fixed_point_position)
 {
     // Create tensors
-    Tensor src     = create_tensor(input_shape, dt, 1, fixed_point_position);
-    Tensor weights = create_tensor(weights_shape, dt, 1, fixed_point_position);
-    Tensor bias    = create_tensor(bias_shape, dt, 1, fixed_point_position);
-    Tensor dst     = create_tensor(output_shape, dt, 1, fixed_point_position);
+    Tensor src     = create_tensor<Tensor>(input_shape, dt, 1, fixed_point_position);
+    Tensor weights = create_tensor<Tensor>(weights_shape, dt, 1, fixed_point_position);
+    Tensor bias    = create_tensor<Tensor>(bias_shape, dt, 1, fixed_point_position);
+    Tensor dst     = create_tensor<Tensor>(output_shape, dt, 1, fixed_point_position);
 
     // Create and configure function
     NEConvolutionLayer conv;
@@ -107,10 +108,10 @@ BOOST_DATA_TEST_CASE(Configuration,
     int fixed_point_position = (dt == DataType::F32) ? 0 : 3;
 
     // Create tensors
-    Tensor src     = create_tensor(conv_set.src_shape, dt, 1, fixed_point_position);
-    Tensor weights = create_tensor(conv_set.weights_shape, dt, 1, fixed_point_position);
-    Tensor bias    = create_tensor(conv_set.bias_shape, dt, 1, fixed_point_position);
-    Tensor dst     = create_tensor(conv_set.dst_shape, dt, 1, fixed_point_position);
+    Tensor src     = create_tensor<Tensor>(conv_set.src_shape, dt, 1, fixed_point_position);
+    Tensor weights = create_tensor<Tensor>(conv_set.weights_shape, dt, 1, fixed_point_position);
+    Tensor bias    = create_tensor<Tensor>(conv_set.bias_shape, dt, 1, fixed_point_position);
+    Tensor dst     = create_tensor<Tensor>(conv_set.dst_shape, dt, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(weights.info()->is_resizable());

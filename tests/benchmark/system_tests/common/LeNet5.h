@@ -24,8 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_BENCHMARK_LENET5_H__
 #define __ARM_COMPUTE_TEST_BENCHMARK_LENET5_H__
 
-#include "TensorLibrary.h"
-#include "Utils.h"
+#include "tests/TensorLibrary.h"
+#include "tests/Utils.h"
 
 #include "benchmark/Profiler.h"
 #include "benchmark/WallClockTimer.h"
@@ -79,4 +79,4 @@ public:
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute
-#endif //__ARM_COMPUTE_TEST_BENCHMARK_LENET5_H__
+#endif

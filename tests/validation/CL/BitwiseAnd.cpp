@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -60,9 +59,9 @@ namespace
 CLTensor compute_bitwise_and(const TensorShape &shape)
 {
     // Create tensors
-    CLTensor src1 = create_tensor(shape, DataType::U8);
-    CLTensor src2 = create_tensor(shape, DataType::U8);
-    CLTensor dst  = create_tensor(shape, DataType::U8);
+    CLTensor src1 = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor src2 = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst  = create_tensor<CLTensor>(shape, DataType::U8);
 
     // Create and configure function
     CLBitwiseAnd band;
@@ -96,9 +95,9 @@ CLTensor compute_bitwise_and(const TensorShape &shape)
 CLTensor compute_bitwise_and_subtensor(const TensorShape &shape)
 {
     // Create tensors
-    CLTensor src1 = create_tensor(shape, DataType::U8);
-    CLTensor src2 = create_tensor(shape, DataType::U8);
-    CLTensor dst  = create_tensor(shape, DataType::U8);
+    CLTensor src1 = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor src2 = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst  = create_tensor<CLTensor>(shape, DataType::U8);
 
     // Create SubTensors
     int         coord_z   = shape.z() / 2;
@@ -147,9 +146,9 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
 {
     // Create tensors
-    CLTensor src1 = create_tensor(shape, DataType::U8);
-    CLTensor src2 = create_tensor(shape, DataType::U8);
-    CLTensor dst  = create_tensor(shape, DataType::U8);
+    CLTensor src1 = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor src2 = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst  = create_tensor<CLTensor>(shape, DataType::U8);
 
     BOOST_TEST(src1.info()->is_resizable());
     BOOST_TEST(src2.info()->is_resizable());

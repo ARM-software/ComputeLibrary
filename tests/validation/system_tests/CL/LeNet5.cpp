@@ -23,7 +23,6 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "validation/Validation.h"
 
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"

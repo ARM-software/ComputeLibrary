@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -63,9 +62,9 @@ namespace
 Tensor compute_arithmetic_addition(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, dt_in0);
-    Tensor src2 = create_tensor(shape, dt_in1);
-    Tensor dst  = create_tensor(shape, dt_out);
+    Tensor src1 = create_tensor<Tensor>(shape, dt_in0);
+    Tensor src2 = create_tensor<Tensor>(shape, dt_in1);
+    Tensor dst  = create_tensor<Tensor>(shape, dt_out);
 
     // Create and configure function
     NEArithmeticAddition add;
@@ -124,9 +123,9 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src1 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::U8);
 
     validate_configuration(src1, src2, dst, shape, policy);
 }
@@ -151,9 +150,9 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, dt, policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, dt);
-    Tensor src2 = create_tensor(shape, DataType::S16);
-    Tensor dst  = create_tensor(shape, DataType::S16);
+    Tensor src1 = create_tensor<Tensor>(shape, dt);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::S16);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::S16);
 
     validate_configuration(src1, src2, dst, shape, policy);
 }
@@ -191,9 +190,9 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::F32);
-    Tensor src2 = create_tensor(shape, DataType::F32);
-    Tensor dst  = create_tensor(shape, DataType::F32);
+    Tensor src1 = create_tensor<Tensor>(shape, DataType::F32);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::F32);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::F32);
 
     validate_configuration(src1, src2, dst, shape, policy);
 }

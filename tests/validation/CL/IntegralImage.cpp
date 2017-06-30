@@ -23,7 +23,6 @@
  */
 
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -60,8 +59,8 @@ namespace
 CLTensor compute_integral_image(const TensorShape &shape)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape, DataType::U8);
-    CLTensor dst = create_tensor(shape, DataType::U32);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U32);
 
     // Create integral image configure function
     CLIntegralImage integral_image;
@@ -92,8 +91,8 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape, DataType::U8);
-    CLTensor dst = create_tensor(shape, DataType::U32);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U32);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

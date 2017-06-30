@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "TypePrinter.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "tests/dataset/PoolingLayerDataset.h"
 #include "validation/Datasets.h"
 #include "validation/Reference.h"
@@ -52,8 +53,8 @@ const float tolerance_f = 1e-05; /**< Tolerance value for comparing reference's 
 CLTensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape_in, dt);
-    CLTensor dst = create_tensor(shape_out, dt);
+    CLTensor src = create_tensor<CLTensor>(shape_in, dt);
+    CLTensor dst = create_tensor<CLTensor>(shape_out, dt);
 
     // Create and configure function
     CLPoolingLayer pool;

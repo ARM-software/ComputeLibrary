@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -87,8 +86,8 @@ float activation_layer_tolerance(ActivationLayerInfo::ActivationFunction activat
 CLTensor compute_activation_layer(bool in_place, const TensorShape &shape, DataType dt, ActivationLayerInfo act_info, int fixed_point_position = 0)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    CLTensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, dt, 1, fixed_point_position);
+    CLTensor dst = create_tensor<CLTensor>(shape, dt, 1, fixed_point_position);
 
     // Create and configure function
     CLActivationLayer act_layer;
@@ -155,8 +154,8 @@ BOOST_DATA_TEST_CASE(Configuration, boost::unit_test::data::make({ false, true }
     const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
-    CLTensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    CLTensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, dt, 1, fixed_point_position);
+    CLTensor dst = create_tensor<CLTensor>(shape, dt, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

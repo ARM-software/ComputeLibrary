@@ -24,8 +24,9 @@
 #ifndef __ARM_COMPUTE_TEST_MODEL_OBJECTS_LENET5_H__
 #define __ARM_COMPUTE_TEST_MODEL_OBJECTS_LENET5_H__
 
-#include "TensorLibrary.h"
-#include "Utils.h"
+#include "tests/Globals.h"
+#include "tests/TensorLibrary.h"
+#include "tests/Utils.h"
 
 #include <memory>
 

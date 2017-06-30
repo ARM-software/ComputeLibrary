@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -63,8 +62,8 @@ namespace
 CLTensor compute_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape, dt_in);
-    CLTensor dst = create_tensor(shape, dt_out);
+    CLTensor src = create_tensor<CLTensor>(shape, dt_in);
+    CLTensor dst = create_tensor<CLTensor>(shape, dt_out);
 
     // Create and configure function
     CLDepthConvert depth_convert;
@@ -97,8 +96,8 @@ CLTensor compute_depth_convert(const TensorShape &shape, DataType dt_in, DataTyp
 void compute_configure_validate(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape, dt_in);
-    CLTensor dst = create_tensor(shape, dt_out);
+    CLTensor src = create_tensor<CLTensor>(shape, dt_in);
+    CLTensor dst = create_tensor<CLTensor>(shape, dt_out);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

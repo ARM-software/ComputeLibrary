@@ -397,6 +397,24 @@ inline bool is_in_valid_region(const ValidRegion &valid_region, const Coordinate
     }
     return true;
 }
+
+/** Create and initialize a tensor of the given type.
+ *
+ * @param[in] shape                Tensor shape.
+ * @param[in] data_type            Data type.
+ * @param[in] num_channels         (Optional) Number of channels.
+ * @param[in] fixed_point_position (Optional) Number of fractional bits.
+ *
+ * @return Initialized tensor of given type.
+ */
+template <typename T>
+inline T create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1, int fixed_point_position = 0)
+{
+    T tensor;
+    tensor.allocator()->init(TensorInfo(shape, num_channels, data_type, fixed_point_position));
+
+    return tensor;
+}
 } // namespace test
 } // namespace arm_compute
 #endif

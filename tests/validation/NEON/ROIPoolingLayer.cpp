@@ -25,6 +25,8 @@
 #include "NEON/NEAccessor.h"
 #include "TypePrinter.h"
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "validation/Datasets.h"
 #include "validation/Helpers.h"
 #include "validation/Reference.h"
@@ -50,8 +52,8 @@ Tensor compute_roi_pooling_layer(const TensorShape &shape, DataType dt, const st
     shape_dst.set(3, rois.size());
 
     // Create tensors
-    Tensor     src        = create_tensor(shape, dt);
-    Tensor     dst        = create_tensor(shape_dst, dt);
+    Tensor     src        = create_tensor<Tensor>(shape, dt);
+    Tensor     dst        = create_tensor<Tensor>(shape_dst, dt);
     Array<ROI> rois_array = create_array(rois);
 
     // Create and configure function

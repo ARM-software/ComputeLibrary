@@ -59,8 +59,8 @@ public:
         dst_shape.set(dst_shape.num_dimensions(), batches);
 
         // Create tensors
-        src = create_tensor(src_shape, dt, 1, fixed_point_position);
-        dst = create_tensor(dst_shape, dt, 1, fixed_point_position);
+        src = create_tensor<TensorType>(src_shape, dt, 1, fixed_point_position);
+        dst = create_tensor<TensorType>(dst_shape, dt, 1, fixed_point_position);
 
         // Create and configure function
         pool_layer.configure(&src, &dst, pool_obj.info);

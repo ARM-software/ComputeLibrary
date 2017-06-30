@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -65,8 +64,8 @@ namespace
 Tensor compute_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src1 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::U8);
 
     // Create and configure function
     NEThreshold thrsh;
@@ -99,8 +98,8 @@ BOOST_DATA_TEST_CASE(Configuration,
                      shape, thrshConf)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U8);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -59,9 +58,9 @@ namespace
 Tensor compute_bitwise_or(const TensorShape &shape)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src1 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::U8);
 
     // Create and configure function
     NEBitwiseOr bor;
@@ -95,9 +94,9 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src1 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::U8);
 
     BOOST_TEST(src1.info()->is_resizable());
     BOOST_TEST(src2.info()->is_resizable());

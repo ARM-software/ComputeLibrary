@@ -60,10 +60,10 @@ public:
         dst_shape.set(dst_shape.num_dimensions(), batches);
 
         // Create tensors
-        src     = create_tensor(src_shape, dt, 1, fixed_point_position);
-        weights = create_tensor(fc_obj.weights_shape, dt, 1, fixed_point_position);
-        bias    = create_tensor(fc_obj.bias_shape, dt, 1, fixed_point_position);
-        dst     = create_tensor(dst_shape, dt, 1, fixed_point_position);
+        src     = create_tensor<TensorType>(src_shape, dt, 1, fixed_point_position);
+        weights = create_tensor<TensorType>(fc_obj.weights_shape, dt, 1, fixed_point_position);
+        bias    = create_tensor<TensorType>(fc_obj.bias_shape, dt, 1, fixed_point_position);
+        dst     = create_tensor<TensorType>(dst_shape, dt, 1, fixed_point_position);
 
         // Create and configure function
         fc_layer = std::unique_ptr<Function>(new Function());

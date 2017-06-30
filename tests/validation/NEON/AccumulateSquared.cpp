@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -59,8 +58,8 @@ namespace
 Tensor compute_accumulate_squared(const TensorShape &shape, uint32_t shift)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::S16);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::S16);
 
     // Create and configure function
     NEAccumulateSquared acc;
@@ -94,8 +93,8 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, shift)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::S16);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::S16);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

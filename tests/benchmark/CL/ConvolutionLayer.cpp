@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "TensorLibrary.h"
 #include "benchmark/Datasets.h"

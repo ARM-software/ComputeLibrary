@@ -22,7 +22,6 @@
 cmake_minimum_required (VERSION 3.1)
 
 set(arm_compute_test_validation_NEON_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/NEON/Helper.h
     ${CMAKE_SOURCE_DIR}/NEON/NEAccessor.h
     ${CMAKE_CURRENT_SOURCE_DIR}/AbsoluteDifference.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Accumulate.cpp

@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -67,9 +66,9 @@ Tensor compute_pixel_wise_multiplication(const TensorShape &shape, DataType dt_i
                                          int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, dt_in0, 1, fixed_point_position);
-    Tensor src2 = create_tensor(shape, dt_in1, 1, fixed_point_position);
-    Tensor dst  = create_tensor(shape, dt_out, 1, fixed_point_position);
+    Tensor src1 = create_tensor<Tensor>(shape, dt_in0, 1, fixed_point_position);
+    Tensor src2 = create_tensor<Tensor>(shape, dt_in1, 1, fixed_point_position);
+    Tensor dst  = create_tensor<Tensor>(shape, dt_out, 1, fixed_point_position);
 
     // Create and configure function
     NEPixelWiseMultiplication multiply;
@@ -131,9 +130,9 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * (1.f / 255
                      shape, scale, convert_policy, rounding_policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src1 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::U8);
 
     validate_configuration(src1, src2, dst, shape, scale, convert_policy, rounding_policy);
 }
@@ -180,9 +179,9 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, scale, convert_policy, rounding_policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src1 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::U8);
 
     validate_configuration(src1, src2, dst, shape, scale, convert_policy, rounding_policy);
 }
@@ -230,9 +229,9 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, dt, scale, convert_policy, rounding_policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, dt);
-    Tensor src2 = create_tensor(shape, DataType::S16);
-    Tensor dst  = create_tensor(shape, DataType::S16);
+    Tensor src1 = create_tensor<Tensor>(shape, dt);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::S16);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::S16);
 
     validate_configuration(src1, src2, dst, shape, scale, convert_policy, rounding_policy);
 }
@@ -277,9 +276,9 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, dt, scale, convert_policy, rounding_policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, dt);
-    Tensor src2 = create_tensor(shape, DataType::S16);
-    Tensor dst  = create_tensor(shape, DataType::S16);
+    Tensor src1 = create_tensor<Tensor>(shape, dt);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::S16);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::S16);
 
     validate_configuration(src1, src2, dst, shape, scale, convert_policy, rounding_policy);
 }
@@ -323,9 +322,9 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * (1.f / 255
                      shape, scale, convert_policy, rounding_policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::F32);
-    Tensor src2 = create_tensor(shape, DataType::F32);
-    Tensor dst  = create_tensor(shape, DataType::F32);
+    Tensor src1 = create_tensor<Tensor>(shape, DataType::F32);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::F32);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::F32);
 
     validate_configuration(src1, src2, dst, shape, scale, convert_policy, rounding_policy);
 }
@@ -370,9 +369,9 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, scale, convert_policy, rounding_policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::F32);
-    Tensor src2 = create_tensor(shape, DataType::F32);
-    Tensor dst  = create_tensor(shape, DataType::F32);
+    Tensor src1 = create_tensor<Tensor>(shape, DataType::F32);
+    Tensor src2 = create_tensor<Tensor>(shape, DataType::F32);
+    Tensor dst  = create_tensor<Tensor>(shape, DataType::F32);
 
     validate_configuration(src1, src2, dst, shape, scale, convert_policy, rounding_policy);
 }

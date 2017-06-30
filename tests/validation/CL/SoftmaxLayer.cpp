@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -66,8 +65,8 @@ const float tolerance_fixed_point = 2.f;
 CLTensor compute_softmax_layer(const TensorShape &shape, DataType dt, int fixed_point_position = 0)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    CLTensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, dt, 1, fixed_point_position);
+    CLTensor dst = create_tensor<CLTensor>(shape, dt, 1, fixed_point_position);
 
     // Create and configure function
     CLSoftmaxLayer smx_layer;
@@ -111,8 +110,8 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTyp
     int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
-    CLTensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    CLTensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, dt, 1, fixed_point_position);
+    CLTensor dst = create_tensor<CLTensor>(shape, dt, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

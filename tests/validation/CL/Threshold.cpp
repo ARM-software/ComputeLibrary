@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -65,8 +64,8 @@ namespace
 CLTensor compute_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape, DataType::U8);
-    CLTensor dst = create_tensor(shape, DataType::U8);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8);
 
     // Create and configure function
     CLThreshold thrsh;
@@ -99,8 +98,8 @@ BOOST_DATA_TEST_CASE(Configuration,
                      shape, threshold_conf)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape, DataType::U8);
-    CLTensor dst = create_tensor(shape, DataType::U8);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

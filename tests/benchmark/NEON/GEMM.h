@@ -63,10 +63,10 @@ public:
         TensorShape shape_d = gemm_obj.shape_d;
 
         // Create tensors
-        a = create_tensor(shape_a, data_type, 1, 4);
-        b = create_tensor(shape_b, data_type, 1, 4);
-        c = create_tensor(shape_c, data_type, 1, 4);
-        d = create_tensor(shape_d, data_type, 1, 4);
+        a = create_tensor<Tensor>(shape_a, data_type, 1, 4);
+        b = create_tensor<Tensor>(shape_b, data_type, 1, 4);
+        c = create_tensor<Tensor>(shape_c, data_type, 1, 4);
+        d = create_tensor<Tensor>(shape_d, data_type, 1, 4);
 
         // Create and configure function
         gemm_layer = std::unique_ptr<Function>(new Function());

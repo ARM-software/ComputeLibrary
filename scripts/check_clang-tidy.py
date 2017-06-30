@@ -58,6 +58,10 @@ if __name__ == "__main__":
                         "syscall" in lines[i + 1])):
                             continue
 
+                if "use '= default' to define a trivial default constructor" in line:
+                    if i + 1 < len(lines) and "BENCHMARK" in lines[i + 1]:
+                        continue
+
                 failed = True
                 print(line)
 

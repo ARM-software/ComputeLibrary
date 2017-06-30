@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TensorLibrary.h"
 #include "benchmark/Datasets.h"
@@ -56,11 +55,12 @@ public:
         profiler.add(std::make_shared<WallClockTimer>());
 
         const std::string image_name = *(DataSet().begin() + state.range(0));
+        const RawTensor &raw        = library->get(image_name);
 
         // Create tensors
-        src1 = create_tensor(image_name, DataType::U8);
-        src2 = create_tensor(image_name, DataType::U8);
-        dst  = create_tensor(image_name, DataType::U8);
+        src1 = create_tensor<Tensor>(raw.shape(), DataType::U8);
+        src2 = create_tensor<Tensor>(raw.shape(), DataType::U8);
+        dst  = create_tensor<Tensor>(raw.shape(), DataType::U8);
 
         // Create and configure function
         band.configure(&src1, &src2, &dst);

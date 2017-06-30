@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -66,8 +65,8 @@ constexpr BorderSize   border_size(filter_size / 2); /** Border size of the kern
 Tensor compute_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U8);
 
     // Create and configure function
     NEBox3x3 box3x3;
@@ -98,8 +97,8 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * BorderModes(), shape, border_mode)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U8);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

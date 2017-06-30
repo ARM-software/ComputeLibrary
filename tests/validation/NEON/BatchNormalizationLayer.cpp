@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TypePrinter.h"
 #include "dataset/BatchNormalizationLayerDataset.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "tests/validation/Helpers.h"
 #include "validation/Datasets.h"
 #include "validation/Reference.h"
@@ -55,12 +56,12 @@ const float tolerance_q = 3;     /**< Tolerance value for comparing reference's 
 Tensor compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src   = create_tensor(shape0, dt, 1, fixed_point_position);
-    Tensor dst   = create_tensor(shape0, dt, 1, fixed_point_position);
-    Tensor mean  = create_tensor(shape1, dt, 1, fixed_point_position);
-    Tensor var   = create_tensor(shape1, dt, 1, fixed_point_position);
-    Tensor beta  = create_tensor(shape1, dt, 1, fixed_point_position);
-    Tensor gamma = create_tensor(shape1, dt, 1, fixed_point_position);
+    Tensor src   = create_tensor<Tensor>(shape0, dt, 1, fixed_point_position);
+    Tensor dst   = create_tensor<Tensor>(shape0, dt, 1, fixed_point_position);
+    Tensor mean  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
+    Tensor var   = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
+    Tensor beta  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
+    Tensor gamma = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
 
     // Create and configure function
     NEBatchNormalizationLayer norm;
@@ -127,12 +128,12 @@ BOOST_DATA_TEST_CASE(Configuration, RandomBatchNormalizationLayerDataset() * (bo
     int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
-    Tensor src   = create_tensor(obj.shape0, dt, 1, fixed_point_position);
-    Tensor dst   = create_tensor(obj.shape0, dt, 1, fixed_point_position);
-    Tensor mean  = create_tensor(obj.shape1, dt, 1, fixed_point_position);
-    Tensor var   = create_tensor(obj.shape1, dt, 1, fixed_point_position);
-    Tensor beta  = create_tensor(obj.shape1, dt, 1, fixed_point_position);
-    Tensor gamma = create_tensor(obj.shape1, dt, 1, fixed_point_position);
+    Tensor src   = create_tensor<Tensor>(obj.shape0, dt, 1, fixed_point_position);
+    Tensor dst   = create_tensor<Tensor>(obj.shape0, dt, 1, fixed_point_position);
+    Tensor mean  = create_tensor<Tensor>(obj.shape1, dt, 1, fixed_point_position);
+    Tensor var   = create_tensor<Tensor>(obj.shape1, dt, 1, fixed_point_position);
+    Tensor beta  = create_tensor<Tensor>(obj.shape1, dt, 1, fixed_point_position);
+    Tensor gamma = create_tensor<Tensor>(obj.shape1, dt, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

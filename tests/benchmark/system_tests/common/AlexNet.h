@@ -24,8 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_BENCHMARK_ALEXNET_H__
 #define __ARM_COMPUTE_TEST_BENCHMARK_ALEXNET_H__
 
-#include "TensorLibrary.h"
-#include "Utils.h"
+#include "tests/TensorLibrary.h"
+#include "tests/Utils.h"
 
 #include "benchmark/Profiler.h"
 #include "benchmark/WallClockTimer.h"

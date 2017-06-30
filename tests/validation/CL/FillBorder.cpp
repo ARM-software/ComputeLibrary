@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
@@ -58,7 +57,7 @@ BOOST_DATA_TEST_CASE(FillBorder, BorderModes() * boost::unit_test::data::make({ 
     BorderSize        border_size{ 5 };
 
     // Create tensors
-    CLTensor src = create_tensor(TensorShape{ 10U, 10U, 2U }, DataType::U8);
+    CLTensor src = create_tensor<CLTensor>(TensorShape{ 10U, 10U, 2U }, DataType::U8);
 
     src.info()->extend_padding(padding);
 

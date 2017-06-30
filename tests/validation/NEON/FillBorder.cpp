@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
@@ -57,7 +56,7 @@ BOOST_DATA_TEST_CASE(FillBorder, BorderModes() * boost::unit_test::data::make({ 
     BorderSize        border_size{ 5 };
 
     // Create tensors
-    Tensor src = create_tensor(TensorShape{ 10U, 10U, 2U }, DataType::U8);
+    Tensor src = create_tensor<Tensor>(TensorShape{ 10U, 10U, 2U }, DataType::U8);
 
     src.info()->extend_padding(padding);
 

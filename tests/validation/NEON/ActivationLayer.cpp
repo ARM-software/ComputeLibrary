@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "Globals.h"
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -87,8 +86,8 @@ float activation_layer_tolerance(ActivationLayerInfo::ActivationFunction activat
 Tensor compute_activation_layer(bool in_place, const TensorShape &shape, DataType dt, ActivationLayerInfo act_info, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
 
     // Create and configure function
     NEActivationLayer act_layer;
@@ -155,8 +154,8 @@ BOOST_DATA_TEST_CASE(Configuration, boost::unit_test::data::make({ false, true }
     const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TypePrinter.h"
 #include "dataset/FullyConnectedLayerDataset.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "validation/Datasets.h"
 #include "validation/Reference.h"
 #include "validation/Validation.h"
@@ -49,9 +50,9 @@ Tensor compute_fully_connected_layer(const TensorShape &input_shape, const Tenso
                                      bool transpose_weights, int fixed_point_position)
 {
     // Create tensors
-    Tensor src  = create_tensor(input_shape, dt, 1, fixed_point_position);
-    Tensor bias = create_tensor(bias_shape, dt, 1, fixed_point_position);
-    Tensor dst  = create_tensor(output_shape, dt, 1, fixed_point_position);
+    Tensor src  = create_tensor<Tensor>(input_shape, dt, 1, fixed_point_position);
+    Tensor bias = create_tensor<Tensor>(bias_shape, dt, 1, fixed_point_position);
+    Tensor dst  = create_tensor<Tensor>(output_shape, dt, 1, fixed_point_position);
 
     // Swap the first and second dimension of weights' shape if transpose_weights is true
     TensorShape ws = weights_shape;
@@ -62,7 +63,7 @@ Tensor compute_fully_connected_layer(const TensorShape &input_shape, const Tenso
         ws.set(1, dimx);
     }
 
-    Tensor weights = create_tensor(ws, dt, 1, fixed_point_position);
+    Tensor weights = create_tensor<Tensor>(ws, dt, 1, fixed_point_position);
 
     // Create and configure function.
     // Note: We pass the weights already transposed
@@ -115,9 +116,9 @@ BOOST_DATA_TEST_CASE(Configuration,
     int fixed_point_position = (dt == DataType::F32) ? 0 : 3;
 
     // Create tensors
-    Tensor src  = create_tensor(fc_set.src_shape, dt, 1, fixed_point_position);
-    Tensor bias = create_tensor(fc_set.bias_shape, dt, 1, fixed_point_position);
-    Tensor dst  = create_tensor(fc_set.dst_shape, dt, 1, fixed_point_position);
+    Tensor src  = create_tensor<Tensor>(fc_set.src_shape, dt, 1, fixed_point_position);
+    Tensor bias = create_tensor<Tensor>(fc_set.bias_shape, dt, 1, fixed_point_position);
+    Tensor dst  = create_tensor<Tensor>(fc_set.dst_shape, dt, 1, fixed_point_position);
 
     // Swap the first and second dimension of weights' shape if transpose_weights is true
     TensorShape ws = fc_set.weights_shape;
@@ -128,7 +129,7 @@ BOOST_DATA_TEST_CASE(Configuration,
         ws.set(1, dimx);
     }
 
-    Tensor weights = create_tensor(ws, dt, 1, fixed_point_position);
+    Tensor weights = create_tensor<Tensor>(ws, dt, 1, fixed_point_position);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(weights.info()->is_resizable());

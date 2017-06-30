@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
 #include "Globals.h"
 #include "PaddingCalculator.h"
 #include "TensorLibrary.h"
@@ -69,8 +68,8 @@ CLTensor compute_non_linear_filter(const TensorShape &shape, NonLinearFilterFunc
                                    uint8_t constant_border_value)
 {
     // Create tensors
-    CLTensor src = create_tensor(shape, DataType::U8);
-    CLTensor dst = create_tensor(shape, DataType::U8);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8);
 
     // Create and configure function
     CLNonLinearFilter filter;
@@ -113,8 +112,8 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes())
     const auto half_mask_size = static_cast<int>(mask_size / 2);
 
     // Create tensors
-    CLTensor src = create_tensor(shape, DataType::U8);
-    CLTensor dst = create_tensor(shape, DataType::U8);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());

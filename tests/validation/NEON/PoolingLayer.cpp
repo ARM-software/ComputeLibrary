@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "TypePrinter.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "tests/dataset/PoolingLayerDataset.h"
 #include "validation/Datasets.h"
 #include "validation/Reference.h"
 #include "validation/Validation.h"
 
-#include <iostream>
 #include <random>
 
 using namespace arm_compute;
@@ -54,8 +54,8 @@ const float tolerance_f = 1e-05; /**< Tolerance value for comparing reference's 
 Tensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src = create_tensor(shape_in, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape_out, dt, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape_in, dt, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape_out, dt, 1, fixed_point_position);
 
     // Create and configure function
     NEPoolingLayer pool;
