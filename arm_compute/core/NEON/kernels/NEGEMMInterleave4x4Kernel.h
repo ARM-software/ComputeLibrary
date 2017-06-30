@@ -56,7 +56,7 @@ public:
     NEGEMMInterleave4x4Kernel();
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  Input tensor. Data types supported: U8/S8/QS8/QS16/U16/S16/F16/U32/S32/F32
      * @param[out] output Output tensor which stores the interleaved matrix. Data type supported: same as @p input.
      */
     void configure(const ITensor *input, ITensor *output);
@@ -67,7 +67,7 @@ public:
 private:
     /** Common signature for all the transpose functions
      *
-     * @param[in]  input  An input tensor. Data types supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  An input tensor. Data types supported: U8/S8/QS8/U16/S16/QS16/F16/U32/S32/F32
      * @param[out] output The output tensor. Data type supported: same as @p input
      * @param[in]  window Region on which to execute the kernel.
      */

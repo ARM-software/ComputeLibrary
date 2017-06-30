@@ -311,6 +311,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
         case DataType::S16:
             os << "S16";
             break;
+        case DataType::QS16:
+            os << "QS16";
+            break;
         case DataType::U32:
             os << "U32";
             break;

@@ -55,7 +55,7 @@ public:
      *
      * @note The input and output tensor must have the same dimensions
      *
-     * @param[in]      input  Input tensor (Matrix C). Data types supported: QS8/F16/F32
+     * @param[in]      input  Input tensor (Matrix C). Data types supported: QS8/QS16/F16/F32
      * @param[in, out] output Output tensor. If this kernel is used to finalize the GEMM result, output contains the result obtained by the kernel @ref NEGEMMMatrixMultiplyKernel. Data type supported: the same as @p input.
      * @param[in]      beta   Weight of matrix C
      */
@@ -67,7 +67,7 @@ public:
 private:
     /** Common signature for all the matrix addition functions
      *
-     * @param[in]  input  An input tensor. Data types supported: QS8/F16/F32
+     * @param[in]  input  An input tensor. Data types supported: QS8/QS16/F16/F32
      * @param[out] output The output tensor. Data type supported: same as @p input
      * @param[in]  window Region on which to execute the kernel.
      * @param[in]  beta   Weight of matrix C
