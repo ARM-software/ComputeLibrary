@@ -29,6 +29,7 @@
 #include "RawTensor.h"
 
 #include <ostream>
+#include <vector>
 
 namespace arm_compute
 {

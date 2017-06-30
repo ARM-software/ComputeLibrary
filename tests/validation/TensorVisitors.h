@@ -31,6 +31,7 @@
 #include "boost_wrapper.h"
 
 #include <ostream>
+#include <vector>
 
 namespace arm_compute
 {

@@ -27,6 +27,8 @@
 #include "RawTensor.h"
 #include "Types.h"
 
+#include <vector>
+
 namespace arm_compute
 {
 namespace test

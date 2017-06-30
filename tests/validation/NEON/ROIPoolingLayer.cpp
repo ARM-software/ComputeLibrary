@@ -32,6 +32,7 @@
 #include "validation/ValidationUserConfiguration.h"
 
 #include <random>
+#include <vector>
 
 using namespace arm_compute;
 using namespace arm_compute::test;

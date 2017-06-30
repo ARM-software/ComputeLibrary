@@ -41,6 +41,7 @@
 #include <array>
 #include <cmath>
 #include <random>
+#include <vector>
 
 namespace arm_compute
 {
