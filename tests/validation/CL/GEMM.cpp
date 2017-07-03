@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "CL/Helper.h"
-#include "Globals.h"
 #include "TensorLibrary.h"
 #include "TypePrinter.h"
-#include "Utils.h"
 #include "dataset/GEMMDataset.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "validation/Datasets.h"
 #include "validation/Reference.h"
 #include "validation/Validation.h"
@@ -57,10 +56,10 @@ CLTensor compute_gemm(const TensorShape &src_shape1, const TensorShape &src_shap
                       const TensorShape &out_shape, float alpha, float beta, DataType dt, int fixed_point_position = 0)
 {
     // Create tensors
-    CLTensor src1 = create_tensor(src_shape1, dt, 1, fixed_point_position);
-    CLTensor src2 = create_tensor(src_shape2, dt, 1, fixed_point_position);
-    CLTensor src3 = create_tensor(src_shape3, dt, 1, fixed_point_position);
-    CLTensor dst  = create_tensor(out_shape, dt, 1, fixed_point_position);
+    CLTensor src1 = create_tensor<CLTensor>(src_shape1, dt, 1, fixed_point_position);
+    CLTensor src2 = create_tensor<CLTensor>(src_shape2, dt, 1, fixed_point_position);
+    CLTensor src3 = create_tensor<CLTensor>(src_shape3, dt, 1, fixed_point_position);
+    CLTensor dst  = create_tensor<CLTensor>(out_shape, dt, 1, fixed_point_position);
 
     // Create and configure function
     CLGEMM gemm;
@@ -112,10 +111,10 @@ BOOST_DATA_TEST_CASE(Configuration,
     int fixed_point_position = (dt == DataType::F32) ? 0 : 3;
 
     // Create tensors
-    CLTensor src1 = create_tensor(gemm_set.shape_a, dt, 1, fixed_point_position);
-    CLTensor src2 = create_tensor(gemm_set.shape_b, dt, 1, fixed_point_position);
-    CLTensor src3 = create_tensor(gemm_set.shape_c, dt, 1, fixed_point_position);
-    CLTensor dst  = create_tensor(gemm_set.shape_d, dt, 1, fixed_point_position);
+    CLTensor src1 = create_tensor<CLTensor>(gemm_set.shape_a, dt, 1, fixed_point_position);
+    CLTensor src2 = create_tensor<CLTensor>(gemm_set.shape_b, dt, 1, fixed_point_position);
+    CLTensor src3 = create_tensor<CLTensor>(gemm_set.shape_c, dt, 1, fixed_point_position);
+    CLTensor dst  = create_tensor<CLTensor>(gemm_set.shape_d, dt, 1, fixed_point_position);
 
     BOOST_TEST(src1.info()->is_resizable());
     BOOST_TEST(src2.info()->is_resizable());
