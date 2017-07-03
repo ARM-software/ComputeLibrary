@@ -89,7 +89,7 @@ void matrix_addition_f16(const ITensor *input, ITensor *output, const Window &wi
     },
     in, out);
 }
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 void matrix_addition_qs8(const ITensor *input, ITensor *output, const Window &window, float beta)
 {
@@ -142,7 +142,7 @@ void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output
 #ifdef ARM_COMPUTE_ENABLE_FP16
             _func = &matrix_addition_f16;
             break;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
             break;

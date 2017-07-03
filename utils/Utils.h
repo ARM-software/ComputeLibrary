@@ -153,7 +153,7 @@ public:
             {
                 image.map();
             }
-#endif
+#endif /* ARM_COMPUTE_CL */
             // Check if the file is large enough to fill the image
             const size_t current_position = _fs.tellg();
             _fs.seekg(0, std::ios_base::end);
@@ -220,7 +220,7 @@ public:
             {
                 image.unmap();
             }
-#endif
+#endif /* ARM_COMPUTE_CL */
         }
         catch(const std::ifstream::failure &e)
         {
@@ -267,7 +267,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         {
             tensor.map();
         }
-#endif
+#endif /* ARM_COMPUTE_CL */
 
         switch(tensor.info()->format())
         {
@@ -314,7 +314,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         {
             tensor.unmap();
         }
-#endif
+#endif /* ARM_COMPUTE_CL */
     }
     catch(const std::ofstream::failure &e)
     {
@@ -351,7 +351,7 @@ void load_trained_data(T &tensor, const std::string &filename)
         {
             tensor.map();
         }
-#endif
+#endif /* ARM_COMPUTE_CL */
         Window window;
 
         window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, 1, 1));
@@ -375,7 +375,7 @@ void load_trained_data(T &tensor, const std::string &filename)
         {
             tensor.unmap();
         }
-#endif
+#endif /* ARM_COMPUTE_CL */
     }
     catch(const std::ofstream::failure &e)
     {

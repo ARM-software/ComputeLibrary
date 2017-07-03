@@ -45,7 +45,7 @@
 
 #if ARM_COMPUTE_ENABLE_FP16
 #include <arm_fp16.h> // needed for float16_t
-#endif
+#endif                /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace arm_compute
 {
@@ -370,7 +370,7 @@ private:
     mutable TensorCache             _cache{};
     mutable std::mutex              _format_lock{};
     mutable std::mutex              _channel_lock{};
-    std::string                     _library_path;
+    const std::string               _library_path;
     std::random_device::result_type _seed;
 };
 
@@ -600,7 +600,7 @@ void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             fill(tensor, distribution_f16, seed_offset);
             break;
         }
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         case DataType::F32:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<float, D>::value));
@@ -632,9 +632,9 @@ void TensorLibrary::fill_layer_data(T &&tensor, std::string name) const
 {
 #ifdef _WIN32
     const std::string path_separator("\\");
-#else
+#else  /* _WIN32 */
     const std::string path_separator("/");
-#endif
+#endif /* _WIN32 */
 
     const std::string path = _library_path + path_separator + name;
 
@@ -662,4 +662,4 @@ void TensorLibrary::fill_layer_data(T &&tensor, std::string name) const
 }
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_TENSOR_LIBRARY_H__ */

@@ -787,7 +787,7 @@ void NEGradientFP16Kernel::configure(const ITensor *gx, const ITensor *gy, ITens
 
     INEKernel::configure(win);
 }
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace
 {

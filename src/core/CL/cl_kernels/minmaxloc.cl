@@ -26,11 +26,11 @@
 
 #ifndef DATA_TYPE_MIN
 #define DATA_TYPE_MIN 0x0
-#endif
+#endif /* DATA_TYPE_MIN */
 
 #ifndef DATA_TYPE_MAX
 #define DATA_TYPE_MAX 0xFF
-#endif
+#endif /* DATA_TYPE_MAX */
 
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_min = (VEC_DATA_TYPE(DATA_TYPE, 16))(DATA_TYPE_MIN);
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_max = (VEC_DATA_TYPE(DATA_TYPE, 16))(DATA_TYPE_MAX);
@@ -82,7 +82,7 @@ __kernel void minmax(
     widx      = CONVERT(((uint16)(width4 << 4) + idx16) < width, VEC_DATA_TYPE(DATA_TYPE, 16));
     local_max = max(local_max, select(type_min, data, widx));
     local_min = min(local_min, select(type_max, data, widx));
-#endif
+#endif /* NON_MULTIPLE_OF_16 */
 
     // Perform min/max reduction
     local_min.s01234567 = min(local_min.s01234567, local_min.s89ABCDEF);
@@ -124,41 +124,41 @@ __kernel void minmaxloc(
     IMAGE_DECLARATION(src),
     __global int *min_max,
     __global uint *min_max_count
-#if defined        LOCATE_MIN
+#ifdef LOCATE_MIN
     ,
     __global Coordinates2D *min_loc, uint max_min_loc_count
-#endif
-#if defined LOCATE_MAX
+#endif /* LOCATE_MIN */
+#ifdef LOCATE_MAX
     ,
     __global Coordinates2D *max_loc, uint max_max_loc_count
-#endif
+#endif /* LOCATE_MAX */
 )
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 
     DATA_TYPE value = *((__global DATA_TYPE *)src.ptr);
-#if defined COUNT_MIN_MAX
+#ifdef COUNT_MIN_MAX
     if(value == min_max[0])
     {
         uint idx = atomic_inc(&min_max_count[0]);
-#if defined  LOCATE_MIN
+#ifdef LOCATE_MIN
         if(idx < max_min_loc_count)
         {
             min_loc[idx].x = get_global_id(0);
             min_loc[idx].y = get_global_id(1);
         }
-#endif
+#endif /* LOCATE_MIN */
     }
     if(value == min_max[1])
     {
         uint idx = atomic_inc(&min_max_count[1]);
-#if defined  LOCATE_MAX
+#ifdef LOCATE_MAX
         if(idx < max_max_loc_count)
         {
             max_loc[idx].x = get_global_id(0);
             max_loc[idx].y = get_global_id(1);
         }
-#endif
+#endif /* LOCATE_MAX */
     }
-#endif
+#endif /* COUNT_MIN_MAX */
 }

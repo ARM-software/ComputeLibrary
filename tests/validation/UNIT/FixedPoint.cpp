@@ -161,4 +161,4 @@ BOOST_DATA_TEST_CASE(FixedPointQS8Outputs, (boost::unit_test::data::make(func_na
 
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* DOXYGEN_SKIP_THIS */

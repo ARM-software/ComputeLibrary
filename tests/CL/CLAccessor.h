@@ -133,4 +133,4 @@ inline void *CLAccessor::operator()(const Coordinates &coord)
 } // cl
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_CL_CLACCESSOR_H__ */

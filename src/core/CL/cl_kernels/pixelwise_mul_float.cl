@@ -25,9 +25,9 @@
 
 #ifdef SATURATE
 #define CONVERT_OP_FLOAT_STR(x, type, round) (convert_##type##_sat##round(x))
-#else
+#else /* SATURATE */
 #define CONVERT_OP_FLOAT_STR(x, type, round) (convert_##type##round(x))
-#endif
+#endif /* SATURATE */
 #define CONVERT_OP_FLOAT(x, type, round) CONVERT_OP_FLOAT_STR(x, type, round)
 
 /** Performs a pixelwise multiplication with float scale of either integer or float inputs.
@@ -76,13 +76,13 @@ __kernel void pixelwise_mul_float(
     in2_data = CONVERT(vload16(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(DATA_TYPE_RES, 16));
 
     // Perform multiplication
-#if defined DATA_TYPE_FLOAT
+#ifdef DATA_TYPE_FLOAT
     VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
     res = CONVERT(in1_data * in2_data * scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
-#else
+#else  /* DATA_TYPE_FLOAT */
     VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
     res = CONVERT_OP_FLOAT(CONVERT_OP_FLOAT((convert_float16(in1_data * in2_data) * scale), VEC_DATA_TYPE(DATA_TYPE_RES, 16), ROUND), VEC_DATA_TYPE(DATA_TYPE_OUT, 16), ROUND);
-#endif
+#endif /* DATA_TYPE_FLOAT */
 
     // Store result
     vstore16(res, 0, (__global DATA_TYPE_OUT *)out.ptr);

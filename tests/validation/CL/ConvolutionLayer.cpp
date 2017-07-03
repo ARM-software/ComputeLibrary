@@ -151,7 +151,7 @@ BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
     validate(CLAccessor(dst), ref_dst, tolerance_f32);
 }
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -188,4 +188,4 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* DOXYGEN_SKIP_THIS */

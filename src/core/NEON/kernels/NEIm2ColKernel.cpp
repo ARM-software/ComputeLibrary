@@ -305,7 +305,7 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
             case DataType::F16:
                 _func = &NEIm2ColKernel::run_reduced<float16_t>;
                 break;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
             case DataType::QS8:
                 _func = &NEIm2ColKernel::run_reduced<qint8_t>;
                 break;
@@ -325,7 +325,7 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
             case DataType::F16:
                 _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<float16_t, false> : &NEIm2ColKernel::run_generic<float16_t, true>;
                 break;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
             case DataType::QS8:
                 _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<qint8_t, false> : &NEIm2ColKernel::run_generic<qint8_t, true>;
                 break;

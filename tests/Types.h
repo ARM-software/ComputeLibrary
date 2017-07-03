@@ -34,4 +34,4 @@ enum class FixedPointOp
     RECIPROCAL /**< Reciprocal */
 };
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_TYPES_H__ */

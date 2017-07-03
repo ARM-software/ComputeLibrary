@@ -67,4 +67,4 @@ BOOST_DATA_TEST_CASE(SetEmpty, boost::unit_test::data::make({ 0, 1, 2, 3, 4, 5 }
 
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* DOXYGEN_SKIP_THIS */

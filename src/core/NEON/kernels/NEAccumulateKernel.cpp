@@ -131,7 +131,7 @@ void NEAccumulateWeightedFP16Kernel::run(const Window &window)
     },
     input, accum);
 }
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace
 {

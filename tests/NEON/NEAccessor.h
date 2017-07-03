@@ -121,4 +121,4 @@ inline void *NEAccessor::operator()(const Coordinates &coord)
 } // namespace neon
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_NEON_NEACCESSOR_H__ */

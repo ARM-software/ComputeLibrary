@@ -428,7 +428,7 @@ template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L1NORM, Ph
 template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L2NORM, PhaseType::SIGNED>;
 template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L1NORM, PhaseType::UNSIGNED>;
 template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L2NORM, PhaseType::UNSIGNED>;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace
 {

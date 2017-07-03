@@ -38,7 +38,7 @@
 
 #ifdef BOOST
 #include "boost_wrapper.h"
-#endif
+#endif /* BOOST */
 
 namespace arm_compute
 {
@@ -92,4 +92,4 @@ public:
 
 } // namespace test
 } // namespace arm_compute
-#endif //__ARM_COMPUTE_TEST_DATASET_THRESHOLD_DATASET_H__
+#endif /* __ARM_COMPUTE_TEST_DATASET_THRESHOLD_DATASET_H__ */

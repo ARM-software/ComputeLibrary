@@ -86,4 +86,4 @@ inline IAccessor::~IAccessor()
 }
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_IACCESSOR_H__ */

@@ -35,7 +35,7 @@
 
 #ifdef BOOST
 #include "boost_wrapper.h"
-#endif
+#endif /* BOOST */
 
 namespace arm_compute
 {

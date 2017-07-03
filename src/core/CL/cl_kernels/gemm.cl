@@ -262,7 +262,7 @@ __kernel void gemm_interleave4x4_8bit(IMAGE_DECLARATION(src),
  * @param[in]      biases_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]      biases_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
-#if(defined DATA_TYPE)
+#ifdef DATA_TYPE
 __kernel void gemm_accumulate_biases(
     IMAGE_DECLARATION(accum),
     VECTOR_DECLARATION(biases))
@@ -279,9 +279,9 @@ __kernel void gemm_accumulate_biases(
     // Store result in the accummulate buffer
     vstore16(accum_value, 0, (__global DATA_TYPE *)accum.ptr);
 }
-#endif // defined DATA_TYPE
+#endif /* DATA_TYPE */
 
-#if(defined WIDTH_MATRIX_B)
+#ifdef WIDTH_MATRIX_B
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_8bit and @ref gemm_transpose1x16 before running the matrix multiplication
  *
@@ -385,9 +385,9 @@ __kernel void gemm_mm_u8(IMAGE_DECLARATION(src0),
     vstore16(convert_uchar16_sat(c20), 0, (__global uchar *)(offset(&dst, 0, 2)));
     vstore16(convert_uchar16_sat(c30), 0, (__global uchar *)(offset(&dst, 0, 3)));
 }
-#endif
+#endif /* WIDTH_MATRIX_B */
 
-#if(defined WIDTH_MATRIX_B && defined ALPHA)
+#if defined(WIDTH_MATRIX_B) && defined(ALPHA)
 /** This OpenCL kernel is optimised for Midgard. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
@@ -796,7 +796,7 @@ __kernel void gemm_mm_f16(IMAGE_DECLARATION(src0),
     vstore8(c30, 0, (__global half *)(offset(&dst, 0, 3)));
 }
 
-#if(defined FIXED_POINT_POSITION)
+#ifdef FIXED_POINT_POSITION
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in 8 bit fixed point precision
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_8bit and @ref gemm_transpose1x16 before running the matrix multiplication
  *
@@ -888,9 +888,9 @@ __kernel void gemm_mm_qs8(IMAGE_DECLARATION(src0),
     vstore16(c20_qs8, 0, (__global char *)(offset(&dst, 0, 2)));
     vstore16(c30_qs8, 0, (__global char *)(offset(&dst, 0, 3)));
 }
-#endif // (defined FIXED_POINT_POSITION)
+#endif /* FIXED_POINT_POSITION */
 
-#if(defined WIDTH_VECTOR_A)
+#ifdef WIDTH_VECTOR_A
 /** This OpenCL kernel computes the vector by matrix multiplication between the vector A (src0) and matrix B (src1)
  *
  * @attention The width of vector A, the width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_VECTOR_A -DWIDTH_MATRIX_B and -DALPHA
@@ -1027,7 +1027,7 @@ __kernel void gemm_vm_f16(IMAGE_DECLARATION(src0),
     vstore8(acc, 0, (__global half *)(offset(&dst, 0, 0)));
 }
 
-#if(defined FIXED_POINT_POSITION)
+#ifdef FIXED_POINT_POSITION
 /** This OpenCL kernel computes the vector by matrix multiplication between the vector A (src0) and matrix B (src1) in 8 bit fixed point
  *
  * @attention The width of vector A, the width of matrix B, the alpha's value and the fixed point position need to be passed at compile time using -DWIDTH_VECTOR_A -DWIDTH_MATRIX_B, -DALPHA and -DFIXED_POINT_POSITION
@@ -1111,11 +1111,11 @@ __kernel void gemm_vm_qs8(IMAGE_DECLARATION(src0),
     /* Store 16 values */
     vstore16(acc_qs8, 0, (__global char *)(offset(&dst, 0, 0)));
 }
-#endif /* #if(defined FIXED_POINT_POSITION) */
-#endif /* (defined WIDTH_VECTOR_A) */
-#endif /* (defined WIDTH_MATRIX_B && defined ALPHA) */
+#endif /* FIXED_POINT_POSITION */
+#endif /* WIDTH_VECTOR_A */
+#endif /* WIDTH_MATRIX_B && ALPHA */
 
-#if(defined BETA)
+#ifdef BETA
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
  *
  * @attention The beta's value need to be passed at compile time using -DBETA
@@ -1190,7 +1190,7 @@ __kernel void gemm_ma_f16(IMAGE_DECLARATION(src),
     vstore8(out, 0, (__global half *)dst.ptr);
 }
 
-#if(defined FIXED_POINT_POSITION)
+#ifdef FIXED_POINT_POSITION
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices in 8 bit fixed point taking into account that the second matrix might be weighted by a scalar value beta:
  *
  * @attention The beta's value and the fixed point position need to be passed at compile time using -DBETA and -DFIXED_POINT_POSITION
@@ -1229,10 +1229,10 @@ __kernel void gemm_ma_qs8(IMAGE_DECLARATION(src),
     /* Store final result in axb matrix */
     vstore16(out, 0, (__global char *)dst.ptr);
 }
-#endif /* #if(defined FIXED_POINT_POSITION) */
-#endif /* (defined BETA) */
+#endif /* FIXED_POINT_POSITION */
+#endif /* BETA */
 
-#if(defined WIDTH_VECTOR_A)
+#ifdef WIDTH_VECTOR_A
 /** This OpenCL kernel computes the vector by matrix multiplication between each row of A (src0) and matrix B (src1) used for locally connected layer
  *
  * @attention The width of A need to be passed at compile time using -DWIDTH_VECTOR_A
@@ -1298,4 +1298,4 @@ __kernel void gemm_lc_vm_f32(IMAGE_DECLARATION(src0),
 
     vstore4(acc, 0, (__global float *)(offset(&dst, 0, 0)));
 }
-#endif /* (defined WIDTH_VECTOR_A) */
+#endif /* WIDTH_VECTOR_A */

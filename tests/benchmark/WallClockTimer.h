@@ -50,4 +50,4 @@ private:
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_BENCHMARK_WALL_CLOCK_TIMER_H__ */

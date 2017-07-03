@@ -23,7 +23,7 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
+#ifdef FIXED_POINT_POSITION
 
 #include "fixed_point.h"
 #define MAX_OP(x, y, type, size) MAX_OP_EXPAND(x, y, type, size)
@@ -37,7 +37,7 @@
 #define MINVAL MIN_VAL(DATA_TYPE)
 #define SELECT_DATA_TYPE EXPAND(DATA_TYPE)
 
-#else
+#else /* FIXED_POINT_POSITION */
 
 #define MAX_OP(x, y, type, size) max((x), (y))
 #define ADD_OP(x, y, type, size) ((x) + (y))
@@ -45,15 +45,15 @@
 #define DIV_OP(x, y, type, size) ((x) / (y))
 #define EXP_OP(x, type, size) exp((x))
 
-#if defined USE_F16
+#ifdef USE_F16
 #define MINVAL -HALF_MAX
 #define SELECT_DATA_TYPE short
-#else
+#else /* USE_F16 */
 #define MINVAL -FLT_MAX
 #define SELECT_DATA_TYPE int
-#endif
+#endif /* USE_F16 */
 
-#endif
+#endif /* FIXED_POINT_POSITION */
 
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_min = (VEC_DATA_TYPE(DATA_TYPE, 16))(MINVAL);
 __constant uint16 idx16 = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
@@ -99,14 +99,14 @@ __kernel void softmax_layer_max(
         max_val = MAX_OP(data, max_val, DATA_TYPE, 16);
     }
 
-#if defined NON_MULTIPLE_OF_16
+#ifdef NON_MULTIPLE_OF_16
     // Handle non multiple of 16
     VEC_DATA_TYPE(DATA_TYPE, 16)
     data = vload16(0, (__global DATA_TYPE *)offset(&src, width4 << 4, 0));
     VEC_DATA_TYPE(SELECT_DATA_TYPE, 16)
     widx    = CONVERT(((uint16)(width4 << 4) + idx16) < width, VEC_DATA_TYPE(SELECT_DATA_TYPE, 16));
     max_val = MAX_OP(max_val, select(type_min, data, widx), DATA_TYPE, 16);
-#endif
+#endif /* NON_MULTIPLE_OF_16 */
 
     // Perform max reduction
     max_val.s01234567 = MAX_OP(max_val.s01234567, max_val.s89ABCDEF, DATA_TYPE, 8);
@@ -182,7 +182,7 @@ __kernel void softmax_layer_shift_exp_sum(
         sum1D = ADD_OP(sum1D, data, DATA_TYPE, 16);
     }
 
-#if defined NON_MULTIPLE_OF_16
+#ifdef NON_MULTIPLE_OF_16
     // Handle non multiple of 16
     VEC_DATA_TYPE(DATA_TYPE, 16)
     data = vload16(0, (__global DATA_TYPE *)offset(&src, width4 << 4, 0));
@@ -193,7 +193,7 @@ __kernel void softmax_layer_shift_exp_sum(
     data = select(0, data, widx);
     vstore16(data, 0, (__global DATA_TYPE *)offset(&dst, width4 << 4, 0));
     sum1D = ADD_OP(sum1D, data, DATA_TYPE, 16);
-#endif
+#endif /* NON_MULTIPLE_OF_16 */
 
     // Perform min/max reduction
     sum1D.s01234567 = ADD_OP(sum1D.s01234567, sum1D.s89ABCDEF, DATA_TYPE, 8);

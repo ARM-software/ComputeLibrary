@@ -224,7 +224,7 @@ void NENonMaximaSuppression3x3FP16Kernel::configure(const ITensor *input, ITenso
 
     INEKernel::configure(win);
 }
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace
 {

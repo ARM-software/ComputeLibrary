@@ -42,4 +42,4 @@ public:
 } // namespace performance
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_PERFORMANCE_PROGRAM_OPTIONS_H__ */

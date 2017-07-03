@@ -32,7 +32,7 @@
 
 #if ARM_COMPUTE_ENABLE_FP16
 #include <arm_fp16.h> // needed for float16_t
-#endif
+#endif                /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace arm_compute
 {
@@ -45,7 +45,7 @@ using TensorVariant = boost::variant < Tensor<uint8_t>, Tensor<int8_t>,
       Tensor<uint32_t>, Tensor<int32_t>,
 #ifdef ARM_COMPUTE_ENABLE_FP16
       Tensor<float16_t>,
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
       Tensor<float >>;
 
 /** Helper to create a constant type if the passed reference is constant. */
@@ -100,7 +100,7 @@ public:
                 using value_type_f16 = typename match_const<R, float16_t>::type;
                 v                    = Tensor<float16_t>(shape, dt, fixed_point_position, reinterpret_cast<value_type_f16 *>(data));
                 break;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
             case DataType::F32:
                 using value_type_f32 = typename match_const<R, float>::type;
                 v                    = Tensor<float>(shape, dt, fixed_point_position, reinterpret_cast<value_type_f32 *>(data));

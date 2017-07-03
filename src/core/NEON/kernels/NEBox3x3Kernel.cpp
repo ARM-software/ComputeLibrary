@@ -103,7 +103,7 @@ void NEBox3x3FP16Kernel::run(const Window &window)
     },
     input, output);
 }
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BorderSize NEBox3x3Kernel::border_size() const
 {

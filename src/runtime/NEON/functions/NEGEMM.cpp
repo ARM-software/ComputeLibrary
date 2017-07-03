@@ -90,7 +90,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
                     shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / 8.0f));
                     break;
                 }
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
             case DataType::QS8:
             {
                 shape_tmp_b.set(0, b->info()->dimension(1) * 16);

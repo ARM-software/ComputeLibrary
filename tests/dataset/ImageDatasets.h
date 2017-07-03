@@ -29,7 +29,7 @@
 
 #ifdef BOOST
 #include "boost_wrapper.h"
-#endif
+#endif /* BOOST */
 
 namespace arm_compute
 {
@@ -56,9 +56,9 @@ public:
     /** Number of samples in the data set. */
 #ifdef BOOST
     boost::unit_test::data::size_t size() const
-#else
+#else  /* BOOST */
     unsigned int size() const
-#endif
+#endif /* BOOST */
     {
         return _images.size();
     }
@@ -109,7 +109,7 @@ public:
 #ifdef INTERNAL_ONLY
         : ImageDataset("1280x720.ppm", "1920x1080.ppm", "4160x3120.ppm")
           // The 4k image is too large to distribute
-#else
+#else  /* INTERNAL_ONLY */
         : ImageDataset("1280x720.ppm", "1920x1080.ppm")
 #endif /* INTERNAL_ONLY */
     {
@@ -117,4 +117,4 @@ public:
 };
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_IMAGE_DATASETS_H__ */

@@ -92,8 +92,8 @@ public:
      */
     void configure(const ITensor *input, ITensor *output, bool border_undefined);
 };
-#else
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
 using NENonMaximaSuppression3x3FP16Kernel = NENonMaximaSuppression3x3Kernel;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 }
 #endif /* _ARM_COMPUTE_NENONMAXIMASUPPRESSION3x3KERNEL_H__ */

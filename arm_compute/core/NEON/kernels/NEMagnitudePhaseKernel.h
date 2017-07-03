@@ -156,9 +156,9 @@ private:
     ITensor                  *_magnitude; /**< Output - Magnitude */
     ITensor                  *_phase;     /**< Output - Phase */
 };
-#else
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
 template <MagnitudeType mag_type, PhaseType phase_type>
 using NEMagnitudePhaseFP16Kernel = NEMagnitudePhaseKernel<mag_type, phase_type>;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 }
 #endif /* __ARM_COMPUTE_NEMAGNITUDEPHASEKERNEL_H__ */

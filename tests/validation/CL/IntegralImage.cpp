@@ -140,4 +140,4 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes(), shape)
 
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* DOXYGEN_SKIP_THIS */

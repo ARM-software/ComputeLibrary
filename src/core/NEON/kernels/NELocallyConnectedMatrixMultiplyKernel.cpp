@@ -89,7 +89,7 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
         asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(vec_a)));
         asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b)));
         asm volatile("PLD [%0, #128*4]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + in_b_stride)));
-#endif
+#endif /* __arm__ */
 
         const float *vec_a_end_addr = vec_a + num_elems_vec_a;
 
@@ -113,7 +113,7 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
             asm volatile("PLD [%0, #128*1]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + 2 * in_b_stride)));
             asm volatile("PLD [%0, #128*1]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + 3 * in_b_stride)));
             asm volatile("PLD [%0, #128*1]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + 4 * in_b_stride)));
-#endif
+#endif /* __arm __ */
 
             acc0 = vmlaq_lane_f32(acc0, b00, a0l, 0);
             acc1 = vmlaq_lane_f32(acc1, b01, a0l, 0);

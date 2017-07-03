@@ -86,4 +86,4 @@ BOOST_DATA_TEST_CASE(FillBorder, BorderModes() * boost::unit_test::data::make({ 
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* DOXYGEN_SKIP_THIS */

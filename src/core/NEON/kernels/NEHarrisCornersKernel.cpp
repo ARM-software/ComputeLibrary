@@ -360,7 +360,7 @@ void NEHarrisScoreFP16Kernel<block_size>::configure(const IImage *input1, const 
     INEKernel::configure(win);
 }
 
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 template class arm_compute::NEHarrisScoreKernel<3>;
 template class arm_compute::NEHarrisScoreKernel<5>;

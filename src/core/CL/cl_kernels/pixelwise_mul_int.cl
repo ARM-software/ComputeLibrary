@@ -25,9 +25,9 @@
 
 #ifdef SATURATE
 #define CONVERT_OP_INT_STR(x, type) (convert_##type##_sat(x))
-#else
+#else /* SATURATE */
 #define CONVERT_OP_INT_STR(x, type) (convert_##type(x))
-#endif
+#endif /* SATURATE */
 #define CONVERT_OP_INT(x, type) CONVERT_OP_INT_STR(x, type)
 
 /** Performs a pixelwise multiplication with integer scale of integer inputs.

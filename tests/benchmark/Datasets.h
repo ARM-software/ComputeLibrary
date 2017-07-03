@@ -76,4 +76,4 @@ void DataSetArgs(::benchmark::internal::Benchmark *b)
 }
 }
 }
-#endif
+#endif /* __ARM_COMPUTE_TEST_BENCHMARK_DATASETS_H__ */

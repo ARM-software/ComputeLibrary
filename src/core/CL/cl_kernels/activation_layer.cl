@@ -51,48 +51,48 @@
  */
 __kernel void activation_layer(
     TENSOR3D_DECLARATION(input)
-#if !defined IN_PLACE
+#ifndef IN_PLACE
     ,
     TENSOR3D_DECLARATION(output)
-#endif
+#endif /* not IN_PLACE */
 )
 {
     // Get pixels pointer
     Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT(input);
-#if defined  IN_PLACE
+#ifdef IN_PLACE
     Tensor3D output = input;
-#else
+#else  /* IN_PLACE */
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
-#endif
+#endif /* IN_PLACE */
 
     // Load data
     VEC_DATA_TYPE(DATA_TYPE, 16)
     data = vload16(0, (__global DATA_TYPE *)input.ptr);
 
     // Perform activation
-#if defined LOGISTIC
+#ifdef LOGISTIC
     data = 1 / (1 + exp(-data));
-#elif defined TANH
+#elif defined(TANH)
     data            = (VEC_DATA_TYPE(DATA_TYPE, 16))A * tanh((VEC_DATA_TYPE(DATA_TYPE, 16))B * data);
-#elif defined RELU
+#elif defined(RELU)
     data = max(0, data);
-#elif defined BRELU
+#elif defined(BRELU)
     data = min((VEC_DATA_TYPE(DATA_TYPE, 16))A, max(0, data));
-#elif defined SRELU
+#elif defined(SRELU)
     data = log(1 + exp(data));
-#elif defined ABS
-#if defined   TYPE_INT
+#elif defined(ABS)
+#ifdef TYPE_INT
     data = abs(data);
-#else
+#else  /* TYPE_INT */
     data = fabs(data);
-#endif
-#elif defined SQUARE
+#endif /* TYPE_INT */
+#elif defined(SQUARE)
     data = data * data;
-#elif defined SQRT
+#elif defined(SQRT)
     data = sqrt(data);
-#elif defined LINEAR
+#elif defined(LINEAR)
     data = (VEC_DATA_TYPE(DATA_TYPE, 16))A * data + (VEC_DATA_TYPE(DATA_TYPE, 16))B;
-#endif
+#endif /* switch TANH, RELU, BRELU, SRELU, ABS, SQUARE, SQRT, LINEAR */
 
     // Store result
     vstore16(data, 0, (__global DATA_TYPE *)output.ptr);

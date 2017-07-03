@@ -133,4 +133,4 @@ UserConfiguration::Option<T>::operator T() const
 }
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_USER_CONFIGURATION_H__ */

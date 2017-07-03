@@ -268,4 +268,4 @@ struct is_dataset<arm_compute::test::MatrixPatterns> : boost::mpl::true_
 }
 }
 }
-#endif
+#endif /* __ARM_COMPUTE_TEST_VALIDATION_DATASETS_H__ */

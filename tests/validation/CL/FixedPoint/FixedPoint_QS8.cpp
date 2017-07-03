@@ -70,7 +70,7 @@ CLTensor compute_fixed_point_op(const TensorShape &shape, int fixed_point_positi
     std::string fixed_point_operation_kernel;
 #ifndef EMBEDDED_KERNELS
     fixed_point_operation_kernel += "#include \"fixed_point.h\"\n";
-#endif
+#endif /* EMBEDDED_KERNELS */
     fixed_point_operation_kernel +=
         "__kernel void fixed_point_operation_qs8(                                                                 \n"
         "   __global char* src,                                                                                   \n"
@@ -138,7 +138,7 @@ CLTensor compute_fixed_point_op(const TensorShape &shape, int fixed_point_positi
 
 #ifndef EMBEDDED_KERNELS
     build_opts += " -I" + CLKernelLibrary::get().get_kernel_path();
-#else
+#else  /* EMBEDDED_KERNELS */
     sources.push_back(CLKernelLibrary::get().get_program_source("fixed_point.h"));
 #endif /* EMBEDDED_KERNELS */
 
@@ -222,4 +222,4 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* DOXYGEN_SKIP_THIS */

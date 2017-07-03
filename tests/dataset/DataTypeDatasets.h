@@ -28,7 +28,7 @@
 
 #ifdef BOOST
 #include "boost_wrapper.h"
-#endif
+#endif /* BOOST */
 
 namespace arm_compute
 {
@@ -55,9 +55,9 @@ public:
     /** Number of samples in the data set. */
 #ifdef BOOST
     boost::unit_test::data::size_t size() const
-#else
+#else  /* BOOST */
     unsigned int size() const
-#endif
+#endif /* BOOST */
     {
         return _types.size();
     }
@@ -190,4 +190,4 @@ public:
 };
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_DATA_TYPE_DATASET_H__ */

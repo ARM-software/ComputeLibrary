@@ -40,9 +40,9 @@
 #include <string>
 #include <type_traits>
 
-#if ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_ENABLE_FP16
 #include <arm_fp16.h> // needed for float16_t
-#endif
+#endif                /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace arm_compute
 {
@@ -102,7 +102,7 @@ template <> struct promote<int32_t> { using type = int64_t; };
 template <> struct promote<float> { using type = float; };
 #ifdef ARM_COMPUTE_ENABLE_FP16
 template <> struct promote<float16_t> { using type = float16_t; };
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 
 template <typename T>
@@ -417,4 +417,4 @@ inline T create_tensor(const TensorShape &shape, DataType data_type, int num_cha
 }
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_UTILS_H__ */

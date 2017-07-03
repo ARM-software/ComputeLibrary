@@ -44,6 +44,23 @@ then
     exit -1
 fi
 
+grep -Hnir "#.*defined[^(]" $DIRECTORIES | tee bad_style.log
+if [[ $(cat bad_style.log | wc -l) > 0 ]]
+then
+    echo ""
+    echo "ERROR: use parenthesis after #if defined(MY_PREPROCESSOR)"
+    exit -1
+fi
+
+grep -Hnir "#else$\|#endif$" $DIRECTORIES | tee bad_style.log
+if [[ $(cat bad_style.log | wc -l) > 0 ]]
+then
+    echo ""
+    echo "ERROR: #else and #endif should be followed by a comment of the guard they refer to (e.g /* ARM_COMPUTE_ENABLE_FP16 */ )"
+    exit -1
+fi
+
+
 spdx_missing=0
 for f in $(find $DIRECTORIES -type f)
 do

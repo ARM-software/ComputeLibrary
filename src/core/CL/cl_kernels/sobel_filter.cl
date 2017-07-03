@@ -56,28 +56,28 @@ __kernel void sobel3x3(
 #ifdef GRAD_X
     ,
     IMAGE_DECLARATION(dst_gx)
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     ,
     IMAGE_DECLARATION(dst_gy)
-#endif
+#endif /* GRAD_Y */
 )
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 #ifdef GRAD_X
     Image dst_gx = CONVERT_TO_IMAGE_STRUCT(dst_gx);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     Image dst_gy = CONVERT_TO_IMAGE_STRUCT(dst_gy);
-#endif
+#endif /* GRAD_Y */
 
     // Output pixels
 #ifdef GRAD_X
     short8 gx = (short8)0;
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     short8 gy = (short8)0;
-#endif
+#endif /* GRAD_Y */
 
     // Row0
     uchar16 temp   = vload16(0, offset(&src, -1, -1));
@@ -87,12 +87,12 @@ __kernel void sobel3x3(
 #ifdef GRAD_X
     gx += left * (short8)(-1);
     gx += right * (short8)(+1);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     gy += left * (short8)(-1);
     gy += middle * (short8)(-2);
     gy += right * (short8)(-1);
-#endif
+#endif /* GRAD_Y */
 
     // Row1
     temp  = vload16(0, offset(&src, -1, 0));
@@ -101,7 +101,7 @@ __kernel void sobel3x3(
 #ifdef GRAD_X
     gx += left * (short8)(-2);
     gx += right * (short8)(+2);
-#endif
+#endif /* GRAD_X */
 
     // Row2
     temp   = vload16(0, offset(&src, -1, 1));
@@ -111,20 +111,20 @@ __kernel void sobel3x3(
 #ifdef GRAD_X
     gx += left * (short8)(-1);
     gx += right * (short8)(+1);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     gy += left * (short8)(+1);
     gy += middle * (short8)(+2);
     gy += right * (short8)(+1);
-#endif
+#endif /* GRAD_Y */
 
     // Store results
 #ifdef GRAD_X
     vstore8(gx, 0, ((__global short *)dst_gx.ptr));
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     vstore8(gy, 0, ((__global short *)dst_gy.ptr));
-#endif
+#endif /* GRAD_Y */
 }
 
 /**********************************************/
@@ -261,20 +261,20 @@ __kernel void sobel_separable1x5(
 #ifdef GRAD_X
     ,
     IMAGE_DECLARATION(dst_gx)
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     ,
     IMAGE_DECLARATION(dst_gy)
-#endif
+#endif /* GRAD_Y */
 )
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 #ifdef GRAD_X
     Image dst_gx = CONVERT_TO_IMAGE_STRUCT(dst_gx);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     Image dst_gy = CONVERT_TO_IMAGE_STRUCT(dst_gy);
-#endif
+#endif /* GRAD_Y */
 
     // Output pixels
     short16 gx_gy = sobel1x5(&src,
@@ -284,10 +284,10 @@ __kernel void sobel_separable1x5(
     // Store result in dst
 #ifdef GRAD_X
     vstore8(gx_gy.s01234567, 0, ((__global short *)dst_gx.ptr));
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     vstore8(gx_gy.s89ABCDEF, 0, ((__global short *)dst_gy.ptr));
-#endif
+#endif /* GRAD_Y */
 }
 
 /** Apply a 5x1 convolution matrix to two single channel S16 input temporary images
@@ -326,32 +326,32 @@ __kernel void sobel_separable5x1(
 #ifdef GRAD_X
     IMAGE_DECLARATION(src_x),
     IMAGE_DECLARATION(dst_gx),
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     IMAGE_DECLARATION(src_y),
     IMAGE_DECLARATION(dst_gy),
-#endif
+#endif /* GRAD_Y */
     int dummy)
 {
 #ifdef GRAD_X
     Image src_x  = CONVERT_TO_IMAGE_STRUCT(src_x);
     Image dst_gx = CONVERT_TO_IMAGE_STRUCT(dst_gx);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     Image src_y  = CONVERT_TO_IMAGE_STRUCT(src_y);
     Image dst_gy = CONVERT_TO_IMAGE_STRUCT(dst_gy);
-#endif
+#endif /* GRAD_Y */
 
 #ifdef GRAD_X
     short8 gx = sobel5x1(&src_x,
                          1, 4, 6, 4, 1);
     vstore8(gx, 0, ((__global short *)dst_gx.ptr));
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     short8 gy = sobel5x1(&src_y,
                          -1, -2, 0, 2, 1);
     vstore8(gy, 0, ((__global short *)dst_gy.ptr));
-#endif
+#endif /* GRAD_Y */
 }
 
 /**********************************************/
@@ -444,20 +444,20 @@ __kernel void sobel_separable1x7(
 #ifdef GRAD_X
     ,
     IMAGE_DECLARATION(dst_gx)
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     ,
     IMAGE_DECLARATION(dst_gy)
-#endif
+#endif /* GRAD_Y */
 )
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 #ifdef GRAD_X
     Image dst_gx = CONVERT_TO_IMAGE_STRUCT(dst_gx);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     Image dst_gy = CONVERT_TO_IMAGE_STRUCT(dst_gy);
-#endif
+#endif /* GRAD_Y */
     int8 gx = (int8)0;
     int8 gy = (int8)0;
 
@@ -466,10 +466,10 @@ __kernel void sobel_separable1x7(
     // Store result in dst
 #ifdef GRAD_X
     vstore8(gx, 0, ((__global int *)dst_gx.ptr));
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     vstore8(gy, 0, ((__global int *)dst_gy.ptr));
-#endif
+#endif /* GRAD_Y */
 }
 
 /** Apply a 7x1 convolution matrix to two single channel S16 input temporary images and output two single channel S16 images and leave the borders undefined.
@@ -507,33 +507,33 @@ __kernel void sobel_separable7x1(
 #ifdef GRAD_X
     IMAGE_DECLARATION(src_x),
     IMAGE_DECLARATION(dst_gx),
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     IMAGE_DECLARATION(src_y),
     IMAGE_DECLARATION(dst_gy),
-#endif
+#endif /* GRAD_Y */
     int dummy)
 {
 #ifdef GRAD_X
     Image src_x  = CONVERT_TO_IMAGE_STRUCT(src_x);
     Image dst_gx = CONVERT_TO_IMAGE_STRUCT(dst_gx);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     Image src_y  = CONVERT_TO_IMAGE_STRUCT(src_y);
     Image dst_gy = CONVERT_TO_IMAGE_STRUCT(dst_gy);
-#endif
+#endif /* GRAD_Y */
 
     // Output pixels
 #ifdef GRAD_X
     int8 gx = 0;
     SOBEL7x1(&src_x, gx, Y);
     vstore8(gx, 0, (__global int *)dst_gx.ptr);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     int8 gy = 0;
     SOBEL7x1(&src_y, gy, X);
     vstore8(gy, 0, (__global int *)dst_gy.ptr);
-#endif
+#endif /* GRAD_Y */
 }
 
 /**********************************************/

@@ -68,7 +68,7 @@ BOOST_DATA_TEST_CASE(Index2CoordFail, boost::unit_test::data::make({ TensorShape
 {
     BOOST_CHECK_THROW(index2coord(shape, index), std::runtime_error);
 }
-#endif
+#endif /* 0 */
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Coord2Index, boost::unit_test::data::make({ TensorShape{ 1U }, TensorShape{ 2U }, TensorShape{ 2U, 3U } }) ^ boost::unit_test::data::make({ Coordinates{ 0 }, Coordinates{ 1 }, Coordinates{ 0, 1 } })
@@ -87,8 +87,8 @@ BOOST_DATA_TEST_CASE(Coord2IndexFail, boost::unit_test::data::make({ TensorShape
 {
     BOOST_CHECK_THROW(coord2index(shape, coordinate), std::runtime_error);
 }
-#endif
+#endif /* 0 */
 
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* DOXYGEN_SKIP_THIS */

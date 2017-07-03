@@ -370,4 +370,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_REFERENCE_REFERENCE_H__ */

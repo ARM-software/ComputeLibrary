@@ -118,9 +118,9 @@ private:
     /** Harris Score function to use for the particular image types passed to configure() */
     HarrisScoreFunction *_func;
 };
-#else
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
 template <int32_t block_size>
 using NEHarrisScoreFP16Kernel = NEHarrisScoreKernel<block_size>;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 }
 #endif /* __ARM_COMPUTE_NEHARRISCORNERSKERNEL_H__ */

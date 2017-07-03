@@ -35,4 +35,4 @@ namespace test
 extern std::unique_ptr<TensorLibrary> library;
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_GLOBALS_H__ */

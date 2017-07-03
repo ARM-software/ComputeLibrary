@@ -28,7 +28,7 @@
 
 #ifdef BOOST
 #include "boost_wrapper.h"
-#endif
+#endif /* BOOST */
 
 #include <array>
 
@@ -56,9 +56,9 @@ public:
     /** Number of samples in the data set. */
 #ifdef BOOST
     boost::unit_test::data::size_t size() const
-#else
+#else  /* BOOST */
     unsigned int size() const
-#endif
+#endif /* BOOST */
     {
         return _patterns.size();
     }
@@ -79,4 +79,4 @@ private:
 };
 } // namespace test
 } // namespace arm_compute
-#endif // __ARM_COMPUTE_TEST_MATRIX_PATTERN_DATASET_H__
+#endif /* __ARM_COMPUTE_TEST_MATRIX_PATTERN_DATASET_H__ */

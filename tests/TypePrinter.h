@@ -464,4 +464,4 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
     return os;
 }
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

@@ -25,15 +25,15 @@
 
 #ifndef DATA_TYPE
 #define DATA_TYPE short
-#endif
+#endif /* DATA_TYPE */
 
 #ifndef COMPUTE_TYPE
 #define COMPUTE_TYPE int
-#endif
+#endif /* COMPUTE_TYPE */
 
 #ifndef DATA_TYPE_OUT
 #define DATA_TYPE_OUT uchar
-#endif
+#endif /* DATA_TYPE_OUT */
 
 /** Compute a 1D horizontal convolution of size 5 for 8 bytes assuming the input is made of 1 channel of 1 byte (i.e 8 pixels).
  *

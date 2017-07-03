@@ -23,11 +23,11 @@
  */
 #include "helpers.h"
 
-#if defined POOL_AVG
+#ifdef POOL_AVG
 #define POOL_OP(x, y) ((x) + (y))
-#else
+#else /* POOL_AVG */
 #define POOL_OP(x, y) (fmax((x), (y)))
-#endif
+#endif /* POOL_AVG */
 
 float calculate_avg_scale(const int pool_size, const int upper_bound_w, const int upper_bound_h,
                           const int pad_x, const int pad_y, const int stride_x, const int stride_y)
@@ -70,7 +70,7 @@ __kernel void pooling_layer_2(
 #ifdef POOL_AVG
     ,
     int2 max_dims, int2 strides, int2 paddings
-#endif
+#endif /* POOL_AVG */
 )
 {
     // Get pixels pointer
@@ -90,7 +90,7 @@ __kernel void pooling_layer_2(
     // Divide by pool region in case of average pooling
 #ifdef POOL_AVG
     res *= calculate_avg_scale(2, max_dims.x, max_dims.y, paddings.x, paddings.y, strides.x, strides.y);
-#endif
+#endif /* POOL_AVG */
 
     // Store result
     *(__global DATA_TYPE *)output.ptr = res;
@@ -127,7 +127,7 @@ __kernel void pooling_layer_3(
 #ifdef POOL_AVG
     ,
     int2 max_dims, int2 strides, int2 paddings
-#endif
+#endif /* POOL_AVG */
 )
 {
     // Get pixels pointer
@@ -150,7 +150,7 @@ __kernel void pooling_layer_3(
     // Divide by pool region in case of average pooling
 #ifdef POOL_AVG
     res *= calculate_avg_scale(3, max_dims.x, max_dims.y, paddings.x, paddings.y, strides.x, strides.y);
-#endif
+#endif /* POOL_AVG */
 
     // Store result
     *(__global DATA_TYPE *)output.ptr = res;
@@ -187,7 +187,7 @@ __kernel void pooling_layer_7(
 #ifdef POOL_AVG
     ,
     int2 max_dims, int2 strides, int2 paddings
-#endif
+#endif /* POOL_AVG */
 )
 {
     // Get pixels pointer
@@ -221,9 +221,9 @@ __kernel void pooling_layer_7(
     // Set last element
 #ifdef POOL_AVG
     data0.s7 = 0;
-#else
+#else  /* POOL_AVG */
     data0.s7 = data0.s6;
-#endif
+#endif /* POOL_AVG */
 
     // Reduce result
     VEC_DATA_TYPE(DATA_TYPE, 4)
@@ -235,7 +235,7 @@ __kernel void pooling_layer_7(
     // Divide by pool region in case of average pooling
 #ifdef POOL_AVG
     res *= calculate_avg_scale(7, max_dims.x, max_dims.y, paddings.x, paddings.y, strides.x, strides.y);
-#endif
+#endif /* POOL_AVG */
 
     // Store result
     *(__global DATA_TYPE *)output.ptr = res;

@@ -69,4 +69,4 @@ private:
     bool          _non_max_suppression; /** true if non-maxima suppression is applied in the next stage */
 };
 }
-#endif
+#endif /* __ARM_COMPUTE_NEFASTCORNERSKERNEL_H__ */

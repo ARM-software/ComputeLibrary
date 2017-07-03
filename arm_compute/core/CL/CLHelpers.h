@@ -103,4 +103,4 @@ GPUTarget get_target_from_device(cl::Device &device);
  */
 GPUTarget get_arch_from_target(GPUTarget target);
 }
-#endif
+#endif /* __ARM_COMPUTE_CLHELPERS_H__ */

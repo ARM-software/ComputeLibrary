@@ -88,9 +88,9 @@ public:
     // Inherited methods overridden:
     void run(const Window &window) override;
 };
-#else
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
 using NEAccumulateWeightedFP16Kernel = NEAccumulateWeightedKernel;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 /** Interface for the accumulate squared kernel
  *

@@ -57,9 +57,9 @@ template <class T>
 struct is_floating_point
     : std::integral_constant < bool,
       std::is_same<float, typename std::remove_cv<T>::type>::value ||
-#if ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_ENABLE_FP16
       std::is_same<float16_t, typename std::remove_cv<T>::type>::value ||
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
       std::is_same<double, typename std::remove_cv<T>::type>::value || std::is_same<long double, typename std::remove_cv<T>::type>::value >
 {
 };

@@ -49,4 +49,4 @@ Array<T> create_array(const std::vector<T> &v)
 } // namespace neon
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_NEON_HELPER_H__ */

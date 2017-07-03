@@ -54,4 +54,4 @@ struct PerformanceUserConfiguration : public UserConfiguration
 extern performance::PerformanceUserConfiguration user_config;
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_PERFORMANCE_PERFORMANCE_USER_CONFIGURATION_H__ */

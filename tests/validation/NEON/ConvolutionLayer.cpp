@@ -45,8 +45,8 @@ namespace
 const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef ARM_COMPUTE_ENABLE_FP16
 const float tolerance_f16 = 0.01f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif
-const float tolerance_qs8 = 3.0f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
+#endif                             /* ARM_COMPUTE_ENABLE_FP16 */
+const float tolerance_qs8 = 3.0f;  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
 
 Tensor compute_convolution_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
                                  const PadStrideInfo &conv_info, int fixed_point_position)
@@ -151,7 +151,7 @@ BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
     validate(NEAccessor(dst), ref_dst, tolerance_f16);
 }
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -220,4 +220,4 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
-#endif
+#endif /* DOXYGEN_SKIP_THIS */

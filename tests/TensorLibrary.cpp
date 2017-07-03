@@ -186,13 +186,15 @@ RawTensor load_ppm(const std::string &path)
 }
 } // namespace
 
-TensorLibrary::TensorLibrary(std::string path)
-    : _library_path(std::move(path)), _seed{ std::random_device()() }
+TensorLibrary::TensorLibrary(std::string path) //NOLINT
+    : _library_path(std::move(path)),
+      _seed{ std::random_device()() }
 {
 }
 
-TensorLibrary::TensorLibrary(std::string path, std::random_device::result_type seed)
-    : _library_path(std::move(path)), _seed{ seed }
+TensorLibrary::TensorLibrary(std::string path, std::random_device::result_type seed) //NOLINT
+    : _library_path(std::move(path)),
+      _seed{ seed }
 {
 }
 
@@ -342,9 +344,9 @@ RawTensor TensorLibrary::load_image(const std::string &name) const
 {
 #ifdef _WIN32
     const std::string image_path = ("\\images\\");
-#else
+#else  /* _WIN32 */
     const std::string image_path = ("/images/");
-#endif
+#endif /* _WIN32 */
 
     const std::string path      = _library_path + image_path + name;
     const std::string extension = path.substr(path.find_last_of('.') + 1);

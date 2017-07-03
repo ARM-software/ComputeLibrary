@@ -26,10 +26,10 @@
 #ifdef SATURATE
 #define ADD(x, y) add_sat((x), (y))
 #define SUB(x, y) sub_sat((x), (y))
-#else
+#else /* SATURATE */
 #define ADD(x, y) (x) + (y)
 #define SUB(x, y) (x) - (y)
-#endif
+#endif /* SATURATE */
 
 /** This function add two images.
  *

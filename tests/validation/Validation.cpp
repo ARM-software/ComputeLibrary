@@ -40,9 +40,9 @@
 #include <cstdint>
 #include <iomanip>
 
-#if ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_ENABLE_FP16
 #include <arm_fp16.h> // needed for float16_t
-#endif
+#endif                /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace arm_compute
 {
@@ -88,10 +88,10 @@ double get_double_data(const void *ptr, DataType data_type)
             return *reinterpret_cast<const uint64_t *>(ptr);
         case DataType::S64:
             return *reinterpret_cast<const int64_t *>(ptr);
-#if ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
             return *reinterpret_cast<const float16_t *>(ptr);
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         case DataType::F32:
             return *reinterpret_cast<const float *>(ptr);
         case DataType::F64:

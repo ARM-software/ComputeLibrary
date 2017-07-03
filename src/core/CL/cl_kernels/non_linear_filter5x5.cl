@@ -351,17 +351,17 @@ __kernel void non_linear_filter_box5x5(
     uchar16 bottom2 = vload16(0, offset(&src, -2, 2));
 
     // Apply respective filter
-#if defined   MIN
-    uchar16   tmp = min(middle, min(min(top2, top), min(bottom, bottom2)));
-    uchar8    out = row_reduce_min_5(tmp);
-#elif defined MAX
+#ifdef MIN
+    uchar16 tmp = min(middle, min(min(top2, top), min(bottom, bottom2)));
+    uchar8  out = row_reduce_min_5(tmp);
+#elif defined(MAX)
     uchar16 tmp = max(middle, max(max(top2, top), max(bottom, bottom2)));
     uchar8  out = row_reduce_max_5(tmp);
-#elif defined MEDIAN
+#elif defined(MEDIAN)
     uchar8 out = median_box5x5(top2, top, middle, bottom, bottom2);
-#else
+#else /* MIN or MAX or MEDIAN */
 #error "Unsupported filter function"
-#endif
+#endif /* MIN or MAX or MEDIAN */
 
     // Store result
     vstore8(out, 0, dst.ptr);
@@ -399,13 +399,13 @@ __kernel void non_linear_filter_cross5x5(
     uchar16 bottom2 = vload16(0, offset(&src, 0, 2));
 
     // Apply respective filter
-#if defined   MIN
-    uchar8    tmp_middle = row_reduce_min_5(middle);
-    uchar8    out        = min(tmp_middle, min(min(top2.s01234567, top.s01234567), min(bottom.s01234567, bottom2.s01234567)));
-#elif defined MAX
+#ifdef MIN
+    uchar8 tmp_middle = row_reduce_min_5(middle);
+    uchar8 out        = min(tmp_middle, min(min(top2.s01234567, top.s01234567), min(bottom.s01234567, bottom2.s01234567)));
+#elif defined(MAX)
     uchar8  tmp_middle = row_reduce_max_5(middle);
     uchar8  out        = max(tmp_middle, max(max(top2.s01234567, top.s01234567), max(bottom.s01234567, bottom2.s01234567)));
-#elif defined MEDIAN
+#elif defined(MEDIAN)
     uchar8 p0  = top2.s01234567;
     uchar8 p1  = top.s01234567;
     uchar8 p2  = middle.s01234567;
@@ -416,9 +416,9 @@ __kernel void non_linear_filter_cross5x5(
     uchar8 p7  = bottom.s01234567;
     uchar8 p8  = bottom2.s01234567;
     uchar8 out = sort9(p0, p1, p2, p3, p4, p5, p6, p7, p8);
-#else
+#else /* MIN or MAX or MEDIAN */
 #error "Unsupported filter function"
-#endif
+#endif /* MIN or MAX or MEDIAN */
 
     // Store result
     vstore8(out, 0, dst.ptr);
@@ -456,23 +456,23 @@ __kernel void non_linear_filter_disk5x5(
     uchar16 bottom2 = vload16(0, offset(&src, -1, 2));
 
     // Apply respective filter
-#if defined   MIN
-    uchar16   tmp_3     = min(top2, bottom2);
-    uchar16   tmp_5     = min(middle, min(top, bottom));
-    uchar8    tmp_3_red = row_reduce_min_3(tmp_3);
-    uchar8    tmp_5_red = row_reduce_min_5(tmp_5);
-    uchar8    out       = min(tmp_3_red, tmp_5_red);
-#elif defined MAX
+#ifdef MIN
+    uchar16 tmp_3     = min(top2, bottom2);
+    uchar16 tmp_5     = min(middle, min(top, bottom));
+    uchar8  tmp_3_red = row_reduce_min_3(tmp_3);
+    uchar8  tmp_5_red = row_reduce_min_5(tmp_5);
+    uchar8  out       = min(tmp_3_red, tmp_5_red);
+#elif defined(MAX)
     uchar16 tmp_3      = max(top2, bottom2);
     uchar16 tmp_5      = max(middle, max(top, bottom));
     uchar8  tmp_3_red  = row_reduce_max_3(tmp_3);
     uchar8  tmp_5_red  = row_reduce_max_5(tmp_5);
     uchar8  out        = max(tmp_3_red, tmp_5_red);
-#elif defined MEDIAN
+#elif defined(MEDIAN)
     uchar8 out = median_disk5x5(top2, top, middle, bottom, bottom2);
-#else
+#else /* MIN or MAX or MEDIAN */
 #error "Unsupported filter function"
-#endif
+#endif /* MIN or MAX or MEDIAN */
 
     // Store result
     vstore8(out, 0, dst.ptr);

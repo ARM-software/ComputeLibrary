@@ -34,7 +34,7 @@
 
 #ifdef OPENCL
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#endif
+#endif /* OPENCL */
 #include "arm_compute/runtime/Scheduler.h"
 
 #include <iostream>
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 
 #ifdef OPENCL
     arm_compute::CLScheduler::get().default_init();
-#endif
+#endif /* OPENCL */
 
     std::cout << "Using " << user_config.threads << " CPU " << (user_config.threads == 1 ? "thread" : "threads") << "\n";
     std::cout << "Seed: " << library->seed() << "\n";

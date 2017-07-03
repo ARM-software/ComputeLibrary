@@ -42,4 +42,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_VALIDATION_PROGRAM_OPTIONS_H__ */

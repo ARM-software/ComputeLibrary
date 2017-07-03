@@ -30,7 +30,7 @@
 
 #ifdef BOOST
 #include "boost_wrapper.h"
-#endif
+#endif /* BOOST */
 
 namespace arm_compute
 {
@@ -56,9 +56,9 @@ public:
     /** Number of samples in the data set. */
 #ifdef BOOST
     boost::unit_test::data::size_t size() const
-#else
+#else  /* BOOST */
     unsigned int size() const
-#endif
+#endif /* BOOST */
     {
         return _policies.size();
     }
@@ -79,4 +79,4 @@ private:
 };
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_CONVERT_POLICY_DATASETS_H__ */

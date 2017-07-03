@@ -45,4 +45,4 @@ struct CLFixture
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_VALIDATION_CL_CLFIXTURE_H__ */

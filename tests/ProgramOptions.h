@@ -98,4 +98,4 @@ bool ProgramOptions::get(const std::string &name, T &value) const
 }
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_PROGRAM_OPTIONS_H__ */

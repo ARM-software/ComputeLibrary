@@ -25,9 +25,9 @@
 
 #ifdef SATURATE
 #define CONVERT_DOWN(x, type) CONVERT_SAT(x, type)
-#else
+#else /* SATURATE */
 #define CONVERT_DOWN(x, type) CONVERT(x, type)
-#endif
+#endif /* SATURATE */
 
 /** This function performs a down-scaling depth conversion.
  *

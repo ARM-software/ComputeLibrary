@@ -70,4 +70,4 @@ private:
     uint8_t         _threshold;
 };
 }
-#endif
+#endif /* __ARM_COMPUTE_NEFILLARRAYKERNEL_H__*/

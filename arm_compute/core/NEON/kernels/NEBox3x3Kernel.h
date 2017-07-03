@@ -55,8 +55,8 @@ public:
     // Inherited methods overridden:
     void run(const Window &window) override;
 };
-#else
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
 using NEBox3x3FP16Kernel = NEBox3x3Kernel;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 }
 #endif /*__ARM_COMPUTE_NEBOX3x3KERNEL_H__ */

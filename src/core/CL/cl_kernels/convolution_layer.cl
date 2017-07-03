@@ -53,9 +53,9 @@
 __kernel void reshape_to_columns(
     TENSOR3D_DECLARATION(src),
     IMAGE_DECLARATION(dst),
-#if defined HAS_BIAS
+#ifdef HAS_BIAS
     VECTOR_DECLARATION(bias),
-#endif
+#endif /* HAS_BIAS */
     uint width, uint height, uint depth, uint total_filters)
 {
     Tensor3D src            = CONVERT_TO_TENSOR3D_STRUCT(src);
@@ -64,9 +64,9 @@ __kernel void reshape_to_columns(
     __global uchar *tmp_src_ptr = src.ptr;
     __global uchar *tmp_dst_ptr = dst_ptr + dst_offset_first_element_in_bytes + get_global_id(0) * dst_stride_y + get_global_id(1) * width * dst_stride_y + get_global_id(
                                       2) * width * height * dst_stride_y;
-#if defined         HAS_BIAS
+#ifdef HAS_BIAS
     __global uchar *tmp_bias_ptr = bias_ptr + bias_offset_first_element_in_bytes;
-#endif
+#endif /* HAS_BIAS */
 
     if(is_last_thread)
     {
@@ -74,10 +74,10 @@ __kernel void reshape_to_columns(
         {
             *((__global DATA_TYPE *)tmp_dst_ptr) = *((__global DATA_TYPE *)tmp_src_ptr);
 
-#if defined HAS_BIAS
+#ifdef HAS_BIAS
             *((__global DATA_TYPE *)(tmp_dst_ptr + dst_stride_y)) = *((__global DATA_TYPE *)(tmp_bias_ptr));
             tmp_bias_ptr += bias_stride_x;
-#endif
+#endif /* HAS_BIAS */
             tmp_src_ptr += depth * src_stride_z;
             tmp_dst_ptr += dst_stride_x;
         }
@@ -93,7 +93,7 @@ __kernel void reshape_to_columns(
     }
 }
 
-#if(defined CONVOLVED_WIDTH && defined STRIDE_X && defined STRIDE_Y && defined PAD_X && defined PAD_Y && defined KERNEL_WIDTH && defined KERNEL_HEIGHT && defined KERNEL_DEPTH && SRC_WIDTH && SRC_HEIGHT)
+#if defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_X) && defined(PAD_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT)
 /** This kernel performs a reshaping of the input tensor to a tensor used to perform convolution using GEMM.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
@@ -148,11 +148,11 @@ __kernel void im2col_generic(
         }
     }
 
-#if defined HAS_BIAS
+#if defined(HAS_BIAS)
     *((__global DATA_TYPE *)output_ptr) = (DATA_TYPE)1;
-#endif
+#endif /* HAS_BIAS */
 }
-#endif //(defined CONVOLVED_WIDTH && defined STRIDE_X && defined STRIDE_Y && defined PAD_X && defined PAD_Y && defined KERNEL_WIDTH && defined KERNEL_HEIGHT && defined KERNEL_DEPTH && SRC_WIDTH && SRC_HEIGHT)
+#endif //(CONVOLVED_WIDTH && STRIDE_X && STRIDE_Y && PAD_X && PAD_Y && KERNEL_WIDTH && KERNEL_HEIGHT && KERNEL_DEPTH && SRC_WIDTH && SRC_HEIGHT)
 
 /** This kernel performs a reshaping of the output of the convolution layer.
  *
@@ -220,12 +220,12 @@ __kernel void im2col_reduced(
 
     *((__global DATA_TYPE *)tmp_out_ptr) = *((__global DATA_TYPE *)src.ptr);
 
-#if defined HAS_BIAS
+#ifdef HAS_BIAS
     // If it is the last thread in the 3 dimensional workgroup
     if(get_global_id(0) == (get_global_size(0) - 1) && get_global_id(1) == (get_global_size(1) - 1) && get_global_id(2) == (get_global_size(2) - 1))
     {
         tmp_out_ptr += dst_stride_x;
         *((__global DATA_TYPE *)tmp_out_ptr) = (DATA_TYPE)1;
     }
-#endif
+#endif /* HAS_BIAS */
 }

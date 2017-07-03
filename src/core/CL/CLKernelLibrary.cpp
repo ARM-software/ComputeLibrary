@@ -487,7 +487,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
         "warp_perspective.cl",
 #include "./cl_kernels/warp_perspective.clembed"
     },
-#endif
+#endif /* EMBEDDED_KERNELS */
 };
 
 CLKernelLibrary::CLKernelLibrary()
@@ -560,7 +560,7 @@ const Program &CLKernelLibrary::load_program(const std::string &program_name) co
     }
 
     program = Program(_context, program_name, program_source_it->second);
-#else
+#else  /* EMBEDDED_KERNELS */
     // Check for binary
     std::string source_name = _kernel_path + program_name;
     std::string binary_name = source_name + "bin";
@@ -578,7 +578,7 @@ const Program &CLKernelLibrary::load_program(const std::string &program_name) co
     {
         ARM_COMPUTE_ERROR("Kernel file %s does not exist.", source_name.c_str());
     }
-#endif
+#endif /* EMBEDDED_KERNELS */
 
     // Insert program to program map
     const auto new_program = _programs_map.emplace(program_name, std::move(program));

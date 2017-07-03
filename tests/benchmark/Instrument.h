@@ -104,4 +104,4 @@ Instrument::Measurement<T>::operator double() const
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_BENCHMARK_INSTRUMENT_H__ */
