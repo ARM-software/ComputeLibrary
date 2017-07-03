@@ -102,8 +102,10 @@ BOOST_AUTO_TEST_SUITE(QS16)
 BOOST_AUTO_TEST_SUITE(Invsqrt)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunSmall, Small1DShape() * boost::unit_test::data::xrange(1, 14), shape, fixed_point_position)
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::xrange(1, 14), fixed_point_position)
 {
+    TensorShape shape(8192U);
+
     // Compute function
     Tensor dst = compute_invsqrt_qs16(shape, fixed_point_position);
 

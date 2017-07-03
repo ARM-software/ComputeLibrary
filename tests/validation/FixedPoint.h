@@ -753,18 +753,22 @@ struct functions
 
         shift += std::numeric_limits<T>::is_signed ? 1 : 0;
 
-        const auto           three_half = fixed_point<T>(1.5f, p);
-        fixed_point<T>       a          = shift < 0 ? shift_left(x, -shift) : shift_right(x, shift);
-        const fixed_point<T> x_half     = shift_right(a, 1);
+        // Use volatile to restrict compiler optimizations on shift as compiler reports maybe-uninitialized error on Android
+        volatile int8_t *shift_ptr = &shift;
+
+        auto           const_three = fixed_point<T>(3, p);
+        auto           a           = (*shift_ptr < 0) ? shift_left(x, -(shift)) : shift_right(x, shift);
+        fixed_point<T> x2          = a;
 
         // We need three iterations to find the result for QS8 and five for QS16
         constexpr int num_iterations = std::is_same<T, int8_t>::value ? 3 : 5;
         for(int i = 0; i < num_iterations; ++i)
         {
-            a = mul(a, sub(three_half, mul(x_half, mul(a, a))));
+            fixed_point<T> three_minus_dx = sub(const_three, mul(a, mul(x2, x2)));
+            x2                            = shift_right(mul(x2, three_minus_dx), 1);
         }
 
-        return (shift < 0) ? shift_left(a, -shift >> 1) : shift_right(a, shift >> 1);
+        return (shift < 0) ? shift_left(x2, -shift >> 1) : shift_right(x2, shift >> 1);
     }
     /** Calculate the hyperbolic tangent of a fixed point number
      *

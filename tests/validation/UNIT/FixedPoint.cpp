@@ -82,7 +82,7 @@ BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::l
 // The last input argument specifies the expected number of failures for a
 // given combination of (function name, number of fractional bits) as defined
 // by the first two arguments.
-BOOST_DATA_TEST_CASE(FixedPointQS8Outputs, (boost::unit_test::data::make(func_names) * boost::unit_test::data::xrange(1, 7)) ^ (boost::unit_test::data::make({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 8, 13, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 32, 67 })),
+BOOST_DATA_TEST_CASE(FixedPointQS8Outputs, (boost::unit_test::data::make(func_names) * boost::unit_test::data::xrange(1, 7)) ^ (boost::unit_test::data::make({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 8, 13, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 33, 96 })),
                      func_name, frac_bits, expected_failures)
 {
     const std::string base_file_name = user_config.path.get() + "/dumps/" + func_name + "_Q8." + support::cpp11::to_string(frac_bits);
