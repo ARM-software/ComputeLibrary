@@ -43,15 +43,15 @@ void CLBatchNormalizationLayerKernel::configure(const ICLTensor *input, ICLTenso
                                                 float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mean, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(var, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(beta, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gamma, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, beta);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, gamma);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, mean, var, beta, gamma);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, mean, var, beta, gamma);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != mean->info()->dimension(0));
 
     // Set build options
