@@ -52,9 +52,9 @@ public:
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *
-     * @param[in]  input1          An input tensor. Data types supported: U8/QS8/S16/F32.
-     * @param[in]  input2          An input tensor. Data types supported: U8/QS8/S16/F32.
-     * @param[out] output          The output tensor. Data types supported: U8 (Only if both inputs are U8) /S16/F32.
+     * @param[in]  input1          An input tensor. Data types supported: U8/QS8/S16/F16/F32.
+     * @param[in]  input2          An input tensor. Data types supported: U8/QS8/S16/F16/F32.
+     * @param[out] output          The output tensor. Data types supported: U8 (Only if both inputs are U8) /S16/F16/F32.
      * @param[in]  scale           Scale to apply after multiplication.
      *                             Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]  overflow_policy Overflow policy.

@@ -122,7 +122,6 @@ BOOST_AUTO_TEST_SUITE(NEON)
 BOOST_AUTO_TEST_SUITE(PixelWiseMultiplication)
 
 BOOST_AUTO_TEST_SUITE(U8)
-
 BOOST_AUTO_TEST_SUITE(Scale255)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * (1.f / 255.f) * ConvertPolicies()
@@ -313,6 +312,27 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Da
 }
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(F16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * (1.f / 255.f) * ConvertPolicies() * RoundingPolicy::TO_NEAREST_UP,
+                     shape, scale, convert_policy, rounding_policy)
+{
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, DataType::F16, DataType::F16, DataType::F16, scale, convert_policy, rounding_policy);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_pixel_wise_multiplication(shape, DataType::F16, DataType::F16, DataType::F16, scale, convert_policy, rounding_policy);
+
+    // Validate output
+    // Allow tolerance value of 1.f to counteract imprecision due to 32-bit float conversion
+    validate(NEAccessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<int16_t>::max());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_AUTO_TEST_SUITE(Scale255)

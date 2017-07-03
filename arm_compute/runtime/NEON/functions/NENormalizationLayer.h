@@ -52,7 +52,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                       and an optional 4th dimension for batch of inputs. Data type supported: QS8/F32
+     *                       and an optional 4th dimension for batch of inputs. Data type supported: QS8/F16/F32
      * @param[out] output    Destination with the same dimensions, data type and number of channels of  @p input
      * @param[in]  norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */

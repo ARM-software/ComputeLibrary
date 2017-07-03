@@ -52,6 +52,8 @@ float normalization_layer_tolerance(DataType dt)
     {
         case DataType::QS8:
             return 2.0f;
+        case DataType::F16:
+            return 0.001f;
         case DataType::F32:
             return 1e-05;
         default:
@@ -107,6 +109,29 @@ Tensor compute_normalization_layer(const TensorShape &shape, DataType dt, Normal
 #ifndef DOXYGEN_SKIP_THIS
 BOOST_AUTO_TEST_SUITE(NEON)
 BOOST_AUTO_TEST_SUITE(NormalizationLayer)
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall,
+                     SmallShapes() * DataType::F16 *NormalizationTypes() * boost::unit_test::data::xrange(3, 9, 2) * boost::unit_test::data::make({ 0.5f, 1.0f, 2.0f }),
+                     shape, dt, norm_type, norm_size, beta)
+{
+    // Provide normalization layer information
+    NormalizationLayerInfo norm_info(norm_type, norm_size, 5, beta);
+
+    // Compute function
+    Tensor dst = compute_normalization_layer(shape, dt, norm_info);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_normalization_layer(shape, dt, norm_info);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst, normalization_layer_tolerance(DataType::F16));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))

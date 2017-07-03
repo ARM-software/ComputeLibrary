@@ -91,6 +91,26 @@ float32x4_t vtanhq_f32(float32x4_t val);
  * @return The calculated power.
  */
 float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+/** Calculate exponential
+ *
+ * @param[in] x Input vector value in F16 format.
+ *
+ * @return The calculated exponent.
+ */
+float16x8_t vexpq_f16(float16x8_t x);
+/** Calculate n power of a number.
+ *
+ * pow(x,n) = e^(n*log(x))
+ *
+ * @param[in] val Input vector value in F16 format.
+ * @param[in] n   Powers to raise the input to.
+ *
+ * @return The calculated power.
+ */
+float16x8_t vpowq_f16(float16x8_t val, float16x8_t n);
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 }
 #include "arm_compute/core/NEON/NEMath.inl"
 #endif /* __ARM_COMPUTE_NEMATH_H__ */

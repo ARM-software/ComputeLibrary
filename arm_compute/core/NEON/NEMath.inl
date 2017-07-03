@@ -141,4 +141,100 @@ inline float32x4_t vpowq_f32(float32x4_t val, float32x4_t n)
 {
     return vexpq_f32(vmulq_f32(n, vlogq_f32(val)));
 }
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+/* Exponent polynomial coefficients */
+const std::array<float16x8_t, 8> exp_tab_f16 =
+{
+    {
+        vdupq_n_f16(1.f),
+        vdupq_n_f16(0.0416598916054f),
+        vdupq_n_f16(0.500000596046f),
+        vdupq_n_f16(0.0014122662833f),
+        vdupq_n_f16(1.00000011921f),
+        vdupq_n_f16(0.00833693705499f),
+        vdupq_n_f16(0.166665703058f),
+        vdupq_n_f16(0.000195780929062f),
+    }
+};
+
+/* Logarithm polynomial coefficients */
+const std::array<float16x8_t, 8> log_tab_f16 =
+{
+    {
+        vdupq_n_f16(-2.29561495781f),
+        vdupq_n_f16(-2.47071170807f),
+        vdupq_n_f16(-5.68692588806f),
+        vdupq_n_f16(-0.165253549814f),
+        vdupq_n_f16(5.17591238022f),
+        vdupq_n_f16(0.844007015228f),
+        vdupq_n_f16(4.58445882797f),
+        vdupq_n_f16(0.0141278216615f),
+    }
+};
+
+inline float16x8_t vinvq_f16(float16x8_t x)
+{
+    float16x8_t recip = vrecpeq_f16(x);
+    recip             = vmulq_f16(vrecpsq_f16(x, recip), recip);
+    recip             = vmulq_f16(vrecpsq_f16(x, recip), recip);
+    return recip;
+}
+
+inline float16x8_t vtaylor_polyq_f16(float16x8_t x, const std::array<float16x8_t, 8> &coeffs)
+{
+    const float16x8_t A   = vaddq_f16(coeffs[0], vmulq_f16(coeffs[4], x));
+    const float16x8_t B   = vaddq_f16(coeffs[2], vmulq_f16(coeffs[6], x));
+    const float16x8_t C   = vaddq_f16(coeffs[1], vmulq_f16(coeffs[5], x));
+    const float16x8_t D   = vaddq_f16(coeffs[3], vmulq_f16(coeffs[7], x));
+    const float16x8_t x2  = vmulq_f16(x, x);
+    const float16x8_t x4  = vmulq_f16(x2, x2);
+    const float16x8_t res = vaddq_f16(vaddq_f16(A, vmulq_f16(B, x2)), vmulq_f16(vaddq_f16(C, vmulq_f16(D, x2)), x4));
+    return res;
+}
+
+inline float16x8_t vexpq_f16(float16x8_t x)
+{
+    static const float16x8_t CONST_LN2          = vdupq_n_f16(0.6931471805f); // ln(2)
+    static const float16x8_t CONST_INV_LN2      = vdupq_n_f16(1.4426950408f); // 1/ln(2)
+    static const float16x8_t CONST_0            = vdupq_n_f16(0.f);
+    static const int16x8_t   CONST_NEGATIVE_126 = vdupq_n_s16(-126);
+
+    // Perform range reduction [-log(2),log(2)]
+    const int16x8_t   m   = vcvtq_s16_f16(vmulq_f16(x, CONST_INV_LN2));
+    const float16x8_t val = vsubq_f16(x, vmulq_f16(vcvtq_f16_s16(m), CONST_LN2));
+
+    // Polynomial Approximation
+    float16x8_t poly = vtaylor_polyq_f16(val, exp_tab_f16);
+
+    // Reconstruct
+    poly = vreinterpretq_f16_s16(vqaddq_s16(vreinterpretq_s16_f16(poly), vqshlq_n_s16(m, 9)));
+    poly = vbslq_f16(vcltq_s16(m, CONST_NEGATIVE_126), CONST_0, poly);
+
+    return poly;
+}
+
+inline float16x8_t vlogq_f16(float16x8_t x)
+{
+    static const int16x8_t   CONST_127 = vdupq_n_s16(127);           // 127
+    static const float16x8_t CONST_LN2 = vdupq_n_f16(0.6931471805f); // ln(2)
+
+    // Extract exponent
+    const int16x8_t   m   = vsubq_s16(vreinterpretq_s16_u16(vshrq_n_u16(vreinterpretq_u16_f16(x), 9)), CONST_127);
+    const float16x8_t val = vreinterpretq_f16_s16(vsubq_s16(vreinterpretq_s16_f16(x), vshlq_n_s16(m, 9)));
+
+    // Polynomial Approximation
+    float16x8_t poly = vtaylor_polyq_f16(val, log_tab_f16);
+
+    // Reconstruct
+    poly = vaddq_f16(poly, vmulq_f16(vcvtq_f16_s16(m), CONST_LN2));
+
+    return poly;
+}
+
+inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
+{
+    return vexpq_f16(vmulq_f16(n, vlogq_f16(val)));
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 }

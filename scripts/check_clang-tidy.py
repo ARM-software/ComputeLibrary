@@ -20,6 +20,7 @@ if __name__ == "__main__":
                     ("cl2.hpp" in line and "cast from pointer to smaller type 'cl_context_properties' (aka 'int') loses information" in line) or
                     ("arm_fp16.h" in line) or
                     ("memory" in line and "cast from pointer to smaller type 'uintptr_t' (aka 'unsigned int') loses information" in line) or
+                    ("NEMath.inl" in line and "statement expression not allowed at file scope" in line) or
                     "3rdparty" in line):
                     continue
 

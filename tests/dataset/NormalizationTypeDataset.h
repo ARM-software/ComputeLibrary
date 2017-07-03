@@ -73,7 +73,7 @@ public:
     }
 
 private:
-    std::array<NormType, 3> _types{ { NormType::IN_MAP_1D, NormType::IN_MAP_2D, NormType::CROSS_MAP } };
+    const std::array<NormType, 3> _types{ { NormType::IN_MAP_1D, NormType::IN_MAP_2D, NormType::CROSS_MAP } };
 };
 } // namespace test
 } // namespace arm_compute

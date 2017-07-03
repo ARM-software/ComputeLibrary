@@ -73,8 +73,8 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    template <unsigned int dim, bool do_2D_norm>
-    void normalize(const Window &window);
+    template <DataType dt, unsigned int dim, bool do_2D_norm>
+    void normalize_float(const Window &window);
 
     /** Function to perform normalization for fixed-point values depending on
      * the given template dimension. The second template parameter specifies
