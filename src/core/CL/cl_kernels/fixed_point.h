@@ -35,16 +35,21 @@
 
 TYPE_ALIAS(char, qs8)
 TYPE_ALIAS(short, qs16)
+TYPE_ALIAS(int, qs32)
 
 #define qs8_MIN ((char)CHAR_MIN)
 #define qs8_MAX ((char)CHAR_MAX)
 #define qs16_MIN ((short)SHRT_MIN)
 #define qs16_MAX ((short)SHRT_MAX)
+#define qs32_MIN ((int)INT_MIN)
+#define qs32_MAX ((int)INT_MAX)
 
 #define qu8_MIN ((uchar)0)
 #define qu8_MAX ((uchar)UCHAR_MAX)
 #define qu16_MIN ((ushort)0)
 #define qu16_MAX ((ushort)USHRT_MAX)
+#define qu32_MIN ((uint)0)
+#define qu32_MAX ((uint)UINT_MAX)
 
 #define qs8_TYPE char
 #define qs8x1_TYPE char
@@ -59,6 +64,13 @@ TYPE_ALIAS(short, qs16)
 #define qs16x4_TYPE short4
 #define qs16x8_TYPE short8
 #define qs16x16_TYPE short16
+
+#define qs32_TYPE int
+#define qs32x1_TYPE int
+#define qs32x2_TYPE int2
+#define qs32x4_TYPE int4
+#define qs32x8_TYPE int8
+#define qs32x16_TYPE int16
 
 /* All internal constants are represented in the maximum supported fixed point format (QS16),
  * thus we define an additional shift parameter required to convert the constant
@@ -166,6 +178,7 @@ SUBQ_SAT_IMPL(qs8x16)
     }
 
 MULQ_SAT_IMPL(qs8x16, qs16x16)
+MULQ_SAT_IMPL(qs16x8, qs32x8)
 
 #define MUL_SAT_OP_EXPAND_STR(a, b, type, size, position) mul_sat_##type##x##size((a), (b), (position))
 #define MUL_SAT_OP_EXPAND(a, b, type, size, position) MUL_SAT_OP_EXPAND_STR(a, b, type, size, position)
@@ -186,6 +199,7 @@ MULQ_SAT_IMPL(qs8x16, qs16x16)
 
 MLAQ_SAT_IMPL(qs8x8, qs16x8)
 MLAQ_SAT_IMPL(qs8x16, qs16x16)
+MLAQ_SAT_IMPL(qs16x8, qs32x8)
 
 #define MLA_SAT_OP_EXPAND_STR(a, b, c, type, size, position) mla_sat_##type##x##size((a), (b), (c), (position))
 #define MLA_SAT_OP_EXPAND(a, b, c, type, size, position) MLA_SAT_OP_EXPAND_STR(a, b, c, type, size, position)
@@ -205,6 +219,7 @@ MLAQ_SAT_IMPL(qs8x16, qs16x16)
     }
 
 MLALQ_SAT_IMPL(qs8x8, qs16x8)
+MLALQ_SAT_IMPL(qs16x8, qs32x8)
 
 #define MLAL_SAT_OP_EXPAND_STR(a, b, c, type, size, position) mlal_sat_##type##x##size((a), (b), (c), (position))
 #define MLAL_SAT_OP_EXPAND(a, b, c, type, size, position) MLAL_SAT_OP_EXPAND_STR(a, b, c, type, size, position)

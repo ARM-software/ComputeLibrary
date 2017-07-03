@@ -50,7 +50,7 @@ CLGEMMMatrixMultiplyKernel::CLGEMMMatrixMultiplyKernel()
 
 void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, float alpha)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
 
@@ -74,8 +74,18 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
 
     std::ostringstream mm_arguments;
     mm_arguments << "-DWIDTH_MATRIX_B=" << input1->info()->dimension(0) << " ";
-    mm_arguments << "-DALPHA=" << (input0->info()->data_type() == DataType::QS8 ? scvt_qs8_f32(alpha, input0->info()->fixed_point_position()) : alpha) << " ";
-    mm_arguments << "-DFIXED_POINT_POSITION=" << input0->info()->fixed_point_position() << " ";
+    if(is_data_type_fixed_point(input0->info()->data_type()))
+    {
+        mm_arguments << "-DALPHA=" << (input0->info()->data_type() == DataType::QS8 ?
+                                       scvt_qs8_f32(alpha, input0->info()->fixed_point_position()) :
+                                       scvt_qs16_f32(alpha, input0->info()->fixed_point_position()))
+                     << " ";
+        mm_arguments << "-DFIXED_POINT_POSITION=" << input0->info()->fixed_point_position() << " ";
+    }
+    else
+    {
+        mm_arguments << "-DALPHA=" << alpha << " ";
+    }
     std::set<std::string> build_opts;
 
     // Check if the output tensor is a vector. If so,the kernel runs the vector-matrix multiplication

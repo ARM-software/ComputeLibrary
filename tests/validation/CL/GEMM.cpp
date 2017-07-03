@@ -50,7 +50,7 @@ using namespace arm_compute::test::validation;
 namespace
 {
 const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-const float tolerance_qs8 = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
+const float tolerance_q   = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 
 CLTensor compute_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2, const TensorShape &src_shape3,
                       const TensorShape &out_shape, float alpha, float beta, DataType dt, int fixed_point_position = 0)
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_SUITE(GEMM)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration,
-                     SmallGEMMDataset() * boost::unit_test::data::make({ DataType::F32, DataType::QS8 }),
+                     SmallGEMMDataset() * boost::unit_test::data::make({ DataType::F32, DataType::QS8, DataType::QS16 }),
                      gemm_set, dt)
 {
     // Set fixed point position data type allowed
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(Quantized)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(SmallGEMM, SmallGEMMDataset() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(4, 7),
+BOOST_DATA_TEST_CASE(SmallGEMM, SmallGEMMDataset() * boost::unit_test::data::make({ DataType::QS8, DataType::QS16 }) * boost::unit_test::data::xrange(4, 7),
                      gemm_set, dt, fixed_point_position)
 {
     // Compute reference
@@ -179,11 +179,11 @@ BOOST_DATA_TEST_CASE(SmallGEMM, SmallGEMMDataset() * boost::unit_test::data::mak
     CLTensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt, fixed_point_position);
 
     // Validate output
-    validate(CLAccessor(dst), ref_dst, tolerance_qs8);
+    validate(CLAccessor(dst), ref_dst, tolerance_q);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(LargeGEMM, LargeGEMMDataset() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(4, 7),
+BOOST_DATA_TEST_CASE(LargeGEMM, LargeGEMMDataset() * boost::unit_test::data::make({ DataType::QS8, DataType::QS16 }) * boost::unit_test::data::xrange(4, 7),
                      gemm_set, dt, fixed_point_position)
 {
     // Compute reference
@@ -193,7 +193,7 @@ BOOST_DATA_TEST_CASE(LargeGEMM, LargeGEMMDataset() * boost::unit_test::data::mak
     CLTensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt, fixed_point_position);
 
     // Validate output
-    validate(CLAccessor(dst), ref_dst, tolerance_qs8);
+    validate(CLAccessor(dst), ref_dst, tolerance_q);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

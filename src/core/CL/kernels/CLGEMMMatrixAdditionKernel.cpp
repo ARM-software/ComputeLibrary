@@ -43,7 +43,7 @@ CLGEMMMatrixAdditionKernel::CLGEMMMatrixAdditionKernel()
 
 void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *output, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != output->info()->dimension(0));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != output->info()->dimension(1));
@@ -53,8 +53,19 @@ void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *ou
     const unsigned int num_elems_processed_per_iteration = max_cl_vector_width / data_size_from_type(input->info()->data_type());
 
     std::ostringstream ma_arguments;
-    ma_arguments << "-DBETA=" << (input->info()->data_type() == DataType::QS8 ? scvt_qs8_f32(beta, input->info()->fixed_point_position()) : beta) << " ";
-    ma_arguments << "-DFIXED_POINT_POSITION=" << input->info()->fixed_point_position();
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        ma_arguments << "-DBETA=" << (input->info()->data_type() == DataType::QS8 ?
+                                      scvt_qs8_f32(beta, input->info()->fixed_point_position()) :
+                                      scvt_qs16_f32(beta, input->info()->fixed_point_position()))
+                     << " ";
+        ma_arguments << "-DFIXED_POINT_POSITION=" << input->info()->fixed_point_position();
+    }
+    else
+    {
+        ma_arguments << "-DBETA=" << beta;
+    }
+
     std::set<std::string> build_opts;
     build_opts.emplace(ma_arguments.str());
 
