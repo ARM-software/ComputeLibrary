@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "fixed_point.h"
 #include "helpers.h"
 
 /** This kernel reshapes the tensor's low three dimensions to single column
@@ -99,7 +100,7 @@ __kernel void reshape_to_columns(
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -148,17 +149,21 @@ __kernel void im2col_generic(
         }
     }
 
-#if defined(HAS_BIAS)
-    *((__global DATA_TYPE *)output_ptr) = (DATA_TYPE)1;
-#endif /* HAS_BIAS */
+#ifdef HAS_BIAS
+#ifdef FIXED_POINT_POSITION
+    *((__global DATA_TYPE *)output_ptr) = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
+#else  // FIXED_POINT_POSITION
+    *((__global DATA_TYPE *)output_ptr) = 1.0f;
+#endif // FIXED_POINT_POSITION
+#endif // HAS_BIAS
 }
-#endif //(CONVOLVED_WIDTH && STRIDE_X && STRIDE_Y && PAD_X && PAD_Y && KERNEL_WIDTH && KERNEL_HEIGHT && KERNEL_DEPTH && SRC_WIDTH && SRC_HEIGHT)
+#endif //defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_X) && defined(PAD_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT)
 
 /** This kernel performs a reshaping of the output of the convolution layer.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -192,7 +197,7 @@ __kernel void col2im(
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note In case biases will be added in late stage, -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -225,7 +230,11 @@ __kernel void im2col_reduced(
     if(get_global_id(0) == (get_global_size(0) - 1) && get_global_id(1) == (get_global_size(1) - 1) && get_global_id(2) == (get_global_size(2) - 1))
     {
         tmp_out_ptr += dst_stride_x;
+#ifdef FIXED_POINT_POSITION
+        *((__global DATA_TYPE *)tmp_out_ptr) = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
+#else  // FIXED_POINT_POSITION
         *((__global DATA_TYPE *)tmp_out_ptr) = (DATA_TYPE)1;
+#endif // FIXED_POINT_POSITION
     }
-#endif /* HAS_BIAS */
+#endif // HAS_BIAS
 }

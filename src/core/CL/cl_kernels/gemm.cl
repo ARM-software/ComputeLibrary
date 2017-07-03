@@ -21,8 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "fixed_point.h"
 #include "helpers.h"
+
+#ifdef FIXED_POINT_POSITION
+#include "fixed_point.h"
+#endif // FIXED_POINT_POSITION
 
 /** This OpenCL kernel computes the "vector" 1x4 transposition of input matrix
  *
@@ -274,7 +277,11 @@ __kernel void gemm_accumulate_biases(
     accum_value = vload16(0, (__global DATA_TYPE *)accum.ptr);
     VEC_DATA_TYPE(DATA_TYPE, 16)
     biases_value = vload16(0, (__global DATA_TYPE *)biases.ptr);
-    accum_value  = biases_value + accum_value;
+#ifdef FIXED_POINT_POSITION
+    accum_value = ADD_SAT_OP_EXPAND(biases_value, accum_value, DATA_TYPE, 16);
+#else  // FIXED_POINT_POSITION
+    accum_value = biases_value + accum_value;
+#endif // FIXED_POINT_POSITION
 
     // Store result in the accummulate buffer
     vstore16(accum_value, 0, (__global DATA_TYPE *)accum.ptr);

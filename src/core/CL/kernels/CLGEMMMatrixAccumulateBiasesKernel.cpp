@@ -53,6 +53,10 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
 
     std::set<std::string> build_opts;
     build_opts.insert(("-DDATA_TYPE=" + get_cl_type_from_data_type(accum->info()->data_type())));
+    if(accum->info()->data_type() == DataType::QS8)
+    {
+        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(accum->info()->fixed_point_position()));
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_accumulate_biases", build_opts));

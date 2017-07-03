@@ -56,7 +56,7 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
-    const unsigned int num_elems_processed_per_iteration = max_cl_vector_width / data_size_from_type(input->info()->data_type());
+    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
     const float        scale_x                           = num_elems_processed_per_iteration;
     ARM_COMPUTE_ERROR_ON((0 == static_cast<int>(input->info()->dimension(0) * (1.f / scale_x))));
 

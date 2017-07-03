@@ -46,8 +46,9 @@ CLIm2ColKernel::CLIm2ColKernel()
 
 void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     _input  = input;
     _output = output;
@@ -56,6 +57,11 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     std::set<std::string> build_opts;
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.emplace((has_bias ? "-DHAS_BIAS" : ""));
+
+    if(input->info()->data_type() == DataType::QS8)
+    {
+        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    }
 
     int pad_x    = 0;
     int pad_y    = 0;
