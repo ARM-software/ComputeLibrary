@@ -287,15 +287,18 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
 
-    set_shape_if_empty(*output->info(), input1->info()->tensor_shape());
+    // Auto initialize output if not initialized
+    {
+        set_shape_if_empty(*output->info(), input1->info()->tensor_shape());
 
-    if(input1->info()->data_type() == DataType::S16 || input2->info()->data_type() == DataType::S16)
-    {
-        set_format_if_unknown(*output->info(), Format::S16);
-    }
-    else if(input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32)
-    {
-        set_format_if_unknown(*output->info(), Format::F32);
+        if(input1->info()->data_type() == DataType::S16 || input2->info()->data_type() == DataType::S16)
+        {
+            set_format_if_unknown(*output->info(), Format::S16);
+        }
+        else if(input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32)
+        {
+            set_format_if_unknown(*output->info(), Format::F32);
+        }
     }
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input1, input2, output);
