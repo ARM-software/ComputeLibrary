@@ -97,9 +97,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     ARM_COMPUTE_UNUSED(supported_pool_sizes);
 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON(supported_pool_sizes.find(pool_size) == supported_pool_sizes.end());
     ARM_COMPUTE_ERROR_ON(7 == pool_size && input->info()->data_type() != DataType::F32);
     ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
@@ -109,8 +107,18 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
                                                      pool_size, pool_size, pool_info.pad_stride_info());
-    ARM_COMPUTE_UNUSED(pooled_w);
-    ARM_COMPUTE_UNUSED(pooled_h);
+
+    // Output auto initialization if not yet initialized
+    {
+        TensorShape output_shape{ input->info()->tensor_shape() };
+        output_shape.set(0, pooled_w);
+        output_shape.set(1, pooled_h);
+
+        auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    }
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pooled_w) || (output->info()->dimension(1) != pooled_h));
 
     unsigned int num_elems_read_per_iteration      = 0;
