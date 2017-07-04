@@ -208,6 +208,89 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
 }
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(QS16_to_F32)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * boost::unit_test::data::xrange(1, 15, 1),
+                     shape, policy, fixed_point_position)
+{
+    // Compute configure and validate region/padding
+    compute_configure_validate(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * boost::unit_test::data::xrange(1, 15, 1),
+                     shape, policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * boost::unit_test::data::xrange(1, 15, 1),
+                     shape, policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(F32_to_QS16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * boost::unit_test::data::xrange(1, 7, 1),
+                     shape, policy, fixed_point_position)
+{
+    // Compute configure and validate region/padding
+    compute_configure_validate(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * boost::unit_test::data::xrange(1, 15, 1),
+                     shape, policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * boost::unit_test::data::xrange(1, 15, 1),
+                     shape, policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE(U8_to_U16)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 

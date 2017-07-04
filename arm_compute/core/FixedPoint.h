@@ -296,7 +296,7 @@ float scvt_f32_qs8(qint8_t a, int fixed_point_position);
  *
  * @return The result of the conversion float -> 8 bit fixed point
  */
-qint8_t scvt_qs8_f32(float a, int fixed_point_position);
+qint8_t sqcvt_qs8_f32(float a, int fixed_point_position);
 
 /** Convert a 16 bit fixed point to float
  *
@@ -314,7 +314,7 @@ float scvt_f32_qs16(qint16_t a, int fixed_point_position);
  *
  * @return The result of the conversion float -> 16 bit fixed point
  */
-qint16_t scvt_qs16_f32(float a, int fixed_point_position);
+qint16_t sqcvt_qs16_f32(float a, int fixed_point_position);
 
 /** Scalar saturating move and narrow.
  *

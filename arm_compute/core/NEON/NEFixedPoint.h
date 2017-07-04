@@ -788,36 +788,36 @@ qint32x4_t vqmlal_qs16(qint32x4_t a, qint16x4_t b, qint16x4_t c, int fixed_point
  * @param[in] a                    Float input vector
  * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
  *
- * @return The result of the conversion float -> 8 bit fixed point
+ * @return The result of the conversion float -> 8 bit fixed point. The result is saturated in case of overflow
  */
-qint8x8_t vcvt_qs8_f32(const float32x4x2_t a, int fixed_point_position);
+qint8x8_t vqcvt_qs8_f32(const float32x4x2_t a, int fixed_point_position);
 
 /** Convert a float vector with 4 elements to 16 bit fixed point vector with 4 elements
  *
  * @param[in] a                    Float input vector
  * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
  *
- * @return The result of the conversion float -> 16 bit fixed point
+ * @return The result of the conversion float -> 16 bit fixed point. The result is saturated in case of overflow
  */
-qint16x4_t vcvt_qs16_f32(const float32x4_t a, int fixed_point_position);
+qint16x4_t vqcvt_qs16_f32(const float32x4_t a, int fixed_point_position);
 
 /** Convert a float vector with 4x4 elements to 8 bit fixed point vector with 16 elements
  *
  * @param[in] a                    Float input vector
  * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
  *
- * @return The result of the conversion float -> 8 bit fixed point
+ * @return The result of the conversion float -> 8 bit fixed point. The result is saturated in case of overflow
  */
-qint8x16_t vcvtq_qs8_f32(const float32x4x4_t &a, int fixed_point_position);
+qint8x16_t vqcvtq_qs8_f32(const float32x4x4_t &a, int fixed_point_position);
 
 /** Convert a float vector with 4x2 elements to 16 bit fixed point vector with 8 elements
  *
  * @param[in] a                    Float input vector
  * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
  *
- * @return The result of the conversion float -> 16 bit fixed point
+ * @return The result of the conversion float -> 16 bit fixed point. The result is saturated in case of overflow
  */
-qint16x8_t vcvtq_qs16_f32(const float32x4x2_t &a, int fixed_point_position);
+qint16x8_t vqcvtq_qs16_f32(const float32x4x2_t &a, int fixed_point_position);
 
 /** Convert a 8 bit fixed point vector with 8 elements to a float vector with 4x2 elements
  *

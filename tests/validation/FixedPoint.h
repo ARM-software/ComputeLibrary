@@ -333,7 +333,7 @@ struct constant_expr
      */
     static constexpr T to_fixed(float val, uint8_t p)
     {
-        return static_cast<T>(val * fixed_one(p) + ((val >= 0) ? 0.5 : -0.5));
+        return static_cast<T>(saturate_cast<float>(val * fixed_one(p) + ((val >= 0) ? 0.5 : -0.5)));
     }
     /** Clamp value between two ranges
      *

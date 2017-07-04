@@ -267,9 +267,9 @@ typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivation
     int      fixed_point_position = _input->info()->fixed_point_position();
 
     static const qint8x16_t CONST_0 = vdupq_n_qs8(0);
-    const qint8x16_t        CONST_1 = vdupq_n_qs8(scvt_qs8_f32(1.f, fixed_point_position));
-    const qint8x16_t        a       = vdupq_n_qs8(scvt_qs8_f32(_act_info.a(), fixed_point_position));
-    const qint8x16_t        b       = vdupq_n_qs8(scvt_qs8_f32(_act_info.b(), fixed_point_position));
+    const qint8x16_t        CONST_1 = vdupq_n_qs8(sqcvt_qs8_f32(1.f, fixed_point_position));
+    const qint8x16_t        a       = vdupq_n_qs8(sqcvt_qs8_f32(_act_info.a(), fixed_point_position));
+    const qint8x16_t        b       = vdupq_n_qs8(sqcvt_qs8_f32(_act_info.b(), fixed_point_position));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {

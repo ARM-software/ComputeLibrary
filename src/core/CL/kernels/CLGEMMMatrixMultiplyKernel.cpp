@@ -77,8 +77,8 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     if(is_data_type_fixed_point(input0->info()->data_type()))
     {
         mm_arguments << "-DALPHA=" << (input0->info()->data_type() == DataType::QS8 ?
-                                       scvt_qs8_f32(alpha, input0->info()->fixed_point_position()) :
-                                       scvt_qs16_f32(alpha, input0->info()->fixed_point_position()))
+                                       sqcvt_qs8_f32(alpha, input0->info()->fixed_point_position()) :
+                                       sqcvt_qs16_f32(alpha, input0->info()->fixed_point_position()))
                      << " ";
         mm_arguments << "-DFIXED_POINT_POSITION=" << input0->info()->fixed_point_position() << " ";
     }

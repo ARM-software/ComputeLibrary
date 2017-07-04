@@ -94,7 +94,7 @@ void matrix_addition_f16(const ITensor *input, ITensor *output, const Window &wi
 void matrix_addition_qs8(const ITensor *input, ITensor *output, const Window &window, float beta)
 {
     const int        fixed_point_position = input->info()->fixed_point_position();
-    const qint8x16_t beta_qs8             = vdupq_n_qs8(scvt_qs8_f32(beta, fixed_point_position));
+    const qint8x16_t beta_qs8             = vdupq_n_qs8(sqcvt_qs8_f32(beta, fixed_point_position));
 
     Iterator in(input, window);
     Iterator out(output, window);
@@ -118,7 +118,7 @@ void matrix_addition_qs8(const ITensor *input, ITensor *output, const Window &wi
 void matrix_addition_qs16(const ITensor *input, ITensor *output, const Window &window, float beta)
 {
     const int        fixed_point_position = input->info()->fixed_point_position();
-    const qint16x8_t beta_qs16            = vdupq_n_qs16(scvt_qs16_f32(beta, fixed_point_position));
+    const qint16x8_t beta_qs16            = vdupq_n_qs16(sqcvt_qs16_f32(beta, fixed_point_position));
 
     Iterator in(input, window);
     Iterator out(output, window);

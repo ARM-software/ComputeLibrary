@@ -46,18 +46,18 @@ NEDepthConvertKernel::NEDepthConvertKernel()
 
 void NEDepthConvertKernel::configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QS8, DataType::S16, DataType::U16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QS8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QS8, DataType::S16, DataType::U16, DataType::QS16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QS8, DataType::S16, DataType::U16, DataType::QS16, DataType::U32, DataType::S32, DataType::F32);
     ARM_COMPUTE_ERROR_ON(shift >= 8);
     ARM_COMPUTE_ERROR_ON(input == output);
     ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == output->info()->data_type(), "Input and output data_types must be different");
 
-    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::QS8 && (output->info()->data_type() != DataType::F32),
-                             "Only data_types supported [in] QS8 ->  [out] F32");
-
     ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::U8 && (output->info()->data_type() != DataType::S16 && output->info()->data_type() != DataType::U16
                                                                             && output->info()->data_type() != DataType::S32),
                              "Only data_types supported [in] U8 -> [out] U16, S16, S32");
+
+    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::QS8 && output->info()->data_type() != DataType::F32,
+                             "Only data_types supported [in] QS8 ->  [out] F32");
 
     ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::U16 && (output->info()->data_type() != DataType::U8 && output->info()->data_type() != DataType::U32),
                              "Only data_types supported [in] U16 ->  [out] U8, U32");
@@ -65,8 +65,16 @@ void NEDepthConvertKernel::configure(const ITensor *input, ITensor *output, Conv
     ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::S16 && (output->info()->data_type() != DataType::U8 && output->info()->data_type() != DataType::S32),
                              "Only data_types supported [in] S16 ->  [out] U8, S32");
 
-    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::F32 && (output->info()->data_type() != DataType::QS8),
-                             "Only data_types supported [in] F32 ->  [out] QS8");
+    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::QS16 && output->info()->data_type() != DataType::F32,
+                             "Only data_types supported [in] QS16 ->  [out] F32");
+
+    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::F32 && (output->info()->data_type() != DataType::QS8 && output->info()->data_type() != DataType::QS16),
+                             "Only data_types supported [in] F32 ->  [out] QS8, QS16");
+
+    // Auto initialize output shape if not initialized (We can only auto-configure the shape, datatype must be given)
+    set_shape_if_empty(*output->info(), input->info()->tensor_shape());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
     _policy = policy;
     _shift  = shift;
@@ -346,6 +354,38 @@ void NEDepthConvertKernel::run(const Window &window)
             }
             break;
         }
+        case DataType::QS16:
+        {
+            const int fixed_point_position = _input->info()->fixed_point_position();
+
+            switch(_output->info()->data_type())
+            {
+                case DataType::F32:
+                {
+                    /* Up-conversion QS16 -> F32 */
+                    execute_window_loop(window, [&](const Coordinates & id)
+                    {
+                        const int16x8x2_t texels =
+                        {
+                            {
+                                vld1q_s16(reinterpret_cast<qint16_t *>(input.ptr())),
+                                vld1q_s16(reinterpret_cast<qint16_t *>(input.ptr()) + 8)
+                            }
+                        };
+
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()), vcvt_f32_qs16(vget_low_s16(texels.val[0]), fixed_point_position));
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 4, vcvt_f32_qs16(vget_high_s16(texels.val[0]), fixed_point_position));
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 8, vcvt_f32_qs16(vget_low_s16(texels.val[1]), fixed_point_position));
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12, vcvt_f32_qs16(vget_high_s16(texels.val[1]), fixed_point_position));
+                    },
+                    input, output);
+                    break;
+                }
+                default:
+                    ARM_COMPUTE_ERROR("Output data type not supported");
+            }
+            break;
+        }
         case DataType::F32:
         {
             switch(_output->info()->data_type())
@@ -366,9 +406,36 @@ void NEDepthConvertKernel::run(const Window &window)
                             }
                         };
 
-                        const qint8x16_t texels_s8 = vcvtq_qs8_f32(texels_f32, fixed_point_position);
+                        const qint8x16_t texels_s8 = vqcvtq_qs8_f32(texels_f32, fixed_point_position);
 
                         vst1q_s8(reinterpret_cast<int8_t *>(output.ptr()), texels_s8);
+                    },
+                    input, output);
+                    break;
+                }
+                case DataType::QS16:
+                {
+                    const int fixed_point_position = _output->info()->fixed_point_position();
+                    /* Down-conversion F32 -> QS16 */
+                    execute_window_loop(window, [&](const Coordinates & id)
+                    {
+                        const float32x4x2_t texels_f32_1 =
+                        {
+                            {
+                                vld1q_f32(reinterpret_cast<const float *>(input.ptr())),
+                                vld1q_f32(reinterpret_cast<const float *>(input.ptr()) + 4),
+                            }
+                        };
+                        const float32x4x2_t texels_f32_2 =
+                        {
+                            {
+                                vld1q_f32(reinterpret_cast<const float *>(input.ptr()) + 8),
+                                vld1q_f32(reinterpret_cast<const float *>(input.ptr()) + 12)
+                            }
+                        };
+
+                        vst1q_s16(reinterpret_cast<qint16_t *>(output.ptr()), vqcvtq_qs16_f32(texels_f32_1, fixed_point_position));
+                        vst1q_s16(reinterpret_cast<qint16_t *>(output.ptr()) + 8, vqcvtq_qs16_f32(texels_f32_2, fixed_point_position));
                     },
                     input, output);
                     break;

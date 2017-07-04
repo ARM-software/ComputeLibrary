@@ -560,6 +560,7 @@ void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             break;
         }
         case DataType::S16:
+        case DataType::QS16:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<int16_t, D>::value));
             std::uniform_int_distribution<int16_t> distribution_s16(low, high);

@@ -56,8 +56,8 @@ void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *ou
     if(is_data_type_fixed_point(input->info()->data_type()))
     {
         ma_arguments << "-DBETA=" << (input->info()->data_type() == DataType::QS8 ?
-                                      scvt_qs8_f32(beta, input->info()->fixed_point_position()) :
-                                      scvt_qs16_f32(beta, input->info()->fixed_point_position()))
+                                      sqcvt_qs8_f32(beta, input->info()->fixed_point_position()) :
+                                      sqcvt_qs16_f32(beta, input->info()->fixed_point_position()))
                      << " ";
         ma_arguments << "-DFIXED_POINT_POSITION=" << input->info()->fixed_point_position();
     }

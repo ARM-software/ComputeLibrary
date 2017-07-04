@@ -136,11 +136,11 @@ inline void linearize_volume(const uint8_t *const in_ptr,
     {
         if(std::is_same<T, qint8_t>::value)
         {
-            *out_ptr = scvt_qs8_f32(1.0f, fixed_point_position);
+            *out_ptr = sqcvt_qs8_f32(1.0f, fixed_point_position);
         }
         else if(std::is_same<T, qint16_t>::value)
         {
-            *out_ptr = scvt_qs16_f32(1.0f, fixed_point_position);
+            *out_ptr = sqcvt_qs16_f32(1.0f, fixed_point_position);
         }
         else
         {
@@ -255,11 +255,11 @@ void NEIm2ColKernel::run_reduced(const Window &window)
         {
             if(std::is_same<T, qint8_t>::value)
             {
-                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = scvt_qs8_f32(1.0f, _input->info()->fixed_point_position());
+                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = sqcvt_qs8_f32(1.0f, _input->info()->fixed_point_position());
             }
             else if(std::is_same<T, qint16_t>::value)
             {
-                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = scvt_qs16_f32(1.0f, _input->info()->fixed_point_position());
+                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = sqcvt_qs16_f32(1.0f, _input->info()->fixed_point_position());
             }
             else
             {

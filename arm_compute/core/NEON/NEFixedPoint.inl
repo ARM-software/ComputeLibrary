@@ -236,7 +236,7 @@ inline qint8x16_t vdupq_n_qs8_f32(float a, int fixed_point_position)
             vdupq_n_f32(a),
         }
     };
-    return vcvtq_qs8_f32(res, fixed_point_position);
+    return vqcvtq_qs8_f32(res, fixed_point_position);
 }
 
 inline qint16x8_t vdupq_n_qs16(qint16_t a)
@@ -809,15 +809,15 @@ inline qint32x4_t vqmlal_qs16(qint32x4_t a, qint16x4_t b, qint16x4_t c, int fixe
     return vqaddq_s32(a, tmp);
 }
 
-inline qint8x8_t vcvt_qs8_f32(const float32x4x2_t &a, int fixed_point_position)
+inline qint8x8_t vqcvt_qs8_f32(const float32x4x2_t &a, int fixed_point_position)
 {
     const float32x4_t pow2 = vdupq_n_f32(static_cast<float>(1 << fixed_point_position));
 
     float32x4x2_t res_f32 =
     {
         {
-            vdupq_n_f32(0.5f),
-            vdupq_n_f32(0.5f)
+            vbslq_f32(vcgeq_f32(a.val[0], vdupq_n_f32(0)), vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f)),
+            vbslq_f32(vcgeq_f32(a.val[1], vdupq_n_f32(0)), vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f))
         }
     };
 
@@ -837,11 +837,11 @@ inline qint8x8_t vcvt_qs8_f32(const float32x4x2_t &a, int fixed_point_position)
     return vqmovn_s16(res_s16);
 }
 
-inline qint16x4_t vcvt_qs16_f32(const float32x4_t a, int fixed_point_position)
+inline qint16x4_t vqcvt_qs16_f32(const float32x4_t a, int fixed_point_position)
 {
     const float32x4_t pow2 = vdupq_n_f32(static_cast<float>(1 << fixed_point_position));
 
-    float32x4_t res_f32 = vdupq_n_f32(0.5f);
+    float32x4_t res_f32 = vbslq_f32(vcgeq_f32(a, vdupq_n_f32(0)), vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f));
 
     res_f32 = vmlaq_f32(res_f32, a, pow2);
 
@@ -850,17 +850,17 @@ inline qint16x4_t vcvt_qs16_f32(const float32x4_t a, int fixed_point_position)
     return vqmovn_s32(res_s32);
 }
 
-inline qint8x16_t vcvtq_qs8_f32(const float32x4x4_t &a, int fixed_point_position)
+inline qint8x16_t vqcvtq_qs8_f32(const float32x4x4_t &a, int fixed_point_position)
 {
     const float32x4_t pow2 = vdupq_n_f32(static_cast<float>(1 << fixed_point_position));
 
     float32x4x4_t res_f32 =
     {
         {
-            vdupq_n_f32(0.5f),
-            vdupq_n_f32(0.5f),
-            vdupq_n_f32(0.5f),
-            vdupq_n_f32(0.5f)
+            vbslq_f32(vcgeq_f32(a.val[0], vdupq_n_f32(0)), vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f)),
+            vbslq_f32(vcgeq_f32(a.val[1], vdupq_n_f32(0)), vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f)),
+            vbslq_f32(vcgeq_f32(a.val[2], vdupq_n_f32(0)), vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f)),
+            vbslq_f32(vcgeq_f32(a.val[3], vdupq_n_f32(0)), vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f))
         }
     };
 
@@ -890,15 +890,15 @@ inline qint8x16_t vcvtq_qs8_f32(const float32x4x4_t &a, int fixed_point_position
     return vcombine_s8(vqmovn_s16(res_s16.val[0]), vqmovn_s16(res_s16.val[1]));
 }
 
-inline qint16x8_t vcvtq_qs16_f32(const float32x4x2_t &a, int fixed_point_position)
+inline qint16x8_t vqcvtq_qs16_f32(const float32x4x2_t &a, int fixed_point_position)
 {
     const float32x4_t pow2 = vdupq_n_f32(static_cast<float>(1 << fixed_point_position));
 
     float32x4x2_t res_f32 =
     {
         {
-            vdupq_n_f32(0.5f),
-            vdupq_n_f32(0.5f)
+            vbslq_f32(vcgeq_f32(a.val[0], vdupq_n_f32(0)), vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f)),
+            vbslq_f32(vcgeq_f32(a.val[1], vdupq_n_f32(0)), vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f))
         }
     };
 

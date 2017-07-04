@@ -456,7 +456,7 @@ void vector_matrix_multiply_qs8(const ITensor *input0, const ITensor *input1, IT
         // Multiply by the weight of the matrix product (alpha)
         if(multiply_alpha)
         {
-            const qint8x8_t alpha_qs8 = vdup_n_qs8(scvt_qs8_f32(alpha, fixed_point_position));
+            const qint8x8_t alpha_qs8 = vdup_n_qs8(sqcvt_qs8_f32(alpha, fixed_point_position));
             acc00_qs8                 = vqmul_qs8(acc00_qs8, alpha_qs8, fixed_point_position);
             acc01_qs8                 = vqmul_qs8(acc01_qs8, alpha_qs8, fixed_point_position);
             acc02_qs8                 = vqmul_qs8(acc02_qs8, alpha_qs8, fixed_point_position);
@@ -585,7 +585,7 @@ void vector_matrix_multiply_qs16(const ITensor *input0, const ITensor *input1, I
         // Multiply by the weight of the matrix product (alpha)
         if(multiply_alpha)
         {
-            const qint16x4_t alpha_qs16 = vdup_n_qs16(scvt_qs16_f32(alpha, fixed_point_position));
+            const qint16x4_t alpha_qs16 = vdup_n_qs16(sqcvt_qs16_f32(alpha, fixed_point_position));
             acc00_qs16                  = vqmul_qs16(acc00_qs16, alpha_qs16, fixed_point_position);
             acc01_qs16                  = vqmul_qs16(acc01_qs16, alpha_qs16, fixed_point_position);
             acc02_qs16                  = vqmul_qs16(acc02_qs16, alpha_qs16, fixed_point_position);
@@ -1058,7 +1058,7 @@ void matrix_matrix_multiply_qs8(const ITensor *input0, const ITensor *input1, IT
     const size_t    out_stride3          = out_stride1 * 3;
     const int       num_elems_matrix_b_x = input1->info()->dimension(0);
     const int       fixed_point_position = input0->info()->fixed_point_position();
-    const qint8x8_t alpha_qs8            = vdup_n_qs8(scvt_qs8_f32(alpha, fixed_point_position));
+    const qint8x8_t alpha_qs8            = vdup_n_qs8(sqcvt_qs8_f32(alpha, fixed_point_position));
     ARM_COMPUTE_UNUSED(alpha_qs8);
 
     // Set step_x and step_y for matrix A. Scale by a factor of 4 the Y range as the input interleaved matrix A has 4 times less the rows of the output matrix
@@ -1291,7 +1291,7 @@ void matrix_matrix_multiply_qs16(const ITensor *input0, const ITensor *input1, I
     const size_t     out_stride3          = out_stride1 * 3;
     const int        num_elems_matrix_b_x = input1->info()->dimension(0);
     const int        fixed_point_position = input0->info()->fixed_point_position();
-    const qint16x4_t alpha_qs16           = vdup_n_qs16(scvt_qs16_f32(alpha, fixed_point_position));
+    const qint16x4_t alpha_qs16           = vdup_n_qs16(sqcvt_qs16_f32(alpha, fixed_point_position));
     ARM_COMPUTE_UNUSED(alpha_qs16);
 
     // Set step_x and step_y for matrix A. Scale by a factor of 4 the Y range as the input interleaved matrix A has 4 times less the rows of the output matrix

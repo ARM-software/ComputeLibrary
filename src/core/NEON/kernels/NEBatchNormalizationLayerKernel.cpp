@@ -58,7 +58,7 @@ void batch_normalization_q8(const ITensor *in, ITensor *out, const ITensor *mean
     qint8x16_t       gamma_vec   = vdupq_n_qs8(0);
     qint8x16_t       beta_vec    = vdupq_n_qs8(0);
     qint8x16_t       denominator = vdupq_n_qs8(0);
-    const qint8x16_t epsilon_vec = vdupq_n_qs8(scvt_qs8_f32(epsilon, fixed_point_position));
+    const qint8x16_t epsilon_vec = vdupq_n_qs8(sqcvt_qs8_f32(epsilon, fixed_point_position));
     execute_window_loop(window, [&](const Coordinates & id)
     {
         if(slice != id.z())

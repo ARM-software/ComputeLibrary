@@ -366,10 +366,10 @@ inline float scvt_f32_qs8(qint8_t a, int fixed_point_position)
     return static_cast<float>(a) / (1 << fixed_point_position);
 }
 
-inline qint8_t scvt_qs8_f32(float a, int fixed_point_position)
+inline qint8_t sqcvt_qs8_f32(float a, int fixed_point_position)
 {
     // round_nearest_integer(a * 2^(fixed_point_position))
-    return static_cast<qint8_t>(a * (1 << fixed_point_position) + 0.5f);
+    return saturate_convert<float, qint8_t>(a * (1 << fixed_point_position) + ((a >= 0) ? 0.5 : -0.5));
 }
 
 inline float scvt_f32_qs16(qint16_t a, int fixed_point_position)
@@ -377,10 +377,10 @@ inline float scvt_f32_qs16(qint16_t a, int fixed_point_position)
     return static_cast<float>(a) / (1 << fixed_point_position);
 }
 
-inline qint16_t scvt_qs16_f32(float a, int fixed_point_position)
+inline qint16_t sqcvt_qs16_f32(float a, int fixed_point_position)
 {
     // round_nearest_integer(a * 2^(fixed_point_position))
-    return static_cast<qint16_t>(a * (1 << fixed_point_position) + 0.5f);
+    return saturate_convert<float, qint16_t>(a * (1 << fixed_point_position) + ((a >= 0) ? 0.5 : -0.5));
 }
 
 inline qint8_t sqmovn_qs16(qint16_t a)
