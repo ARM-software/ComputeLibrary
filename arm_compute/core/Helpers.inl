@@ -53,8 +53,8 @@ inline uint8_t pixel_bilinear_c1u8(const uint8_t *first_pixel_ptr, size_t stride
 {
     ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
 
-    const int32_t xi = x;
-    const int32_t yi = y;
+    const int32_t xi = std::floor(x);
+    const int32_t yi = std::floor(y);
 
     const float dx = x - xi;
     const float dy = y - yi;

@@ -103,6 +103,18 @@ void validate(const IAccessor &tensor, const RawTensor &reference, float toleran
  */
 void validate(const IAccessor &tensor, const RawTensor &reference, const ValidRegion &valid_region, float tolerance_value = 0.f, float tolerance_number = 0.f, uint64_t wrap_range = 0);
 
+/** Validate tensors with valid mask.
+ *
+ * - Dimensionality has to be the same.
+ * - All values have to match.
+ *
+ * @note: wrap_range allows cases where reference tensor rounds up to the wrapping point, causing it to wrap around to
+ * zero while the test tensor stays at wrapping point to pass. This may permit true erroneous cases (difference between
+ * reference tensor and test tensor is multiple of wrap_range), but such errors would be detected by
+ * other test cases.
+ */
+void validate(const IAccessor &tensor, const RawTensor &reference, const RawTensor &valid_mask, float tolerance_value = 0.f, float tolerance_number = 0.f, uint64_t wrap_range = 0);
+
 /** Validate tensors against constant value.
  *
  * - All values have to match.

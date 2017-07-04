@@ -521,7 +521,6 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
         const float yn = y0 / z0;
 
         // Only use input values if xn and yn are within the valid region.
-        // Otherwise write the constant border value.
         if((min_y <= yn) && (yn < max_y) && (min_x <= xn) && (xn < max_x))
         {
             switch(interpolation)
@@ -538,7 +537,34 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
         }
         else
         {
-            *out.ptr() = _constant_border_value;
+            switch(interpolation)
+            {
+                case InterpolationPolicy::NEAREST_NEIGHBOR:
+                    *out.ptr() = _constant_border_value;
+                    break;
+                case InterpolationPolicy::BILINEAR:
+                {
+                    const auto xi   = clamp<int>(std::floor(xn), min_x - 1, max_x);
+                    const auto yi   = clamp<int>(std::floor(yn), min_y - 1, max_y);
+                    const auto xi_1 = clamp<int>(std::floor(xn + 1), min_x - 1, max_x);
+                    const auto yi_1 = clamp<int>(std::floor(yn + 1), min_y - 1, max_y);
+
+                    const float dx  = xn - std::floor(xn);
+                    const float dy  = yn - std::floor(yn);
+                    const float dx1 = 1.0f - dx;
+                    const float dy1 = 1.0f - dy;
+
+                    const float a00 = *(in.ptr() + xi + yi * stride);
+                    const float a01 = *(in.ptr() + xi_1 + yi * stride);
+                    const float a10 = *(in.ptr() + xi + yi_1 * stride);
+                    const float a11 = *(in.ptr() + xi_1 + yi_1 * stride);
+
+                    *out.ptr() = a00 * (dx1 * dy1) + a01 * (dx * dy1) + a10 * (dx1 * dy) + a11 * (dx * dy);
+                }
+                break;
+                default:
+                    ARM_COMPUTE_ERROR("Interpolation not supported");
+            }
         }
 
         x0 += M00;
@@ -619,7 +645,6 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
         const float yn = y0 / z0;
 
         // Only load from (x0, y0) if the point is within the valid region.
-        // Otherwise load from the edge of the valid region.
         if((min_y <= yn) && (yn < max_y) && (min_x <= xn) && (xn < max_x))
         {
             switch(interpolation)
@@ -637,10 +662,34 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
         else
         {
             // Clamp coordinates
-            const auto xi = clamp<int>(x0, min_x, max_x - 1);
-            const auto yi = clamp<int>(y0, min_y, max_y - 1);
+            const auto xi = clamp<int>(std::floor(xn), min_x, max_x - 1);
+            const auto yi = clamp<int>(std::floor(yn), min_y, max_y - 1);
+            switch(interpolation)
+            {
+                case InterpolationPolicy::NEAREST_NEIGHBOR:
+                    *out.ptr() = *(in.ptr() + xi + yi * stride);
+                    break;
+                case InterpolationPolicy::BILINEAR:
+                {
+                    const auto xi_1 = clamp<int>(std::floor(xn + 1), min_x, max_x - 1);
+                    const auto yi_1 = clamp<int>(std::floor(yn + 1), min_y, max_y - 1);
 
-            *out.ptr() = *(in.ptr() + xi + yi * stride);
+                    const float dx  = xn - std::floor(xn);
+                    const float dy  = yn - std::floor(yn);
+                    const float dx1 = 1.0f - dx;
+                    const float dy1 = 1.0f - dy;
+
+                    const float a00 = *(in.ptr() + xi + yi * stride);
+                    const float a01 = *(in.ptr() + xi_1 + yi * stride);
+                    const float a10 = *(in.ptr() + xi + yi_1 * stride);
+                    const float a11 = *(in.ptr() + xi_1 + yi_1 * stride);
+
+                    *out.ptr() = a00 * (dx1 * dy1) + a01 * (dx * dy1) + a10 * (dx1 * dy) + a11 * (dx * dy);
+                }
+                break;
+                default:
+                    ARM_COMPUTE_ERROR("Interpolation not supported");
+            }
         }
 
         x0 += M00;

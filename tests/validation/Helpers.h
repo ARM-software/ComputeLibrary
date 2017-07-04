@@ -225,6 +225,31 @@ inline TensorShape calculate_depth_concatenate_shape(std::vector<TensorShape> in
     return out_shape;
 }
 
+/** Fill matrix random.
+ *
+ * @param[in,out] matrix Matrix
+ * @param[in]     cols   Columns (width) of matrix
+ * @param[in]     rows   Rows (height) of matrix
+ */
+template <std::size_t SIZE>
+inline void fill_warp_matrix(std::array<float, SIZE> &matrix, int cols, int rows)
+{
+    std::mt19937                          gen(user_config.seed.get());
+    std::uniform_real_distribution<float> dist(-1, 1);
+
+    for(int v = 0, r = 0; r < rows; ++r)
+    {
+        for(int c = 0; c < cols; ++c, ++v)
+        {
+            matrix[v] = dist(gen);
+        }
+    }
+    if(SIZE == 9)
+    {
+        matrix[(cols * rows) - 1] = 1;
+    }
+}
+
 /** Create a vector of random ROIs.
  *
  * @param[in] shape     The shape of the input tensor.

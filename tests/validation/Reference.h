@@ -266,6 +266,21 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper);
+
+    /** Compute reference Warp Perspective.
+     *
+     * @param[in]  shape                 Shape of the input and output tensors.
+     * @param[out] valid_mask            Valid mask tensor.
+     * @param[in]  matrix                The perspective matrix. Must be 3x3 of type float.
+     * @param[in]  policy                The interpolation type.
+     * @param[in]  border_mode           Strategy to use for borders.
+     * @param[in]  constant_border_value Constant value to use for borders if border_mode is set to CONSTANT.
+     *
+     * @return Computed raw tensor.
+     */
+    static RawTensor compute_reference_warp_perspective(const TensorShape &shape, RawTensor &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode,
+                                                        uint8_t constant_border_value);
+
     /** Compute reference batch normalization layer.
      *
      * @param[in] shape0               Shape of the input and output tensors.

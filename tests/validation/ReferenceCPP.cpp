@@ -252,6 +252,16 @@ void ReferenceCPP::threshold(const RawTensor &src, RawTensor &dst, uint8_t thres
     tensor_operations::threshold(s, d, threshold, false_value, true_value, type, upper);
 }
 
+// Warp perspective
+void ReferenceCPP::warp_perspective(const RawTensor &src, RawTensor &dst, RawTensor &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
+{
+    ARM_COMPUTE_ERROR_ON(src.data_type() != DataType::U8 || dst.data_type() != DataType::U8);
+    const Tensor<uint8_t> s(src.shape(), src.data_type(), src.fixed_point_position(), reinterpret_cast<const uint8_t *>(src.data()));
+    Tensor<uint8_t>       d(dst.shape(), dst.data_type(), dst.fixed_point_position(), reinterpret_cast<uint8_t *>(dst.data()));
+    Tensor<uint8_t>       vmask(valid_mask.shape(), valid_mask.data_type(), valid_mask.fixed_point_position(), reinterpret_cast<uint8_t *>(valid_mask.data()));
+    tensor_operations::warp_perspective(s, d, vmask, matrix, policy, border_mode, constant_border_value);
+}
+
 // Batch Normalization Layer
 void ReferenceCPP::batch_normalization_layer(const RawTensor &src, RawTensor &dst, const RawTensor &mean, const RawTensor &var, const RawTensor &beta, const RawTensor &gamma, float epsilon,
                                              int fixed_point_position)
