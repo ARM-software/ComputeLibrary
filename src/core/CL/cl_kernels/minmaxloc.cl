@@ -32,6 +32,17 @@
 #define DATA_TYPE_MAX 0xFF
 #endif /* DATA_TYPE_MAX */
 
+inline int FloatFlip(float val)
+{
+    union
+    {
+        int   int_val;
+        float flt_val;
+    } u_val;
+    u_val.flt_val = val;
+    return (u_val.int_val >= 0) ? u_val.int_val : u_val.int_val ^ 0x7FFFFFFF;
+}
+
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_min = (VEC_DATA_TYPE(DATA_TYPE, 16))(DATA_TYPE_MIN);
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_max = (VEC_DATA_TYPE(DATA_TYPE, 16))(DATA_TYPE_MAX);
 __constant uint16 idx16 = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
@@ -78,8 +89,12 @@ __kernel void minmax(
     // Handle non multiple of 16
     VEC_DATA_TYPE(DATA_TYPE, 16)
     data = vload16(0, (__global DATA_TYPE *)offset(&src, width4 << 4, 0));
+#ifdef IS_DATA_TYPE_FLOAT
+    int16 widx = convert_int16(((uint16)(width4 << 4) + idx16) < width);
+#else  /* IS_DATA_TYPE_FLOAT */
     VEC_DATA_TYPE(DATA_TYPE, 16)
-    widx      = CONVERT(((uint16)(width4 << 4) + idx16) < width, VEC_DATA_TYPE(DATA_TYPE, 16));
+    widx = CONVERT(((uint16)(width4 << 4) + idx16) < width, VEC_DATA_TYPE(DATA_TYPE, 16));
+#endif /* IS_DATA_TYPE_FLOAT */
     local_max = max(local_max, select(type_min, data, widx));
     local_min = min(local_min, select(type_max, data, widx));
 #endif /* NON_MULTIPLE_OF_16 */
@@ -98,8 +113,13 @@ __kernel void minmax(
     local_max.s0 = max(local_max.s0, local_max.s1);
 
     // Update global min/max
+#ifdef IS_DATA_TYPE_FLOAT
+    atomic_min(&min_max[0], FloatFlip(local_min.s0));
+    atomic_max(&min_max[1], FloatFlip(local_max.s0));
+#else  /* IS_DATA_TYPE_FLOAT */
     atomic_min(&min_max[0], local_min.s0);
     atomic_max(&min_max[1], local_max.s0);
+#endif /* IS_DATA_TYPE_FLOAT */
 }
 
 /** This function counts the min and max occurrences in an image and tags their position.
@@ -136,9 +156,18 @@ __kernel void minmaxloc(
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 
+#ifdef IS_DATA_TYPE_FLOAT
+    __global float *min_max_ptr = (__global float *)min_max;
+    float           min_value   = min_max_ptr[0];
+    float           max_value   = min_max_ptr[1];
+#else  /* IS_DATA_TYPE_FLOAT */
+    int min_value = min_max[0];
+    int max_value = min_max[1];
+#endif /* IS_DATA_TYPE_FLOAT */
+
     DATA_TYPE value = *((__global DATA_TYPE *)src.ptr);
 #ifdef COUNT_MIN_MAX
-    if(value == min_max[0])
+    if(value == min_value)
     {
         uint idx = atomic_inc(&min_max_count[0]);
 #ifdef LOCATE_MIN
@@ -149,7 +178,7 @@ __kernel void minmaxloc(
         }
 #endif /* LOCATE_MIN */
     }
-    if(value == min_max[1])
+    if(value == max_value)
     {
         uint idx = atomic_inc(&min_max_count[1]);
 #ifdef LOCATE_MAX

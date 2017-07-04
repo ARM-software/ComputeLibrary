@@ -51,8 +51,8 @@ public:
     CLMinMaxKernel &operator=(CLMinMaxKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input   Input Image. Data types supported: U8 or S16.
-     * @param[out] min_max Buffer of 2 elements to store the min value at position 0 and the max value at position 1. Data type supported: S32.
+     * @param[in]  input   Input Image. Data types supported: U8/S16/F32.
+     * @param[out] min_max Buffer of 2 elements to store the min value at position 0 and the max value at position 1. Data type supported: S32 if input type is U8/S16, F32 if input type is F32.
      */
     void configure(const ICLImage *input, cl::Buffer *min_max);
 
@@ -84,8 +84,8 @@ public:
      *
      * @note When locations of min and max occurrences are requested, the reported number of locations is limited to the given array size.
      *
-     * @param[in]  input         Input image. Data types supported: U8 or S16.
-     * @param[in]  min_max       Buffer of 2 elements which contains the min value at position 0 and the max value at position 1. Data type supported: S32
+     * @param[in]  input         Input image. Data types supported: U8/S16/F32.
+     * @param[out] min_max       Buffer of 2 elements to store the min value at position 0 and the max value at position 1. Data type supported: S32 if input type is U8/S16, F32 if input type is F32.
      * @param[out] min_max_count Buffer of 2 elements to store the min value occurrences at position 0 and the max value occurrences at position 1. Data type supported: S32
      * @param[out] min_loc       (Optional) Array of Coordinates2D used to store minimum value locations.
      * @param[out] max_loc       (Optional) Array of Coordinates2D used to store maximum value locations.

@@ -34,6 +34,26 @@
 
 using namespace arm_compute;
 
+inline int32_t FloatFlip(float val)
+{
+    static_assert(sizeof(float) == sizeof(int32_t), "Float must be same size as int32_t");
+    int32_t int_val = 0;
+
+    memcpy(&int_val, &val, sizeof(float));
+    int_val = (int_val >= 0) ? int_val : int_val ^ 0x7FFFFFFF;
+    return int_val;
+}
+
+inline float IFloatFlip(int32_t val)
+{
+    static_assert(sizeof(float) == sizeof(int32_t), "Float must be same size as int32_t");
+    float flt_val = 0.f;
+
+    val = (val >= 0) ? val : val ^ 0x7FFFFFFF;
+    memcpy(&flt_val, &val, sizeof(float));
+    return flt_val;
+}
+
 CLMinMaxKernel::CLMinMaxKernel()
     : _input(nullptr), _min_max(), _data_type_max_min()
 {
@@ -41,7 +61,7 @@ CLMinMaxKernel::CLMinMaxKernel()
 
 void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(min_max == nullptr);
 
@@ -59,6 +79,10 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
             _data_type_max_min[0] = SHRT_MAX;
             _data_type_max_min[1] = SHRT_MIN;
             break;
+        case DataType::F32:
+            _data_type_max_min[0] = FloatFlip(std::numeric_limits<float>::max());
+            _data_type_max_min[1] = FloatFlip(std::numeric_limits<float>::lowest());
+            break;
         default:
             ARM_COMPUTE_ERROR("You called with the wrong image data types");
     }
@@ -66,9 +90,18 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     // Set kernel build options
     std::set<std::string> build_opts;
     build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.emplace("-DDATA_TYPE_MAX=" + support::cpp11::to_string(_data_type_max_min[0]));
-    build_opts.emplace("-DDATA_TYPE_MIN=" + support::cpp11::to_string(_data_type_max_min[1]));
     build_opts.emplace((0 != (num_elems_processed_per_iteration % max_cl_vector_width)) ? "-DNON_MULTIPLE_OF_16" : "");
+    if(input->info()->data_type() == DataType::F32)
+    {
+        build_opts.emplace("-DDATA_TYPE_MAX=" + support::cpp11::to_string(std::numeric_limits<float>::max()));
+        build_opts.emplace("-DDATA_TYPE_MIN=" + support::cpp11::to_string(std::numeric_limits<float>::lowest()));
+        build_opts.emplace("-DIS_DATA_TYPE_FLOAT");
+    }
+    else
+    {
+        build_opts.emplace("-DDATA_TYPE_MAX=" + support::cpp11::to_string(_data_type_max_min[0]));
+        build_opts.emplace("-DDATA_TYPE_MIN=" + support::cpp11::to_string(_data_type_max_min[1]));
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("minmax", build_opts));
@@ -100,6 +133,28 @@ void CLMinMaxKernel::run(const Window &window, cl::CommandQueue &queue)
         enqueue(queue, *this, slice);
     }
     while(window.slide_window_slice_2D(slice));
+
+    cl_int min = 0;
+    cl_int max = 0;
+    queue.enqueueReadBuffer(*_min_max, CL_TRUE /* blocking */, 0 * sizeof(cl_int), sizeof(cl_int), static_cast<int *>(&min));
+    queue.enqueueReadBuffer(*_min_max, CL_TRUE /* blocking */, 1 * sizeof(cl_int), sizeof(cl_int), static_cast<int *>(&max));
+
+    if(_input->info()->data_type() == DataType::F32)
+    {
+        std::array<float, 2> min_max =
+        {
+            {
+                IFloatFlip(min),
+                IFloatFlip(max)
+            }
+        };
+        queue.enqueueWriteBuffer(*_min_max, CL_TRUE /* blocking */, 0, min_max.size() * sizeof(float), min_max.data());
+    }
+    else
+    {
+        std::array<int32_t, 2> min_max = { { min, max } };
+        queue.enqueueWriteBuffer(*_min_max, CL_TRUE /* blocking */, 0, min_max.size() * sizeof(int32_t), min_max.data());
+    }
 }
 
 CLMinMaxLocationKernel::CLMinMaxLocationKernel()
@@ -109,7 +164,7 @@ CLMinMaxLocationKernel::CLMinMaxLocationKernel()
 
 void CLMinMaxLocationKernel::configure(const ICLImage *input, cl::Buffer *min_max, cl::Buffer *min_max_count, ICLCoordinates2DArray *min_loc, ICLCoordinates2DArray *max_loc)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(min_max == nullptr);
     ARM_COMPUTE_ERROR_ON(min_max_count == nullptr && min_loc == nullptr && max_loc == nullptr);
@@ -123,6 +178,10 @@ void CLMinMaxLocationKernel::configure(const ICLImage *input, cl::Buffer *min_ma
     build_opts.emplace((min_max_count != nullptr) ? "-DCOUNT_MIN_MAX" : "");
     build_opts.emplace((min_loc != nullptr) ? "-DLOCATE_MIN" : "");
     build_opts.emplace((max_loc != nullptr) ? "-DLOCATE_MAX" : "");
+    if(input->info()->data_type() == DataType::F32)
+    {
+        build_opts.emplace("-DIS_DATA_TYPE_FLOAT");
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("minmaxloc", build_opts));

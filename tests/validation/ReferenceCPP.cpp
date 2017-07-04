@@ -71,7 +71,7 @@ void ReferenceCPP::sobel_5x5(RawTensor &src, RawTensor &dst_x, RawTensor &dst_y,
 }
 
 // Minimum maximum location
-void ReferenceCPP::min_max_location(const RawTensor &src, int32_t &min, int32_t &max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count)
+void ReferenceCPP::min_max_location(const RawTensor &src, void *min, void *max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count)
 {
     const TensorVariant s = TensorFactory::get_tensor(src);
     boost::apply_visitor(tensor_visitors::min_max_location_visitor(min, max, min_loc, max_loc, min_count, max_count), s);

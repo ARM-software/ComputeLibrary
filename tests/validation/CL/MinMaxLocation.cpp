@@ -50,22 +50,27 @@ using namespace arm_compute::test::validation;
 namespace
 {
 /** Compute CL MinMaxLocation function.
-*
-* @param[in] shape Shape of the input and output tensors.
-* @param[in] dt_in Data type of first input tensor.
-*
-* @return Computed output tensor.
-*/
-void compute_min_max_location(const TensorShape &shape, DataType dt_in, int32_t &min, int32_t &max,
+ *
+ * @param[in]  shape     Shape of the input and output tensors.
+ * @param[in]  dt_in     Data type of first input tensor.
+ * @param[out] min       Minimum value of tensor
+ * @param[out] max       Maximum value of tensor
+ * @param[out] min_loc   Array with locations of minimum values
+ * @param[out] max_loc   Array with locations of maximum values
+ * @param[out] min_count Number of minimum values found
+ * @param[out] max_count Number of maximum values found
+ *
+ * @return Computed output tensor.
+ */
+void compute_min_max_location(const TensorShape &shape, DataType dt_in, void *min, void *max,
                               CLCoordinates2DArray &min_loc, CLCoordinates2DArray &max_loc, uint32_t &min_count, uint32_t &max_count)
 {
     // Create tensor
     CLTensor src = create_tensor<CLTensor>(shape, dt_in);
-    src.info()->set_format((dt_in == DataType::U8) ? Format::U8 : Format::S16);
 
     // Create and configure min_max_location configure function
     CLMinMaxLocation min_max_loc;
-    min_max_loc.configure(&src, &min, &max, &min_loc, &max_loc, &min_count, &max_count);
+    min_max_loc.configure(&src, min, max, &min_loc, &max_loc, &min_count, &max_count);
 
     // Allocate tensors
     src.allocator()->allocate();
@@ -141,13 +146,13 @@ BOOST_DATA_TEST_CASE(RunSmall, Small2DShapes(),
     uint32_t             ref_max_count;
 
     // Compute function
-    compute_min_max_location(shape, DataType::U8, min, max, min_loc, max_loc, min_count, max_count);
+    compute_min_max_location(shape, DataType::U8, &min, &max, min_loc, max_loc, min_count, max_count);
 
     // Compute reference
     ref_min_loc.map();
     ref_max_loc.map();
 
-    Reference::compute_reference_min_max_location(shape, DataType::U8, ref_min, ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
+    Reference::compute_reference_min_max_location(shape, DataType::U8, &ref_min, &ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
 
     min_loc.map();
     max_loc.map();
@@ -181,13 +186,13 @@ BOOST_DATA_TEST_CASE(RunLarge, Large2DShapes(),
     uint32_t             ref_max_count;
 
     // Compute function
-    compute_min_max_location(shape, DataType::U8, min, max, min_loc, max_loc, min_count, max_count);
+    compute_min_max_location(shape, DataType::U8, &min, &max, min_loc, max_loc, min_count, max_count);
 
     // Compute reference
     ref_min_loc.map();
     ref_max_loc.map();
 
-    Reference::compute_reference_min_max_location(shape, DataType::U8, ref_min, ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
+    Reference::compute_reference_min_max_location(shape, DataType::U8, &ref_min, &ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
 
     min_loc.map();
     max_loc.map();
@@ -234,13 +239,13 @@ BOOST_DATA_TEST_CASE(RunSmall, Small2DShapes(),
     uint32_t             ref_max_count;
 
     // Compute function
-    compute_min_max_location(shape, DataType::S16, min, max, min_loc, max_loc, min_count, max_count);
+    compute_min_max_location(shape, DataType::S16, &min, &max, min_loc, max_loc, min_count, max_count);
 
     // Compute reference
     ref_min_loc.map();
     ref_max_loc.map();
 
-    Reference::compute_reference_min_max_location(shape, DataType::S16, ref_min, ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
+    Reference::compute_reference_min_max_location(shape, DataType::S16, &ref_min, &ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
 
     min_loc.map();
     max_loc.map();
@@ -274,13 +279,105 @@ BOOST_DATA_TEST_CASE(RunLarge, Large2DShapes(),
     uint32_t             ref_max_count;
 
     // Compute function
-    compute_min_max_location(shape, DataType::S16, min, max, min_loc, max_loc, min_count, max_count);
+    compute_min_max_location(shape, DataType::S16, &min, &max, min_loc, max_loc, min_count, max_count);
 
     // Compute reference
     ref_min_loc.map();
     ref_max_loc.map();
 
-    Reference::compute_reference_min_max_location(shape, DataType::S16, ref_min, ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
+    Reference::compute_reference_min_max_location(shape, DataType::S16, &ref_min, &ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
+
+    min_loc.map();
+    max_loc.map();
+
+    // Validate output
+    validate_min_max_loc(min, ref_min, max, ref_max, min_loc, ref_min_loc, max_loc, ref_max_loc, min_count, ref_min_count, max_count, ref_max_count);
+
+    ref_min_loc.unmap();
+    ref_max_loc.unmap();
+    min_loc.unmap();
+    max_loc.unmap();
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(Float)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(Configuration, (Small2DShapes() + Large2DShapes()),
+                     shape)
+{
+    // Create tensor
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::F32);
+
+    validate_configuration(src, shape);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, Small2DShapes(),
+                     shape)
+{
+    // Create output storage
+    float                min;
+    float                max;
+    CLCoordinates2DArray min_loc(shape.total_size());
+    CLCoordinates2DArray max_loc(shape.total_size());
+    uint32_t             min_count;
+    uint32_t             max_count;
+
+    float                ref_min;
+    float                ref_max;
+    CLCoordinates2DArray ref_min_loc(shape.total_size());
+    CLCoordinates2DArray ref_max_loc(shape.total_size());
+    uint32_t             ref_min_count;
+    uint32_t             ref_max_count;
+
+    // Compute function
+    compute_min_max_location(shape, DataType::F32, &min, &max, min_loc, max_loc, min_count, max_count);
+
+    // Compute reference
+    ref_min_loc.map();
+    ref_max_loc.map();
+
+    Reference::compute_reference_min_max_location(shape, DataType::F32, &ref_min, &ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
+
+    min_loc.map();
+    max_loc.map();
+
+    // Validate output
+    validate_min_max_loc(min, ref_min, max, ref_max, min_loc, ref_min_loc, max_loc, ref_max_loc, min_count, ref_min_count, max_count, ref_max_count);
+
+    ref_min_loc.unmap();
+    ref_max_loc.unmap();
+    min_loc.unmap();
+    max_loc.unmap();
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLarge, Large2DShapes(),
+                     shape)
+{
+    // Create output storage
+    float                min;
+    float                max;
+    CLCoordinates2DArray min_loc(shape.total_size());
+    CLCoordinates2DArray max_loc(shape.total_size());
+    uint32_t             min_count;
+    uint32_t             max_count;
+
+    float                ref_min;
+    float                ref_max;
+    CLCoordinates2DArray ref_min_loc(shape.total_size());
+    CLCoordinates2DArray ref_max_loc(shape.total_size());
+    uint32_t             ref_min_count;
+    uint32_t             ref_max_count;
+
+    // Compute function
+    compute_min_max_location(shape, DataType::F32, &min, &max, min_loc, max_loc, min_count, max_count);
+
+    // Compute reference
+    ref_min_loc.map();
+    ref_max_loc.map();
+
+    Reference::compute_reference_min_max_location(shape, DataType::F32, &ref_min, &ref_max, ref_min_loc, ref_max_loc, ref_min_count, ref_max_count);
 
     min_loc.map();
     max_loc.map();

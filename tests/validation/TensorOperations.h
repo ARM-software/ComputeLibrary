@@ -305,34 +305,50 @@ void sobel_5x5(Tensor<T1> &in, Tensor<T2> &out_x, Tensor<T2> &out_y, BorderMode 
     }
 }
 
-// Min max location
-template <typename T1>
-void min_max_location(const Tensor<T1> &in, int32_t &min, int32_t &max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count)
+template <typename T>
+void compute_min_max(const Tensor<T> &in, void *min, void *max)
 {
-    // Set min and max to first pixel
-    min       = in[0];
-    max       = in[0];
-    min_count = 0;
-    max_count = 0;
+    using type = typename std::conditional<std::is_same<T, float>::value, float, int32_t>::type;
 
-    const size_t width = in.shape().x();
+    // Set min and max to first pixel
+    type tmp_min = static_cast<type>(in[0]);
+    type tmp_max = static_cast<type>(in[0]);
 
     // Look for min and max values
     for(int i = 1; i < in.num_elements(); ++i)
     {
-        if(static_cast<int32_t>(in[i]) < min)
+        if(static_cast<type>(in[i]) < tmp_min)
         {
-            min = in[i];
+            tmp_min = static_cast<type>(in[i]);
         }
-        if(static_cast<int32_t>(in[i]) > max)
+        if(static_cast<type>(in[i]) > tmp_max)
         {
-            max = in[i];
+            tmp_max = static_cast<type>(in[i]);
         }
     }
 
+    *static_cast<type *>(min) = tmp_min;
+    *static_cast<type *>(max) = tmp_max;
+}
+
+// Min max location
+template <typename T1>
+void min_max_location(const Tensor<T1> &in, void *min, void *max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count)
+{
+    const size_t width = in.shape().x();
+
+    compute_min_max(in, min, max);
+
+    using type = typename std::conditional<std::is_same<T1, float>::value, float, int32_t>::type;
+
+    type min_value = *static_cast<type *>(min);
+    type max_value = *static_cast<type *>(max);
+
+    min_count = 0;
+    max_count = 0;
     for(int i = 0; i < in.num_elements(); ++i)
     {
-        if(static_cast<int32_t>(in[i]) == min)
+        if(static_cast<type>(in[i]) == min_value)
         {
             Coordinates2D min_coord;
             min_coord.x = static_cast<int32_t>(i % width);
@@ -342,7 +358,7 @@ void min_max_location(const Tensor<T1> &in, int32_t &min, int32_t &max, IArray<C
 
             min_count++;
         }
-        if(static_cast<int32_t>(in[i]) == max)
+        if(static_cast<type>(in[i]) == max_value)
         {
             Coordinates2D max_coord;
             max_coord.x = static_cast<int32_t>(i % width);

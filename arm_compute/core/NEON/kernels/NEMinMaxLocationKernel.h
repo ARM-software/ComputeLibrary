@@ -54,11 +54,11 @@ public:
 
     /** Initialise the kernel's input and outputs.
      *
-     * @param[in]  input Input Image. Data types supported: U8/S16.
-     * @param[out] min   Minimum value of image.
-     * @param[out] max   Maximum value of image.
+     * @param[in]  input Input Image. Data types supported: U8/S16/F32.
+     * @param[out] min   Minimum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
+     * @param[out] max   Maximum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
      */
-    void configure(const IImage *input, int32_t *min, int32_t *max);
+    void configure(const IImage *input, void *min, void *max);
     /** Resets global minimum and maximum. */
     void reset();
 
@@ -76,6 +76,11 @@ private:
      * @param win The window to run the algorithm on.
      */
     void minmax_S16(Window win);
+    /** Performs the min/max algorithm on F32 images on a given window.
+     *
+     * @param win The window to run the algorithm on.
+     */
+    void minmax_F32(Window win);
     /** Common signature for all the specialised MinMax functions
      *
      * @param[in] window Region on which to execute the kernel.
@@ -87,12 +92,10 @@ private:
     template <typename T>
     void update_min_max(T min, T max);
 
-    const IImage *_input;    /**< Input image. */
-    int32_t      *_min;      /**< Minimum value. */
-    int32_t      *_max;      /**< Maximum value. */
-    int32_t       _min_init; /**< Value to initialise global minimum value. */
-    int32_t       _max_init; /**< Value to initialise global maximum value. */
-    std::mutex    _mtx;      /**< Mutex used for result reduction. */
+    const IImage *_input; /**< Input image. */
+    void         *_min;   /**< Minimum value. */
+    void         *_max;   /**< Maximum value. */
+    std::mutex    _mtx;   /**< Mutex used for result reduction. */
 };
 
 /** Interface for the kernel to find min max locations of an image. */
@@ -114,15 +117,15 @@ public:
 
     /** Initialise the kernel's input and outputs.
      *
-     * @param[in]  input     Input Image. Data types supported: U8 or S16.
-     * @param[out] min       Minimum value of image.
-     * @param[out] max       Maximum value of image.
+     * @param[in]  input     Input Image. Data types supported: U8/S16/F32.
+     * @param[out] min       Minimum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
+     * @param[out] max       Maximum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
      * @param[out] min_loc   Array of minimum value locations.
      * @param[out] max_loc   Array of maximum value locations.
      * @param[out] min_count Number of minimum value encounters.
      * @param[out] max_count Number of maximum value encounters.
      */
-    void configure(const IImage *input, int32_t *min, int32_t *max,
+    void configure(const IImage *input, void *min, void *max,
                    ICoordinates2DArray *min_loc = nullptr, ICoordinates2DArray *max_loc = nullptr,
                    uint32_t *min_count = nullptr, uint32_t *max_count = nullptr);
 
@@ -149,8 +152,8 @@ private:
     struct create_func_table;
 
     const IImage        *_input;     /**< Input image. */
-    int32_t             *_min;       /**< Minimum value. */
-    int32_t             *_max;       /**< Maximum value. */
+    void                *_min;       /**< Minimum value. */
+    void                *_max;       /**< Maximum value. */
     uint32_t            *_min_count; /**< Count of minimum value encounters. */
     uint32_t            *_max_count; /**< Count of maximum value encounters. */
     ICoordinates2DArray *_min_loc;   /**< Locations of minimum values. */
