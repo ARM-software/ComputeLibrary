@@ -97,6 +97,7 @@ private:
 using CLKeyPointArray        = CLArray<KeyPoint>;
 using CLCoordinates2DArray   = CLArray<Coordinates2D>;
 using CLDetectionWindowArray = CLArray<DetectionWindow>;
+using CLROIArray             = CLArray<ROI>;
 using CLSize2DArray          = CLArray<Size2D>;
 using CLUInt8Array           = CLArray<cl_uchar>;
 using CLUInt16Array          = CLArray<cl_ushort>;

@@ -32,6 +32,7 @@
 #include "tests/validation/half.h"
 
 #include <array>
+#include <cstring>
 #include <random>
 #include <type_traits>
 #include <utility>
@@ -250,17 +251,6 @@ inline void fill_warp_matrix(std::array<float, SIZE> &matrix, int cols, int rows
     }
 }
 
-/** Create a vector of random ROIs.
- *
- * @param[in] shape     The shape of the input tensor.
- * @param[in] pool_info The ROI pooling information.
- * @param[in] num_rois  The number of ROIs to be created.
- * @param[in] seed      The random seed to be used.
- *
- * @return A vector that contains the requested number of random ROIs
- */
-std::vector<ROI> generate_random_rois(const TensorShape &shape, const ROIPoolingLayerInfo &pool_info, unsigned int num_rois, std::random_device::result_type seed);
-
 /** Helper function to fill the Lut random by a ILutAccessor.
  *
  * @param[in,out] table Accessor at the Lut.
@@ -277,7 +267,6 @@ void fill_lookuptable(T &&table)
         table[i] = distribution(generator);
     }
 }
-
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

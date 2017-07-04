@@ -41,8 +41,6 @@
 
 #include "boost_wrapper.h"
 
-#include <iostream>
-
 #include <random>
 #include <string>
 

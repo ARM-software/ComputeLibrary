@@ -21,33 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_NEON_HELPER_H__
-#define __ARM_COMPUTE_TEST_NEON_HELPER_H__
-
-#include "arm_compute/runtime/Array.h"
-#include "tests/Globals.h"
-
-#include <algorithm>
-#include <array>
-#include <vector>
+#ifndef __ARM_COMPUTE_TEST_IARRAYACCESSOR_H__
+#define __ARM_COMPUTE_TEST_IARRAYACCESSOR_H__
 
 namespace arm_compute
 {
 namespace test
 {
-template <typename D, typename T, typename... Ts>
-void fill_tensors(D &&dist, std::initializer_list<int> seeds, T &&tensor, Ts &&... other_tensors)
+/** Common interface to provide information and access to array like
+ * structures.
+ */
+template <typename T>
+class IArrayAccessor
 {
-    const std::array < T, 1 + sizeof...(Ts) > tensors{ { std::forward<T>(tensor), std::forward<Ts>(other_tensors)... } };
-    std::vector<int> vs(seeds);
-    ARM_COMPUTE_ERROR_ON(vs.size() != tensors.size());
-    int k = 0;
-    for(auto tp : tensors)
-    {
-        library->fill(Accessor(*tp), std::forward<D>(dist), vs[k++]);
-    }
-}
+public:
+    using value_type = T;
 
+    /** Virtual destructor. */
+    virtual ~IArrayAccessor() = default;
+
+    /** Number of elements of the tensor. */
+    virtual int num_values() const = 0;
+
+    /** Access to the buffer.
+     *
+     * @return A pointer to the first element in the buffer.
+     */
+    virtual T *buffer() = 0;
+
+    /** Resize array.
+     *
+     *  @param[in] num The new array size in number of elements
+     */
+    virtual void resize(size_t num) = 0;
+};
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_NEON_HELPER_H__ */
+#endif /* __ARM_COMPUTE_TEST_IARRAYACCESSOR_H__ */

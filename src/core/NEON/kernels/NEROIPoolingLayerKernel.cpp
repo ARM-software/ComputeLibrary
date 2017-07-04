@@ -50,7 +50,7 @@ void NEROIPoolingLayerKernel::configure(const ITensor *input, const IROIArray *r
     ARM_COMPUTE_ERROR_ON(rois->num_values() == 0);
 
     // Output auto inizialitation if not yet initialized
-    TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), rois->num_values());
+    TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->info()->dimension(2), rois->num_values());
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);

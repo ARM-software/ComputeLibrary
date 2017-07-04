@@ -37,9 +37,11 @@
 #include <cstddef>
 #include <limits>
 #include <memory>
+#include <random>
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 namespace arm_compute
 {
@@ -420,6 +422,59 @@ inline T create_tensor(const TensorShape &shape, DataType data_type, int num_cha
     tensor.allocator()->init(TensorInfo(shape, num_channels, data_type, fixed_point_position));
 
     return tensor;
+}
+
+/** Create a vector of random ROIs.
+ *
+ * @param[in] shape     The shape of the input tensor.
+ * @param[in] pool_info The ROI pooling information.
+ * @param[in] num_rois  The number of ROIs to be created.
+ * @param[in] seed      The random seed to be used.
+ *
+ * @return A vector that contains the requested number of random ROIs
+ */
+inline std::vector<ROI> generate_random_rois(const TensorShape &shape, const ROIPoolingLayerInfo &pool_info, unsigned int num_rois, std::random_device::result_type seed)
+{
+    ARM_COMPUTE_ERROR_ON((pool_info.pooled_width() < 4) || (pool_info.pooled_height() < 4));
+
+    std::vector<ROI> rois;
+    std::mt19937     gen(seed);
+    const int        pool_width  = pool_info.pooled_width();
+    const int        pool_height = pool_info.pooled_height();
+    const float      roi_scale   = pool_info.spatial_scale();
+
+    // Calculate distribution bounds
+    const auto scaled_width  = static_cast<int>((shape.x() / roi_scale) / pool_width);
+    const auto scaled_height = static_cast<int>((shape.y() / roi_scale) / pool_height);
+    const auto min_width     = static_cast<int>(pool_width / roi_scale);
+    const auto min_height    = static_cast<int>(pool_height / roi_scale);
+
+    // Create distributions
+    std::uniform_int_distribution<int> dist_batch(0, shape[3] - 1);
+    std::uniform_int_distribution<int> dist_x(0, scaled_width);
+    std::uniform_int_distribution<int> dist_y(0, scaled_height);
+    std::uniform_int_distribution<int> dist_w(min_width, std::max(min_width, (pool_width - 2) * scaled_width));
+    std::uniform_int_distribution<int> dist_h(min_height, std::max(min_height, (pool_height - 2) * scaled_height));
+
+    for(unsigned int r = 0; r < num_rois; ++r)
+    {
+        ROI roi;
+        roi.batch_idx   = dist_batch(gen);
+        roi.rect.x      = dist_x(gen);
+        roi.rect.y      = dist_y(gen);
+        roi.rect.width  = dist_w(gen);
+        roi.rect.height = dist_h(gen);
+        rois.push_back(roi);
+    }
+
+    return rois;
+}
+
+template <typename T, typename ArrayAccessor_T>
+inline void fill_array(ArrayAccessor_T &&array, const std::vector<T> &v)
+{
+    array.resize(v.size());
+    std::memcpy(array.buffer(), v.data(), v.size() * sizeof(T));
 }
 } // namespace test
 } // namespace arm_compute

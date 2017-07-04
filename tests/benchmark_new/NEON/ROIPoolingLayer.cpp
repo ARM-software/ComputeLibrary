@@ -21,33 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_NEON_HELPER_H__
-#define __ARM_COMPUTE_TEST_NEON_HELPER_H__
-
+#include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Array.h"
-#include "tests/Globals.h"
-
-#include <algorithm>
-#include <array>
-#include <vector>
+#include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/TensorAllocator.h"
+#include "framework/Macros.h"
+#include "framework/datasets/Datasets.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/NEON/ArrayAccessor.h"
+#include "tests/TypePrinter.h"
+#include "tests/datasets_new/ROIPoolingLayerDataset.h"
+#include "tests/fixtures_new/ROIPoolingLayerFixture.h"
 
 namespace arm_compute
 {
 namespace test
 {
-template <typename D, typename T, typename... Ts>
-void fill_tensors(D &&dist, std::initializer_list<int> seeds, T &&tensor, Ts &&... other_tensors)
-{
-    const std::array < T, 1 + sizeof...(Ts) > tensors{ { std::forward<T>(tensor), std::forward<Ts>(other_tensors)... } };
-    std::vector<int> vs(seeds);
-    ARM_COMPUTE_ERROR_ON(vs.size() != tensors.size());
-    int k = 0;
-    for(auto tp : tensors)
-    {
-        library->fill(Accessor(*tp), std::forward<D>(dist), vs[k++]);
-    }
-}
+using NEROIPoolingLayerFixture = ROIPoolingLayerFixture<Tensor, NEROIPoolingLayer, Accessor, Array<ROI>, ArrayAccessor<ROI>>;
 
+TEST_SUITE(NEON)
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayer, NEROIPoolingLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SmallROIPoolingLayerDataset(),
+                                                                                        framework::dataset::make("DataType", { DataType::F32 })),
+                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+
+TEST_SUITE_END()
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_NEON_HELPER_H__ */

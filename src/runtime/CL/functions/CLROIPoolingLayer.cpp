@@ -21,33 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_NEON_HELPER_H__
-#define __ARM_COMPUTE_TEST_NEON_HELPER_H__
+#include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
 
-#include "arm_compute/runtime/Array.h"
-#include "tests/Globals.h"
+#include "arm_compute/core/CL/ICLArray.h"
 
-#include <algorithm>
-#include <array>
-#include <vector>
+#include "arm_compute/core/CL/kernels/CLROIPoolingLayerKernel.h"
+#include "support/ToolchainSupport.h"
 
-namespace arm_compute
+using namespace arm_compute;
+
+void CLROIPoolingLayer::configure(const ICLTensor *input, const ICLROIArray *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
-namespace test
-{
-template <typename D, typename T, typename... Ts>
-void fill_tensors(D &&dist, std::initializer_list<int> seeds, T &&tensor, Ts &&... other_tensors)
-{
-    const std::array < T, 1 + sizeof...(Ts) > tensors{ { std::forward<T>(tensor), std::forward<Ts>(other_tensors)... } };
-    std::vector<int> vs(seeds);
-    ARM_COMPUTE_ERROR_ON(vs.size() != tensors.size());
-    int k = 0;
-    for(auto tp : tensors)
-    {
-        library->fill(Accessor(*tp), std::forward<D>(dist), vs[k++]);
-    }
+    // Configure ROI pooling kernel
+    auto k = arm_compute::support::cpp14::make_unique<CLROIPoolingLayerKernel>();
+    k->configure(input, rois, output, pool_info);
+    _kernel = std::move(k);
 }
-
-} // namespace test
-} // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_NEON_HELPER_H__ */

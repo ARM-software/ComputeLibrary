@@ -27,15 +27,24 @@ set(arm_compute_test_validation_OPENCL_SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/CL/CLAccessor.h
     ${CMAKE_CURRENT_SOURCE_DIR}/CLFixture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/CLFixture.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ActivationLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/BitwiseAnd.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Box3x3.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConvolutionLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DepthConvert.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FillBorder.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FixedPoint/FixedPoint_QS8.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FullyConnectedLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Gaussian3x3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Gaussian5x5.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GEMM.cpp
 `   ${CMAKE_CURRENT_SOURCE_DIR}/IntegralImage.cpp
+`   ${CMAKE_CURRENT_SOURCE_DIR}/NonLinearFilter.cpp
+`   ${CMAKE_CURRENT_SOURCE_DIR}/PoolingLayer.cpp
+`   ${CMAKE_CURRENT_SOURCE_DIR}/ROIPoolingLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel3x3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel5x5.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/SoftmaxLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Threshold.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectConvolutionLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/MeanStdDev.cpp

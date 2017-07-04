@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/Accessor.h"
-#include "NEON/ArrayAccessor.h"
+#include "CL/CLAccessor.h"
+#include "CL/CLArrayAccessor.h"
 #include "TypePrinter.h"
-#include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
+#include "arm_compute/runtime/CL/CLArray.h"
+#include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"
 #include "validation/Datasets.h"
@@ -41,7 +42,7 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-Tensor compute_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, ROIPoolingLayerInfo pool_info)
+CLTensor compute_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, ROIPoolingLayerInfo pool_info)
 {
     TensorShape shape_dst;
     shape_dst.set(0, pool_info.pooled_width());
@@ -50,15 +51,15 @@ Tensor compute_roi_pooling_layer(const TensorShape &shape, DataType dt, const st
     shape_dst.set(3, rois.size());
 
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, dt);
-    Tensor dst = create_tensor<Tensor>(shape_dst, dt);
+    CLTensor src = create_tensor<CLTensor>(shape, dt);
+    CLTensor dst = create_tensor<CLTensor>(shape_dst, dt);
 
     // Create ROI array
-    Array<ROI> rois_array(rois.size());
-    fill_array(ArrayAccessor<ROI>(rois_array), rois);
+    CLArray<ROI> rois_array(rois.size());
+    fill_array(CLArrayAccessor<ROI>(rois_array), rois);
 
     // Create and configure function
-    NEROIPoolingLayer roi_pool;
+    CLROIPoolingLayer roi_pool;
     roi_pool.configure(&src, &rois_array, &dst, pool_info);
 
     // Allocate tensors
@@ -70,7 +71,7 @@ Tensor compute_roi_pooling_layer(const TensorShape &shape, DataType dt, const st
 
     // Fill tensors
     std::uniform_real_distribution<> distribution(-1, 1);
-    library->fill(Accessor(src), distribution, 0);
+    library->fill(CLAccessor(src), distribution, 0);
 
     // Compute function
     roi_pool.run();
@@ -80,12 +81,13 @@ Tensor compute_roi_pooling_layer(const TensorShape &shape, DataType dt, const st
 } // namespace
 
 #ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
+BOOST_AUTO_TEST_SUITE(CL)
 BOOST_AUTO_TEST_SUITE(ROIPoolingLayer)
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, CNNFloatDataTypes() * boost::unit_test::data::make({ 10, 20, 40 }) * boost::unit_test::data::make({ 7, 9 }) * boost::unit_test::data::make({ 1.f / 8.f, 1.f / 16.f }),
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ DataType::F16, DataType::F32 }) * boost::unit_test::data::make({ 10, 20, 40 }) * boost::unit_test::data::make({ 7, 9 }) *
+                     boost::unit_test::data::make({ 1.f / 8.f, 1.f / 16.f }),
                      dt, num_rois, roi_pool_size, roi_scale)
 {
     TensorShape         shape(50U, 47U, 2U, 3U);
@@ -95,13 +97,13 @@ BOOST_DATA_TEST_CASE(RunSmall, CNNFloatDataTypes() * boost::unit_test::data::mak
     std::vector<ROI> rois = generate_random_rois(shape, pool_info, num_rois, user_config.seed);
 
     // Compute function
-    Tensor dst = compute_roi_pooling_layer(shape, dt, rois, pool_info);
+    CLTensor dst = compute_roi_pooling_layer(shape, dt, rois, pool_info);
 
     // Compute reference
     RawTensor ref_dst = Reference::compute_reference_roi_pooling_layer(shape, dt, rois, pool_info);
 
     // Validate output
-    validate(Accessor(dst), ref_dst);
+    validate(CLAccessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

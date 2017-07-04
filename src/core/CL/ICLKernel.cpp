@@ -70,12 +70,6 @@ cl::Kernel &ICLKernel::kernel()
 }
 
 template <unsigned int dimension_size>
-unsigned int           ICLKernel::num_arguments_per_tensor() const
-{
-    return 2 + 2 * dimension_size;
-}
-
-template <unsigned int dimension_size>
 void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, const Window &window)
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
@@ -125,6 +119,11 @@ void ICLKernel::add_3D_tensor_argument(unsigned int &idx, const ICLTensor *tenso
 void ICLKernel::add_4D_tensor_argument(unsigned int &idx, const ICLTensor *tensor, const Window &window)
 {
     add_tensor_argument<4>(idx, tensor, window);
+}
+
+unsigned int ICLKernel::num_arguments_per_1D_array() const
+{
+    return num_arguments_per_array<1>();
 }
 
 unsigned int ICLKernel::num_arguments_per_1D_tensor() const

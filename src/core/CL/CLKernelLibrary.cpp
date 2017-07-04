@@ -246,6 +246,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "RGBA8888_to_NV12_bt709", "color_convert.cl" },
     { "RGBA8888_to_RGB888_bt709", "color_convert.cl" },
     { "RGBA8888_to_YUV444_bt709", "color_convert.cl" },
+    { "roi_pooling_layer", "roi_pooling_layer.cl" },
     { "scale_nearest_neighbour", "scale.cl" },
     { "scale_bilinear", "scale.cl" },
     { "scharr3x3", "scharr_filter.cl" },
@@ -475,6 +476,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "remap.cl",
 #include "./cl_kernels/remap.clembed"
+    },
+    {
+        "roi_pooling_layer.cl",
+#include "./cl_kernels/roi_pooling_layer.clembed"
     },
     {
         "scale.cl",

@@ -107,6 +107,7 @@ private:
 using ICLKeyPointArray        = ICLArray<KeyPoint>;
 using ICLCoordinates2DArray   = ICLArray<Coordinates2D>;
 using ICLDetectionWindowArray = ICLArray<DetectionWindow>;
+using ICLROIArray             = ICLArray<ROI>;
 using ICLSize2DArray          = ICLArray<Size2D>;
 using ICLUInt8Array           = ICLArray<cl_uchar>;
 using ICLUInt16Array          = ICLArray<cl_ushort>;
