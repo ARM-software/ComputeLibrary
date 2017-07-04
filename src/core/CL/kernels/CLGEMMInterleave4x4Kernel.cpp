@@ -62,7 +62,7 @@ void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *out
 
     // Create kernel
     std::string data_type_name;
-    data_type_name = val_to_string(input->info()->element_size() * 8) + "bit";
+    data_type_name = support::cpp11::to_string(input->info()->element_size() * 8) + "bit";
     _kernel        = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_interleave4x4_" + data_type_name));
 
     // Configure kernel window

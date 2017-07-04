@@ -78,18 +78,6 @@ std::string build_information();
  */
 std::string read_file(const std::string &filename, bool binary);
 
-/** Return a value as a string
- *
- * @param[in] val Input value.
- *
- * @return Value represented as a string
- */
-template <typename T>
-const std::string val_to_string(T val)
-{
-    return static_cast<const std::ostringstream &>(std::ostringstream() << val).str();
-}
-
 /** The size in bytes of the data type
  *
  * @param[in] data_type Input data type

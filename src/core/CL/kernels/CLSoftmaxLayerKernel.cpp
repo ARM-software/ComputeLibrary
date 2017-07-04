@@ -56,7 +56,7 @@ void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     if(is_data_type_fixed_point(input->info()->data_type()))
     {
-        build_opts.emplace(("-DFIXED_POINT_POSITION=" + val_to_string(input->info()->fixed_point_position())));
+        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
     }
 
     // Tell the kernel that the width is not a multiple of 16
@@ -111,7 +111,7 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     if(is_data_type_fixed_point(input->info()->data_type()))
     {
-        build_opts.emplace(("-DFIXED_POINT_POSITION=" + val_to_string(input->info()->fixed_point_position())));
+        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
     }
 
     // Tell the kernel that the width is not a multiple of 16
@@ -184,7 +184,7 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     if(is_data_type_fixed_point(input->info()->data_type()))
     {
-        build_opts.emplace(("-DFIXED_POINT_POSITION=" + val_to_string(input->info()->fixed_point_position())));
+        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
     }
 
     // Create kernel

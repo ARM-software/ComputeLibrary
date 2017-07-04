@@ -59,8 +59,8 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     build_opts.insert(("-D" + string_from_activation_func(act_info.activation())));
     build_opts.insert(("-D" + ((is_data_type_float(input->info()->data_type())) ? std::string("TYPE_FP") : std::string("TYPE_INT"))));
     build_opts.insert(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    build_opts.insert(("-DA=" + val_to_string(act_info.a())));
-    build_opts.insert(("-DB=" + val_to_string(act_info.b())));
+    build_opts.insert(("-DA=" + support::cpp11::to_string(act_info.a())));
+    build_opts.insert(("-DB=" + support::cpp11::to_string(act_info.b())));
     build_opts.insert(output == nullptr ? "-DIN_PLACE" : "");
 
     // Create kernel

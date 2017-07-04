@@ -66,8 +66,8 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     // Set kernel build options
     std::set<std::string> build_opts;
     build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.emplace("-DDATA_TYPE_MAX=" + val_to_string<int>(_data_type_max_min[0]));
-    build_opts.emplace("-DDATA_TYPE_MIN=" + val_to_string<int>(_data_type_max_min[1]));
+    build_opts.emplace("-DDATA_TYPE_MAX=" + support::cpp11::to_string(_data_type_max_min[0]));
+    build_opts.emplace("-DDATA_TYPE_MIN=" + support::cpp11::to_string(_data_type_max_min[1]));
     build_opts.emplace((0 != (num_elems_processed_per_iteration % max_cl_vector_width)) ? "-DNON_MULTIPLE_OF_16" : "");
 
     // Create kernel

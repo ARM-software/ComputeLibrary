@@ -73,7 +73,7 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
      * The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor)
      */
     // Create kernel
-    std::string kernel_name = "gemm_transpose1x" + val_to_string(num_elems_processed_per_iteration);
+    std::string kernel_name = "gemm_transpose1x" + support::cpp11::to_string(num_elems_processed_per_iteration);
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure window

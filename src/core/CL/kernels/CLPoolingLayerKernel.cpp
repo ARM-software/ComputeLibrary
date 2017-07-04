@@ -112,7 +112,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     build_opts.emplace(("-DPOOL_" + ((PoolingType::MAX == pool_type) ? std::string("MAX") : std::string("AVG"))));
 
     // Create kernel
-    std::string kernel_name = "pooling_layer_" + val_to_string(pool_size);
+    std::string kernel_name = "pooling_layer_" + support::cpp11::to_string(pool_size);
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Set static kernel arguments

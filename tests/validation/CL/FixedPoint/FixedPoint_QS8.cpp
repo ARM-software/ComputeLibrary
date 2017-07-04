@@ -104,7 +104,7 @@ CLTensor compute_fixed_point_op(const TensorShape &shape, int fixed_point_positi
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Set build options
-    std::string build_opts = "-DFIXED_POINT_POS=" + val_to_string<int>(fixed_point_position);
+    std::string build_opts = "-DFIXED_POINT_POS=" + support::cpp11::to_string(fixed_point_position);
     build_opts += " -DDATA_TYPE=qs8";
 
     // Fill tensors.

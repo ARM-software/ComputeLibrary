@@ -86,10 +86,10 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     std::set<std::string> build_opts;
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
     build_opts.emplace(("-DSELECT_TYPE=" + select_type));
-    build_opts.emplace(("-DBORDER_SIZE_TOP=" + val_to_string(border_size.top)));
-    build_opts.emplace(("-DBORDER_SIZE_BOTTOM=" + val_to_string(border_size.bottom)));
-    build_opts.emplace(("-DBORDER_SIZE_LEFT=" + val_to_string(border_size.left)));
-    build_opts.emplace(("-DBORDER_SIZE_RIGHT=" + val_to_string(border_size.right)));
+    build_opts.emplace(("-DBORDER_SIZE_TOP=" + support::cpp11::to_string(border_size.top)));
+    build_opts.emplace(("-DBORDER_SIZE_BOTTOM=" + support::cpp11::to_string(border_size.bottom)));
+    build_opts.emplace(("-DBORDER_SIZE_LEFT=" + support::cpp11::to_string(border_size.left)));
+    build_opts.emplace(("-DBORDER_SIZE_RIGHT=" + support::cpp11::to_string(border_size.right)));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));

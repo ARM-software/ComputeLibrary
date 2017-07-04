@@ -33,6 +33,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/ToolchainSupport.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -63,7 +64,7 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
     _output = output;
 
     // Create kernel and set static arguments
-    std::set<std::string> build_opts = { ("-DWIDTH_MATRIX_B=" + val_to_string(input1->info()->dimension(0))) };
+    std::set<std::string> build_opts = { ("-DWIDTH_MATRIX_B=" + support::cpp11::to_string(input1->info()->dimension(0))) };
     _kernel                          = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_mm_u8", build_opts));
     unsigned int idx                 = 3 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg<int32_t>(idx++, a_offset);
