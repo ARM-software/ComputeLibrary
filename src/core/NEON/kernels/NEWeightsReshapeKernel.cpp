@@ -95,7 +95,7 @@ NEWeightsReshapeKernel::NEWeightsReshapeKernel()
 
 void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     const int          fixed_point_position = input->info()->fixed_point_position();
@@ -129,26 +129,26 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
     _bias   = bias;
     _output = output;
 
-    switch(_input->info()->data_type())
+    switch(_input->info()->element_size())
     {
-        case DataType::F32:
+        case 4:
         {
             _func = &weights_reshape<uint32_t>;
             break;
         }
-        case DataType::F16:
+        case 2:
         {
             _func = &weights_reshape<uint16_t>;
             break;
         }
-        case DataType::QS8:
+        case 1:
         {
             _func = &weights_reshape<uint8_t>;
             break;
         }
         default:
         {
-            ARM_COMPUTE_ERROR_ON("Data type not supported");
+            ARM_COMPUTE_ERROR_ON("Element size not supported");
             break;
         }
     }

@@ -158,7 +158,7 @@ void convolution3d(const T *in, const T *weights, const T *bias, T *out, int xi,
     *out = res.raw();
 }
 
-template <typename T>
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
 void vector_matrix_multiply(const T *in, const T *weights, const T *bias, T *out, int cols_weights, int rows_weights, uint8_t fixed_point_position)
 {
     for(int x = 0; x < cols_weights; ++x)
@@ -172,11 +172,12 @@ void vector_matrix_multiply(const T *in, const T *weights, const T *bias, T *out
     }
 }
 
-template <>
-void vector_matrix_multiply(const int8_t *in, const int8_t *weights, const int8_t *bias, int8_t *out, int cols_weights, int rows_weights, uint8_t fixed_point_position)
+// Vector matrix multiply for fixed point type
+template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type * = nullptr>
+void vector_matrix_multiply(const T *in, const T *weights, const T *bias, T *out, int cols_weights, int rows_weights, uint8_t fixed_point_position)
 {
     using namespace fixed_point_arithmetic;
-    using promoted_type = typename fixed_point_arithmetic::traits::promote<int8_t>::type;
+    using promoted_type = typename fixed_point_arithmetic::traits::promote<T>::type;
 
     for(int x = 0; x < cols_weights; ++x)
     {
@@ -192,10 +193,10 @@ void vector_matrix_multiply(const int8_t *in, const int8_t *weights, const int8_
         }
 
         // Get the bias
-        const fixed_point<int8_t> b(bias[x], fixed_point_position, true);
+        const fixed_point<T> b(bias[x], fixed_point_position, true);
 
         // Convert back and accumulate the bias
-        fixed_point<int8_t> res(acc);
+        fixed_point<T> res(acc);
         res = res + b;
 
         // Store the result

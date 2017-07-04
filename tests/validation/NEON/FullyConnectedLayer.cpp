@@ -44,7 +44,7 @@ using namespace arm_compute::test::validation;
 namespace
 {
 const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-const float tolerance_qs8 = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
+const float tolerance_q   = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 
 Tensor compute_fully_connected_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
                                      bool transpose_weights, int fixed_point_position)
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_SUITE(FullyConnectedLayer)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration,
-                     SmallFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::F32, DataType::QS8 }),
+                     SmallFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::F32, DataType::QS8, DataType::QS16 }),
                      fc_set, dt)
 {
     // Set fixed point position data type allowed
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(Quantized)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(RunSmall,
-                     SmallFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::QS8 }) * boost::unit_test::data::xrange(4, 7),
+                     SmallFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::QS8, DataType::QS16 }) * boost::unit_test::data::xrange(4, 7),
                      fc_set, dt, fixed_point_position)
 {
     // Compute function
@@ -198,12 +198,12 @@ BOOST_DATA_TEST_CASE(RunSmall,
     RawTensor ref_dst = Reference::compute_reference_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
+    validate(NEAccessor(dst), ref_dst, tolerance_q);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge,
-                     LargeFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::QS8 }) * boost::unit_test::data::xrange(4, 7),
+                     LargeFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::QS8, DataType::QS16 }) * boost::unit_test::data::xrange(4, 7),
                      fc_set, dt, fixed_point_position)
 {
     // Compute function
@@ -213,7 +213,7 @@ BOOST_DATA_TEST_CASE(RunLarge,
     RawTensor ref_dst = Reference::compute_reference_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
+    validate(NEAccessor(dst), ref_dst, tolerance_q);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

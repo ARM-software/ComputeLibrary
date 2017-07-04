@@ -69,7 +69,8 @@ NECol2ImKernel::NECol2ImKernel()
 
 void NECol2ImKernel::configure(const ITensor *input, ITensor *output, std::pair<unsigned int, unsigned int> convolved_dims)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::U16, DataType::S16, DataType::QS16, DataType::U32, DataType::S32, DataType::F16,
+                                                  DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     TensorShape output_shape = input->info()->tensor_shape();

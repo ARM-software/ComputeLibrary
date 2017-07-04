@@ -41,14 +41,13 @@ NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights()
 
 void NEConvolutionLayerReshapeWeights::configure(const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose1xW)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(weights, output);
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
 
     if(biases != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::QS8, DataType::F16, DataType::F32);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(weights, biases);
         ARM_COMPUTE_ERROR_ON(biases->info()->dimension(0) != weights->info()->dimension(3));
@@ -96,7 +95,7 @@ NEConvolutionLayer::NEConvolutionLayer()
 
 void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights, output);
     ARM_COMPUTE_ERROR_ON(!weights_info.are_reshaped() && weights->info()->dimension(2) != input->info()->dimension(2));
