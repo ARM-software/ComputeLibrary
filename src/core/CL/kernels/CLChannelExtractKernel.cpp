@@ -71,12 +71,12 @@ void CLChannelExtractKernel::configure(const ICLTensor *input, Channel channel, 
     // Configure window
     Window                 win = calculate_max_window(*input->info(), Steps(_num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(input->info(), 0, _num_elems_processed_per_iteration);
-    AccessWindowRectangle  output_access(input->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _subsampling, 1.f / _subsampling);
+    AccessWindowRectangle  output_access(output->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _subsampling, 1.f / _subsampling);
 
     update_window_and_padding(win, input_access, output_access);
 
     ValidRegion input_valid_region = input->info()->valid_region();
-    output_access.set_valid_region(win, ValidRegion(std::move(input_valid_region.anchor), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(input_valid_region.anchor, output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
 }
@@ -115,11 +115,10 @@ void CLChannelExtractKernel::configure(const ICLMultiImage *input, Channel chann
 
     // Configure window
     Window                 win = calculate_max_window(*input_plane->info(), Steps(_num_elems_processed_per_iteration));
-    AccessWindowHorizontal output_access(input_plane->info(), 0, _num_elems_processed_per_iteration);
+    AccessWindowHorizontal input_access(input_plane->info(), 0, _num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, _num_elems_processed_per_iteration);
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(input_plane->info(), 0, _num_elems_processed_per_iteration),
-                              output_access);
+    update_window_and_padding(win, input_access, output_access);
 
     output_access.set_valid_region(win, input_plane->info()->valid_region());
 
