@@ -30,6 +30,7 @@
 #include "TestResult.h"
 #include "Utils.h"
 #include "instruments/Instruments.h"
+#include "printers/Printer.h"
 
 #include <algorithm>
 #include <chrono>
@@ -190,6 +191,15 @@ public:
      */
     void set_test_result(std::string test_case_name, TestResult result);
 
+    /** Use the specified printer to output test results from the last run.
+     *
+     * This method can be used if the test results need to be obtained using a
+     * different printer than the one managed by the framework.
+     *
+     * @param[in] printer Printer used to output results.
+     */
+    void print_test_results(Printer &printer) const;
+
     /** Factory method to obtain a configured profiler.
      *
      * The profiler enables all instruments that have been passed to the @ref
@@ -198,6 +208,12 @@ public:
      * @return Configured profiler to collect benchmark results.
      */
     Profiler get_profiler() const;
+
+    /** Set the printer used for the output of test results.
+     *
+     * @param[in] printer Pointer to a printer.
+     */
+    void set_printer(Printer *printer);
 
     /** List of @ref TestId's.
      *
@@ -231,6 +247,7 @@ private:
     std::chrono::seconds _runtime{ 0 };
     int                  _num_iterations{ 1 };
     bool                 _throw_errors{ false };
+    Printer             *_printer{ nullptr };
 
     using create_function = std::unique_ptr<Instrument>();
     std::map<InstrumentType, create_function *> _available_instruments{};

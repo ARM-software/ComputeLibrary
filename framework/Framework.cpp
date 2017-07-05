@@ -123,7 +123,10 @@ void Framework::pop_suite()
 
 void Framework::log_test_start(const std::string &test_name)
 {
-    static_cast<void>(test_name);
+    if(_printer != nullptr)
+    {
+        _printer->print_test_header(test_name);
+    }
 }
 
 void Framework::log_test_skipped(const std::string &test_name)
@@ -133,7 +136,11 @@ void Framework::log_test_skipped(const std::string &test_name)
 
 void Framework::log_test_end(const std::string &test_name)
 {
-    static_cast<void>(test_name);
+    if(_printer != nullptr)
+    {
+        _printer->print_measurements(_test_results.at(test_name).measurements);
+        _printer->print_test_footer();
+    }
 }
 
 void Framework::log_failed_expectation(const std::string &msg)
@@ -256,6 +263,11 @@ bool Framework::run()
     _test_results.clear();
     _runtime = std::chrono::seconds{ 0 };
 
+    if(_printer != nullptr)
+    {
+        _printer->print_run_header();
+    }
+
     const auto start = std::chrono::high_resolution_clock::now();
 
     int id = 0;
@@ -278,6 +290,11 @@ bool Framework::run()
 
     const auto end = std::chrono::high_resolution_clock::now();
 
+    if(_printer != nullptr)
+    {
+        _printer->print_run_footer();
+    }
+
     _runtime = std::chrono::duration_cast<std::chrono::seconds>(end - start);
 
     int passed  = 0;
@@ -296,6 +313,20 @@ void Framework::set_test_result(std::string test_case_name, TestResult result)
     _test_results.emplace(std::move(test_case_name), std::move(result));
 }
 
+void Framework::print_test_results(Printer &printer) const
+{
+    printer.print_run_header();
+
+    for(const auto &test : _test_results)
+    {
+        printer.print_test_header(test.first);
+        printer.print_measurements(test.second.measurements);
+        printer.print_test_footer();
+    }
+
+    printer.print_run_footer();
+}
+
 Profiler Framework::get_profiler() const
 {
     Profiler profiler;
@@ -309,6 +340,11 @@ Profiler Framework::get_profiler() const
     }
 
     return profiler;
+}
+
+void Framework::set_printer(Printer *printer)
+{
+    _printer = printer;
 }
 
 std::vector<Framework::TestId> Framework::test_ids() const
