@@ -143,22 +143,22 @@ __kernel void gemm_interleave4x4_32bit(IMAGE_DECLARATION(src),
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
     /* Load values from Matrix A */
-    float4 a0 = vload4(0, (__global float *)(offset(&src, 0, 0)));
-    float4 a1 = vload4(0, (__global float *)(offset(&src, 0, 1)));
-    float4 a2 = vload4(0, (__global float *)(offset(&src, 0, 2)));
-    float4 a3 = vload4(0, (__global float *)(offset(&src, 0, 3)));
+    uint4 a0 = vload4(0, (__global uint *)(offset(&src, 0, 0)));
+    uint4 a1 = vload4(0, (__global uint *)(offset(&src, 0, 1)));
+    uint4 a2 = vload4(0, (__global uint *)(offset(&src, 0, 2)));
+    uint4 a3 = vload4(0, (__global uint *)(offset(&src, 0, 3)));
 
-    float4 val0 = (float4)(a0.s0, a1.s0, a2.s0, a3.s0);
-    vstore4(val0, 0, ((__global float *)dst.ptr) + 0);
+    uint4 val0 = (uint4)(a0.s0, a1.s0, a2.s0, a3.s0);
+    vstore4(val0, 0, ((__global uint *)dst.ptr) + 0);
 
-    val0 = (float4)(a0.s1, a1.s1, a2.s1, a3.s1);
-    vstore4(val0, 0, ((__global float *)dst.ptr) + 4);
+    val0 = (uint4)(a0.s1, a1.s1, a2.s1, a3.s1);
+    vstore4(val0, 0, ((__global uint *)dst.ptr) + 4);
 
-    val0 = (float4)(a0.s2, a1.s2, a2.s2, a3.s2);
-    vstore4(val0, 0, ((__global float *)dst.ptr) + 8);
+    val0 = (uint4)(a0.s2, a1.s2, a2.s2, a3.s2);
+    vstore4(val0, 0, ((__global uint *)dst.ptr) + 8);
 
-    val0 = (float4)(a0.s3, a1.s3, a2.s3, a3.s3);
-    vstore4(val0, 0, ((__global float *)dst.ptr) + 12);
+    val0 = (uint4)(a0.s3, a1.s3, a2.s3, a3.s3);
+    vstore4(val0, 0, ((__global uint *)dst.ptr) + 12);
 }
 
 /** This OpenCL kernel reshapes the input matrix transposing each 4x4 block and interleaving the values
@@ -184,22 +184,22 @@ __kernel void gemm_interleave4x4_16bit(IMAGE_DECLARATION(src),
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
     /* Load values from Matrix A */
-    half8 a0 = vload8(0, (__global half *)(offset(&src, 0, 0)));
-    half8 a1 = vload8(0, (__global half *)(offset(&src, 0, 1)));
-    half8 a2 = vload8(0, (__global half *)(offset(&src, 0, 2)));
-    half8 a3 = vload8(0, (__global half *)(offset(&src, 0, 3)));
+    ushort8 a0 = vload8(0, (__global ushort *)(offset(&src, 0, 0)));
+    ushort8 a1 = vload8(0, (__global ushort *)(offset(&src, 0, 1)));
+    ushort8 a2 = vload8(0, (__global ushort *)(offset(&src, 0, 2)));
+    ushort8 a3 = vload8(0, (__global ushort *)(offset(&src, 0, 3)));
 
-    half8 val0 = (half8)((half4)(a0.s0, a1.s0, a2.s0, a3.s0), (half4)(a0.s1, a1.s1, a2.s1, a3.s1));
-    vstore8(val0, 0, ((__global half *)dst.ptr) + 0);
+    ushort8 val0 = (ushort8)((ushort4)(a0.s0, a1.s0, a2.s0, a3.s0), (ushort4)(a0.s1, a1.s1, a2.s1, a3.s1));
+    vstore8(val0, 0, ((__global ushort *)dst.ptr) + 0);
 
-    val0 = (half8)((half4)(a0.s2, a1.s2, a2.s2, a3.s2), (half4)(a0.s3, a1.s3, a2.s3, a3.s3));
-    vstore8(val0, 0, ((__global half *)dst.ptr) + 8);
+    val0 = (ushort8)((ushort4)(a0.s2, a1.s2, a2.s2, a3.s2), (ushort4)(a0.s3, a1.s3, a2.s3, a3.s3));
+    vstore8(val0, 0, ((__global ushort *)dst.ptr) + 8);
 
-    val0 = (half8)((half4)(a0.s4, a1.s4, a2.s4, a3.s4), (half4)(a0.s5, a1.s5, a2.s5, a3.s5));
-    vstore8(val0, 0, ((__global half *)dst.ptr) + 16);
+    val0 = (ushort8)((ushort4)(a0.s4, a1.s4, a2.s4, a3.s4), (ushort4)(a0.s5, a1.s5, a2.s5, a3.s5));
+    vstore8(val0, 0, ((__global ushort *)dst.ptr) + 16);
 
-    val0 = (half8)((half4)(a0.s6, a1.s6, a2.s6, a3.s6), (half4)(a0.s7, a1.s7, a2.s7, a3.s7));
-    vstore8(val0, 0, ((__global half *)dst.ptr) + 24);
+    val0 = (ushort8)((ushort4)(a0.s6, a1.s6, a2.s6, a3.s6), (ushort4)(a0.s7, a1.s7, a2.s7, a3.s7));
+    vstore8(val0, 0, ((__global ushort *)dst.ptr) + 24);
 }
 
 /** This OpenCL kernel reshapes the input matrix transposing each 4x4 block and interleaving the values
