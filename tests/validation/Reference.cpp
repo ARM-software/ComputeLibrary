@@ -513,39 +513,50 @@ RawTensor Reference::compute_reference_batch_normalization_layer(const TensorSha
     RawTensor ref_beta(shape1, dt, 1, fixed_point_position);
     RawTensor ref_gamma(shape1, dt, 1, fixed_point_position);
 
-    // Fill tensors with values from -1 to 1.
-    if(dt == DataType::F32)
+    // Fill tensors
+    switch(dt)
     {
-        float min_bound = 0.f;
-        float max_bound = 0.f;
-        std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<float>();
-        std::uniform_real_distribution<> distribution(min_bound, max_bound);
-        std::uniform_real_distribution<> distribution_var(0, max_bound);
-        library->fill(ref_src, distribution, 0);
-        library->fill(ref_mean, distribution, 1);
-        library->fill(ref_var, distribution_var, 0);
-        library->fill(ref_beta, distribution, 3);
-        library->fill(ref_gamma, distribution, 4);
-    }
-    else
-    {
-        int min_bound = 0;
-        int max_bound = 0;
-        if(dt == DataType::QS8)
+        case DataType::QS8:
         {
-            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<int8_t>(fixed_point_position);
+            const std::pair<int8_t, int8_t> bounds = get_batchnormalization_layer_test_bounds<int8_t>(fixed_point_position);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
+            std::uniform_int_distribution<> distribution_var(0, bounds.second);
+            fill_tensors(distribution, { 0, 1, 3, 4 }, &ref_src, &ref_mean, &ref_beta, &ref_gamma);
+            fill_tensors(distribution_var, { 0 }, &ref_var);
+            break;
         }
-        else
+        case DataType::QS16:
         {
-            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<int16_t>(fixed_point_position);
+            const std::pair<int16_t, int16_t> bounds = get_batchnormalization_layer_test_bounds<int16_t>(fixed_point_position);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
+            std::uniform_int_distribution<> distribution_var(0, bounds.second);
+            fill_tensors(distribution, { 0, 1, 3, 4 }, &ref_src, &ref_mean, &ref_beta, &ref_gamma);
+            fill_tensors(distribution_var, { 0 }, &ref_var);
+            break;
         }
-        std::uniform_int_distribution<> distribution(min_bound, max_bound);
-        std::uniform_int_distribution<> distribution_var(0, max_bound);
-        library->fill(ref_src, distribution, 0);
-        library->fill(ref_mean, distribution, 1);
-        library->fill(ref_var, distribution_var, 0);
-        library->fill(ref_beta, distribution, 3);
-        library->fill(ref_gamma, distribution, 4);
+        case DataType::F16:
+        {
+            const std::pair<half_float::half, half_float::half> bounds = get_batchnormalization_layer_test_bounds<half_float::half>();
+            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
+            std::uniform_real_distribution<> distribution_var(0, bounds.second);
+            fill_tensors(distribution, { 0, 1, 3, 4 }, &ref_src, &ref_mean, &ref_beta, &ref_gamma);
+            fill_tensors(distribution_var, { 0 }, &ref_var);
+            break;
+        }
+        case DataType::F32:
+        {
+            const std::pair<float, float> bounds = get_batchnormalization_layer_test_bounds<float>();
+            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
+            std::uniform_real_distribution<> distribution_var(0, bounds.second);
+            fill_tensors(distribution, { 0, 1, 3, 4 }, &ref_src, &ref_mean, &ref_beta, &ref_gamma);
+            fill_tensors(distribution_var, { 0 }, &ref_var);
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Not supported");
+            break;
+        }
     }
 
     // Compute reference

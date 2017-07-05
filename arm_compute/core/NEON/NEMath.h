@@ -36,6 +36,16 @@ namespace arm_compute
  */
 float32x4_t vinvsqrtq_f32(float32x4_t x);
 
+#ifdef ARM_COMPUTE_ENABLE_FP16
+/** Calculate inverse square root.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated inverse square root.
+ */
+float16x8_t vinvsqrtq_f16(float16x8_t x);
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
 /** Calculate reciprocal.
  *
  * @param[in] x Input value.

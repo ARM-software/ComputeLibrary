@@ -25,6 +25,7 @@
 #include "TypePrinter.h"
 #include "dataset/BatchNormalizationLayerDataset.h"
 #include "tests/Globals.h"
+#include "tests/NEON/Helper.h"
 #include "tests/Utils.h"
 #include "tests/validation/Helpers.h"
 #include "validation/Datasets.h"
@@ -41,9 +42,12 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance_f    = 1e-05; /**< Tolerance value for comparing reference's output against floating point implementation's output */
-const float tolerance_qs8  = 6;     /**< Tolerance value for comparing reference's output against quantized implementation's output */
-const float tolerance_qs16 = 6;     /**< Tolerance value for comparing reference's output against quantized implementation's output */
+const float tolerance_qs8  = 6;      /**< Tolerance value for comparing reference's output against quantized implementation's output */
+const float tolerance_qs16 = 6;      /**< Tolerance value for comparing reference's output against quantized implementation's output */
+const float tolerance_f32  = 1e-05f; /**< Tolerance value for comparing reference's output against floating point implementation's output */
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const float tolerance_f16 = 0.01f; /**< Tolerance value for comparing reference's output against half precision floating point implementation's output */
+#endif                             /* ARM_COMPUTE_ENABLE_FP16 */
 
 /** Compute Neon batch normalization function.
  *
@@ -83,38 +87,51 @@ Tensor compute_reference_batch_normalization_layer(const TensorShape &shape0, co
     BOOST_TEST(!gamma.info()->is_resizable());
 
     // Fill tensors
-    if(dt == DataType::F32)
+    switch(dt)
     {
-        float min_bound = 0.f;
-        float max_bound = 0.f;
-        std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<float>();
-        std::uniform_real_distribution<> distribution(min_bound, max_bound);
-        std::uniform_real_distribution<> distribution_var(0, max_bound);
-        library->fill(Accessor(src), distribution, 0);
-        library->fill(Accessor(mean), distribution, 1);
-        library->fill(Accessor(var), distribution_var, 0);
-        library->fill(Accessor(beta), distribution, 3);
-        library->fill(Accessor(gamma), distribution, 4);
-    }
-    else
-    {
-        int min_bound = 0;
-        int max_bound = 0;
-        if(dt == DataType::QS8)
+        case DataType::QS8:
         {
-            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<int8_t>(fixed_point_position);
+            const std::pair<int8_t, int8_t> bounds = get_batchnormalization_layer_test_bounds<int8_t>(fixed_point_position);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
+            std::uniform_int_distribution<> distribution_var(0, bounds.second);
+            test::fill_tensors(distribution, { 0, 1, 3, 4 }, &src, &mean, &beta, &gamma);
+            test::fill_tensors(distribution_var, { 0 }, &var);
+            break;
         }
-        else
+        case DataType::QS16:
         {
-            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<int16_t>(fixed_point_position);
+            const std::pair<int16_t, int16_t> bounds = get_batchnormalization_layer_test_bounds<int16_t>(fixed_point_position);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
+            std::uniform_int_distribution<> distribution_var(0, bounds.second);
+            test::fill_tensors(distribution, { 0, 1, 3, 4 }, &src, &mean, &beta, &gamma);
+            test::fill_tensors(distribution_var, { 0 }, &var);
+            break;
         }
-        std::uniform_int_distribution<> distribution(min_bound, max_bound);
-        std::uniform_int_distribution<> distribution_var(0, max_bound);
-        library->fill(Accessor(src), distribution, 0);
-        library->fill(Accessor(mean), distribution, 1);
-        library->fill(Accessor(var), distribution_var, 0);
-        library->fill(Accessor(beta), distribution, 3);
-        library->fill(Accessor(gamma), distribution, 4);
+#ifdef ARM_COMPUTE_ENABLE_FP16
+        case DataType::F16:
+        {
+            const std::pair<half_float::half, half_float::half> bounds = get_batchnormalization_layer_test_bounds<half_float::half>();
+            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
+            std::uniform_real_distribution<> distribution_var(0, bounds.second);
+            test::fill_tensors(distribution, { 0, 1, 3, 4 }, &src, &mean, &beta, &gamma);
+            test::fill_tensors(distribution_var, { 0 }, &var);
+            break;
+        }
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+        case DataType::F32:
+        {
+            const std::pair<float, float> bounds = get_batchnormalization_layer_test_bounds<float>();
+            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
+            std::uniform_real_distribution<> distribution_var(0, bounds.second);
+            test::fill_tensors(distribution, { 0, 1, 3, 4 }, &src, &mean, &beta, &gamma);
+            test::fill_tensors(distribution_var, { 0 }, &var);
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Not supported");
+            break;
+        }
     }
 
     // Compute function
@@ -177,9 +194,28 @@ BOOST_DATA_TEST_CASE(Random,
     RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon);
 
     // Validate output
-    validate(Accessor(dst), ref_dst, tolerance_f, 0);
+    validate(Accessor(dst), ref_dst, tolerance_f32, 0);
 }
 BOOST_AUTO_TEST_SUITE_END()
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(Random,
+                     RandomBatchNormalizationLayerDataset() * boost::unit_test::data::make(DataType::F16),
+                     obj, dt)
+{
+    // Compute function
+    Tensor dst = compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon);
+
+    // Validate output
+    validate(Accessor(dst), ref_dst, tolerance_f16, 0);
+}
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Quantized)
 BOOST_AUTO_TEST_SUITE(QS8)

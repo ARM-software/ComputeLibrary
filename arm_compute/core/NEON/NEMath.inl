@@ -141,7 +141,6 @@ inline float32x4_t vpowq_f32(float32x4_t val, float32x4_t n)
 {
     return vexpq_f32(vmulq_f32(n, vlogq_f32(val)));
 }
-
 #ifdef ARM_COMPUTE_ENABLE_FP16
 /* Exponent polynomial coefficients */
 const std::array<float16x8_t, 8> exp_tab_f16 =
@@ -172,12 +171,12 @@ const std::array<float16x8_t, 8> log_tab_f16 =
         vdupq_n_f16(0.0141278216615f),
     }
 };
+
 inline float16x8_t vinvsqrtq_f16(float16x8_t x)
 {
     float16x8_t sqrt_reciprocal = vrsqrteq_f16(x);
     sqrt_reciprocal             = vmulq_f16(vrsqrtsq_f16(vmulq_f16(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
     sqrt_reciprocal             = vmulq_f16(vrsqrtsq_f16(vmulq_f16(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
-
     return sqrt_reciprocal;
 }
 

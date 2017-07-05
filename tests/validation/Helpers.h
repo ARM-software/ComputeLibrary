@@ -25,11 +25,13 @@
 #define __ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__
 
 #include "arm_compute/core/Types.h"
+#include "tests/Globals.h"
 #include "tests/ILutAccessor.h"
 #include "tests/Types.h"
 #include "tests/validation/ValidationUserConfiguration.h"
 #include "tests/validation/half.h"
 
+#include <array>
 #include <random>
 #include <type_traits>
 #include <utility>
@@ -41,6 +43,27 @@ namespace test
 {
 namespace validation
 {
+/** Helper function to fill one or more tensors with the uniform distribution with int values.
+ *
+ * @param[in]     dist          Distribution to be used to get the values for the tensor.
+ * @param[in]     seeds         List of seeds to be used to fill each tensor.
+ * @param[in,out] tensor        Tensor to be initialized with the values of the distribution.
+ * @param[in,out] other_tensors (Optional) One or more tensors to be filled.
+ *
+ */
+template <typename D, typename T, typename... Ts>
+void fill_tensors(D &&dist, std::initializer_list<int> seeds, T &&tensor, Ts &&... other_tensors)
+{
+    const std::array < T, 1 + sizeof...(Ts) > tensors{ { std::forward<T>(tensor), std::forward<Ts>(other_tensors)... } };
+    std::vector<int> vs(seeds);
+    ARM_COMPUTE_ERROR_ON(vs.size() != tensors.size());
+    int k = 0;
+    for(auto tp : tensors)
+    {
+        library->fill(*tp, std::forward<D>(dist), vs[k++]);
+    }
+}
+
 /** Helper function to get the testing range for each activation layer.
  *
  * @param[in] activation           Activation function to test.
