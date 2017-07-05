@@ -73,7 +73,13 @@ public:
      */
     void set(size_t dimension, size_t value)
     {
-        ARM_COMPUTE_ERROR_ON(value < 1);
+        // Clear entire shape if one dimension is zero
+        if(value == 0)
+        {
+            _num_dimensions = 0;
+            std::fill(_id.begin(), _id.end(), 0);
+            return;
+        }
 
         // Make sure all empty dimensions are filled with 1
         std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
