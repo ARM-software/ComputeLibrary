@@ -76,7 +76,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
 
     // Define select type required by replicate border > 1
     const DataType dt          = tensor->info()->data_type();
-    std::string    select_type = get_cl_type_from_data_type(dt);
+    std::string    select_type = get_underlying_cl_type_from_data_type(dt);
     if(is_data_type_float(dt))
     {
         select_type = (DataType::F32 == dt) ? "int" : "short";
@@ -84,7 +84,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
 
     // Define build options
     std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
+    build_opts.emplace(("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(dt)));
     build_opts.emplace(("-DSELECT_TYPE=" + select_type));
     build_opts.emplace(("-DBORDER_SIZE_TOP=" + support::cpp11::to_string(border_size.top)));
     build_opts.emplace(("-DBORDER_SIZE_BOTTOM=" + support::cpp11::to_string(border_size.bottom)));
@@ -119,9 +119,14 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
             case DataType::U8:
                 set_constant_border<uint8_t>(idx, constant_border_value);
                 break;
+            case DataType::QS8:
+            case DataType::S8:
+                set_constant_border<int8_t>(idx, constant_border_value);
+                break;
             case DataType::U16:
                 set_constant_border<uint16_t>(idx, constant_border_value);
                 break;
+            case DataType::QS16:
             case DataType::S16:
                 set_constant_border<int16_t>(idx, constant_border_value);
                 break;

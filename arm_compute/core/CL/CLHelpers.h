@@ -53,6 +53,14 @@ static constexpr const unsigned int max_cl_vector_width = 16;
  */
 std::string get_cl_type_from_data_type(const DataType &dt);
 
+/** Translates fixed point tensor data type to the underlying OpenCL type.
+ *
+ * @param[in] dt @ref DataType to be translated to OpenCL type.
+ *
+ * @return The string specifying the underlying OpenCL type to be used.
+ */
+std::string get_underlying_cl_type_from_data_type(const DataType &dt);
+
 /** Translates a given gpu device target to string.
  *
  * @param[in] target Given gpu target.

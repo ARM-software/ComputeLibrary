@@ -30,6 +30,12 @@
 
 #define CLAMP(x, min_val, max_val) min(max(x, min_val), max_val)
 
+#define VLOAD_STR(size) vload##size
+#define VLOAD(size) VLOAD_STR(size)
+
+#define VSTORE_STR(size) vstore##size
+#define VSTORE(size) VSTORE_STR(size)
+
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
 

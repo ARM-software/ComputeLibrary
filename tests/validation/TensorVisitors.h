@@ -30,6 +30,8 @@
 
 #include "boost_wrapper.h"
 
+#include <algorithm>
+#include <memory>
 #include <ostream>
 #include <vector>
 
@@ -253,7 +255,31 @@ private:
     const TensorVariant &_bias;
     PadStrideInfo        _conv_info;
 };
+// Depth Concatenate Layer visitor
+struct depth_concatenate_layer_visitor : public boost::static_visitor<>
+{
+public:
+    explicit depth_concatenate_layer_visitor(const std::vector<TensorVariant> &srcs)
+        : _srcs(srcs)
+    {
+    }
 
+    template <typename T>
+    void operator()(Tensor<T> &out) const
+    {
+        std::vector<const Tensor<T> *> srcs;
+        srcs.resize(_srcs.size());
+        std::transform(_srcs.begin(), _srcs.end(), srcs.begin(), [](const TensorVariant & t)
+        {
+            return &(boost::get<Tensor<T>>(t));
+        });
+        tensor_operations::depth_concatenate_layer(srcs, out);
+    }
+
+private:
+    const std::vector<TensorVariant> &_srcs;
+};
+// Fully Connected Layer visitor
 struct fully_connected_layer_visitor : public boost::static_visitor<>
 {
 public:

@@ -28,6 +28,7 @@
 
 #include "RawTensor.h"
 
+#include <memory>
 #include <ostream>
 #include <vector>
 
@@ -262,6 +263,12 @@ public:
      * @param[in]  conv_info Pads and strides information for the convolution layer.
      */
     static void convolution_layer(const RawTensor &src, const RawTensor &weights, const RawTensor &bias, RawTensor &dst, const PadStrideInfo &conv_info);
+    /** Depth concatenate layer from @p srcs to @p dst
+     *
+     * @param[in]  srcs Input tensors.
+     * @param[out] dst  Result tensor.
+     */
+    static void depth_concatenate_layer(const std::vector<std::unique_ptr<RawTensor>> &srcs, RawTensor &dst);
     /** Fully connected layer function
      *
      * @param[in]  src     Input tensor

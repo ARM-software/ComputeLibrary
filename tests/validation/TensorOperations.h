@@ -41,6 +41,7 @@
 #include <array>
 #include <cmath>
 #include <random>
+#include <string>
 #include <vector>
 
 namespace arm_compute
@@ -1000,6 +1001,53 @@ void batch_normalization_layer(const Tensor<T> &in, Tensor<T> &out, const Tensor
                 }
             }
         }
+    }
+}
+
+// Depth Concatenate layer
+template <typename T>
+void depth_concatenate_layer(const std::vector<const Tensor<T> *> &srcs, Tensor<T> &out)
+{
+    unsigned  depth_offset = 0;
+    const int width_out    = out.shape().x();
+    const int height_out   = out.shape().y();
+    const int depth_out    = out.shape().z();
+    const int out_stride_z = width_out * height_out;
+    const int batches      = out.shape().total_size_upper(3);
+
+    // Set output tensor to 0
+    memset(out.data(), 0, out.num_elements() * element_size_from_data_type(out.data_type()));
+
+    for(unsigned int i = 0; i < srcs.size(); ++i)
+    {
+        ARM_COMPUTE_ERROR_ON(srcs[i] == nullptr);
+        ARM_COMPUTE_ERROR_ON(srcs[i]->data_type() != out.data_type());
+        ARM_COMPUTE_ERROR_ON(depth_offset >= out.shape().z());
+        ARM_COMPUTE_ERROR_ON(batches != static_cast<int>(srcs[i]->shape().total_size_upper(3)));
+
+        const Tensor<T>   *src    = srcs[i];
+        const int          width  = src->shape().x();
+        const int          height = src->shape().y();
+        const int          depth  = src->shape().z();
+        const unsigned int x_diff = (width_out - width) / 2;
+        const unsigned int y_diff = (height_out - height) / 2;
+
+        const T *src_ptr = src->data();
+        for(int b = 0; b < batches; ++b)
+        {
+            const unsigned int offset_to_first_element = b * out_stride_z * depth_out + depth_offset * out_stride_z
+                                                         + y_diff * width_out + x_diff;
+            for(int d = 0; d < depth; ++d)
+            {
+                for(int r = 0; r < height; ++r)
+                {
+                    std::copy(src_ptr, src_ptr + width, out.data() + offset_to_first_element + d * out_stride_z + r * width_out);
+                    src_ptr += width;
+                }
+            }
+        }
+
+        depth_offset += depth;
     }
 }
 

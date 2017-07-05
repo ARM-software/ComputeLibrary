@@ -100,6 +100,19 @@ std::string get_cl_type_from_data_type(const DataType &dt)
     }
 }
 
+std::string get_underlying_cl_type_from_data_type(const DataType &dt)
+{
+    switch(dt)
+    {
+        case DataType::QS8:
+            return "char";
+        case DataType::QS16:
+            return "short";
+        default:
+            return get_cl_type_from_data_type(dt);
+    }
+}
+
 const std::string &string_from_target(GPUTarget target)
 {
     static std::map<GPUTarget, const std::string> gpu_target_map =

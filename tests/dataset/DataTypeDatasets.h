@@ -166,11 +166,11 @@ public:
 };
 
 /** Supported CNN fixed point types. */
-class CNNFixedPointDataTypes final : public DataTypes<1>
+class CNNFixedPointDataTypes final : public DataTypes<2>
 {
 public:
     CNNFixedPointDataTypes()
-        : DataTypes{ DataType::QS8 }
+        : DataTypes{ DataType::QS8, DataType::QS16 }
     {
     }
 
