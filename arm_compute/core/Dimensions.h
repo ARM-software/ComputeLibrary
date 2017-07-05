@@ -126,12 +126,17 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(first + n > _id.size());
 
+        if(n == 0)
+        {
+            return;
+        }
+
         // Collapse dimensions into the first
         _id[first] = std::accumulate(_id.cbegin() + first, _id.cbegin() + first + n, 1, std::multiplies<T>());
         // Shift the remaining dimensions down
         std::copy(_id.begin() + first + n, _id.end(), _id.begin() + first + 1);
         // Reduce the number of dimensions
-        _num_dimensions -= n - 1;
+        _num_dimensions -= std::min(n, _num_dimensions) - 1;
         // Fill the now empty dimensions with zero
         std::fill(_id.begin() + _num_dimensions, _id.end(), 0);
     }
