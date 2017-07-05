@@ -29,6 +29,8 @@
 #include "arm_compute/core/Types.h"
 
 #include <ostream>
+#include <sstream>
+#include <string>
 
 namespace arm_compute
 {
@@ -51,6 +53,22 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimen
     os << ")";
 
     return os;
+}
+
+//FIXME: Check why this doesn't work and the TensorShape overload is needed
+template <typename T>
+inline std::string to_string(const Dimensions<T> &dimensions)
+{
+    std::stringstream str;
+    str << dimensions;
+    return str.str();
+}
+
+inline std::string to_string(const TensorShape &shape)
+{
+    std::stringstream str;
+    str << shape;
+    return str.str();
 }
 
 /** Formatted output of the Rectangle type. */
@@ -231,6 +249,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
     return os;
 }
 
+inline std::string to_string(const arm_compute::ActivationLayerInfo &info)
+{
+    std::stringstream str;
+    str << info.activation();
+    return str.str();
+}
+
 /** Formatted output of the NormType type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
 {
@@ -252,6 +277,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
     return os;
 }
 
+inline std::string to_string(const arm_compute::NormalizationLayerInfo &info)
+{
+    std::stringstream str;
+    str << info.type();
+    return str.str();
+}
+
 /** Formatted output of the PoolingType type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_type)
 {
@@ -266,6 +298,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_ty
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
+
+    return os;
+}
+
+/** Formatted output of @ref PoolingLayerInfo. */
+inline ::std::ostream &operator<<(::std::ostream &os, const PoolingLayerInfo &info)
+{
+    os << info.pool_type();
 
     return os;
 }
@@ -346,6 +386,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
     }
 
     return os;
+}
+
+inline std::string to_string(const arm_compute::DataType &data_type)
+{
+    std::stringstream str;
+    str << data_type;
+    return str.str();
 }
 
 /** Formatted output of the Format type. */

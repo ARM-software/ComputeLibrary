@@ -68,31 +68,17 @@ common_env.Append(LIBS = ['boost_program_options'])
 common_env.Append(CXXFLAGS = ['-Wno-missing-field-initializers'])
 
 validation_env = common_env.Clone()
-benchmark_env = common_env.Clone()
 
 validation_env.Append(CPPDEFINES=['BOOST'])
-# overloaded virtual function "benchmark::Fixture::SetUp" is only partially overridden
-benchmark_env.Append(CPPFLAGS=['-Wno-overloaded-virtual'])
 
 files = Glob('*.cpp')
+files = [f for f in files if "DatasetManager" not in os.path.basename(str(f))]
 
 common_objects = [ common_env.StaticObject( f ) for f in files ]
 
 validation_env.Append(LIBS = ['boost_unit_test_framework'])
-benchmark_env.Append(LIBS = ['benchmark'])
 
 files_validation = Glob('validation/*.cpp')
-files_benchmark = Glob('benchmark/*.cpp')
-
-if env['os'] == 'android' or not common_env['pmu']:
-    if env['os'] == 'android' and common_env['pmu']:
-        if env['Werror']:
-            print("pmu=1 is not supported for os=android")
-            Exit(1)
-        else:
-            print("pmu=1 is not supported for os=android")
-
-    files_benchmark = [f for f in files_benchmark if "PMU" not in os.path.basename(str(f))]
 
 # Add unit tests
 files_validation += Glob('validation/UNIT/*.cpp')
@@ -101,31 +87,19 @@ files_validation += Glob('validation/UNIT/*/*.cpp')
 if env['opencl']:
     Import('opencl')
 
-    benchmark_env.Append(CPPDEFINES=['OPENCL'])
-
     files_validation += Glob('validation/CL/*.cpp')
     files_validation += Glob('validation/CL/*/*.cpp')
     files_validation += Glob('validation/system_tests/CL/*.cpp')
-    files_benchmark += Glob('benchmark/CL/*/*.cpp')
-    files_benchmark += Glob('benchmark/CL/*.cpp')
-    files_benchmark += Glob('benchmark/system_tests/CL/*.cpp')
 
     validation_env.Append(LIBS = "OpenCL")
-    benchmark_env.Append(LIBS = "OpenCL")
 
 if env['neon']:
     files_validation += Glob('validation/NEON/*.cpp')
     files_validation += Glob('validation/NEON/*/*.cpp')
     files_validation += Glob('validation/system_tests/NEON/*.cpp')
-    files_benchmark += Glob('benchmark/NEON/*/*.cpp')
-    files_benchmark += Glob('benchmark/NEON/*.cpp')
-    files_benchmark += Glob('benchmark/system_tests/NEON/*.cpp')
 
 if env['os'] == 'android':
     validation_env.Append(LIBS = ["log"])
-    benchmark_env.Append(LIBS = ["log"])
-else:
-    benchmark_env.Append(LIBS = ["rt"])
 
 if common_env['validation_tests']:
     arm_compute_validation = validation_env.Program('arm_compute_validation',
@@ -135,12 +109,70 @@ if common_env['validation_tests']:
         Depends(arm_compute_validation, opencl)
     Default(arm_compute_validation)
     Export('arm_compute_validation')
+
+#######################################################################
+# Using new framework
+#######################################################################
+
+# Clone the environment to make sure we're not polluting the arm_compute one:
+benchmark_env = env.Clone()
+# Workaround to build both test systems in parallel
+benchmark_env.VariantDir("new", ".", duplicate=0)
+
+if env['os'] in ['android', 'bare_metal'] or env['standalone']:
+    Import("arm_compute_a")
+    benchmark_env.Append(LIBS = [arm_compute_a])
+    arm_compute_lib = arm_compute_a
+else:
+    Import('arm_compute_so')
+    benchmark_env.Append(LIBS = ["arm_compute"])
+    arm_compute_lib = arm_compute_so
+
+#FIXME Delete before release
+if common_env['internal_only']:
+    benchmark_env.Append(CPPDEFINES=['INTERNAL_ONLY'])
+
+benchmark_env.Append(CPPPATH = [".", "#3rdparty/include"])
+benchmark_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
+benchmark_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
+benchmark_env.Append(LIBPATH = ["#build/%s/framework" % env['build_dir']])
+benchmark_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
+
+Import("arm_compute_test_framework")
+benchmark_env.Append(LIBS = ['arm_compute_test_framework'])
+
+files_benchmark = Glob('new/DatasetManager.cpp')
+files_benchmark += Glob('new/TensorLibrary.cpp')
+files_benchmark += Glob('new/RawTensor.cpp')
+files_benchmark += Glob('new/benchmark_new/*.cpp')
+
+# Add unit tests
+if env['opencl']:
+    Import('opencl')
+
+    benchmark_env.Append(CPPDEFINES=['OPENCL'])
+
+    files_benchmark += Glob('new/benchmark_new/CL/*/*.cpp')
+    files_benchmark += Glob('new/benchmark_new/CL/*.cpp')
+
+    benchmark_env.Append(LIBS = "OpenCL")
+
+if env['neon']:
+    files_benchmark += Glob('new/benchmark_new/NEON/*/*.cpp')
+    files_benchmark += Glob('new/benchmark_new/NEON/*.cpp')
+
+if env['os'] == 'android':
+    benchmark_env.Append(LIBS = ["log"])
+else:
+    benchmark_env.Append(LIBS = ["rt"])
+
 if common_env['benchmark_tests']:
-    arm_compute_benchmark = benchmark_env.Program('arm_compute_benchmark',
-                                                 files_benchmark + common_objects)
+    arm_compute_benchmark = benchmark_env.Program('arm_compute_benchmark', files_benchmark)
+    Depends(arm_compute_benchmark, arm_compute_test_framework)
     Depends(arm_compute_benchmark, arm_compute_lib)
+
     if env['opencl']:
         Depends(arm_compute_benchmark, opencl)
+
     Default(arm_compute_benchmark)
     Export('arm_compute_benchmark')
-
