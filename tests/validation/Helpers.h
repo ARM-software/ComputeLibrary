@@ -35,6 +35,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef ARM_COMPUTE_ENABLE_FP16
+#include <arm_fp16.h>
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
 namespace arm_compute
 {
 namespace test
@@ -49,9 +53,13 @@ namespace validation
  * @return A pair containing the lower upper testing bounds for a given function.
  */
 template <typename T>
-std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::ActivationFunction activation, int fixed_point_position = 1)
+inline std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::ActivationFunction activation, int fixed_point_position = 1)
 {
-    bool is_float = std::is_floating_point<T>::value;
+    bool is_float = std::is_same<T, float>::value;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    is_float = is_float || std::is_same<T, float16_t>::value;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
     std::pair<T, T> bounds;
 
     // Set initial values
@@ -98,7 +106,6 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
     }
     return bounds;
 }
-
 /** Helper function to get the testing range for batch normalization layer.
  *
  * @param[in] fixed_point_position (Optional) Number of bits for the fractional part. Defaults to 1.

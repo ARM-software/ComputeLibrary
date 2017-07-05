@@ -93,6 +93,24 @@ float32x4_t vtanhq_f32(float32x4_t val);
 float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
+/** Calculate hyperbolic tangent.
+ *
+ * tanh(x) = (e^2x - 1)/(e^2x + 1)
+ *
+ * @note We clamp x to [-5,5] to avoid overflowing issues.
+ *
+ * @param[in] val Input vector value in F32 format.
+ *
+ * @return The calculated Hyperbolic Tangent.
+ */
+float16x8_t vtanhq_f16(float16x8_t val);
+/** Calculate inverse square root.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated inverse square root.
+ */
+float16x8_t vinvsqrtq_f16(float16x8_t x);
 /** Calculate exponential
  *
  * @param[in] x Input vector value in F16 format.

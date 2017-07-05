@@ -47,7 +47,7 @@ NEActivationLayerKernel::NEActivationLayerKernel()
 
 void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
 
     _input    = input;
     _act_info = activation_info;
@@ -79,6 +79,23 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float> },
     };
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    // Activation functions : FP16
+    static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f16 =
+    {
+        { ActivationFunction::ABS, &NEActivationLayerKernel::activation<ActivationFunction::ABS, float16_t> },
+        { ActivationFunction::LINEAR, &NEActivationLayerKernel::activation<ActivationFunction::LINEAR, float16_t> },
+        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, float16_t> },
+        { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, float16_t> },
+        { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, float16_t> },
+        { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float16_t> },
+        { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float16_t> },
+        { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float16_t> },
+        { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float16_t> },
+    };
+#endif /* ARM_COMPUTE_ENABLE_FP16*/
+
     // Activation functions : QS8
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qs8 =
     {
@@ -119,6 +136,11 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         case DataType::F32:
             _func = act_map_f32[activation_info.activation()];
             break;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+        case DataType::F16:
+            _func = act_map_f16[activation_info.activation()];
+            break;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
     }
@@ -147,6 +169,130 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
 
     ICPPKernel::configure(win);
 }
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+template <ActivationLayerInfo::ActivationFunction F, typename T>
+typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
+{
+    Iterator input(_input, window);
+    Iterator output(_output, window);
+
+    static const float16x8_t CONST_0 = vdupq_n_f16(0.f);
+    static const float16x8_t CONST_1 = vdupq_n_f16(1.f);
+
+    const float16x8_t a = vdupq_n_f16(_act_info.a());
+    const float16x8_t b = vdupq_n_f16(_act_info.b());
+
+    execute_window_loop(window, [&](const Coordinates &)
+    {
+        const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
+        const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
+
+        const float16x8x2_t in  = vld2q_f16(input_ptr);
+        float16x8x2_t       tmp = { {} };
+
+        switch(F)
+        {
+            case ActivationFunction::ABS:
+                tmp =
+                {
+                    {
+                        vabsq_f16(in.val[0]),
+                        vabsq_f16(in.val[1]),
+                    }
+                };
+                break;
+            case ActivationFunction::BOUNDED_RELU:
+                tmp =
+                {
+                    {
+                        vminq_f16(a, vmaxq_f16(CONST_0, in.val[0])),
+                        vminq_f16(a, vmaxq_f16(CONST_0, in.val[1]))
+                    }
+                };
+                break;
+            case ActivationFunction::LINEAR:
+                tmp =
+                {
+                    {
+                        vaddq_f16(b, vmulq_f16(a, in.val[0])),
+                        vaddq_f16(b, vmulq_f16(a, in.val[1]))
+                    }
+                };
+                break;
+            case ActivationFunction::LOGISTIC:
+                tmp =
+                {
+                    {
+                        vinvq_f16(vaddq_f16(CONST_1, vexpq_f16(vnegq_f16(in.val[0])))),
+                        vinvq_f16(vaddq_f16(CONST_1, vexpq_f16(vnegq_f16(in.val[1])))),
+                    }
+                };
+                break;
+            case ActivationFunction::RELU:
+                tmp =
+                {
+                    {
+                        vmaxq_f16(CONST_0, in.val[0]),
+                        vmaxq_f16(CONST_0, in.val[1])
+                    }
+                };
+                break;
+            case ActivationFunction::LEAKY_RELU:
+                tmp =
+                {
+                    {
+                        vbslq_f16(vcgtq_f16(in.val[0], CONST_0), in.val[0], vmulq_f16(a, in.val[0])),
+                        vbslq_f16(vcgtq_f16(in.val[1], CONST_0), in.val[1], vmulq_f16(a, in.val[1]))
+                    }
+                };
+                break;
+            case ActivationFunction::SOFT_RELU:
+                tmp =
+                {
+                    {
+                        vlogq_f16(vaddq_f16(CONST_1, vexpq_f16(in.val[0]))),
+                        vlogq_f16(vaddq_f16(CONST_1, vexpq_f16(in.val[1]))),
+                    }
+                };
+                break;
+            case ActivationFunction::SQRT:
+                tmp =
+                {
+                    {
+                        vinvq_f16(vinvsqrtq_f16(in.val[0])),
+                        vinvq_f16(vinvsqrtq_f16(in.val[1])),
+                    }
+                };
+                break;
+            case ActivationFunction::SQUARE:
+                tmp =
+                {
+                    {
+                        vmulq_f16(in.val[0], in.val[0]),
+                        vmulq_f16(in.val[1], in.val[1])
+                    }
+                };
+                break;
+            case ActivationFunction::TANH:
+                tmp =
+                {
+                    {
+                        vmulq_f16(a, vtanhq_f16(vmulq_f16(b, in.val[0]))),
+                        vmulq_f16(a, vtanhq_f16(vmulq_f16(b, in.val[1]))),
+                    }
+                };
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Not implemented");
+                break;
+        }
+
+        vst2q_f16(output_ptr, tmp);
+    },
+    input, output);
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 template <ActivationLayerInfo::ActivationFunction F, typename T>
 typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
@@ -350,7 +496,7 @@ typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivation
 }
 
 template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, int16_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
+typename std::enable_if<std::is_same<T, qint16_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
 {
     Iterator  input(_input, window);
     Iterator  output(_output, window);
@@ -462,6 +608,7 @@ typename std::enable_if<std::is_same<T, int16_t>::value, void>::type NEActivatio
                 };
                 break;
             default:
+                ARM_COMPUTE_ERROR("Function not implemented");
                 break;
         }
 

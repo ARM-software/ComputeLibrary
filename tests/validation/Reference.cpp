@@ -459,29 +459,44 @@ RawTensor Reference::compute_reference_activation_layer(const TensorShape &shape
     RawTensor ref_src = library->get(shape, dt, 1, fixed_point_position);
     RawTensor ref_dst = library->get(shape, dt, 1, fixed_point_position);
 
-    // Fill reference
-    if(dt == DataType::F32)
+    // Fill tensors
+    switch(dt)
     {
-        float min_bound = 0;
-        float max_bound = 0;
-        std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<float>(act_info.activation());
-        std::uniform_real_distribution<> distribution(min_bound, max_bound);
-        library->fill(ref_src, distribution, 0);
-    }
-    else
-    {
-        int min_bound = 0;
-        int max_bound = 0;
-        if(dt == DataType::QS8)
+        case DataType::QS8:
         {
-            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+            const std::pair<int8_t, int8_t> bounds = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
+            library->fill(ref_src, distribution, 0);
+            break;
         }
-        else
+        case DataType::QS16:
         {
-            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int16_t>(act_info.activation(), fixed_point_position);
+            const std::pair<int16_t, int16_t> bounds = get_activation_layer_test_bounds<int16_t>(act_info.activation(), fixed_point_position);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
+            library->fill(ref_src, distribution, 0);
+            break;
         }
-        std::uniform_int_distribution<> distribution(min_bound, max_bound);
-        library->fill(ref_src, distribution, 0);
+#ifdef ARM_COMPUTE_ENABLE_FP16
+        case DataType::F16:
+        {
+            const std::pair<float16_t, float16_t> bounds = get_activation_layer_test_bounds<float16_t>(act_info.activation());
+            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
+            library->fill(ref_src, distribution, 0);
+            break;
+        }
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+        case DataType::F32:
+        {
+            const std::pair<float, float> bounds = get_activation_layer_test_bounds<float>(act_info.activation());
+            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
+            library->fill(ref_src, distribution, 0);
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Not supported");
+            break;
+        }
     }
 
     // Compute reference

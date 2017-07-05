@@ -172,6 +172,14 @@ const std::array<float16x8_t, 8> log_tab_f16 =
         vdupq_n_f16(0.0141278216615f),
     }
 };
+inline float16x8_t vinvsqrtq_f16(float16x8_t x)
+{
+    float16x8_t sqrt_reciprocal = vrsqrteq_f16(x);
+    sqrt_reciprocal             = vmulq_f16(vrsqrtsq_f16(vmulq_f16(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
+    sqrt_reciprocal             = vmulq_f16(vrsqrtsq_f16(vmulq_f16(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
+
+    return sqrt_reciprocal;
+}
 
 inline float16x8_t vinvq_f16(float16x8_t x)
 {
@@ -179,6 +187,21 @@ inline float16x8_t vinvq_f16(float16x8_t x)
     recip             = vmulq_f16(vrecpsq_f16(x, recip), recip);
     recip             = vmulq_f16(vrecpsq_f16(x, recip), recip);
     return recip;
+}
+
+inline float16x8_t vtanhq_f16(float16x8_t val)
+{
+    const float16x8_t CONST_1        = vdupq_n_f16(1.f);
+    const float16x8_t CONST_2        = vdupq_n_f16(2.f);
+    const float16x8_t CONST_MIN_TANH = vdupq_n_f16(-10.f);
+    const float16x8_t CONST_MAX_TANH = vdupq_n_f16(10.f);
+
+    const float16x8_t x     = vminq_f16(vmaxq_f16(val, CONST_MIN_TANH), CONST_MAX_TANH);
+    const float16x8_t exp2x = vexpq_f16(vmulq_f16(CONST_2, x));
+    const float16x8_t num   = vsubq_f16(exp2x, CONST_1);
+    const float16x8_t den   = vaddq_f16(exp2x, CONST_1);
+    const float16x8_t tanh  = vmulq_f16(num, vinvq_f16(den));
+    return tanh;
 }
 
 inline float16x8_t vtaylor_polyq_f16(float16x8_t x, const std::array<float16x8_t, 8> &coeffs)

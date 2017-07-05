@@ -569,7 +569,7 @@ void box3x3(const Tensor<T> &in, Tensor<T> &out, BorderMode border_mode, T const
 }
 
 // Depth conversion
-template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&std::is_floating_point<T2>::value, int >::type = 0 >
+template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&is_floating_point<T2>::value, int >::type = 0 >
 void depth_convert(const Tensor<T1> &in, Tensor<T2> &out, ConvertPolicy policy, uint32_t shift)
 {
     using namespace fixed_point_arithmetic;
@@ -581,7 +581,7 @@ void depth_convert(const Tensor<T1> &in, Tensor<T2> &out, ConvertPolicy policy, 
     }
 }
 
-template < typename T1, typename T2, typename std::enable_if < std::is_floating_point<T1>::value &&std::is_integral<T2>::value, int >::type = 0 >
+template < typename T1, typename T2, typename std::enable_if < is_floating_point<T1>::value &&std::is_integral<T2>::value, int >::type = 0 >
 void depth_convert(const Tensor<T1> &in, Tensor<T2> &out, ConvertPolicy policy, uint32_t shift)
 {
     using namespace fixed_point_arithmetic;

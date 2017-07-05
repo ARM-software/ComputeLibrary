@@ -27,6 +27,10 @@
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/NEON/INEKernel.h"
 
+#ifdef ARM_COMPUTE_ENABLE_FP16
+#include <arm_fp16.h>
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
 namespace arm_compute
 {
 class ITensor;
@@ -72,6 +76,14 @@ private:
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, float>::value, void>::type activation(const Window &window);
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    /** Function to apply an activation function on a tensor.
+     *
+     *  @param[in] window Region on which to execute the kernel
+     */
+    template <ActivationLayerInfo::ActivationFunction F, typename T>
+    typename std::enable_if<std::is_same<T, float16_t>::value, void>::type activation(const Window &window);
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
     /** Function to apply an activation function on a tensor.
      *
      *  @param[in] window Region on which to execute the kernel

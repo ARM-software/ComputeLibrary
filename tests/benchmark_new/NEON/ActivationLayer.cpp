@@ -37,23 +37,31 @@ namespace arm_compute
 {
 namespace test
 {
+namespace
+{
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const auto alexnet_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
+const auto lenet_data_types   = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
+const auto alexnet_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
+const auto lenet_data_types   = framework::dataset::make("DataType", { DataType::F32 });
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+} // namespace
+
 using NEActivationLayerFixture = ActivationLayerFixture<Tensor, NEActivationLayer, neon::NEAccessor>;
 
 TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetActivationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", { DataType::F32, DataType::QS8 })),
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetActivationLayerDataset(), alexnet_data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(), lenet_data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetActivationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetActivationLayerDataset(), lenet_data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()

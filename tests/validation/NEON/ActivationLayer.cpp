@@ -73,6 +73,8 @@ float activation_layer_tolerance(DataType dt, ActivationLayerInfo::ActivationFun
                     return 5.f;
                 case DataType::QS16:
                     return 11.f;
+                case DataType::F16:
+                    return 0.01f;
                 default:
                     return 0.00001f;
             }
@@ -119,30 +121,44 @@ Tensor compute_activation_layer(bool in_place, const TensorShape &shape, DataTyp
         dst.allocator()->allocate();
         BOOST_TEST(!dst.info()->is_resizable());
     }
-
     // Fill tensors
-    if(dt == DataType::F32)
+    switch(dt)
     {
-        float min_bound = 0;
-        float max_bound = 0;
-        std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<float>(act_info.activation());
-        std::uniform_real_distribution<> distribution(min_bound, max_bound);
-        library->fill(NEAccessor(src), distribution, 0);
-    }
-    else
-    {
-        int min_bound = 0;
-        int max_bound = 0;
-        if(dt == DataType::QS8)
+        case DataType::QS8:
         {
-            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+            const std::pair<int8_t, int8_t> bounds = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
+            library->fill(NEAccessor(src), distribution, 0);
+            break;
         }
-        else
+        case DataType::QS16:
         {
-            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int16_t>(act_info.activation(), fixed_point_position);
+            const std::pair<int16_t, int16_t> bounds = get_activation_layer_test_bounds<int16_t>(act_info.activation(), fixed_point_position);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
+            library->fill(NEAccessor(src), distribution, 0);
+            break;
         }
-        std::uniform_int_distribution<> distribution(min_bound, max_bound);
-        library->fill(NEAccessor(src), distribution, 0);
+#ifdef ARM_COMPUTE_ENABLE_FP16
+        case DataType::F16:
+        {
+            const std::pair<float16_t, float16_t> bounds = get_activation_layer_test_bounds<float16_t>(act_info.activation());
+            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
+            library->fill(NEAccessor(src), distribution, 0);
+            break;
+        }
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+        case DataType::F32:
+        {
+            const std::pair<float, float> bounds = get_activation_layer_test_bounds<float>(act_info.activation());
+            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
+            library->fill(NEAccessor(src), distribution, 0);
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Not supported");
+            break;
+        }
     }
 
     // Compute function
@@ -206,6 +222,27 @@ BOOST_DATA_TEST_CASE(Configuration, boost::unit_test::data::make({ false, true }
         validate(dst.info()->padding(), padding);
     }
 }
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * SmallShapes() * boost::unit_test::data::make(DataType::F16) * ActivationFunctions() * boost::unit_test::data::make({ 0.5f, 1.f }),
+                     in_place, shape, dt, act_function, alpha_beta)
+{
+    // Create activation layer info
+    const ActivationLayerInfo act_info(act_function, alpha_beta);
+
+    // Compute function
+    Tensor dst = compute_activation_layer(in_place, shape, dt, act_info);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, dt, act_info);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(dt, act_function));
+}
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
