@@ -39,7 +39,7 @@ CLFullyConnectedLayerReshapeWeights::CLFullyConnectedLayerReshapeWeights()
 
 void CLFullyConnectedLayerReshapeWeights::configure(const ICLTensor *input, ICLTensor *output, bool transpose_weights, bool is_batched_fc_layer)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
     ARM_COMPUTE_ERROR_ON(input->info()->num_dimensions() != 2);
     ARM_COMPUTE_ERROR_ON((transpose_weights == false) && (is_batched_fc_layer == false));
@@ -196,7 +196,7 @@ void CLFullyConnectedLayer::configure_fc_fc_nb(const ICLTensor *input, const ICL
 
 void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose_weights, bool are_weights_reshaped)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() != 2);
 

@@ -50,7 +50,7 @@ public:
     CLFullyConnectedLayerReshapeWeights();
     /** Set the input and output tensors.
      *
-     * @param[in]  input               Weights tensor. The weights must be 2 dimensional. Data types supported: QS8/F16/F32.
+     * @param[in]  input               Weights tensor. The weights must be 2 dimensional. Data types supported: QS8/QS16/F16/F32.
      * @param[out] output              Destination tensor. Data type supported: Same as @p input.
      * @param[in]  transpose_weights   True if the weights must be transposed. Data types supported: Same as @p weights.
      * @param[in]  is_batched_fc_layer True if it is a batched fully connected layer

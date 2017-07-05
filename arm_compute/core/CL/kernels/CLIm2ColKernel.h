@@ -69,7 +69,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/F16/F32
+     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/F16/F32
      * @param[out] output      The output tensor. First 2 lower dimensions represent a transform of each 3D input,
      *                         while every dimension above represents a batch. Data types supported: Same as @p input
      * @param[in]  kernel_dims The kernel dimensions (width and height).

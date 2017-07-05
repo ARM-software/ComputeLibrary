@@ -43,7 +43,7 @@ CLGEMMMatrixAccumulateBiasesKernel::CLGEMMMatrixAccumulateBiasesKernel()
 
 void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTensor *biases)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(biases, accum);
     ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() != 1);
@@ -53,7 +53,7 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
 
     std::set<std::string> build_opts;
     build_opts.insert(("-DDATA_TYPE=" + get_cl_type_from_data_type(accum->info()->data_type())));
-    if(accum->info()->data_type() == DataType::QS8)
+    if(is_data_type_fixed_point(accum->info()->data_type()))
     {
         build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(accum->info()->fixed_point_position()));
     }
