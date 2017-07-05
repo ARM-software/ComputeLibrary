@@ -74,7 +74,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         paths = []
 
-        for top_level in ["./arm_compute", "./src", "./examples", "./tests", "./utils"]:
+        for top_level in ["./arm_compute", "./src", "./examples", "./tests", "./utils", "./framework", "./support"]:
             for root, _, files in os.walk(top_level):
                 paths.extend([os.path.join(root, f) for f in files])
     else:

@@ -2,7 +2,7 @@
 
 set -e
 
-DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils"
+DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./framework ./support"
 
 grep -HrnP "/\*\*$" $DIRECTORIES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))

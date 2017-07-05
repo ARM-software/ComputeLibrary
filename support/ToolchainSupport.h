@@ -154,7 +154,7 @@ inline T copysign(T x, T y)
 {
     return ::copysign(x, y);
 }
-#else
+#else  /* __ANDROID__ */
 /** Convert integer and float values to string.
  *
  * @note This function acts as a convenience wrapper around std::to_string. The
@@ -260,7 +260,7 @@ inline T copysign(T x, T y)
 {
     return std::copysign(x, y);
 }
-#endif
+#endif /* __ANDROID__ */
 } // namespace cpp11
 
 namespace cpp14
@@ -307,4 +307,4 @@ make_unique(Args &&...) = delete;
 } // namespace cpp14
 } // namespace support
 } // namespace arm_compute
-#endif
+#endif /* ARM_COMPUTE_TEST_TOOLCHAINSUPPORT */

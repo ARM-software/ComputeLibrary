@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils"
+DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./framework ./support"
 
 if [ $# -eq 0 ]
 then
@@ -45,6 +45,8 @@ fi
 ARMV7_GCC_PATH=$(dirname $ARMV7_GCC)/..
 AARCH64_GCC_PATH=$(dirname $AARCH64_GCC)/..
 
+INCLUDE_PATHS="-Iinclude -I. -I3rdparty/include -Ikernels -Itests -Icomputer_vision -Iframework"
+
 function armv7
 {
     USE_BOOST=""
@@ -60,7 +62,7 @@ function armv7
     -target armv7a-none-linux-gnueabihf \
     --gcc-toolchain=$ARMV7_GCC_PATH \
     -std=c++11 \
-    -Iinclude -I. -I3rdparty/include -Ikernels -Itests -Icomputer_vision \
+    $INCLUDE_PATHS \
     -DARM_COMPUTE_CPP_SCHEDULER=1 $USE_BOOST
     #read -rsp $'Press enter to continue...\n'
 }
@@ -81,7 +83,7 @@ function aarch64
     --gcc-toolchain=$AARCH64_GCC_PATH \
     -std=c++11 \
     -include $SCRIPT_PATH/clang-tidy.h \
-    -Iinclude -I. -I3rdparty/include -Ikernels -Itests -Icomputer_vision \
+    $INCLUDE_PATHS \
     -DARM_COMPUTE_ENABLE_FP16 -DARM_COMPUTE_CPP_SCHEDULER=1 $USE_BOOST
 }
 

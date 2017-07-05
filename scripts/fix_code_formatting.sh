@@ -17,7 +17,7 @@ ASTYLE_PARAMETERS=" --style=ansi \
 	--indent-preprocessor \
 	"
 
-DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils"
+DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./framework ./support"
 
 if [ $# -eq 0 ]
 then

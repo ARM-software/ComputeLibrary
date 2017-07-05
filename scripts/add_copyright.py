@@ -3,13 +3,13 @@
 import glob
 import os.path
 
-eula_copyright = open("scripts/copyright_eula.txt",'r').read()
+mit_copyright = open("scripts/copyright_mit.txt",'r').read()
 
 def add_cpp_copyright( f, content):
-    global eula_copyright
+    global mit_copyright
     out = open(f,'w')
     out.write("/*\n")
-    for line in eula_copyright.split('\n')[:-1]:
+    for line in mit_copyright.split('\n')[:-1]:
         out.write(" *");
         if line.strip() != "":
             out.write(" %s" %line)
@@ -20,9 +20,9 @@ def add_cpp_copyright( f, content):
     out.close()
 
 def add_python_copyright( f, content):
-    global eula_copyright
+    global mit_copyright
     out = open(f,'w')
-    for line in eula_copyright.split('\n')[:-1]:
+    for line in mit_copyright.split('\n')[:-1]:
         out.write("#");
         if line.strip() != "":
             out.write(" %s" %line)
@@ -57,7 +57,7 @@ def remove_comment_python( content ):
             out += line + "\n"
     return out
 
-for top in ['./arm_compute', './tests','./src','./examples','./utils/']:
+for top in ['./arm_compute', './tests','./src','./examples','./utils/','./framework','./support']:
     for root, _, files in os.walk(top):
         for f in files:
             path = os.path.join(root, f)
