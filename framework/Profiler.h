@@ -21,10 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TESTRESULT
-#define ARM_COMPUTE_TEST_TESTRESULT
+#ifndef ARM_COMPUTE_TEST_PROFILER
+#define ARM_COMPUTE_TEST_PROFILER
 
-#include "Profiler.h"
+#include "instruments/Instrument.h"
+
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace arm_compute
 {
@@ -32,48 +37,39 @@ namespace test
 {
 namespace framework
 {
-/** Class to store results of a test.
+/** Profiler class to collect benchmark numbers.
  *
- * Currently the execution status and profiling information are stored.
+ * A profiler manages multiple instruments that can collect different types of benchmarking numbers.
  */
-struct TestResult
+class Profiler
 {
-    /** Execution status of a test. */
-    enum class Status
-    {
-        NOT_RUN,
-        SUCCESS,
-        EXPECTED_FAILURE,
-        FAILED,
-        CRASHED
-    };
+public:
+    /** Mapping from instrument ids to their measurements. */
+    using MeasurementsMap = std::map<std::string, std::vector<Instrument::Measurement>>;
 
-    /** Default constructor. */
-    TestResult() = default;
-
-    /** Initialise the result with a status.
+    /** Add @p instrument to the performance monitor.
      *
-     * @param[in] status Execution status.
-     */
-    TestResult(Status status)
-        : status{ status }
-    {
-    }
-
-    /** Initialise the result with a status and profiling information.
+     * All added instruments will be used when @ref start or @ref stop are
+     * called to make measurements.
      *
-     * @param[in] status       Execution status.
-     * @param[in] measurements Profiling information.
+     * @param[in] instrument Instrument to be used to measure performance.
      */
-    TestResult(Status status, const Profiler::MeasurementsMap &measurements)
-        : status{ status }, measurements{ measurements }
-    {
-    }
+    void add(std::unique_ptr<Instrument> instrument);
 
-    Status                    status{ Status::NOT_RUN }; //< Execution status
-    Profiler::MeasurementsMap measurements{};            //< Profiling information
+    /** Start all added instruments to measure performance. */
+    void start();
+
+    /** Stop all added instruments. */
+    void stop();
+
+    /** Return measurements for all instruments. */
+    const MeasurementsMap &measurements() const;
+
+private:
+    std::vector<std::unique_ptr<Instrument>> _instruments{};
+    MeasurementsMap                          _measurements{};
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TESTRESULT */
+#endif /* ARM_COMPUTE_TEST_PROFILER */

@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TESTRESULT
-#define ARM_COMPUTE_TEST_TESTRESULT
-
 #include "Profiler.h"
+
+#include <iostream>
+#include <utility>
 
 namespace arm_compute
 {
@@ -32,48 +32,36 @@ namespace test
 {
 namespace framework
 {
-/** Class to store results of a test.
- *
- * Currently the execution status and profiling information are stored.
- */
-struct TestResult
+void Profiler::add(std::unique_ptr<Instrument> instrument)
 {
-    /** Execution status of a test. */
-    enum class Status
-    {
-        NOT_RUN,
-        SUCCESS,
-        EXPECTED_FAILURE,
-        FAILED,
-        CRASHED
-    };
+    _instruments.emplace_back(std::move(instrument));
+}
 
-    /** Default constructor. */
-    TestResult() = default;
-
-    /** Initialise the result with a status.
-     *
-     * @param[in] status Execution status.
-     */
-    TestResult(Status status)
-        : status{ status }
+void Profiler::start()
+{
+    for(auto &instrument : _instruments)
     {
+        instrument->start();
+    }
+}
+
+void Profiler::stop()
+{
+    for(auto &instrument : _instruments)
+    {
+        instrument->stop();
     }
 
-    /** Initialise the result with a status and profiling information.
-     *
-     * @param[in] status       Execution status.
-     * @param[in] measurements Profiling information.
-     */
-    TestResult(Status status, const Profiler::MeasurementsMap &measurements)
-        : status{ status }, measurements{ measurements }
+    for(const auto &instrument : _instruments)
     {
+        _measurements[instrument->id()].push_back(instrument->measurement());
     }
+}
 
-    Status                    status{ Status::NOT_RUN }; //< Execution status
-    Profiler::MeasurementsMap measurements{};            //< Profiling information
-};
+const Profiler::MeasurementsMap &Profiler::measurements() const
+{
+    return _measurements;
+}
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TESTRESULT */

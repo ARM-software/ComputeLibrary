@@ -37,6 +37,27 @@ namespace test
 {
 namespace framework
 {
+Framework::Framework()
+{
+    _available_instruments.emplace(InstrumentType::WALL_CLOCK_TIMER, Instrument::make_instrument<WallClockTimer>);
+#ifdef PMU_ENABLED
+    _available_instruments.emplace(InstrumentType::PMU_CYCLE_COUNTER, Instrument::make_instrument<CycleCounter>);
+    _available_instruments.emplace(InstrumentType::PMU_INSTRUCTION_COUNTER, Instrument::make_instrument<InstructionCounter>);
+#endif /* PMU_ENABLED */
+}
+
+std::set<InstrumentType> Framework::available_instruments() const
+{
+    std::set<InstrumentType> types;
+
+    for(const auto &instrument : _available_instruments)
+    {
+        types.emplace(instrument.first);
+    }
+
+    return types;
+}
+
 std::tuple<int, int, int> Framework::count_test_results() const
 {
     int passed  = 0;
@@ -71,11 +92,18 @@ Framework &Framework::get()
     return instance;
 }
 
-void Framework::init(int num_iterations, const std::string &name_filter, const std::string &id_filter)
+void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, const std::string &name_filter, const std::string &id_filter)
 {
     _test_name_filter = std::regex{ name_filter };
     _test_id_filter   = std::regex{ id_filter };
     _num_iterations   = num_iterations;
+
+    _instruments = InstrumentType::NONE;
+
+    for(const auto &instrument : instruments)
+    {
+        _instruments |= instrument;
+    }
 }
 
 std::string Framework::current_suite_name() const
@@ -144,6 +172,7 @@ void Framework::run_test(TestCaseFactory &test_factory)
 
     log_test_start(test_case_name);
 
+    Profiler   profiler = get_profiler();
     TestResult result;
 
     try
@@ -156,7 +185,9 @@ void Framework::run_test(TestCaseFactory &test_factory)
 
             for(int i = 0; i < _num_iterations; ++i)
             {
+                profiler.start();
                 test_case->do_run();
+                profiler.stop();
             }
 
             test_case->do_teardown();
@@ -213,6 +244,8 @@ void Framework::run_test(TestCaseFactory &test_factory)
         }
     }
 
+    result.measurements = profiler.measurements();
+
     set_test_result(test_case_name, result);
     log_test_end(test_case_name);
 }
@@ -260,7 +293,22 @@ bool Framework::run()
 
 void Framework::set_test_result(std::string test_case_name, TestResult result)
 {
-    _test_results.emplace(std::move(test_case_name), result);
+    _test_results.emplace(std::move(test_case_name), std::move(result));
+}
+
+Profiler Framework::get_profiler() const
+{
+    Profiler profiler;
+
+    for(const auto &instrument : _available_instruments)
+    {
+        if((instrument.first & _instruments) != InstrumentType::NONE)
+        {
+            profiler.add(instrument.second());
+        }
+    }
+
+    return profiler;
 }
 
 std::vector<Framework::TestId> Framework::test_ids() const

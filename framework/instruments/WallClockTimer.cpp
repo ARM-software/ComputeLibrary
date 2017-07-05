@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TESTRESULT
-#define ARM_COMPUTE_TEST_TESTRESULT
+#include "WallClockTimer.h"
 
-#include "Profiler.h"
+#include "../Framework.h"
+#include "../Utils.h"
 
 namespace arm_compute
 {
@@ -32,48 +32,26 @@ namespace test
 {
 namespace framework
 {
-/** Class to store results of a test.
- *
- * Currently the execution status and profiling information are stored.
- */
-struct TestResult
+std::string WallClockTimer::id() const
 {
-    /** Execution status of a test. */
-    enum class Status
-    {
-        NOT_RUN,
-        SUCCESS,
-        EXPECTED_FAILURE,
-        FAILED,
-        CRASHED
-    };
+    return "Wall clock";
+}
 
-    /** Default constructor. */
-    TestResult() = default;
+void WallClockTimer::start()
+{
+    _start = std::chrono::high_resolution_clock::now();
+}
 
-    /** Initialise the result with a status.
-     *
-     * @param[in] status Execution status.
-     */
-    TestResult(Status status)
-        : status{ status }
-    {
-    }
+void WallClockTimer::stop()
+{
+    _stop = std::chrono::high_resolution_clock::now();
+}
 
-    /** Initialise the result with a status and profiling information.
-     *
-     * @param[in] status       Execution status.
-     * @param[in] measurements Profiling information.
-     */
-    TestResult(Status status, const Profiler::MeasurementsMap &measurements)
-        : status{ status }, measurements{ measurements }
-    {
-    }
-
-    Status                    status{ Status::NOT_RUN }; //< Execution status
-    Profiler::MeasurementsMap measurements{};            //< Profiling information
-};
+Instrument::Measurement WallClockTimer::measurement() const
+{
+    const auto delta = std::chrono::duration_cast<std::chrono::microseconds>(_stop - _start);
+    return Instrument::Measurement(delta.count(), "us");
+}
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TESTRESULT */

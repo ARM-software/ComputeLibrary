@@ -21,10 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TESTRESULT
-#define ARM_COMPUTE_TEST_TESTRESULT
+#ifndef ARM_COMPUTE_TEST_WALL_CLOCK_TIMER
+#define ARM_COMPUTE_TEST_WALL_CLOCK_TIMER
 
-#include "Profiler.h"
+#include "Instrument.h"
+
+#include <chrono>
 
 namespace arm_compute
 {
@@ -32,48 +34,20 @@ namespace test
 {
 namespace framework
 {
-/** Class to store results of a test.
- *
- * Currently the execution status and profiling information are stored.
- */
-struct TestResult
+/** Implementation of an instrument to measure elapsed wall-clock time in milliseconds. */
+class WallClockTimer : public Instrument
 {
-    /** Execution status of a test. */
-    enum class Status
-    {
-        NOT_RUN,
-        SUCCESS,
-        EXPECTED_FAILURE,
-        FAILED,
-        CRASHED
-    };
+public:
+    std::string id() const override;
+    void        start() override;
+    void        stop() override;
+    Measurement measurement() const override;
 
-    /** Default constructor. */
-    TestResult() = default;
-
-    /** Initialise the result with a status.
-     *
-     * @param[in] status Execution status.
-     */
-    TestResult(Status status)
-        : status{ status }
-    {
-    }
-
-    /** Initialise the result with a status and profiling information.
-     *
-     * @param[in] status       Execution status.
-     * @param[in] measurements Profiling information.
-     */
-    TestResult(Status status, const Profiler::MeasurementsMap &measurements)
-        : status{ status }, measurements{ measurements }
-    {
-    }
-
-    Status                    status{ Status::NOT_RUN }; //< Execution status
-    Profiler::MeasurementsMap measurements{};            //< Profiling information
+private:
+    std::chrono::high_resolution_clock::time_point _start{};
+    std::chrono::high_resolution_clock::time_point _stop{};
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TESTRESULT */
+#endif /* ARM_COMPUTE_TEST_WALL_CLOCK_TIMER */

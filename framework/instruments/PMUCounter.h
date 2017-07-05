@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TESTRESULT
-#define ARM_COMPUTE_TEST_TESTRESULT
+#ifndef ARM_COMPUTE_TEST_PMU_COUNTER
+#define ARM_COMPUTE_TEST_PMU_COUNTER
 
-#include "Profiler.h"
+#include "Instrument.h"
 
 namespace arm_compute
 {
@@ -32,48 +32,40 @@ namespace test
 {
 namespace framework
 {
-/** Class to store results of a test.
- *
- * Currently the execution status and profiling information are stored.
- */
-struct TestResult
+/** Implementation of an instrument to count CPU cycles. */
+class CycleCounter : public Instrument
 {
-    /** Execution status of a test. */
-    enum class Status
-    {
-        NOT_RUN,
-        SUCCESS,
-        EXPECTED_FAILURE,
-        FAILED,
-        CRASHED
-    };
+public:
+    /** Initialise the cycle counter. */
+    CycleCounter();
 
-    /** Default constructor. */
-    TestResult() = default;
+    std::string id() const override;
+    void        start() override;
+    void        stop() override;
+    Measurement measurement() const override;
 
-    /** Initialise the result with a status.
-     *
-     * @param[in] status Execution status.
-     */
-    TestResult(Status status)
-        : status{ status }
-    {
-    }
+private:
+    long      _fd{ -1 };
+    long long _cycles{ 0 };
+};
 
-    /** Initialise the result with a status and profiling information.
-     *
-     * @param[in] status       Execution status.
-     * @param[in] measurements Profiling information.
-     */
-    TestResult(Status status, const Profiler::MeasurementsMap &measurements)
-        : status{ status }, measurements{ measurements }
-    {
-    }
+/** Implementation of an instrument to count executed CPU instructions. */
+class InstructionCounter : public Instrument
+{
+public:
+    /** Initialise the instruction counter. */
+    InstructionCounter();
 
-    Status                    status{ Status::NOT_RUN }; //< Execution status
-    Profiler::MeasurementsMap measurements{};            //< Profiling information
+    std::string id() const override;
+    void        start() override;
+    void        stop() override;
+    Measurement measurement() const override;
+
+private:
+    long      _fd{ -1 };
+    long long _instructions{ 0 };
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TESTRESULT */
+#endif /* ARM_COMPUTE_TEST_PMU_COUNTER */

@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TESTRESULT
-#define ARM_COMPUTE_TEST_TESTRESULT
+#include "Instruments.h"
 
-#include "Profiler.h"
+#include <map>
+#include <stdexcept>
 
 namespace arm_compute
 {
@@ -32,48 +32,26 @@ namespace test
 {
 namespace framework
 {
-/** Class to store results of a test.
- *
- * Currently the execution status and profiling information are stored.
- */
-struct TestResult
+InstrumentType instrument_type_from_name(const std::string &name)
 {
-    /** Execution status of a test. */
-    enum class Status
+    static const std::map<std::string, InstrumentType> types =
     {
-        NOT_RUN,
-        SUCCESS,
-        EXPECTED_FAILURE,
-        FAILED,
-        CRASHED
+        { "all", InstrumentType::ALL },
+        { "none", InstrumentType::NONE },
+        { "wall_clock", InstrumentType::WALL_CLOCK_TIMER },
+        { "cycles", InstrumentType::PMU_CYCLE_COUNTER },
+        { "instructions", InstrumentType::PMU_INSTRUCTION_COUNTER },
     };
 
-    /** Default constructor. */
-    TestResult() = default;
-
-    /** Initialise the result with a status.
-     *
-     * @param[in] status Execution status.
-     */
-    TestResult(Status status)
-        : status{ status }
+    try
     {
+        return types.at(name);
     }
-
-    /** Initialise the result with a status and profiling information.
-     *
-     * @param[in] status       Execution status.
-     * @param[in] measurements Profiling information.
-     */
-    TestResult(Status status, const Profiler::MeasurementsMap &measurements)
-        : status{ status }, measurements{ measurements }
+    catch(const std::out_of_range &)
     {
+        throw std::invalid_argument(name);
     }
-
-    Status                    status{ Status::NOT_RUN }; //< Execution status
-    Profiler::MeasurementsMap measurements{};            //< Profiling information
-};
+}
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TESTRESULT */
