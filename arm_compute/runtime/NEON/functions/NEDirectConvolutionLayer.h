@@ -48,7 +48,7 @@ public:
     NEDirectConvolutionLayer();
     /** Set the input, weights, biases and output tensors.
       *
-      * @param[in, out] input     Input tensor. Data types supported: QS8/F32.
+      * @param[in, out] input     Input tensor. Data types supported: QS8/F16/F32.
       * @param[in]      weights   Set of kernels to convolve the input volume.
       *                           The 3rd dimension must be the same as the input's volume 3rd dimension.
       *                           Data type supported: Same as @p input.

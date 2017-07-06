@@ -40,7 +40,7 @@ NEDirectConvolutionLayer::NEDirectConvolutionLayer()
 
 void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::F16, DataType::F32);
 
     // Free accumulator
     if(_accumulator.buffer() != nullptr)

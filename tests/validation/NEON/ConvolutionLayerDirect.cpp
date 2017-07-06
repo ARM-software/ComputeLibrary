@@ -48,8 +48,11 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance_fp  = 1e-3f; /**< Tolerance for floating point tests */
-const float tolerance_qs8 = 1;     /**< Tolerance for fixed point tests */
+const float tolerance_fp32 = 1e-3f; /**< Tolerance for floating point tests */
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const float tolerance_fp16 = 0.01f; /**< Tolerance for half precision floating point tests */
+#endif                              /* ARM_COMPUTE_ENABLE_FP16 */
+const float tolerance_qs8 = 1;      /**< Tolerance for fixed point tests */
 
 /** Compute NEON direct convolution layer function.
  *
@@ -88,7 +91,7 @@ Tensor compute_convolution_layer(const TensorShape &src_shape, const TensorShape
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    if(dt == DataType::F32)
+    if(dt == DataType::F16 || dt == DataType::F32)
     {
         std::uniform_real_distribution<> distribution(-1.f, 1.f);
         library->fill(Accessor(src), distribution, 0);
@@ -129,6 +132,51 @@ BOOST_AUTO_TEST_SUITE(NEON)
 BOOST_AUTO_TEST_SUITE(ConvolutionLayer)
 BOOST_AUTO_TEST_SUITE(Direct)
 
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(W1x1,
+                     DirectConvolutionShapes() * boost::unit_test::data::make(DataType::F16) * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::make({ 1, 4, 8, 16 }),
+                     input_shape, dt, sx, sy, num_kernels)
+{
+    const unsigned int  kernel_size = 1;
+    const PadStrideInfo conv_info(sx, sy, 0, 0, DimensionRoundingType::FLOOR);
+    const TensorShape   w_shape(kernel_size, kernel_size, input_shape.z(), static_cast<unsigned int>(num_kernels));
+    const TensorShape   b_shape(static_cast<unsigned int>(num_kernels));
+    const TensorShape   d_shape(get_output_shape(input_shape, w_shape, conv_info));
+
+    Tensor dst = compute_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info);
+
+    RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, 0);
+
+    // Validate output
+    validate(NEAccessor(dst), ref);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * boost::unit_test::data::make(DataType::F16) * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(1, 3,
+                     1)
+                     * boost::unit_test::data::xrange(0, 2,
+                                                      1)
+                     * boost::unit_test::data::xrange(0, 2, 1) * boost::unit_test::data::make({ 1, 4, 8, 16 }),
+                     input_shape, dt, sx, sy, px, py, num_kernels)
+{
+    const unsigned int  kernel_size = 3;
+    const PadStrideInfo conv_info(sx, sy, px, py, DimensionRoundingType::FLOOR);
+    const TensorShape   w_shape(kernel_size, kernel_size, input_shape.z(), static_cast<unsigned int>(num_kernels));
+    const TensorShape   b_shape(static_cast<unsigned int>(num_kernels));
+    const TensorShape   d_shape(get_output_shape(input_shape, w_shape, conv_info));
+
+    Tensor dst = compute_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info);
+
+    RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, 0);
+
+    // Validate output
+    validate(NEAccessor(dst), ref, tolerance_fp16);
+}
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(W1x1,
@@ -166,7 +214,7 @@ BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * CNNFloatDataTypes() * boo
     RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, 0);
 
     // Validate output
-    validate(Accessor(dst), ref, tolerance_fp);
+    validate(Accessor(dst), ref, tolerance_fp32);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

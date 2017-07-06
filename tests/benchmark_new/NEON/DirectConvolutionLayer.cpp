@@ -37,14 +37,21 @@ namespace arm_compute
 {
 namespace test
 {
+namespace
+{
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
+const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+} // namespace
+
 using NEDirectConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvolutionLayer, Accessor>;
 
 TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(DirectConvolutionLayer, NEDirectConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::DirectConvolutionLayerDataset(),
-                                                                                        framework::dataset::make("DataType", { DataType::F32, DataType::QS8 })),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                framework::dataset::combine(framework::dataset::combine(datasets::DirectConvolutionLayerDataset(), data_types), framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()
 } // namespace test
