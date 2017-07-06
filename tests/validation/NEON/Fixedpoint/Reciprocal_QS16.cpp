@@ -48,7 +48,7 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance = 9.0f; /**< Tolerance value for comparing reference's output against implementation's output. */
+const float tolerance = 11.0f; /**< Tolerance value for comparing reference's output against implementation's output. */
 
 /** Compute Neon reciprocal function for signed 16 bit fixed point.
  *
