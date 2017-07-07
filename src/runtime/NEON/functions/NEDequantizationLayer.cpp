@@ -21,47 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEQUANTIZATIONLAYER_H__
-#define __ARM_COMPUTE_NEQUANTIZATIONLAYER_H__
 
-#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEMinMaxLocationKernel.h"
-#include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
-#include "arm_compute/runtime/Tensor.h"
-
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 
-namespace arm_compute
+using namespace arm_compute;
+
+NEDequantizationLayer::NEDequantizationLayer()
+    : _dequantize_kernel()
 {
-class ITensor;
-
-/** Basic function to simulate a quantization layer. This function calls the following NEON kernels:
- *
- * -# @ref NEMinMaxKernel
- * -# @ref NEQuantizationLayerKernel
- *
- */
-class NEQuantizationLayer : public IFunction
-{
-public:
-    /** Default constructor */
-    NEQuantizationLayer();
-    /** Set the input and output tensors.
-     *
-     * @param[in]  input  Source tensor. Data types supported: F32
-     * @param[out] output Destination tensor. Data types supported: U8
-     */
-    void configure(const ITensor *input, ITensor *output);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    NEQuantizationLayerKernel _quantize_kernel;
-    NEMinMaxKernel            _min_max_kernel;
-    float                     _min;
-    float                     _max;
-};
 }
-#endif /* __ARM_COMPUTE_NEQUANTIZATIONLAYER_H__ */
+
+void NEDequantizationLayer::configure(const ITensor *input, ITensor *output, const float *min, const float *max)
+{
+    // Configure kernels
+    _dequantize_kernel.configure(input, output, min, max);
+}
+
+void NEDequantizationLayer::run()
+{
+    NEScheduler::get().schedule(&_dequantize_kernel, Window::DimY);
+}
