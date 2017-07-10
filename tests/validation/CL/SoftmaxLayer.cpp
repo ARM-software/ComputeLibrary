@@ -49,10 +49,9 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-/** Tolerance for float operations */
-const float tolerance = 0.000001f;
-/** Tolerance for fixed point operations */
-const float tolerance_fixed_point = 2.f;
+const float tolerance      = 0.000001f; /** Tolerance for float operations */
+const float tolerance_qs8  = 2.f;       /** Tolerance for QS8 fixed point operations */
+const float tolerance_qs16 = 2.f;       /** Tolerance for QS16 fixed point operations */
 
 /** Compute OpenCL softmax layer function.
  *
@@ -160,33 +159,67 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * CNNFloatDataTypes(), shape, dt)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(Quantized)
+BOOST_AUTO_TEST_SUITE(QS8)
+// Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFixedPointDataTypes() * boost::unit_test::data::xrange(1, 6),
-                     shape, dt, fixed_point_position)
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::xrange(1, 6),
+                     shape, fixed_point_position)
 {
     // Compute function
-    CLTensor dst = compute_softmax_layer(shape, dt, fixed_point_position);
+    CLTensor dst = compute_softmax_layer(shape, DataType::QS8, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, DataType::QS8, fixed_point_position);
 
     // Validate output
-    validate(CLAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(CLAccessor(dst), ref_dst, tolerance_qs8);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * CNNFixedPointDataTypes() * boost::unit_test::data::xrange(1, 6),
-                     shape, dt, fixed_point_position)
+BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::xrange(1, 6),
+                     shape, fixed_point_position)
 {
     // Compute function
-    CLTensor dst = compute_softmax_layer(shape, dt, fixed_point_position);
+    CLTensor dst = compute_softmax_layer(shape, DataType::QS8, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, DataType::QS8, fixed_point_position);
 
     // Validate output
-    validate(CLAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(CLAccessor(dst), ref_dst, tolerance_qs8);
 }
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(QS16)
+// Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::xrange(1, 14),
+                     shape, fixed_point_position)
+{
+    // Compute function
+    CLTensor dst = compute_softmax_layer(shape, DataType::QS16, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, DataType::QS16, fixed_point_position);
+
+    // Validate output
+    validate(CLAccessor(dst), ref_dst, tolerance_qs16);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::xrange(1, 14),
+                     shape, fixed_point_position)
+{
+    // Compute function
+    CLTensor dst = compute_softmax_layer(shape, DataType::QS16, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, DataType::QS16, fixed_point_position);
+
+    // Validate output
+    validate(CLAccessor(dst), ref_dst, tolerance_qs16);
+}
+BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

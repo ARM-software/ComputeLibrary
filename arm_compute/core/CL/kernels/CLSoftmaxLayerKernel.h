@@ -36,7 +36,7 @@ class CLLogits1DMaxKernel : public ICLSimple2DKernel
 public:
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/F16/F32
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
@@ -58,7 +58,7 @@ public:
     CLLogits1DShiftExpSumKernel &operator=(CLLogits1DShiftExpSumKernel &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/F16/F32
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
      * @param[in]  max    Max values tensor. Data types supported: same as @p input
      * @param[out] output Destination tensor. Data types supported: same as @p input
      * @param[out] sum    Sum of 1D logits tensor. Data types supported: same as @p input
@@ -91,7 +91,7 @@ public:
     CLLogits1DNormKernel &operator=(CLLogits1DNormKernel &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/F16/F32
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
      * @param[in]  sum    Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */

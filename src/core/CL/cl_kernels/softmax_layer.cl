@@ -64,7 +64,7 @@ __constant uint16 idx16 = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
  * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  * @note In case the input is not multiple of 16 -DNON_MULTIPLE_OF_16 must be passed.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QS8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QS8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -125,7 +125,7 @@ __kernel void softmax_layer_max(
  * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  * @note In case the input is not multiple of 16 -DNON_MULTIPLE_OF_16 must be passed.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QS8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QS8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -210,7 +210,7 @@ __kernel void softmax_layer_shift_exp_sum(
  * @note Datatype must be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  *
- * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QS8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QS8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)

@@ -116,6 +116,11 @@ MAXQ_IMPL(qs8x2)
 MAXQ_IMPL(qs8x4)
 MAXQ_IMPL(qs8x8)
 MAXQ_IMPL(qs8x16)
+MAXQ_IMPL(qs16x1)
+MAXQ_IMPL(qs16x2)
+MAXQ_IMPL(qs16x4)
+MAXQ_IMPL(qs16x8)
+MAXQ_IMPL(qs16x16)
 
 #define MAX_OP_EXPAND_STR(a, b, type, size) max_##type##x##size((a), (b))
 #define MAX_OP_EXPAND(a, b, type, size) MAX_OP_EXPAND_STR(a, b, type, size)
@@ -163,6 +168,11 @@ SUBQ_SAT_IMPL(qs8x2)
 SUBQ_SAT_IMPL(qs8x4)
 SUBQ_SAT_IMPL(qs8x8)
 SUBQ_SAT_IMPL(qs8x16)
+SUBQ_SAT_IMPL(qs16x1)
+SUBQ_SAT_IMPL(qs16x2)
+SUBQ_SAT_IMPL(qs16x4)
+SUBQ_SAT_IMPL(qs16x8)
+SUBQ_SAT_IMPL(qs16x16)
 
 #define SUB_SAT_OP_EXPAND_STR(a, b, type, size) sub_sat_##type##x##size((a), (b))
 #define SUB_SAT_OP_EXPAND(a, b, type, size) SUB_SAT_OP_EXPAND_STR(a, b, type, size)
@@ -270,6 +280,7 @@ MLALQ_SAT_IMPL(qs16x8, qs32x8)
     }
 
 DIVQ_SAT_IMPL(qs8, qs8x16, qs16x16)
+DIVQ_SAT_IMPL(qs16, qs16x16, qs32x16)
 
 #define DIV_SAT_OP_EXPAND_STR(a, b, type, size, position) div_sat_##type##x##size((a), (b), (position))
 #define DIV_SAT_OP_EXPAND(a, b, type, size, position) DIV_SAT_OP_EXPAND_STR(a, b, type, size, position)
@@ -304,6 +315,7 @@ DIVQ_SAT_IMPL(qs8, qs8x16, qs16x16)
     }
 
 EXPQ_IMPL(qs8, qs8x16, 16)
+EXPQ_IMPL(qs16, qs16x16, 16)
 
 #define EXP_OP_EXPAND_STR(a, type, size, position) exp_sat_##type##x##size((a), (position))
 #define EXP_OP_EXPAND(a, type, size, position) EXP_OP_EXPAND_STR(a, type, size, position)
