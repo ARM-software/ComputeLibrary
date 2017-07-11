@@ -149,7 +149,7 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Set scale argument
-    unsigned int idx = 3 * num_arguments_per_2D_tensor(); //Skip the inputs and output parameters
+    unsigned int idx = 3 * num_arguments_per_3D_tensor(); //Skip the inputs and output parameters
 
     if(scale_int >= 0)
     {
@@ -183,15 +183,15 @@ void CLPixelWiseMultiplicationKernel::run(const Window &window, cl::CommandQueue
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    Window slice = window.first_slice_window_2D();
+    Window slice = window.first_slice_window_3D();
 
     do
     {
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input1, slice);
-        add_2D_tensor_argument(idx, _input2, slice);
-        add_2D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, _input1, slice);
+        add_3D_tensor_argument(idx, _input2, slice);
+        add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window.slide_window_slice_3D(slice));
 }
