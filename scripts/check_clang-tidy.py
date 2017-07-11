@@ -47,6 +47,7 @@ if __name__ == "__main__":
                    ("ReferenceCPP.cpp" in line and re.search(r"parameter '[^']+' is unused", line)) or
                    ("NEGEMMMatrixMultiplyKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                    ("NEPoolingLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
+                   ("NESoftmaxLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                    "3rdparty" in line):
                     continue
 

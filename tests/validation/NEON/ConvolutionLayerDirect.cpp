@@ -150,7 +150,7 @@ BOOST_DATA_TEST_CASE(W1x1,
     RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, 0);
 
     // Validate output
-    validate(NEAccessor(dst), ref);
+    validate(Accessor(dst), ref);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -172,7 +172,7 @@ BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * boost::unit_test::data::m
     RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, 0);
 
     // Validate output
-    validate(NEAccessor(dst), ref, tolerance_fp16);
+    validate(Accessor(dst), ref, tolerance_fp16);
 }
 BOOST_AUTO_TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */

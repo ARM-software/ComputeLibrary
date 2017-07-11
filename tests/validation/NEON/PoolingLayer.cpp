@@ -162,7 +162,7 @@ BOOST_DATA_TEST_CASE(RandomDataset,
     RawTensor ref_dst = Reference::compute_reference_pooling_layer(obj.src_shape, obj.dst_shape, dt, obj.info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f16, 0);
+    validate(Accessor(dst), ref_dst, tolerance_f16, 0);
 }
 BOOST_AUTO_TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */

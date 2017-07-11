@@ -49,7 +49,10 @@ using namespace arm_compute::test::validation;
 namespace
 {
 /** Tolerance for float operations */
-const float tolerance = 0.000001f;
+const float tolerance_f32 = 0.000001f;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const float tolerance_f16 = 0.0001f;
+#endif /* ARM_COMPUTE_ENABLE_FP16*/
 /** Tolerance for fixed point operations */
 const float tolerance_fixed_point = 2.f;
 
@@ -102,6 +105,23 @@ Tensor compute_softmax_layer(const TensorShape &shape, DataType dt, int fixed_po
 BOOST_AUTO_TEST_SUITE(NEON)
 BOOST_AUTO_TEST_SUITE(SoftmaxLayer)
 
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
+{
+    // Compute function
+    Tensor dst = compute_softmax_layer(shape, DataType::F16);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, DataType::F16);
+
+    // Validate output
+    validate(Accessor(dst), ref_dst, tolerance_f16);
+}
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16*/
+
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTypes(), shape, dt)
 {
@@ -142,7 +162,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFloatDataTypes(), shape, dt)
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt);
 
     // Validate output
-    validate(Accessor(dst), ref_dst, tolerance);
+    validate(Accessor(dst), ref_dst, tolerance_f32);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -155,7 +175,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * CNNFloatDataTypes(), shape, dt)
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt);
 
     // Validate output
-    validate(Accessor(dst), ref_dst, tolerance);
+    validate(Accessor(dst), ref_dst, tolerance_f32);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

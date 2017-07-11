@@ -10,7 +10,7 @@ inline float16x4_t vpmax_f16 (float16x4_t, float16x4_t)
   return vdup_n_f16(0);
 }
 
-inline float16x4_t vpadd_f16 (float16x4_t, float16x4_t)
+inline float16x4_t vpadd_f16(float16x4_t, float16x4_t)
 {
   return vdup_n_f16(0);
 }

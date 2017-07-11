@@ -238,7 +238,7 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
     RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, dt, act_info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(dt, act_function));
+    validate(Accessor(dst), ref_dst, activation_layer_tolerance(dt, act_function));
 }
 BOOST_AUTO_TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */

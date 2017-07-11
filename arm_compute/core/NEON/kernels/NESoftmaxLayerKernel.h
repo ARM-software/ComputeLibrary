@@ -39,7 +39,7 @@ public:
     NELogits1DMaxKernel();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
@@ -74,7 +74,7 @@ public:
     ~NELogits1DShiftExpSumKernel() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[in]  max    Max values tensor. Data types supported: same as @p input.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      * @param[out] sum    Sum of 1D logits tensor. Data types supported: same as @p input.
@@ -113,7 +113,7 @@ public:
     ~NELogits1DNormKernel() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[in]  sum    Sum tensor. The number of dimensions should be dim(input)-1. Data types supported: same as @p input.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      */
