@@ -108,7 +108,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     const unsigned int total_valid_width = border_size.left + valid_width + border_size.right;
 
     // Set static kernel arguments
-    unsigned int idx = num_arguments_per_2D_tensor(); //Skip the tensor parameters
+    unsigned int idx = num_arguments_per_3D_tensor(); //Skip the tensor parameters
     ICLKernel::add_argument<cl_uint>(idx, valid_width);
     ICLKernel::add_argument<cl_uint>(idx, valid_height);
     ICLKernel::add_argument<cl_int2>(idx, valid_region_coords);
@@ -163,13 +163,13 @@ void CLFillBorderKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
-    Window slice = window.first_slice_window_2D();
+    Window slice = window.first_slice_window_3D();
 
     do
     {
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _tensor, slice);
+        add_3D_tensor_argument(idx, _tensor, slice);
         enqueue(queue, *this, slice, cl::NullRange);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window.slide_window_slice_3D(slice));
 }

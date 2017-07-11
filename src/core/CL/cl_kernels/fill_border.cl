@@ -36,18 +36,20 @@
  * @param[in]     buf_step_x                        buf_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]     buf_stride_y                      Stride of the source image in Y dimension (in bytes)
  * @param[in]     buf_step_y                        buf_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     buf_stride_z                      Stride between images if batching images (in bytes)
+ * @param[in]     buf_step_z                        buf_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]     buf_offset_first_element_in_bytes The offset of the first element in the source image
  * @param[in]     width                             Width of the valid region of the image
  * @param[in]     height                            Height of the valid region of the image
  * @param[in]     start_pos                         XY coordinate indicating the start point of the valid region
  */
 __kernel void fill_image_borders_replicate(
-    IMAGE_DECLARATION(buf),
+    TENSOR3D_DECLARATION(buf),
     uint width,
     uint height,
     int2 start_pos)
 {
-    Image buf = CONVERT_TO_IMAGE_STRUCT_NO_STEP(buf);
+    Image buf = CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP(buf);
 
     // Update pointer to point to the starting point of the valid region
     buf.ptr += start_pos.y * buf.stride_y + start_pos.x * buf.stride_x;
@@ -109,6 +111,8 @@ __kernel void fill_image_borders_replicate(
  * @param[in]  buf_step_x                        buf_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  buf_stride_y                      Stride of the source image in Y dimension (in bytes)
  * @param[in]  buf_step_y                        buf_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  buf_stride_z                      Stride between images if batching images (in bytes)
+ * @param[in]  buf_step_z                        buf_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  buf_offset_first_element_in_bytes The offset of the first element in the source image
  * @param[in]  width                             Width of the valid region of the image
  * @param[in]  height                            Height of the valid region of the image
@@ -116,13 +120,13 @@ __kernel void fill_image_borders_replicate(
  * @param[in]  constant_value                    Constant value to use to fill the edges
  */
 __kernel void fill_image_borders_constant(
-    IMAGE_DECLARATION(buf),
+    TENSOR3D_DECLARATION(buf),
     uint      width,
     uint      height,
     int2      start_pos,
     DATA_TYPE constant_value)
 {
-    Image buf = CONVERT_TO_IMAGE_STRUCT_NO_STEP(buf);
+    Image buf = CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP(buf);
 
     // Update pointer to point to the starting point of the valid region
     buf.ptr += start_pos.y * buf.stride_y + start_pos.x * buf.stride_x;
