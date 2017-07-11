@@ -181,6 +181,11 @@ inline qint16x8_t vld1q_dup_qs16(const qint16_t *addr)
     return vld1q_dup_s16(addr);
 }
 
+inline qint16x8x2_t vld2q_qs16(const qint16_t *addr)
+{
+    return vld2q_s16(addr);
+}
+
 inline void vst1_qs8(qint8_t *addr, qint8x8_t b)
 {
     vst1_s8(addr, b);

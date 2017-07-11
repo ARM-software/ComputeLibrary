@@ -145,6 +145,14 @@ qint8x16_t vld1q_dup_qs8(const qint8_t *addr);
  */
 qint16x8_t vld1q_dup_qs16(const qint16_t *addr);
 
+/** Load two 16 bit fixed point vectors from memory (8x2 elements)
+ *
+ * @param[in] addr Memory address of the 16 bit fixed point vectors to load
+ *
+ * @return 16 bit fixed point vectors (8x2 elements)
+ */
+qint16x8x2_t vld2q_qs16(qint16_t *addr);
+
 /** Store a single 8 bit fixed point vector to memory (8 elements)
  *
  * @param[in] addr Memory address where the 8 bit fixed point vector should be stored

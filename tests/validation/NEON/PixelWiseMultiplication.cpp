@@ -334,7 +334,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * (1.f / 255.f) * ConvertPolicies()
 BOOST_AUTO_TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-BOOST_AUTO_TEST_SUITE(Float)
+BOOST_AUTO_TEST_SUITE(F32)
 BOOST_AUTO_TEST_SUITE(Scale255)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * (1.f / 255.f) * ConvertPolicies()
@@ -428,6 +428,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(Quantized)
+BOOST_AUTO_TEST_SUITE(QS8)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * DataType::QS8 *ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange<int>(1, 7),
                      shape, dt, convert_policy, rounding_policy, fixed_point_position)
@@ -441,6 +442,51 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * DataType::QS8 *ConvertPolicies() 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
 }
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * DataType::QS8 *ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange<int>(1, 7),
+                     shape, dt, convert_policy, rounding_policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, convert_policy, rounding_policy);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(QS16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * DataType::QS16 *ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange<int>(1, 15),
+                     shape, dt, convert_policy, rounding_policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, convert_policy, rounding_policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_fixed_point_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, fixed_point_position, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * DataType::QS16 *ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange<int>(1, 15),
+                     shape, dt, convert_policy, rounding_policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, convert_policy, rounding_policy);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

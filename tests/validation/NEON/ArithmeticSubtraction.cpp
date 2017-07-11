@@ -51,20 +51,21 @@ namespace
 {
 /** Compute Neon arithmetic subtraction function.
  *
- * @param[in] shape  Shape of the input and output tensors.
- * @param[in] dt_in0 Data type of first input tensor.
- * @param[in] dt_in1 Data type of second input tensor.
- * @param[in] dt_out Data type of the output tensor.
- * @param[in] policy Overflow policy of the operation.
+ * @param[in] shape                Shape of the input and output tensors.
+ * @param[in] dt_in0               Data type of first input tensor.
+ * @param[in] dt_in1               Data type of second input tensor.
+ * @param[in] dt_out               Data type of the output tensor.
+ * @param[in] policy               Overflow policy of the operation.
+ * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16 (default = 0).
  *
  * @return Computed output tensor.
  */
-Tensor compute_arithmetic_subtraction(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy policy)
+Tensor compute_arithmetic_subtraction(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy policy, int fixed_point_position = 0)
 {
     // Create tensors
-    Tensor src1 = create_tensor<Tensor>(shape, dt_in0);
-    Tensor src2 = create_tensor<Tensor>(shape, dt_in1);
-    Tensor dst  = create_tensor<Tensor>(shape, dt_out);
+    Tensor src1 = create_tensor<Tensor>(shape, dt_in0, 1, fixed_point_position);
+    Tensor src2 = create_tensor<Tensor>(shape, dt_in1, 1, fixed_point_position);
+    Tensor dst  = create_tensor<Tensor>(shape, dt_out, 1, fixed_point_position);
 
     // Create and configure function
     NEArithmeticSubtraction sub;
@@ -184,7 +185,67 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Da
 }
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(F32)
+BOOST_AUTO_TEST_SUITE(Quantized)
+BOOST_AUTO_TEST_SUITE(QS8)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * ConvertPolicies() * boost::unit_test::data::xrange(1, 7),
+                     shape, policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_arithmetic_subtraction(shape, DataType::QS8, DataType::QS8, DataType::QS8, policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_arithmetic_subtraction(shape, DataType::QS8, DataType::QS8, DataType::QS8, policy, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * ConvertPolicies() * boost::unit_test::data::xrange(1, 7),
+                     shape, policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_arithmetic_subtraction(shape, DataType::QS8, DataType::QS8, DataType::QS8, policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_arithmetic_subtraction(shape, DataType::QS8, DataType::QS8, DataType::QS8, policy, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(QS16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * ConvertPolicies() * boost::unit_test::data::xrange(1, 15),
+                     shape, policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_arithmetic_subtraction(shape, DataType::QS16, DataType::QS16, DataType::QS16, policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_arithmetic_subtraction(shape, DataType::QS16, DataType::QS16, DataType::QS16, policy, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * ConvertPolicies() * boost::unit_test::data::xrange(1, 15),
+                     shape, policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_arithmetic_subtraction(shape, DataType::QS16, DataType::QS16, DataType::QS16, policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_arithmetic_subtraction(shape, DataType::QS16, DataType::QS16, DataType::QS16, policy, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
                      shape, policy)
