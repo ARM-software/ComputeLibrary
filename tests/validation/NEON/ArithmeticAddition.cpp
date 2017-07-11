@@ -184,6 +184,22 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Da
 }
 BOOST_AUTO_TEST_SUITE_END()
 
+#ifdef ARM_COMPUTE_ENABLE_FP16
+BOOST_AUTO_TEST_SUITE(F16)
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
+{
+    // Compute function
+    Tensor dst = compute_arithmetic_addition(shape, DataType::F16, DataType::F16, DataType::F16, ConvertPolicy::WRAP);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::F16, DataType::F16, DataType::F16, ConvertPolicy::WRAP);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_AUTO_TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
 BOOST_AUTO_TEST_SUITE(F32)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),

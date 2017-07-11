@@ -112,6 +112,45 @@ inline int16x8x2_t vqadd2q_s16(const int16x8x2_t &a, const int16x8x2_t &b)
     return res;
 }
 
+#ifdef ARM_COMPUTE_ENABLE_FP16
+inline float16x8x2_t vadd2q_f16(const float16x8x2_t &a, const float16x8x2_t &b)
+{
+    const float16x8x2_t res =
+    {
+        {
+            vaddq_f16(a.val[0], b.val[0]),
+            vaddq_f16(a.val[1], b.val[1])
+        }
+    };
+
+    return res;
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
+void add_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    Iterator input1(in1, window);
+    Iterator input2(in2, window);
+    Iterator output(out, window);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const float16x8x2_t a = vld2q_f16(reinterpret_cast<const float16_t *>(input1.ptr()));
+        const float16x8x2_t b = vld2q_f16(reinterpret_cast<const float16_t *>(input2.ptr()));
+
+        vst2q_f16(reinterpret_cast<float16_t *>(output.ptr()), vadd2q_f16(a, b));
+    },
+    input1, input2, output);
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
+    ARM_COMPUTE_UNUSED(in1);
+    ARM_COMPUTE_UNUSED(in2);
+    ARM_COMPUTE_UNUSED(out);
+    ARM_COMPUTE_UNUSED(window);
+    ARM_COMPUTE_ERROR("Not supported, recompile the library with arch=arm64-v8.2-a");
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+}
+
 void add_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     Iterator input1(in1, window);
@@ -302,6 +341,10 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
         {
             set_format_if_unknown(*output->info(), Format::S16);
         }
+        else if(input1->info()->data_type() == DataType::F16 || input2->info()->data_type() == DataType::F16)
+        {
+            set_format_if_unknown(*output->info(), Format::F16);
+        }
         else if(input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32)
         {
             set_format_if_unknown(*output->info(), Format::F32);
@@ -309,9 +352,9 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
     }
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input1, input2, output);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::S16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::S16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->data_type() == DataType::U8 && (input1->info()->data_type() != DataType::U8 || input2->info()->data_type() != DataType::U8),
                              "Output can only be U8 if both inputs are U8");
 
@@ -329,6 +372,9 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
         { "add_saturate_S16_S16_S16", &add_saturate_S16_S16_S16 },
         { "add_wrap_F32_F32_F32", &add_F32_F32_F32 },
         { "add_saturate_F32_F32_F32", &add_F32_F32_F32 },
+        { "add_wrap_F16_F16_F16", &add_F16_F16_F16 },
+        { "add_saturate_F16_F16_F16", &add_F16_F16_F16 },
+
     };
 
     _input1 = input1;
