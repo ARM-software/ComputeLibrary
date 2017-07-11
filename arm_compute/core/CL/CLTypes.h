@@ -37,5 +37,15 @@ enum class GPUTarget
     T800          = 0x130,
     G70           = 0x210
 };
+
+/* Available OpenCL Version */
+enum class CLVersion
+{
+    CL10,   /* the OpenCL 1.0 */
+    CL11,   /* the OpenCL 1.1 */
+    CL12,   /* the OpenCL 1.2 */
+    CL20,   /* the OpenCL 2.0 and above */
+    UNKNOWN /* unkown version */
+};
 }
 #endif /* __ARM_COMPUTE_CL_TYPES_H__ */

@@ -28,7 +28,7 @@
 using namespace arm_compute;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD)
+    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false)
 {
 }
 
@@ -40,6 +40,10 @@ CLScheduler &CLScheduler::get()
 
 void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
 {
+    ARM_COMPUTE_ERROR_ON_MSG(!_is_initialised,
+                             "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
+                             or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
+
     kernel.run(kernel.window(), _queue);
 
     if(flush)

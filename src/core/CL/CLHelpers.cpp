@@ -166,4 +166,57 @@ GPUTarget get_arch_from_target(GPUTarget target)
 {
     return (target & GPUTarget::GPU_ARCH_MASK);
 }
+
+bool non_uniform_workgroup_support(const cl::Device &device)
+{
+    std::vector<char> extension;
+    size_t            extension_size = 0;
+    cl_int            err            = clGetDeviceInfo(device.get(), CL_DEVICE_EXTENSIONS, 0, nullptr, &extension_size);
+    ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (extension_size == 0), "clGetDeviceInfo failed to return valid information");
+    // Resize vector
+    extension.resize(extension_size);
+    // Query extension
+    err = clGetDeviceInfo(device.get(), CL_DEVICE_EXTENSIONS, extension_size, extension.data(), nullptr);
+    ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetDeviceInfo failed to return valid information");
+    ARM_COMPUTE_UNUSED(err);
+
+    std::string extension_str(extension.begin(), extension.end());
+    auto        pos = extension_str.find("cl_arm_non_uniform_work_group_size");
+    return (pos != std::string::npos);
+}
+
+CLVersion get_cl_version(const cl::Device &device)
+{
+    std::vector<char> version;
+    size_t            version_size = 0;
+    cl_int            err          = clGetDeviceInfo(device.get(), CL_DEVICE_VERSION, 0, nullptr, &version_size);
+    ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (version_size == 0), "clGetDeviceInfo failed to return valid information");
+    // Resize vector
+    version.resize(version_size);
+    // Query version
+    err = clGetDeviceInfo(device.get(), CL_DEVICE_VERSION, version_size, version.data(), nullptr);
+    ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetDeviceInfo failed to return valid information");
+    ARM_COMPUTE_UNUSED(err);
+
+    std::string version_str(version.begin(), version.end());
+    if(version_str.find("OpenCL 2") != std::string::npos)
+    {
+        return CLVersion::CL20;
+    }
+    else if(version_str.find("OpenCL 1.2") != std::string::npos)
+    {
+        return CLVersion::CL12;
+    }
+    else if(version_str.find("OpenCL 1.1") != std::string::npos)
+    {
+        return CLVersion::CL11;
+    }
+    else if(version_str.find("OpenCL 1.0") != std::string::npos)
+    {
+        return CLVersion::CL10;
+    }
+
+    return CLVersion::UNKNOWN;
+}
+
 } // namespace arm_compute

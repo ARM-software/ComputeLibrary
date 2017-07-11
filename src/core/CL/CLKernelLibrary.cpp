@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Utils.h"
 
@@ -514,9 +515,25 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
         ARM_COMPUTE_ERROR("Kernel %s not found in the CLKernelLibrary", kernel_name.c_str());
     }
 
+    std::string concat_str;
+
+    if(non_uniform_workgroup_support(_device))
+    {
+        concat_str += " -cl-arm-non-uniform-work-group-size ";
+    }
+    else if(get_cl_version(_device) == CLVersion::CL20)
+    {
+        concat_str += " -cl-std=CL2.0 ";
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Non uniform workgroup size is not supported!!");
+    }
+
     // Check if the program has been built before with same build options.
-    const std::string program_name       = kernel_program_it->second;
-    const std::string build_options      = stringify_set(build_options_set);
+    const std::string program_name  = kernel_program_it->second;
+    const std::string build_options = stringify_set(build_options_set) + concat_str;
+
     const std::string built_program_name = program_name + "_" + build_options;
     auto              built_program_it   = _built_programs_map.find(built_program_name);
 
@@ -591,7 +608,7 @@ const Program &CLKernelLibrary::load_program(const std::string &program_name) co
 
 std::string CLKernelLibrary::stringify_set(const StringSet &s) const
 {
-    std::string concat_set = "-cl-arm-non-uniform-work-group-size ";
+    std::string concat_set;
 
 #ifndef EMBEDDED_KERNELS
     concat_set += "-I" + _kernel_path + " ";

@@ -102,5 +102,20 @@ GPUTarget get_target_from_device(cl::Device &device);
  * @return the GPU target which shows the arch
  */
 GPUTarget get_arch_from_target(GPUTarget target);
+
+/** Helper function to get the highest OpenCL version supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return the highest OpenCL version supported
+ */
+CLVersion get_cl_version(const cl::Device &device);
+/** Helper function to check whether the arm_non_uniform_work_group_size extension is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the extension is supported
+ */
+bool non_uniform_workgroup_support(const cl::Device &device);
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

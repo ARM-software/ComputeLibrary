@@ -72,9 +72,10 @@ public:
     void init(cl::Context context = cl::Context::getDefault(), cl::CommandQueue queue = cl::CommandQueue::getDefault(),
               cl::Device device = cl::Device::getDefault())
     {
-        _context = std::move(context);
-        _queue   = std::move(queue);
-        _target  = get_target_from_device(device);
+        _context        = std::move(context);
+        _queue          = std::move(queue);
+        _target         = get_target_from_device(device);
+        _is_initialised = true;
     }
 
     /** Accessor for the associated CL context.
@@ -83,6 +84,7 @@ public:
      */
     cl::Context &context()
     {
+        ARM_COMPUTE_ERROR_ON(!_is_initialised);
         return _context;
     }
 
@@ -101,6 +103,7 @@ public:
      */
     cl::CommandQueue &queue()
     {
+        ARM_COMPUTE_ERROR_ON(!_is_initialised);
         return _queue;
     }
 
@@ -153,6 +156,7 @@ private:
     cl::Context      _context;
     cl::CommandQueue _queue;
     GPUTarget        _target;
+    bool             _is_initialised;
 };
 }
 #endif /* __ARM_COMPUTE_CLSCHEDULER_H__ */
