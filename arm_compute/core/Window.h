@@ -326,6 +326,17 @@ public:
         return _num_threads;
     }
 
+    /* Collapse the dimensions higher than @p first if possible.
+     *
+     * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
+     *
+     * @param[in] full_window Full window @p window has been created from.
+     * @param[in] first       Dimensions into which the following are collapsed.
+     *
+     * @return Collapsed window.
+     */
+    Window collapse_if_possible(const Window &full_window, size_t first) const;
+
 private:
     /** First slice of the window
      *

@@ -99,7 +99,8 @@ void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    Window slice = window.first_slice_window_3D();
+    Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window slice     = collapsed.first_slice_window_3D();
 
     do
     {
@@ -111,5 +112,5 @@ void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         }
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_3D(slice));
+    while(collapsed.slide_window_slice_3D(slice));
 }

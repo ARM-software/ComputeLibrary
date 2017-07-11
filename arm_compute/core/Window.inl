@@ -43,6 +43,35 @@ inline void Window::set(const size_t dimension, const Window::Dimension &dim)
     _dims[dimension] = dim;
 }
 
+inline Window Window::collapse_if_possible(const Window &full_window, size_t first) const
+{
+    bool   is_collapsable = false;
+    Window collapsed;
+    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
+    {
+        if(is_collapsable)
+        {
+            collapsed.set(first, Window::Dimension(collapsed[first].end() * _dims[d].start(), collapsed[first].end() * _dims[d].end()));
+        }
+        else
+        {
+            collapsed.set(d, _dims[d]);
+        }
+
+        if(is_collapsable || d == first) // Try to start collapsing from this dimension
+        {
+            // The _dims's dimension must match the full _dims dimension to be collapsable:
+            is_collapsable = _dims[d].start() == 0 && _dims[d].start() == full_window[d].start()
+                             && full_window[d].end() == _dims[d].end();
+        }
+        else
+        {
+            is_collapsable = false;
+        }
+    }
+    return collapsed;
+}
+
 inline void Window::shift(const size_t dimension, const int shift_value)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
