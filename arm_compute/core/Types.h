@@ -505,6 +505,7 @@ public:
         TANH,         /**< Hyperbolic tangent */
         RELU,         /**< Rectifier */
         BOUNDED_RELU, /**< Bounded Rectifier */
+        LEAKY_RELU,   /**< Leaky Rectifier */
         SOFT_RELU,    /**< Soft Rectifier */
         ABS,          /**< Absolute */
         SQUARE,       /**< Square */

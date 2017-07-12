@@ -868,9 +868,6 @@ void activation_layer(const Tensor<T> &in, Tensor<T> &out, ActivationLayerInfo a
             case ActivationLayerInfo::ActivationFunction::ABS:
                 out[i] = std::abs(x);
                 break;
-            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-                out[i] = std::min<T>(a, std::max<T>(0, x));
-                break;
             case ActivationLayerInfo::ActivationFunction::LINEAR:
                 out[i] = a * x + b;
                 break;
@@ -879,6 +876,12 @@ void activation_layer(const Tensor<T> &in, Tensor<T> &out, ActivationLayerInfo a
                 break;
             case ActivationLayerInfo::ActivationFunction::RELU:
                 out[i] = std::max<T>(0, x);
+                break;
+            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
+                out[i] = std::min<T>(a, std::max<T>(0, x));
+                break;
+            case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
+                out[i] = (x > 0) ? x : a * x;
                 break;
             case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
                 out[i] = std::log(static_cast<T>(1) + std::exp(x));
@@ -919,9 +922,6 @@ void activation_layer(const Tensor<T> &in, Tensor<T> &out, ActivationLayerInfo a
             case ActivationLayerInfo::ActivationFunction::ABS:
                 out[i] = abs(x).raw();
                 break;
-            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-                out[i] = min(a, max(const_0, x)).raw();
-                break;
             case ActivationLayerInfo::ActivationFunction::LINEAR:
                 out[i] = add(b, mul(a, x)).raw();
                 break;
@@ -930,6 +930,12 @@ void activation_layer(const Tensor<T> &in, Tensor<T> &out, ActivationLayerInfo a
                 break;
             case ActivationLayerInfo::ActivationFunction::RELU:
                 out[i] = max(const_0, x).raw();
+                break;
+            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
+                out[i] = min(a, max(const_0, x)).raw();
+                break;
+            case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
+                out[i] = (x > const_0) ? x.raw() : mul(a, x).raw();
                 break;
             case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
                 out[i] = log(const_1 + exp(x)).raw();

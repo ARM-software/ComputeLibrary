@@ -76,6 +76,11 @@ inline TYPE brelu_op(TYPE x)
 {
     return min((TYPE)A_VAL, max(0, x));
 }
+// Leaky RELU Activation
+inline TYPE lrelu_op(TYPE x)
+{
+    return select(MUL_OP((TYPE)A_VAL, x), x, x > (TYPE)0);
+}
 // Soft RELU Activation
 inline TYPE srelu_op(TYPE x)
 {

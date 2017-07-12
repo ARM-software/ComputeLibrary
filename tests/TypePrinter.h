@@ -197,9 +197,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::ABS:
             os << "ABS";
             break;
-        case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-            os << "BOUNDED_RELU";
-            break;
         case ActivationLayerInfo::ActivationFunction::LINEAR:
             os << "LINEAR";
             break;
@@ -208,6 +205,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
             break;
         case ActivationLayerInfo::ActivationFunction::RELU:
             os << "RELU";
+            break;
+        case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
+            os << "BOUNDED_RELU";
+            break;
+        case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
+            os << "LEAKY_RELU";
             break;
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
             os << "SOFT_RELU";

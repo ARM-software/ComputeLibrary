@@ -40,17 +40,18 @@ namespace test
  * Can be used as input for Boost data test cases to automatically run a test
  * case on all activation functions.
  */
-class ActivationFunctions final : public GenericDataset<ActivationLayerInfo::ActivationFunction, 9>
+class ActivationFunctions final : public GenericDataset<ActivationLayerInfo::ActivationFunction, 10>
 {
 public:
     ActivationFunctions()
         : GenericDataset
     {
         ActivationLayerInfo::ActivationFunction::ABS,
-        ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
         ActivationLayerInfo::ActivationFunction::LINEAR,
         ActivationLayerInfo::ActivationFunction::LOGISTIC,
         ActivationLayerInfo::ActivationFunction::RELU,
+        ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+        ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
         ActivationLayerInfo::ActivationFunction::SOFT_RELU,
         ActivationLayerInfo::ActivationFunction::SQRT,
         ActivationLayerInfo::ActivationFunction::SQUARE,

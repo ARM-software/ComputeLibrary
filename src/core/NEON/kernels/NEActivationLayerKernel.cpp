@@ -73,6 +73,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, float> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, float> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, float> },
+        { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float> },
@@ -86,6 +87,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qint8_t> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qint8_t> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qint8_t> },
+        { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, qint8_t> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, qint8_t> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, qint8_t> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, qint8_t> },
@@ -99,6 +101,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qint16_t> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qint16_t> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qint16_t> },
+        { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, qint16_t> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, qint16_t> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, qint16_t> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, qint16_t> },
@@ -177,17 +180,6 @@ typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationL
                     }
                 };
                 break;
-            case ActivationFunction::BOUNDED_RELU:
-                tmp =
-                {
-                    {
-                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[0])),
-                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[1])),
-                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[2])),
-                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[3])),
-                    }
-                };
-                break;
             case ActivationFunction::LINEAR:
                 tmp =
                 {
@@ -218,6 +210,28 @@ typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationL
                         vmaxq_f32(CONST_0, in.val[1]),
                         vmaxq_f32(CONST_0, in.val[2]),
                         vmaxq_f32(CONST_0, in.val[3]),
+                    }
+                };
+                break;
+            case ActivationFunction::BOUNDED_RELU:
+                tmp =
+                {
+                    {
+                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[0])),
+                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[1])),
+                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[2])),
+                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[3])),
+                    }
+                };
+                break;
+            case ActivationFunction::LEAKY_RELU:
+                tmp =
+                {
+                    {
+                        vbslq_f32(vcgtq_f32(in.val[0], CONST_0), in.val[0], vmulq_f32(a, in.val[0])),
+                        vbslq_f32(vcgtq_f32(in.val[1], CONST_0), in.val[1], vmulq_f32(a, in.val[1])),
+                        vbslq_f32(vcgtq_f32(in.val[2], CONST_0), in.val[2], vmulq_f32(a, in.val[2])),
+                        vbslq_f32(vcgtq_f32(in.val[3], CONST_0), in.val[3], vmulq_f32(a, in.val[3])),
                     }
                 };
                 break;
@@ -299,9 +313,6 @@ typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivation
             case ActivationFunction::ABS:
                 tmp = vqabsq_qs8(in);
                 break;
-            case ActivationFunction::BOUNDED_RELU:
-                tmp = vminq_qs8(a, vmaxq_qs8(CONST_0, in));
-                break;
             case ActivationFunction::LINEAR:
                 tmp = vqmlaq_qs8(b, a, in, fixed_point_position);
                 break;
@@ -310,6 +321,12 @@ typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivation
                 break;
             case ActivationFunction::RELU:
                 tmp = vmaxq_qs8(CONST_0, in);
+                break;
+            case ActivationFunction::BOUNDED_RELU:
+                tmp = vminq_qs8(a, vmaxq_qs8(CONST_0, in));
+                break;
+            case ActivationFunction::LEAKY_RELU:
+                tmp = vbslq_s8(vcgtq_s8(in, CONST_0), in, vmulq_qs8(a, in, fixed_point_position));
                 break;
             case ActivationFunction::SOFT_RELU:
                 tmp = vlogq_qs8(vqaddq_qs8(CONST_1, vqexpq_qs8(in, fixed_point_position)), fixed_point_position);
@@ -363,15 +380,6 @@ typename std::enable_if<std::is_same<T, int16_t>::value, void>::type NEActivatio
                     }
                 };
                 break;
-            case ActivationFunction::BOUNDED_RELU:
-                tmp =
-                {
-                    {
-                        vminq_qs16(a, vmaxq_qs16(CONST_0, in.val[0])),
-                        vminq_qs16(a, vmaxq_qs16(CONST_0, in.val[1])),
-                    }
-                };
-                break;
             case ActivationFunction::LINEAR:
                 tmp =
                 {
@@ -396,6 +404,24 @@ typename std::enable_if<std::is_same<T, int16_t>::value, void>::type NEActivatio
                     {
                         vmaxq_qs16(CONST_0, in.val[0]),
                         vmaxq_qs16(CONST_0, in.val[1]),
+                    }
+                };
+                break;
+            case ActivationFunction::BOUNDED_RELU:
+                tmp =
+                {
+                    {
+                        vminq_qs16(a, vmaxq_qs16(CONST_0, in.val[0])),
+                        vminq_qs16(a, vmaxq_qs16(CONST_0, in.val[1])),
+                    }
+                };
+                break;
+            case ActivationFunction::LEAKY_RELU:
+                tmp =
+                {
+                    {
+                        vbslq_s16(vcgtq_s16(in.val[0], CONST_0), in.val[0], vmulq_qs16(a, in.val[0], fixed_point_position)),
+                        vbslq_s16(vcgtq_s16(in.val[1], CONST_0), in.val[1], vmulq_qs16(a, in.val[1], fixed_point_position)),
                     }
                 };
                 break;
