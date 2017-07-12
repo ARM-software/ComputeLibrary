@@ -283,10 +283,11 @@ RawTensor Reference::compute_reference_box3x3(const TensorShape &shape, BorderMo
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position)
+RawTensor Reference::compute_reference_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy,
+                                                     uint32_t shift, uint32_t fixed_point_position_in, uint32_t fixed_point_position_out)
 {
-    RawTensor ref_src = library->get(shape, dt_in, 1, fixed_point_position);
-    RawTensor ref_dst = library->get(shape, dt_out, 1, fixed_point_position);
+    RawTensor ref_src = library->get(shape, dt_in, 1, fixed_point_position_in);
+    RawTensor ref_dst = library->get(shape, dt_out, 1, fixed_point_position_out);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);

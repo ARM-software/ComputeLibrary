@@ -51,20 +51,22 @@ namespace
 {
 /** Compute Neon depth convert function.
  *
- * @param[in] shape                Shape of the input and output tensors.
- * @param[in] dt_in                Data type of input tensor.
- * @param[in] dt_out               Data type of the output tensor.
- * @param[in] policy               Conversion policy.
- * @param[in] shift                Value for down/up conversions. Must be 0 <= shift < 8.
- * @param[in] fixed_point_position Fixed point position.
+ * @param[in] shape                    Shape of the input and output tensors.
+ * @param[in] dt_in                    Data type of input tensor.
+ * @param[in] dt_out                   Data type of the output tensor.
+ * @param[in] policy                   Conversion policy.
+ * @param[in] shift                    Value for down/up conversions. Must be 0 <= shift < 8.
+ * @param[in] fixed_point_position_in  (Optional) Fixed point position for the input tensor.
+ * @param[in] fixed_point_position_out (Optional) Fixed point position for the output tensor.
  *
  * @return Computed output tensor.
  */
-Tensor compute_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position)
+Tensor compute_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy,
+                             uint32_t shift, uint32_t fixed_point_position_in = 0, uint32_t fixed_point_position_out = 0)
 {
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, dt_in, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, dt_out, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, dt_in, 1, fixed_point_position_in);
+    Tensor dst = create_tensor<Tensor>(shape, dt_out, 1, fixed_point_position_out);
 
     // Create and configure function
     NEDepthConvert depth_convert;
@@ -87,20 +89,22 @@ Tensor compute_depth_convert(const TensorShape &shape, DataType dt_in, DataType 
 }
 /** Configure and validate region/padding function.
  *
- * @param[in] shape                Shape of the input and output tensors.
- * @param[in] dt_in                Data type of input tensor.
- * @param[in] dt_out               Data type of the output tensor.
- * @param[in] policy               Conversion policy.
- * @param[in] shift                Value for down/up conversions. Must be 0 <= shift < 8.
- * @param[in] fixed_point_position Fixed point position.
+ * @param[in] shape                    Shape of the input and output tensors.
+ * @param[in] dt_in                    Data type of input tensor.
+ * @param[in] dt_out                   Data type of the output tensor.
+ * @param[in] policy                   Conversion policy.
+ * @param[in] shift                    Value for down/up conversions. Must be 0 <= shift < 8.
+ * @param[in] fixed_point_position_in  (Optional) Fixed point position for the input tensor.
+ * @param[in] fixed_point_position_out (Optional) Fixed point position for the output tensor.
  *
  */
 
-void compute_configure_validate(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position)
+void compute_configure_validate(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy,
+                                uint32_t shift, uint32_t fixed_point_position_in = 0, uint32_t fixed_point_position_out = 0)
 {
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, dt_in, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, dt_out, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, dt_in, 1, fixed_point_position_in);
+    Tensor dst = create_tensor<Tensor>(shape, dt_out, 1, fixed_point_position_out);
 
     BOOST_TEST(src.info()->is_resizable());
     BOOST_TEST(dst.info()->is_resizable());
@@ -125,6 +129,32 @@ void compute_configure_validate(const TensorShape &shape, DataType dt_in, DataTy
 BOOST_AUTO_TEST_SUITE(NEON)
 BOOST_AUTO_TEST_SUITE(DepthConvert)
 
+BOOST_AUTO_TEST_SUITE(QS8_to_QS8)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * (boost::unit_test::data::make({ 1, 3, 5, 6 }) ^ boost::unit_test::data::make({ 6, 5, 1, 3 })),
+                     shape, policy, fixed_point_position_in, fixed_point_position_out)
+{
+    // Compute configure and validate region/padding
+    compute_configure_validate(shape, DataType::QS8, DataType::QS8, policy, 0, fixed_point_position_in, fixed_point_position_out);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * (boost::unit_test::data::make({ 1, 3, 5, 6 }) ^ boost::unit_test::data::make({ 6, 5, 1, 3 })),
+                     shape, policy, fixed_point_position_in, fixed_point_position_out)
+{
+    // Compute function
+    Tensor dst = compute_depth_convert(shape, DataType::QS8, DataType::QS8, policy, 0, fixed_point_position_in, fixed_point_position_out);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::QS8, policy, 0, fixed_point_position_in, fixed_point_position_out);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE(QS8_to_F32)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
@@ -132,7 +162,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, fixed_point_position)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
+    compute_configure_validate(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -141,10 +171,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
+    Tensor dst = compute_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -156,15 +186,14 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
+    Tensor dst = compute_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
 }
-
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(F32_to_QS8)
@@ -174,7 +203,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, fixed_point_position)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
+    compute_configure_validate(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position, fixed_point_position);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -183,10 +212,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
+    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -198,10 +227,36 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
+    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position, fixed_point_position);
+
+    // Validate output
+    validate(NEAccessor(dst), ref_dst);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(QS16_to_QS16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * (boost::unit_test::data::make({ 3, 6, 7, 13, 14 }) ^ boost::unit_test::data::make({ 5, 10, 14, 4, 7 })),
+                     shape, policy, fixed_point_position_in, fixed_point_position_out)
+{
+    // Compute configure and validate region/padding
+    compute_configure_validate(shape, DataType::QS16, DataType::QS16, policy, 0, fixed_point_position_in, fixed_point_position_out);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
+                     * (boost::unit_test::data::make({ 3, 6, 7, 13, 14 }) ^ boost::unit_test::data::make({ 5, 10, 14, 4, 7 })),
+                     shape, policy, fixed_point_position_in, fixed_point_position_out)
+{
+    // Compute function
+    Tensor dst = compute_depth_convert(shape, DataType::QS16, DataType::QS16, policy, 0, fixed_point_position_in, fixed_point_position_out);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::QS16, policy, 0, fixed_point_position_in, fixed_point_position_out);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -215,7 +270,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, fixed_point_position)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+    compute_configure_validate(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -224,10 +279,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+    Tensor dst = compute_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -239,10 +294,10 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+    Tensor dst = compute_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -257,7 +312,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, fixed_point_position)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+    compute_configure_validate(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position, fixed_point_position);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -266,10 +321,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -281,10 +336,10 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, fixed_point_position)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -308,10 +363,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::U16, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::U16, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::U16, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::U16, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -322,10 +377,10 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::U16, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::U16, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::U16, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::U16, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -339,7 +394,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, shift)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::U8, DataType::S16, policy, shift, 0);
+    compute_configure_validate(shape, DataType::U8, DataType::S16, policy, shift);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -348,10 +403,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S16, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S16, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S16, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S16, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -363,10 +418,10 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S16, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S16, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S16, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S16, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -380,7 +435,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, shift)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::U8, DataType::S32, policy, shift, 0);
+    compute_configure_validate(shape, DataType::U8, DataType::S32, policy, shift);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -389,10 +444,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S32, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S32, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S32, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S32, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -404,10 +459,10 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S32, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S32, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S32, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S32, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -421,7 +476,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, shift)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::U16, DataType::U8, policy, shift, 0);
+    compute_configure_validate(shape, DataType::U16, DataType::U8, policy, shift);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -430,10 +485,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U8, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U8, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U8, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U8, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -445,10 +500,10 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U8, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U8, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U8, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U8, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -462,7 +517,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, shift)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::U16, DataType::U32, policy, shift, 0);
+    compute_configure_validate(shape, DataType::U16, DataType::U32, policy, shift);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -471,10 +526,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U32, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U32, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U32, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U32, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -486,10 +541,10 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U32, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U32, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U32, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U32, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -503,7 +558,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, shift)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::S16, DataType::U8, policy, shift, 0);
+    compute_configure_validate(shape, DataType::S16, DataType::U8, policy, shift);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -512,10 +567,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::U8, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::U8, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::U8, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::U8, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -527,10 +582,10 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::U8, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::U8, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::U8, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::U8, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -544,7 +599,7 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
                      shape, policy, shift)
 {
     // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::S16, DataType::S32, policy, shift, 0);
+    compute_configure_validate(shape, DataType::S16, DataType::S32, policy, shift);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -553,10 +608,10 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::S32, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::S32, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::S32, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::S32, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);
@@ -568,10 +623,10 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
                      shape, policy, shift)
 {
     // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::S32, policy, shift, 0);
+    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::S32, policy, shift);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::S32, policy, shift, 0);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::S32, policy, shift);
 
     // Validate output
     validate(NEAccessor(dst), ref_dst);

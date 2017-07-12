@@ -469,7 +469,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Da
     CLTensor dst = compute_depth_convert(shape, DataType::F32, dt, policy, 0, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, dt, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, dt, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
     validate(CLAccessor(dst), ref_dst);
@@ -484,7 +484,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Da
     CLTensor dst = compute_depth_convert(shape, DataType::F32, dt, policy, 0, fixed_point_position);
 
     // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, dt, policy, 0, fixed_point_position);
+    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, dt, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
     validate(CLAccessor(dst), ref_dst);

@@ -30,7 +30,7 @@
 
 using namespace arm_compute;
 
-void NEDepthConvert::configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
+void NEDepthConvert::configure(ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEDepthConvertKernel>();
     k->configure(input, output, policy, shift);

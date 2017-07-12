@@ -244,15 +244,20 @@ public:
     {
         assert(p > 0 && p < std::numeric_limits<T>::digits);
 
+        using promoted_T = typename traits::promote<T>::type;
+        promoted_T val   = _value;
         if(p > _fixed_point_position)
         {
-            _value <<= (p - _fixed_point_position);
+            val <<= (p - _fixed_point_position);
         }
         else if(p < _fixed_point_position)
         {
-            _value >>= (_fixed_point_position - p);
+            uint8_t pbar = _fixed_point_position - p;
+            val += (pbar != 0) ? (1 << (pbar - 1)) : 0;
+            val >>= pbar;
         }
 
+        _value                = detail::constant_expr<T>::saturate_cast(val);
         _fixed_point_position = p;
     }
 

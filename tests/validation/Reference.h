@@ -168,16 +168,18 @@ public:
     static RawTensor compute_reference_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value);
     /** Compute reference depth convert.
      *
-     * @param[in] shape                Shape of the input and output tensors.
-     * @param[in] dt_in                Data type of input tensor.
-     * @param[in] dt_out               Data type of the output tensor.
-     * @param[in] policy               Overflow policy of the operation.
-     * @param[in] shift                Value for down/up conversions. Must be 0 <= shift < 8.
-     * @param[in] fixed_point_position Fixed point position.
+     * @param[in] shape                    Shape of the input and output tensors.
+     * @param[in] dt_in                    Data type of input tensor.
+     * @param[in] dt_out                   Data type of the output tensor.
+     * @param[in] policy                   Overflow policy of the operation.
+     * @param[in] shift                    Value for down/up conversions. Must be 0 <= shift < 8.
+     * @param[in] fixed_point_position_in  (Optional) Fixed point position for the input tensor.
+     * @param[in] fixed_point_position_out (Optional) Fixed point position for the output tensor.
      *
      * @return Computed raw tensor.
      */
-    static RawTensor compute_reference_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position);
+    static RawTensor compute_reference_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy,
+                                                     uint32_t shift, uint32_t fixed_point_position_in = 0, uint32_t fixed_point_position_out = 0);
     /** Compute reference gaussian3x3 filter.
      *
      * @param[in] shape                 Shape of the input and output tensors.
