@@ -76,17 +76,23 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 4;
-    const int              border_offset                     = (border_undefined) ? 0 : border_size().left;
 
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic input_access(input->info(), -border_offset, -border_offset,
-                                    input->info()->dimension(0) + border_offset, input->info()->dimension(1) + border_offset);
+    const ValidRegion &input_valid_region = input->info()->valid_region();
+
+    // Reads can occur within the valid region of the input
+    AccessWindowStatic input_access(input->info(),
+                                    input_valid_region.anchor[0] - border_size().left, input_valid_region.anchor[1] - border_size().top,
+                                    input_valid_region.anchor[0] + input_valid_region.shape[0] + border_size().right,
+                                    input_valid_region.anchor[1] + input_valid_region.shape[1] + border_size().bottom);
+
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, input_access, output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()), output->info()->tensor_shape(), policy, border_size(),
+                                                                     border_undefined));
 
     ICLKernel::configure(win);
 

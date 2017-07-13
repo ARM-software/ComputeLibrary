@@ -24,7 +24,7 @@
 #include "DepthwiseConvolution.h"
 
 #include "ConvolutionLayer.h"
-#include "TensorElementAt.h"
+#include "Utils.h"
 
 #include "tests/validation_new/Helpers.h"
 #include "tests/validation_new/half.h"

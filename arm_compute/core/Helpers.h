@@ -461,6 +461,17 @@ bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
  * @return True if the fixed point position has been changed.
  */
 bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position);
+/** Helper function to calculate the Valid Region for Scale.
+ *
+ * @param[in] src_info         Input tensor info used to check.
+ * @param[in] dst_shape        Shape of the output.
+ * @param[in] policy           Interpolation policy.
+ * @param[in] border_size      Size of the border.
+ * @param[in] border_undefined True if the border is undefined.
+ *
+ * @return The corrispondent valid region
+ */
+ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined);
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

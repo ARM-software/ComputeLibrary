@@ -79,6 +79,16 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     _dx      = dx;
     _dy      = dy;
 
+    /* Compute the ratio between source width/height and destination width/height */
+    const auto wr = static_cast<float>(input->info()->dimension(0)) / static_cast<float>(output->info()->dimension(0));
+    const auto hr = static_cast<float>(input->info()->dimension(1)) / static_cast<float>(output->info()->dimension(1));
+
+    /* Area interpolation behaves as Nearest Neighbour in case of up-sampling */
+    if(policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
+    {
+        policy = InterpolationPolicy::NEAREST_NEIGHBOR;
+    }
+
     switch(policy)
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
@@ -104,13 +114,18 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     }
 
     constexpr unsigned int num_elems_processed_per_iteration = 16;
-    const int              border_offset                     = (border_undefined) ? 0 : border_size().left;
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic     input_access(input->info(), -border_offset, -border_offset, input->info()->dimension(0) + border_offset, input->info()->dimension(1) + border_offset);
-    AccessWindowHorizontal offsets_access(offsets->info(), 0, num_elems_processed_per_iteration);
+    const ValidRegion &input_valid_region = input->info()->valid_region();
+
+    // Reads can occur within the valid region of the input
+    AccessWindowStatic input_access(input->info(),
+                                    input_valid_region.anchor[0] - border_size().left, input_valid_region.anchor[1] - border_size().top,
+                                    input_valid_region.anchor[0] + input_valid_region.shape[0] + border_size().right,
+                                    input_valid_region.anchor[1] + input_valid_region.shape[1] + border_size().bottom);
+    AccessWindowHorizontal offsets_access(offsets == nullptr ? nullptr : offsets->info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal dx_access(dx == nullptr ? nullptr : dx->info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal dy_access(dy == nullptr ? nullptr : dy->info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
@@ -122,8 +137,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
                               dy_access,
                               output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
+    output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()), output->info()->tensor_shape(), policy, border_size(), border_undefined));
     INEKernel::configure(win);
 }
 
@@ -164,8 +178,8 @@ void NEScaleKernel::scale_nearest(const Window &window)
                 const auto           offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
                 const uint8_t *const in_ptr      = in.ptr();
 
-                const size_t in_yi      = (id.y() + 0.5f) * hr;
-                const size_t offset_row = in_yi * input_stride;
+                const int in_yi      = std::floor((id.y() + 0.5f) * hr);
+                const int offset_row = in_yi * input_stride;
 
                 tmp = vsetq_lane_u8(in_ptr[offsets_ptr[0] + offset_row], tmp, 0);
                 tmp = vsetq_lane_u8(in_ptr[offsets_ptr[1] + offset_row], tmp, 1);
@@ -203,8 +217,8 @@ void NEScaleKernel::scale_nearest(const Window &window)
             {
                 const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
 
-                const size_t in_yi      = (id.y() + 0.5f) * hr;
-                const size_t offset_row = in_yi * input_stride;
+                const int in_yi      = (id.y() + 0.5f) * hr;
+                const int offset_row = in_yi * input_stride;
 
                 tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
                 tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[2] + offset_row), tmp.val[0], 1);
@@ -273,8 +287,8 @@ void NEScaleKernel::scale_bilinear(const Window &window)
         const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
         const auto in_ptr      = reinterpret_cast<const uint8_t *>(in.ptr());
 
-        const size_t in_yi      = std::floor((id.y() + 0.5f) * hr - 0.5f);
-        const size_t offset_row = in_yi * in_stride;
+        const int in_yi      = std::floor((id.y() + 0.5f) * hr - 0.5f);
+        const int offset_row = in_yi * in_stride;
 
         uint8x8_t tmp0 = vdup_n_u8(0);
         tmp0           = vset_lane_u8(delta_bilinear_c1u8(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0]), tmp0, 0);

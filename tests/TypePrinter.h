@@ -121,6 +121,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderMode &mode)
     return os;
 }
 
+inline std::string to_string(const BorderMode &mode)
+{
+    std::stringstream str;
+    str << mode;
+    return str.str();
+}
+
 /** Formatted output of the NonLinearFilterFunction type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const NonLinearFilterFunction &function)
 {
@@ -185,6 +192,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy 
     }
 
     return os;
+}
+
+inline std::string to_string(const InterpolationPolicy &policy)
+{
+    std::stringstream str;
+    str << policy;
+    return str.str();
 }
 
 /** Formatted output of the ConversionPolicy type. */

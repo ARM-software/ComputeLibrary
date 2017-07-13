@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_TENSOR_OPERATIONS_H__
 #define __ARM_COMPUTE_TEST_TENSOR_OPERATIONS_H__
 
+#include "arm_compute/core/FixedPoint.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
 #include "tests/Types.h"
@@ -115,6 +117,46 @@ void apply_2d_spatial_filter(Coordinates coord, const Tensor<T1> &in, Tensor<T3>
     out[coord2index(in.shape(), coord)] = saturate_cast<T3>(rounded_val);
 }
 } // namespace
+
+template <typename T>
+T bilinear_policy(const Tensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, uint8_t constant_border_value)
+{
+    int idx = std::floor(xn);
+    int idy = std::floor(yn);
+
+    const float dx   = xn - idx;
+    const float dy   = yn - idy;
+    const float dx_1 = 1.0f - dx;
+    const float dy_1 = 1.0f - dy;
+
+    id.set(0, idx);
+    id.set(1, idy);
+    const T tl = tensor_elem_at(in, id, border_mode, constant_border_value);
+    id.set(0, idx + 1);
+    id.set(1, idy);
+    const T tr = tensor_elem_at(in, id, border_mode, constant_border_value);
+    id.set(0, idx);
+    id.set(1, idy + 1);
+    const T bl = tensor_elem_at(in, id, border_mode, constant_border_value);
+    id.set(0, idx + 1);
+    id.set(1, idy + 1);
+    const T br = tensor_elem_at(in, id, border_mode, constant_border_value);
+
+    return tl * (dx_1 * dy_1) + tr * (dx * dy_1) + bl * (dx_1 * dy) + br * (dx * dy);
+}
+
+bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode border_mode)
+{
+    if(border_mode != BorderMode::UNDEFINED)
+    {
+        return true;
+    }
+    if((0 <= yn + 1) && (yn + 1 < height) && (0 <= xn + 1) && (xn + 1 < width))
+    {
+        return true;
+    }
+    return false;
+}
 
 // Sobel 3x3
 template <typename T1, typename T2>
@@ -879,46 +921,6 @@ void threshold(const Tensor<T> &in, Tensor<T> &out, uint8_t threshold, uint8_t f
             ARM_COMPUTE_ERROR("Thresholding type not recognised");
             break;
     }
-}
-
-template <typename T>
-T bilinear_policy(const Tensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, uint8_t constant_border_value)
-{
-    int idx = std::floor(xn);
-    int idy = std::floor(yn);
-
-    const float dx   = xn - idx;
-    const float dy   = yn - idy;
-    const float dx_1 = 1.0f - dx;
-    const float dy_1 = 1.0f - dy;
-
-    id.set(0, idx);
-    id.set(1, idy);
-    const T tl = tensor_elem_at(in, id, border_mode, constant_border_value);
-    id.set(0, idx + 1);
-    id.set(1, idy);
-    const T tr = tensor_elem_at(in, id, border_mode, constant_border_value);
-    id.set(0, idx);
-    id.set(1, idy + 1);
-    const T bl = tensor_elem_at(in, id, border_mode, constant_border_value);
-    id.set(0, idx + 1);
-    id.set(1, idy + 1);
-    const T br = tensor_elem_at(in, id, border_mode, constant_border_value);
-
-    return tl * (dx_1 * dy_1) + tr * (dx * dy_1) + bl * (dx_1 * dy) + br * (dx * dy);
-}
-
-bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode border_mode)
-{
-    if(border_mode != BorderMode::UNDEFINED)
-    {
-        return true;
-    }
-    if((0 <= yn + 1) && (yn + 1 < height) && (0 <= xn + 1) && (xn + 1 < width))
-    {
-        return true;
-    }
-    return false;
 }
 
 // Warp Perspective

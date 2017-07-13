@@ -21,50 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "TensorElementAt.h"
+#ifndef __ARM_COMPUTE_TEST_INTEPOLATIONPOLICY_DATASET_H__
+#define __ARM_COMPUTE_TEST_INTEPOLATIONPOLICY_DATASET_H__
 
-#include "tests/validation_new/Helpers.h"
-#include "tests/validation_new/half.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
 namespace test
 {
-namespace validation
+namespace datasets
 {
-namespace reference
+class InterpolationPolicies final : public framework::dataset::ContainerDataset<std::vector<InterpolationPolicy>>
 {
-// Return a tensor element at a specified coordinate with different border modes
-template <typename T>
-T tensor_elem_at(const SimpleTensor<T> &in, Coordinates coord, BorderMode border_mode, T constant_border_value)
-{
-    const int  x      = coord.x();
-    const int  y      = coord.y();
-    const auto width  = static_cast<int>(in.shape().x());
-    const auto height = static_cast<int>(in.shape().y());
-
-    // If coordinates beyond range of tensor's width or height
-    if(x < 0 || y < 0 || x >= width || y >= height)
+public:
+    InterpolationPolicies()
+        : ContainerDataset("InterpolationPolicy",
     {
-        if(border_mode == BorderMode::REPLICATE)
-        {
-            coord.set(0, std::max(0, std::min(x, width - 1)));
-            coord.set(1, std::max(0, std::min(y, height - 1)));
-
-            return in[coord2index(in.shape(), coord)];
-        }
-        else
-        {
-            return constant_border_value;
-        }
-    }
-    else
+        InterpolationPolicy::NEAREST_NEIGHBOR,
+                            InterpolationPolicy::BILINEAR,
+                            InterpolationPolicy::AREA
+    })
     {
-        return in[coord2index(in.shape(), coord)];
     }
-}
-template float tensor_elem_at(const SimpleTensor<float> &in, Coordinates coord, BorderMode border_mode, float constant_border_value);
-} // namespace reference
-} // namespace validation
+};
+} // namespace datasets
 } // namespace test
 } // namespace arm_compute
+#endif /* __ARM_COMPUTE_TEST_INTEPOLATIONPOLICY_DATASET_H__ */

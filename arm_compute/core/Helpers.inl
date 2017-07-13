@@ -303,4 +303,30 @@ inline bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_
 
     return false;
 }
+
+inline ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined)
+{
+    const auto  wr = static_cast<float>(dst_shape[0]) / static_cast<float>(src_info.tensor_shape()[0]);
+    const auto  hr = static_cast<float>(dst_shape[1]) / static_cast<float>(src_info.tensor_shape()[1]);
+    Coordinates anchor;
+    anchor.set_num_dimensions(src_info.tensor_shape().num_dimensions());
+    TensorShape new_dst_shape(dst_shape);
+    anchor.set(0, (policy == InterpolationPolicy::BILINEAR && border_undefined) ? ((static_cast<int>(src_info.valid_region().anchor[0]) + border_size.left + 0.5f) * wr - 0.5f) :
+               ((static_cast<int>(src_info.valid_region().anchor[0]) + 0.5f) * wr - 0.5f));
+    anchor.set(1, (policy == InterpolationPolicy::BILINEAR && border_undefined) ? ((static_cast<int>(src_info.valid_region().anchor[1]) + border_size.top + 0.5f) * hr - 0.5f) :
+               ((static_cast<int>(src_info.valid_region().anchor[1]) + 0.5f) * hr - 0.5f));
+    float shape_out_x = (policy == InterpolationPolicy::BILINEAR
+                         && border_undefined) ?
+                        ((static_cast<int>(src_info.valid_region().anchor[0]) + static_cast<int>(src_info.valid_region().shape[0]) - 1) - 1 + 0.5f) * wr - 0.5f :
+                        ((static_cast<int>(src_info.valid_region().anchor[0]) + static_cast<int>(src_info.valid_region().shape[0])) + 0.5f) * wr - 0.5f;
+    float shape_out_y = (policy == InterpolationPolicy::BILINEAR
+                         && border_undefined) ?
+                        ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1]) - 1) - 1 + 0.5f) * hr - 0.5f :
+                        ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1])) + 0.5f) * hr - 0.5f;
+
+    new_dst_shape.set(0, shape_out_x - anchor[0]);
+    new_dst_shape.set(1, shape_out_y - anchor[1]);
+
+    return ValidRegion(std::move(anchor), std::move(new_dst_shape));
+}
 } // namespace arm_compute

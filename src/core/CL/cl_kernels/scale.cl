@@ -118,6 +118,6 @@ __kernel void scale_bilinear(
     Image        in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
     Image        out = CONVERT_TO_IMAGE_STRUCT(out);
     const float2 r   = (float2)(input_width / output_width, input_height / output_height);
-    const float8 tc  = clamp_to_border(transform_bilinear(get_current_coords(), r), input_width, input_height);
+    const float8 tc  = transform_bilinear(get_current_coords(), r);
     vstore4(bilinear_interpolate(&in, tc, input_width, input_height), 0, (__global DATA_TYPE *)out.ptr);
 }

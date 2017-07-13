@@ -21,11 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_TENSOR_ELEMENT_AT_H__
-#define __ARM_COMPUTE_TEST_TENSOR_ELEMENT_AT_H__
+#ifndef __ARM_COMPUTE_TEST_VALIDATION_UTILS_H__
+#define __ARM_COMPUTE_TEST_VALIDATION_UTILS_H__
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation_new/Helpers.h"
+#include "arm_compute/core/Types.h"
+#include "tests/Globals.h"
+#include "tests/ILutAccessor.h"
+#include "tests/Types.h"
+#include "tests/validation/ValidationUserConfiguration.h"
+#include "tests/validation/half.h"
+
+#include <array>
+#include <random>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace arm_compute
 {
@@ -33,12 +43,12 @@ namespace test
 {
 namespace validation
 {
-namespace reference
-{
 template <typename T>
 T tensor_elem_at(const SimpleTensor<T> &in, Coordinates coord, BorderMode border_mode, T constant_border_value);
-} // namespace reference
+
+template <typename T>
+T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, uint8_t constant_border_value);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_TENSOR_ELEMENT_AT_H__ */
+#endif /* __ARM_COMPUTE_TEST_VALIDATION_UTILS_H__ */
