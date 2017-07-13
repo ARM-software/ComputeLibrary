@@ -69,22 +69,26 @@ __constant uint16 idx16 = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor slice. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  width                             Input image width
  */
 __kernel void softmax_layer_max(
-    IMAGE_DECLARATION(src),
-    IMAGE_DECLARATION(dst),
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst),
     uint width)
 {
-    Image src = CONVERT_TO_IMAGE_STRUCT(src);
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+    Image src = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
+    Image dst = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
 
     // Initialize local maximum
     VEC_DATA_TYPE(DATA_TYPE, 16)
@@ -130,38 +134,46 @@ __kernel void softmax_layer_max(
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[in]  max_ptr                           Pointer to the max values tensor slice. Supported data types: same as @p src_ptr
  * @param[in]  max_stride_x                      Stride of the max values tensor in X dimension (in bytes)
  * @param[in]  max_step_x                        max_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  max_stride_y                      Stride of the max values tensor in Y dimension (in bytes)
  * @param[in]  max_step_y                        max_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  max_stride_z                      Stride of the max values tensor in Z dimension (in bytes)
+ * @param[in]  max_step_z                        max_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  max_offset_first_element_in_bytes The offset of the first element in the max values tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor slice. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[out] sum_ptr                           Pointer to the sum values tensor slice. Supported data types: same as @p src_ptr
  * @param[in]  sum_stride_x                      Stride of the sum values tensor in X dimension (in bytes)
  * @param[in]  sum_step_x                        sum_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  sum_stride_y                      Stride of the sum values tensor in Y dimension (in bytes)
- * @param[in]  sum_step_y                        sum_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  sum_step_y                        sum_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  sum_stride_z                      Stride of the sum values tensor in Z dimension (in bytes)
+ * @param[in]  sum_step_z                        sum_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  sum_offset_first_element_in_bytes The offset of the first element in the sum values tensor
  * @param[in]  width                             Input image width
  */
 __kernel void softmax_layer_shift_exp_sum(
-    IMAGE_DECLARATION(src),
-    IMAGE_DECLARATION(max),
-    IMAGE_DECLARATION(dst),
-    IMAGE_DECLARATION(sum),
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(max),
+    TENSOR3D_DECLARATION(dst),
+    TENSOR3D_DECLARATION(sum),
     uint width)
 {
-    Image src = CONVERT_TO_IMAGE_STRUCT(src);
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
-    Image max = CONVERT_TO_IMAGE_STRUCT(max);
-    Image sum = CONVERT_TO_IMAGE_STRUCT(sum);
+    Image src = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
+    Image dst = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+    Image max = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(max);
+    Image sum = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(sum);
 
     // Load max value of 1D logits vector (row)
     DATA_TYPE max_val = *((__global DATA_TYPE *)offset(&max, 0, 0));
@@ -215,28 +227,34 @@ __kernel void softmax_layer_shift_exp_sum(
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[in]  sum_ptr                           Pointer to the sum values tensor slice. Supported data types: same as @p src_ptr
  * @param[in]  sum_stride_x                      Stride of the sum values tensor in X dimension (in bytes)
  * @param[in]  sum_step_x                        sum_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  sum_stride_y                      Stride of the sum values tensor in Y dimension (in bytes)
  * @param[in]  sum_step_y                        sum_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  sum_stride_z                      Stride of the sum values tensor in Z dimension (in bytes)
+ * @param[in]  sum_step_z                        sum_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  sum_offset_first_element_in_bytes The offset of the first element in the sum values tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor slice. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void softmax_layer_norm(
-    IMAGE_DECLARATION(src),
-    IMAGE_DECLARATION(sum),
-    IMAGE_DECLARATION(dst))
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(sum),
+    TENSOR3D_DECLARATION(dst))
 {
-    Image src = CONVERT_TO_IMAGE_STRUCT(src);
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
-    Image sum = CONVERT_TO_IMAGE_STRUCT_NO_STEP(sum);
+    Image src = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
+    Image dst = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+    Image sum = CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP(sum);
 
     // Load max value of 1D logits vector (row)
     DATA_TYPE sum_val = *((__global DATA_TYPE *)offset(&sum, 0, get_global_id(1)));

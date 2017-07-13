@@ -87,6 +87,9 @@
 #define CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP(name) \
     update_image_from_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, 0, name##_stride_y, 0, name##_stride_z, name##_step_z)
 
+#define CONVERT_TENSOR3D_TO_IMAGE_STRUCT(name) \
+    update_image_from_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, name##_stride_z, name##_step_z)
+
 #define CONVERT_TO_TENSOR3D_STRUCT(name)                                                                                                           \
     update_tensor3D_workitem_ptr(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, \
                                  name##_stride_z, name##_step_z)

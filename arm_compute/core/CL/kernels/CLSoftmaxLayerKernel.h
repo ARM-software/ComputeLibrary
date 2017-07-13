@@ -24,14 +24,14 @@
 #ifndef __ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__
 #define __ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__
 
-#include "arm_compute/core/CL/ICLSimple2DKernel.h"
+#include "arm_compute/core/CL/ICLSimple3DKernel.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
 /** Interface for the identifying the max value of 1D Logits */
-class CLLogits1DMaxKernel : public ICLSimple2DKernel
+class CLLogits1DMaxKernel : public ICLSimple3DKernel
 {
 public:
     /** Set the input and output tensors.
