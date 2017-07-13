@@ -66,6 +66,7 @@ private:
     const ICLTensor *_squared_input;
     ICLTensor       *_output;
     BorderSize       _border_size;
+    bool             _is_in_map;
 };
 }
 #endif /*__ARM_COMPUTE_CLNORMALIZATIONLAYERKERNEL_H__ */

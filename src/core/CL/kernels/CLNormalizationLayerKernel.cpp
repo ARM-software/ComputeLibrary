@@ -35,7 +35,7 @@
 using namespace arm_compute;
 
 CLNormalizationLayerKernel::CLNormalizationLayerKernel()
-    : _input(nullptr), _squared_input(nullptr), _output(nullptr), _border_size(0)
+    : _input(nullptr), _squared_input(nullptr), _output(nullptr), _border_size(0), _is_in_map(false)
 {
 }
 
@@ -65,8 +65,8 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, const ICLTens
     _squared_input = squared_input;
     _output        = output;
 
-    const bool         is_in_map    = (norm_info.type() == NormType::IN_MAP_1D);
-    const unsigned int border_width = is_in_map ? std::min(norm_info.norm_size() / 2, 3U) : 0;
+    _is_in_map                      = (norm_info.type() == NormType::IN_MAP_1D);
+    const unsigned int border_width = _is_in_map ? std::min(norm_info.norm_size() / 2, 3U) : 0;
     _border_size                    = BorderSize(0, border_width);
 
     // Create kernel
@@ -81,7 +81,7 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, const ICLTens
     _kernel.setArg<cl_uint>(idx++, norm_info.norm_size() / 2);
 
     // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = (is_in_map) ? 4 : 1;
+    const unsigned int num_elems_processed_per_iteration = (_is_in_map) ? 4 : 1;
     const unsigned int num_elems_read_per_iteration      = num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2);
 
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
@@ -102,7 +102,9 @@ void CLNormalizationLayerKernel::run(const Window &window, cl::CommandQueue &que
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    Window slice = window.first_slice_window_3D();
+    const int collapsed_dimension = _is_in_map ? Window::DimZ : 4;
+    Window    window_collapsed    = window.collapse_if_possible(ICLKernel::window(), collapsed_dimension);
+    Window    slice               = window_collapsed.first_slice_window_3D();
 
     do
     {
@@ -112,5 +114,5 @@ void CLNormalizationLayerKernel::run(const Window &window, cl::CommandQueue &que
         add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_3D(slice));
+    while(window_collapsed.slide_window_slice_3D(slice));
 }

@@ -167,7 +167,8 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
 
-    Window slice = window.first_slice_window_3D();
+    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window slice            = window_collapsed.first_slice_window_3D();
 
     do
     {
@@ -182,5 +183,5 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_3D(slice));
+    while(window_collapsed.slide_window_slice_3D(slice));
 }
