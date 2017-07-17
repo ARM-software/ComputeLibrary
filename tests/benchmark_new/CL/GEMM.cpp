@@ -50,7 +50,7 @@ using CLGEMMFixture = GEMMFixture<CLTensor, CLGEMM>;
 
 TEST_SUITE(CL)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetGEMM, CLGEMMFixture, framework::dataset::combine(datasets::GoogLeNetGEMMDataset(), std::move(data_types)));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetGEMMDataset(), std::move(data_types)));
 
 TEST_SUITE_END()
 } // namespace test

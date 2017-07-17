@@ -41,17 +41,17 @@ using NEActivationLayerFixture = ActivationLayerFixture<Tensor, NEActivationLaye
 
 TEST_SUITE(NEON)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetActivationLayer, NEActivationLayerFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetActivationLayerDataset(),
                                                                                         framework::dataset::make("Data type", { DataType::F32, DataType::QS8 })),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, NEActivationLayerFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(),
                                                                                         framework::dataset::make("Data type", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetActivationLayer, NEActivationLayerFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetActivationLayerDataset(),
                                                                                         framework::dataset::make("Data type", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));

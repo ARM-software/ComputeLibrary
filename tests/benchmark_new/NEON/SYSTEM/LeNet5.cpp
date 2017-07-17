@@ -51,7 +51,7 @@ using NELeNet5Fixture = LeNet5Fixture<Tensor,
 TEST_SUITE(SYSTEM_TEST)
 TEST_SUITE(NEON)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5, NELeNet5Fixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5, NELeNet5Fixture, framework::DatasetMode::ALL,
                                 framework::dataset::make("Batches", { 1, 4, 8 }));
 
 TEST_SUITE_END()

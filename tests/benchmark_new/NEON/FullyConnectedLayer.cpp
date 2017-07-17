@@ -43,17 +43,17 @@ using NEFullyConnectedLayerFixture = FullyConnectedLayerFixture<Tensor, NEFullyC
 
 TEST_SUITE(NEON)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, NEFullyConnectedLayerFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
                                                                                         framework::dataset::make("Data type", { DataType::F32, DataType::QS8 })),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, NEFullyConnectedLayerFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5FullyConnectedLayerDataset(),
                                                                                         framework::dataset::make("Data type", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetFullyConnectedLayer, NEFullyConnectedLayerFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetFullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetFullyConnectedLayerDataset(),
                                                                                         framework::dataset::make("Data type", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));

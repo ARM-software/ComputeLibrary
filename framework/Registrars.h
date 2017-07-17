@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_FRAMEWORK_REGISTRARS
 #define ARM_COMPUTE_TEST_FRAMEWORK_REGISTRARS
 
+#include "DatasetModes.h"
 #include "Framework.h"
 
 #include <string>
@@ -45,16 +46,18 @@ public:
     /** Add a new test case with the given name to the framework.
      *
      * @param[in] test_name Name of the test case.
+     * @param[in] mode      Mode in which the test should be activated.
      */
-    TestCaseRegistrar(std::string test_name);
+    TestCaseRegistrar(std::string test_name, DatasetMode mode);
 
     /** Add a new data test case with the given name to the framework.
      *
      * @param[in] test_name Name of the test case.
+     * @param[in] mode      Mode in which the test should be activated.
      * @param[in] dataset   Dataset used as input for the test case.
      */
     template <typename D>
-    TestCaseRegistrar(std::string test_name, D &&dataset);
+    TestCaseRegistrar(std::string test_name, DatasetMode mode, D &&dataset);
 };
 
 /** Helper class to statically begin and end a test suite. */
@@ -72,14 +75,14 @@ public:
 };
 
 template <typename T>
-inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name)
+inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, DatasetMode mode)
 {
-    Framework::get().add_test_case<T>(std::move(test_name));
+    Framework::get().add_test_case<T>(std::move(test_name), mode);
 }
 
 template <typename T>
 template <typename D>
-inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, D &&dataset)
+inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, DatasetMode mode, D &&dataset)
 {
     auto it = dataset.begin();
 
@@ -88,7 +91,7 @@ inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, D &&datase
         // WORKAROUND for GCC 4.9
         // The last argument should be *it to pass just the data and not the
         // iterator.
-        Framework::get().add_data_test_case<T>(test_name, it.description(), it);
+        Framework::get().add_data_test_case<T>(test_name, mode, it.description(), it);
     }
 }
 

@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_FRAMEWORK
 #define ARM_COMPUTE_TEST_FRAMEWORK
 
+#include "DatasetModes.h"
 #include "Profiler.h"
 #include "TestCase.h"
 #include "TestCaseFactory.h"
@@ -60,12 +61,13 @@ class Framework final
 public:
     /** Type of a test identifier.
      *
-     * A test can be identified either via its id or via its name.
+     * A test can be identified either via its id or via its name. Additionally
+     * each test is tagged with the data set mode in which it will be used.
      *
      * @note The mapping between test id and test name is not guaranteed to be
      * stable. It is subject to change as new test are added.
      */
-    using TestId = std::pair<int, std::string>;
+    using TestId = std::tuple<int, std::string, DatasetMode>;
 
     /** Access to the singleton.
      *
@@ -83,10 +85,11 @@ public:
      *
      * @param[in] instruments    Instrument types that will be used for benchmarking.
      * @param[in] num_iterations Number of iterations per test.
+     * @param[in] mode           Dataset mode.
      * @param[in] name_filter    Regular expression to filter tests by name. Only matching tests will be executed.
      * @param[in] id_filter      Regular expression to filter tests by id. Only matching tests will be executed.
      */
-    void init(const std::vector<InstrumentType> &instruments, int num_iterations, const std::string &name_filter, const std::string &id_filter);
+    void init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter);
 
     /** Add a new test suite.
      *
@@ -109,18 +112,20 @@ public:
     /** Add a test case to the framework.
      *
      * @param[in] test_name Name of the new test case.
+     * @param[in] mode      Mode in which to include the test.
      */
     template <typename T>
-    void add_test_case(std::string test_name);
+    void add_test_case(std::string test_name, DatasetMode mode);
 
     /** Add a data test case to the framework.
      *
      * @param[in] test_name   Name of the new test case.
+     * @param[in] mode        Mode in which to include the test.
      * @param[in] description Description of @p data.
      * @param[in] data        Data that will be used as input to the test.
      */
     template <typename T, typename D>
-    void add_data_test_case(std::string test_name, std::string description, D &&data);
+    void add_data_test_case(std::string test_name, DatasetMode mode, std::string description, D &&data);
 
     /** Tell the framework that execution of a test starts.
      *
@@ -255,21 +260,22 @@ private:
     InstrumentType _instruments{ InstrumentType::NONE };
     std::regex     _test_name_filter{ ".*" };
     std::regex     _test_id_filter{ ".*" };
+    DatasetMode    _dataset_mode{ DatasetMode::ALL };
 };
 
 template <typename T>
-inline void Framework::add_test_case(std::string test_name)
+inline void Framework::add_test_case(std::string test_name, DatasetMode mode)
 {
-    _test_factories.emplace_back(support::cpp14::make_unique<SimpleTestCaseFactory<T>>(current_suite_name(), std::move(test_name)));
+    _test_factories.emplace_back(support::cpp14::make_unique<SimpleTestCaseFactory<T>>(current_suite_name(), std::move(test_name), mode));
 }
 
 template <typename T, typename D>
-inline void Framework::add_data_test_case(std::string test_name, std::string description, D &&data)
+inline void Framework::add_data_test_case(std::string test_name, DatasetMode mode, std::string description, D &&data)
 {
     // WORKAROUND for GCC 4.9
     // The function should get *it which is tuple but that seems to trigger a
     // bug in the compiler.
-    auto tmp = std::unique_ptr<DataTestCaseFactory<T, decltype(*std::declval<D>())>>(new DataTestCaseFactory<T, decltype(*std::declval<D>())>(current_suite_name(), std::move(test_name),
+    auto tmp = std::unique_ptr<DataTestCaseFactory<T, decltype(*std::declval<D>())>>(new DataTestCaseFactory<T, decltype(*std::declval<D>())>(current_suite_name(), std::move(test_name), mode,
                                                                                      std::move(description), *data));
     _test_factories.emplace_back(std::move(tmp));
 }

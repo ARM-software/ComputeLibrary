@@ -21,31 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
-#include "framework/Macros.h"
-#include "framework/datasets/Datasets.h"
-#include "tests/NEON/NEAccessor.h"
-#include "tests/TypePrinter.h"
-#include "tests/datasets_new/DirectConvolutionLayerDataset.h"
-#include "tests/fixtures_new/ConvolutionLayerFixture.h"
+#include "DatasetModes.h"
+
+#include <map>
 
 namespace arm_compute
 {
 namespace test
 {
-using NEDirectConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvolutionLayer, neon::NEAccessor>;
+namespace framework
+{
+DatasetMode dataset_mode_from_name(const std::string &name)
+{
+    static const std::map<std::string, DatasetMode> modes =
+    {
+        { "all", DatasetMode::ALL },
+        { "precommit", DatasetMode::PRECOMMIT },
+        { "nightly", DatasetMode::NIGHTLY },
+    };
 
-TEST_SUITE(NEON)
-
-REGISTER_FIXTURE_DATA_TEST_CASE(DirectConvolutionLayer, NEDirectConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::DirectConvolutionLayerDataset(),
-                                                                                        framework::dataset::make("Data type", { DataType::F32, DataType::QS8 })),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
-
-TEST_SUITE_END()
+    try
+    {
+        return modes.at(name);
+    }
+    catch(const std::out_of_range &)
+    {
+        throw std::invalid_argument(name);
+    }
+}
+} // namespace framework
 } // namespace test
 } // namespace arm_compute

@@ -51,7 +51,7 @@ using CLLeNet5Fixture = LeNet5Fixture<CLTensor,
 TEST_SUITE(SYSTEM_TEST)
 TEST_SUITE(CL)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5, CLLeNet5Fixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5, CLLeNet5Fixture, framework::DatasetMode::ALL,
                                 framework::dataset::make("Batches", { 1, 4, 8 }));
 
 TEST_SUITE_END()

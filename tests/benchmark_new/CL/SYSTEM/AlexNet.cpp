@@ -57,7 +57,7 @@ using CLAlexNetFixture = AlexNetFixture<ICLTensor,
 TEST_SUITE(SYSTEM_TEST)
 TEST_SUITE(CL)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, CLAlexNetFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, CLAlexNetFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::make("Data type", DataType::F32),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 

@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_TEST_CASE_FACTORY
 #define ARM_COMPUTE_TEST_TEST_CASE_FACTORY
 
+#include "DatasetModes.h"
 #include "TestCase.h"
 #include "support/ToolchainSupport.h"
 
@@ -44,9 +45,10 @@ public:
      *
      * @param[in] suite_name  Name of the test suite to which the test case has been added.
      * @param[in] name        Name of the test case.
+     * @param[in] mode        Datset mode of the test case.
      * @param[in] description Description of data arguments.
      */
-    TestCaseFactory(std::string suite_name, std::string name, std::string description = "");
+    TestCaseFactory(std::string suite_name, std::string name, DatasetMode mode, std::string description = "");
 
     /** Default destructor. */
     virtual ~TestCaseFactory() = default;
@@ -56,6 +58,12 @@ public:
      * @return Name of the test case.
      */
     std::string name() const;
+
+    /** Get the mode for which test case will be enabled.
+     *
+     * @return Dataset mode of the test case.
+     */
+    DatasetMode mode() const;
 
     /** Factory function to create the test case
      *
@@ -67,6 +75,7 @@ private:
     const std::string _suite_name;
     const std::string _test_name;
     const std::string _data_description;
+    const DatasetMode _mode{ DatasetMode::ALL };
 };
 
 /** Implementation of a test case factory to create non-data test cases. */
@@ -88,10 +97,11 @@ public:
      *
      * @param[in] suite_name  Name of the test suite to which the test case has been added.
      * @param[in] test_name   Name of the test case.
+     * @param[in] mode        Mode in which the test case is enabled.
      * @param[in] description Description of data arguments.
      * @param[in] data        Input data for the test case.
      */
-    DataTestCaseFactory(std::string suite_name, std::string test_name, std::string description, const D &data);
+    DataTestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, std::string description, const D &data);
 
     std::unique_ptr<TestCase> make() const override;
 
@@ -99,8 +109,8 @@ private:
     D _data;
 };
 
-inline TestCaseFactory::TestCaseFactory(std::string suite_name, std::string test_name, std::string description)
-    : _suite_name{ std::move(suite_name) }, _test_name{ std::move(test_name) }, _data_description{ std::move(description) }
+inline TestCaseFactory::TestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, std::string description)
+    : _suite_name{ std::move(suite_name) }, _test_name{ std::move(test_name) }, _data_description{ std::move(description) }, _mode{ mode }
 {
 }
 
@@ -116,6 +126,11 @@ inline std::string TestCaseFactory::name() const
     return name;
 }
 
+inline DatasetMode TestCaseFactory::mode() const
+{
+    return _mode;
+}
+
 template <typename T>
 inline std::unique_ptr<TestCase> SimpleTestCaseFactory<T>::make() const
 {
@@ -123,8 +138,8 @@ inline std::unique_ptr<TestCase> SimpleTestCaseFactory<T>::make() const
 }
 
 template <typename T, typename D>
-inline DataTestCaseFactory<T, D>::DataTestCaseFactory(std::string suite_name, std::string test_name, std::string description, const D &data)
-    : TestCaseFactory{ std::move(suite_name), std::move(test_name), std::move(description) }, _data{ data }
+inline DataTestCaseFactory<T, D>::DataTestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, std::string description, const D &data)
+    : TestCaseFactory{ std::move(suite_name), std::move(test_name), mode, std::move(description) }, _data{ data }
 {
 }
 

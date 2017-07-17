@@ -76,28 +76,28 @@
     {                             \
         FIXTURE::teardown();      \
     }
-#define TEST_REGISTRAR(TEST_NAME)                                                             \
+#define TEST_REGISTRAR(TEST_NAME, MODE)                                                       \
     static arm_compute::test::framework::detail::TestCaseRegistrar<TEST_NAME> TEST_NAME##_reg \
     {                                                                                         \
-        #TEST_NAME                                                                            \
+        #TEST_NAME, MODE                                                                      \
     }
-#define DATA_TEST_REGISTRAR(TEST_NAME, DATASET)                                               \
+#define DATA_TEST_REGISTRAR(TEST_NAME, MODE, DATASET)                                         \
     static arm_compute::test::framework::detail::TestCaseRegistrar<TEST_NAME> TEST_NAME##_reg \
     {                                                                                         \
-        #TEST_NAME, DATASET                                                                   \
+        #TEST_NAME, MODE, DATASET                                                             \
     }
 
-#define TEST_CASE(TEST_NAME)                                        \
+#define TEST_CASE(TEST_NAME, MODE)                                  \
     class TEST_NAME : public arm_compute::test::framework::TestCase \
     {                                                               \
     public:                                                     \
         TEST_CASE_CONSTRUCTOR(TEST_NAME)                            \
         void do_run() override;                                     \
     };                                                              \
-    TEST_REGISTRAR(TEST_NAME);                                      \
+    TEST_REGISTRAR(TEST_NAME, MODE);                                \
     void TEST_NAME::do_run()
 
-#define DATA_TEST_CASE(TEST_NAME, DATASET, ...)                                                  \
+#define DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...)                                            \
     class TEST_NAME : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type> \
     {                                                                                            \
     public:                                                                                  \
@@ -108,10 +108,10 @@
         }                                                                                        \
         void run(__VA_ARGS__);                                                                   \
     };                                                                                           \
-    DATA_TEST_REGISTRAR(TEST_NAME, DATASET);                                                     \
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, DATASET);                                               \
     void TEST_NAME::run(__VA_ARGS__)
 
-#define FIXTURE_TEST_CASE(TEST_NAME, FIXTURE)                                       \
+#define FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE)                                 \
     class TEST_NAME : public arm_compute::test::framework::TestCase, public FIXTURE \
     {                                                                               \
     public:                                                                     \
@@ -120,10 +120,10 @@
         void do_run() override;                                                     \
         FIXTURE_TEARDOWN(FIXTURE)                                                   \
     };                                                                              \
-    TEST_REGISTRAR(TEST_NAME);                                                      \
+    TEST_REGISTRAR(TEST_NAME, MODE);                                                \
     void TEST_NAME::do_run()
 
-#define FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, DATASET)                                                      \
+#define FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET)                                                \
     class TEST_NAME : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type>, public FIXTURE \
     {                                                                                                            \
     public:                                                                                                  \
@@ -132,10 +132,10 @@
         void do_run() override;                                                                                  \
         FIXTURE_TEARDOWN(FIXTURE)                                                                                \
     };                                                                                                           \
-    DATA_TEST_REGISTRAR(TEST_NAME, DATASET);                                                                     \
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, DATASET);                                                               \
     void TEST_NAME::do_run()
 
-#define REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE)                              \
+#define REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE)                        \
     class TEST_NAME : public arm_compute::test::framework::TestCase, public FIXTURE \
     {                                                                               \
     public:                                                                     \
@@ -144,9 +144,9 @@
         FIXTURE_RUN(FIXTURE)                                                        \
         FIXTURE_TEARDOWN(FIXTURE)                                                   \
     };                                                                              \
-    TEST_REGISTRAR(TEST_NAME)
+    TEST_REGISTRAR(TEST_NAME, MODE)
 
-#define REGISTER_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, DATASET)                                             \
+#define REGISTER_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET)                                       \
     class TEST_NAME : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type>, public FIXTURE \
     {                                                                                                            \
     public:                                                                                                  \
@@ -155,7 +155,7 @@
         FIXTURE_RUN(FIXTURE)                                                                                     \
         FIXTURE_TEARDOWN(FIXTURE)                                                                                \
     };                                                                                                           \
-    DATA_TEST_REGISTRAR(TEST_NAME, DATASET)
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, DATASET)
 //
 // TEST CASE MACROS END
 //

@@ -57,7 +57,7 @@ using NEAlexNetFixture = AlexNetFixture<ITensor,
 TEST_SUITE(SYSTEM_TEST)
 TEST_SUITE(NEON)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, NEAlexNetFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, NEAlexNetFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::make("Data type", { DataType::F32, DataType::QS8 }),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 

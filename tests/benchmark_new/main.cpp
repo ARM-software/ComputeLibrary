@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "framework/DatasetModes.h"
 #include "framework/Macros.h"
 #include "framework/command_line/CommandLineOptions.h"
 #include "framework/command_line/CommandLineParser.h"
 #include "framework/instruments/Instruments.h"
 #include "framework/printers/Printers.h"
 #include "support/ToolchainSupport.h"
-#include "tests/DatasetManager.h"
 #include "tests/TensorLibrary.h"
 
 #ifdef OPENCL
@@ -74,11 +74,11 @@ int main(int argc, char **argv)
         allowed_instruments.insert(type);
     }
 
-    std::set<DatasetManager::DatasetMode> allowed_modes
+    std::set<framework::DatasetMode> allowed_modes
     {
-        DatasetManager::DatasetMode::PRECOMMIT,
-        DatasetManager::DatasetMode::NIGHTLY,
-        DatasetManager::DatasetMode::ALL
+        framework::DatasetMode::PRECOMMIT,
+        framework::DatasetMode::NIGHTLY,
+        framework::DatasetMode::ALL
     };
 
     std::set<framework::LogFormat> supported_log_formats
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 
     auto help = parser.add_option<framework::ToggleOption>("help");
     help->set_help("Show this help message");
-    auto dataset_mode = parser.add_option<framework::EnumOption<DatasetManager::DatasetMode>>("mode", allowed_modes, DatasetManager::DatasetMode::ALL);
+    auto dataset_mode = parser.add_option<framework::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::ALL);
     dataset_mode->set_help("For managed datasets select which group to use");
     auto instruments = parser.add_option<framework::EnumListOption<framework::InstrumentType>>("instruments", allowed_instruments, std::initializer_list<framework::InstrumentType> { framework::InstrumentType::ALL });
     instruments->set_help("Set the profiling instruments to use");
@@ -162,7 +162,6 @@ int main(int argc, char **argv)
             }
         }
 
-        DatasetManager::get().set_mode(dataset_mode->value());
         library = support::cpp14::make_unique<TensorLibrary>(assets->value(), seed->value());
         Scheduler::get().set_num_threads(threads->value());
 
@@ -175,7 +174,7 @@ int main(int argc, char **argv)
             printer->print_entry("Dataset mode", to_string(dataset_mode->value()));
         }
 
-        framework.init(instruments->value(), iterations->value(), filter->value(), filter_id->value());
+        framework.init(instruments->value(), iterations->value(), dataset_mode->value(), filter->value(), filter_id->value());
         framework.set_printer(printer.get());
         framework.set_throw_errors(throw_errors->value());
 
@@ -185,7 +184,7 @@ int main(int argc, char **argv)
         {
             for(const auto &id : framework.test_ids())
             {
-                std::cout << "[" << id.first << "] " << id.second << "\n";
+                std::cout << "[" << std::get<0>(id) << ", " << std::get<2>(id) << "] " << std::get<1>(id) << "\n";
             }
         }
         else

@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASETMANAGER
-#define ARM_COMPUTE_TEST_DATASETMANAGER
+#ifndef ARM_COMPUTE_TEST_DATASET_MODES
+#define ARM_COMPUTE_TEST_DATASET_MODES
 
-#include "arm_compute/core/TensorShape.h"
-#include "framework/datasets/Datasets.h"
-
+#include <istream>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -35,34 +34,39 @@ namespace arm_compute
 {
 namespace test
 {
-class DatasetManager final
+namespace framework
 {
-public:
-    enum class DatasetMode : unsigned int
-    {
-        ALL       = 0,
-        PRECOMMIT = 1,
-        NIGHTLY   = 2
-    };
-
-    using ShapesDataset = framework::dataset::RangeDataset<std::vector<arm_compute::TensorShape>::const_iterator>;
-
-    static DatasetManager &get();
-
-    void set_mode(DatasetMode mode);
-
-    ShapesDataset shapesDataset() const;
-
-private:
-    DatasetManager()  = default;
-    ~DatasetManager() = default;
-
-    DatasetMode _mode{ DatasetMode::ALL };
+/** Possible dataset modes. */
+enum class DatasetMode : unsigned int
+{
+    ALL       = ~0U,
+    DISABLED  = 0,
+    PRECOMMIT = 1,
+    NIGHTLY   = 2
 };
 
-DatasetManager::DatasetMode dataset_mode_from_name(const std::string &name);
+inline DatasetMode operator&(DatasetMode t1, DatasetMode t2)
+{
+    using type = std::underlying_type<DatasetMode>::type;
+    return static_cast<DatasetMode>(static_cast<type>(t1) & static_cast<type>(t2));
+}
 
-inline ::std::stringstream &operator>>(::std::stringstream &stream, DatasetManager::DatasetMode &mode)
+inline DatasetMode operator|(DatasetMode t1, DatasetMode t2)
+{
+    using type = std::underlying_type<DatasetMode>::type;
+    return static_cast<DatasetMode>(static_cast<type>(t1) | static_cast<type>(t2));
+}
+
+inline DatasetMode &operator|=(DatasetMode &t1, DatasetMode t2)
+{
+    using type = std::underlying_type<DatasetMode>::type;
+    t1         = static_cast<DatasetMode>(static_cast<type>(t1) | static_cast<type>(t2));
+    return t1;
+}
+
+DatasetMode dataset_mode_from_name(const std::string &name);
+
+inline ::std::istream &operator>>(::std::istream &stream, DatasetMode &mode)
 {
     std::string value;
     stream >> value;
@@ -70,17 +74,17 @@ inline ::std::stringstream &operator>>(::std::stringstream &stream, DatasetManag
     return stream;
 }
 
-inline ::std::stringstream &operator<<(::std::stringstream &stream, DatasetManager::DatasetMode mode)
+inline ::std::ostream &operator<<(::std::ostream &stream, DatasetMode mode)
 {
     switch(mode)
     {
-        case DatasetManager::DatasetMode::PRECOMMIT:
+        case DatasetMode::PRECOMMIT:
             stream << "PRECOMMIT";
             break;
-        case DatasetManager::DatasetMode::NIGHTLY:
+        case DatasetMode::NIGHTLY:
             stream << "NIGHTLY";
             break;
-        case DatasetManager::DatasetMode::ALL:
+        case DatasetMode::ALL:
             stream << "ALL";
             break;
         default:
@@ -90,12 +94,13 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, DatasetManag
     return stream;
 }
 
-inline std::string to_string(const DatasetManager::DatasetMode &mode)
+inline std::string to_string(DatasetMode mode)
 {
     std::stringstream stream;
     stream << mode;
     return stream.str();
 }
+} // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASETMANAGER */
+#endif /* ARM_COMPUTE_TEST_DATASET_MODES */

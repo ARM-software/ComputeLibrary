@@ -92,11 +92,12 @@ Framework &Framework::get()
     return instance;
 }
 
-void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, const std::string &name_filter, const std::string &id_filter)
+void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter)
 {
     _test_name_filter = std::regex{ name_filter };
     _test_id_filter   = std::regex{ id_filter };
     _num_iterations   = num_iterations;
+    _dataset_mode     = mode;
 
     _instruments = InstrumentType::NONE;
 
@@ -170,7 +171,27 @@ bool Framework::throw_errors() const
 
 bool Framework::is_enabled(const TestId &id) const
 {
-    return (std::regex_search(support::cpp11::to_string(id.first), _test_id_filter) && std::regex_search(id.second, _test_name_filter));
+    int         test_id = 0;
+    std::string name;
+    DatasetMode mode = DatasetMode::ALL;
+    std::tie(test_id, name, mode) = id;
+
+    if((mode & _dataset_mode) == DatasetMode::DISABLED)
+    {
+        return false;
+    }
+
+    if(!std::regex_search(support::cpp11::to_string(test_id), _test_id_filter))
+    {
+        return false;
+    }
+
+    if(!std::regex_search(name, _test_name_filter))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void Framework::run_test(TestCaseFactory &test_factory)
@@ -276,7 +297,7 @@ bool Framework::run()
     {
         const std::string test_case_name = test_factory->name();
 
-        if(!is_enabled(TestId(id, test_case_name)))
+        if(!is_enabled(TestId(id, test_case_name, test_factory->mode())))
         {
             log_test_skipped(test_case_name);
         }
@@ -355,9 +376,9 @@ std::vector<Framework::TestId> Framework::test_ids() const
 
     for(const auto &factory : _test_factories)
     {
-        if(is_enabled(TestId(id, factory->name())))
+        if(is_enabled(TestId(id, factory->name(), factory->mode())))
         {
-            ids.emplace_back(id, factory->name());
+            ids.emplace_back(id, factory->name(), factory->mode());
         }
 
         ++id;

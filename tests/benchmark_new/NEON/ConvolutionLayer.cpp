@@ -43,17 +43,17 @@ using NEConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEConvolutionL
 
 TEST_SUITE(NEON)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, NEConvolutionLayerFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(),
                                                                                         framework::dataset::make("Data type", { DataType::F32, DataType::QS8 })),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ConvolutionLayer, NEConvolutionLayerFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(),
                                                                                         framework::dataset::make("Data type", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetConvolutionLayer, NEConvolutionLayerFixture,
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetConvolutionLayerDataset(),
                                                                                         framework::dataset::make("Data type", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
