@@ -442,6 +442,36 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * DataType::QS8 *ConvertPolicies() 
     validate(Accessor(dst), ref_dst);
 }
 
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmallScale255, SmallShapes() * DataType::QS8 * (1.f / 255.f) * ConvertPolicies() * RoundingPolicy::TO_NEAREST_UP * boost::unit_test::data::xrange(1, 7),
+                     shape, dt, scale, convert_policy, rounding_policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, scale, convert_policy, rounding_policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_fixed_point_pixel_wise_multiplication(shape, dt, dt, dt, scale, fixed_point_position, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(Accessor(dst), ref_dst);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmallScaleOther, SmallShapes() * DataType::QS8 *ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange(1, 7),
+                     shape, dt, convert_policy, rounding_policy, fixed_point_position)
+{
+    const float scale = 1.f / static_cast<float>(1 << fixed_point_position);
+
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, scale, convert_policy, rounding_policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_fixed_point_pixel_wise_multiplication(shape, dt, dt, dt, scale, fixed_point_position, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(Accessor(dst), ref_dst, 1.f);
+}
+
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * DataType::QS8 *ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange<int>(1, 7),
                      shape, dt, convert_policy, rounding_policy, fixed_point_position)
@@ -454,6 +484,36 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * DataType::QS8 *ConvertPolicies() 
 
     // Validate output
     validate(Accessor(dst), ref_dst);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLargeScale255, LargeShapes() * DataType::QS8 * (1.f / 255.f) * ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange(1, 7),
+                     shape, dt, scale, convert_policy, rounding_policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, scale, convert_policy, rounding_policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_fixed_point_pixel_wise_multiplication(shape, dt, dt, dt, scale, fixed_point_position, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(Accessor(dst), ref_dst);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
+BOOST_DATA_TEST_CASE(RunLargeScaleOther, LargeShapes() * DataType::QS8 *ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange(1, 7),
+                     shape, dt, convert_policy, rounding_policy, fixed_point_position)
+{
+    const float scale = 1.f / static_cast<float>(1 << fixed_point_position);
+
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, scale, convert_policy, rounding_policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_fixed_point_pixel_wise_multiplication(shape, dt, dt, dt, scale, fixed_point_position, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(Accessor(dst), ref_dst, 1.f);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -470,6 +530,36 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * DataType::QS16 *ConvertPolicies()
 
     // Validate output
     validate(Accessor(dst), ref_dst);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmallScale255, SmallShapes() * DataType::QS16 * (1.f / 255.f) * ConvertPolicies() * RoundingPolicy::TO_NEAREST_UP * boost::unit_test::data::xrange(1, 15),
+                     shape, dt, scale, convert_policy, rounding_policy, fixed_point_position)
+{
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, scale, convert_policy, rounding_policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_fixed_point_pixel_wise_multiplication(shape, dt, dt, dt, scale, fixed_point_position, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(Accessor(dst), ref_dst);
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmallScaleOther, SmallShapes() * DataType::QS16 *ConvertPolicies() * RoundingPolicy::TO_ZERO * boost::unit_test::data::xrange(1, 15),
+                     shape, dt, convert_policy, rounding_policy, fixed_point_position)
+{
+    const float scale = 1.f / static_cast<float>(1 << fixed_point_position);
+
+    // Compute function
+    Tensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, scale, convert_policy, rounding_policy, fixed_point_position);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_fixed_point_pixel_wise_multiplication(shape, dt, dt, dt, scale, fixed_point_position, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(Accessor(dst), ref_dst, 1.f);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))

@@ -866,7 +866,7 @@ void pixel_wise_multiplication(const Tensor<T1> &in1, const Tensor<T2> &in2, Ten
 
 // Fixed-point Pixel-wise Multiplication
 template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-void fixed_point_pixel_wise_multiplication(const Tensor<T> &in1, const Tensor<T> &in2, Tensor<T> &out, int scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
+void fixed_point_pixel_wise_multiplication(const Tensor<T> &in1, const Tensor<T> &in2, Tensor<T> &out, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
 {
     using namespace fixed_point_arithmetic;
 
@@ -881,18 +881,20 @@ void fixed_point_pixel_wise_multiplication(const Tensor<T> &in1, const Tensor<T>
     ARM_COMPUTE_ERROR_ON((in1.data_type() == DataType::QS8) && (fixed_point_position == 0 || fixed_point_position > 7));
     ARM_COMPUTE_ERROR_ON((in1.data_type() == DataType::QS16) && (fixed_point_position == 0 || fixed_point_position > 15));
 
-    fixed_point<T> fp_scale(scale, fixed_point_position);
-    const bool     is_sat     = convert_policy == ConvertPolicy::SATURATE;
-    const bool     do_scaling = scale != 1;
+    const fixed_point<T> fp_scale(scale, fixed_point_position);
+    const bool           is_sat = convert_policy == ConvertPolicy::SATURATE;
 
     for(int i = 0; i < in1.num_elements(); ++i)
     {
-        fixed_point<T> val1(in1[i], fixed_point_position, true);
-        fixed_point<T> val2(in2[i], fixed_point_position, true);
-        fixed_point<T> res = (is_sat) ? val1 * val2 : mul<OverflowPolicy::WRAP>(val1, val2);
-        if(do_scaling)
+        const fixed_point<T> val1(in1[i], fixed_point_position, true);
+        fixed_point<T>       res(in2[i], fixed_point_position, true);
+        if(is_sat)
         {
-            res = (is_sat) ? res * fp_scale : mul<OverflowPolicy::WRAP>(res, fp_scale);
+            res = mul(mul(res, val1), fp_scale);
+        }
+        else
+        {
+            res = mul<OverflowPolicy::WRAP>(mul<OverflowPolicy::WRAP>(res, val1), fp_scale);
         }
         out[i] = res.raw();
     }

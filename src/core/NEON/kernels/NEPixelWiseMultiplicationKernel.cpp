@@ -131,60 +131,100 @@ void mul_U8_U8_U8_n(const void *__restrict input1_ptr, const void *__restrict in
 template <bool is_scale255, bool is_sat>
 void mul_QS8_QS8_QS8_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int n, int fixed_point_position)
 {
-    // n is the exponent of the scaling factor, that is scale = 1/2^n. Currently, we only support scaling factor equal to 1 => n = 0.
-    ARM_COMPUTE_ERROR_ON_MSG(n != 0, "Scaling factor different than 1 not supported for 8-bit fixed-point pixel-wise multiplication");
-    ARM_COMPUTE_UNUSED(n);
-
-    const auto input1 = static_cast<const qint8_t *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const qint8_t *__restrict>(input2_ptr);
     const auto output = static_cast<qint8_t *__restrict>(output_ptr);
 
-    const qint8x16_t ta1 = vld1q_qs8(input1);
-    const qint8x16_t ta2 = vld1q_qs8(input2);
+    const qint8x16_t ta1 = vld1q_qs8(static_cast<const qint8_t *__restrict>(input1_ptr));
+    const qint8x16_t ta2 = vld1q_qs8(static_cast<const qint8_t *__restrict>(input2_ptr));
 
-    qint8x16_t res = (is_sat) ? vqmulq_qs8(ta1, ta2, fixed_point_position) : vmulq_qs8(ta1, ta2, fixed_point_position);
+    if(is_scale255)
+    {
+        qint16x8_t       tmp1_high = vmovl_s8(vget_high_s8(ta1));
+        qint16x8_t       tmp1_low  = vmovl_s8(vget_low_s8(ta1));
+        const qint16x8_t tmp2_high = vmovl_s8(vget_high_s8(ta2));
+        const qint16x8_t tmp2_low  = vmovl_s8(vget_low_s8(ta2));
 
-    vst1q_s8(output, res);
+        const float32x4x2_t scale255_f32 =
+        {
+            {
+                scale255_constant_f32q,
+                scale255_constant_f32q
+            }
+        };
+        const qint16x8_t scale255 = vqcvtq_qs16_f32(scale255_f32, fixed_point_position);
+
+        tmp1_high = vmulq_qs16(tmp1_high, tmp2_high, fixed_point_position);
+        tmp1_low  = vmulq_qs16(tmp1_low, tmp2_low, fixed_point_position);
+        tmp1_high = vmulq_qs16(tmp1_high, scale255, fixed_point_position);
+        tmp1_low  = vmulq_qs16(tmp1_low, scale255, fixed_point_position);
+
+        if(is_sat)
+        {
+            vst1q_qs8(output, vcombine_s8(vqmovn_s16(tmp1_low), vqmovn_s16(tmp1_high)));
+        }
+        else
+        {
+            vst1q_qs8(output, vcombine_s8(vmovn_s16(tmp1_low), vmovn_s16(tmp1_high)));
+        }
+    }
+    else
+    {
+        const qint8x16_t vn  = vdupq_n_s8(-n);
+        qint8x16_t       res = ta2;
+
+        if(is_sat)
+        {
+            res = vqshlq_s8(vqmulq_qs8(ta1, res, fixed_point_position), vn);
+        }
+        else
+        {
+            res = vshlq_s8(vmulq_qs8(ta1, res, fixed_point_position), vn);
+        }
+        vst1q_qs8(output, res);
+    }
 }
 
 template <bool is_scale255, bool is_sat>
 void mul_QS16_QS16_QS16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int n, int fixed_point_position)
 {
-    // n is the exponent of the scaling factor, that is scale = 1/2^n. Currently, we only support scaling factor equal to 1 => n = 0.
-    ARM_COMPUTE_ERROR_ON_MSG(n != 0, "Scaling factor different than 1 not supported for 16-bit fixed-point pixel-wise multiplication");
-    ARM_COMPUTE_UNUSED(n);
-
     const qint16x8x2_t ta1 = vld2q_qs16(static_cast<const qint16_t *__restrict>(input1_ptr));
-    const qint16x8x2_t ta2 = vld2q_qs16(static_cast<const qint16_t *__restrict>(input2_ptr));
+    qint16x8x2_t       res = vld2q_qs16(static_cast<const qint16_t *__restrict>(input2_ptr));
 
-    if(is_sat)
+    if(is_scale255)
     {
-        const qint16x8x2_t res =
+        const float32x4x2_t scale255_f32 =
         {
             {
-                // First 8 elements
-                vqmulq_qs16(ta1.val[0], ta2.val[0], fixed_point_position),
-                // Second 8 elements
-                vqmulq_qs16(ta1.val[1], ta2.val[1], fixed_point_position)
+                scale255_constant_f32q,
+                scale255_constant_f32q
             }
         };
-
-        vst2q_s16(static_cast<qint16_t *__restrict>(output_ptr), res);
+        const qint16x8_t scale255 = vqcvtq_qs16_f32(scale255_f32, fixed_point_position);
+        if(is_sat)
+        {
+            res.val[0] = vqmulq_qs16(vqmulq_qs16(ta1.val[0], res.val[0], fixed_point_position), scale255, fixed_point_position);
+            res.val[1] = vqmulq_qs16(vqmulq_qs16(ta1.val[1], res.val[1], fixed_point_position), scale255, fixed_point_position);
+        }
+        else
+        {
+            res.val[0] = vmulq_qs16(vmulq_qs16(ta1.val[0], res.val[0], fixed_point_position), scale255, fixed_point_position);
+            res.val[1] = vmulq_qs16(vmulq_qs16(ta1.val[1], res.val[1], fixed_point_position), scale255, fixed_point_position);
+        }
     }
     else
     {
-        const qint16x8x2_t res =
+        const qint16x8_t vn = vdupq_n_s16(-n);
+        if(is_sat)
         {
-            {
-                // First 8 elements
-                vmulq_qs16(ta1.val[0], ta2.val[0], fixed_point_position),
-                // Second 8 elements
-                vmulq_qs16(ta1.val[1], ta2.val[1], fixed_point_position)
-            }
-        };
-
-        vst2q_s16(static_cast<qint16_t *__restrict>(output_ptr), res);
+            res.val[0] = vqshlq_s16(vqmulq_qs16(ta1.val[0], res.val[0], fixed_point_position), vn);
+            res.val[1] = vqshlq_s16(vqmulq_qs16(ta1.val[1], res.val[1], fixed_point_position), vn);
+        }
+        else
+        {
+            res.val[0] = vshlq_s16(vmulq_qs16(ta1.val[0], res.val[0], fixed_point_position), vn);
+            res.val[1] = vshlq_s16(vmulq_qs16(ta1.val[1], res.val[1], fixed_point_position), vn);
+        }
     }
+    vst2q_s16(static_cast<qint16_t *__restrict>(output_ptr), res);
 }
 
 template <bool is_scale255, bool is_sat>
@@ -438,6 +478,8 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
     {
         // Check that all data types are the same and all fixed-point positions are the same
         ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input1, input2, output);
+        // Check if scale is representable in fixed-point with the provided settings
+        ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(scale, input1);
     }
 
     _input1         = input1;
