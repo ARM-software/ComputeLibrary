@@ -122,6 +122,11 @@ void ICLKernel::add_3D_tensor_argument(unsigned int &idx, const ICLTensor *tenso
     add_tensor_argument<3>(idx, tensor, window);
 }
 
+void ICLKernel::add_4D_tensor_argument(unsigned int &idx, const ICLTensor *tensor, const Window &window)
+{
+    add_tensor_argument<4>(idx, tensor, window);
+}
+
 unsigned int ICLKernel::num_arguments_per_1D_tensor() const
 {
     return num_arguments_per_tensor<1>();
@@ -135,6 +140,11 @@ unsigned int ICLKernel::num_arguments_per_2D_tensor() const
 unsigned int ICLKernel::num_arguments_per_3D_tensor() const
 {
     return num_arguments_per_tensor<3>();
+}
+
+unsigned int ICLKernel::num_arguments_per_4D_tensor() const
+{
+    return num_arguments_per_tensor<4>();
 }
 
 void ICLKernel::set_target(cl::Device &device)

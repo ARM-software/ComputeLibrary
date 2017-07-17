@@ -103,7 +103,6 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
         {
             _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("im2col_generic", build_opts));
         }
-
         _run_func = &CLIm2ColKernel::run_generic;
     }
     else
@@ -117,6 +116,12 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     Window win = calculate_max_window(*input->info(), Steps());
     // The CLIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    if(!run_img2col_reduced)
+    {
+        // set the Z dimension's step same size as the whole dimension so that one can't split across the Z dimension
+        win.set_dimension_step(Window::DimZ, win[Window::DimZ].end() - win[Window::DimZ].start());
+    }
+
     ICLKernel::configure(win);
 }
 
@@ -132,14 +137,17 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
     // Get initial windows
-    Window slice     = window.first_slice_window_3D();
-    Window slice_in  = window.first_slice_window_3D();
-    Window slice_out = window.first_slice_window_3D();
+    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    // Change the Z dimension's step back to 1
+    window_collapsed.set_dimension_step(Window::DimZ, 1);
+
+    Window slice     = window_collapsed.first_slice_window_3D();
+    Window slice_in  = window_collapsed.first_slice_window_3D();
+    Window slice_out = window_collapsed.first_slice_window_3D();
 
     // Setup slice
     slice.set(Window::DimX, Window::Dimension(0, static_cast<int>(_convolved_dims.first), 1));
     slice.set(Window::DimY, Window::Dimension(0, static_cast<int>(_convolved_dims.second), 1));
-    slice.set(Window::DimZ, Window::Dimension(0, static_cast<int>(_input->info()->dimension(2)), 1));
 
     // Setup input slice
     // The first three dimensions of the input are increased by the inner loops
@@ -157,13 +165,15 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
 
     do
     {
-        // Set inputs
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice_out);
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->dimension(2)));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
         enqueue(queue, *this, slice, _lws_hint);
     }
-    while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_out) && window.slide_window_slice_3D(slice_in));
+    while(window_collapsed.slide_window_slice_3D(slice) && window_collapsed.slide_window_slice_3D(slice_out) && window_collapsed.slide_window_slice_3D(slice_in));
 }
 
 void CLIm2ColKernel::run_reduced(const Window &window, cl::CommandQueue &queue)

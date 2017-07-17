@@ -147,6 +147,21 @@ void error_on_invalid_subwindow(const char *function, const char *file, const in
                                 const Window &full, const Window &sub);
 #define ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(f, s) ::arm_compute::error_on_invalid_subwindow(__func__, __FILE__, __LINE__, f, s)
 
+/** Throw an error if the window can't be collapsed at the given dimension.
+ *
+ * The window cannot be collapsed if the given dimension not equal to the full window's dimension or not start from 0.
+ *
+ *  @param[in] function Function in which the error occurred.
+ *  @param[in] file     Name of the file where the error occurred.
+ *  @param[in] line     Line on which the error occurred.
+ *  @param[in] full     Full size window
+ *  @param[in] window   Window to be collapsed.
+ *  @param[in] dim      Dimension need to be checked.
+ */
+void error_on_window_not_collapsable_at_dimension(const char *function, const char *file, const int line,
+                                                  const Window &full, const Window &window, const int dim);
+#define ARM_COMPUTE_ERROR_ON_WINDOW_NOT_COLLAPSABLE_AT_DIMENSION(f, w, d) ::arm_compute::error_on_window_not_collapsable_at_dimension(__func__, __FILE__, __LINE__, f, w, d)
+
 /** Throw an error if the passed coordinates have too many dimensions.
  *
  * The coordinates have too many dimensions if any of the dimensions greater or equal to max_dim is different from 0.

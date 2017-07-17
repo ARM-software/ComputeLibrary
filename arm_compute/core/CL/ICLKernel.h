@@ -65,6 +65,13 @@ public:
      * @param[in]     window Window the kernel will be executed on.
      */
     void add_3D_tensor_argument(unsigned int &idx, const ICLTensor *tensor, const Window &window);
+    /** Add the passed 4D tensor's parameters to the object's kernel's arguments starting from the index idx.
+     *
+     * @param[in,out] idx    Index at which to start adding the tensor's arguments. Will be incremented by the number of kernel arguments set.
+     * @param[in]     tensor Tensor to set as an argument of the object's kernel.
+     * @param[in]     window Window the kernel will be executed on.
+     */
+    void add_4D_tensor_argument(unsigned int &idx, const ICLTensor *tensor, const Window &window);
     /** Returns the number of arguments enqueued per 1D tensor object.
      *
      * @return The number of arguments enqueues per 1D tensor object.
@@ -80,6 +87,11 @@ public:
      * @return The number of arguments enqueues per 3D tensor object.
      */
     unsigned int num_arguments_per_3D_tensor() const;
+    /** Returns the number of arguments enqueued per 4D tensor object.
+     *
+     * @return The number of arguments enqueues per 4D tensor object.
+     */
+    unsigned int num_arguments_per_4D_tensor() const;
     /** Enqueue the OpenCL kernel to process the given window  on the passed OpenCL command queue.
      *
      * @note The queue is *not* flushed by this method, and therefore the kernel will not have been executed by the time this method returns.

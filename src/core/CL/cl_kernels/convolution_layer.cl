@@ -120,11 +120,15 @@ __kernel void reshape_to_columns(
  */
 __kernel void im2col_generic(
     TENSOR3D_DECLARATION(src),
-    IMAGE_DECLARATION(dst))
+    IMAGE_DECLARATION(dst),
+    uint filter_depth,
+    uint src_stride_w,
+    uint dst_stride_w)
 {
-    const int xc = get_global_id(0); // x coordinate in the convolved tensor
-    const int yc = get_global_id(1); // y coordinate in the convolved tensor
-    const int ch = get_global_id(2); // input feature map
+    const int xc    = get_global_id(0);                // x coordinate in the convolved tensor
+    const int yc    = get_global_id(1);                // y coordinate in the convolved tensor
+    const int ch    = get_global_id(2) % filter_depth; // input feature map
+    const int batch = get_global_id(2) / filter_depth; // the batch
 
     // Calculate input indeces
     const int xi = xc * STRIDE_X - PAD_X;
@@ -134,8 +138,8 @@ __kernel void im2col_generic(
     const int xo = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
     const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
 
-    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + ch * src_stride_z;
-    __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y)) + xo;
+    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + ch * src_stride_z + batch * src_stride_w;
+    __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y + batch * dst_stride_w)) + xo;
 
     // Linearize convolution elements
     for(int y = yi, y_e = yi + KERNEL_HEIGHT; y < y_e; ++y)
@@ -158,7 +162,7 @@ __kernel void im2col_generic(
     }
 
 #ifdef HAS_BIAS
-    if(get_global_id(2) == (KERNEL_DEPTH - 1))
+    if(ch == (KERNEL_DEPTH - 1))
     {
 #ifdef FIXED_POINT_POSITION
         *output_ptr = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
@@ -191,11 +195,15 @@ __kernel void im2col_generic(
  */
 __kernel void im2col_kernel3x3_padx0_pady0(
     TENSOR3D_DECLARATION(src),
-    IMAGE_DECLARATION(dst))
+    IMAGE_DECLARATION(dst),
+    uint filter_depth,
+    uint src_stride_w,
+    uint dst_stride_w)
 {
-    const int xc = get_global_id(0); // x coordinate in the convolved tensor
-    const int yc = get_global_id(1); // y coordinate in the convolved tensor
-    const int ch = get_global_id(2); // input feature map
+    const int xc    = get_global_id(0);                // x coordinate in the convolved tensor
+    const int yc    = get_global_id(1);                // y coordinate in the convolved tensor
+    const int ch    = get_global_id(2) % filter_depth; // input feature map
+    const int batch = get_global_id(2) / filter_depth; // the batch
 
     // Calculate input indeces
     const int xi = xc * STRIDE_X;
@@ -206,8 +214,9 @@ __kernel void im2col_kernel3x3_padx0_pady0(
     const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
 
     // Get input and output address
-    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + xi * src_stride_x + yi * src_stride_y + ch * src_stride_z;
-    __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y)) + xo;
+    __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + xi * src_stride_x + yi * src_stride_y + ch * src_stride_z + batch * src_stride_w;
+
+    __global DATA_TYPE *output_ptr = (__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y + batch * dst_stride_w) + xo;
 
     VEC_DATA_TYPE(DATA_TYPE, 3)
     row0 = vload3(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y));
@@ -220,7 +229,7 @@ __kernel void im2col_kernel3x3_padx0_pady0(
     *(output_ptr + 8) = row2.s2;
 
 #ifdef HAS_BIAS
-    if(get_global_id(2) == (KERNEL_DEPTH - 1))
+    if(ch == (KERNEL_DEPTH - 1))
     {
 #ifdef FIXED_POINT_POSITION
         *(output_ptr + 9) = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
