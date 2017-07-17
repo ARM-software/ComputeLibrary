@@ -84,7 +84,7 @@ function aarch64
     -std=c++11 \
     -include $SCRIPT_PATH/clang-tidy.h \
     $INCLUDE_PATHS \
-    -DARM_COMPUTE_ENABLE_FP16 -DARM_COMPUTE_CPP_SCHEDULER=1 $USE_BOOST
+    -DARM_COMPUTE_CL -DARM_COMPUTE_ENABLE_FP16 -DARM_COMPUTE_CPP_SCHEDULER=1 $USE_BOOST
 }
 
 for f in $files; do

@@ -30,9 +30,9 @@
 #include "support/ToolchainSupport.h"
 #include "tests/TensorLibrary.h"
 
-#ifdef OPENCL
+#ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#endif /* OPENCL */
+#endif /* ARM_COMPUTE_CL */
 #include "arm_compute/runtime/Scheduler.h"
 
 #include <fstream>
@@ -55,9 +55,9 @@ std::unique_ptr<TensorLibrary> library;
 
 int main(int argc, char **argv)
 {
-#ifdef OPENCL
+#ifdef ARM_COMPUTE_CL
     CLScheduler::get().default_init();
-#endif /* OPENCL */
+#endif /* ARM_COMPUTE_CL */
 
     framework::Framework &framework = framework::Framework::get();
 

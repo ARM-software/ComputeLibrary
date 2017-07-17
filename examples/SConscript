@@ -48,7 +48,7 @@ else:
 if env['opencl'] and env['neon']:
     for file in Glob("./neoncl_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])
-        prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LIBS = [arm_compute_lib, "OpenCL"])
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_CL'], LIBS = [arm_compute_lib, "OpenCL"])
         Depends(prog, [arm_compute_dependency, opencl])
         alias = examples_env.Alias(example, prog)
         Default(alias)
@@ -56,7 +56,7 @@ if env['opencl'] and env['neon']:
 if env['opencl']:
     for file in Glob("./cl_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])
-        prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LIBS = [arm_compute_lib, "OpenCL"])
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_CL'], LIBS = [arm_compute_lib, "OpenCL"])
         Depends(prog, [arm_compute_dependency, opencl])
         alias = examples_env.Alias(example, prog)
         Default(alias)

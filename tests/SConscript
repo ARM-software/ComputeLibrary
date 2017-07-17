@@ -150,7 +150,7 @@ files_benchmark += Glob('new/benchmark_new/*.cpp')
 if env['opencl']:
     Import('opencl')
 
-    benchmark_env.Append(CPPDEFINES=['OPENCL'])
+    benchmark_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
 
     files_benchmark += Glob('new/benchmark_new/CL/*/*.cpp')
     files_benchmark += Glob('new/benchmark_new/CL/*.cpp')

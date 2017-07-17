@@ -424,11 +424,11 @@ To cross compile a NEON example for Linux 64bit:
 
 To cross compile an OpenCL example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -lOpenCL -o cl_convolution
+	arm-linux-gnueabihf-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
 
 To cross compile an OpenCL example for Linux 64bit:
 
-	aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -lOpenCL -o cl_convolution
+	aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
 
@@ -444,7 +444,7 @@ To compile natively (i.e directly on an ARM device) for NEON for Linux 64bit:
 
 To compile natively (i.e directly on an ARM device) for OpenCL for Linux 32bit or Linux 64bit:
 
-	g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -lOpenCL -o cl_convolution
+	g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
 
 
 @note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L
@@ -509,9 +509,9 @@ To cross compile a NEON example:
 To cross compile an OpenCL example:
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL
+	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL
+	aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 
 @note Due to some issues in older versions of the Mali OpenCL DDK (<= r13p0), we recommend to link arm_compute statically on Android.
 
