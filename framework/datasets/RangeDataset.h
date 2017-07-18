@@ -40,7 +40,10 @@ namespace framework
 {
 namespace dataset
 {
-/** Implementation of a dataset created from a range of values. */
+/** Implementation of a dataset created from a range of values.
+ *
+ * The range is inclusive of the first value but exclusive of the last, i.e. [start, end).
+ */
 template <typename T>
 class RangeDataset final : public NamedDataset
 {
@@ -48,47 +51,49 @@ public:
     /** Construct dataset with given name and values in the specified range.
      *
      * @param[in] name  Description of the values.
-     * @param[in] first Iterator to the first value.
-     * @param[in] last  Iterator behind the last value.
+     * @param[in] start Begin of the range.
+     * @param[in] end   End of the range.
+     * @param[in] step  Step size.
      */
-    RangeDataset(std::string name, T &&first, T &&last)
-        : NamedDataset{ std::move(name) }, _first{ std::forward<T>(first) }, _last{ std::forward<T>(last) }
+    RangeDataset(std::string name, T start, T end, T step = 1)
+        : NamedDataset{ std::move(name) }, _start{ start }, _end{ end }, _step{ step }
     {
     }
 
     RangeDataset(RangeDataset &&) = default;
 
     /** Type of the dataset. */
-    using type = std::tuple<typename std::iterator_traits<T>::value_type>;
+    using type = std::tuple<T>;
 
     /** Iterator for the dataset. */
     struct iterator
     {
-        iterator(std::string name, T iterator)
-            : _name{ name }, _iterator{ iterator }
+        iterator(std::string name, T start, T step)
+            : _name{ name }, _value{ start }, _step{ step }
         {
         }
 
         std::string description() const
         {
             using support::cpp11::to_string;
-            return _name + "=" + to_string(*_iterator);
+            return _name + "=" + to_string(_value);
         }
 
         RangeDataset::type operator*() const
         {
-            return std::make_tuple(*_iterator);
+            return std::make_tuple(_value);
         }
 
         iterator &operator++()
         {
-            ++_iterator;
+            _value += _step;
             return *this;
         }
 
     private:
         std::string _name;
-        T           _iterator;
+        T           _value;
+        T           _step;
     };
 
     /** Iterator pointing at the begin of the dataset.
@@ -97,7 +102,7 @@ public:
      */
     iterator begin() const
     {
-        return iterator(name(), _first);
+        return iterator(name(), _start, _step);
     }
 
     /** Size of the dataset.
@@ -106,26 +111,28 @@ public:
      */
     int size() const
     {
-        return std::distance(_first, _last);
+        return (_end - _start) / std::abs(_step);
     }
 
 private:
-    T _first;
-    T _last;
+    T _start;
+    T _end;
+    T _step;
 };
 
 /** Helper function to create a @ref RangeDataset.
  *
  * @param[in] name  Name of the dataset.
- * @param[in] first Iterator to the first value.
- * @param[in] last  Iterator behind the last value.
+ * @param[in] start Begin of the range.
+ * @param[in] end   End of the range.
+ * @param[in] step  Step size.
  *
  * @return A range dataset.
  */
 template <typename T>
-RangeDataset<T> make(std::string name, T &&first, T &&last)
+RangeDataset<T> make(std::string name, T start, T end, T step = 1)
 {
-    return RangeDataset<T>(std::move(name), std::forward<T>(first), std::forward<T>(last));
+    return RangeDataset<T>(std::move(name), start, end, step);
 }
 } // namespace dataset
 } // namespace framework

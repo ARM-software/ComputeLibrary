@@ -24,12 +24,9 @@
 #ifndef ARM_COMPUTE_TEST_FRAMEWORK_MACROS
 #define ARM_COMPUTE_TEST_FRAMEWORK_MACROS
 
-#include "Exceptions.h"
 #include "Framework.h"
 #include "Registrars.h"
 #include "TestCase.h"
-
-#include <sstream>
 
 //
 // TEST SUITE MACROS
@@ -218,30 +215,4 @@
 //
 // TEST CASE MACROS END
 //
-
-#define ARM_COMPUTE_ASSERT_EQUAL(x, y)                                \
-    do                                                                \
-    {                                                                 \
-        const auto &_x = (x);                                         \
-        const auto &_y = (y);                                         \
-        if(_x != _y)                                                  \
-        {                                                             \
-            std::stringstream msg;                                    \
-            msg << "Assertion " << _x << " != " << _y << " failed.";  \
-            throw arm_compute::test::framework::TestError(msg.str()); \
-        }                                                             \
-    } while(false)
-
-#define ARM_COMPUTE_EXPECT_EQUAL(x, y)                                                        \
-    do                                                                                        \
-    {                                                                                         \
-        const auto &_x = (x);                                                                 \
-        const auto &_y = (y);                                                                 \
-        if(_x != _y)                                                                          \
-        {                                                                                     \
-            std::stringstream msg;                                                            \
-            msg << "Expectation " << _x << " != " << _y << " failed.";                        \
-            arm_compute::test::framework::Framework::get().log_failed_expectation(msg.str()); \
-        }                                                                                     \
-    } while(false)
 #endif /* ARM_COMPUTE_TEST_FRAMEWORK_MACROS */

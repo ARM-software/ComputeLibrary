@@ -55,7 +55,7 @@ struct is_container<std::vector<V, A>> : public std::true_type
 
 /** Implementation of a dataset created from a container. */
 template <typename T>
-class ContainerDataset final : public NamedDataset
+class ContainerDataset : public NamedDataset
 {
 private:
     using container_value_type     = typename T::value_type;
@@ -68,7 +68,7 @@ public:
      * @param[in] container Values for the dataset.
      */
     ContainerDataset(std::string name, T &&container)
-        : NamedDataset{ std::move(name) }, _container{ std::forward<T>(container) }
+        : NamedDataset{ std::move(name) }, _container(std::forward<T>(container))
     {
     }
 

@@ -43,7 +43,7 @@ namespace dataset
 {
 /** Implementation of a dataset holding a single value. */
 template <typename T>
-class SingletonDataset final : public NamedDataset
+class SingletonDataset : public NamedDataset
 {
 public:
     /** Construct dataset with given name and value.
