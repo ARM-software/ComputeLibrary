@@ -127,6 +127,27 @@ public:
     template <typename T, typename D>
     void add_data_test_case(std::string test_name, DatasetMode mode, std::string description, D &&data);
 
+    /** Add info string for the next expectation/assertion.
+     *
+     * @param[in] info Info string.
+     */
+    void add_test_info(std::string info);
+
+    /** Clear the collected test info. */
+    void clear_test_info();
+
+    /** Check if any info has been registered.
+     *
+     * @return True if there is test info.
+     */
+    bool has_test_info() const;
+
+    /** Print test info.
+     *
+     * @param[out] os Output stream.
+     */
+    void print_test_info(std::ostream &os) const;
+
     /** Tell the framework that execution of a test starts.
      *
      * @param[in] test_name Name of the started test case.
@@ -257,11 +278,12 @@ private:
     using create_function = std::unique_ptr<Instrument>();
     std::map<InstrumentType, create_function *> _available_instruments{};
 
-    InstrumentType _instruments{ InstrumentType::NONE };
-    std::regex     _test_name_filter{ ".*" };
-    int64_t        _test_id_filter{ -1 };
-    DatasetMode    _dataset_mode{ DatasetMode::ALL };
-    TestResult    *_current_test_result{ nullptr };
+    InstrumentType           _instruments{ InstrumentType::NONE };
+    std::regex               _test_name_filter{ ".*" };
+    int64_t                  _test_id_filter{ -1 };
+    DatasetMode              _dataset_mode{ DatasetMode::ALL };
+    TestResult              *_current_test_result{ nullptr };
+    std::vector<std::string> _test_info{};
 };
 
 template <typename T>

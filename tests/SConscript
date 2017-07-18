@@ -42,68 +42,61 @@ for v in variables:
     vars.Add(v)
 
 # Clone the environment to make sure we're not polluting the arm_compute one:
-common_env = env.Clone()
-vars.Update(common_env)
+old_validation_env = env.Clone()
+vars.Update(old_validation_env)
 
-Help(new_options.GenerateHelpText(common_env))
+Help(new_options.GenerateHelpText(old_validation_env))
 
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import('arm_compute_a')
-    common_env.Append(LIBS = [arm_compute_a])
+    old_validation_env.Append(LIBS = [arm_compute_a])
     arm_compute_lib = arm_compute_a
 else:
     Import('arm_compute_so')
-    common_env.Append(LIBS = ["arm_compute"])
+    old_validation_env.Append(LIBS = ["arm_compute"])
     arm_compute_lib = arm_compute_so
 
 #FIXME Delete before release
-if common_env['internal_only']:
-    common_env.Append(CPPDEFINES=['INTERNAL_ONLY'])
+if old_validation_env['internal_only']:
+    old_validation_env.Append(CPPDEFINES=['INTERNAL_ONLY'])
 
-common_env.Append(CPPPATH = [".", "#3rdparty/include"])
-common_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
-common_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
-common_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
-common_env.Append(LIBS = ['boost_program_options'])
-common_env.Append(CXXFLAGS = ['-Wno-missing-field-initializers'])
+old_validation_env.Append(CPPPATH = [".", "#3rdparty/include"])
+old_validation_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
+old_validation_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
+old_validation_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
+old_validation_env.Append(LIBS = ['boost_program_options'])
+old_validation_env.Append(CXXFLAGS = ['-Wno-missing-field-initializers'])
+old_validation_env.Append(CPPDEFINES=['BOOST'])
+old_validation_env.Append(LIBS = ['boost_unit_test_framework'])
 
-validation_env = common_env.Clone()
-
-validation_env.Append(CPPDEFINES=['BOOST'])
-
-files = Glob('*.cpp')
-files = [f for f in files if "DatasetManager" not in os.path.basename(str(f))]
-
-common_objects = [ common_env.StaticObject( f ) for f in files ]
-
-validation_env.Append(LIBS = ['boost_unit_test_framework'])
-
-files_validation = Glob('validation/*.cpp')
+old_files_validation = Glob('*.cpp')
+old_files_validation = [f for f in old_files_validation if "main.cpp" not in os.path.basename(str(f))]
+old_files_validation += Glob('validation/*.cpp')
 
 # Add unit tests
-files_validation += Glob('validation/UNIT/*.cpp')
-files_validation += Glob('validation/UNIT/*/*.cpp')
+old_files_validation += Glob('validation/UNIT/*.cpp')
+old_files_validation += Glob('validation/UNIT/*/*.cpp')
 
 if env['opencl']:
     Import('opencl')
 
-    files_validation += Glob('validation/CL/*.cpp')
-    files_validation += Glob('validation/CL/*/*.cpp')
-    files_validation += Glob('validation/system_tests/CL/*.cpp')
+    old_files_validation += Glob('validation/CL/*.cpp')
+    old_files_validation += Glob('validation/CL/*/*.cpp')
+    old_files_validation += Glob('validation/system_tests/CL/*.cpp')
 
-    validation_env.Append(LIBS = "OpenCL")
+    old_validation_env.Append(LIBS = "OpenCL")
+    old_validation_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
 
 if env['neon']:
-    files_validation += Glob('validation/NEON/*.cpp')
-    files_validation += Glob('validation/NEON/*/*.cpp')
-    files_validation += Glob('validation/system_tests/NEON/*.cpp')
+    old_files_validation += Glob('validation/NEON/*.cpp')
+    old_files_validation += Glob('validation/NEON/*/*.cpp')
+    old_files_validation += Glob('validation/system_tests/NEON/*.cpp')
 
 if env['os'] == 'android':
-    validation_env.Append(LIBS = ["log"])
+    old_validation_env.Append(LIBS = ["log"])
 
-if common_env['validation_tests']:
-    arm_compute_validation = validation_env.Program('arm_compute_validation',
-                                                   files_validation + common_objects)
+if old_validation_env['validation_tests']:
+    arm_compute_validation = old_validation_env.Program('arm_compute_validation', old_files_validation)
     Depends(arm_compute_validation, arm_compute_lib)
     if env['opencl']:
         Depends(arm_compute_validation, opencl)
@@ -115,58 +108,70 @@ if common_env['validation_tests']:
 #######################################################################
 
 # Clone the environment to make sure we're not polluting the arm_compute one:
-benchmark_env = env.Clone()
+test_env = env.Clone()
 # Workaround to build both test systems in parallel
-benchmark_env.VariantDir("new", ".", duplicate=0)
+test_env.VariantDir("new", ".", duplicate=0)
 
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
-    benchmark_env.Append(LIBS = [arm_compute_a])
+    test_env.Append(LIBS = [arm_compute_a])
     arm_compute_lib = arm_compute_a
 else:
-    Import('arm_compute_so')
-    benchmark_env.Append(LIBS = ["arm_compute"])
+    Import("arm_compute_so")
+    test_env.Append(LIBS = ["arm_compute"])
     arm_compute_lib = arm_compute_so
 
 #FIXME Delete before release
-if common_env['internal_only']:
-    benchmark_env.Append(CPPDEFINES=['INTERNAL_ONLY'])
+if old_validation_env['internal_only']:
+    test_env.Append(CPPDEFINES=['INTERNAL_ONLY'])
 
-benchmark_env.Append(CPPPATH = [".", "#3rdparty/include"])
-benchmark_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
-benchmark_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
-benchmark_env.Append(LIBPATH = ["#build/%s/framework" % env['build_dir']])
-benchmark_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
+test_env.Append(CPPPATH = [".", "#3rdparty/include"])
+test_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
+test_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
+test_env.Append(LIBPATH = ["#build/%s/framework" % env['build_dir']])
+test_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
 
 Import("arm_compute_test_framework")
-benchmark_env.Append(LIBS = ['arm_compute_test_framework'])
+test_env.Append(LIBS = arm_compute_test_framework)
 
-files_benchmark = Glob('new/DatasetManager.cpp')
-files_benchmark += Glob('new/AssetsLibrary.cpp')
-files_benchmark += Glob('new/RawTensor.cpp')
-files_benchmark += Glob('new/benchmark_new/*.cpp')
+common_files = Glob('new/AssetsLibrary.cpp')
+common_files += Glob('new/RawTensor.cpp')
+common_files += Glob('new/main.cpp')
+
+common_objects = [test_env.StaticObject(f) for f in common_files]
+
+files_benchmark = Glob('new/benchmark_new/*.cpp')
+files_validation = Glob('new/validation_new/*.cpp')
+
+# Always compile reference for validation
+files_validation += Glob('new/validation_new/CPP/*.cpp')
 
 if env['opencl']:
     Import('opencl')
 
-    benchmark_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
+    test_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
+    test_env.Append(LIBS = ["OpenCL"])
 
     files_benchmark += Glob('new/benchmark_new/CL/*/*.cpp')
     files_benchmark += Glob('new/benchmark_new/CL/*.cpp')
 
-    benchmark_env.Append(LIBS = "OpenCL")
+    files_validation += Glob('new/validation_new/CL/*/*.cpp')
+    files_validation += Glob('new/validation_new/CL/*.cpp')
 
 if env['neon']:
     files_benchmark += Glob('new/benchmark_new/NEON/*/*.cpp')
     files_benchmark += Glob('new/benchmark_new/NEON/*.cpp')
 
-if env['os'] == 'android':
-    benchmark_env.Append(LIBS = ["log"])
-else:
-    benchmark_env.Append(LIBS = ["rt"])
+    files_validation += Glob('new/validation_new/NEON/*/*.cpp')
+    files_validation += Glob('new/validation_new/NEON/*.cpp')
 
-if common_env['benchmark_tests']:
-    arm_compute_benchmark = benchmark_env.Program('arm_compute_benchmark', files_benchmark)
+if env['os'] == 'android':
+    test_env.Append(LIBS = ["log"])
+else:
+    test_env.Append(LIBS = ["rt"])
+
+if old_validation_env['benchmark_tests']:
+    arm_compute_benchmark = test_env.Program('arm_compute_benchmark', files_benchmark + common_objects)
     Depends(arm_compute_benchmark, arm_compute_test_framework)
     Depends(arm_compute_benchmark, arm_compute_lib)
 
@@ -175,3 +180,14 @@ if common_env['benchmark_tests']:
 
     Default(arm_compute_benchmark)
     Export('arm_compute_benchmark')
+
+if old_validation_env['validation_tests']:
+    arm_compute_validation_new = test_env.Program('arm_compute_validation_new', files_validation + common_objects)
+    Depends(arm_compute_validation_new, arm_compute_test_framework)
+    Depends(arm_compute_validation_new, arm_compute_lib)
+
+    if env['opencl']:
+        Depends(arm_compute_validation_new, opencl)
+
+    Default(arm_compute_validation_new)
+    Export('arm_compute_validation_new')

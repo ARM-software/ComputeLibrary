@@ -127,6 +127,31 @@ void Framework::pop_suite()
     _test_suite_name.pop_back();
 }
 
+void Framework::add_test_info(std::string info)
+{
+    _test_info.emplace_back(std::move(info));
+}
+
+void Framework::clear_test_info()
+{
+    _test_info.clear();
+}
+
+bool Framework::has_test_info() const
+{
+    return !_test_info.empty();
+}
+
+void Framework::print_test_info(std::ostream &os) const
+{
+    os << "CONTEXT:\n";
+
+    for(const auto &str : _test_info)
+    {
+        os << "    " << str << "\n";
+    }
+}
+
 void Framework::log_test_start(const std::string &test_name)
 {
     if(_printer != nullptr)
