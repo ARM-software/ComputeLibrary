@@ -26,6 +26,10 @@
 #include "Exceptions.h"
 #include "support/ToolchainSupport.h"
 
+#ifdef ARM_COMPUTE_CL
+#include "arm_compute/core/CL/OpenCL.h"
+#endif /* ARM_COMPUTE_CL */
+
 #include <chrono>
 #include <iostream>
 #include <sstream>
@@ -237,6 +241,18 @@ void Framework::run_test(TestCaseFactory &test_factory)
                 throw;
             }
         }
+#ifdef ARM_COMPUTE_CL
+        catch(const ::cl::Error &error)
+        {
+            std::cerr << "FATAL CL ERROR: " << error.what() << " with code " << error.err() << "\n";
+            result.status = TestResult::Status::FAILED;
+
+            if(_throw_errors)
+            {
+                throw;
+            }
+        }
+#endif /* ARM_COMPUTE_CL */
         catch(const std::exception &error)
         {
             std::cerr << "FATAL ERROR: Received unhandled error: '" << error.what() << "'\n";

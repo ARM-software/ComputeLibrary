@@ -47,6 +47,9 @@ if env['os'] == 'android' and framework_env['pmu']:
     print("pmu=1 is not supported for os=android")
     Exit(1)
 
+if(env['opencl']):
+    framework_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
+
 framework_env.Append(CPPPATH = ["."])
 framework_env.Append(CPPFLAGS=['-Wno-overloaded-virtual'])
 
