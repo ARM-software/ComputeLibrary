@@ -37,6 +37,7 @@ set(arm_compute_test_validation_OPENCL_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel3x3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sobel5x5.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Threshold.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectConvolutionLayer.cpp
 )
 
 add_library(arm_compute_test_validation_OPENCL OBJECT

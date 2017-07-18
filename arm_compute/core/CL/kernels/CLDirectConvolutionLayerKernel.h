@@ -21,57 +21,66 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYERKERNEL_H__
-#define __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYERKERNEL_H__
+#ifndef __ARM_COMPUTE_CLDIRECTCONVOLUTIONLAYERKERNEL_H__
+#define __ARM_COMPUTE_CLDIRECTCONVOLUTIONLAYERKERNEL_H__
 
-#include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
-class ITensor;
+class ICLTensor;
 
-/** NEON interface for Direct Convolution Layer kernel */
-class NEDirectConvolutionLayerKernel : public INEKernel
+/** Interface for the  direct convolution kernel.
+ */
+template <unsigned int kernel_size>
+class CLDirectConvolutionLayerKernel : public ICLKernel
 {
 public:
     /** Default constructor */
-    NEDirectConvolutionLayerKernel();
+    CLDirectConvolutionLayerKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDirectConvolutionLayerKernel(const NEDirectConvolutionLayerKernel &) = delete;
+    CLDirectConvolutionLayerKernel(const CLDirectConvolutionLayerKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDirectConvolutionLayerKernel &operator=(const NEDirectConvolutionLayerKernel &) = delete;
+    CLDirectConvolutionLayerKernel &operator=(const CLDirectConvolutionLayerKernel &) = delete;
     /** Allow instances of this class to be moved */
-    NEDirectConvolutionLayerKernel(NEDirectConvolutionLayerKernel &&) = default;
+    CLDirectConvolutionLayerKernel(CLDirectConvolutionLayerKernel &&) = default;
     /** Allow instances of this class to be moved */
-    NEDirectConvolutionLayerKernel &operator=(NEDirectConvolutionLayerKernel &&) = default;
+    CLDirectConvolutionLayerKernel &operator=(CLDirectConvolutionLayerKernel &&) = default;
     /** Default destructor */
-    ~NEDirectConvolutionLayerKernel() = default;
-    /** Set the input, weights, and output tensors.
+    ~CLDirectConvolutionLayerKernel() = default;
+    /** Set the input, weights, biases and output tensors.
      *
      * @param[in]  input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
-     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/F32.
+     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F32.
      * @param[in]  weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
      *                       The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                       Data type supported:Same as @p input.
+     * @param[in]  biases    Biases tensor. Biases are 1D tensor with dimension [OFM]. Data type supported: Same as @p input.
      * @param[out] output    Output tensor.
      *                       The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      */
-    void configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info);
+    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
     BorderSize border_size() const override;
 
+    // Inherited methods overridden:
+    void run(const Window &window, cl::CommandQueue &queue) override;
+
 private:
-    const ITensor *_input;
-    const ITensor *_weights;
-    ITensor       *_output;
-    PadStrideInfo  _conv_info;
-    BorderSize     _border_size;
-    unsigned int   _kernel_size;
-    unsigned int   _num_elems_read_per_iteration;
-    unsigned int   _num_elems_written_per_iteration;
+    const ICLTensor *_input;
+    const ICLTensor *_biases;
+    const ICLTensor *_weights;
+    ICLTensor       *_output;
+    BorderSize       _border_size;
+    int              _conv_pad_x;
+    int              _conv_pad_y;
+    int              _conv_stride_x;
+    int              _conv_stride_y;
 };
+
+using CLDirectConvolutionLayer3x3Kernel = CLDirectConvolutionLayerKernel<3>;
 }
-#endif /*__ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYERKERNEL_H__ */
+#endif /*__ARM_COMPUTE_CLDIRECTCONVOLUTIONLAYERKERNEL_H__ */

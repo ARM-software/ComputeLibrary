@@ -37,7 +37,7 @@ set(arm_compute_test_validation_NEON_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/BitwiseXor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Box3x3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ConvolutionLayer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ConvolutionLayerDirect.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectConvolutionLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DepthConvert.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FillBorder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Fixedpoint/Exp_QS8.cpp

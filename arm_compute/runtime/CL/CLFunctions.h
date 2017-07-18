@@ -46,6 +46,7 @@
 #include "arm_compute/runtime/CL/functions/CLDepthConvert.h"
 #include "arm_compute/runtime/CL/functions/CLDerivative.h"
 #include "arm_compute/runtime/CL/functions/CLDilate.h"
+#include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLEqualizeHistogram.h"
 #include "arm_compute/runtime/CL/functions/CLErode.h"
 #include "arm_compute/runtime/CL/functions/CLFastCorners.h"

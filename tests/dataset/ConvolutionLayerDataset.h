@@ -93,12 +93,13 @@ public:
 };
 
 /** Data set containing direct convolution tensor shapes. */
-class DirectConvolutionShapes final : public ShapeDataset<3>
+class DirectConvolutionShapes final : public ShapeDataset<4>
 {
 public:
     DirectConvolutionShapes()
         : ShapeDataset(TensorShape(3U, 3U, 3U, 2U, 4U, 5U),
                        TensorShape(32U, 37U, 3U),
+                       TensorShape(64U, 32U, 4U, 2U),
                        TensorShape(13U, 15U, 8U, 3U))
     {
     }

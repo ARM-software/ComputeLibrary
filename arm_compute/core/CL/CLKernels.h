@@ -46,6 +46,7 @@
 #include "arm_compute/core/CL/kernels/CLDepthConvertKernel.h"
 #include "arm_compute/core/CL/kernels/CLDerivativeKernel.h"
 #include "arm_compute/core/CL/kernels/CLDilateKernel.h"
+#include "arm_compute/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLErodeKernel.h"
 #include "arm_compute/core/CL/kernels/CLFastCornersKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
