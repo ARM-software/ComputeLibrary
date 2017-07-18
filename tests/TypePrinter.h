@@ -38,19 +38,15 @@ namespace arm_compute
 template <typename T>
 inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimensions)
 {
-    os << "(";
-
     if(dimensions.num_dimensions() > 0)
     {
         os << dimensions[0];
 
         for(unsigned int d = 1; d < dimensions.num_dimensions(); ++d)
         {
-            os << ", " << dimensions[d];
+            os << "x" << dimensions[d];
         }
     }
-
-    os << ")";
 
     return os;
 }
@@ -74,11 +70,8 @@ inline std::string to_string(const TensorShape &shape)
 /** Formatted output of the Rectangle type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
 {
-    os << "(";
-    os << rect.height << ", " << rect.width;
-    os << ", ";
-    os << rect.x << ", " << rect.y;
-    os << ")";
+    os << rect.width << "x" << rect.height;
+    os << "+" << rect.x << "+" << rect.y;
 
     return os;
 }
@@ -86,11 +79,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
 /** Formatted output of the PadStridInfo type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_stride_info)
 {
-    os << "(";
-    os << pad_stride_info.stride().first << ", " << pad_stride_info.stride().second;
-    os << ", ";
-    os << pad_stride_info.pad().first << ", " << pad_stride_info.pad().second;
-    os << ")";
+    os << pad_stride_info.stride().first << "," << pad_stride_info.stride().second;
+    os << ";";
+    os << pad_stride_info.pad().first << "," << pad_stride_info.pad().second;
 
     return os;
 }
@@ -98,7 +89,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_s
 /** Formatted output of the ROIPoolingInfo type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo &pool_info)
 {
-    os << pool_info.pooled_width() << ", " << pool_info.pooled_height() << ", " << pool_info.spatial_scale();
+    os << pool_info.pooled_width() << "x" << pool_info.pooled_height() << "~" << pool_info.spatial_scale();
     return os;
 }
 
@@ -509,10 +500,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Channel &channel)
 /** Formatted output of the BorderSize type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
 {
-    os << "{" << border.top << ", "
-       << border.right << ", "
-       << border.bottom << ", "
-       << border.left << "}";
+    os << border.top << ","
+       << border.right << ","
+       << border.bottom << ","
+       << border.left;
 
     return os;
 }

@@ -45,17 +45,17 @@ TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetPoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetPoolingLayerDataset(),
-                                                                                        framework::dataset::make("Data type", { DataType::F32, DataType::QS8 })),
+                                                                                        framework::dataset::make("DataType", { DataType::F32, DataType::QS8 })),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5PoolingLayerDataset(),
-                                                                                        framework::dataset::make("Data type", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetPoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetPoolingLayerDataset(),
-                                                                                        framework::dataset::make("Data type", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()

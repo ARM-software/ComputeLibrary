@@ -43,12 +43,12 @@ TEST_SUITE(CL)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, CLNormalizationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(),
-                                                                                        framework::dataset::make("Data type", { DataType::F32 })),
+                                                                                        framework::dataset::make("DataType", { DataType::F32 })),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetNormalizationLayer, CLNormalizationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetNormalizationLayerDataset(),
-                                                                                        framework::dataset::make("Data type", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()

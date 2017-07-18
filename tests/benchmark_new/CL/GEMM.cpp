@@ -37,7 +37,7 @@ namespace test
 {
 namespace
 {
-auto data_types = framework::dataset::make("Data type",
+auto data_types = framework::dataset::make("DataType",
 {
 #if ARM_COMPUTE_ENABLE_FP16
     DataType::FP16,
