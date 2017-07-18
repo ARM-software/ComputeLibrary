@@ -128,11 +128,6 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        if(!parser.validate())
-        {
-            return 1;
-        }
-
         std::unique_ptr<framework::Printer> printer;
         std::ofstream                       log_stream;
 
@@ -162,7 +157,6 @@ int main(int argc, char **argv)
             }
         }
 
-        library = support::cpp14::make_unique<TensorLibrary>(assets->value(), seed->value());
         Scheduler::get().set_num_threads(threads->value());
 
         printer->print_global_header();
@@ -186,11 +180,18 @@ int main(int argc, char **argv)
             {
                 std::cout << "[" << std::get<0>(id) << ", " << std::get<2>(id) << "] " << std::get<1>(id) << "\n";
             }
+
+            return 0;
         }
-        else
+
+        library = support::cpp14::make_unique<TensorLibrary>(assets->value(), seed->value());
+
+        if(!parser.validate())
         {
-            success = framework.run();
+            return 1;
         }
+
+        success = framework.run();
 
         printer->print_global_footer();
 
