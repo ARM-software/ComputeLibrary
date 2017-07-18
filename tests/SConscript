@@ -142,7 +142,7 @@ Import("arm_compute_test_framework")
 benchmark_env.Append(LIBS = ['arm_compute_test_framework'])
 
 files_benchmark = Glob('new/DatasetManager.cpp')
-files_benchmark += Glob('new/TensorLibrary.cpp')
+files_benchmark += Glob('new/AssetsLibrary.cpp')
 files_benchmark += Glob('new/RawTensor.cpp')
 files_benchmark += Glob('new/benchmark_new/*.cpp')
 

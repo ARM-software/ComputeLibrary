@@ -24,8 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_MODEL_OBJECTS_ALEXNET_H__
 #define __ARM_COMPUTE_TEST_MODEL_OBJECTS_ALEXNET_H__
 
+#include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
-#include "tests/TensorLibrary.h"
 #include "tests/Utils.h"
 
 #include <memory>

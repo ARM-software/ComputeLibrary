@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 
+#include "AssetsLibrary.h"
 #include "CL/CLAccessor.h"
 #include "Globals.h"
 #include "PaddingCalculator.h"
-#include "TensorLibrary.h"
 #include "TypePrinter.h"
 #include "Utils.h"
 #include "validation/Datasets.h"

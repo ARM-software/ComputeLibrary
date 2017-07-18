@@ -23,8 +23,8 @@
  */
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#include "AssetsLibrary.h"
 #include "Globals.h"
-#include "TensorLibrary.h"
 #include "Utils.h"
 #include "ValidationProgramOptions.h"
 #include "ValidationUserConfiguration.h"
@@ -46,7 +46,7 @@ namespace arm_compute
 namespace test
 {
 ValidationUserConfiguration    user_config;
-std::unique_ptr<TensorLibrary> library;
+std::unique_ptr<AssetsLibrary> library;
 } // namespace test
 } // namespace arm_compute
 
@@ -54,15 +54,7 @@ struct GlobalFixture
 {
     GlobalFixture()
     {
-        if(user_config.seed.is_set())
-        {
-            library = arm_compute::support::cpp14::make_unique<TensorLibrary>(user_config.path.get(), user_config.seed);
-        }
-        else
-        {
-            library = arm_compute::support::cpp14::make_unique<TensorLibrary>(user_config.path.get());
-        }
-
+        library = arm_compute::support::cpp14::make_unique<AssetsLibrary>(user_config.path.get(), user_config.seed);
         std::cout << "Seed: " << library->seed() << "\n";
     }
 };

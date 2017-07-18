@@ -57,22 +57,16 @@ namespace test
  * explicitly. Furthermore, provides methods to fill tensors with the content of
  * loaded images or with random values.
  */
-class TensorLibrary final
+class AssetsLibrary final
 {
 public:
-    /** Initialises the library with a @p path to the image directory.
-     *
-     * @param[in] path Path to load images from.
-     */
-    TensorLibrary(std::string path);
-
     /** Initialises the library with a @p path to the image directory.
      * Furthermore, sets the seed for the random generator to @p seed.
      *
      * @param[in] path Path to load images from.
      * @param[in] seed Seed used to initialise the random number generator.
      */
-    TensorLibrary(std::string path, std::random_device::result_type seed);
+    AssetsLibrary(std::string path, std::random_device::result_type seed);
 
     /** Seed that is used to fill tensors with random values. */
     std::random_device::result_type seed() const;
@@ -82,23 +76,6 @@ public:
      * @param[in] name Image file used to look up the raw tensor.
      */
     TensorShape get_image_shape(const std::string &name);
-
-    /** Creates an uninitialised raw tensor with the given @p shape, @p
-     * data_type and @p num_channels.
-     *
-     * @param[in] shape                Shape used to initialise the tensor.
-     * @param[in] data_type            Data type used to initialise the tensor.
-     * @param[in] num_channels         (Optional) Number of channels used to initialise the tensor.
-     * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers
-     */
-    static RawTensor get(const TensorShape &shape, DataType data_type, int num_channels = 1, int fixed_point_position = 0);
-
-    /** Creates an uninitialised raw tensor with the given @p shape and @p format.
-     *
-     * @param[in] shape  Shape used to initialise the tensor.
-     * @param[in] format Format used to initialise the tensor.
-     */
-    static RawTensor get(const TensorShape &shape, Format format);
 
     /** Provides a contant raw tensor for the specified image.
      *
@@ -375,7 +352,7 @@ private:
 };
 
 template <typename T, typename D>
-void TensorLibrary::fill(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
+void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
 {
     Window window;
     for(unsigned int d = 0; d < tensor.shape().num_dimensions(); ++d)
@@ -396,7 +373,7 @@ void TensorLibrary::fill(T &&tensor, D &&distribution, std::random_device::resul
 }
 
 template <typename D>
-void TensorLibrary::fill(RawTensor &raw, D &&distribution, std::random_device::result_type seed_offset) const
+void AssetsLibrary::fill(RawTensor &raw, D &&distribution, std::random_device::result_type seed_offset) const
 {
     std::mt19937 gen(_seed + seed_offset);
 
@@ -409,7 +386,7 @@ void TensorLibrary::fill(RawTensor &raw, D &&distribution, std::random_device::r
 }
 
 template <typename T>
-void TensorLibrary::fill(T &&tensor, const std::string &name, Format format) const
+void AssetsLibrary::fill(T &&tensor, const std::string &name, Format format) const
 {
     const RawTensor &raw = get(name, format);
 
@@ -424,13 +401,13 @@ void TensorLibrary::fill(T &&tensor, const std::string &name, Format format) con
 }
 
 template <typename T>
-void TensorLibrary::fill(T &&tensor, const std::string &name, Channel channel) const
+void AssetsLibrary::fill(T &&tensor, const std::string &name, Channel channel) const
 {
     fill(std::forward<T>(tensor), name, get_format_for_channel(channel), channel);
 }
 
 template <typename T>
-void TensorLibrary::fill(T &&tensor, const std::string &name, Format format, Channel channel) const
+void AssetsLibrary::fill(T &&tensor, const std::string &name, Format format, Channel channel) const
 {
     const RawTensor &raw = get(name, format, channel);
 
@@ -445,7 +422,7 @@ void TensorLibrary::fill(T &&tensor, const std::string &name, Format format, Cha
 }
 
 template <typename T>
-void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_type seed_offset) const
+void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_type seed_offset) const
 {
     switch(tensor.data_type())
     {
@@ -528,7 +505,7 @@ void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
 }
 
 template <typename T, typename D>
-void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_type seed_offset, D low, D high) const
+void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_type seed_offset, D low, D high) const
 {
     switch(tensor.data_type())
     {
@@ -625,7 +602,7 @@ void TensorLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
 }
 
 template <typename T>
-void TensorLibrary::fill_layer_data(T &&tensor, std::string name) const
+void AssetsLibrary::fill_layer_data(T &&tensor, std::string name) const
 {
 #ifdef _WIN32
     const std::string path_separator("\\");

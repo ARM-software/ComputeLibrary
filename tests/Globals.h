@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_GLOBALS_H__
 #define __ARM_COMPUTE_TEST_GLOBALS_H__
 
-#include "TensorLibrary.h"
+#include "AssetsLibrary.h"
 
 #include <memory>
 
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 namespace test
 {
-extern std::unique_ptr<TensorLibrary> library;
+extern std::unique_ptr<AssetsLibrary> library;
 } // namespace test
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_GLOBALS_H__ */

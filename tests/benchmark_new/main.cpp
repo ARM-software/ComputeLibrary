@@ -28,7 +28,7 @@
 #include "framework/instruments/Instruments.h"
 #include "framework/printers/Printers.h"
 #include "support/ToolchainSupport.h"
-#include "tests/TensorLibrary.h"
+#include "tests/AssetsLibrary.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -49,7 +49,7 @@ namespace arm_compute
 {
 namespace test
 {
-std::unique_ptr<TensorLibrary> library;
+std::unique_ptr<AssetsLibrary> library;
 } // namespace test
 } // namespace arm_compute
 
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        library = support::cpp14::make_unique<TensorLibrary>(assets->value(), seed->value());
+        library = support::cpp14::make_unique<AssetsLibrary>(assets->value(), seed->value());
 
         if(!parser.validate())
         {

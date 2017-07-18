@@ -44,13 +44,13 @@ include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/..")
 include_directories("${CMAKE_SOURCE_DIR}/../3rdparty/include/")
 
-# TensorLibrary
+# AssetsLibrary
 set(tensor_library_SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/RawTensor.h
     ${CMAKE_SOURCE_DIR}/RawTensor.cpp
     ${CMAKE_SOURCE_DIR}/TensorCache.h
-    ${CMAKE_SOURCE_DIR}/TensorLibrary.h
-    ${CMAKE_SOURCE_DIR}/TensorLibrary.cpp
+    ${CMAKE_SOURCE_DIR}/AssetsLibrary.h
+    ${CMAKE_SOURCE_DIR}/AssetsLibrary.cpp
 )
 
 add_library(tensor_library OBJECT

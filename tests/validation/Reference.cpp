@@ -23,10 +23,10 @@
  */
 #include "Reference.h"
 
+#include "AssetsLibrary.h"
 #include "Globals.h"
 #include "Helpers.h"
 #include "ReferenceCPP.h"
-#include "TensorLibrary.h"
 #include "validation/Helpers.h"
 
 #include <random>
@@ -44,9 +44,9 @@ namespace validation
 std::pair<RawTensor, RawTensor> Reference::compute_reference_sobel_3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference
-    RawTensor ref_src   = library->get(shape, Format::U8);
-    RawTensor ref_dst_x = library->get(shape, Format::S16);
-    RawTensor ref_dst_y = library->get(shape, Format::S16);
+    RawTensor ref_src(shape, Format::U8);
+    RawTensor ref_dst_x(shape, Format::S16);
+    RawTensor ref_dst_y(shape, Format::S16);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -59,9 +59,9 @@ std::pair<RawTensor, RawTensor> Reference::compute_reference_sobel_3x3(const Ten
 std::pair<RawTensor, RawTensor> Reference::compute_reference_sobel_5x5(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference
-    RawTensor ref_src   = library->get(shape, Format::U8);
-    RawTensor ref_dst_x = library->get(shape, Format::S16);
-    RawTensor ref_dst_y = library->get(shape, Format::S16);
+    RawTensor ref_src(shape, Format::U8);
+    RawTensor ref_dst_x(shape, Format::S16);
+    RawTensor ref_dst_y(shape, Format::S16);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -75,7 +75,7 @@ void Reference::compute_reference_min_max_location(const TensorShape &shape, Dat
                                                    uint32_t &min_count, uint32_t &max_count)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, dt_in);
+    RawTensor ref_src(shape, dt_in);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -86,7 +86,7 @@ void Reference::compute_reference_min_max_location(const TensorShape &shape, Dat
 std::pair<float, float> Reference::compute_reference_mean_and_standard_deviation(const TensorShape &shape)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
+    RawTensor ref_src(shape, DataType::U8);
 
     // Create output variables
     float mean;
@@ -103,8 +103,8 @@ std::pair<float, float> Reference::compute_reference_mean_and_standard_deviation
 RawTensor Reference::compute_reference_integral_image(const TensorShape &shape)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::U32);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U32);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -117,9 +117,9 @@ RawTensor Reference::compute_reference_integral_image(const TensorShape &shape)
 RawTensor Reference::compute_reference_absolute_difference(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out)
 {
     // Create reference
-    RawTensor ref_src1 = library->get(shape, dt_in0);
-    RawTensor ref_src2 = library->get(shape, dt_in1);
-    RawTensor ref_dst  = library->get(shape, dt_out);
+    RawTensor ref_src1(shape, dt_in0);
+    RawTensor ref_src2(shape, dt_in1);
+    RawTensor ref_dst(shape, dt_out);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src1, 0);
@@ -134,8 +134,8 @@ RawTensor Reference::compute_reference_absolute_difference(const TensorShape &sh
 RawTensor Reference::compute_reference_accumulate(const TensorShape &shape)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::S16);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::S16);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -150,8 +150,8 @@ RawTensor Reference::compute_reference_accumulate(const TensorShape &shape)
 RawTensor Reference::compute_reference_accumulate_squared(const TensorShape &shape, uint32_t shift)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::S16);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::S16);
 
     // Fill reference
     // ref_dst tensor filled with non-negative values
@@ -167,8 +167,8 @@ RawTensor Reference::compute_reference_accumulate_squared(const TensorShape &sha
 RawTensor Reference::compute_reference_accumulate_weighted(const TensorShape &shape, float alpha)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::U8);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -183,9 +183,9 @@ RawTensor Reference::compute_reference_accumulate_weighted(const TensorShape &sh
 RawTensor Reference::compute_reference_arithmetic_addition(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy convert_policy, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src1 = library->get(shape, dt_in0, 1, fixed_point_position);
-    RawTensor ref_src2 = library->get(shape, dt_in1, 1, fixed_point_position);
-    RawTensor ref_dst  = library->get(shape, dt_out, 1, fixed_point_position);
+    RawTensor ref_src1(shape, dt_in0, 1, fixed_point_position);
+    RawTensor ref_src2(shape, dt_in1, 1, fixed_point_position);
+    RawTensor ref_dst(shape, dt_out, 1, fixed_point_position);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src1, 0);
@@ -200,9 +200,9 @@ RawTensor Reference::compute_reference_arithmetic_addition(const TensorShape &sh
 RawTensor Reference::compute_reference_arithmetic_subtraction(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy convert_policy, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src1 = library->get(shape, dt_in0, 1, fixed_point_position);
-    RawTensor ref_src2 = library->get(shape, dt_in1, 1, fixed_point_position);
-    RawTensor ref_dst  = library->get(shape, dt_out, 1, fixed_point_position);
+    RawTensor ref_src1(shape, dt_in0, 1, fixed_point_position);
+    RawTensor ref_src2(shape, dt_in1, 1, fixed_point_position);
+    RawTensor ref_dst(shape, dt_out, 1, fixed_point_position);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src1, 0);
@@ -217,9 +217,9 @@ RawTensor Reference::compute_reference_arithmetic_subtraction(const TensorShape 
 RawTensor Reference::compute_reference_bitwise_and(const TensorShape &shape)
 {
     // Create reference
-    RawTensor ref_src1 = library->get(shape, DataType::U8);
-    RawTensor ref_src2 = library->get(shape, DataType::U8);
-    RawTensor ref_dst  = library->get(shape, DataType::U8);
+    RawTensor ref_src1(shape, DataType::U8);
+    RawTensor ref_src2(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src1, 0);
@@ -234,9 +234,9 @@ RawTensor Reference::compute_reference_bitwise_and(const TensorShape &shape)
 RawTensor Reference::compute_reference_bitwise_or(const TensorShape &shape)
 {
     // Create reference
-    RawTensor ref_src1 = library->get(shape, DataType::U8);
-    RawTensor ref_src2 = library->get(shape, DataType::U8);
-    RawTensor ref_dst  = library->get(shape, DataType::U8);
+    RawTensor ref_src1(shape, DataType::U8);
+    RawTensor ref_src2(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src1, 0);
@@ -251,9 +251,9 @@ RawTensor Reference::compute_reference_bitwise_or(const TensorShape &shape)
 RawTensor Reference::compute_reference_bitwise_xor(const TensorShape &shape)
 {
     // Create reference
-    RawTensor ref_src1 = library->get(shape, DataType::U8);
-    RawTensor ref_src2 = library->get(shape, DataType::U8);
-    RawTensor ref_dst  = library->get(shape, DataType::U8);
+    RawTensor ref_src1(shape, DataType::U8);
+    RawTensor ref_src2(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src1, 0);
@@ -268,8 +268,8 @@ RawTensor Reference::compute_reference_bitwise_xor(const TensorShape &shape)
 RawTensor Reference::compute_reference_bitwise_not(const TensorShape &shape)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::U8);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -283,8 +283,8 @@ RawTensor Reference::compute_reference_bitwise_not(const TensorShape &shape)
 RawTensor Reference::compute_reference_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::U8);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -298,8 +298,8 @@ RawTensor Reference::compute_reference_box3x3(const TensorShape &shape, BorderMo
 RawTensor Reference::compute_reference_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy,
                                                      uint32_t shift, uint32_t fixed_point_position_in, uint32_t fixed_point_position_out)
 {
-    RawTensor ref_src = library->get(shape, dt_in, 1, fixed_point_position_in);
-    RawTensor ref_dst = library->get(shape, dt_out, 1, fixed_point_position_out);
+    RawTensor ref_src(shape, dt_in, 1, fixed_point_position_in);
+    RawTensor ref_dst(shape, dt_out, 1, fixed_point_position_out);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -313,8 +313,8 @@ RawTensor Reference::compute_reference_depth_convert(const TensorShape &shape, D
 RawTensor Reference::compute_reference_gaussian3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::U8);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -328,8 +328,8 @@ RawTensor Reference::compute_reference_gaussian3x3(const TensorShape &shape, Bor
 RawTensor Reference::compute_reference_gaussian5x5(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::U8);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -343,10 +343,10 @@ RawTensor Reference::compute_reference_gaussian5x5(const TensorShape &shape, Bor
 RawTensor Reference::compute_reference_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2, const TensorShape &src_shape3,
                                             const TensorShape &dst_shape, float alpha, float beta, DataType dt, int fixed_point_position)
 {
-    RawTensor src1 = library->get(src_shape1, dt, 1, fixed_point_position);
-    RawTensor src2 = library->get(src_shape2, dt, 1, fixed_point_position);
-    RawTensor src3 = library->get(src_shape3, dt, 1, fixed_point_position);
-    RawTensor dst  = library->get(dst_shape, dt, 1, fixed_point_position);
+    RawTensor src1(src_shape1, dt, 1, fixed_point_position);
+    RawTensor src2(src_shape2, dt, 1, fixed_point_position);
+    RawTensor src3(src_shape3, dt, 1, fixed_point_position);
+    RawTensor dst(dst_shape, dt, 1, fixed_point_position);
 
     // Fill reference
     if(dt == DataType::F16 || dt == DataType::F32)
@@ -373,8 +373,8 @@ RawTensor Reference::compute_reference_non_linear_filter(const TensorShape &shap
                                                          MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::U8);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -389,9 +389,9 @@ RawTensor Reference::compute_reference_pixel_wise_multiplication(const TensorSha
                                                                  RoundingPolicy rounding_policy)
 {
     // Create reference
-    RawTensor ref_src1 = library->get(shape, dt_in0);
-    RawTensor ref_src2 = library->get(shape, dt_in1);
-    RawTensor ref_dst  = library->get(shape, dt_out);
+    RawTensor ref_src1(shape, dt_in0);
+    RawTensor ref_src2(shape, dt_in1);
+    RawTensor ref_dst(shape, dt_out);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src1, 0);
@@ -407,9 +407,9 @@ RawTensor Reference::compute_reference_fixed_point_pixel_wise_multiplication(con
                                                                              ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
 {
     // Create reference
-    RawTensor ref_src1 = library->get(shape, dt_in0, 1, fixed_point_position);
-    RawTensor ref_src2 = library->get(shape, dt_in1, 1, fixed_point_position);
-    RawTensor ref_dst  = library->get(shape, dt_out, 1, fixed_point_position);
+    RawTensor ref_src1(shape, dt_in0, 1, fixed_point_position);
+    RawTensor ref_src2(shape, dt_in1, 1, fixed_point_position);
+    RawTensor ref_dst(shape, dt_out, 1, fixed_point_position);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src1, 0);
@@ -425,8 +425,8 @@ template <typename T>
 RawTensor Reference::compute_reference_table_lookup(const TensorShape &shape, DataType dt_inout, std::map<T, T> &lut)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, dt_inout);
-    RawTensor ref_dst = library->get(shape, dt_inout);
+    RawTensor ref_src(shape, dt_inout);
+    RawTensor ref_dst(shape, dt_inout);
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
 
@@ -441,8 +441,8 @@ template RawTensor arm_compute::test::validation::Reference::compute_reference_t
 RawTensor Reference::compute_reference_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, DataType::U8);
-    RawTensor ref_dst = library->get(shape, DataType::U8);
+    RawTensor ref_src(shape, DataType::U8);
+    RawTensor ref_dst(shape, DataType::U8);
 
     // Fill reference
     library->fill_tensor_uniform(ref_src, 0);
@@ -456,8 +456,8 @@ RawTensor Reference::compute_reference_threshold(const TensorShape &shape, uint8
 RawTensor Reference::compute_reference_activation_layer(const TensorShape &shape, DataType dt, ActivationLayerInfo act_info, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst = library->get(shape, dt, 1, fixed_point_position);
+    RawTensor ref_src(shape, dt, 1, fixed_point_position);
+    RawTensor ref_dst(shape, dt, 1, fixed_point_position);
 
     // Fill tensors
     switch(dt)
@@ -508,12 +508,12 @@ RawTensor Reference::compute_reference_activation_layer(const TensorShape &shape
 RawTensor Reference::compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src   = library->get(shape0, dt, 1, fixed_point_position);
-    RawTensor ref_dst   = library->get(shape0, dt, 1, fixed_point_position);
-    RawTensor ref_mean  = library->get(shape1, dt, 1, fixed_point_position);
-    RawTensor ref_var   = library->get(shape1, dt, 1, fixed_point_position);
-    RawTensor ref_beta  = library->get(shape1, dt, 1, fixed_point_position);
-    RawTensor ref_gamma = library->get(shape1, dt, 1, fixed_point_position);
+    RawTensor ref_src(shape0, dt, 1, fixed_point_position);
+    RawTensor ref_dst(shape0, dt, 1, fixed_point_position);
+    RawTensor ref_mean(shape1, dt, 1, fixed_point_position);
+    RawTensor ref_var(shape1, dt, 1, fixed_point_position);
+    RawTensor ref_beta(shape1, dt, 1, fixed_point_position);
+    RawTensor ref_gamma(shape1, dt, 1, fixed_point_position);
 
     // Fill tensors with values from -1 to 1.
     if(dt == DataType::F32)
@@ -560,10 +560,10 @@ RawTensor Reference::compute_reference_convolution_layer(const TensorShape &inpu
                                                          const PadStrideInfo &conv_info, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src     = library->get(input_shape, dt, 1, fixed_point_position);
-    RawTensor ref_weights = library->get(weights_shape, dt, 1, fixed_point_position);
-    RawTensor ref_bias    = library->get(bias_shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst     = library->get(output_shape, dt, 1, fixed_point_position);
+    RawTensor ref_src(input_shape, dt, 1, fixed_point_position);
+    RawTensor ref_weights(weights_shape, dt, 1, fixed_point_position);
+    RawTensor ref_bias(bias_shape, dt, 1, fixed_point_position);
+    RawTensor ref_dst(output_shape, dt, 1, fixed_point_position);
 
     // Fill reference
     switch(dt)
@@ -608,7 +608,7 @@ RawTensor Reference::compute_reference_depth_concatenate_layer(const std::vector
     {
         ref_srcs.push_back(support::cpp14::make_unique<RawTensor>(RawTensor(shapes[i], dt, 1, fixed_point_position)));
     }
-    RawTensor ref_dst = library->get(dst_shape, dt, 1, fixed_point_position);
+    RawTensor ref_dst(dst_shape, dt, 1, fixed_point_position);
 
     // Fill references
     for(unsigned int i = 0; i < ref_srcs.size(); ++i)
@@ -626,9 +626,9 @@ RawTensor Reference::compute_reference_fully_connected_layer(const TensorShape &
                                                              DataType dt, bool transpose_weights, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src  = library->get(input_shape, dt, 1, fixed_point_position);
-    RawTensor ref_bias = library->get(bias_shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst  = library->get(output_shape, dt, 1, fixed_point_position);
+    RawTensor ref_src(input_shape, dt, 1, fixed_point_position);
+    RawTensor ref_bias(bias_shape, dt, 1, fixed_point_position);
+    RawTensor ref_dst(output_shape, dt, 1, fixed_point_position);
 
     // Swap the first and second dimension of weights' shape if transpose_weights is true
     TensorShape ws = weights_shape;
@@ -639,7 +639,7 @@ RawTensor Reference::compute_reference_fully_connected_layer(const TensorShape &
         ws.set(1, dimx);
     }
 
-    RawTensor ref_weights = library->get(ws, dt, 1, fixed_point_position);
+    RawTensor ref_weights(ws, dt, 1, fixed_point_position);
 
     // Fill reference
     if(dt == DataType::F16 || dt == DataType::F32)
@@ -665,8 +665,8 @@ RawTensor Reference::compute_reference_fully_connected_layer(const TensorShape &
 RawTensor Reference::compute_reference_normalization_layer(const TensorShape &shape, DataType dt, NormalizationLayerInfo norm_info, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst = library->get(shape, dt, 1, fixed_point_position);
+    RawTensor ref_src(shape, dt, 1, fixed_point_position);
+    RawTensor ref_dst(shape, dt, 1, fixed_point_position);
 
     // Fill reference
     if(dt == DataType::QS8)
@@ -689,8 +689,8 @@ RawTensor Reference::compute_reference_normalization_layer(const TensorShape &sh
 RawTensor Reference::compute_reference_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape_in, dt, 1, fixed_point_position);
-    RawTensor ref_dst = library->get(shape_out, dt, 1, fixed_point_position);
+    RawTensor ref_src(shape_in, dt, 1, fixed_point_position);
+    RawTensor ref_dst(shape_out, dt, 1, fixed_point_position);
 
     // Fill reference
     int min = 0;
@@ -726,8 +726,8 @@ RawTensor Reference::compute_reference_roi_pooling_layer(const TensorShape &shap
     shape_dst.set(3, rois.size());
 
     // Create reference
-    RawTensor ref_src = library->get(shape, dt);
-    RawTensor ref_dst = library->get(shape_dst, dt);
+    RawTensor ref_src(shape, dt);
+    RawTensor ref_dst(shape_dst, dt);
 
     // Fill reference
     std::uniform_real_distribution<> distribution(-1, 1);
@@ -742,8 +742,8 @@ RawTensor Reference::compute_reference_roi_pooling_layer(const TensorShape &shap
 RawTensor Reference::compute_reference_softmax_layer(const TensorShape &shape, DataType dt, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst = library->get(shape, dt, 1, fixed_point_position);
+    RawTensor ref_src(shape, dt, 1, fixed_point_position);
+    RawTensor ref_dst(shape, dt, 1, fixed_point_position);
 
     // Fill reference
     if(arm_compute::is_data_type_float(dt))
@@ -767,8 +767,8 @@ RawTensor Reference::compute_reference_softmax_layer(const TensorShape &shape, D
 RawTensor Reference::compute_reference_fixed_point_operation(const TensorShape &shape, DataType dt_in, DataType dt_out, FixedPointOp op, int fixed_point_position)
 {
     // Create reference
-    RawTensor ref_src = library->get(shape, dt_in, 1, fixed_point_position);
-    RawTensor ref_dst = library->get(shape, dt_out, 1, fixed_point_position);
+    RawTensor ref_src(shape, dt_in, 1, fixed_point_position);
+    RawTensor ref_dst(shape, dt_out, 1, fixed_point_position);
 
     // Fill reference
     int min = 0;

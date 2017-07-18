@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "AssetsLibrary.h"
 #include "CL/CLAccessor.h"
 #include "PaddingCalculator.h"
-#include "TensorLibrary.h"
 #include "TypePrinter.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"

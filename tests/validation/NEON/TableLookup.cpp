@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "AssetsLibrary.h"
 #include "Globals.h"
 #include "NEON/Helper.h"
 #include "NEON/NEAccessor.h"
 #include "NEON/NELutAccessor.h"
 #include "PaddingCalculator.h"
 #include "RawLutAccessor.h"
-#include "TensorLibrary.h"
 #include "TypePrinter.h"
 #include "Utils.h"
 #include "validation/Datasets.h"

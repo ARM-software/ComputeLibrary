@@ -26,7 +26,7 @@
 
 #include "framework/Fixture.h"
 #include "networks_new/LeNet5Network.h"
-#include "tests/TensorLibrary.h"
+#include "tests/AssetsLibrary.h"
 #include "tests/Utils.h"
 
 namespace arm_compute

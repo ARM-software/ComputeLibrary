@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "TensorLibrary.h"
+#include "AssetsLibrary.h"
 
 #include "TypePrinter.h"
 #include "UserConfiguration.h"
@@ -186,42 +186,36 @@ RawTensor load_ppm(const std::string &path)
 }
 } // namespace
 
-TensorLibrary::TensorLibrary(std::string path) //NOLINT
-    : _library_path(std::move(path)),
-      _seed{ std::random_device()() }
-{
-}
-
-TensorLibrary::TensorLibrary(std::string path, std::random_device::result_type seed) //NOLINT
+AssetsLibrary::AssetsLibrary(std::string path, std::random_device::result_type seed) //NOLINT
     : _library_path(std::move(path)),
       _seed{ seed }
 {
 }
 
-std::random_device::result_type TensorLibrary::seed() const
+std::random_device::result_type AssetsLibrary::seed() const
 {
     return _seed;
 }
 
-void TensorLibrary::fill(RawTensor &raw, const std::string &name, Format format) const
+void AssetsLibrary::fill(RawTensor &raw, const std::string &name, Format format) const
 {
     //FIXME: Should be done by swapping cached buffers
     const RawTensor &src = get(name, format);
     std::copy_n(src.data(), raw.size(), raw.data());
 }
 
-void TensorLibrary::fill(RawTensor &raw, const std::string &name, Channel channel) const
+void AssetsLibrary::fill(RawTensor &raw, const std::string &name, Channel channel) const
 {
     fill(raw, name, get_format_for_channel(channel), channel);
 }
 
-void TensorLibrary::fill(RawTensor &raw, const std::string &name, Format format, Channel channel) const
+void AssetsLibrary::fill(RawTensor &raw, const std::string &name, Format format, Channel channel) const
 {
     const RawTensor &src = get(name, format, channel);
     std::copy_n(src.data(), raw.size(), raw.data());
 }
 
-const TensorLibrary::Loader &TensorLibrary::get_loader(const std::string &extension) const
+const AssetsLibrary::Loader &AssetsLibrary::get_loader(const std::string &extension) const
 {
     static std::unordered_map<std::string, Loader> loaders =
     {
@@ -240,7 +234,7 @@ const TensorLibrary::Loader &TensorLibrary::get_loader(const std::string &extens
     }
 }
 
-const TensorLibrary::Converter &TensorLibrary::get_converter(Format src, Format dst) const
+const AssetsLibrary::Converter &AssetsLibrary::get_converter(Format src, Format dst) const
 {
     static std::map<std::pair<Format, Format>, Converter> converters =
     {
@@ -264,7 +258,7 @@ const TensorLibrary::Converter &TensorLibrary::get_converter(Format src, Format 
     }
 }
 
-const TensorLibrary::Converter &TensorLibrary::get_converter(DataType src, Format dst) const
+const AssetsLibrary::Converter &AssetsLibrary::get_converter(DataType src, Format dst) const
 {
     static std::map<std::pair<DataType, Format>, Converter> converters = {};
 
@@ -282,7 +276,7 @@ const TensorLibrary::Converter &TensorLibrary::get_converter(DataType src, Forma
     }
 }
 
-const TensorLibrary::Converter &TensorLibrary::get_converter(DataType src, DataType dst) const
+const AssetsLibrary::Converter &AssetsLibrary::get_converter(DataType src, DataType dst) const
 {
     static std::map<std::pair<DataType, DataType>, Converter> converters = {};
 
@@ -300,7 +294,7 @@ const TensorLibrary::Converter &TensorLibrary::get_converter(DataType src, DataT
     }
 }
 
-const TensorLibrary::Converter &TensorLibrary::get_converter(Format src, DataType dst) const
+const AssetsLibrary::Converter &AssetsLibrary::get_converter(Format src, DataType dst) const
 {
     static std::map<std::pair<Format, DataType>, Converter> converters = {};
 
@@ -318,7 +312,7 @@ const TensorLibrary::Converter &TensorLibrary::get_converter(Format src, DataTyp
     }
 }
 
-const TensorLibrary::Extractor &TensorLibrary::get_extractor(Format format, Channel channel) const
+const AssetsLibrary::Extractor &AssetsLibrary::get_extractor(Format format, Channel channel) const
 {
     static std::map<std::pair<Format, Channel>, Extractor> extractors =
     {
@@ -340,7 +334,7 @@ const TensorLibrary::Extractor &TensorLibrary::get_extractor(Format format, Chan
     }
 }
 
-RawTensor TensorLibrary::load_image(const std::string &name) const
+RawTensor AssetsLibrary::load_image(const std::string &name) const
 {
 #ifdef _WIN32
     const std::string image_path = ("\\images\\");
@@ -353,7 +347,7 @@ RawTensor TensorLibrary::load_image(const std::string &name) const
     return (*get_loader(extension))(path);
 }
 
-const RawTensor &TensorLibrary::find_or_create_raw_tensor(const std::string &name, Format format) const
+const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &name, Format format) const
 {
     std::lock_guard<std::mutex> guard(_format_lock);
 
@@ -377,7 +371,7 @@ const RawTensor &TensorLibrary::find_or_create_raw_tensor(const std::string &nam
     return _cache.add(std::make_tuple(name, format), std::move(raw));
 }
 
-const RawTensor &TensorLibrary::find_or_create_raw_tensor(const std::string &name, Format format, Channel channel) const
+const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &name, Format format, Channel channel) const
 {
     std::lock_guard<std::mutex> guard(_channel_lock);
 
@@ -397,66 +391,56 @@ const RawTensor &TensorLibrary::find_or_create_raw_tensor(const std::string &nam
     return _cache.add(std::make_tuple(name, format, channel), std::move(dst));
 }
 
-TensorShape TensorLibrary::get_image_shape(const std::string &name)
+TensorShape AssetsLibrary::get_image_shape(const std::string &name)
 {
     return load_image(name).shape();
 }
 
-RawTensor TensorLibrary::get(const TensorShape &shape, DataType data_type, int num_channels, int fixed_point_position)
-{
-    return RawTensor(shape, data_type, num_channels, fixed_point_position);
-}
-
-RawTensor TensorLibrary::get(const TensorShape &shape, Format format)
-{
-    return RawTensor(shape, format);
-}
-
-const RawTensor &TensorLibrary::get(const std::string &name) const
+const RawTensor &AssetsLibrary::get(const std::string &name) const
 {
     //FIXME: Format should be derived from the image name. Not be fixed to RGB.
     return find_or_create_raw_tensor(name, Format::RGB888);
 }
 
-RawTensor TensorLibrary::get(const std::string &name)
+RawTensor AssetsLibrary::get(const std::string &name)
 {
     //FIXME: Format should be derived from the image name. Not be fixed to RGB.
     return RawTensor(find_or_create_raw_tensor(name, Format::RGB888));
 }
 
-RawTensor TensorLibrary::get(const std::string &name, DataType data_type, int num_channels) const
+RawTensor AssetsLibrary::get(const std::string &name, DataType data_type, int num_channels) const
 {
     const RawTensor &raw = get(name);
 
     return RawTensor(raw.shape(), data_type, num_channels);
 }
 
-const RawTensor &TensorLibrary::get(const std::string &name, Format format) const
+const RawTensor &AssetsLibrary::get(const std::string &name, Format format) const
 {
     return find_or_create_raw_tensor(name, format);
 }
 
-RawTensor TensorLibrary::get(const std::string &name, Format format)
+RawTensor AssetsLibrary::get(const std::string &name, Format format)
 {
     return RawTensor(find_or_create_raw_tensor(name, format));
 }
 
-const RawTensor &TensorLibrary::get(const std::string &name, Channel channel) const
+const RawTensor &AssetsLibrary::get(const std::string &name, Channel channel) const
 {
     return get(name, get_format_for_channel(channel), channel);
 }
 
-RawTensor TensorLibrary::get(const std::string &name, Channel channel)
+RawTensor AssetsLibrary::get(const std::string &name, Channel channel)
 {
     return RawTensor(get(name, get_format_for_channel(channel), channel));
 }
 
-const RawTensor &TensorLibrary::get(const std::string &name, Format format, Channel channel) const
+const RawTensor &AssetsLibrary::get(const std::string &name, Format format, Channel channel) const
 {
     return find_or_create_raw_tensor(name, format, channel);
 }
 
-RawTensor TensorLibrary::get(const std::string &name, Format format, Channel channel)
+RawTensor AssetsLibrary::get(const std::string &name, Format format, Channel channel)
 {
     return RawTensor(find_or_create_raw_tensor(name, format, channel));
 }
