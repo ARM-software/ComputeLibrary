@@ -49,7 +49,7 @@ public:
      * @param[in] dims Values to initialize the dimensions.
      */
     template <typename... Ts>
-    Dimensions(Ts... dims)
+    explicit Dimensions(Ts... dims)
         : _id{ { dims... } }, _num_dimensions{ sizeof...(dims) }
     {
     }

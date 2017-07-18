@@ -43,6 +43,7 @@ template <typename TensorType,
 class LeNet5Fixture : public framework::Fixture
 {
 public:
+    template <typename...>
     void setup(int batches)
     {
         network.init(batches);

@@ -39,6 +39,7 @@ template <typename TensorType, typename Function, typename Accessor>
 class PoolingLayerFixture : public framework::Fixture
 {
 public:
+    template <typename...>
     void setup(TensorShape src_shape, TensorShape dst_shape, PoolingLayerInfo info, DataType data_type, int batches)
     {
         // Set batched in source and destination shapes

@@ -39,6 +39,7 @@ template <typename TensorType, typename Function, typename Accessor>
 class ActivationLayerFixture : public framework::Fixture
 {
 public:
+    template <typename...>
     void setup(TensorShape shape, ActivationLayerInfo info, DataType data_type, int batches)
     {
         // Set batched in source and destination shapes

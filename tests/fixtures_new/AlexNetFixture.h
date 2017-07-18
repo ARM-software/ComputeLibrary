@@ -47,6 +47,7 @@ template <typename ITensorType,
 class AlexNetFixture : public framework::Fixture
 {
 public:
+    template <typename...>
     void setup(DataType data_type, int batches)
     {
         constexpr bool weights_transposed   = true;

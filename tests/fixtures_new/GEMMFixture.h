@@ -39,6 +39,7 @@ template <typename TensorType, typename Function>
 class GEMMFixture : public framework::Fixture
 {
 public:
+    template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape shape_dst, float alpha, float beta, DataType data_type)
     {
         constexpr int fixed_point_position = 4;

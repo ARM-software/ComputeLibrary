@@ -58,7 +58,7 @@ class DataTestCase : public TestCase
 {
 protected:
     explicit DataTestCase(T data)
-        : _data{ data }
+        : _data{ std::move(data) }
     {
     }
 

@@ -39,6 +39,7 @@ template <typename TensorType, typename Function, typename Accessor>
 class ConvolutionLayerFixture : public framework::Fixture
 {
 public:
+    template <typename...>
     void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape dst_shape, PadStrideInfo info, DataType data_type, int batches)
     {
         // Set batched in source and destination shapes
