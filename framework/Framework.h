@@ -261,6 +261,7 @@ private:
     std::regex     _test_name_filter{ ".*" };
     std::regex     _test_id_filter{ ".*" };
     DatasetMode    _dataset_mode{ DatasetMode::ALL };
+    TestResult    *_current_test_result{ nullptr };
 };
 
 template <typename T>

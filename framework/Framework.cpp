@@ -147,6 +147,11 @@ void Framework::log_test_end(const std::string &test_name)
 void Framework::log_failed_expectation(const std::string &msg)
 {
     std::cerr << "ERROR: " << msg << "\n";
+
+    if(_current_test_result != nullptr)
+    {
+        _current_test_result->status = TestResult::Status::FAILED;
+    }
 }
 
 int Framework::num_iterations() const
@@ -201,7 +206,9 @@ void Framework::run_test(TestCaseFactory &test_factory)
     log_test_start(test_case_name);
 
     Profiler   profiler = get_profiler();
-    TestResult result;
+    TestResult result(TestResult::Status::SUCCESS);
+
+    _current_test_result = &result;
 
     try
     {
@@ -219,8 +226,6 @@ void Framework::run_test(TestCaseFactory &test_factory)
             }
 
             test_case->do_teardown();
-
-            result.status = TestResult::Status::SUCCESS;
         }
         catch(const TestError &error)
         {
@@ -265,12 +270,15 @@ void Framework::run_test(TestCaseFactory &test_factory)
     catch(...)
     {
         std::cerr << "FATAL ERROR: Received unhandled exception during fixture creation\n";
+        result.status = TestResult::Status::CRASHED;
 
         if(_throw_errors)
         {
             throw;
         }
     }
+
+    _current_test_result = nullptr;
 
     result.measurements = profiler.measurements();
 
