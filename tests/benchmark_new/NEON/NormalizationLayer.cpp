@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
-#include "tests/NEON/NEAccessor.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/NormalizationLayerDataset.h"
 #include "tests/fixtures_new/NormalizationLayerFixture.h"
@@ -37,7 +37,7 @@ namespace arm_compute
 {
 namespace test
 {
-using NENormalizationLayerFixture = NormalizationLayerFixture<Tensor, NENormalizationLayer, neon::NEAccessor>;
+using NENormalizationLayerFixture = NormalizationLayerFixture<Tensor, NENormalizationLayer, Accessor>;
 
 TEST_SUITE(NEON)
 

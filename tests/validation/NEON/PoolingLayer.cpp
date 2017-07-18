@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "tests/Globals.h"
@@ -35,7 +35,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -85,7 +84,7 @@ Tensor compute_pooling_layer(const TensorShape &shape_in, const TensorShape &sha
             ARM_COMPUTE_ERROR("DataType not supported.");
     }
     std::uniform_real_distribution<> distribution(min, max);
-    library->fill(NEAccessor(src), distribution, 0);
+    library->fill(Accessor(src), distribution, 0);
 
     // Compute function
     pool.run();
@@ -124,7 +123,7 @@ BOOST_DATA_TEST_CASE(RandomDataset,
     RawTensor ref_dst = Reference::compute_reference_pooling_layer(obj.src_shape, obj.dst_shape, dt, obj.info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f, 0);
+    validate(Accessor(dst), ref_dst, tolerance_f, 0);
 }
 
 BOOST_DATA_TEST_CASE(RunSmall7x7,
@@ -141,7 +140,7 @@ BOOST_DATA_TEST_CASE(RunSmall7x7,
     RawTensor ref_dst = Reference::compute_reference_pooling_layer(src_shape, dst_shape, dt, pool_info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f, 0);
+    validate(Accessor(dst), ref_dst, tolerance_f, 0);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -158,7 +157,7 @@ BOOST_DATA_TEST_CASE(RandomDataset,
     RawTensor ref_dst = Reference::compute_reference_pooling_layer(obj.src_shape, obj.dst_shape, dt, obj.info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_q, 0);
+    validate(Accessor(dst), ref_dst, tolerance_q, 0);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

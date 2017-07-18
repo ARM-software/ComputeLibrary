@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "NEON/Accessor.h"
 #include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
 #include "TypePrinter.h"
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
 #include "tests/Globals.h"
@@ -38,7 +38,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -69,7 +68,7 @@ Tensor compute_roi_pooling_layer(const TensorShape &shape, DataType dt, const st
 
     // Fill tensors
     std::uniform_real_distribution<> distribution(-1, 1);
-    library->fill(NEAccessor(src), distribution, 0);
+    library->fill(Accessor(src), distribution, 0);
 
     // Compute function
     roi_pool.run();
@@ -100,7 +99,7 @@ BOOST_DATA_TEST_CASE(RunSmall, CNNFloatDataTypes() * boost::unit_test::data::mak
     RawTensor ref_dst = Reference::compute_reference_roi_pooling_layer(shape, dt, rois, pool_info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

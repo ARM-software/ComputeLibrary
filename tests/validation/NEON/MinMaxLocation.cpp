@@ -24,8 +24,8 @@
 
 #include "AssetsLibrary.h"
 #include "Globals.h"
+#include "NEON/Accessor.h"
 #include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -46,7 +46,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -82,7 +81,7 @@ void compute_min_max_location(const TensorShape &shape, DataType dt_in, int32_t 
     BOOST_TEST(!src.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
+    library->fill_tensor_uniform(Accessor(src), 0);
 
     // Compute function
     min_max_loc.run();

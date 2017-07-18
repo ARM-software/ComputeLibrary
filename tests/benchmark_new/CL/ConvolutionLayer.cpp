@@ -39,7 +39,7 @@ namespace arm_compute
 {
 namespace test
 {
-using CLConvolutionLayerFixture = ConvolutionLayerFixture<CLTensor, CLConvolutionLayer, cl::CLAccessor>;
+using CLConvolutionLayerFixture = ConvolutionLayerFixture<CLTensor, CLConvolutionLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 

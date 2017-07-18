@@ -21,10 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "Utils.h"
 #include "validation/Datasets.h"
@@ -46,7 +45,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -87,7 +85,7 @@ std::pair<Tensor, Tensor> compute_sobel_3x3(const TensorShape &shape, BorderMode
     BOOST_TEST(!dst_y.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
+    library->fill_tensor_uniform(Accessor(src), 0);
 
     // Compute function
     sobel_3x3.run();
@@ -169,8 +167,8 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * BorderModes(), shape, border_mode
     const ValidRegion valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size);
 
     // Validate output
-    validate(NEAccessor(dst.first), ref_dst.first, valid_region);
-    validate(NEAccessor(dst.second), ref_dst.second, valid_region);
+    validate(Accessor(dst.first), ref_dst.first, valid_region);
+    validate(Accessor(dst.second), ref_dst.second, valid_region);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -196,8 +194,8 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * BorderModes(), shape, border_mode
     const ValidRegion valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size);
 
     // Validate output
-    validate(NEAccessor(dst.first), ref_dst.first, valid_region);
-    validate(NEAccessor(dst.second), ref_dst.second, valid_region);
+    validate(Accessor(dst.first), ref_dst.first, valid_region);
+    validate(Accessor(dst.second), ref_dst.second, valid_region);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

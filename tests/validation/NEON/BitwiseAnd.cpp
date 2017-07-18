@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -45,7 +45,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -77,8 +76,8 @@ Tensor compute_bitwise_and(const TensorShape &shape)
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src1), 0);
-    library->fill_tensor_uniform(NEAccessor(src2), 1);
+    library->fill_tensor_uniform(Accessor(src1), 0);
+    library->fill_tensor_uniform(Accessor(src2), 1);
 
     // Compute function
     band.run();
@@ -127,8 +126,8 @@ Tensor compute_bitwise_and_subtensor(const TensorShape &shape)
 
     // Fill tensors
     std::uniform_int_distribution<> distribution(0, 255);
-    library->fill(NEAccessor(src1), distribution, 0);
-    library->fill(NEAccessor(src2), distribution, 1);
+    library->fill(Accessor(src1), distribution, 0);
+    library->fill(Accessor(src2), distribution, 1);
 
     // Compute function
     band1.run();
@@ -181,7 +180,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
     RawTensor ref_dst = Reference::compute_reference_bitwise_and(shape);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -197,7 +196,7 @@ BOOST_AUTO_TEST_CASE(RunSubTensor)
     RawTensor ref_dst = Reference::compute_reference_bitwise_and(shape);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -210,7 +209,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes(), shape)
     RawTensor ref_dst = Reference::compute_reference_bitwise_and(shape);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

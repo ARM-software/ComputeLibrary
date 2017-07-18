@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "dataset/BatchNormalizationLayerDataset.h"
 #include "tests/Globals.h"
@@ -37,7 +37,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -91,11 +90,11 @@ Tensor compute_reference_batch_normalization_layer(const TensorShape &shape0, co
         std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<float>();
         std::uniform_real_distribution<> distribution(min_bound, max_bound);
         std::uniform_real_distribution<> distribution_var(0, max_bound);
-        library->fill(NEAccessor(src), distribution, 0);
-        library->fill(NEAccessor(mean), distribution, 1);
-        library->fill(NEAccessor(var), distribution_var, 0);
-        library->fill(NEAccessor(beta), distribution, 3);
-        library->fill(NEAccessor(gamma), distribution, 4);
+        library->fill(Accessor(src), distribution, 0);
+        library->fill(Accessor(mean), distribution, 1);
+        library->fill(Accessor(var), distribution_var, 0);
+        library->fill(Accessor(beta), distribution, 3);
+        library->fill(Accessor(gamma), distribution, 4);
     }
     else
     {
@@ -111,11 +110,11 @@ Tensor compute_reference_batch_normalization_layer(const TensorShape &shape0, co
         }
         std::uniform_int_distribution<> distribution(min_bound, max_bound);
         std::uniform_int_distribution<> distribution_var(0, max_bound);
-        library->fill(NEAccessor(src), distribution, 0);
-        library->fill(NEAccessor(mean), distribution, 1);
-        library->fill(NEAccessor(var), distribution_var, 0);
-        library->fill(NEAccessor(beta), distribution, 3);
-        library->fill(NEAccessor(gamma), distribution, 4);
+        library->fill(Accessor(src), distribution, 0);
+        library->fill(Accessor(mean), distribution, 1);
+        library->fill(Accessor(var), distribution_var, 0);
+        library->fill(Accessor(beta), distribution, 3);
+        library->fill(Accessor(gamma), distribution, 4);
     }
 
     // Compute function
@@ -178,7 +177,7 @@ BOOST_DATA_TEST_CASE(Random,
     RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f, 0);
+    validate(Accessor(dst), ref_dst, tolerance_f, 0);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -196,7 +195,7 @@ BOOST_DATA_TEST_CASE(Random,
     RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
+    validate(Accessor(dst), ref_dst, tolerance_qs8);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -213,7 +212,7 @@ BOOST_DATA_TEST_CASE(Random,
     RawTensor ref_dst = Reference::compute_reference_batch_normalization_layer(obj.shape0, obj.shape1, dt, obj.epsilon, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs16);
+    validate(Accessor(dst), ref_dst, tolerance_qs16);
 }
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()

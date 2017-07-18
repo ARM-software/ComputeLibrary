@@ -33,8 +33,6 @@ namespace arm_compute
 {
 namespace test
 {
-namespace neon
-{
 template <typename T>
 Array<T> create_array(const std::vector<T> &v)
 {
@@ -46,7 +44,6 @@ Array<T> create_array(const std::vector<T> &v)
 
     return array;
 }
-} // namespace neon
 } // namespace test
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_NEON_HELPER_H__ */

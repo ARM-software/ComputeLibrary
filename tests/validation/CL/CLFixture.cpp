@@ -28,6 +28,5 @@
 using namespace arm_compute;
 using namespace arm_compute::test;
 using namespace arm_compute::test::validation;
-using namespace arm_compute::test::validation::cl;
 
 BOOST_GLOBAL_FIXTURE(CLFixture);

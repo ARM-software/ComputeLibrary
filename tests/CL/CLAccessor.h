@@ -21,18 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_CL_CLACCESSOR_H__
-#define __ARM_COMPUTE_TEST_CL_CLACCESSOR_H__
-
-#include "IAccessor.h"
+#ifndef __ARM_COMPUTE_TEST_CLACCESSOR_H__
+#define __ARM_COMPUTE_TEST_CLACCESSOR_H__
 
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "tests/IAccessor.h"
 
 namespace arm_compute
 {
 namespace test
-{
-namespace cl
 {
 /** Accessor implementation for @ref CLTensor objects. */
 class CLAccessor : public IAccessor
@@ -130,7 +127,6 @@ inline void *CLAccessor::operator()(const Coordinates &coord)
 {
     return _tensor.ptr_to_element(coord);
 }
-} // cl
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_CL_CLACCESSOR_H__ */
+#endif /* __ARM_COMPUTE_TEST_CLACCESSOR_H__ */

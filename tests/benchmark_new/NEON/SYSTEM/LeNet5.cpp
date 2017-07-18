@@ -32,7 +32,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
-#include "tests/NEON/NEAccessor.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/fixtures_new/LeNet5Fixture.h"
 
@@ -41,7 +41,7 @@ namespace arm_compute
 namespace test
 {
 using NELeNet5Fixture = LeNet5Fixture<Tensor,
-      neon::NEAccessor,
+      Accessor,
       NEActivationLayer,
       NEConvolutionLayer,
       NEFullyConnectedLayer,

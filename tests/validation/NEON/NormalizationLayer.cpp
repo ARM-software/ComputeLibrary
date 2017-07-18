@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"
@@ -35,7 +35,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -92,11 +91,11 @@ Tensor compute_normalization_layer(const TensorShape &shape, DataType dt, Normal
     {
         const int8_t one_fixed_point       = 1 << fixed_point_position;
         const int8_t minus_one_fixed_point = -one_fixed_point;
-        library->fill_tensor_uniform(NEAccessor(src), 0, minus_one_fixed_point, one_fixed_point);
+        library->fill_tensor_uniform(Accessor(src), 0, minus_one_fixed_point, one_fixed_point);
     }
     else
     {
-        library->fill_tensor_uniform(NEAccessor(src), 0);
+        library->fill_tensor_uniform(Accessor(src), 0);
     }
 
     // Compute function
@@ -127,7 +126,7 @@ BOOST_DATA_TEST_CASE(RunSmall,
     RawTensor ref_dst = Reference::compute_reference_normalization_layer(shape, dt, norm_info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, normalization_layer_tolerance(DataType::F16));
+    validate(Accessor(dst), ref_dst, normalization_layer_tolerance(DataType::F16));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -149,7 +148,7 @@ BOOST_DATA_TEST_CASE(RunSmall,
     RawTensor ref_dst = Reference::compute_reference_normalization_layer(shape, dt, norm_info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, normalization_layer_tolerance(DataType::F32));
+    validate(Accessor(dst), ref_dst, normalization_layer_tolerance(DataType::F32));
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -169,7 +168,7 @@ BOOST_DATA_TEST_CASE(RunSmall,
     RawTensor ref_dst = Reference::compute_reference_normalization_layer(shape, dt, norm_info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, normalization_layer_tolerance(DataType::QS8));
+    validate(Accessor(dst), ref_dst, normalization_layer_tolerance(DataType::QS8));
 }
 BOOST_AUTO_TEST_SUITE_END()
 

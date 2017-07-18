@@ -37,7 +37,7 @@ namespace arm_compute
 {
 namespace test
 {
-using CLActivationLayerFixture = ActivationLayerFixture<CLTensor, CLActivationLayer, cl::CLAccessor>;
+using CLActivationLayerFixture = ActivationLayerFixture<CLTensor, CLActivationLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 

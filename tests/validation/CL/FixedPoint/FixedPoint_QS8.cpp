@@ -50,7 +50,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::cl;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -145,12 +144,12 @@ CLTensor compute_fixed_point_op(const TensorShape &shape, int fixed_point_positi
     sources.push_back(fixed_point_operation_kernel);
 
     // Create program
-    ::cl::Program program = ::cl::Program(sources);
+    ::cl::Program program(sources);
 
     // Build program
     program.build(build_opts.c_str());
 
-    ::cl::Kernel kernel = ::cl::Kernel(program, "fixed_point_operation_qs8", nullptr);
+    ::cl::Kernel kernel(program, "fixed_point_operation_qs8", nullptr);
 
     unsigned int idx = 0;
     kernel.setArg(idx++, src.cl_buffer());

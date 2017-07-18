@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -50,7 +50,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -104,7 +103,7 @@ Tensor compute_depth_concatenate_layer(const std::vector<TensorShape> &shapes, D
     // Fill tensors
     for(unsigned int i = 0; i < srcs.size(); ++i)
     {
-        library->fill_tensor_uniform(NEAccessor(*srcs[i]), i);
+        library->fill_tensor_uniform(Accessor(*srcs[i]), i);
     }
 
     // Compute function
@@ -137,7 +136,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFloatDataTypes(), shape, dt)
     RawTensor ref_dst = Reference::compute_reference_depth_concatenate_layer(shapes, dt);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -153,7 +152,7 @@ BOOST_DATA_TEST_CASE(RunSmallPad, CNNFloatDataTypes(), dt)
     RawTensor ref_dst = Reference::compute_reference_depth_concatenate_layer(shapes, dt);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -176,7 +175,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFixedPointDataTypes() * boost:
     RawTensor ref_dst = Reference::compute_reference_depth_concatenate_layer(shapes, dt, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -192,7 +191,7 @@ BOOST_DATA_TEST_CASE(RunSmallPad, CNNFixedPointDataTypes() * boost::unit_test::d
     RawTensor ref_dst = Reference::compute_reference_depth_concatenate_layer(shapes, dt, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

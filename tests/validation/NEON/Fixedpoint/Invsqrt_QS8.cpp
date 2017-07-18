@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "Utils.h"
 #include "validation/Datasets.h"
@@ -43,7 +43,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -79,7 +78,7 @@ Tensor compute_invsqrt_qs8(const TensorShape &shape, int fixed_point_position)
 
     // Fill tensors. Keep the range between [1, 127).
     std::uniform_int_distribution<> distribution(1, 127);
-    library->fill(NEAccessor(src), distribution, 0);
+    library->fill(Accessor(src), distribution, 0);
 
     Iterator input(&src, window);
     Iterator output(&dst, window);
@@ -111,7 +110,7 @@ BOOST_DATA_TEST_CASE(Small1DShape, SmallShapes() * boost::unit_test::data::xrang
     RawTensor ref_dst = Reference::compute_reference_fixed_point_operation(shape, DataType::QS8, DataType::QS8, FixedPointOp::INV_SQRT, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance, 0);
+    validate(Accessor(dst), ref_dst, tolerance, 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

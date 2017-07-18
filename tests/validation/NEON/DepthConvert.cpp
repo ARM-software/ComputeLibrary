@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -44,7 +44,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -80,7 +79,7 @@ Tensor compute_depth_convert(const TensorShape &shape, DataType dt_in, DataType 
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
+    library->fill_tensor_uniform(Accessor(src), 0);
 
     // Compute function
     depth_convert.run();
@@ -151,7 +150,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::QS8, policy, 0, fixed_point_position_in, fixed_point_position_out);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -177,7 +176,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -192,7 +191,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -218,7 +217,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -233,7 +232,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -259,7 +258,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::QS16, policy, 0, fixed_point_position_in, fixed_point_position_out);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -285,7 +284,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -300,7 +299,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS16, DataType::F32, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -327,7 +326,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -342,7 +341,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS16, policy, 0, fixed_point_position, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -369,7 +368,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::U16, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
@@ -383,7 +382,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::U16, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -409,7 +408,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S16, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -424,7 +423,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S16, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -450,7 +449,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S32, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -465,7 +464,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S32, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -491,7 +490,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U8, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -506,7 +505,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U8, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -532,7 +531,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U32, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -547,7 +546,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U32, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -573,7 +572,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::U8, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -588,7 +587,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::U8, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -614,7 +613,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::S32, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -629,7 +628,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::S32, policy, shift);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -48,7 +48,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -82,7 +81,7 @@ Tensor compute_gaussian5x5(const TensorShape &shape, BorderMode border_mode, uin
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
+    library->fill_tensor_uniform(Accessor(src), 0);
 
     // Compute function
     gaussian5x5.run();
@@ -145,7 +144,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * BorderModes(), shape, border_mode
     RawTensor ref_dst = Reference::compute_reference_gaussian5x5(shape, border_mode, border_value);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size));
+    validate(Accessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size));
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -162,7 +161,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * BorderModes(), shape, border_mode
     RawTensor ref_dst = Reference::compute_reference_gaussian5x5(shape, border_mode, border_value);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size));
+    validate(Accessor(dst), ref_dst, shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, border_size));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

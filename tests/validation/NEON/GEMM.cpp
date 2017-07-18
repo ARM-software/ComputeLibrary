@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "Utils.h"
 #include "dataset/GEMMDataset.h"
@@ -44,7 +44,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -80,15 +79,15 @@ Tensor compute_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2
     if(dt == DataType::F16 || dt == DataType::F32)
     {
         std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-        library->fill(NEAccessor(src1), distribution, 0);
-        library->fill(NEAccessor(src2), distribution, 1);
-        library->fill(NEAccessor(src3), distribution, 2);
+        library->fill(Accessor(src1), distribution, 0);
+        library->fill(Accessor(src2), distribution, 1);
+        library->fill(Accessor(src3), distribution, 2);
     }
     else
     {
-        library->fill_tensor_uniform(NEAccessor(src1), 0);
-        library->fill_tensor_uniform(NEAccessor(src2), 1);
-        library->fill_tensor_uniform(NEAccessor(src3), 2);
+        library->fill_tensor_uniform(Accessor(src1), 0);
+        library->fill_tensor_uniform(Accessor(src2), 1);
+        library->fill_tensor_uniform(Accessor(src3), 2);
     }
 
     // Compute function
@@ -150,7 +149,7 @@ BOOST_DATA_TEST_CASE(SmallGEMM, SmallGEMMDataset() * boost::unit_test::data::mak
     Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(dst), ref_dst, tolerance_f32);
 }
 BOOST_AUTO_TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
@@ -167,7 +166,7 @@ BOOST_DATA_TEST_CASE(SmallGEMM, SmallGEMMDataset() * boost::unit_test::data::mak
     Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(dst), ref_dst, tolerance_f32);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -181,7 +180,7 @@ BOOST_DATA_TEST_CASE(LargeGEMM, LargeGEMMDataset() * boost::unit_test::data::mak
     Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(dst), ref_dst, tolerance_f32);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -197,7 +196,7 @@ BOOST_DATA_TEST_CASE(SmallGEMM, SmallGEMMDataset() * boost::unit_test::data::mak
     Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_q);
+    validate(Accessor(dst), ref_dst, tolerance_q);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -211,7 +210,7 @@ BOOST_DATA_TEST_CASE(LargeGEMM, LargeGEMMDataset() * boost::unit_test::data::mak
     Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_q);
+    validate(Accessor(dst), ref_dst, tolerance_q);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

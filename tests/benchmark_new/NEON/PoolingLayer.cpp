@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
-#include "tests/NEON/NEAccessor.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/AlexNetPoolingLayerDataset.h"
 #include "tests/datasets_new/GoogLeNetPoolingLayerDataset.h"
@@ -39,7 +39,7 @@ namespace arm_compute
 {
 namespace test
 {
-using NEPoolingLayerFixture = PoolingLayerFixture<Tensor, NEPoolingLayer, neon::NEAccessor>;
+using NEPoolingLayerFixture = PoolingLayerFixture<Tensor, NEPoolingLayer, Accessor>;
 
 TEST_SUITE(NEON)
 

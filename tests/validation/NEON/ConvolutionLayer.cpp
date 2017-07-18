@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "dataset/ConvolutionLayerDataset.h"
 #include "tests/Globals.h"
@@ -37,7 +37,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -76,15 +75,15 @@ Tensor compute_convolution_layer(const TensorShape &input_shape, const TensorSha
     if(dt == DataType::F16 || dt == DataType::F32)
     {
         std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-        library->fill(NEAccessor(src), distribution, 0);
-        library->fill(NEAccessor(weights), distribution, 1);
-        library->fill(NEAccessor(bias), distribution, 2);
+        library->fill(Accessor(src), distribution, 0);
+        library->fill(Accessor(weights), distribution, 1);
+        library->fill(Accessor(bias), distribution, 2);
     }
     else
     {
-        library->fill_tensor_uniform(NEAccessor(src), 0);
-        library->fill_tensor_uniform(NEAccessor(weights), 1);
-        library->fill_tensor_uniform(NEAccessor(bias), 2);
+        library->fill_tensor_uniform(Accessor(src), 0);
+        library->fill_tensor_uniform(Accessor(weights), 1);
+        library->fill_tensor_uniform(Accessor(bias), 2);
     }
 
     // Compute NEConvolutionLayer function
@@ -148,7 +147,7 @@ BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
     RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f16);
+    validate(Accessor(dst), ref_dst, tolerance_f16);
 }
 BOOST_AUTO_TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
@@ -166,7 +165,7 @@ BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
     RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(dst), ref_dst, tolerance_f32);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -181,7 +180,7 @@ BOOST_DATA_TEST_CASE(LargeConvolutionLayer,
     RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(dst), ref_dst, tolerance_f32);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -198,7 +197,7 @@ BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
     RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_q);
+    validate(Accessor(dst), ref_dst, tolerance_q);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -213,7 +212,7 @@ BOOST_DATA_TEST_CASE(LargeConvolutionLayer,
     RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_q);
+    validate(Accessor(dst), ref_dst, tolerance_q);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

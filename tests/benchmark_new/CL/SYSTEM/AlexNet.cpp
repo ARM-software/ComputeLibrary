@@ -46,7 +46,7 @@ namespace test
 using CLAlexNetFixture = AlexNetFixture<ICLTensor,
       CLTensor,
       CLSubTensor,
-      cl::CLAccessor,
+      CLAccessor,
       CLActivationLayer,
       CLConvolutionLayer,
       CLFullyConnectedLayer,

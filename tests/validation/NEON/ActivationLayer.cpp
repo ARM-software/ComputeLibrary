@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -46,7 +46,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -128,14 +127,14 @@ Tensor compute_activation_layer(bool in_place, const TensorShape &shape, DataTyp
         {
             const std::pair<int8_t, int8_t> bounds = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
             std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
-            library->fill(NEAccessor(src), distribution, 0);
+            library->fill(Accessor(src), distribution, 0);
             break;
         }
         case DataType::QS16:
         {
             const std::pair<int16_t, int16_t> bounds = get_activation_layer_test_bounds<int16_t>(act_info.activation(), fixed_point_position);
             std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
-            library->fill(NEAccessor(src), distribution, 0);
+            library->fill(Accessor(src), distribution, 0);
             break;
         }
 #ifdef ARM_COMPUTE_ENABLE_FP16
@@ -143,7 +142,7 @@ Tensor compute_activation_layer(bool in_place, const TensorShape &shape, DataTyp
         {
             const std::pair<float16_t, float16_t> bounds = get_activation_layer_test_bounds<float16_t>(act_info.activation());
             std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
-            library->fill(NEAccessor(src), distribution, 0);
+            library->fill(Accessor(src), distribution, 0);
             break;
         }
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
@@ -151,7 +150,7 @@ Tensor compute_activation_layer(bool in_place, const TensorShape &shape, DataTyp
         {
             const std::pair<float, float> bounds = get_activation_layer_test_bounds<float>(act_info.activation());
             std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
-            library->fill(NEAccessor(src), distribution, 0);
+            library->fill(Accessor(src), distribution, 0);
             break;
         }
         default:
@@ -259,7 +258,7 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
     RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, dt, act_info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(dt, act_function));
+    validate(Accessor(dst), ref_dst, activation_layer_tolerance(dt, act_function));
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -276,7 +275,7 @@ BOOST_DATA_TEST_CASE(RunLarge, boost::unit_test::data::make({ false, true }) * L
     RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, dt, act_info);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(dt, act_function));
+    validate(Accessor(dst), ref_dst, activation_layer_tolerance(dt, act_function));
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -299,7 +298,7 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
     RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, DataType::QS8, act_info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(DataType::QS8, act_function, fixed_point_position));
+    validate(Accessor(dst), ref_dst, activation_layer_tolerance(DataType::QS8, act_function, fixed_point_position));
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -318,7 +317,7 @@ BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ false, true }) * S
     RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, DataType::QS16, act_info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(DataType::QS16, act_function, fixed_point_position));
+    validate(Accessor(dst), ref_dst, activation_layer_tolerance(DataType::QS16, act_function, fixed_point_position));
 }
 BOOST_AUTO_TEST_SUITE_END()
 

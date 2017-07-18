@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
-#include "tests/NEON/NEAccessor.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/ActivationLayerDataset.h"
 #include "tests/fixtures_new/ActivationLayerFixture.h"
@@ -48,7 +48,7 @@ const auto lenet_data_types   = framework::dataset::make("DataType", { DataType:
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 
-using NEActivationLayerFixture = ActivationLayerFixture<Tensor, NEActivationLayer, neon::NEAccessor>;
+using NEActivationLayerFixture = ActivationLayerFixture<Tensor, NEActivationLayer, Accessor>;
 
 TEST_SUITE(NEON)
 

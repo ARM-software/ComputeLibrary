@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -44,7 +44,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -83,13 +82,13 @@ Tensor compute_softmax_layer(const TensorShape &shape, DataType dt, int fixed_po
     if(arm_compute::is_data_type_float(dt))
     {
         std::uniform_real_distribution<> distribution(-1000.f, 1000.f);
-        library->fill(NEAccessor(src), distribution, 0);
+        library->fill(Accessor(src), distribution, 0);
     }
     else
     {
         int                             one_fixed = 1 << fixed_point_position;
         std::uniform_int_distribution<> distribution(-one_fixed, one_fixed);
-        library->fill(NEAccessor(src), distribution, 0);
+        library->fill(Accessor(src), distribution, 0);
     }
 
     // Compute function
@@ -143,7 +142,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFloatDataTypes(), shape, dt)
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance);
+    validate(Accessor(dst), ref_dst, tolerance);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -156,7 +155,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * CNNFloatDataTypes(), shape, dt)
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance);
+    validate(Accessor(dst), ref_dst, tolerance);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -174,7 +173,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::xrange(1,
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, DataType::QS8, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(Accessor(dst), ref_dst, tolerance_fixed_point);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -188,7 +187,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::xrange(1,
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, DataType::QS8, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(Accessor(dst), ref_dst, tolerance_fixed_point);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -205,7 +204,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::xrange(1,
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, DataType::QS16, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(Accessor(dst), ref_dst, tolerance_fixed_point);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -219,7 +218,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::xrange(1,
     RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, DataType::QS16, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(Accessor(dst), ref_dst, tolerance_fixed_point);
 }
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()

@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -46,7 +46,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -83,7 +82,7 @@ Tensor compute_non_linear_filter(const TensorShape &shape, NonLinearFilterFuncti
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
+    library->fill_tensor_uniform(Accessor(src), 0);
 
     // Compute function
     filter.run();
@@ -169,7 +168,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes()
     const ValidRegion valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(static_cast<int>(mask_size / 2)));
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, valid_region);
+    validate(Accessor(dst), ref_dst, valid_region);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -196,7 +195,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes()
     const ValidRegion valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(static_cast<int>(mask_size / 2)));
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, valid_region);
+    validate(Accessor(dst), ref_dst, valid_region);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -44,7 +44,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -84,8 +83,8 @@ Tensor compute_pixel_wise_multiplication(const TensorShape &shape, DataType dt_i
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src1), 0);
-    library->fill_tensor_uniform(NEAccessor(src2), 1);
+    library->fill_tensor_uniform(Accessor(src1), 0);
+    library->fill_tensor_uniform(Accessor(src2), 1);
 
     // Compute function
     multiply.run();
@@ -150,7 +149,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * (1.f / 255.f) * ConvertPolicies()
 
     // Validate output
     // Allow tolerance value of 1.f to counteract imprecision due to 32-bit float conversion
-    validate(NEAccessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<uint8_t>::max());
+    validate(Accessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<uint8_t>::max());
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * (1.f / 255.f) * ConvertPolicies() * RoundingPolicy::TO_NEAREST_UP,
@@ -166,7 +165,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * (1.f / 255.f) * ConvertPolicies()
 
     // Validate output
     // Allow tolerance value of 1.f to counteract imprecision due to 32-bit float conversion
-    validate(NEAccessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<uint8_t>::max());
+    validate(Accessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<uint8_t>::max());
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -199,7 +198,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ 1.
                                                                                DataType::U8, scale, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ 1.f, 1.f / 32768.f }) * ConvertPolicies()
@@ -215,7 +214,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ 1.
                                                                                DataType::U8, scale, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
@@ -247,7 +246,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Da
 
     // Validate output
     // Allow tolerance value of 2.f to counteract imprecision due to 32-bit float conversion
-    validate(NEAccessor(dst), ref_dst, 2.f, 0.f, std::numeric_limits<int16_t>::max());
+    validate(Accessor(dst), ref_dst, 2.f, 0.f, std::numeric_limits<int16_t>::max());
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ DataType::U8, DataType::S16 }) * (1.f / 255.f) * ConvertPolicies()
@@ -263,7 +262,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Da
 
     // Validate output
     // Allow tolerance value of 2.f to counteract imprecision due to 32-bit float conversion
-    validate(NEAccessor(dst), ref_dst, 2.f, 0.f, std::numeric_limits<int16_t>::max());
+    validate(Accessor(dst), ref_dst, 2.f, 0.f, std::numeric_limits<int16_t>::max());
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -293,7 +292,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Da
     RawTensor ref_dst = Reference::compute_reference_pixel_wise_multiplication(shape, dt, DataType::S16, DataType::S16, scale, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ DataType::U8, DataType::S16 }) * boost::unit_test::data::make({ 1.f, 1.f / 32768.f }) * ConvertPolicies()
@@ -308,7 +307,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Da
                                                                                scale, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
@@ -328,7 +327,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * (1.f / 255.f) * ConvertPolicies()
 
     // Validate output
     // Allow tolerance value of 1.f to counteract imprecision due to 32-bit float conversion
-    validate(NEAccessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<int16_t>::max());
+    validate(Accessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<int16_t>::max());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -361,7 +360,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * (1.f / 255.f) * ConvertPolicies()
 
     // Validate output
     // Allow tolerance value of 1.f to counteract imprecision due to 32-bit float conversion
-    validate(NEAccessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<int16_t>::max());
+    validate(Accessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<int16_t>::max());
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * (1.f / 255.f) * ConvertPolicies()
@@ -377,7 +376,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * (1.f / 255.f) * ConvertPolicies()
 
     // Validate output
     // Allow tolerance value of 1.f to counteract imprecision due to 32-bit float conversion
-    validate(NEAccessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<int16_t>::max());
+    validate(Accessor(dst), ref_dst, 1.f, 0.f, std::numeric_limits<int16_t>::max());
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -407,7 +406,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ 1.
     RawTensor ref_dst = Reference::compute_reference_pixel_wise_multiplication(shape, DataType::F32, DataType::F32, DataType::F32, scale, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ 1.f, 1.f / 32768.f }) * ConvertPolicies()
@@ -422,7 +421,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ 1.
                                                                                scale, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
@@ -440,7 +439,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * DataType::QS8 *ConvertPolicies() 
     RawTensor ref_dst = Reference::compute_reference_fixed_point_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, fixed_point_position, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -454,7 +453,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * DataType::QS8 *ConvertPolicies() 
     RawTensor ref_dst = Reference::compute_reference_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -470,7 +469,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * DataType::QS16 *ConvertPolicies()
     RawTensor ref_dst = Reference::compute_reference_fixed_point_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, fixed_point_position, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -484,7 +483,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * DataType::QS16 *ConvertPolicies()
     RawTensor ref_dst = Reference::compute_reference_pixel_wise_multiplication(shape, dt, dt, dt, 1.f, convert_policy, rounding_policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()

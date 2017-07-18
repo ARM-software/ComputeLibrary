@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "Utils.h"
 #include "validation/Datasets.h"
@@ -42,7 +42,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 #ifndef DOXYGEN_SKIP_THIS
@@ -68,7 +67,7 @@ BOOST_DATA_TEST_CASE(FillBorder, BorderModes() * boost::unit_test::data::make({ 
 
     // Fill tensor with constant value
     std::uniform_int_distribution<uint8_t> distribution{ tensor_value, tensor_value };
-    library->fill(NEAccessor(src), distribution, 0);
+    library->fill(Accessor(src), distribution, 0);
 
     // Create and configure kernel
     NEFillBorderKernel fill_border;
@@ -79,10 +78,10 @@ BOOST_DATA_TEST_CASE(FillBorder, BorderModes() * boost::unit_test::data::make({ 
 
     // Validate border
     border_size.limit(padding);
-    validate(NEAccessor(src), border_size, border_mode, &border_value);
+    validate(Accessor(src), border_size, border_mode, &border_value);
 
     // Validate tensor
-    validate(NEAccessor(src), &tensor_value);
+    validate(Accessor(src), &tensor_value);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -21,33 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_NEON_NEACCESSOR_H__
-#define __ARM_COMPUTE_TEST_NEON_NEACCESSOR_H__
-
-#include "IAccessor.h"
+#ifndef __ARM_COMPUTE_TEST_ACCESSOR_H__
+#define __ARM_COMPUTE_TEST_ACCESSOR_H__
 
 #include "arm_compute/runtime/Tensor.h"
+#include "tests/IAccessor.h"
 
 namespace arm_compute
 {
 namespace test
 {
-namespace neon
-{
 /** Accessor implementation for @ref Tensor objects. */
-class NEAccessor : public IAccessor
+class Accessor : public IAccessor
 {
 public:
     /** Create an accessor for the given @p tensor.
      *
      * @param[in, out] tensor To be accessed tensor.
      */
-    NEAccessor(Tensor &tensor);
+    Accessor(Tensor &tensor);
 
-    NEAccessor(const NEAccessor &) = delete;
-    NEAccessor &operator=(const NEAccessor &) = delete;
-    NEAccessor(NEAccessor &&)                 = default;
-    NEAccessor &operator=(NEAccessor &&) = default;
+    Accessor(const Accessor &) = delete;
+    Accessor &operator=(const Accessor &) = delete;
+    Accessor(Accessor &&)                 = default;
+    Accessor &operator=(Accessor &&) = default;
 
     TensorShape shape() const override;
     size_t      element_size() const override;
@@ -64,61 +61,60 @@ private:
     Tensor &_tensor;
 };
 
-inline NEAccessor::NEAccessor(Tensor &tensor)
+inline Accessor::Accessor(Tensor &tensor)
     : _tensor{ tensor }
 {
 }
 
-inline TensorShape NEAccessor::shape() const
+inline TensorShape Accessor::shape() const
 {
     return _tensor.info()->tensor_shape();
 }
 
-inline size_t NEAccessor::element_size() const
+inline size_t Accessor::element_size() const
 {
     return _tensor.info()->element_size();
 }
 
-inline size_t NEAccessor::size() const
+inline size_t Accessor::size() const
 {
     return _tensor.info()->total_size();
 }
 
-inline Format NEAccessor::format() const
+inline Format Accessor::format() const
 {
     return _tensor.info()->format();
 }
 
-inline DataType NEAccessor::data_type() const
+inline DataType Accessor::data_type() const
 {
     return _tensor.info()->data_type();
 }
 
-inline int NEAccessor::num_channels() const
+inline int Accessor::num_channels() const
 {
     return _tensor.info()->num_channels();
 }
 
-inline int NEAccessor::num_elements() const
+inline int Accessor::num_elements() const
 {
     return _tensor.info()->tensor_shape().total_size();
 }
 
-inline int NEAccessor::fixed_point_position() const
+inline int Accessor::fixed_point_position() const
 {
     return _tensor.info()->fixed_point_position();
 }
 
-inline const void *NEAccessor::operator()(const Coordinates &coord) const
+inline const void *Accessor::operator()(const Coordinates &coord) const
 {
     return _tensor.ptr_to_element(coord);
 }
 
-inline void *NEAccessor::operator()(const Coordinates &coord)
+inline void *Accessor::operator()(const Coordinates &coord)
 {
     return _tensor.ptr_to_element(coord);
 }
-} // namespace neon
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_NEON_NEACCESSOR_H__ */
+#endif /* __ARM_COMPUTE_TEST_ACCESSOR_H__ */

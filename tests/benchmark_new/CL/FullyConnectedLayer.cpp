@@ -39,7 +39,7 @@ namespace arm_compute
 {
 namespace test
 {
-using CLFullyConnectedLayerFixture = FullyConnectedLayerFixture<CLTensor, CLFullyConnectedLayer, cl::CLAccessor>;
+using CLFullyConnectedLayerFixture = FullyConnectedLayerFixture<CLTensor, CLFullyConnectedLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 

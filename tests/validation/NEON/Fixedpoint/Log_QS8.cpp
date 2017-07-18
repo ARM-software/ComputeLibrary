@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "Utils.h"
 #include "validation/Datasets.h"
@@ -43,7 +43,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -80,7 +79,7 @@ Tensor compute_log_qs8(const TensorShape &shape, int fixed_point_position)
     // Fill tensors. Keep the range between [(1 << (fixed_point_position - 1), 63) so the result won't
     // overflow. E.g. for Q2.5 ln(0.001) = -6.9, which cannot be represented.
     std::uniform_int_distribution<> distribution((1 << (fixed_point_position - 1)), 0x3F);
-    library->fill(NEAccessor(src), distribution, 0);
+    library->fill(Accessor(src), distribution, 0);
 
     Iterator input(&src, window);
     Iterator output(&dst, window);
@@ -112,7 +111,7 @@ BOOST_DATA_TEST_CASE(RunSmall, Small1DShape() * boost::unit_test::data::xrange(3
     RawTensor ref_dst = Reference::compute_reference_fixed_point_operation(shape, DataType::QS8, DataType::QS8, FixedPointOp::LOG, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance, 0);
+    validate(Accessor(dst), ref_dst, tolerance, 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

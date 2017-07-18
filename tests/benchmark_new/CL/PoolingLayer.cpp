@@ -39,7 +39,7 @@ namespace arm_compute
 {
 namespace test
 {
-using CLPoolingLayerFixture = PoolingLayerFixture<CLTensor, CLPoolingLayer, cl::CLAccessor>;
+using CLPoolingLayerFixture = PoolingLayerFixture<CLTensor, CLPoolingLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 

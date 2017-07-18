@@ -37,8 +37,8 @@ namespace test
 class IAccessor
 {
 public:
-    /** Pure virtual destructor. */
-    virtual ~IAccessor() = 0;
+    /** Virtual destructor. */
+    virtual ~IAccessor() = default;
 
     /** Shape of the tensor. */
     virtual TensorShape shape() const = 0;
@@ -80,10 +80,6 @@ public:
      */
     virtual void *operator()(const Coordinates &coord) = 0;
 };
-
-inline IAccessor::~IAccessor()
-{
-}
 } // namespace test
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_IACCESSOR_H__ */

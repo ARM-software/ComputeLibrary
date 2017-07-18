@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
-#include "tests/NEON/NEAccessor.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/DirectConvolutionLayerDataset.h"
 #include "tests/fixtures_new/ConvolutionLayerFixture.h"
@@ -37,7 +37,7 @@ namespace arm_compute
 {
 namespace test
 {
-using NEDirectConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvolutionLayer, neon::NEAccessor>;
+using NEDirectConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvolutionLayer, Accessor>;
 
 TEST_SUITE(NEON)
 

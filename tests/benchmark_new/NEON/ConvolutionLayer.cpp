@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
-#include "tests/NEON/NEAccessor.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets_new/GoogLeNetConvolutionLayerDataset.h"
@@ -50,7 +50,7 @@ const auto lenet_data_types   = framework::dataset::make("DataType", { DataType:
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 
-using NEConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEConvolutionLayer, neon::NEAccessor>;
+using NEConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEConvolutionLayer, Accessor>;
 
 TEST_SUITE(NEON)
 

@@ -23,9 +23,9 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
+#include "NEON/Accessor.h"
 #include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "NEON/NELutAccessor.h"
+#include "NEON/LutAccessor.h"
 #include "PaddingCalculator.h"
 #include "RawLutAccessor.h"
 #include "TypePrinter.h"
@@ -48,7 +48,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -79,7 +78,7 @@ Tensor compute_table_lookup(const TensorShape &shape, DataType data_type, Lut &l
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
+    library->fill_tensor_uniform(Accessor(src), 0);
 
     // Compute function
     table_lookup.run();
@@ -102,11 +101,11 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::uni
 
     if(data_type == DataType::U8)
     {
-        fill_lookuptable(NELutAccessor<uint8_t>(lut));
+        fill_lookuptable(LutAccessor<uint8_t>(lut));
     }
     else
     {
-        fill_lookuptable(NELutAccessor<int16_t>(lut));
+        fill_lookuptable(LutAccessor<int16_t>(lut));
     }
 
     // Create tensors
@@ -146,7 +145,7 @@ BOOST_DATA_TEST_CASE(RunSmall,
         std::map<uint8_t, uint8_t> rawlut;
 
         //Fill the Lut
-        fill_lookuptable(NELutAccessor<uint8_t>(lut));
+        fill_lookuptable(LutAccessor<uint8_t>(lut));
         fill_lookuptable(RawLutAccessor<uint8_t>(rawlut));
 
         // Compute function
@@ -156,7 +155,7 @@ BOOST_DATA_TEST_CASE(RunSmall,
         RawTensor ref_dst = Reference::compute_reference_table_lookup(shape, data_type, rawlut);
 
         // Validate output
-        validate(NEAccessor(dst), ref_dst);
+        validate(Accessor(dst), ref_dst);
     }
     else
     {
@@ -164,7 +163,7 @@ BOOST_DATA_TEST_CASE(RunSmall,
         std::map<int16_t, int16_t> rawlut;
 
         //Fill the Lut
-        fill_lookuptable(NELutAccessor<int16_t>(lut));
+        fill_lookuptable(LutAccessor<int16_t>(lut));
         fill_lookuptable(RawLutAccessor<int16_t>(rawlut));
 
         // Compute function
@@ -174,7 +173,7 @@ BOOST_DATA_TEST_CASE(RunSmall,
         RawTensor ref_dst = Reference::compute_reference_table_lookup(shape, data_type, rawlut);
 
         // Validate output
-        validate(NEAccessor(dst), ref_dst);
+        validate(Accessor(dst), ref_dst);
     }
 }
 
@@ -193,7 +192,7 @@ BOOST_DATA_TEST_CASE(RunLarge,
         std::map<uint8_t, uint8_t> rawlut;
 
         //Fill the Lut
-        fill_lookuptable(NELutAccessor<uint8_t>(lut));
+        fill_lookuptable(LutAccessor<uint8_t>(lut));
         fill_lookuptable(RawLutAccessor<uint8_t>(rawlut));
 
         // Compute function
@@ -203,7 +202,7 @@ BOOST_DATA_TEST_CASE(RunLarge,
         RawTensor ref_dst = Reference::compute_reference_table_lookup(shape, data_type, rawlut);
 
         // Validate output
-        validate(NEAccessor(dst), ref_dst);
+        validate(Accessor(dst), ref_dst);
     }
     else
     {
@@ -211,7 +210,7 @@ BOOST_DATA_TEST_CASE(RunLarge,
         std::map<int16_t, int16_t> rawlut;
 
         //Fill the Lut
-        fill_lookuptable(NELutAccessor<int16_t>(lut));
+        fill_lookuptable(LutAccessor<int16_t>(lut));
         fill_lookuptable(RawLutAccessor<int16_t>(rawlut));
 
         // Compute function
@@ -221,7 +220,7 @@ BOOST_DATA_TEST_CASE(RunLarge,
         RawTensor ref_dst = Reference::compute_reference_table_lookup(shape, data_type, rawlut);
 
         // Validate output
-        validate(NEAccessor(dst), ref_dst);
+        validate(Accessor(dst), ref_dst);
     }
 }
 

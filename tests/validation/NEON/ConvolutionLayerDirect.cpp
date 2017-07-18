@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "TypePrinter.h"
 #include "Utils.h"
 #include "validation/Datasets.h"
@@ -44,7 +44,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -92,15 +91,15 @@ Tensor compute_convolution_layer(const TensorShape &src_shape, const TensorShape
     if(dt == DataType::F32)
     {
         std::uniform_real_distribution<> distribution(-1.f, 1.f);
-        library->fill(NEAccessor(src), distribution, 0);
-        library->fill(NEAccessor(weights), distribution, 1);
-        library->fill(NEAccessor(bias), distribution, 2);
+        library->fill(Accessor(src), distribution, 0);
+        library->fill(Accessor(weights), distribution, 1);
+        library->fill(Accessor(bias), distribution, 2);
     }
     else
     {
-        library->fill_tensor_uniform(NEAccessor(src), 0);
-        library->fill_tensor_uniform(NEAccessor(weights), 1);
-        library->fill_tensor_uniform(NEAccessor(bias), 2);
+        library->fill_tensor_uniform(Accessor(src), 0);
+        library->fill_tensor_uniform(Accessor(weights), 1);
+        library->fill_tensor_uniform(Accessor(bias), 2);
     }
 
     // Compute function
@@ -147,7 +146,7 @@ BOOST_DATA_TEST_CASE(W1x1,
     RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, 0);
 
     // Validate output
-    validate(NEAccessor(dst), ref);
+    validate(Accessor(dst), ref);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -167,7 +166,7 @@ BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * CNNFloatDataTypes() * boo
     RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, 0);
 
     // Validate output
-    validate(NEAccessor(dst), ref, tolerance_fp);
+    validate(Accessor(dst), ref, tolerance_fp);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -188,7 +187,7 @@ BOOST_DATA_TEST_CASE(W1x1,
     RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, DataType::QS8, conv_info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref);
+    validate(Accessor(dst), ref);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
@@ -207,7 +206,7 @@ BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * boost::unit_test::data::x
     RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, DataType::QS8, conv_info, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref, tolerance_qs8);
+    validate(Accessor(dst), ref, tolerance_qs8);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

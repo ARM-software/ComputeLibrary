@@ -46,7 +46,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::cl;
 using namespace arm_compute::test::validation;
 
 namespace

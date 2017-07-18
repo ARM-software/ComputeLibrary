@@ -32,8 +32,6 @@ namespace arm_compute
 {
 namespace test
 {
-namespace cl
-{
 /** Accessor implementation for @ref CLLut objects. */
 template <typename T>
 class CLLutAccessor : public ILutAccessor<T>
@@ -88,8 +86,6 @@ public:
 private:
     CLLut &_lut;
 };
-
-} // namespace cl
 } // namespace test
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_CL_CLLUTACCESSOR_H__ */

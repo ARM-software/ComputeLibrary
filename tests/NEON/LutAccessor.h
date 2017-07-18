@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_NEON_NELUTACCESSOR_H__
-#define __ARM_COMPUTE_TEST_NEON_NELUTACCESSOR_H__
+#ifndef __ARM_COMPUTE_TEST_NEON_LUTACCESSOR_H__
+#define __ARM_COMPUTE_TEST_NEON_LUTACCESSOR_H__
 
 #include "ILutAccessor.h"
 
@@ -32,24 +32,22 @@ namespace arm_compute
 {
 namespace test
 {
-namespace neon
-{
 /** Accessor implementation for @ref Lut objects. */
 template <typename T>
-class NELutAccessor : public ILutAccessor<T>
+class LutAccessor : public ILutAccessor<T>
 {
 public:
     /** Create an accessor for the given @p Lut.
      */
-    NELutAccessor(Lut &lut)
+    LutAccessor(Lut &lut)
         : _lut{ lut }
     {
     }
 
-    NELutAccessor(const NELutAccessor &) = delete;
-    NELutAccessor &operator=(const NELutAccessor &) = delete;
-    NELutAccessor(NELutAccessor &&)                 = default;
-    NELutAccessor &operator=(NELutAccessor &&) = default;
+    LutAccessor(const LutAccessor &) = delete;
+    LutAccessor &operator=(const LutAccessor &) = delete;
+    LutAccessor(LutAccessor &&)                 = default;
+    LutAccessor &operator=(LutAccessor &&) = default;
 
     int num_elements() const override
     {
@@ -83,8 +81,6 @@ public:
 private:
     ILut &_lut;
 };
-
-} // namespace neon
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_NEON_NELUTACCESSOR_H__ */
+#endif /* __ARM_COMPUTE_TEST_NEON_LUTACCESSOR_H__ */

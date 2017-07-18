@@ -32,8 +32,6 @@ namespace test
 {
 namespace validation
 {
-namespace cl
-{
 struct CLFixture
 {
     CLFixture()
@@ -41,7 +39,6 @@ struct CLFixture
         CLScheduler::get().default_init();
     }
 };
-} // namespace cl
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

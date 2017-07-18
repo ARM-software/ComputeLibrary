@@ -41,7 +41,7 @@ namespace arm_compute
 namespace test
 {
 using CLLeNet5Fixture = LeNet5Fixture<CLTensor,
-      cl::CLAccessor,
+      CLAccessor,
       CLActivationLayer,
       CLConvolutionLayer,
       CLFullyConnectedLayer,

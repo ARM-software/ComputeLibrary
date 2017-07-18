@@ -23,7 +23,7 @@
  */
 #include "AssetsLibrary.h"
 #include "Globals.h"
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "PaddingCalculator.h"
 #include "TypePrinter.h"
 #include "Utils.h"
@@ -44,7 +44,6 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
@@ -81,8 +80,8 @@ Tensor compute_arithmetic_addition(const TensorShape &shape, DataType dt_in0, Da
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src1), 0);
-    library->fill_tensor_uniform(NEAccessor(src2), 1);
+    library->fill_tensor_uniform(Accessor(src1), 0);
+    library->fill_tensor_uniform(Accessor(src2), 1);
 
     // Compute function
     add.run();
@@ -141,7 +140,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::U8, DataType::U8, DataType::U8, policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -168,7 +167,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ Da
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, dt, DataType::S16, DataType::S16, policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ DataType::U8, DataType::S16 }) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
@@ -181,7 +180,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Da
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, dt, DataType::S16, DataType::S16, policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -198,7 +197,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * ConvertPolicies() * boost::unit_t
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::QS8, DataType::QS8, DataType::QS8, policy, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * ConvertPolicies() * boost::unit_test::data::xrange(1, 7),
@@ -211,7 +210,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * ConvertPolicies() * boost::unit_t
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::QS8, DataType::QS8, DataType::QS8, policy, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -227,7 +226,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * ConvertPolicies() * boost::unit_t
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::QS16, DataType::QS16, DataType::QS16, policy, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * ConvertPolicies() * boost::unit_test::data::xrange(1, 15),
@@ -240,7 +239,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * ConvertPolicies() * boost::unit_t
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::QS16, DataType::QS16, DataType::QS16, policy, fixed_point_position);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
@@ -256,7 +255,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::F16, DataType::F16, DataType::F16, ConvertPolicy::WRAP);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
@@ -283,7 +282,7 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::F32, DataType::F32, DataType::F32, ConvertPolicy::WRAP);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
 BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
@@ -296,7 +295,7 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ Co
     RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::F32, DataType::F32, DataType::F32, policy);
 
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

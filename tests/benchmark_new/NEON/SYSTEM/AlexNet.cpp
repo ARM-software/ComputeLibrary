@@ -34,7 +34,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
-#include "tests/NEON/NEAccessor.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/ActivationLayerDataset.h"
 #include "tests/fixtures_new/AlexNetFixture.h"
@@ -46,7 +46,7 @@ namespace test
 using NEAlexNetFixture = AlexNetFixture<ITensor,
       Tensor,
       SubTensor,
-      neon::NEAccessor,
+      Accessor,
       NEActivationLayer,
       NEConvolutionLayer,
       NEFullyConnectedLayer,

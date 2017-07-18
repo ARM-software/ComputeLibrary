@@ -37,7 +37,7 @@ namespace arm_compute
 {
 namespace test
 {
-using CLNormalizationLayerFixture = NormalizationLayerFixture<CLTensor, CLNormalizationLayer, cl::CLAccessor>;
+using CLNormalizationLayerFixture = NormalizationLayerFixture<CLTensor, CLNormalizationLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 

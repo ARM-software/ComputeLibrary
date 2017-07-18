@@ -45,7 +45,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/NEAccessor.h"
+#include "NEON/Accessor.h"
 #include "validation/Validation.h"
 
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
@@ -58,13 +58,12 @@
 
 using namespace arm_compute;
 using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
 using namespace arm_compute::test::validation;
 
 namespace
 {
 using NELeNet5Model = model_objects::LeNet5<Tensor,
-      NEAccessor,
+      Accessor,
       NEActivationLayer,
       NEConvolutionLayer,
       NEFullyConnectedLayer,
