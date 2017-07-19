@@ -28,6 +28,7 @@
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
 
 #include <chrono>
@@ -226,6 +227,12 @@ void Framework::run_test(TestCaseFactory &test_factory)
             {
                 profiler.start();
                 test_case->do_run();
+#ifdef ARM_COMPUTE_CL
+                if(opencl_is_available())
+                {
+                    CLScheduler::get().sync();
+                }
+#endif /* ARM_COMPUTE_CL */
                 profiler.stop();
             }
 
