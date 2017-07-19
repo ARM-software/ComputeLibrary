@@ -660,30 +660,6 @@ RawTensor Reference::compute_reference_fully_connected_layer(const TensorShape &
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_normalization_layer(const TensorShape &shape, DataType dt, NormalizationLayerInfo norm_info, int fixed_point_position)
-{
-    // Create reference
-    RawTensor ref_src(shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst(shape, dt, 1, fixed_point_position);
-
-    // Fill reference
-    if(dt == DataType::QS8)
-    {
-        const int8_t one_fixed_point       = 1 << fixed_point_position;
-        const int8_t minus_one_fixed_point = -one_fixed_point;
-        library->fill_tensor_uniform(ref_src, 0, minus_one_fixed_point, one_fixed_point);
-    }
-    else
-    {
-        library->fill_tensor_uniform(ref_src, 0);
-    }
-
-    // Compute reference
-    ReferenceCPP::normalization_layer(ref_src, ref_dst, norm_info);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info, int fixed_point_position)
 {
     // Create reference

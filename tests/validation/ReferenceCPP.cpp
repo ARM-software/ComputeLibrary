@@ -337,14 +337,6 @@ void ReferenceCPP::fully_connected_layer(const RawTensor &src, const RawTensor &
     boost::apply_visitor(tensor_visitors::fully_connected_layer_visitor(s, w, b), d);
 }
 
-// Normalization Layer
-void ReferenceCPP::normalization_layer(const RawTensor &src, RawTensor &dst, NormalizationLayerInfo norm_info)
-{
-    const TensorVariant s = TensorFactory::get_tensor(src);
-    TensorVariant       d = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(tensor_visitors::normalization_layer_visitor(s, norm_info), d);
-}
-
 // Pooling Layer
 void ReferenceCPP::pooling_layer(const RawTensor &src, RawTensor &dst, PoolingLayerInfo pool_info, int fixed_point_position)
 {

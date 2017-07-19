@@ -353,16 +353,6 @@ public:
      */
     static RawTensor compute_reference_fully_connected_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
                                                              bool transpose_weights, int fixed_point_position);
-    /** Compute reference normalization layer.
-     *
-     * @param[in] shape                Shape of the input and output tensors.
-     * @param[in] dt                   Data type of input and output tensors.
-     * @param[in] norm_info            Normalization Layer information.
-     * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16 (default = 0).
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_normalization_layer(const TensorShape &shape, DataType dt, NormalizationLayerInfo norm_info, int fixed_point_position = 0);
     /** Compute reference pooling layer.
       *
       * @param[in] shape_in             Shape of the input tensor.

@@ -345,26 +345,6 @@ private:
     const TensorVariant &_bias;
 };
 
-// Normalization Layer visitor
-struct normalization_layer_visitor : public boost::static_visitor<>
-{
-public:
-    explicit normalization_layer_visitor(const TensorVariant &in, NormalizationLayerInfo norm_info)
-        : _in(in), _norm_info(norm_info)
-    {
-    }
-
-    template <typename T>
-    void operator()(Tensor<T> &out) const
-    {
-        const Tensor<T> &in = boost::get<Tensor<T>>(_in);
-        tensor_operations::normalization_layer(in, out, _norm_info);
-    }
-
-private:
-    const TensorVariant   &_in;
-    NormalizationLayerInfo _norm_info;
-};
 // Pooling layer
 struct pooling_layer_visitor : public boost::static_visitor<>
 {

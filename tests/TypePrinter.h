@@ -240,7 +240,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
     return os;
 }
 
-inline std::string to_string(const arm_compute::ActivationLayerInfo &info)
+inline std::string to_string(const ActivationLayerInfo &info)
 {
     std::stringstream str;
     str << info.activation();
@@ -268,7 +268,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
     return os;
 }
 
-inline std::string to_string(const arm_compute::NormalizationLayerInfo &info)
+inline std::string to_string(const NormType &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
+inline std::string to_string(const NormalizationLayerInfo &info)
 {
     std::stringstream str;
     str << info.type();
@@ -379,7 +386,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
     return os;
 }
 
-inline std::string to_string(const arm_compute::DataType &data_type)
+inline std::string to_string(const DataType &data_type)
 {
     std::stringstream str;
     str << data_type;

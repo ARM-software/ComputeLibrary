@@ -296,13 +296,6 @@ public:
      * @param[out] dst     Result tensor.
      */
     static void fully_connected_layer(const RawTensor &src, const RawTensor &weights, const RawTensor &bias, RawTensor &dst);
-    /** Normalization of @p src based on the information from @p norm_info.
-     *
-     * @param[in]  src       Input tensor.
-     * @param[out] dst       Result tensor.
-     * @param[in]  norm_info Normalization Layer information.
-     */
-    static void normalization_layer(const RawTensor &src, RawTensor &dst, NormalizationLayerInfo norm_info);
     /** Pooling layer of @p src based on the information from @p pool_info.
      *
      * @param[in]  src                  Input tensor.
