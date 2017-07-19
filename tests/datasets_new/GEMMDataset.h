@@ -63,7 +63,7 @@ public:
             description << "B=" << *_b_it << ":";
             description << "C=" << *_c_it << ":";
             description << "Out=" << *_dst_it << ":";
-            description << "Alpha=" << *_alpha_it;
+            description << "Alpha=" << *_alpha_it << ":";
             description << "Beta=" << *_beta_it;
             return description.str();
         }

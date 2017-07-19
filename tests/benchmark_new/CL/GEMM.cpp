@@ -29,6 +29,7 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/GoogLeNetGEMMDataset.h"
+#include "tests/datasets_new/MatrixMultiplyGEMMDataset.h"
 #include "tests/fixtures_new/GEMMFixture.h"
 
 namespace arm_compute
@@ -37,20 +38,15 @@ namespace test
 {
 namespace
 {
-auto data_types = framework::dataset::make("DataType",
-{
-#if ARM_COMPUTE_ENABLE_FP16
-    DataType::FP16,
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
-    DataType::F32
-});
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
 } // namespace
 
 using CLGEMMFixture = GEMMFixture<CLTensor, CLGEMM>;
 
 TEST_SUITE(CL)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetGEMMDataset(), std::move(data_types)));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetGEMMDataset(), data_types));
+REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(), data_types));
 
 TEST_SUITE_END()
 } // namespace test

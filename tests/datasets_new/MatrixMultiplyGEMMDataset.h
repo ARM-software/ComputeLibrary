@@ -21,41 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMM.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
-#include "framework/Macros.h"
-#include "framework/datasets/Datasets.h"
+#ifndef ARM_COMPUTE_TEST_MATRIXMULTIPLY_GEMM_DATASET
+#define ARM_COMPUTE_TEST_MATRIXMULTIPLY_GEMM_DATASET
+
+#include "tests/datasets_new/GEMMDataset.h"
+
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/GoogLeNetGEMMDataset.h"
-#include "tests/datasets_new/MatrixMultiplyGEMMDataset.h"
-#include "tests/fixtures_new/GEMMFixture.h"
+
+#include "arm_compute/core/TensorShape.h"
 
 namespace arm_compute
 {
 namespace test
 {
-namespace
+namespace datasets
 {
-const auto data_types = framework::dataset::make("DataType",
+class MatrixMultiplyGEMMDataset final : public GEMMDataset
 {
-#if ARM_COMPUTE_ENABLE_FP16
-    DataType::F16,
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
-    DataType::F32,
-    DataType::QS8
-});
-} // namespace
-
-using NEGEMMFixture = GEMMFixture<Tensor, NEGEMM>;
-
-TEST_SUITE(NEON)
-
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetGEMM, NEGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetGEMMDataset(), data_types));
-REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, NEGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(), data_types));
-
-TEST_SUITE_END()
+public:
+    MatrixMultiplyGEMMDataset()
+    {
+        add_config(TensorShape(1024U, 1U), TensorShape(1000U, 1024U), TensorShape(1000U, 1U), TensorShape(1000U, 1U), 1.0f, 0.0f);
+        add_config(TensorShape(256U, 784U), TensorShape(64U, 256U), TensorShape(64U, 784U), TensorShape(64U, 784U), 1.0f, 0.0f);
+        add_config(TensorShape(1152U, 2704U), TensorShape(256U, 1152U), TensorShape(256U, 2704U), TensorShape(256U, 2704U), 1.0f, 0.0f);
+    }
+};
+} // namespace datasets
 } // namespace test
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_TEST_MATRIXMULTIPLY_GEMM_DATASET */
