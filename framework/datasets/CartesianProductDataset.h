@@ -47,8 +47,10 @@ template <typename T, typename U>
 class CartesianProductDataset : public Dataset
 {
 private:
-    using iter1_type = typename T::iterator;
-    using iter2_type = typename U::iterator;
+    using T_noref    = typename std::remove_reference<T>::type;
+    using U_noref    = typename std::remove_reference<U>::type;
+    using iter1_type = typename T_noref::iterator;
+    using iter2_type = typename U_noref::iterator;
 
 public:
     /** Construct dataset from the given datasets.
@@ -70,7 +72,7 @@ public:
     /** Iterator for the dataset. */
     struct iterator
     {
-        iterator(const T *dataset1, const U *dataset2)
+        iterator(const T_noref *dataset1, const U_noref *dataset2)
             : _iter1{ dataset1->begin() },
               _dataset2{ dataset2 },
               _iter2{ dataset2->begin() }
@@ -114,11 +116,11 @@ public:
         }
 
     private:
-        iter1_type _iter1;
-        const U   *_dataset2;
-        iter2_type _iter2;
-        int        _first_pos{ 0 };
-        int        _second_pos{ 0 };
+        iter1_type     _iter1;
+        const U_noref *_dataset2;
+        iter2_type     _iter2;
+        int            _first_pos{ 0 };
+        int            _second_pos{ 0 };
     };
 
     /** Iterator pointing at the begin of the dataset.
