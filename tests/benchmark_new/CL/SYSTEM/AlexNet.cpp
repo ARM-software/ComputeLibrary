@@ -54,8 +54,8 @@ using CLAlexNetFixture = AlexNetFixture<ICLTensor,
       CLPoolingLayer,
       CLSoftmaxLayer>;
 
-TEST_SUITE(SYSTEM_TEST)
 TEST_SUITE(CL)
+TEST_SUITE(SYSTEM_TEST)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, CLAlexNetFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::make("DataType", DataType::F32),

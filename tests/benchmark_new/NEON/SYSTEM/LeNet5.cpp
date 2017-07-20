@@ -48,8 +48,8 @@ using NELeNet5Fixture = LeNet5Fixture<Tensor,
       NEPoolingLayer,
       NESoftmaxLayer>;
 
-TEST_SUITE(SYSTEM_TEST)
 TEST_SUITE(NEON)
+TEST_SUITE(SYSTEM_TEST)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5, NELeNet5Fixture, framework::DatasetMode::ALL,
                                 framework::dataset::make("Batches", { 1, 4, 8 }));

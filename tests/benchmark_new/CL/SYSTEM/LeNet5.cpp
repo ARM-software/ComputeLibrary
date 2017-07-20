@@ -48,8 +48,8 @@ using CLLeNet5Fixture = LeNet5Fixture<CLTensor,
       CLPoolingLayer,
       CLSoftmaxLayer>;
 
-TEST_SUITE(SYSTEM_TEST)
 TEST_SUITE(CL)
+TEST_SUITE(SYSTEM_TEST)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5, CLLeNet5Fixture, framework::DatasetMode::ALL,
                                 framework::dataset::make("Batches", { 1, 4, 8 }));
