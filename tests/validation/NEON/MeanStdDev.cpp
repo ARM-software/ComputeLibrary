@@ -122,7 +122,7 @@ BOOST_DATA_TEST_CASE(RunSmall, Small2DShapes(), shape)
 
     // Validate output
     validate(output.first, ref_output.first);
-    validate(output.second, ref_output.second);
+    validate(output.second, ref_output.second, 0.f, 0.001f);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
@@ -136,7 +136,7 @@ BOOST_DATA_TEST_CASE(RunLarge, Large2DShapes(), shape)
 
     // Validate output
     validate(output.first, ref_output.first);
-    validate(output.second, ref_output.second);
+    validate(output.second, ref_output.second, 0.f, 0.001f);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
