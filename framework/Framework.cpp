@@ -97,10 +97,10 @@ Framework &Framework::get()
     return instance;
 }
 
-void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter)
+void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, int64_t id_filter)
 {
     _test_name_filter = std::regex{ name_filter };
-    _test_id_filter   = std::regex{ id_filter };
+    _test_id_filter   = id_filter;
     _num_iterations   = num_iterations;
     _dataset_mode     = mode;
 
@@ -191,7 +191,7 @@ bool Framework::is_enabled(const TestId &id) const
         return false;
     }
 
-    if(!std::regex_search(support::cpp11::to_string(test_id), _test_id_filter))
+    if(_test_id_filter > -1 && _test_id_filter != test_id)
     {
         return false;
     }

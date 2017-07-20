@@ -87,9 +87,9 @@ public:
      * @param[in] num_iterations Number of iterations per test.
      * @param[in] mode           Dataset mode.
      * @param[in] name_filter    Regular expression to filter tests by name. Only matching tests will be executed.
-     * @param[in] id_filter      Regular expression to filter tests by id. Only matching tests will be executed.
+     * @param[in] id_filter      Test id. Only this test will be executed.
      */
-    void init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter);
+    void init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, int64_t id_filter);
 
     /** Add a new test suite.
      *
@@ -259,7 +259,7 @@ private:
 
     InstrumentType _instruments{ InstrumentType::NONE };
     std::regex     _test_name_filter{ ".*" };
-    std::regex     _test_id_filter{ ".*" };
+    int64_t        _test_id_filter{ -1 };
     DatasetMode    _dataset_mode{ DatasetMode::ALL };
     TestResult    *_current_test_result{ nullptr };
 };

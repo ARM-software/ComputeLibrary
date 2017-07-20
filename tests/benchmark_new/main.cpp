@@ -102,8 +102,8 @@ int main(int argc, char **argv)
     log_format->set_help("Output format for measurements and failures");
     auto filter = parser.add_option<framework::SimpleOption<std::string>>("filter", ".*");
     filter->set_help("Regular expression to select test cases");
-    auto filter_id = parser.add_option<framework::SimpleOption<std::string>>("filter-id", ".*");
-    filter_id->set_help("Regular expression to select test cases by id");
+    auto filter_id = parser.add_option<framework::SimpleOption<int64_t>>("filter-id", -1);
+    filter_id->set_help("Test id. Only this test will be executed.");
     auto log_file = parser.add_option<framework::SimpleOption<std::string>>("log-file");
     log_file->set_help("Write output to file instead of to the console");
     auto throw_errors = parser.add_option<framework::ToggleOption>("throw-errors");
