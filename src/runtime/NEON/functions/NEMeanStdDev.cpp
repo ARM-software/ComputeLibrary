@@ -23,19 +23,19 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDev.h"
 
-#include "arm_compute/core/NEON/kernels/NEMeanStdDevKernel.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 using namespace arm_compute;
 
 NEMeanStdDev::NEMeanStdDev()
-    : _mean_stddev_kernel(), _global_sum(0), _global_sum_squared(0)
+    : _mean_stddev_kernel(), _fill_border_kernel(), _global_sum(0), _global_sum_squared(0)
 {
 }
 
-void NEMeanStdDev::configure(const IImage *input, float *mean, float *stddev)
+void NEMeanStdDev::configure(IImage *input, float *mean, float *stddev)
 {
     _mean_stddev_kernel.configure(input, mean, &_global_sum, stddev, &_global_sum_squared);
+    _fill_border_kernel.configure(input, _mean_stddev_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
 }
 
 void NEMeanStdDev::run()
@@ -43,5 +43,6 @@ void NEMeanStdDev::run()
     _global_sum         = 0;
     _global_sum_squared = 0;
 
+    _fill_border_kernel.run(_fill_border_kernel.window());
     NEScheduler::get().schedule(&_mean_stddev_kernel, Window::DimY);
 }

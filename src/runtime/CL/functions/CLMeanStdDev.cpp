@@ -23,19 +23,19 @@
  */
 #include "arm_compute/runtime/CL/functions/CLMeanStdDev.h"
 
-#include "arm_compute/core/CL/kernels/CLMeanStdDevKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 using namespace arm_compute;
 
 CLMeanStdDev::CLMeanStdDev()
     : _mean_stddev_kernel(),
+      _fill_border_kernel(),
       _global_sum(),
       _global_sum_squared()
 {
 }
 
-void CLMeanStdDev::configure(const ICLImage *input, float *mean, float *stddev)
+void CLMeanStdDev::configure(ICLImage *input, float *mean, float *stddev)
 {
     _global_sum = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, sizeof(cl_ulong));
 
@@ -45,9 +45,11 @@ void CLMeanStdDev::configure(const ICLImage *input, float *mean, float *stddev)
     }
 
     _mean_stddev_kernel.configure(input, mean, &_global_sum, stddev, &_global_sum_squared);
+    _fill_border_kernel.configure(input, _mean_stddev_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
 }
 
 void CLMeanStdDev::run()
 {
+    CLScheduler::get().enqueue(_fill_border_kernel);
     CLScheduler::get().enqueue(_mean_stddev_kernel);
 }

@@ -85,8 +85,13 @@ std::pair<uint64x1_t, uint64x1_t> accumulate(const Window &window, Iterator &ite
 } // namespace
 
 NEMeanStdDevKernel::NEMeanStdDevKernel()
-    : _input(nullptr), _mean(nullptr), _stddev(nullptr), _global_sum(nullptr), _global_sum_squared(nullptr), _mtx()
+    : _input(nullptr), _mean(nullptr), _stddev(nullptr), _global_sum(nullptr), _global_sum_squared(nullptr), _mtx(), _border_size(0)
 {
+}
+
+BorderSize NEMeanStdDevKernel::border_size() const
+{
+    return _border_size;
 }
 
 void NEMeanStdDevKernel::configure(const IImage *input, float *mean, uint64_t *global_sum, float *stddev, uint64_t *global_sum_squared)
@@ -104,6 +109,9 @@ void NEMeanStdDevKernel::configure(const IImage *input, float *mean, uint64_t *g
     _global_sum_squared = global_sum_squared;
 
     constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+    _border_size = BorderSize(std::max(static_cast<int>(num_elems_processed_per_iteration) - static_cast<int>(input->info()->dimension(0)),
+                                       static_cast<int>(input->info()->dimension(0) % num_elems_processed_per_iteration)));
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));

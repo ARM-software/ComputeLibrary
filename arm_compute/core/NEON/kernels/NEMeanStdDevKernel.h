@@ -64,6 +64,8 @@ public:
     // Inherited methods overridden:
     void run(const Window &window) override;
 
+    BorderSize border_size() const override;
+
 private:
     const IImage *_input;
     float        *_mean;
@@ -71,6 +73,7 @@ private:
     uint64_t     *_global_sum;
     uint64_t     *_global_sum_squared;
     std::mutex    _mtx;
+    BorderSize    _border_size;
 };
 }
 #endif /* __ARM_COMPUTE_NEMEANSTDDEVKERNEL_H__ */

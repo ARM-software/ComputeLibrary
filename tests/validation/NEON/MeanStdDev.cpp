@@ -134,8 +134,8 @@ BOOST_DATA_TEST_CASE(RunLarge, Large2DShapes(), shape)
     std::pair<float, float> ref_output = Reference::compute_reference_mean_and_standard_deviation(shape);
 
     // Validate output
-    validate(output.first, ref_output.first);
-    validate(output.second, ref_output.second, 0.f, 0.001f);
+    validate(output.first, ref_output.first, 0.f, 0.0001f);
+    validate(output.second, ref_output.second, 0.f, 0.01f);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

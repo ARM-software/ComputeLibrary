@@ -59,6 +59,7 @@ public:
     DataType    data_type() const override;
     int         num_channels() const override;
     int         num_elements() const override;
+    PaddingSize padding() const override;
     int         fixed_point_position() const override;
     const void *operator()(const Coordinates &coord) const override;
     void *operator()(const Coordinates &coord) override;
@@ -111,6 +112,11 @@ inline int CLAccessor::num_channels() const
 inline int CLAccessor::num_elements() const
 {
     return _tensor.info()->tensor_shape().total_size();
+}
+
+inline PaddingSize CLAccessor::padding() const
+{
+    return _tensor.info()->padding();
 }
 
 inline int CLAccessor::fixed_point_position() const

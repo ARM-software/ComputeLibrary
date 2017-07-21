@@ -127,6 +127,9 @@ public:
     /** Number of elements of the tensor. */
     int num_elements() const override;
 
+    /** Available padding around the tensor. */
+    PaddingSize padding() const override;
+
     /** The number of bits for the fractional part of the fixed point numbers. */
     int fixed_point_position() const override;
 
@@ -289,6 +292,12 @@ template <typename T>
 int SimpleTensor<T>::num_elements() const
 {
     return _shape.total_size();
+}
+
+template <typename T>
+PaddingSize SimpleTensor<T>::padding() const
+{
+    return PaddingSize(0);
 }
 
 template <typename T>

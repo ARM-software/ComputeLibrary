@@ -114,6 +114,9 @@ public:
     /** Number of elements of the tensor. */
     int num_elements() const;
 
+    /** Available padding around the tensor. */
+    PaddingSize padding() const;
+
     /** The number of bits for the fractional part of the fixed point numbers. */
     int fixed_point_position() const;
 

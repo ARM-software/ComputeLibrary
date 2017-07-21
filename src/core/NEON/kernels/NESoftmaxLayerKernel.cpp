@@ -224,7 +224,7 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
 
     _input       = input;
     _output      = output;
-    _border_size = BorderSize(0, input_width % num_elems_processed_per_iteration, 0, 0);
+    _border_size = BorderSize(0, num_elems_processed_per_iteration - (input_width % num_elems_processed_per_iteration), 0, 0);
 
     // Configure kernel window
     constexpr unsigned int num_elems_written_per_row = 1;

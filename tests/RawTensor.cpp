@@ -146,6 +146,11 @@ int RawTensor::num_elements() const
     return _shape.total_size();
 }
 
+PaddingSize RawTensor::padding() const
+{
+    return PaddingSize(0);
+}
+
 const RawTensor::BufferType *RawTensor::data() const
 {
     return _buffer.get();

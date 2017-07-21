@@ -150,6 +150,15 @@ public:
      */
     RawTensor get(const std::string &name, Format format, Channel channel);
 
+    /** Puts garbage values all around the tensor for testing purposes
+     *
+     * @param[in, out] tensor       To be filled tensor.
+     * @param[in]      distribution Distribution used to fill the tensor's surroundings.
+     * @param[in]      seed_offset  The offset will be added to the global seed before initialising the random generator.
+     */
+    template <typename T, typename D>
+    void fill_borders_with_garbage(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const;
+
     /** Fills the specified @p tensor with random values drawn from @p
      * distribution.
      *
@@ -348,6 +357,32 @@ private:
 };
 
 template <typename T, typename D>
+void AssetsLibrary::fill_borders_with_garbage(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
+{
+    const PaddingSize padding_size = tensor.padding();
+
+    Window window;
+    window.set(0, Window::Dimension(-padding_size.left, tensor.shape()[0] + padding_size.right, 1));
+    window.set(1, Window::Dimension(-padding_size.top, tensor.shape()[1] + padding_size.bottom, 1));
+
+    std::mt19937 gen(_seed);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        TensorShape shape = tensor.shape();
+
+        // If outside of valid region
+        if(id.x() < 0 || id.x() >= static_cast<int>(shape.x()) || id.y() < 0 || id.y() >= static_cast<int>(shape.y()))
+        {
+            using ResultType         = typename std::remove_reference<D>::type::result_type;
+            const ResultType value   = distribution(gen);
+            void *const      out_ptr = tensor(id);
+            store_value_with_data_type(out_ptr, value, tensor.data_type());
+        }
+    });
+}
+
+template <typename T, typename D>
 void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
 {
     Window window;
@@ -366,6 +401,8 @@ void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::resul
         void *const      out_ptr = tensor(id);
         store_value_with_data_type(out_ptr, value, tensor.data_type());
     });
+
+    fill_borders_with_garbage(tensor, distribution, seed_offset);
 }
 
 template <typename D>

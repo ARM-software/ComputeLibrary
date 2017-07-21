@@ -61,6 +61,9 @@ public:
     /** Number of elements of the tensor. */
     virtual int num_elements() const = 0;
 
+    /** Available padding around the tensor. */
+    virtual PaddingSize padding() const = 0;
+
     /** Number of bits for the fractional part. */
     virtual int fixed_point_position() const = 0;
 
