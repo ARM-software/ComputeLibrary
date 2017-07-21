@@ -382,15 +382,6 @@ public:
      * @param[in] pool_info ROI Pooling Layer information.
      */
     static RawTensor compute_reference_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info);
-    /** Compute reference softmax layer.
-     *
-     * @param[in] shape                Shape of the input and output tensors.
-     * @param[in] dt                   Data type of input and output tensors.
-     * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_softmax_layer(const TensorShape &shape, DataType dt, int fixed_point_position = 0);
     /** Compute reference fixed point operation.
      *
      * @param[in] shape                Shape of the input and output tensors.

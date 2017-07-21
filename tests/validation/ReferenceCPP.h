@@ -319,12 +319,6 @@ public:
      * @param[in]  pool_info ROI Pooling Layer information.
      */
     static void roi_pooling_layer(const RawTensor &src, RawTensor &dst, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info);
-    /** Softmax Layer of @p src.
-     *
-     * @param[in]  src Input tensor.
-     * @param[out] dst Result tensor.
-     */
-    static void softmax_layer(const RawTensor &src, RawTensor &dst);
     /** Fixed point operations of @p src
      *
      * @param[in]  src Input tensor.

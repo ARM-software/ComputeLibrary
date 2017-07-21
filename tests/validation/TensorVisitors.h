@@ -409,25 +409,6 @@ private:
     ROIPoolingLayerInfo     _pool_info;
 };
 
-// Softmax Layer visitor
-struct softmax_layer_visitor : public boost::static_visitor<>
-{
-public:
-    explicit softmax_layer_visitor(const TensorVariant &in)
-        : _in(in)
-    {
-    }
-
-    template <typename T>
-    void operator()(Tensor<T> &out) const
-    {
-        const auto &in = boost::get<Tensor<T>>(_in);
-        tensor_operations::softmax_layer(in, out);
-    }
-
-private:
-    const TensorVariant &_in;
-};
 // Fixed Point operations visitor
 struct fixed_point_operation_visitor : public boost::static_visitor<>
 {

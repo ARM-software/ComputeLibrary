@@ -738,31 +738,6 @@ RawTensor Reference::compute_reference_roi_pooling_layer(const TensorShape &shap
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_softmax_layer(const TensorShape &shape, DataType dt, int fixed_point_position)
-{
-    // Create reference
-    RawTensor ref_src(shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst(shape, dt, 1, fixed_point_position);
-
-    // Fill reference
-    if(arm_compute::is_data_type_float(dt))
-    {
-        std::uniform_real_distribution<> distribution(-1000.f, 1000.f);
-        library->fill(ref_src, distribution, 0);
-    }
-    else
-    {
-        int                             one_fixed = 1 << fixed_point_position;
-        std::uniform_int_distribution<> distribution(-one_fixed, one_fixed);
-        library->fill(ref_src, distribution, 0);
-    }
-
-    // Compute reference
-    ReferenceCPP::softmax_layer(ref_src, ref_dst);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_fixed_point_operation(const TensorShape &shape, DataType dt_in, DataType dt_out, FixedPointOp op, int fixed_point_position)
 {
     // Create reference
