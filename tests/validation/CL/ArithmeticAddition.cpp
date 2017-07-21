@@ -244,7 +244,6 @@ BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * ConvertPolicies() * boost::unit_t
 BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
 BOOST_AUTO_TEST_SUITE(F16)
 BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
 {
@@ -258,7 +257,6 @@ BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
     validate(CLAccessor(dst), ref_dst);
 }
 BOOST_AUTO_TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(F32)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))

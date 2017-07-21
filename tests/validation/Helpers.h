@@ -24,20 +24,16 @@
 #ifndef __ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__
 #define __ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__
 
-#include "ILutAccessor.h"
-#include "Types.h"
-#include "ValidationUserConfiguration.h"
-
 #include "arm_compute/core/Types.h"
+#include "tests/ILutAccessor.h"
+#include "tests/Types.h"
+#include "tests/validation/ValidationUserConfiguration.h"
+#include "tests/validation/half.h"
 
 #include <random>
 #include <type_traits>
 #include <utility>
 #include <vector>
-
-#ifdef ARM_COMPUTE_ENABLE_FP16
-#include <arm_fp16.h>
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace arm_compute
 {
@@ -56,9 +52,7 @@ template <typename T>
 inline std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::ActivationFunction activation, int fixed_point_position = 1)
 {
     bool is_float = std::is_same<T, float>::value;
-#ifdef ARM_COMPUTE_ENABLE_FP16
-    is_float = is_float || std::is_same<T, float16_t>::value;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+    is_float      = is_float || std::is_same<T, half_float::half>::value;
 
     std::pair<T, T> bounds;
 

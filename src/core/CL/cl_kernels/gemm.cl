@@ -754,7 +754,7 @@ __kernel void gemm_mm_f16(IMAGE_DECLARATION(src0),
     half8 c20 = 0.0f;
     half8 c30 = 0.0f;
 
-    for(; src_addr.s1 <= (end_row_mtx_b - 8); src_addr += (int2)(8, 16))
+    for(; src_addr.s1 <= (end_row_mtx_b - 16); src_addr += (int2)(8, 16))
     {
         /* Load values from matrix A (interleaved) and matrix B (transposed) */
         half4 a0 = vload4(0, ((__global half *)src0_ptr) + src_addr.s0);

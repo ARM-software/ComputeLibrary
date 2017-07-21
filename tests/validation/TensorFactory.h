@@ -24,15 +24,12 @@
 #ifndef __ARM_COMPUTE_TEST_TENSOR_FACTORY_H__
 #define __ARM_COMPUTE_TEST_TENSOR_FACTORY_H__
 
-#include "RawTensor.h"
-#include "Tensor.h"
 #include "arm_compute/core/Error.h"
+#include "tests/RawTensor.h"
+#include "tests/validation/Tensor.h"
+#include "tests/validation/half.h"
 
 #include "boost_wrapper.h"
-
-#if ARM_COMPUTE_ENABLE_FP16
-#include <arm_fp16.h> // needed for float16_t
-#endif                /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace arm_compute
 {
@@ -40,13 +37,11 @@ namespace test
 {
 namespace validation
 {
-using TensorVariant = boost::variant < Tensor<uint8_t>, Tensor<int8_t>,
+using TensorVariant = boost::variant<Tensor<uint8_t>, Tensor<int8_t>,
       Tensor<uint16_t>, Tensor<int16_t>,
       Tensor<uint32_t>, Tensor<int32_t>,
-#ifdef ARM_COMPUTE_ENABLE_FP16
-      Tensor<float16_t>,
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
-      Tensor<float >>;
+      Tensor<half_float::half>,
+      Tensor<float>>;
 
 /** Helper to create a constant type if the passed reference is constant. */
 template <typename R, typename T>
@@ -95,12 +90,10 @@ public:
                 using value_type_s32 = typename match_const<R, int32_t>::type;
                 v                    = Tensor<int32_t>(shape, dt, fixed_point_position, reinterpret_cast<value_type_s32 *>(data));
                 break;
-#ifdef ARM_COMPUTE_ENABLE_FP16
             case DataType::F16:
-                using value_type_f16 = typename match_const<R, float16_t>::type;
-                v                    = Tensor<float16_t>(shape, dt, fixed_point_position, reinterpret_cast<value_type_f16 *>(data));
+                using value_type_f16 = typename match_const<R, half_float::half>::type;
+                v                    = Tensor<half_float::half>(shape, dt, fixed_point_position, reinterpret_cast<value_type_f16 *>(data));
                 break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
             case DataType::F32:
                 using value_type_f32 = typename match_const<R, float>::type;
                 v                    = Tensor<float>(shape, dt, fixed_point_position, reinterpret_cast<value_type_f32 *>(data));

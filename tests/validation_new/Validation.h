@@ -85,8 +85,8 @@ void validate(const arm_compute::PaddingSize &padding, const arm_compute::Paddin
  * reference tensor and test tensor is multiple of wrap_range), but such errors would be detected by
  * other test cases.
  */
-template <typename T, typename U>
-void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value = 0, float tolerance_number = 0.f);
+template <typename T, typename U = T>
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value = U(0), float tolerance_number = 0.f);
 
 /** Validate tensors with valid region.
  *
@@ -98,8 +98,8 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U toler
  * reference tensor and test tensor is multiple of wrap_range), but such errors would be detected by
  * other test cases.
  */
-template <typename T, typename U>
-void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value = 0, float tolerance_number = 0.f);
+template <typename T, typename U = T>
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value = U(0), float tolerance_number = 0.f);
 
 /** Validate tensors against constant value.
  *

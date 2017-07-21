@@ -45,6 +45,7 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
+const float tolerance_f16 = 1.f;    /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 const float tolerance_q   = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 
@@ -73,7 +74,7 @@ CLTensor compute_convolution_layer(const TensorShape &input_shape, const TensorS
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    if(dt == DataType::F32)
+    if(dt == DataType::F32 || dt == DataType::F16)
     {
         std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
         library->fill(CLAccessor(src), distribution, 0);
@@ -134,7 +135,6 @@ BOOST_DATA_TEST_CASE(Configuration,
     validate(dst.info()->valid_region(), dst_valid_region);
 }
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
 BOOST_AUTO_TEST_SUITE(Float16)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
@@ -148,10 +148,9 @@ BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
     RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
 
     // Validate output
-    validate(CLAccessor(dst), ref_dst, tolerance_f32);
+    validate(CLAccessor(dst), ref_dst, tolerance_f16);
 }
 BOOST_AUTO_TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))

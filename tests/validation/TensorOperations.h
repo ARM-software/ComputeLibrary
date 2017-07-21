@@ -24,18 +24,15 @@
 #ifndef __ARM_COMPUTE_TEST_TENSOR_OPERATIONS_H__
 #define __ARM_COMPUTE_TEST_TENSOR_OPERATIONS_H__
 
-#include "FixedPoint.h"
-#include "Tensor.h"
-#include "Types.h"
-#include "Utils.h"
-#include "support/ToolchainSupport.h"
-
-#include "FixedPoint.h"
-#include "Types.h"
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Types.h"
+#include "support/ToolchainSupport.h"
+#include "tests/Types.h"
+#include "tests/Utils.h"
 #include "tests/validation/FixedPoint.h"
+#include "tests/validation/Tensor.h"
 #include "tests/validation/ValidationUserConfiguration.h"
+#include "tests/validation/half.h"
 
 #include <algorithm>
 #include <array>
@@ -43,26 +40,6 @@
 #include <random>
 #include <string>
 #include <vector>
-
-#if ARM_COMPUTE_ENABLE_FP16
-//Beware! most std templates acting on types don't work with the data type float16_t
-namespace std
-{
-template <>
-class numeric_limits<float16_t>
-{
-public:
-    static float16_t lowest()
-    {
-        return -std::numeric_limits<float>::max(); // -inf
-    };
-    static float16_t max()
-    {
-        return std::numeric_limits<float>::max(); // +inf
-    };
-};
-}
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace arm_compute
 {
@@ -77,11 +54,8 @@ namespace
 template <class T>
 struct is_floating_point
     : std::integral_constant < bool,
-      std::is_same<float, typename std::remove_cv<T>::type>::value ||
-#ifdef ARM_COMPUTE_ENABLE_FP16
-      std::is_same<float16_t, typename std::remove_cv<T>::type>::value ||
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
-      std::is_same<double, typename std::remove_cv<T>::type>::value || std::is_same<long double, typename std::remove_cv<T>::type>::value >
+      std::is_same<float, typename std::remove_cv<T>::type>::value || std::is_same<half_float::half, typename std::remove_cv<T>::type>::value
+      || std::is_same<double, typename std::remove_cv<T>::type>::value || std::is_same<long double, typename std::remove_cv<T>::type>::value >
 {
 };
 
@@ -184,7 +158,7 @@ void vector_matrix_multiply(const T *in, const T *weights, const T *bias, T *out
 {
     for(int x = 0; x < cols_weights; ++x)
     {
-        T acc = 0.0f;
+        T acc(0);
         for(int y = 0; y < rows_weights; ++y)
         {
             acc += in[y] * weights[x + y * cols_weights];
@@ -456,8 +430,8 @@ void absolute_difference(const Tensor<T1> &in1, const Tensor<T2> &in2, Tensor<T3
 
     for(int i = 0; i < in1.num_elements(); ++i)
     {
-        intermediate_type val = std::abs(static_cast<intermediate_type>(in1[i]) - static_cast<intermediate_type>(in2[i]));
-        out[i]                = saturate_cast<T3>(val);
+        intermediate_type val(std::abs(static_cast<intermediate_type>(in1[i]) - static_cast<intermediate_type>(in2[i])));
+        out[i] = saturate_cast<T3>(val);
     }
 }
 
@@ -708,7 +682,7 @@ void gemm(const Tensor<T> &in1, const Tensor<T> &in2, const Tensor<T> &in3, Tens
     {
         for(int c = 0; c < N; ++c)
         {
-            T acc = 0.0f;
+            T acc(0);
 
             for(int k = 0; k < K; ++k)
             {
@@ -967,10 +941,10 @@ void activation_layer(const Tensor<T> &in, Tensor<T> &out, ActivationLayerInfo a
                 out[i] = static_cast<T>(1) / (static_cast<T>(1) + std::exp(-x));
                 break;
             case ActivationLayerInfo::ActivationFunction::RELU:
-                out[i] = std::max<T>(0, x);
+                out[i] = std::max(static_cast<T>(0), x);
                 break;
             case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-                out[i] = std::min<T>(a, std::max<T>(0, x));
+                out[i] = std::min<T>(a, std::max(static_cast<T>(0), x));
                 break;
             case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
                 out[i] = (x > 0) ? x : a * x;
@@ -1519,16 +1493,16 @@ void pooling_layer(const Tensor<T> &in, Tensor<T> &out, PoolingLayerInfo pool_in
             {
                 for(int w = 0; w < pooled_w; ++w)
                 {
-                    T   avg_val = 0;
-                    int wstart  = w * pool_stride_x - pad_x;
-                    int hstart  = h * pool_stride_y - pad_y;
-                    int wend    = std::min(wstart + pool_size, w_in + pad_x);
-                    int hend    = std::min(hstart + pool_size, h_in + pad_y);
-                    int pool    = (hend - hstart) * (wend - wstart);
-                    wstart      = std::max(wstart, 0);
-                    hstart      = std::max(hstart, 0);
-                    wend        = std::min(wend, w_in);
-                    hend        = std::min(hend, h_in);
+                    T   avg_val(0);
+                    int wstart = w * pool_stride_x - pad_x;
+                    int hstart = h * pool_stride_y - pad_y;
+                    int wend   = std::min(wstart + pool_size, w_in + pad_x);
+                    int hend   = std::min(hstart + pool_size, h_in + pad_y);
+                    int pool   = (hend - hstart) * (wend - wstart);
+                    wstart     = std::max(wstart, 0);
+                    hstart     = std::max(hstart, 0);
+                    wend       = std::min(wend, w_in);
+                    hend       = std::min(hend, h_in);
                     if(is_floating_point<T>::value)
                     {
                         for(int y = hstart; y < hend; ++y)
@@ -1652,7 +1626,7 @@ void softmax_layer(const Tensor<T> &in, Tensor<T> &out)
         }
 
         // Regularize
-        T sum = 0;
+        T sum(0);
         for(int c = 0; c < cols; ++c)
         {
             const T res       = exp(in[r * cols + c] - max);
@@ -1661,7 +1635,7 @@ void softmax_layer(const Tensor<T> &in, Tensor<T> &out)
         }
 
         // Normalize
-        const T norm_val = 1 / sum;
+        const T norm_val = static_cast<T>(1) / sum;
         for(int c = 0; c < cols; ++c)
         {
             out[r * cols + c] *= norm_val;

@@ -27,15 +27,12 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "tests/validation/half.h"
 
 #include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-
-#ifdef ARM_COMPUTE_ENABLE_FP16
-#include <arm_fp16.h> // needed for float16_t
-#endif                /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace arm_compute
 {
@@ -81,10 +78,8 @@ double get_double_data(const void *ptr, DataType data_type)
             return *reinterpret_cast<const uint64_t *>(ptr);
         case DataType::S64:
             return *reinterpret_cast<const int64_t *>(ptr);
-#ifdef ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
-            return *reinterpret_cast<const float16_t *>(ptr);
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+            return *reinterpret_cast<const half_float::half *>(ptr);
         case DataType::F32:
             return *reinterpret_cast<const float *>(ptr);
         case DataType::F64:

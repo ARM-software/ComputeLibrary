@@ -24,10 +24,6 @@
 #ifndef __ARM_COMPUTE_TEST_TENSOR_LIBRARY_H__
 #define __ARM_COMPUTE_TEST_TENSOR_LIBRARY_H__
 
-#include "RawTensor.h"
-#include "TensorCache.h"
-#include "Utils.h"
-
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -35,6 +31,10 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "tests/RawTensor.h"
+#include "tests/TensorCache.h"
+#include "tests/Utils.h"
+#include "tests/validation/half.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -42,10 +42,6 @@
 #include <random>
 #include <string>
 #include <type_traits>
-
-#if ARM_COMPUTE_ENABLE_FP16
-#include <arm_fp16.h> // needed for float16_t
-#endif                /* ARM_COMPUTE_ENABLE_FP16 */
 
 namespace arm_compute
 {
@@ -476,9 +472,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             fill(tensor, distribution_s64, seed_offset);
             break;
         }
-#if ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
         case DataType::F32:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
@@ -567,14 +561,12 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             fill(tensor, distribution_s64, seed_offset);
             break;
         }
-#if ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
         {
-            std::uniform_real_distribution<float_t> distribution_f16(low, high);
+            std::uniform_real_distribution<float> distribution_f16(low, high);
             fill(tensor, distribution_f16, seed_offset);
             break;
         }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
         case DataType::F32:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<float, D>::value));

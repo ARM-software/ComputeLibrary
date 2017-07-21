@@ -476,15 +476,13 @@ RawTensor Reference::compute_reference_activation_layer(const TensorShape &shape
             library->fill(ref_src, distribution, 0);
             break;
         }
-#ifdef ARM_COMPUTE_ENABLE_FP16
         case DataType::F16:
         {
-            const std::pair<float16_t, float16_t> bounds = get_activation_layer_test_bounds<float16_t>(act_info.activation());
+            const std::pair<half_float::half, half_float::half> bounds = get_activation_layer_test_bounds<half_float::half>(act_info.activation());
             std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
             library->fill(ref_src, distribution, 0);
             break;
         }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
         case DataType::F32:
         {
             const std::pair<float, float> bounds = get_activation_layer_test_bounds<float>(act_info.activation());
@@ -604,9 +602,9 @@ RawTensor Reference::compute_reference_depth_concatenate_layer(const std::vector
     TensorShape                             dst_shape = calculate_depth_concatenate_shape(shapes);
 
     // Create tensors
-    for(unsigned int i = 0; i < shapes.size(); ++i)
+    for(const auto &shape : shapes)
     {
-        ref_srcs.push_back(support::cpp14::make_unique<RawTensor>(RawTensor(shapes[i], dt, 1, fixed_point_position)));
+        ref_srcs.push_back(support::cpp14::make_unique<RawTensor>(shape, dt, 1, fixed_point_position));
     }
     RawTensor ref_dst(dst_shape, dt, 1, fixed_point_position);
 
