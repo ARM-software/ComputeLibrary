@@ -56,6 +56,11 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetActivationLayer, CLActivationLayerFixtu
                                                                                         framework::dataset::make("DataType", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetActivationLayerDataset(),
+                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+
 TEST_SUITE_END()
 } // namespace test
 } // namespace arm_compute

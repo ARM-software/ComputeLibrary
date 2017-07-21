@@ -33,6 +33,7 @@
 #include "tests/datasets_new/AlexNetPoolingLayerDataset.h"
 #include "tests/datasets_new/GoogLeNetPoolingLayerDataset.h"
 #include "tests/datasets_new/LeNet5PoolingLayerDataset.h"
+#include "tests/datasets_new/SqueezeNetPoolingLayerDataset.h"
 #include "tests/fixtures_new/PoolingLayerFixture.h"
 
 namespace arm_compute
@@ -55,6 +56,11 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5PoolingLayer, CLPoolingLayerFixture, frame
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetPoolingLayerDataset(),
+                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(),
                                                                                         framework::dataset::make("DataType", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
