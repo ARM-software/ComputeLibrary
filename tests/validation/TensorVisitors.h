@@ -228,26 +228,6 @@ private:
 template struct arm_compute::test::validation::tensor_visitors::table_lookup<uint8_t>;
 template struct arm_compute::test::validation::tensor_visitors::table_lookup<int16_t>;
 
-// Activation layer visitor
-struct activation_layer_visitor : public boost::static_visitor<>
-{
-public:
-    explicit activation_layer_visitor(const TensorVariant &in, ActivationLayerInfo act_info)
-        : _in(in), _act_info(act_info)
-    {
-    }
-
-    template <typename T>
-    void operator()(Tensor<T> &out) const
-    {
-        const auto &in = boost::get<Tensor<T>>(_in);
-        tensor_operations::activation_layer(in, out, _act_info);
-    }
-
-private:
-    const TensorVariant      &_in;
-    const ActivationLayerInfo _act_info;
-};
 // Batch Normalization Layer visitor
 struct batch_normalization_layer_visitor : public boost::static_visitor<>
 {

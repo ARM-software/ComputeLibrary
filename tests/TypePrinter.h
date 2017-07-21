@@ -240,6 +240,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
     return os;
 }
 
+inline std::string to_string(const ActivationLayerInfo::ActivationFunction &function)
+{
+    std::stringstream str;
+    str << function;
+    return str.str();
+}
+
 inline std::string to_string(const ActivationLayerInfo &info)
 {
     std::stringstream str;

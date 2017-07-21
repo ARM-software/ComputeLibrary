@@ -453,56 +453,6 @@ RawTensor Reference::compute_reference_threshold(const TensorShape &shape, uint8
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_activation_layer(const TensorShape &shape, DataType dt, ActivationLayerInfo act_info, int fixed_point_position)
-{
-    // Create reference
-    RawTensor ref_src(shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst(shape, dt, 1, fixed_point_position);
-
-    // Fill tensors
-    switch(dt)
-    {
-        case DataType::QS8:
-        {
-            const std::pair<int8_t, int8_t> bounds = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
-            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
-            library->fill(ref_src, distribution, 0);
-            break;
-        }
-        case DataType::QS16:
-        {
-            const std::pair<int16_t, int16_t> bounds = get_activation_layer_test_bounds<int16_t>(act_info.activation(), fixed_point_position);
-            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
-            library->fill(ref_src, distribution, 0);
-            break;
-        }
-        case DataType::F16:
-        {
-            const std::pair<half_float::half, half_float::half> bounds = get_activation_layer_test_bounds<half_float::half>(act_info.activation());
-            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
-            library->fill(ref_src, distribution, 0);
-            break;
-        }
-        case DataType::F32:
-        {
-            const std::pair<float, float> bounds = get_activation_layer_test_bounds<float>(act_info.activation());
-            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
-            library->fill(ref_src, distribution, 0);
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Not supported");
-            break;
-        }
-    }
-
-    // Compute reference
-    ReferenceCPP::activation_layer(ref_src, ref_dst, act_info);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position)
 {
     // Create reference

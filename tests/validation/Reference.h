@@ -295,16 +295,6 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper);
-    /** Compute reference activation layer.
-     *
-     * @param[in] shape                Shape of the input and output tensors.
-     * @param[in] dt                   Data type of the tensors.
-     * @param[in] act_info             Activation layer information.
-     * @param[in] fixed_point_position (Optional)Number of bits for the fractional part of fixed point numbers.
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_activation_layer(const TensorShape &shape, DataType dt, ActivationLayerInfo act_info, int fixed_point_position = 0);
     /** Compute reference batch normalization layer.
      *
      * @param[in] shape0               Shape of the input and output tensors.

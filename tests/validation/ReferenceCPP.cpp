@@ -283,14 +283,6 @@ void ReferenceCPP::threshold(const RawTensor &src, RawTensor &dst, uint8_t thres
     tensor_operations::threshold(s, d, threshold, false_value, true_value, type, upper);
 }
 
-// Activation layer
-void ReferenceCPP::activation_layer(const RawTensor &input, RawTensor &output, ActivationLayerInfo act_info)
-{
-    const TensorVariant s = TensorFactory::get_tensor(input);
-    TensorVariant       d = TensorFactory::get_tensor(output);
-    boost::apply_visitor(tensor_visitors::activation_layer_visitor(s, act_info), d);
-}
-
 // Batch Normalization Layer
 void ReferenceCPP::batch_normalization_layer(const RawTensor &src, RawTensor &dst, const RawTensor &mean, const RawTensor &var, const RawTensor &beta, const RawTensor &gamma, float epsilon,
                                              int fixed_point_position)

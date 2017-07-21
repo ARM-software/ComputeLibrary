@@ -253,13 +253,6 @@ public:
      * @param[in]  upper       Upper threshold. Only used when the thresholding type is RANGE.
      */
     static void threshold(const RawTensor &src, RawTensor &dst, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper);
-    /** Activation layer of @p src base on information from @p act_info.
-     *
-     * @param[in]  input    Input tensor.
-     * @param[in]  output   Second tensor.
-     * @param[out] act_info Activation layer information.
-     */
-    static void activation_layer(const RawTensor &input, RawTensor &output, ActivationLayerInfo act_info);
     /** Batch Normalization of @p src based on the information from @p norm_info.
      *
      * @param[in]  src                  Input tensor.

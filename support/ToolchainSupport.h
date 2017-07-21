@@ -51,7 +51,7 @@ namespace cpp11
  * @return String representation of @p value.
  */
 template <typename T, typename std::enable_if<std::is_arithmetic<typename std::decay<T>::type>::value, int>::type = 0>
-std::string to_string(T && value)
+inline std::string to_string(T && value)
 {
     std::stringstream stream;
     stream << std::forward<T>(value);
@@ -165,7 +165,7 @@ inline T copysign(T x, T y)
  * @return String representation of @p value.
  */
 template <typename T>
-std::string to_string(T &&value)
+inline std::string to_string(T &&value)
 {
     return ::std::to_string(std::forward<T>(value));
 }
@@ -261,6 +261,13 @@ inline T copysign(T x, T y)
     return std::copysign(x, y);
 }
 #endif /* __ANDROID__ */
+
+inline std::string to_string(bool value)
+{
+    std::stringstream str;
+    str << std::boolalpha << value;
+    return str.str();
+}
 } // namespace cpp11
 
 namespace cpp14
