@@ -320,15 +320,6 @@ public:
      */
     static RawTensor compute_reference_convolution_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
                                                          const PadStrideInfo &conv_info, int fixed_point_position);
-    /** Compute reference depth concatenation layer
-     *
-     * @param[in] shapes               Input tensor shapes (All dimensions should match apart from DimZ)
-     * @param[in] dt                   Data type to use
-     * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_depth_concatenate_layer(const std::vector<TensorShape> &shapes, DataType dt, int fixed_point_position = 0);
     /** Compute reference for fully connected layer function
      *
      * @param[in] input_shape          Shape for the input tensor

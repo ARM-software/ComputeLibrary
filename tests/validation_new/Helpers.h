@@ -128,6 +128,14 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
 
     return bounds;
 }
+
+/** Calculate output tensor shape give a vector of input tensor to concatenate
+ *
+ * @param[in] input_shapes Shapes of the tensors to concatenate across depth.
+ *
+ * @return The shape of output concatenated tensor.
+ */
+TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &input_shapes);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

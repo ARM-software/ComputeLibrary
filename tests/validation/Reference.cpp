@@ -557,30 +557,6 @@ RawTensor Reference::compute_reference_convolution_layer(const TensorShape &inpu
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_depth_concatenate_layer(const std::vector<TensorShape> &shapes, DataType dt, int fixed_point_position)
-{
-    std::vector<std::unique_ptr<RawTensor>> ref_srcs{};
-    TensorShape                             dst_shape = calculate_depth_concatenate_shape(shapes);
-
-    // Create tensors
-    for(const auto &shape : shapes)
-    {
-        ref_srcs.push_back(support::cpp14::make_unique<RawTensor>(shape, dt, 1, fixed_point_position));
-    }
-    RawTensor ref_dst(dst_shape, dt, 1, fixed_point_position);
-
-    // Fill references
-    for(unsigned int i = 0; i < ref_srcs.size(); ++i)
-    {
-        library->fill_tensor_uniform(*ref_srcs[i], i);
-    }
-
-    // Compute reference
-    ReferenceCPP::depth_concatenate_layer(ref_srcs, ref_dst);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_fully_connected_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
                                                              DataType dt, bool transpose_weights, int fixed_point_position)
 {

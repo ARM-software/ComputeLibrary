@@ -306,19 +306,6 @@ void ReferenceCPP::convolution_layer(const RawTensor &src, const RawTensor &weig
     boost::apply_visitor(tensor_visitors::convolution_layer_visitor(s, w, b, conv_info), d);
 }
 
-// Depth concatenate layer
-void ReferenceCPP::depth_concatenate_layer(const std::vector<std::unique_ptr<RawTensor>> &srcs, RawTensor &dst)
-{
-    std::vector<TensorVariant> ss;
-    ss.resize(srcs.size());
-    std::transform(srcs.begin(), srcs.end(), ss.begin(), [](std::unique_ptr<RawTensor> const & t)
-    {
-        return TensorFactory::get_tensor(*t);
-    });
-    TensorVariant d = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(tensor_visitors::depth_concatenate_layer_visitor(ss), d);
-}
-
 // Fully connected layer
 void ReferenceCPP::fully_connected_layer(const RawTensor &src, const RawTensor &weights, const RawTensor &bias, RawTensor &dst)
 {
