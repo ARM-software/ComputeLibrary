@@ -355,8 +355,6 @@ Example:
 
 @b pmu: Enable the PMU cycle counter to measure execution time in benchmark tests. (Your device needs to support it)
 
-@note You will need the Boost Program options and Google Benchmark headers and libraries to build the benchmark tests. See @ref building_google_benchmark for more information.
-
 @b openmp Build in the OpenMP scheduler for NEON.
 
 @note Only works when building with g++ not clang++

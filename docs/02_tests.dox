@@ -5,9 +5,9 @@
 
 @section building_test_dependencies Building dependencies
 
-The tests currently make use of Boost (Test and Program options) for validation
-and Google Benchmark for performance runs. Below are instructions about how to
-build these 3rd party libraries.
+The tests currently make use of Boost (Test and Program options) for
+validation. Below are instructions about how to build these 3rd party
+libraries.
 
 @note By default the build of the validation and benchmark tests is disabled, to enable it use `validation_tests=1` and `benchmark_tests=1`
 
@@ -30,41 +30,43 @@ After executing the build command the libraries
 ```libboost_program_options.a``` and ```libboost_unit_test_framework.a``` can
 be found in ```./stage/lib```.
 
-@subsection building_google_benchmark Building Google Benchmark
-
-Instructions on how to build Google Benchmark using CMake can be found in their
-repository: https://github.com/google/benchmark. For example, building for
-Android 32bit can be achieved via
-
-    cmake -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_COMPILER=arm-linux-androideabi-clang++ \
-    -DBENCHMARK_ENABLE_LTO=false -DBENCHMARK_ENABLE_TESTING=false ..
-
-The library required by the compute library is ```libbenchmark.a```.
-
 @section tests_running_tests Running tests
 @subsection tests_running_tests_benchmarking Benchmarking
 @subsubsection tests_running_tests_benchmarking_filter Filter tests
 All tests can be run by invoking
 
-    ./arm_compute_benchmark -- ./data
+    ./arm_compute_benchmark ./data
 
 where `./data` contains the assets needed by the tests.
 
-If only a subset of the tests has to be executed the `--benchmark_filter` option takes a regular expression to select matching tests.
+If only a subset of the tests has to be executed the `--filter` option takes a
+regular expression to select matching tests.
 
-    ./arm_compute_benchmark --benchmark_filter=neon_bitwise_and ./data
+    ./arm_compute_benchmark --filter='NEON/.*AlexNet' ./data
 
-All available tests can be displayed with the `--benchmark_list_tests` switch.
+Additionally each test has a test id which can be used as a filter, too.
+However, the test id is not guaranteed to be stable when new tests are added.
+Only for a specific build the same the test will keep its id.
 
-    ./arm_compute_benchmark --benchmark_list_tests ./data
+    ./arm_compute_benchmark --filter-id=10 ./data
+
+All available tests can be displayed with the `--list-tests` switch.
+
+    ./arm_compute_benchmark --list-tests
+
+More options can be found in the `--help` message.
 
 @subsubsection tests_running_tests_benchmarking_runtime Runtime
-By default every test is run multiple *iterations* until a minimum time is reached. The minimum time (in seconds) can be controlled with the `--benchmark_min_time` flag. However, each test might have a hard coded value for the number of iterations or minimum execution time. In that case the command line argument is ignored for those specific tests.
-Additionally it is possible to specify multiple *repetitions* (`--benchmark_repetitions`) which will run each test multiple times (including the iterations). The average and standard deviation for all repetitions is automatically computed and reported.
+By default every test is run once on a single thread. The number of iterations
+can be controlled via the `--iterations` option and the number of threads via
+`--threads`.
 
-@subsubsection tests_running_tests_benchmarking_verbosity Verbosity
-The verbosity of the test output can be controlled via the `--v` flag. Though it should hardly ever be necessary.
+@subsubsection tests_running_tests_benchmarking_output Output
+By default the benchmarking results are printed in a human readable format on
+the command line. The colored output can be disabled via `--no-color-output`.
+As an alternative output format JSON is supported and can be selected via
+`--log-format=json`. To write the output to a file instead of stdout the
+`--log-file` option can be used.
 
 @subsection tests_running_tests_validation Validation
 @subsubsection tests_running_tests_validation_filter Filter tests
