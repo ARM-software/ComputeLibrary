@@ -1,5 +1,10 @@
 #include <arm_neon.h>
 
+inline float16x8_t vrsqrtsq_f16 (float16x8_t, float16x8_t)
+{
+  return vdupq_n_f16(0);
+}
+
 inline float16x4_t vpmax_f16 (float16x4_t, float16x4_t)
 {
   return vdup_n_f16(0);
