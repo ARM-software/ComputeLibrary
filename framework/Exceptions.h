@@ -24,7 +24,10 @@
 #ifndef ARM_COMPUTE_TEST_EXCEPTIONS
 #define ARM_COMPUTE_TEST_EXCEPTIONS
 
+#include <istream>
+#include <ostream>
 #include <stdexcept>
+#include <string>
 
 namespace arm_compute
 {
@@ -32,11 +35,55 @@ namespace test
 {
 namespace framework
 {
+/** Severity of the information.
+ *
+ * Each category includes the ones above it.
+ *
+ * NONE == Only for filtering. Not used to tag information.
+ * CONFIG == Configuration info.
+ * TESTS == Information about the tests.
+ * ERRORS == Violated assertions/expectations.
+ * DEBUG == More violated assertions/expectations.
+ * MEASUREMENTS == Information about measurements.
+ * ALL == Only for filtering. Not used to tag information.
+ */
+enum class LogLevel
+{
+    NONE,
+    CONFIG,
+    TESTS,
+    ERRORS,
+    DEBUG,
+    MEASUREMENTS,
+    ALL,
+};
+
+LogLevel log_level_from_name(const std::string &name);
+::std::istream &operator>>(::std::istream &stream, LogLevel &level);
+::std::ostream &operator<<(::std::ostream &stream, LogLevel level);
+std::string to_string(LogLevel level);
+
 /** Error class for failures during test execution. */
 class TestError : public std::runtime_error
 {
 public:
     using std::runtime_error::runtime_error;
+
+    /** Construct error with severity.
+     *
+     * @param[in] msg   Error message.
+     * @param[in] level Severity level.
+     */
+    TestError(const std::string &msg, LogLevel level);
+
+    /** Severity of the error.
+     *
+     * @return Severity.
+     */
+    LogLevel level() const;
+
+private:
+    LogLevel _level{ LogLevel::ERRORS };
 };
 } // namespace framework
 } // namespace test

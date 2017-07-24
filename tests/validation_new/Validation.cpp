@@ -140,7 +140,7 @@ void check_border_element(const IAccessor &tensor, const Coordinates &id,
         ARM_COMPUTE_TEST_INFO("channel = " << channel);
         ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
         ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << ref);
-        ARM_COMPUTE_EXPECT_EQUAL(target, ref);
+        ARM_COMPUTE_EXPECT_EQUAL(target, ref, framework::LogLevel::DEBUG);
 
         if(!equal)
         {
@@ -154,26 +154,26 @@ void check_border_element(const IAccessor &tensor, const Coordinates &id,
 
 void validate(const arm_compute::ValidRegion &region, const arm_compute::ValidRegion &reference)
 {
-    ARM_COMPUTE_EXPECT_EQUAL(region.anchor.num_dimensions(), reference.anchor.num_dimensions());
-    ARM_COMPUTE_EXPECT_EQUAL(region.shape.num_dimensions(), reference.shape.num_dimensions());
+    ARM_COMPUTE_EXPECT_EQUAL(region.anchor.num_dimensions(), reference.anchor.num_dimensions(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(region.shape.num_dimensions(), reference.shape.num_dimensions(), framework::LogLevel::ERRORS);
 
     for(unsigned int d = 0; d < region.anchor.num_dimensions(); ++d)
     {
-        ARM_COMPUTE_EXPECT_EQUAL(region.anchor[d], reference.anchor[d]);
+        ARM_COMPUTE_EXPECT_EQUAL(region.anchor[d], reference.anchor[d], framework::LogLevel::ERRORS);
     }
 
     for(unsigned int d = 0; d < region.shape.num_dimensions(); ++d)
     {
-        ARM_COMPUTE_EXPECT_EQUAL(region.shape[d], reference.shape[d]);
+        ARM_COMPUTE_EXPECT_EQUAL(region.shape[d], reference.shape[d], framework::LogLevel::ERRORS);
     }
 }
 
 void validate(const arm_compute::PaddingSize &padding, const arm_compute::PaddingSize &reference)
 {
-    ARM_COMPUTE_EXPECT_EQUAL(padding.top, reference.top);
-    ARM_COMPUTE_EXPECT_EQUAL(padding.right, reference.right);
-    ARM_COMPUTE_EXPECT_EQUAL(padding.bottom, reference.bottom);
-    ARM_COMPUTE_EXPECT_EQUAL(padding.left, reference.left);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.top, reference.top, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.right, reference.right, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.bottom, reference.bottom, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.left, reference.left, framework::LogLevel::ERRORS);
 }
 
 void validate(const IAccessor &tensor, const void *reference_value)
@@ -203,7 +203,7 @@ void validate(const IAccessor &tensor, const void *reference_value)
             ARM_COMPUTE_TEST_INFO("channel = " << channel);
             ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
             ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << ref);
-            ARM_COMPUTE_EXPECT_EQUAL(target, ref);
+            ARM_COMPUTE_EXPECT_EQUAL(target, ref, framework::LogLevel::DEBUG);
 
             if(!equal)
             {
@@ -219,7 +219,7 @@ void validate(const IAccessor &tensor, const void *reference_value)
         const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::setprecision(2) << percent_mismatches << "%) mismatched");
-        ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0);
+        ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0, framework::LogLevel::ERRORS);
     }
 }
 
@@ -296,17 +296,17 @@ void validate(const IAccessor &tensor, BorderSize border_size, const BorderMode 
         const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::setprecision(2) << percent_mismatches << "%) mismatched");
-        ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0);
+        ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0, framework::LogLevel::ERRORS);
     }
 }
 
 void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned int> expected_labels)
 {
-    ARM_COMPUTE_EXPECT_EQUAL(classified_labels.size(), expected_labels.size());
+    ARM_COMPUTE_EXPECT_EQUAL(classified_labels.size(), expected_labels.size(), framework::LogLevel::ERRORS);
 
     for(unsigned int i = 0; i < expected_labels.size(); ++i)
     {
-        ARM_COMPUTE_EXPECT_EQUAL(classified_labels[i], expected_labels[i]);
+        ARM_COMPUTE_EXPECT_EQUAL(classified_labels[i], expected_labels[i], framework::LogLevel::ERRORS);
     }
 }
 } // namespace validation

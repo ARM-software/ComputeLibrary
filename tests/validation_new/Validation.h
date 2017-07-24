@@ -28,6 +28,7 @@
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Types.h"
 #include "framework/Asserts.h"
+#include "framework/Exceptions.h"
 #include "tests/IAccessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/Utils.h"
@@ -174,11 +175,11 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
     int64_t num_mismatches = 0;
     int64_t num_elements   = 0;
 
-    ARM_COMPUTE_EXPECT_EQUAL(tensor.element_size(), reference.element_size());
-    ARM_COMPUTE_EXPECT_EQUAL(tensor.format(), reference.format());
-    ARM_COMPUTE_EXPECT_EQUAL(tensor.data_type(), reference.data_type());
-    ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels());
-    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()));
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.element_size(), reference.element_size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.format(), reference.format(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.data_type(), reference.data_type(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()), framework::LogLevel::ERRORS);
 
     const int min_elements = std::min(tensor.num_elements(), reference.num_elements());
     const int min_channels = std::min(tensor.num_channels(), reference.num_channels());
@@ -202,7 +203,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
                     ARM_COMPUTE_TEST_INFO("channel = " << c);
                     ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target_value);
                     ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << reference_value);
-                    ARM_COMPUTE_EXPECT_EQUAL(target_value, reference_value);
+                    ARM_COMPUTE_EXPECT_EQUAL(target_value, reference_value, framework::LogLevel::DEBUG);
 
                     ++num_mismatches;
                 }
@@ -219,7 +220,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::setprecision(2) << percent_mismatches
                               << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number << "%)");
-        ARM_COMPUTE_EXPECT(num_mismatches <= absolute_tolerance_number);
+        ARM_COMPUTE_EXPECT(num_mismatches <= absolute_tolerance_number, framework::LogLevel::ERRORS);
     }
 }
 
@@ -230,7 +231,7 @@ void validate(T target, T ref, U tolerance_abs_error, double tolerance_relative_
 
     ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << ref);
     ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
-    ARM_COMPUTE_EXPECT(equal);
+    ARM_COMPUTE_EXPECT(equal, framework::LogLevel::ERRORS);
 }
 } // namespace validation
 } // namespace test

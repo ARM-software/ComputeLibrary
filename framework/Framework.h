@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_TEST_FRAMEWORK
 
 #include "DatasetModes.h"
+#include "Exceptions.h"
 #include "Profiler.h"
 #include "TestCase.h"
 #include "TestCaseFactory.h"
@@ -95,8 +96,9 @@ public:
      * @param[in] mode           Dataset mode.
      * @param[in] name_filter    Regular expression to filter tests by name. Only matching tests will be executed.
      * @param[in] id_filter      Test id. Only this test will be executed.
+     * @param[in] log_level      Verbosity of the output.
      */
-    void init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, int64_t id_filter);
+    void init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, int64_t id_filter, LogLevel log_level);
 
     /** Add a new test suite.
      *
@@ -177,9 +179,10 @@ public:
 
     /** Tell the framework that the currently running test case failed a non-fatal expectation.
      *
-     * @param[in] msg Description of the failure.
+     * @param[in] msg   Description of the failure.
+     * @param[in] level Severity of the failed expectation.
      */
-    void log_failed_expectation(const std::string &msg);
+    void log_failed_expectation(const std::string &msg, LogLevel level = LogLevel::ERRORS);
 
     /** Number of iterations per test case.
      *
@@ -291,6 +294,7 @@ private:
     std::regex               _test_name_filter{ ".*" };
     int64_t                  _test_id_filter{ -1 };
     DatasetMode              _dataset_mode{ DatasetMode::ALL };
+    LogLevel                 _log_level{ LogLevel::ALL };
     TestResult              *_current_test_result{ nullptr };
     std::vector<std::string> _test_info{};
 };

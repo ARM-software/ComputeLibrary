@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 #include "framework/DatasetModes.h"
+#include "framework/Exceptions.h"
+#include "framework/Framework.h"
 #include "framework/Macros.h"
 #include "framework/command_line/CommandLineOptions.h"
 #include "framework/command_line/CommandLineParser.h"
@@ -88,6 +90,17 @@ int main(int argc, char **argv)
         framework::LogFormat::JSON,
     };
 
+    std::set<framework::LogLevel> supported_log_levels
+    {
+        framework::LogLevel::NONE,
+        framework::LogLevel::CONFIG,
+        framework::LogLevel::TESTS,
+        framework::LogLevel::ERRORS,
+        framework::LogLevel::DEBUG,
+        framework::LogLevel::MEASUREMENTS,
+        framework::LogLevel::ALL,
+    };
+
     auto help = parser.add_option<framework::ToggleOption>("help");
     help->set_help("Show this help message");
     auto dataset_mode = parser.add_option<framework::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::ALL);
@@ -106,6 +119,8 @@ int main(int argc, char **argv)
     filter_id->set_help("Test id. Only this test will be executed.");
     auto log_file = parser.add_option<framework::SimpleOption<std::string>>("log-file");
     log_file->set_help("Write output to file instead of to the console");
+    auto log_level = parser.add_option<framework::EnumOption<framework::LogLevel>>("log-level", supported_log_levels, framework::LogLevel::ALL);
+    log_file->set_help("Verbosity of the output");
     auto throw_errors = parser.add_option<framework::ToggleOption>("throw-errors");
     throw_errors->set_help("Don't catch errors (useful for debugging)");
     auto seed = parser.add_option<framework::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
@@ -159,16 +174,23 @@ int main(int argc, char **argv)
 
         Scheduler::get().set_num_threads(threads->value());
 
-        printer->print_global_header();
-        printer->print_entry("Seed", support::cpp11::to_string(seed->value()));
-        printer->print_entry("Iterations", support::cpp11::to_string(iterations->value()));
-        printer->print_entry("Threads", support::cpp11::to_string(threads->value()));
+        if(log_level->value() > framework::LogLevel::NONE)
         {
-            using support::cpp11::to_string;
-            printer->print_entry("Dataset mode", to_string(dataset_mode->value()));
+            printer->print_global_header();
         }
 
-        framework.init(instruments->value(), iterations->value(), dataset_mode->value(), filter->value(), filter_id->value());
+        if(log_level->value() >= framework::LogLevel::CONFIG)
+        {
+            printer->print_entry("Seed", support::cpp11::to_string(seed->value()));
+            printer->print_entry("Iterations", support::cpp11::to_string(iterations->value()));
+            printer->print_entry("Threads", support::cpp11::to_string(threads->value()));
+            {
+                using support::cpp11::to_string;
+                printer->print_entry("Dataset mode", to_string(dataset_mode->value()));
+            }
+        }
+
+        framework.init(instruments->value(), iterations->value(), dataset_mode->value(), filter->value(), filter_id->value(), log_level->value());
         framework.set_printer(printer.get());
         framework.set_throw_errors(throw_errors->value());
 
@@ -193,7 +215,10 @@ int main(int argc, char **argv)
 
         success = framework.run();
 
-        printer->print_global_footer();
+        if(log_level->value() > framework::LogLevel::NONE)
+        {
+            printer->print_global_footer();
+        }
 
         return (success ? 0 : 1);
     }

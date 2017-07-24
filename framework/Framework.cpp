@@ -23,7 +23,6 @@
  */
 #include "Framework.h"
 
-#include "Exceptions.h"
 #include "support/ToolchainSupport.h"
 
 #ifdef ARM_COMPUTE_CL
@@ -81,12 +80,13 @@ Framework &Framework::get()
     return instance;
 }
 
-void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, int64_t id_filter)
+void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, int64_t id_filter, LogLevel log_level)
 {
     _test_name_filter = std::regex{ name_filter };
     _test_id_filter   = id_filter;
     _num_iterations   = num_iterations;
     _dataset_mode     = mode;
+    _log_level        = log_level;
 
     _instruments = InstrumentType::NONE;
 
@@ -138,7 +138,7 @@ void Framework::print_test_info(std::ostream &os) const
 
 void Framework::log_test_start(const std::string &test_name)
 {
-    if(_printer != nullptr)
+    if(_printer != nullptr && _log_level >= LogLevel::TESTS)
     {
         _printer->print_test_header(test_name);
     }
@@ -153,14 +153,24 @@ void Framework::log_test_end(const std::string &test_name)
 {
     if(_printer != nullptr)
     {
-        _printer->print_measurements(_test_results.at(test_name).measurements);
-        _printer->print_test_footer();
+        if(_log_level >= LogLevel::MEASUREMENTS)
+        {
+            _printer->print_measurements(_test_results.at(test_name).measurements);
+        }
+
+        if(_log_level >= LogLevel::TESTS)
+        {
+            _printer->print_test_footer();
+        }
     }
 }
 
-void Framework::log_failed_expectation(const std::string &msg)
+void Framework::log_failed_expectation(const std::string &msg, LogLevel level)
 {
-    std::cerr << "ERROR: " << msg << "\n";
+    if(_log_level >= level)
+    {
+        std::cerr << "ERROR: " << msg << "\n";
+    }
 
     if(_current_test_result != nullptr)
     {
@@ -251,7 +261,11 @@ void Framework::run_test(TestCaseFactory &test_factory)
         }
         catch(const TestError &error)
         {
-            std::cerr << "FATAL ERROR: " << error.what() << "\n";
+            if(_log_level >= error.level())
+            {
+                std::cerr << "FATAL ERROR: " << error.what() << "\n";
+            }
+
             result.status = TestResult::Status::FAILED;
 
             if(_throw_errors)
@@ -262,7 +276,11 @@ void Framework::run_test(TestCaseFactory &test_factory)
 #ifdef ARM_COMPUTE_CL
         catch(const ::cl::Error &error)
         {
-            std::cerr << "FATAL CL ERROR: " << error.what() << " with code " << error.err() << "\n";
+            if(_log_level >= LogLevel::ERRORS)
+            {
+                std::cerr << "FATAL CL ERROR: " << error.what() << " with code " << error.err() << "\n";
+            }
+
             result.status = TestResult::Status::FAILED;
 
             if(_throw_errors)
@@ -273,7 +291,11 @@ void Framework::run_test(TestCaseFactory &test_factory)
 #endif /* ARM_COMPUTE_CL */
         catch(const std::exception &error)
         {
-            std::cerr << "FATAL ERROR: Received unhandled error: '" << error.what() << "'\n";
+            if(_log_level >= LogLevel::ERRORS)
+            {
+                std::cerr << "FATAL ERROR: Received unhandled error: '" << error.what() << "'\n";
+            }
+
             result.status = TestResult::Status::CRASHED;
 
             if(_throw_errors)
@@ -283,7 +305,11 @@ void Framework::run_test(TestCaseFactory &test_factory)
         }
         catch(...)
         {
-            std::cerr << "FATAL ERROR: Received unhandled exception\n";
+            if(_log_level >= LogLevel::ERRORS)
+            {
+                std::cerr << "FATAL ERROR: Received unhandled exception\n";
+            }
+
             result.status = TestResult::Status::CRASHED;
 
             if(_throw_errors)
@@ -294,7 +320,10 @@ void Framework::run_test(TestCaseFactory &test_factory)
     }
     catch(const std::exception &error)
     {
-        std::cerr << "FATAL ERROR: Received unhandled error during fixture creation: '" << error.what() << "'\n";
+        if(_log_level >= LogLevel::ERRORS)
+        {
+            std::cerr << "FATAL ERROR: Received unhandled error during fixture creation: '" << error.what() << "'\n";
+        }
 
         if(_throw_errors)
         {
@@ -303,7 +332,11 @@ void Framework::run_test(TestCaseFactory &test_factory)
     }
     catch(...)
     {
-        std::cerr << "FATAL ERROR: Received unhandled exception during fixture creation\n";
+        if(_log_level >= LogLevel::ERRORS)
+        {
+            std::cerr << "FATAL ERROR: Received unhandled exception during fixture creation\n";
+        }
+
         result.status = TestResult::Status::CRASHED;
 
         if(_throw_errors)
@@ -331,7 +364,7 @@ bool Framework::run()
     _test_results.clear();
     _runtime = std::chrono::seconds{ 0 };
 
-    if(_printer != nullptr)
+    if(_printer != nullptr && _log_level >= LogLevel::TESTS)
     {
         _printer->print_run_header();
     }
@@ -355,7 +388,7 @@ bool Framework::run()
 
     const auto end = std::chrono::high_resolution_clock::now();
 
-    if(_printer != nullptr)
+    if(_printer != nullptr && _log_level >= LogLevel::TESTS)
     {
         _printer->print_run_footer();
     }
@@ -364,12 +397,15 @@ bool Framework::run()
 
     auto test_results = count_test_results();
 
-    std::cout << "Executed " << _test_results.size() << " test(s) ("
-              << test_results[TestResult::Status::SUCCESS] << " passed, "
-              << test_results[TestResult::Status::EXPECTED_FAILURE] << " expected failures, "
-              << test_results[TestResult::Status::FAILED] << " failed, "
-              << test_results[TestResult::Status::CRASHED] << " crashed, "
-              << test_results[TestResult::Status::DISABLED] << " disabled) in " << _runtime.count() << " second(s)\n";
+    if(_log_level > LogLevel::NONE)
+    {
+        std::cout << "Executed " << _test_results.size() << " test(s) ("
+                  << test_results[TestResult::Status::SUCCESS] << " passed, "
+                  << test_results[TestResult::Status::EXPECTED_FAILURE] << " expected failures, "
+                  << test_results[TestResult::Status::FAILED] << " failed, "
+                  << test_results[TestResult::Status::CRASHED] << " crashed, "
+                  << test_results[TestResult::Status::DISABLED] << " disabled) in " << _runtime.count() << " second(s)\n";
+    }
 
     int num_successful_tests = test_results[TestResult::Status::SUCCESS] + test_results[TestResult::Status::EXPECTED_FAILURE];
 
