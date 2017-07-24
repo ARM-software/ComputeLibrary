@@ -59,7 +59,7 @@
 // Logistic Activation
 inline TYPE logistic_op(TYPE x)
 {
-    return DIV_OP(CONST_ONE, ADD_OP(CONST_ONE, EXP_OP(-x)));
+    return DIV_OP((TYPE)CONST_ONE, ADD_OP((TYPE)CONST_ONE, EXP_OP(-x)));
 }
 // Hyperbolic Tangent Activation
 inline TYPE tanh_op(TYPE x)
@@ -84,7 +84,7 @@ inline TYPE lrelu_op(TYPE x)
 // Soft RELU Activation
 inline TYPE srelu_op(TYPE x)
 {
-    return LOG_OP(ADD_OP(CONST_ONE, EXP_OP(x)));
+    return LOG_OP(ADD_OP((TYPE)CONST_ONE, EXP_OP(x)));
 }
 // Absolute Activation
 inline TYPE abs_op(TYPE x)
