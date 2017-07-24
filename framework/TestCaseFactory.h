@@ -41,14 +41,28 @@ namespace framework
 class TestCaseFactory
 {
 public:
+    /** Test case status.
+     *
+     * ACTIVE == Test is run and result is validated. Failure on failed validation.
+     * EXPECTED_FAILURE == Test is run and result is validated. Failure on successful validation.
+     * DISABLED == Test is not run.
+     */
+    enum class Status
+    {
+        ACTIVE,
+        EXPECTED_FAILURE,
+        DISABLED
+    };
+
     /** Constructor.
      *
      * @param[in] suite_name  Name of the test suite to which the test case has been added.
      * @param[in] name        Name of the test case.
      * @param[in] mode        Datset mode of the test case.
+     * @param[in] status      Status of the test case.
      * @param[in] description Description of data arguments.
      */
-    TestCaseFactory(std::string suite_name, std::string name, DatasetMode mode, std::string description = "");
+    TestCaseFactory(std::string suite_name, std::string name, DatasetMode mode, Status status, std::string description = "");
 
     /** Default destructor. */
     virtual ~TestCaseFactory() = default;
@@ -65,6 +79,12 @@ public:
      */
     DatasetMode mode() const;
 
+    /** Get the status of the test case.
+     *
+     * @return Status of the test case.
+     */
+    Status status() const;
+
     /** Factory function to create the test case
      *
      * @return Unique pointer to a newly created test case.
@@ -76,6 +96,7 @@ private:
     const std::string _test_name;
     const std::string _data_description;
     const DatasetMode _mode{ DatasetMode::ALL };
+    const Status      _status{ Status::ACTIVE };
 };
 
 /** Implementation of a test case factory to create non-data test cases. */
@@ -98,10 +119,11 @@ public:
      * @param[in] suite_name  Name of the test suite to which the test case has been added.
      * @param[in] test_name   Name of the test case.
      * @param[in] mode        Mode in which the test case is enabled.
+     * @param[in] status      Status of the test case.
      * @param[in] description Description of data arguments.
      * @param[in] data        Input data for the test case.
      */
-    DataTestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, std::string description, const D &data);
+    DataTestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, Status status, std::string description, const D &data);
 
     std::unique_ptr<TestCase> make() const override;
 
@@ -109,8 +131,9 @@ private:
     D _data;
 };
 
-inline TestCaseFactory::TestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, std::string description)
-    : _suite_name{ std::move(suite_name) }, _test_name{ std::move(test_name) }, _data_description{ std::move(description) }, _mode{ mode }
+inline TestCaseFactory::TestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, Status status, std::string description)
+    : _suite_name{ std::move(suite_name) }, _test_name{ std::move(test_name) }, _data_description{ std::move(description) }, _mode{ mode }, _status{ status }
+
 {
 }
 
@@ -131,6 +154,31 @@ inline DatasetMode TestCaseFactory::mode() const
     return _mode;
 }
 
+inline TestCaseFactory::Status TestCaseFactory::status() const
+{
+    return _status;
+}
+
+inline ::std::ostream &operator<<(::std::ostream &stream, TestCaseFactory::Status status)
+{
+    switch(status)
+    {
+        case TestCaseFactory::Status::ACTIVE:
+            stream << "ACTIVE";
+            break;
+        case TestCaseFactory::Status::EXPECTED_FAILURE:
+            stream << "EXPECTED_FAILURE";
+            break;
+        case TestCaseFactory::Status::DISABLED:
+            stream << "DISABLED";
+            break;
+        default:
+            throw std::invalid_argument("Unsupported test case factory status");
+    }
+
+    return stream;
+}
+
 template <typename T>
 inline std::unique_ptr<TestCase> SimpleTestCaseFactory<T>::make() const
 {
@@ -138,8 +186,8 @@ inline std::unique_ptr<TestCase> SimpleTestCaseFactory<T>::make() const
 }
 
 template <typename T, typename D>
-inline DataTestCaseFactory<T, D>::DataTestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, std::string description, const D &data)
-    : TestCaseFactory{ std::move(suite_name), std::move(test_name), mode, std::move(description) }, _data{ data }
+inline DataTestCaseFactory<T, D>::DataTestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, Status status, std::string description, const D &data)
+    : TestCaseFactory{ std::move(suite_name), std::move(test_name), mode, status, std::move(description) }, _data{ data }
 {
 }
 

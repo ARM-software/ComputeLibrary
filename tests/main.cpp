@@ -176,9 +176,9 @@ int main(int argc, char **argv)
 
         if(list_tests->value())
         {
-            for(const auto &id : framework.test_ids())
+            for(const auto &info : framework.test_infos())
             {
-                std::cout << "[" << std::get<0>(id) << ", " << std::get<2>(id) << "] " << std::get<1>(id) << "\n";
+                std::cout << "[" << info.id << ", " << info.mode << ", " << info.status << "] " << info.name << "\n";
             }
 
             return 0;

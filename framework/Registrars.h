@@ -47,17 +47,19 @@ public:
      *
      * @param[in] test_name Name of the test case.
      * @param[in] mode      Mode in which the test should be activated.
+     * @param[in] status    Status of the test case.
      */
-    TestCaseRegistrar(std::string test_name, DatasetMode mode);
+    TestCaseRegistrar(std::string test_name, DatasetMode mode, TestCaseFactory::Status status);
 
     /** Add a new data test case with the given name to the framework.
      *
      * @param[in] test_name Name of the test case.
      * @param[in] mode      Mode in which the test should be activated.
+     * @param[in] status    Status of the test case.
      * @param[in] dataset   Dataset used as input for the test case.
      */
     template <typename D>
-    TestCaseRegistrar(std::string test_name, DatasetMode mode, D &&dataset);
+    TestCaseRegistrar(std::string test_name, DatasetMode mode, TestCaseFactory::Status status, D &&dataset);
 };
 
 /** Helper class to statically begin and end a test suite. */
@@ -75,14 +77,14 @@ public:
 };
 
 template <typename T>
-inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, DatasetMode mode)
+inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, DatasetMode mode, TestCaseFactory::Status status)
 {
-    Framework::get().add_test_case<T>(std::move(test_name), mode);
+    Framework::get().add_test_case<T>(std::move(test_name), mode, status);
 }
 
 template <typename T>
 template <typename D>
-inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, DatasetMode mode, D &&dataset)
+inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, DatasetMode mode, TestCaseFactory::Status status, D &&dataset)
 {
     auto it = dataset.begin();
 
@@ -91,7 +93,7 @@ inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, DatasetMod
         // WORKAROUND for GCC 4.9
         // The last argument should be *it to pass just the data and not the
         // iterator.
-        Framework::get().add_data_test_case<T>(test_name, mode, it.description(), it);
+        Framework::get().add_data_test_case<T>(test_name, mode, status, it.description(), it);
     }
 }
 

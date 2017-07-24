@@ -59,15 +59,22 @@ namespace framework
 class Framework final
 {
 public:
-    /** Type of a test identifier.
+    /** Information about a test case.
      *
      * A test can be identified either via its id or via its name. Additionally
-     * each test is tagged with the data set mode in which it will be used.
+     * each test is tagged with the data set mode in which it will be used and
+     * its status.
      *
      * @note The mapping between test id and test name is not guaranteed to be
      * stable. It is subject to change as new test are added.
      */
-    using TestId = std::tuple<int, std::string, DatasetMode>;
+    struct TestInfo
+    {
+        int                     id;
+        std::string             name;
+        DatasetMode             mode;
+        TestCaseFactory::Status status;
+    };
 
     /** Access to the singleton.
      *
@@ -113,19 +120,21 @@ public:
      *
      * @param[in] test_name Name of the new test case.
      * @param[in] mode      Mode in which to include the test.
+     * @param[in] status    Status of the test case.
      */
     template <typename T>
-    void add_test_case(std::string test_name, DatasetMode mode);
+    void add_test_case(std::string test_name, DatasetMode mode, TestCaseFactory::Status status);
 
     /** Add a data test case to the framework.
      *
      * @param[in] test_name   Name of the new test case.
      * @param[in] mode        Mode in which to include the test.
+     * @param[in] status      Status of the test case.
      * @param[in] description Description of @p data.
      * @param[in] data        Data that will be used as input to the test.
      */
     template <typename T, typename D>
-    void add_data_test_case(std::string test_name, DatasetMode mode, std::string description, D &&data);
+    void add_data_test_case(std::string test_name, DatasetMode mode, TestCaseFactory::Status status, std::string description, D &&data);
 
     /** Add info string for the next expectation/assertion.
      *
@@ -196,13 +205,13 @@ public:
      */
     void set_throw_errors(bool throw_errors);
 
-    /** Check if a test case would be executed.
+    /** Check if a test case is selected to be executed.
      *
-     * @param[in] id Id of the test case.
+     * @param[in] info Test case info.
      *
-     * @return True if the test case would be executed.
+     * @return True if the test case is selected to be executed.
      */
-    bool is_enabled(const TestId &id) const;
+    bool is_selected(const TestInfo &info) const;
 
     /** Run all enabled test cases.
      *
@@ -241,11 +250,11 @@ public:
      */
     void set_printer(Printer *printer);
 
-    /** List of @ref TestId's.
+    /** List of @ref TestInfo's.
      *
      * @return Vector with all test ids.
      */
-    std::vector<Framework::TestId> test_ids() const;
+    std::vector<Framework::TestInfo> test_infos() const;
 
 private:
     Framework();
@@ -255,7 +264,7 @@ private:
     Framework &operator=(const Framework &) = delete;
 
     void run_test(TestCaseFactory &test_factory);
-    std::tuple<int, int, int> count_test_results() const;
+    std::map<TestResult::Status, int> count_test_results() const;
 
     /** Returns the current test suite name.
      *
@@ -287,18 +296,18 @@ private:
 };
 
 template <typename T>
-inline void Framework::add_test_case(std::string test_name, DatasetMode mode)
+inline void Framework::add_test_case(std::string test_name, DatasetMode mode, TestCaseFactory::Status status)
 {
-    _test_factories.emplace_back(support::cpp14::make_unique<SimpleTestCaseFactory<T>>(current_suite_name(), std::move(test_name), mode));
+    _test_factories.emplace_back(support::cpp14::make_unique<SimpleTestCaseFactory<T>>(current_suite_name(), std::move(test_name), mode, status));
 }
 
 template <typename T, typename D>
-inline void Framework::add_data_test_case(std::string test_name, DatasetMode mode, std::string description, D &&data)
+inline void Framework::add_data_test_case(std::string test_name, DatasetMode mode, TestCaseFactory::Status status, std::string description, D &&data)
 {
     // WORKAROUND for GCC 4.9
     // The function should get *it which is tuple but that seems to trigger a
     // bug in the compiler.
-    auto tmp = std::unique_ptr<DataTestCaseFactory<T, decltype(*std::declval<D>())>>(new DataTestCaseFactory<T, decltype(*std::declval<D>())>(current_suite_name(), std::move(test_name), mode,
+    auto tmp = std::unique_ptr<DataTestCaseFactory<T, decltype(*std::declval<D>())>>(new DataTestCaseFactory<T, decltype(*std::declval<D>())>(current_suite_name(), std::move(test_name), mode, status,
                                                                                      std::move(description), *data));
     _test_factories.emplace_back(std::move(tmp));
 }

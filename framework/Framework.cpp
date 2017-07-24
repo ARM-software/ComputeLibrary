@@ -63,32 +63,16 @@ std::set<InstrumentType> Framework::available_instruments() const
     return types;
 }
 
-std::tuple<int, int, int> Framework::count_test_results() const
+std::map<TestResult::Status, int> Framework::count_test_results() const
 {
-    int passed  = 0;
-    int failed  = 0;
-    int crashed = 0;
+    std::map<TestResult::Status, int> counts;
 
     for(const auto &test : _test_results)
     {
-        switch(test.second.status)
-        {
-            case TestResult::Status::SUCCESS:
-                ++passed;
-                break;
-            case TestResult::Status::FAILED:
-                ++failed;
-                break;
-            case TestResult::Status::CRASHED:
-                ++crashed;
-                break;
-            default:
-                // Do nothing
-                break;
-        }
+        ++counts[test.second.status];
     }
 
-    return std::make_tuple(passed, failed, crashed);
+    return counts;
 }
 
 Framework &Framework::get()
@@ -204,24 +188,19 @@ bool Framework::throw_errors() const
     return _throw_errors;
 }
 
-bool Framework::is_enabled(const TestId &id) const
+bool Framework::is_selected(const TestInfo &info) const
 {
-    int         test_id = 0;
-    std::string name;
-    DatasetMode mode = DatasetMode::ALL;
-    std::tie(test_id, name, mode) = id;
-
-    if((mode & _dataset_mode) == DatasetMode::DISABLED)
+    if((info.mode & _dataset_mode) == DatasetMode::DISABLED)
     {
         return false;
     }
 
-    if(_test_id_filter > -1 && _test_id_filter != test_id)
+    if(_test_id_filter > -1 && _test_id_filter != info.id)
     {
         return false;
     }
 
-    if(!std::regex_search(name, _test_name_filter))
+    if(!std::regex_search(info.name, _test_name_filter))
     {
         return false;
     }
@@ -232,6 +211,13 @@ bool Framework::is_enabled(const TestId &id) const
 void Framework::run_test(TestCaseFactory &test_factory)
 {
     const std::string test_case_name = test_factory.name();
+
+    if(test_factory.status() == TestCaseFactory::Status::DISABLED)
+    {
+        log_test_skipped(test_case_name);
+        set_test_result(test_case_name, TestResult(TestResult::Status::DISABLED));
+        return;
+    }
 
     log_test_start(test_case_name);
 
@@ -328,6 +314,11 @@ void Framework::run_test(TestCaseFactory &test_factory)
 
     _current_test_result = nullptr;
 
+    if(test_factory.status() == TestCaseFactory::Status::EXPECTED_FAILURE && result.status == TestResult::Status::FAILED)
+    {
+        result.status = TestResult::Status::EXPECTED_FAILURE;
+    }
+
     result.measurements = profiler.measurements();
 
     set_test_result(test_case_name, result);
@@ -352,12 +343,9 @@ bool Framework::run()
     for(auto &test_factory : _test_factories)
     {
         const std::string test_case_name = test_factory->name();
+        const TestInfo    test_info{ id, test_case_name, test_factory->mode(), test_factory->status() };
 
-        if(!is_enabled(TestId(id, test_case_name, test_factory->mode())))
-        {
-            log_test_skipped(test_case_name);
-        }
-        else
+        if(is_selected(test_info))
         {
             run_test(*test_factory);
         }
@@ -374,15 +362,18 @@ bool Framework::run()
 
     _runtime = std::chrono::duration_cast<std::chrono::seconds>(end - start);
 
-    int passed  = 0;
-    int failed  = 0;
-    int crashed = 0;
+    auto test_results = count_test_results();
 
-    std::tie(passed, failed, crashed) = count_test_results();
+    std::cout << "Executed " << _test_results.size() << " test(s) ("
+              << test_results[TestResult::Status::SUCCESS] << " passed, "
+              << test_results[TestResult::Status::EXPECTED_FAILURE] << " expected failures, "
+              << test_results[TestResult::Status::FAILED] << " failed, "
+              << test_results[TestResult::Status::CRASHED] << " crashed, "
+              << test_results[TestResult::Status::DISABLED] << " disabled) in " << _runtime.count() << " second(s)\n";
 
-    std::cout << "Executed " << _test_results.size() << " test(s) (" << passed << " passed, " << failed << " failed, " << crashed << " crashed) in " << _runtime.count() << " second(s)\n";
+    int num_successful_tests = test_results[TestResult::Status::SUCCESS] + test_results[TestResult::Status::EXPECTED_FAILURE];
 
-    return (static_cast<unsigned int>(passed) == _test_results.size());
+    return (static_cast<unsigned int>(num_successful_tests) == _test_results.size());
 }
 
 void Framework::set_test_result(std::string test_case_name, TestResult result)
@@ -424,17 +415,19 @@ void Framework::set_printer(Printer *printer)
     _printer = printer;
 }
 
-std::vector<Framework::TestId> Framework::test_ids() const
+std::vector<Framework::TestInfo> Framework::test_infos() const
 {
-    std::vector<TestId> ids;
+    std::vector<TestInfo> ids;
 
     int id = 0;
 
     for(const auto &factory : _test_factories)
     {
-        if(is_enabled(TestId(id, factory->name(), factory->mode())))
+        TestInfo test_info{ id, factory->name(), factory->mode(), factory->status() };
+
+        if(is_selected(test_info))
         {
-            ids.emplace_back(id, factory->name(), factory->mode());
+            ids.emplace_back(std::move(test_info));
         }
 
         ++id;

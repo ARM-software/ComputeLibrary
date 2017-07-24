@@ -45,7 +45,8 @@ struct TestResult
         SUCCESS,
         EXPECTED_FAILURE,
         FAILED,
-        CRASHED
+        CRASHED,
+        DISABLED
     };
 
     /** Default constructor. */

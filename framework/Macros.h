@@ -119,28 +119,35 @@
     {                             \
         FIXTURE::teardown();      \
     }
-#define TEST_REGISTRAR(TEST_NAME, MODE)                                                       \
+#define TEST_REGISTRAR(TEST_NAME, MODE, STATUS)                                               \
     static arm_compute::test::framework::detail::TestCaseRegistrar<TEST_NAME> TEST_NAME##_reg \
     {                                                                                         \
-        #TEST_NAME, MODE                                                                      \
+        #TEST_NAME, MODE, STATUS                                                              \
     }
-#define DATA_TEST_REGISTRAR(TEST_NAME, MODE, DATASET)                                                                  \
+#define DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)                                                          \
     static arm_compute::test::framework::detail::TestCaseRegistrar<TEST_NAME<decltype(DATASET)::type>> TEST_NAME##_reg \
     {                                                                                                                  \
-        #TEST_NAME, MODE, DATASET                                                                                      \
+        #TEST_NAME, MODE, STATUS, DATASET                                                                              \
     }
 
-#define TEST_CASE(TEST_NAME, MODE)                                  \
+#define TEST_CASE_IMPL(TEST_NAME, MODE, STATUS)                     \
     class TEST_NAME : public arm_compute::test::framework::TestCase \
     {                                                               \
     public:                                                     \
         TEST_CASE_CONSTRUCTOR(TEST_NAME)                            \
         void do_run() override;                                     \
     };                                                              \
-    TEST_REGISTRAR(TEST_NAME, MODE);                                \
+    TEST_REGISTRAR(TEST_NAME, MODE, STATUS);                        \
     void TEST_NAME::do_run()
 
-#define DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...)                                                               \
+#define TEST_CASE(TEST_NAME, MODE) \
+    TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE)
+#define EXPECTED_FAILURE_TEST_CASE(TEST_NAME, MODE) \
+    TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE)
+#define DISABLED_TEST_CASE(TEST_NAME, MODE) \
+    TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED)
+
+#define DATA_TEST_CASE_IMPL(TEST_NAME, MODE, STATUS, DATASET, ...)                                                  \
     template <typename T>                                                                                           \
     class TEST_NAME;                                                                                                \
     template <typename... As>                                                                                       \
@@ -155,12 +162,19 @@
         template <MAKE_TYPE_PARAMS(__VA_ARGS__)>                                                                    \
         void run(MAKE_ARG_PARAMS(__VA_ARGS__));                                                                     \
     };                                                                                                              \
-    DATA_TEST_REGISTRAR(TEST_NAME, MODE, DATASET);                                                                  \
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                          \
     template <typename... As>                                                                                       \
     template <MAKE_TYPE_PARAMS(__VA_ARGS__)>                                                                        \
     void TEST_NAME<std::tuple<As...>>::run(MAKE_ARG_PARAMS(__VA_ARGS__))
 
-#define FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE)                                 \
+#define DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...) \
+    DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET, __VA_ARGS__)
+#define EXPECTED_FAILURE_DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...) \
+    DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET, __VA_ARGS__)
+#define DISABLED_DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...) \
+    DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET, __VA_ARGS__)
+
+#define FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS)                    \
     class TEST_NAME : public arm_compute::test::framework::TestCase, public FIXTURE \
     {                                                                               \
     public:                                                                     \
@@ -169,10 +183,17 @@
         void do_run() override;                                                     \
         FIXTURE_TEARDOWN(FIXTURE)                                                   \
     };                                                                              \
-    TEST_REGISTRAR(TEST_NAME, MODE);                                                \
+    TEST_REGISTRAR(TEST_NAME, MODE, STATUS);                                        \
     void TEST_NAME::do_run()
 
-#define FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET)                                                                   \
+#define FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
+    FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE)
+#define EXPECTED_FAILURE_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
+    FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE)
+#define DISABLED_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
+    FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED)
+
+#define FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                                                      \
     template <typename T>                                                                                                           \
     class TEST_NAME;                                                                                                                \
     template <typename... As>                                                                                                       \
@@ -184,11 +205,18 @@
         void do_run() override;                                                                                                     \
         FIXTURE_TEARDOWN(FIXTURE)                                                                                                   \
     };                                                                                                                              \
-    DATA_TEST_REGISTRAR(TEST_NAME, MODE, DATASET);                                                                                  \
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                                          \
     template <typename... As>                                                                                                       \
     void TEST_NAME<std::tuple<As...>>::do_run()
 
-#define REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE)                        \
+#define FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
+    FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET)
+#define EXPECTED_FAILURE_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
+    FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
+#define DISABLED_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
+    FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
+
+#define REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS)           \
     class TEST_NAME : public arm_compute::test::framework::TestCase, public FIXTURE \
     {                                                                               \
     public:                                                                     \
@@ -197,9 +225,16 @@
         FIXTURE_RUN(FIXTURE)                                                        \
         FIXTURE_TEARDOWN(FIXTURE)                                                   \
     };                                                                              \
-    TEST_REGISTRAR(TEST_NAME, MODE)
+    TEST_REGISTRAR(TEST_NAME, MODE, STATUS)
 
-#define REGISTER_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET)                                                          \
+#define REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
+    REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE)
+#define EXPECTED_FAILURE_REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
+    REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE)
+#define DISABLED_REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
+    REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED)
+
+#define REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                                             \
     template <typename T>                                                                                                           \
     class TEST_NAME;                                                                                                                \
     template <typename... As>                                                                                                       \
@@ -211,7 +246,14 @@
         FIXTURE_RUN(FIXTURE)                                                                                                        \
         FIXTURE_TEARDOWN(FIXTURE)                                                                                                   \
     };                                                                                                                              \
-    DATA_TEST_REGISTRAR(TEST_NAME, MODE, DATASET)
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)
+
+#define REGISTER_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
+    REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET)
+#define EXPECTED_FAILURE_REGISTER_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
+    REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
+#define DISABLED_REGISTER_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
+    REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
 //
 // TEST CASE MACROS END
 //
