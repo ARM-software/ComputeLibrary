@@ -137,15 +137,19 @@ if __name__ == "__main__":
 
                 # Match end of C-style comment */
                 if re.search(r"\*/", line):
-                    #print("End comment {}".format(n_line))
+                    if re.search('"[^"]*\*/[^"]*"', line):
+                        #print("End of comment inside a string: ignoring")
+                        pass
+                    else:
+                        #print("End comment {}".format(n_line))
 
-                    if len(comment) < 1:
-                        raise Exception("Was not in a comment! ({})".format(n_line))
+                        if len(comment) < 1:
+                            raise Exception("Was not in a comment! ({})".format(n_line))
 
-                    #print("Process comment {} {}".format(first_param, last_param))
+                        #print("Process comment {} {}".format(first_param, last_param))
 
-                    process_comment(fd, comment, first_param, last_param)
+                        process_comment(fd, comment, first_param, last_param)
 
-                    comment = list()
-                    first_param = -1
-                    last_param = -1
+                        comment = list()
+                        first_param = -1
+                        last_param = -1
