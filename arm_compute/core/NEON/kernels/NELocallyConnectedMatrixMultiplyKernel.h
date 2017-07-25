@@ -46,7 +46,7 @@ public:
     NELocallyConnectedMatrixMultiplyKernel &operator=(NELocallyConnectedMatrixMultiplyKernel &&) = default;
     /** Initialise the kernel's input and output
      *
-     * @param[in]  input0 First input tensor. Data types supported: F32
+     * @param[in]  input0 First input tensor. Data types supported: F16, F32
      * @param[in]  input1 Second input tensor containing the Matrix B. Data type supported: same as @p input0
      * @param[out] output Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      */
