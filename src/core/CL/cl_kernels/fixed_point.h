@@ -54,6 +54,7 @@ TYPE_ALIAS(int, qs32)
 #define qs8_TYPE char
 #define qs8x1_TYPE char
 #define qs8x2_TYPE char2
+#define qs8x3_TYPE char3
 #define qs8x4_TYPE char4
 #define qs8x8_TYPE char8
 #define qs8x16_TYPE char16
@@ -61,6 +62,7 @@ TYPE_ALIAS(int, qs32)
 #define qs16_TYPE short
 #define qs16x1_TYPE short
 #define qs16x2_TYPE short2
+#define qs16x3_TYPE short3
 #define qs16x4_TYPE short4
 #define qs16x8_TYPE short8
 #define qs16x16_TYPE short16
@@ -68,6 +70,7 @@ TYPE_ALIAS(int, qs32)
 #define qs32_TYPE int
 #define qs32x1_TYPE int
 #define qs32x2_TYPE int2
+#define qs32x3_TYPE int3
 #define qs32x4_TYPE int4
 #define qs32x8_TYPE int8
 #define qs32x16_TYPE int16

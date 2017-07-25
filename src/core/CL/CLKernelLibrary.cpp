@@ -187,6 +187,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "hog_orientation_binning", "hog.cl" },
     { "hysteresis", "canny.cl" },
     { "im2col_generic", "convolution_layer.cl" },
+    { "im2col_kernel3x3_padx0_pady0", "convolution_layer.cl" },
     { "im2col_reduced", "convolution_layer.cl" },
     { "init_level", "optical_flow_pyramid_lk.cl" },
     { "init_level_max", "optical_flow_pyramid_lk.cl" },

@@ -21,8 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "fixed_point.h"
 #include "helpers.h"
+
+#if defined(FIXED_POINT_POSITION)
+#include "fixed_point.h"
+#endif // FIXED_POINT_POSITION
 
 /** This kernel reshapes the tensor's low three dimensions to single column
  *
@@ -100,7 +103,7 @@ __kernel void reshape_to_columns(
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -119,42 +122,112 @@ __kernel void im2col_generic(
     TENSOR3D_DECLARATION(src),
     IMAGE_DECLARATION(dst))
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Image    dst = CONVERT_TO_IMAGE_STRUCT_NO_STEP(dst);
+    const int xc = get_global_id(0); // x coordinate in the convolved tensor
+    const int yc = get_global_id(1); // y coordinate in the convolved tensor
+    const int ch = get_global_id(2); // input feature map
 
-    // Determine output index
-    uint     idx               = (get_global_id(1) * CONVOLVED_WIDTH + get_global_id(0)) * dst.stride_y;
-    __global uchar *output_ptr = dst.ptr + idx;
+    // Calculate input indeces
+    const int xi = xc * STRIDE_X - PAD_X;
+    const int yi = yc * STRIDE_Y - PAD_Y;
 
-    // Determine current input index
-    const int top_left_x = get_global_id(0) * STRIDE_X - PAD_X;
-    const int top_left_y = get_global_id(1) * STRIDE_Y - PAD_Y;
+    // Calculate output indeces
+    const int xo = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
+    const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
+
+    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + ch * src_stride_z;
+    __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y)) + xo;
 
     // Linearize convolution elements
-    for(int d = 0; d < KERNEL_DEPTH; ++d)
+    for(int y = yi, y_e = yi + KERNEL_HEIGHT; y < y_e; ++y)
     {
-        for(int y = top_left_y, y_e = top_left_y + KERNEL_HEIGHT; y < y_e; ++y)
+        for(int x = xi, x_e = xi + KERNEL_WIDTH; x < x_e; ++x, ++output_ptr)
         {
-            for(int x = top_left_x, x_e = top_left_x + KERNEL_WIDTH; x < x_e; ++x, output_ptr += dst.stride_x)
+#if PAD_X == 0 && PAD_Y == 0
+            *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * src_stride_x + y * src_stride_y));
+#else  // PAD_X == 0 && PAD_Y == 0
+            if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
             {
-                if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
-                {
-                    *((__global DATA_TYPE *)output_ptr) = 0;
-                }
-                else
-                {
-                    *((__global DATA_TYPE *)output_ptr) = *((__global DATA_TYPE *)(tensor3D_offset(&src, x, y, d)));
-                }
+                *output_ptr = 0;
             }
+            else
+            {
+                *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * src_stride_x + y * src_stride_y));
+            }
+#endif // PAD_X == 0 && PAD_Y == 0
         }
     }
 
 #ifdef HAS_BIAS
+    if(get_global_id(2) == (KERNEL_DEPTH - 1))
+    {
 #ifdef FIXED_POINT_POSITION
-    *((__global DATA_TYPE *)output_ptr) = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
+        *output_ptr = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
 #else  // FIXED_POINT_POSITION
-    *((__global DATA_TYPE *)output_ptr) = 1.0f;
+        *output_ptr       = 1.0f;
 #endif // FIXED_POINT_POSITION
+    }
+#endif // HAS_BIAS
+}
+
+/** This kernel performs a reshaping of the input tensor to a tensor used to perform convolution using GEMM when the kernel size is 3x3 and pad_x = pad_y = 0
+ *
+ * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
+ *
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void im2col_kernel3x3_padx0_pady0(
+    TENSOR3D_DECLARATION(src),
+    IMAGE_DECLARATION(dst))
+{
+    const int xc = get_global_id(0); // x coordinate in the convolved tensor
+    const int yc = get_global_id(1); // y coordinate in the convolved tensor
+    const int ch = get_global_id(2); // input feature map
+
+    // Calculate input indeces
+    const int xi = xc * STRIDE_X;
+    const int yi = yc * STRIDE_Y;
+
+    // Calculate output indeces
+    const int xo = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
+    const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
+
+    // Get input and output address
+    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + xi * src_stride_x + yi * src_stride_y + ch * src_stride_z;
+    __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y)) + xo;
+
+    VEC_DATA_TYPE(DATA_TYPE, 3)
+    row0 = vload3(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, 3)
+    row1 = vload3(0, (__global DATA_TYPE *)(input_ptr + 1 * src_stride_y));
+    VEC_DATA_TYPE(DATA_TYPE, 3)
+    row2 = vload3(0, (__global DATA_TYPE *)(input_ptr + 2 * src_stride_y));
+
+    vstore8((VEC_DATA_TYPE(DATA_TYPE, 8))(row0.s012, row1.s012, row2.s01), 0, output_ptr);
+    *(output_ptr + 8) = row2.s2;
+
+#ifdef HAS_BIAS
+    if(get_global_id(2) == (KERNEL_DEPTH - 1))
+    {
+#ifdef FIXED_POINT_POSITION
+        *(output_ptr + 9) = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
+#else  // FIXED_POINT_POSITION
+        *(output_ptr + 9) = 1.0f;
+#endif // FIXED_POINT_POSITION
+    }
 #endif // HAS_BIAS
 }
 #endif //defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_X) && defined(PAD_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT)
@@ -163,7 +236,7 @@ __kernel void im2col_generic(
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)

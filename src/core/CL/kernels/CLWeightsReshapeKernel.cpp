@@ -78,6 +78,10 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     std::set<std::string> build_opts;
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.emplace(((biases != nullptr) ? "-DHAS_BIAS" : ""));
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_to_columns", build_opts));

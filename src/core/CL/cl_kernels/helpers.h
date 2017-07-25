@@ -245,7 +245,7 @@ __global inline uchar *offset(const Image *img, int x, int y)
 
 /** Get the pointer position of a Tensor3D
  *
- * @param[in] tensor Pointer to the starting postion of the buffer
+ * @param[in] tensor Pointer to the starting position of the buffer
  * @param[in] x      Relative X position
  * @param[in] y      Relative Y position
  * @param[in] z      Relative Z position

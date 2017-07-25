@@ -87,6 +87,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
         build_opts.emplace("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
         build_opts.emplace("-DKERNEL_DEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
         build_opts.emplace("-DCONVOLVED_WIDTH=" + support::cpp11::to_string(_convolved_dims.first));
+        build_opts.emplace("-DCONVOLVED_HEIGHT=" + support::cpp11::to_string(_convolved_dims.second));
         build_opts.emplace("-DSTRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
         build_opts.emplace("-DSTRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
         build_opts.emplace("-DPAD_X=" + support::cpp11::to_string(conv_info.pad().first));
@@ -94,7 +95,14 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
         build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
         build_opts.emplace("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
 
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("im2col_generic", build_opts));
+        if(kernel_dims.width == 3 && kernel_dims.height == 3 && conv_info.pad().first == 0 && conv_info.pad().second == 0)
+        {
+            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("im2col_kernel3x3_padx0_pady0", build_opts));
+        }
+        else
+        {
+            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("im2col_generic", build_opts));
+        }
 
         _run_func = &CLIm2ColKernel::run_generic;
     }
@@ -131,7 +139,7 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
     // Setup slice
     slice.set(Window::DimX, Window::Dimension(0, static_cast<int>(_convolved_dims.first), 1));
     slice.set(Window::DimY, Window::Dimension(0, static_cast<int>(_convolved_dims.second), 1));
-    slice.set(Window::DimZ, Window::Dimension(0, 1, 1));
+    slice.set(Window::DimZ, Window::Dimension(0, static_cast<int>(_input->info()->dimension(2)), 1));
 
     // Setup input slice
     // The first three dimensions of the input are increased by the inner loops
@@ -144,13 +152,16 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
     slice_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), 1));
     slice_out.set(Window::DimZ, Window::Dimension(0, 1, 1));
 
+    // Set the local-workgroup size
+    _lws_hint = cl::NDRange(4, 4, 4);
+
     do
     {
         // Set inputs
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, _lws_hint);
     }
     while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_out) && window.slide_window_slice_3D(slice_in));
 }

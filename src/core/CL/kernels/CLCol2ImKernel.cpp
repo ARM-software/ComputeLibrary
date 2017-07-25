@@ -53,7 +53,12 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
 
     // Create kernel
     std::set<std::string> build_opts = { ("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())) };
-    _kernel                          = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts));
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    }
+
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts));
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor() + num_arguments_per_3D_tensor();
