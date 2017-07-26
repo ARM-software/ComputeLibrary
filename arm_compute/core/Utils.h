@@ -100,6 +100,7 @@ inline size_t data_size_from_type(DataType data_type)
         case DataType::F32:
         case DataType::U32:
         case DataType::S32:
+        case DataType::QS32:
             return 4;
         case DataType::F64:
         case DataType::U64:
@@ -173,6 +174,7 @@ inline size_t element_size_from_data_type(DataType dt)
         case DataType::U32:
         case DataType::S32:
         case DataType::F32:
+        case DataType::QS32:
             return 4;
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
@@ -645,6 +647,7 @@ inline bool is_data_type_fixed_point(DataType dt)
     {
         case DataType::QS8:
         case DataType::QS16:
+        case DataType::QS32:
             return true;
         default:
             return false;

@@ -51,7 +51,7 @@ public:
     /** Set the accumulate buffer and the biases of the kernel.
      *
      * @param[in, out] input  Input to add the bias to. If @p output is not specified then accumulation is done in-place.
-     *                        Data type supported: QS8/F32
+     *                        Data type supported: QS8/QS16/F16/F32
      * @param[in]      bias   The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
      * @param[out]     output (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
      *                         Data type supported: Same as @p input

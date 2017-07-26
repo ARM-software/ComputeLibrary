@@ -48,6 +48,7 @@ using qint16x8x3_t = int16x8x3_t; /**< 16 bit fixed point vector with 24 element
 using qint16x8x4_t = int16x8x4_t; /**< 16 bit fixed point vector with 32 elements */
 using qint32x2_t   = int32x2_t;   /**< 32 bit fixed point vector with 2 elements */
 using qint32x4_t   = int32x4_t;   /**< 32 bit fixed point vector with 4 elements */
+using qint32x4x2_t = int32x4x2_t; /**< 32 bit fixed point vector with 8 elements */
 
 /** Get the lower half of a 16 elements vector
  *
@@ -672,6 +673,16 @@ qint16x8_t vqmulq_qs16(qint16x8_t a, qint16x8_t b, int fixed_point_position);
  * @return The result of the 8 bit fixed point long vector multiplication.
  */
 qint16x8_t vmull_qs8(qint8x8_t a, qint8x8_t b, int fixed_point_position);
+
+/** 16 bit fixed point vector long multiply (4 elements)
+ *
+ * @param[in] a                    First 16 bit fixed point input vector
+ * @param[in] b                    Second 16 bit fixed point input vector
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 32 bit fixed point long vector multiplication.
+ */
+qint32x4_t vmull_qs16(qint16x4_t a, qint16x4_t b, int fixed_point_position);
 
 /** 8 bit fixed point vector multiply-accumulate (8 elements). This operation performs the product between @p b and @p c and add the result to @p a (a + b * c).
  *

@@ -40,7 +40,7 @@ NEDirectConvolutionLayer::NEDirectConvolutionLayer()
 
 void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
 
     // Free accumulator
     if(_accumulator.buffer() != nullptr)
@@ -49,17 +49,36 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
     }
 
     // Allocate the intermediate accumulator tensor in case of fixed point input
-    if(output->info()->data_type() == DataType::QS8)
+    switch(output->info()->data_type())
     {
-        _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::QS16, output->info()->fixed_point_position()));
-        _conv_kernel.configure(input, weights, &_accumulator, conv_info);
-        _accumulate_bias_kernel.configure(&_accumulator, bias, output);
-        _accumulator.allocator()->allocate();
-    }
-    else
-    {
-        _conv_kernel.configure(input, weights, output, conv_info);
-        _accumulate_bias_kernel.configure(output, bias);
+        case DataType::QS8:
+        {
+            _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::QS16, output->info()->fixed_point_position()));
+            _conv_kernel.configure(input, weights, &_accumulator, conv_info);
+            _accumulate_bias_kernel.configure(&_accumulator, bias, output);
+            _accumulator.allocator()->allocate();
+            break;
+        }
+        case DataType::QS16:
+        {
+            _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::QS32, output->info()->fixed_point_position()));
+            _conv_kernel.configure(input, weights, &_accumulator, conv_info);
+            _accumulate_bias_kernel.configure(&_accumulator, bias, output);
+            _accumulator.allocator()->allocate();
+            break;
+        }
+        case DataType::F16:
+        case DataType::F32:
+        {
+            _conv_kernel.configure(input, weights, output, conv_info);
+            _accumulate_bias_kernel.configure(output, bias);
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Data type not supported");
+            break;
+        }
     }
 
     // Add zero padding XY

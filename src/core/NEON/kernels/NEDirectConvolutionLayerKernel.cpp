@@ -39,6 +39,34 @@ using namespace arm_compute;
 
 namespace
 {
+template <unsigned int stridex>
+qint16x8_t internal_vld1q(const qint16_t *in);
+
+template <>
+qint16x8_t internal_vld1q<1>(const qint16_t *in)
+{
+    return vld1q_qs16(in);
+}
+
+template <>
+qint16x8_t internal_vld1q<2>(const qint16_t *in)
+{
+    const int16x8x2_t tmp = vld2q_s16(in);
+    return tmp.val[0];
+}
+
+template <>
+qint16x8_t internal_vld1q<3>(const qint16_t *in)
+{
+    const int16x8x3_t tmp = vld3q_s16(in);
+    return tmp.val[0];
+}
+
+inline qint16x8_t internal_vdupq_n(qint16_t v)
+{
+    return vdupq_n_qs16(v);
+}
+
 #ifdef ARM_COMPUTE_ENABLE_FP16
 template <unsigned int stridex>
 float16x8_t internal_vld1q(const float16_t *in);
@@ -109,6 +137,28 @@ float32x4_t internal_vld1q<3>(const float *in)
     return tmp.val[0];
 }
 
+inline float32x4_t internal_vdupq_n(float v)
+{
+    return vdupq_n_f32(v);
+}
+
+inline void internal_vst1q(float *p, const float32x4_t &v)
+{
+    vst1q_f32(p, v);
+}
+
+float32x4_t internal_vmull(const float32x4_t &x, const float32x4_t &y, int fixed_point_position)
+{
+    ARM_COMPUTE_UNUSED(fixed_point_position);
+    return vmulq_f32(x, y);
+}
+
+inline float32x4_t internal_vmlal(const float32x4_t &x, const float32x4_t &y, const float32x4_t &z, int fixed_point_position)
+{
+    ARM_COMPUTE_UNUSED(fixed_point_position);
+    return vmlaq_f32(x, y, z);
+}
+
 template <unsigned int stridex>
 qint8x8_t internal_vld1q(const qint8_t *in);
 
@@ -132,28 +182,19 @@ qint8x8_t internal_vld1q<3>(const qint8_t *in)
     return tmp.val[0];
 }
 
-template <unsigned int stridex>
-qint16x8_t internal_vld1q(const qint16_t *in);
-
-template <>
-qint16x8_t internal_vld1q<1>(const qint16_t *in)
-{
-    return vld1q_s16(in);
-}
-
-inline float32x4_t internal_vdupq_n(float v)
-{
-    return vdupq_n_f32(v);
-}
-
 inline qint8x8_t internal_vdupq_n(qint8_t v)
 {
     return vdup_n_qs8(v);
 }
 
-inline void internal_vst1q(float *p, const float32x4_t &v)
+inline qint16x8_t internal_vmull(const qint8x8_t &x, const qint8x8_t &y, int fixed_point_position)
 {
-    vst1q_f32(p, v);
+    return vmull_qs8(x, y, fixed_point_position);
+}
+
+inline qint16x8_t internal_vmlal(const qint16x8_t &x, const qint8x8_t &y, const qint8x8_t &z, int fixed_point_position)
+{
+    return vqmlal_qs8(x, y, z, fixed_point_position);
 }
 
 inline void internal_vst1q(qint16_t *p, const qint16x8_t &v)
@@ -161,26 +202,50 @@ inline void internal_vst1q(qint16_t *p, const qint16x8_t &v)
     vst1q_qs16(p, v);
 }
 
-float32x4_t internal_vmull(const float32x4_t &x, const float32x4_t &y, int fixed_point_position)
+inline void internal_vst1q(int *p, const qint32x4x2_t &v)
 {
-    ARM_COMPUTE_UNUSED(fixed_point_position);
-    return vmulq_f32(x, y);
+    vst1q_s32(p, v.val[0]);
+    vst1q_s32(p + 4, v.val[1]);
 }
 
-qint16x8_t internal_vmull(const qint8x8_t &x, const qint8x8_t &y, int fixed_point_position)
+template <unsigned int stridex>
+qint32x4x2_t internal_vld1q(const qint32_t *in);
+
+template <>
+qint32x4x2_t internal_vld1q<1>(const qint32_t *in)
 {
-    return vmull_qs8(x, y, fixed_point_position);
+    const qint32x4x2_t r =
+    {
+        {
+            vld1q_s32(in),
+            vld1q_s32(in + 4)
+        }
+    };
+    return r;
 }
 
-inline float32x4_t internal_vmlal(const float32x4_t &x, const float32x4_t &y, const float32x4_t &z, int fixed_point_position)
+inline qint32x4x2_t internal_vmull(const qint16x8_t &x, const qint16x8_t &y, int fixed_point_position)
 {
-    ARM_COMPUTE_UNUSED(fixed_point_position);
-    return vmlaq_f32(x, y, z);
+    const qint32x4x2_t r =
+    {
+        {
+            vmull_qs16(vget_low_s16(x), vget_low_s16(y), fixed_point_position),
+            vmull_qs16(vget_high_s16(x), vget_high_s16(y), fixed_point_position),
+        }
+    };
+    return r;
 }
 
-inline qint16x8_t internal_vmlal(const qint16x8_t &x, const qint8x8_t &y, const qint8x8_t &z, int fixed_point_position)
+inline qint32x4x2_t internal_vmlal(const qint32x4x2_t &x, const qint16x8_t &y, const qint16x8_t &z, int fixed_point_position)
 {
-    return vqmlal_qs8(x, y, z, fixed_point_position);
+    const qint32x4x2_t r =
+    {
+        {
+            vqmlal_qs16(x.val[0], vget_low_s16(y), vget_low_s16(z), fixed_point_position),
+            vqmlal_qs16(x.val[1], vget_high_s16(y), vget_high_s16(z), fixed_point_position)
+        }
+    };
+    return r;
 }
 
 template <typename T1, typename T2, unsigned int stridex>
@@ -216,8 +281,7 @@ public:
         window_in.set(Window::DimY, Window::Dimension(0, 0, 0));
         window_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
-        Window window_k = calculate_max_window(*weights->info(), Steps(1u));
-
+        Window   window_k = calculate_max_window(*weights->info(), Steps(1u));
         Iterator out(output, window_out);
         Iterator in(input, window_in);
         Iterator k(weights, window_k);
@@ -887,9 +951,9 @@ BorderSize NEDirectConvolutionLayerKernel::border_size() const
 
 void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QS8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::QS16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QS8, DataType::F16, DataType::QS16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS16, DataType::F16, DataType::QS32, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) == 1 && (std::get<0>(conv_info.pad()) || std::get<1>(conv_info.pad())),
                              "Pad > 0 not supported for 1x1 weights");
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) == 3 && (std::get<0>(conv_info.pad()) > 1 || std::get<1>(conv_info.pad()) > 1),
@@ -919,6 +983,7 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
                 case DataType::F16:
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
                 case DataType::QS8:
+                case DataType::QS16:
                     _num_elems_written_per_iteration = 8;
                     break;
                 case DataType::F32:
@@ -994,6 +1059,9 @@ void NEDirectConvolutionLayerKernel::run(const Window &window)
             {
                 case DataType::QS8:
                     convolve_1x1<qint8_t, qint16_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
+                    break;
+                case DataType::QS16:
+                    convolve_1x1<qint16_t, qint32_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
                     break;
                 case DataType::F32:
                     convolve_1x1<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);

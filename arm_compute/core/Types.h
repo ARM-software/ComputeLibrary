@@ -68,6 +68,7 @@ enum class DataType
     QS16,
     U32,
     S32,
+    QS32,
     U64,
     S64,
     F16,

@@ -48,11 +48,11 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance_fp32 = 1e-3f; /**< Tolerance for floating point tests */
+const float tolerance_qs = 1.f; /**< Tolerance for 8 bit fixed point tests */
 #ifdef ARM_COMPUTE_ENABLE_FP16
 const float tolerance_fp16 = 0.01f; /**< Tolerance for half precision floating point tests */
 #endif                              /* ARM_COMPUTE_ENABLE_FP16 */
-const float tolerance_qs8 = 1;      /**< Tolerance for fixed point tests */
+const float tolerance_fp32 = 1e-3f; /**< Tolerance for floating point tests */
 
 /** Compute NEON direct convolution layer function.
  *
@@ -91,18 +91,30 @@ Tensor compute_convolution_layer(const TensorShape &src_shape, const TensorShape
     BOOST_TEST(!dst.info()->is_resizable());
 
     // Fill tensors
-    if(dt == DataType::F16 || dt == DataType::F32)
+    switch(dt)
     {
-        std::uniform_real_distribution<> distribution(-1.f, 1.f);
-        library->fill(Accessor(src), distribution, 0);
-        library->fill(Accessor(weights), distribution, 1);
-        library->fill(Accessor(bias), distribution, 2);
-    }
-    else
-    {
-        library->fill_tensor_uniform(Accessor(src), 0);
-        library->fill_tensor_uniform(Accessor(weights), 1);
-        library->fill_tensor_uniform(Accessor(bias), 2);
+        case DataType::F16:
+        case DataType::F32:
+        {
+            std::uniform_real_distribution<> distribution(-1.f, 1.f);
+            library->fill(Accessor(src), distribution, 0);
+            library->fill(Accessor(weights), distribution, 1);
+            library->fill(Accessor(bias), distribution, 2);
+            break;
+        }
+        case DataType::QS8:
+        case DataType::QS16:
+        {
+            library->fill_tensor_uniform(Accessor(src), 0);
+            library->fill_tensor_uniform(Accessor(weights), 1);
+            library->fill_tensor_uniform(Accessor(bias), 2);
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Data type not supported.");
+            break;
+        }
     }
 
     // Compute function
@@ -221,8 +233,10 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(Quantized)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
 BOOST_DATA_TEST_CASE(W1x1,
-                     DirectConvolutionShapes() * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::make({ 1, 4, 8, 16 }) * boost::unit_test::data::make({ 4, 5 }),
-                     input_shape, sx, sy, num_kernels, fixed_point_position)
+                     DirectConvolutionShapes() * boost::unit_test::data::make({ DataType::QS8, DataType::QS16 }) * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(1, 3,
+                             1)
+                     * boost::unit_test::data::make({ 1, 4, 8, 16 }) * boost::unit_test::data::make({ 4, 5 }),
+                     input_shape, dt, sx, sy, num_kernels, fixed_point_position)
 {
     const unsigned int  kernel_size = 1;
     const PadStrideInfo conv_info(sx, sy, 0, 0, DimensionRoundingType::FLOOR);
@@ -230,18 +244,20 @@ BOOST_DATA_TEST_CASE(W1x1,
     const TensorShape   b_shape(static_cast<unsigned int>(num_kernels));
     const TensorShape   d_shape(get_output_shape(input_shape, w_shape, conv_info));
 
-    Tensor dst = compute_convolution_layer(input_shape, w_shape, b_shape, d_shape, DataType::QS8, conv_info, fixed_point_position);
+    Tensor dst = compute_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, fixed_point_position);
 
-    RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, DataType::QS8, conv_info, fixed_point_position);
+    RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, fixed_point_position);
 
     // Validate output
-    validate(Accessor(dst), ref);
+    validate(Accessor(dst), ref, tolerance_qs);
 }
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(0, 2, 1)
+BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(1, 3,
+                     1)
+                     * boost::unit_test::data::xrange(0, 2, 1)
                      * boost::unit_test::data::xrange(0, 2, 1) * boost::unit_test::data::make({ 1, 4, 8, 16 }) * boost::unit_test::data::make({ 4, 5 }),
-                     input_shape, sx, sy, px, py, num_kernels, fixed_point_position)
+                     input_shape, dt, sx, sy, px, py, num_kernels, fixed_point_position)
 {
     const unsigned int  kernel_size = 3;
     const PadStrideInfo conv_info(sx, sy, px, py, DimensionRoundingType::FLOOR);
@@ -249,12 +265,12 @@ BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * boost::unit_test::data::x
     const TensorShape   b_shape(static_cast<unsigned int>(num_kernels));
     const TensorShape   d_shape(get_output_shape(input_shape, w_shape, conv_info));
 
-    Tensor dst = compute_convolution_layer(input_shape, w_shape, b_shape, d_shape, DataType::QS8, conv_info, fixed_point_position);
+    Tensor dst = compute_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, fixed_point_position);
 
-    RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, DataType::QS8, conv_info, fixed_point_position);
+    RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, fixed_point_position);
 
     // Validate output
-    validate(Accessor(dst), ref, tolerance_qs8);
+    validate(Accessor(dst), ref, tolerance_qs);
 }
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -624,6 +624,20 @@ inline qint16x8_t vmull_qs8(qint8x8_t a, qint8x8_t b, int fixed_point_position)
     return vqrshlq_s16(res, fixed_point_position_s16);
 }
 
+inline qint32x4_t vmull_qs16(qint16x4_t a, qint16x4_t b, int fixed_point_position)
+{
+    const int32x4_t fixed_point_position_s32 = vdupq_n_s32(-fixed_point_position);
+
+    // Initialize the temporary results with a constant used to round up the result
+    qint32x4_t tmp = vdupq_n_s32(1 << (fixed_point_position - 1));
+
+    // Vector multiply-accumulate long
+    tmp = vmull_s16(a, b);
+
+    // Shift right by fixed_point_position
+    return vqshlq_s32(tmp, fixed_point_position_s32);
+}
+
 inline qint8x8_t vmla_qs8(qint8x8_t a, qint8x8_t b, qint8x8_t c, int fixed_point_position)
 {
     const int16x8_t fixed_point_position_s16 = vdupq_n_s16(-fixed_point_position);
