@@ -50,7 +50,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input         Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                           and an optional 4th dimension for batch of inputs. Data types supported: QS8/F32.
+     *                           and an optional 4th dimension for batch of inputs. Data types supported: QS8/QS16/FP16/F32.
      * @param[in]  input_squared Source with each element has been squared. 3 lower dims represent a single input with dimensions [width, height, IFM],
      *                           Data type supported: same as @p input
      * @param[out] output        Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
@@ -86,7 +86,7 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    template <unsigned int dim, bool do_2D_norm>
+    template <DataType dt, unsigned int dim, bool do_2D_norm>
     void normalize_fixed_point(const Window &window);
     /** Common signature for all the specialised normalization functions
      *

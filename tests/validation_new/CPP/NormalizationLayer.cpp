@@ -268,6 +268,7 @@ SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLay
 template SimpleTensor<float> normalization_layer(const SimpleTensor<float> &src, NormalizationLayerInfo info);
 template SimpleTensor<half_float::half> normalization_layer(const SimpleTensor<half_float::half> &src, NormalizationLayerInfo info);
 template SimpleTensor<qint8_t> normalization_layer(const SimpleTensor<qint8_t> &src, NormalizationLayerInfo info);
+template SimpleTensor<qint16_t> normalization_layer(const SimpleTensor<qint16_t> &src, NormalizationLayerInfo info);
 } // namespace reference
 } // namespace validation
 } // namespace test

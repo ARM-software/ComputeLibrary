@@ -235,12 +235,21 @@ qint8x16_t vdupq_n_qs8(qint8_t a);
 
 /** Duplicate a float and convert it to 8 bit fixed point vector (16 elements)
  *
- * @param[in] a                    8 bit fixed point to duplicate
+ * @param[in] a                    floating point value to convert and duplicate
  * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
  *
  * @return The result of the vector duplication
  */
 qint8x16_t vdupq_n_qs8_f32(float a, int fixed_point_position);
+
+/** Duplicate a float and convert it to 16 bit fixed point vector (8 elements)
+ *
+ * @param[in] a                    floating point value to convert and duplicate
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the vector duplication
+ */
+qint16x8_t vdupq_n_qs16_f32(float a, int fixed_point_position);
 
 /** 16 bit fixed point vector duplicate (8 elements)
  *
@@ -1178,7 +1187,19 @@ qint16x8_t vqtanhq_qs16(qint16x8_t a, int fixed_point_position);
  *
  * @return The result of the 8bit power.
  */
-qint8x8_t vqpowq_qs8(qint8x8_t a, qint8x16_t b, int fixed_point_position);
+qint8x16_t vqpowq_qs8(qint8x16_t a, qint8x16_t b, int fixed_point_position);
+
+/** Calculate saturating n power for fixed point 16bit (8 elements).
+ *
+ * pow(a,b) = e^(b*log(a))
+ *
+ * @param[in] a                    16bit fixed point input vector
+ * @param[in] b                    16bit fixed point power vector
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 16bit power.
+ */
+qint16x8_t vqpowq_qs16(qint16x8_t a, qint16x8_t b, int fixed_point_position);
 
 /** Compute lane-by-lane maximum between elements of a float vector with 4x2 elements
  *

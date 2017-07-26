@@ -50,7 +50,8 @@ constexpr float tolerance_f16 = 0.001f;
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 constexpr float tolerance_f32 = 0.00001f;
 /** Tolerance for fixed point operations */
-constexpr int8_t tolerance_qs8 = 2;
+constexpr int8_t  tolerance_qs8  = 2;
+constexpr int16_t tolerance_qs16 = 3;
 
 /** Input data set. */
 const auto NormalizationDataset = combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()), framework::dataset::make("NormalizationSize", 3, 9, 2)),
@@ -114,6 +115,24 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixedPointFixture<int8_t>, 
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qs8);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QS16)
+// Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
+FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+                       DataType::QS16)),
+                       framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qs16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+                       DataType::QS16)),
+                       framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qs16);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

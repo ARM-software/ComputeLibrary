@@ -250,6 +250,18 @@ inline qint8x16_t vdupq_n_qs8_f32(float a, int fixed_point_position)
     return vqcvtq_qs8_f32(res, fixed_point_position);
 }
 
+inline qint16x8_t vdupq_n_qs16_f32(float a, int fixed_point_position)
+{
+    float32x4x2_t res =
+    {
+        {
+            vdupq_n_f32(a),
+            vdupq_n_f32(a),
+        }
+    };
+    return vqcvtq_qs16_f32(res, fixed_point_position);
+}
+
 inline qint16x8_t vdupq_n_qs16(qint16_t a)
 {
     return vdupq_n_s16(a);
@@ -1939,6 +1951,11 @@ inline qint16x8_t vqtanhq_qs16(qint16x8_t a, int fixed_point_position)
 inline qint8x16_t vqpowq_qs8(qint8x16_t a, qint8x16_t b, int fixed_point_position)
 {
     return vqexpq_qs8(vqmulq_qs8(b, vlogq_qs8(a, fixed_point_position), fixed_point_position), fixed_point_position);
+}
+
+inline qint16x8_t vqpowq_qs16(qint16x8_t a, qint16x8_t b, int fixed_point_position)
+{
+    return vqexpq_qs16(vqmulq_qs16(b, vlogq_qs16(a, fixed_point_position), fixed_point_position), fixed_point_position);
 }
 
 inline float32x4x2_t vmax2q_f32(float32x4x2_t a, float32x4x2_t b)

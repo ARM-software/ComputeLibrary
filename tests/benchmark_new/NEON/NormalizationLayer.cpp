@@ -41,9 +41,9 @@ namespace test
 namespace
 {
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const auto normalization_layer_data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8 });
+const auto normalization_layer_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F16, DataType::F32 });
 #else  /* ARM_COMPUTE_ENABLE_FP16 */
-const auto normalization_layer_data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8 });
+const auto normalization_layer_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F32 });
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 using NENormalizationLayerFixture = NormalizationLayerFixture<Tensor, NENormalizationLayer, Accessor>;

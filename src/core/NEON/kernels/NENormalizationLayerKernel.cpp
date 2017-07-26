@@ -46,7 +46,7 @@ BorderSize NENormalizationLayerKernel::border_size() const
 
 void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *input_squared, ITensor *output, NormalizationLayerInfo norm_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
@@ -118,14 +118,35 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
             switch(norm_info.type())
             {
                 case NormType::IN_MAP_1D:
-                    _func = &NENormalizationLayerKernel::normalize_fixed_point<0, false>;
+                    _func = &NENormalizationLayerKernel::normalize_fixed_point<DataType::QS8, 0, false>;
                     break;
                 case NormType::IN_MAP_2D:
                     // Normalize over X and Y
-                    _func = &NENormalizationLayerKernel::normalize_fixed_point<0, true>;
+                    _func = &NENormalizationLayerKernel::normalize_fixed_point<DataType::QS8, 0, true>;
                     break;
                 case NormType::CROSS_MAP:
-                    _func = &NENormalizationLayerKernel::normalize_fixed_point<2, false>;
+                    _func = &NENormalizationLayerKernel::normalize_fixed_point<DataType::QS8, 2, false>;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported");
+                    break;
+            }
+            break;
+        }
+        case DataType::QS16:
+        {
+            num_elems_processed_per_iteration = 8;
+            switch(norm_info.type())
+            {
+                case NormType::IN_MAP_1D:
+                    _func = &NENormalizationLayerKernel::normalize_fixed_point<DataType::QS16, 0, false>;
+                    break;
+                case NormType::IN_MAP_2D:
+                    // Normalize over X and Y
+                    _func = &NENormalizationLayerKernel::normalize_fixed_point<DataType::QS16, 0, true>;
+                    break;
+                case NormType::CROSS_MAP:
+                    _func = &NENormalizationLayerKernel::normalize_fixed_point<DataType::QS16, 2, false>;
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Not supported");
@@ -250,7 +271,7 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
     }
 }
 
-template <unsigned int dim, bool do_2D_norm>
+template <DataType dt, unsigned int dim, bool do_2D_norm>
 void NENormalizationLayerKernel::normalize_fixed_point(const Window &window)
 {
     Iterator input(_input, window);
@@ -269,40 +290,84 @@ void NENormalizationLayerKernel::normalize_fixed_point(const Window &window)
 
     const int fixed_point_position = _input->info()->fixed_point_position();
 
-    const qint8x16_t coeff_vec = vdupq_n_qs8_f32(_norm_info.scale_coeff(), fixed_point_position);
-    const qint8x16_t beta_vec  = vdupq_n_qs8_f32(_norm_info.beta(), fixed_point_position);
-    const qint8x16_t kappa_vec = vdupq_n_qs8_f32(_norm_info.kappa(), fixed_point_position);
-
-    execute_window_loop(window, [&](const Coordinates & id)
+    if(dt == DataType::QS8)
     {
-        // Get range to normalize
-        const int current_row   = do_2D_norm ? id[dim_y] : 0;
-        const int current_slice = id[dim];
-        const int first_row     = do_2D_norm ? std::max(current_row - radius, min_top) : 0;
-        const int last_row      = do_2D_norm ? std::min(current_row + radius, max_bottom) : 0;
-        const int first_slice   = std::max(current_slice - radius, min_left);
-        const int last_slice    = std::min(current_slice + radius, max_right);
+        const qint8x16_t coeff_vec = vdupq_n_qs8_f32(_norm_info.scale_coeff(), fixed_point_position);
+        const qint8x16_t beta_vec  = vdupq_n_qs8_f32(_norm_info.beta(), fixed_point_position);
+        const qint8x16_t kappa_vec = vdupq_n_qs8_f32(_norm_info.kappa(), fixed_point_position);
 
-        // Accumulate 2D In-Map values
-        qint8x16_t accu = vdupq_n_qs8(0);
-        for(int j = first_row; j <= last_row; ++j)
+        execute_window_loop(window, [&](const Coordinates & id)
         {
-            // Compute row displacement
-            const int            row               = (j - current_row) * _input_squared->info()->strides_in_bytes()[dim_y];
-            const uint8_t *const input_squared_ptr = input_squared.ptr() + row - (current_slice * input_squared_stride);
-            for(int i = first_slice; i <= last_slice; ++i)
-            {
-                accu = vqaddq_qs8(accu, vld1q_qs8(reinterpret_cast<const qint8_t *>(input_squared_ptr + i * input_squared_stride)));
-            }
-        }
+            // Get range to normalize
+            const int current_row   = do_2D_norm ? id[dim_y] : 0;
+            const int current_slice = id[dim];
+            const int first_row     = do_2D_norm ? std::max(current_row - radius, min_top) : 0;
+            const int last_row      = do_2D_norm ? std::min(current_row + radius, max_bottom) : 0;
+            const int first_slice   = std::max(current_slice - radius, min_left);
+            const int last_slice    = std::min(current_slice + radius, max_right);
 
-        // Normalize
-        const qint8x16_t accu_scale       = vqmlaq_qs8(kappa_vec, coeff_vec, accu, fixed_point_position);
-        const qint8x16_t normalized       = vqpowq_qs8(accu_scale, beta_vec, fixed_point_position);
-        const qint8x16_t normalized_pixel = vdivq_qs8(vld1q_qs8(reinterpret_cast<const qint8_t *>(input.ptr())), normalized, fixed_point_position);
-        vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), normalized_pixel);
-    },
-    input, input_squared, output);
+            // Accumulate 2D In-Map values
+            qint8x16_t accu = vdupq_n_qs8(0);
+            for(int j = first_row; j <= last_row; ++j)
+            {
+                // Compute row displacement
+                const int            row               = (j - current_row) * _input_squared->info()->strides_in_bytes()[dim_y];
+                const uint8_t *const input_squared_ptr = input_squared.ptr() + row - (current_slice * input_squared_stride);
+                for(int i = first_slice; i <= last_slice; ++i)
+                {
+                    accu = vqaddq_qs8(accu, vld1q_qs8(reinterpret_cast<const qint8_t *>(input_squared_ptr + i * input_squared_stride)));
+                }
+            }
+
+            // Normalize
+            const qint8x16_t accu_scale       = vqmlaq_qs8(kappa_vec, coeff_vec, accu, fixed_point_position);
+            const qint8x16_t normalized       = vqpowq_qs8(accu_scale, beta_vec, fixed_point_position);
+            const qint8x16_t normalized_pixel = vdivq_qs8(vld1q_qs8(reinterpret_cast<const qint8_t *>(input.ptr())), normalized, fixed_point_position);
+            vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), normalized_pixel);
+        },
+        input, input_squared, output);
+    }
+    else if(dt == DataType::QS16)
+    {
+        const qint16x8_t coeff_vec = vdupq_n_qs16_f32(_norm_info.scale_coeff(), fixed_point_position);
+        const qint16x8_t beta_vec  = vdupq_n_qs16_f32(_norm_info.beta(), fixed_point_position);
+        const qint16x8_t kappa_vec = vdupq_n_qs16_f32(_norm_info.kappa(), fixed_point_position);
+
+        execute_window_loop(window, [&](const Coordinates & id)
+        {
+            // Get range to normalize
+            const int current_row   = do_2D_norm ? id[dim_y] : 0;
+            const int current_slice = id[dim];
+            const int first_row     = do_2D_norm ? std::max(current_row - radius, min_top) : 0;
+            const int last_row      = do_2D_norm ? std::min(current_row + radius, max_bottom) : 0;
+            const int first_slice   = std::max(current_slice - radius, min_left);
+            const int last_slice    = std::min(current_slice + radius, max_right);
+
+            // Accumulate 2D In-Map values
+            qint16x8_t accu = vdupq_n_qs16(0);
+            for(int j = first_row; j <= last_row; ++j)
+            {
+                // Compute row displacement
+                const int            row               = (j - current_row) * _input_squared->info()->strides_in_bytes()[dim_y];
+                const uint8_t *const input_squared_ptr = input_squared.ptr() + row - (current_slice * input_squared_stride);
+                for(int i = first_slice; i <= last_slice; ++i)
+                {
+                    accu = vqaddq_qs16(accu, vld1q_qs16(reinterpret_cast<const qint16_t *>(input_squared_ptr + i * input_squared_stride)));
+                }
+            }
+
+            // Normalize
+            const qint16x8_t accu_scale       = vqmlaq_qs16(kappa_vec, coeff_vec, accu, fixed_point_position);
+            const qint16x8_t normalized       = vqpowq_qs16(accu_scale, beta_vec, fixed_point_position);
+            const qint16x8_t normalized_pixel = vdivq_qs16(vld1q_qs16(reinterpret_cast<const qint16_t *>(input.ptr())), normalized, fixed_point_position);
+            vst1q_qs16(reinterpret_cast<qint16_t *>(output.ptr()), normalized_pixel);
+        },
+        input, input_squared, output);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Not supported");
+    }
 }
 
 void NENormalizationLayerKernel::run(const Window &window)
