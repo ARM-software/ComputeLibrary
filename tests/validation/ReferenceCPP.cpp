@@ -296,16 +296,6 @@ void ReferenceCPP::batch_normalization_layer(const RawTensor &src, RawTensor &ds
     boost::apply_visitor(tensor_visitors::batch_normalization_layer_visitor(s, m, v, b, g, epsilon, fixed_point_position), d);
 }
 
-// Convolution Layer
-void ReferenceCPP::convolution_layer(const RawTensor &src, const RawTensor &weights, const RawTensor &bias, RawTensor &dst, const PadStrideInfo &conv_info)
-{
-    const TensorVariant s = TensorFactory::get_tensor(src);
-    const TensorVariant w = TensorFactory::get_tensor(weights);
-    const TensorVariant b = TensorFactory::get_tensor(bias);
-    TensorVariant       d = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(tensor_visitors::convolution_layer_visitor(s, w, b, conv_info), d);
-}
-
 // Fully connected layer
 void ReferenceCPP::fully_connected_layer(const RawTensor &src, const RawTensor &weights, const RawTensor &bias, RawTensor &dst)
 {

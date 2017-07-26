@@ -254,30 +254,6 @@ private:
     float                _epsilon;
     int                  _fixed_point_position;
 };
-// Convolution Layer visitor
-struct convolution_layer_visitor : public boost::static_visitor<>
-{
-public:
-    explicit convolution_layer_visitor(const TensorVariant &in, const TensorVariant &weights, const TensorVariant &bias, PadStrideInfo conv_info)
-        : _in(in), _weights(weights), _bias(bias), _conv_info(conv_info)
-    {
-    }
-
-    template <typename T>
-    void operator()(Tensor<T> &out) const
-    {
-        const Tensor<T> &in      = boost::get<Tensor<T>>(_in);
-        const Tensor<T> &weights = boost::get<Tensor<T>>(_weights);
-        const Tensor<T> &bias    = boost::get<Tensor<T>>(_bias);
-        tensor_operations::convolution_layer(in, weights, bias, out, _conv_info);
-    }
-
-private:
-    const TensorVariant &_in;
-    const TensorVariant &_weights;
-    const TensorVariant &_bias;
-    PadStrideInfo        _conv_info;
-};
 // Fully Connected Layer visitor
 struct fully_connected_layer_visitor : public boost::static_visitor<>
 {

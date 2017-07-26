@@ -515,48 +515,6 @@ RawTensor Reference::compute_reference_batch_normalization_layer(const TensorSha
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_convolution_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
-                                                         const PadStrideInfo &conv_info, int fixed_point_position)
-{
-    // Create reference
-    RawTensor ref_src(input_shape, dt, 1, fixed_point_position);
-    RawTensor ref_weights(weights_shape, dt, 1, fixed_point_position);
-    RawTensor ref_bias(bias_shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst(output_shape, dt, 1, fixed_point_position);
-
-    // Fill reference
-    switch(dt)
-    {
-        case DataType::F32:
-        case DataType::F16:
-        {
-            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-            library->fill(ref_src, distribution, 0);
-            library->fill(ref_weights, distribution, 1);
-            library->fill(ref_bias, distribution, 2);
-            break;
-        }
-        case DataType::QS16:
-        case DataType::QS8:
-        {
-            library->fill_tensor_uniform(ref_src, 0);
-            library->fill_tensor_uniform(ref_weights, 1);
-            library->fill_tensor_uniform(ref_bias, 2);
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Not supported");
-            break;
-        }
-    }
-
-    // Compute reference
-    ReferenceCPP::convolution_layer(ref_src, ref_weights, ref_bias, ref_dst, conv_info);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_fully_connected_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
                                                              DataType dt, bool transpose_weights, int fixed_point_position)
 {

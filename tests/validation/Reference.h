@@ -306,20 +306,6 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position = 0);
-    /** Compute reference convolution layer
-     *
-     * @param[in] input_shape          Shape for the input tensor
-     * @param[in] weights_shape        Shape for the weights tensor
-     * @param[in] bias_shape           Shape for the bias tensor
-     * @param[in] output_shape         Shape for the output tensor
-     * @param[in] dt                   Data type to use
-     * @param[in] conv_info            Pads and strides information for the convolution layer
-     * @param[in] fixed_point_position Number of bits for the fractional part of the fixed point numbers
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_convolution_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
-                                                         const PadStrideInfo &conv_info, int fixed_point_position);
     /** Compute reference for fully connected layer function
      *
      * @param[in] input_shape          Shape for the input tensor
