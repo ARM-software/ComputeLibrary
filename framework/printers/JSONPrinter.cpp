@@ -23,6 +23,8 @@
  */
 #include "JSONPrinter.h"
 
+#include "framework/Framework.h"
+
 #include <algorithm>
 
 namespace arm_compute
@@ -72,11 +74,11 @@ void JSONPrinter::print_run_footer()
     *_stream << "}";
 }
 
-void JSONPrinter::print_test_header(const std::string &name)
+void JSONPrinter::print_test_header(const TestInfo &info)
 {
     print_separator(_first_test);
 
-    *_stream << R"(")" << name << R"(" : {)";
+    *_stream << R"(")" << info.name << R"(" : {)";
 }
 
 void JSONPrinter::print_test_footer()

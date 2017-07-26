@@ -53,6 +53,28 @@ namespace test
 {
 namespace framework
 {
+/** Information about a test case.
+ *
+ * A test can be identified either via its id or via its name. Additionally
+ * each test is tagged with the data set mode in which it will be used and
+ * its status.
+ *
+ * @note The mapping between test id and test name is not guaranteed to be
+ * stable. It is subject to change as new test are added.
+ */
+struct TestInfo
+{
+    int                     id;
+    std::string             name;
+    DatasetMode             mode;
+    TestCaseFactory::Status status;
+};
+
+inline bool operator<(const TestInfo &lhs, const TestInfo &rhs)
+{
+    return lhs.id < rhs.id;
+}
+
 /** Main framework class.
  *
  * Keeps track of the global state, owns all test cases and collects results.
@@ -60,23 +82,6 @@ namespace framework
 class Framework final
 {
 public:
-    /** Information about a test case.
-     *
-     * A test can be identified either via its id or via its name. Additionally
-     * each test is tagged with the data set mode in which it will be used and
-     * its status.
-     *
-     * @note The mapping between test id and test name is not guaranteed to be
-     * stable. It is subject to change as new test are added.
-     */
-    struct TestInfo
-    {
-        int                     id;
-        std::string             name;
-        DatasetMode             mode;
-        TestCaseFactory::Status status;
-    };
-
     /** Access to the singleton.
      *
      * @return Unique instance of the framework class.
@@ -161,21 +166,21 @@ public:
 
     /** Tell the framework that execution of a test starts.
      *
-     * @param[in] test_name Name of the started test case.
+     * @param[in] info Test info.
      */
-    void log_test_start(const std::string &test_name);
+    void log_test_start(const TestInfo &info);
 
     /** Tell the framework that a test case is skipped.
      *
-     * @param[in] test_name Name of the skipped test case.
+     * @param[in] info Test info.
      */
-    void log_test_skipped(const std::string &test_name);
+    void log_test_skipped(const TestInfo &info);
 
     /** Tell the framework that a test case finished.
      *
-     * @param[in] test_name Name of the finished test case.
+     * @param[in] info Test info.
      */
-    void log_test_end(const std::string &test_name);
+    void log_test_end(const TestInfo &info);
 
     /** Tell the framework that the currently running test case failed a non-fatal expectation.
      *
@@ -224,10 +229,10 @@ public:
 
     /** Set the result for an executed test case.
      *
-     * @param[in] test_case_name Name of the executed test case.
-     * @param[in] result         Execution result.
+     * @param[in] info   Test info.
+     * @param[in] result Execution result.
      */
-    void set_test_result(std::string test_case_name, TestResult result);
+    void set_test_result(TestInfo info, TestResult result);
 
     /** Use the specified printer to output test results from the last run.
      *
@@ -257,7 +262,7 @@ public:
      *
      * @return Vector with all test ids.
      */
-    std::vector<Framework::TestInfo> test_infos() const;
+    std::vector<TestInfo> test_infos() const;
 
 private:
     Framework();
@@ -266,7 +271,7 @@ private:
     Framework(const Framework &) = delete;
     Framework &operator=(const Framework &) = delete;
 
-    void run_test(TestCaseFactory &test_factory);
+    void run_test(const TestInfo &info, TestCaseFactory &test_factory);
     std::map<TestResult::Status, int> count_test_results() const;
 
     /** Returns the current test suite name.
@@ -281,11 +286,10 @@ private:
 
     std::vector<std::string>                      _test_suite_name{};
     std::vector<std::unique_ptr<TestCaseFactory>> _test_factories{};
-    std::map<std::string, TestResult> _test_results{};
-    std::chrono::seconds _runtime{ 0 };
-    int                  _num_iterations{ 1 };
-    bool                 _throw_errors{ false };
-    Printer             *_printer{ nullptr };
+    std::map<TestInfo, TestResult> _test_results{};
+    int      _num_iterations{ 1 };
+    bool     _throw_errors{ false };
+    Printer *_printer{ nullptr };
 
     using create_function = std::unique_ptr<Instrument>();
     std::map<InstrumentType, create_function *> _available_instruments{};

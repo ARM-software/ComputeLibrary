@@ -23,6 +23,8 @@
  */
 #include "PrettyPrinter.h"
 
+#include "framework/Framework.h"
+
 #include <algorithm>
 
 namespace arm_compute
@@ -77,9 +79,9 @@ void PrettyPrinter::print_run_footer()
 {
 }
 
-void PrettyPrinter::print_test_header(const std::string &name)
+void PrettyPrinter::print_test_header(const TestInfo &info)
 {
-    *_stream << begin_color("2") << "Running '" << name << "'" << end_color() << "\n";
+    *_stream << begin_color("2") << "Running [" << info.id << "] '" << info.name << "'" << end_color() << "\n";
 }
 
 void PrettyPrinter::print_test_footer()

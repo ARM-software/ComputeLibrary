@@ -49,7 +49,7 @@ public:
     void print_global_footer() override;
     void print_run_header() override;
     void print_run_footer() override;
-    void print_test_header(const std::string &name) override;
+    void print_test_header(const TestInfo &info) override;
     void print_test_footer() override;
     void print_measurements(const Profiler::MeasurementsMap &measurements) override;
 

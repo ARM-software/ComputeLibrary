@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_PRINTER
 #define ARM_COMPUTE_TEST_PRINTER
 
-#include "../Profiler.h"
+#include "framework/Profiler.h"
 
 #include <fstream>
 #include <iostream>
@@ -36,6 +36,8 @@ namespace test
 {
 namespace framework
 {
+struct TestInfo;
+
 /** Abstract printer class used by the @ref Framework to present output. */
 class Printer
 {
@@ -86,9 +88,9 @@ public:
 
     /** Print header before a test.
      *
-     * @param[in] name test_name.
+     * @param[in] info Test info.
      */
-    virtual void print_test_header(const std::string &name) = 0;
+    virtual void print_test_header(const TestInfo &info) = 0;
 
     /** Print footer after a test. */
     virtual void print_test_footer() = 0;

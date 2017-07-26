@@ -136,26 +136,26 @@ void Framework::print_test_info(std::ostream &os) const
     }
 }
 
-void Framework::log_test_start(const std::string &test_name)
+void Framework::log_test_start(const TestInfo &info)
 {
     if(_printer != nullptr && _log_level >= LogLevel::TESTS)
     {
-        _printer->print_test_header(test_name);
+        _printer->print_test_header(info);
     }
 }
 
-void Framework::log_test_skipped(const std::string &test_name)
+void Framework::log_test_skipped(const TestInfo &info)
 {
-    static_cast<void>(test_name);
+    static_cast<void>(info);
 }
 
-void Framework::log_test_end(const std::string &test_name)
+void Framework::log_test_end(const TestInfo &info)
 {
     if(_printer != nullptr)
     {
         if(_log_level >= LogLevel::MEASUREMENTS)
         {
-            _printer->print_measurements(_test_results.at(test_name).measurements);
+            _printer->print_measurements(_test_results.at(info).measurements);
         }
 
         if(_log_level >= LogLevel::TESTS)
@@ -218,18 +218,16 @@ bool Framework::is_selected(const TestInfo &info) const
     return true;
 }
 
-void Framework::run_test(TestCaseFactory &test_factory)
+void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 {
-    const std::string test_case_name = test_factory.name();
-
     if(test_factory.status() == TestCaseFactory::Status::DISABLED)
     {
-        log_test_skipped(test_case_name);
-        set_test_result(test_case_name, TestResult(TestResult::Status::DISABLED));
+        log_test_skipped(info);
+        set_test_result(info, TestResult(TestResult::Status::DISABLED));
         return;
     }
 
-    log_test_start(test_case_name);
+    log_test_start(info);
 
     Profiler   profiler = get_profiler();
     TestResult result(TestResult::Status::SUCCESS);
@@ -354,22 +352,21 @@ void Framework::run_test(TestCaseFactory &test_factory)
 
     result.measurements = profiler.measurements();
 
-    set_test_result(test_case_name, result);
-    log_test_end(test_case_name);
+    set_test_result(info, result);
+    log_test_end(info);
 }
 
 bool Framework::run()
 {
     // Clear old test results
     _test_results.clear();
-    _runtime = std::chrono::seconds{ 0 };
 
     if(_printer != nullptr && _log_level >= LogLevel::TESTS)
     {
         _printer->print_run_header();
     }
 
-    const auto start = std::chrono::high_resolution_clock::now();
+    const std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
 
     int id = 0;
 
@@ -380,41 +377,40 @@ bool Framework::run()
 
         if(is_selected(test_info))
         {
-            run_test(*test_factory);
+            run_test(test_info, *test_factory);
         }
 
         ++id;
     }
 
-    const auto end = std::chrono::high_resolution_clock::now();
+    const std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
 
     if(_printer != nullptr && _log_level >= LogLevel::TESTS)
     {
         _printer->print_run_footer();
     }
 
-    _runtime = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-
-    auto test_results = count_test_results();
+    auto runtime = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+    std::map<TestResult::Status, int> results = count_test_results();
 
     if(_log_level > LogLevel::NONE)
     {
-        std::cout << "Executed " << _test_results.size() << " test(s) ("
-                  << test_results[TestResult::Status::SUCCESS] << " passed, "
-                  << test_results[TestResult::Status::EXPECTED_FAILURE] << " expected failures, "
-                  << test_results[TestResult::Status::FAILED] << " failed, "
-                  << test_results[TestResult::Status::CRASHED] << " crashed, "
-                  << test_results[TestResult::Status::DISABLED] << " disabled) in " << _runtime.count() << " second(s)\n";
+        std::cout << "Executed " << results.size() << " test(s) ("
+                  << results[TestResult::Status::SUCCESS] << " passed, "
+                  << results[TestResult::Status::EXPECTED_FAILURE] << " expected failures, "
+                  << results[TestResult::Status::FAILED] << " failed, "
+                  << results[TestResult::Status::CRASHED] << " crashed, "
+                  << results[TestResult::Status::DISABLED] << " disabled) in " << runtime.count() << " second(s)\n";
     }
 
-    int num_successful_tests = test_results[TestResult::Status::SUCCESS] + test_results[TestResult::Status::EXPECTED_FAILURE];
+    int num_successful_tests = results[TestResult::Status::SUCCESS] + results[TestResult::Status::EXPECTED_FAILURE];
 
     return (static_cast<unsigned int>(num_successful_tests) == _test_results.size());
 }
 
-void Framework::set_test_result(std::string test_case_name, TestResult result)
+void Framework::set_test_result(TestInfo info, TestResult result)
 {
-    _test_results.emplace(std::move(test_case_name), std::move(result));
+    _test_results.emplace(std::move(info), std::move(result));
 }
 
 void Framework::print_test_results(Printer &printer) const
@@ -451,7 +447,7 @@ void Framework::set_printer(Printer *printer)
     _printer = printer;
 }
 
-std::vector<Framework::TestInfo> Framework::test_infos() const
+std::vector<TestInfo> Framework::test_infos() const
 {
     std::vector<TestInfo> ids;
 
