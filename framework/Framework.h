@@ -213,6 +213,18 @@ public:
      */
     void set_throw_errors(bool throw_errors);
 
+    /** Indicates if test execution is stopped after the first failed test.
+     *
+     * @return True if the execution is going to be aborted after the first failed test.
+     */
+    bool stop_on_error() const;
+
+    /** Set whether to abort execution after the first failed test.
+     *
+     * @param[in] stop_on_error True if execution is going to be aborted after first failed test.
+     */
+    void set_stop_on_error(bool stop_on_error);
+
     /** Check if a test case is selected to be executed.
      *
      * @param[in] info Test case info.
@@ -289,6 +301,7 @@ private:
     std::map<TestInfo, TestResult> _test_results{};
     int      _num_iterations{ 1 };
     bool     _throw_errors{ false };
+    bool     _stop_on_error{ false };
     Printer *_printer{ nullptr };
 
     using create_function = std::unique_ptr<Instrument>();

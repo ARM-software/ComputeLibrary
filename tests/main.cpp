@@ -122,7 +122,9 @@ int main(int argc, char **argv)
     auto log_level = parser.add_option<framework::EnumOption<framework::LogLevel>>("log-level", supported_log_levels, framework::LogLevel::ALL);
     log_file->set_help("Verbosity of the output");
     auto throw_errors = parser.add_option<framework::ToggleOption>("throw-errors");
-    throw_errors->set_help("Don't catch errors (useful for debugging)");
+    throw_errors->set_help("Don't catch fatal errors (useful for debugging)");
+    auto stop_on_error = parser.add_option<framework::ToggleOption>("stop-on-error");
+    throw_errors->set_help("Abort execution after the first failed test (useful for debugging)");
     auto seed = parser.add_option<framework::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
     seed->set_help("Global seed for random number generation");
     auto color_output = parser.add_option<framework::ToggleOption>("color-output", true);
@@ -193,6 +195,7 @@ int main(int argc, char **argv)
         framework.init(instruments->value(), iterations->value(), dataset_mode->value(), filter->value(), filter_id->value(), log_level->value());
         framework.set_printer(printer.get());
         framework.set_throw_errors(throw_errors->value());
+        framework.set_stop_on_error(stop_on_error->value());
 
         bool success = true;
 

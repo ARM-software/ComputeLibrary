@@ -198,6 +198,16 @@ bool Framework::throw_errors() const
     return _throw_errors;
 }
 
+void Framework::set_stop_on_error(bool stop_on_error)
+{
+    _stop_on_error = stop_on_error;
+}
+
+bool Framework::stop_on_error() const
+{
+    return _stop_on_error;
+}
+
 bool Framework::is_selected(const TestInfo &info) const
 {
     if((info.mode & _dataset_mode) == DatasetMode::DISABLED)
@@ -345,9 +355,16 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 
     _current_test_result = nullptr;
 
-    if(test_factory.status() == TestCaseFactory::Status::EXPECTED_FAILURE && result.status == TestResult::Status::FAILED)
+    if(result.status == TestResult::Status::FAILED)
     {
-        result.status = TestResult::Status::EXPECTED_FAILURE;
+        if(info.status == TestCaseFactory::Status::EXPECTED_FAILURE)
+        {
+            result.status = TestResult::Status::EXPECTED_FAILURE;
+        }
+        else if(_stop_on_error)
+        {
+            throw std::runtime_error("Abort on first error.");
+        }
     }
 
     result.measurements = profiler.measurements();
