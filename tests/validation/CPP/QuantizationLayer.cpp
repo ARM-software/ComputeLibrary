@@ -31,29 +31,6 @@ namespace validation
 {
 namespace reference
 {
-void compute_min_max(const SimpleTensor<float> &src, float *min, float *max)
-{
-    // Set min and max to first pixel
-    float tmp_min = src[0];
-    float tmp_max = src[0];
-
-    // Look for min and max values
-    for(int i = 1; i < src.num_elements(); ++i)
-    {
-        if(src[i] < tmp_min)
-        {
-            tmp_min = src[i];
-        }
-        if(src[i] > tmp_max)
-        {
-            tmp_max = src[i];
-        }
-    }
-
-    *min = tmp_min;
-    *max = tmp_max;
-}
-
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
 SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src)
 {

@@ -145,6 +145,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "copy_planes_3p", "channel_combine.cl" },
     { "copy_to_keypoint", "fast_corners.cl" },
     { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
+    { "dequantization_layer", "dequantization_layer.cl" },
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
@@ -212,6 +213,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "mean_stddev_accumulate", "mean_stddev.cl" },
     { "minmax", "minmaxloc.cl" },
     { "minmax_border", "minmaxloc.cl" },
+    { "minmax_layer", "minmax_layer.cl" },
     { "minmaxloc", "minmaxloc.cl" },
     { "non_linear_filter_box3x3", "non_linear_filter3x3.cl" },
     { "non_linear_filter_cross3x3", "non_linear_filter3x3.cl" },
@@ -237,6 +239,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "pooling_layer_3", "pooling_layer.cl" },
     { "pooling_layer_3_optimized", "pooling_layer.cl" },
     { "pooling_layer_7", "pooling_layer.cl" },
+    { "quantization_layer", "quantization_layer.cl" },
     { "reduction_operation", "reduction_operation.cl" },
     { "remap_nearest_neighbour", "remap.cl" },
     { "remap_bilinear", "remap.cl" },
@@ -357,6 +360,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/depthwise_convolution.clembed"
     },
     {
+        "dequantization_layer.cl",
+#include "./cl_kernels/dequantization_layer.clembed"
+    },
+    {
         "derivative.cl",
 #include "./cl_kernels/derivative.clembed"
     },
@@ -441,6 +448,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/minmaxloc.clembed"
     },
     {
+        "minmax_layer.cl",
+#include "./cl_kernels/minmax_layer.clembed"
+    },
+    {
         "non_linear_filter3x3.cl",
 #include "./cl_kernels/non_linear_filter3x3.clembed"
     },
@@ -479,6 +490,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "pooling_layer.cl",
 #include "./cl_kernels/pooling_layer.clembed"
+    },
+    {
+        "quantization_layer.cl",
+#include "./cl_kernels/quantization_layer.clembed"
     },
     {
         "reduction_operation.cl",
