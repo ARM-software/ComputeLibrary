@@ -80,13 +80,11 @@ Framework &Framework::get()
     return instance;
 }
 
-void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, int64_t id_filter, LogLevel log_level)
+void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter, LogLevel log_level)
 {
-    _test_name_filter = std::regex{ name_filter };
-    _test_id_filter   = id_filter;
-    _num_iterations   = num_iterations;
-    _dataset_mode     = mode;
-    _log_level        = log_level;
+    _test_filter    = TestFilter(mode, name_filter, id_filter);
+    _num_iterations = num_iterations;
+    _log_level      = log_level;
 
     _instruments = InstrumentType::NONE;
 
@@ -206,26 +204,6 @@ void Framework::set_stop_on_error(bool stop_on_error)
 bool Framework::stop_on_error() const
 {
     return _stop_on_error;
-}
-
-bool Framework::is_selected(const TestInfo &info) const
-{
-    if((info.mode & _dataset_mode) == DatasetMode::DISABLED)
-    {
-        return false;
-    }
-
-    if(_test_id_filter > -1 && _test_id_filter != info.id)
-    {
-        return false;
-    }
-
-    if(!std::regex_search(info.name, _test_name_filter))
-    {
-        return false;
-    }
-
-    return true;
 }
 
 void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
@@ -392,7 +370,7 @@ bool Framework::run()
         const std::string test_case_name = test_factory->name();
         const TestInfo    test_info{ id, test_case_name, test_factory->mode(), test_factory->status() };
 
-        if(is_selected(test_info))
+        if(_test_filter.is_selected(test_info))
         {
             run_test(test_info, *test_factory);
         }
@@ -474,7 +452,7 @@ std::vector<TestInfo> Framework::test_infos() const
     {
         TestInfo test_info{ id, factory->name(), factory->mode(), factory->status() };
 
-        if(is_selected(test_info))
+        if(_test_filter.is_selected(test_info))
         {
             ids.emplace_back(std::move(test_info));
         }

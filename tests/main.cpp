@@ -115,8 +115,8 @@ int main(int argc, char **argv)
     log_format->set_help("Output format for measurements and failures");
     auto filter = parser.add_option<framework::SimpleOption<std::string>>("filter", ".*");
     filter->set_help("Regular expression to select test cases");
-    auto filter_id = parser.add_option<framework::SimpleOption<int64_t>>("filter-id", -1);
-    filter_id->set_help("Test id. Only this test will be executed.");
+    auto filter_id = parser.add_option<framework::SimpleOption<std::string>>("filter-id");
+    filter_id->set_help("List of test ids. ... can be used to define a range.");
     auto log_file = parser.add_option<framework::SimpleOption<std::string>>("log-file");
     log_file->set_help("Write output to file instead of to the console");
     auto log_level = parser.add_option<framework::EnumOption<framework::LogLevel>>("log-level", supported_log_levels, framework::LogLevel::ALL);

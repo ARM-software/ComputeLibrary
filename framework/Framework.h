@@ -29,6 +29,7 @@
 #include "Profiler.h"
 #include "TestCase.h"
 #include "TestCaseFactory.h"
+#include "TestFilter.h"
 #include "TestResult.h"
 #include "Utils.h"
 #include "instruments/Instruments.h"
@@ -96,14 +97,16 @@ public:
 
     /** Init the framework.
      *
+     * @see TestFilter::TestFilter for the format of the string to filter ids.
+     *
      * @param[in] instruments    Instrument types that will be used for benchmarking.
      * @param[in] num_iterations Number of iterations per test.
      * @param[in] mode           Dataset mode.
      * @param[in] name_filter    Regular expression to filter tests by name. Only matching tests will be executed.
-     * @param[in] id_filter      Test id. Only this test will be executed.
+     * @param[in] id_filter      String to match selected test ids. Only matching tests will be executed.
      * @param[in] log_level      Verbosity of the output.
      */
-    void init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, int64_t id_filter, LogLevel log_level);
+    void init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter, LogLevel log_level);
 
     /** Add a new test suite.
      *
@@ -225,14 +228,6 @@ public:
      */
     void set_stop_on_error(bool stop_on_error);
 
-    /** Check if a test case is selected to be executed.
-     *
-     * @param[in] info Test case info.
-     *
-     * @return True if the test case is selected to be executed.
-     */
-    bool is_selected(const TestInfo &info) const;
-
     /** Run all enabled test cases.
      *
      * @return True if all test cases executed successful.
@@ -308,9 +303,7 @@ private:
     std::map<InstrumentType, create_function *> _available_instruments{};
 
     InstrumentType           _instruments{ InstrumentType::NONE };
-    std::regex               _test_name_filter{ ".*" };
-    int64_t                  _test_id_filter{ -1 };
-    DatasetMode              _dataset_mode{ DatasetMode::ALL };
+    TestFilter               _test_filter{};
     LogLevel                 _log_level{ LogLevel::ALL };
     TestResult              *_current_test_result{ nullptr };
     std::vector<std::string> _test_info{};
