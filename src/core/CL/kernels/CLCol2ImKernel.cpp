@@ -61,7 +61,8 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts));
 
     // Set static kernel arguments
-    unsigned int idx = num_arguments_per_2D_tensor() + num_arguments_per_3D_tensor();
+    unsigned int idx = 2 * num_arguments_per_3D_tensor();
+    _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes()[3]);
     _kernel.setArg<cl_uint>(idx++, _convolved_dims.first);
 
     // Configure window
@@ -79,16 +80,19 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
+    // The collapse method rely on the assumption that the third dimension of input buffer is 1
+    ARM_COMPUTE_ERROR_ON(window.z().end() != 1);
 
-    Window slice_in  = window.first_slice_window_2D();
-    Window slice_out = window.first_slice_window_3D();
+    Window collapsed_window = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window slice            = collapsed_window.first_slice_window_3D();
+
     do
     {
         // Set inputs
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input, slice_in);
-        add_3D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_in);
+        add_3D_tensor_argument(idx, _input, slice);
+        add_3D_tensor_argument(idx, _output, slice);
+        enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_2D(slice_in) && window.slide_window_slice_3D(slice_out));
+    while(collapsed_window.slide_window_slice_3D(slice));
 }

@@ -241,6 +241,8 @@ __kernel void im2col_kernel3x3_padx0_pady0(
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
@@ -250,17 +252,19 @@ __kernel void im2col_kernel3x3_padx0_pady0(
  * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  * @param[in]  width                             The output tensor width
  */
 __kernel void col2im(
-    IMAGE_DECLARATION(src),
+    TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
+    uint dst_stride_w,
     uint width)
 {
-    Image    src = CONVERT_TO_IMAGE_STRUCT(src);
+    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(dst);
 
-    int      idx                         = get_global_id(0) * dst.stride_z + (get_global_id(1) / width) * dst.stride_y + (get_global_id(1) % width) * dst.stride_x;
+    int      idx                         = get_global_id(0) * dst.stride_z + (get_global_id(1) / width) * dst.stride_y + (get_global_id(1) % width) * dst.stride_x + get_global_id(2) * dst_stride_w;
     __global uchar *tmp_out_ptr          = dst.ptr + idx;
     *((__global DATA_TYPE *)tmp_out_ptr) = *((__global DATA_TYPE *)(src.ptr));
 }
