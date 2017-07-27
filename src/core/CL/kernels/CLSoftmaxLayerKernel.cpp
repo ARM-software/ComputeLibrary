@@ -68,6 +68,10 @@ void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
     {
         build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
     }
+    else if(input->info()->data_type() == DataType::F16)
+    {
+        build_opts.emplace("-DUSE_F16");
+    }
 
     // Tell the kernel that the width is not a multiple of 16
     if((input->info()->dimension(0) % max_cl_vector_width) != 0)
@@ -129,6 +133,10 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
     if(is_data_type_fixed_point(input->info()->data_type()))
     {
         build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
+    }
+    else if(input->info()->data_type() == DataType::F16)
+    {
+        build_opts.emplace("-DUSE_F16");
     }
 
     // Tell the kernel that the width is not a multiple of 16
