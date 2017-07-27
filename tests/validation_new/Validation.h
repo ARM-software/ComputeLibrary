@@ -34,6 +34,7 @@
 #include "tests/Utils.h"
 
 #include <iomanip>
+#include <ios>
 #include <vector>
 
 namespace arm_compute
@@ -203,6 +204,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
                     ARM_COMPUTE_TEST_INFO("channel = " << c);
                     ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target_value);
                     ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << reference_value);
+                    ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << tolerance_value);
                     ARM_COMPUTE_EXPECT_EQUAL(target_value, reference_value, framework::LogLevel::DEBUG);
 
                     ++num_mismatches;
@@ -218,7 +220,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
         const int64_t absolute_tolerance_number = tolerance_number * num_elements;
         const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
-        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::setprecision(2) << percent_mismatches
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
                               << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number << "%)");
         ARM_COMPUTE_EXPECT(num_mismatches <= absolute_tolerance_number, framework::LogLevel::ERRORS);
     }
@@ -231,6 +233,7 @@ void validate(T target, T ref, U tolerance_abs_error, double tolerance_relative_
 
     ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << ref);
     ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
+    ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << tolerance_abs_error);
     ARM_COMPUTE_EXPECT(equal, framework::LogLevel::ERRORS);
 }
 } // namespace validation

@@ -213,7 +213,7 @@ void validate(const IAccessor &tensor, const void *reference_value)
     {
         const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
-        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
         ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0, framework::LogLevel::ERRORS);
     }
 }
@@ -290,7 +290,7 @@ void validate(const IAccessor &tensor, BorderSize border_size, const BorderMode 
     {
         const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
-        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
         ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0, framework::LogLevel::ERRORS);
     }
 }
