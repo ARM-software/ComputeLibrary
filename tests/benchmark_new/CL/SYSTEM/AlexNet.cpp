@@ -36,7 +36,6 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/ActivationLayerDataset.h"
 #include "tests/fixtures_new/AlexNetFixture.h"
 
 namespace arm_compute

@@ -30,25 +30,31 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/NormalizationLayerDataset.h"
+#include "tests/datasets_new/AlexNetNormalizationLayerDataset.h"
+#include "tests/datasets_new/GoogLeNetNormalizationLayerDataset.h"
 #include "tests/fixtures_new/NormalizationLayerFixture.h"
 
 namespace arm_compute
 {
 namespace test
 {
+namespace
+{
+const auto normalization_layer_data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+} // namespace
+
 using CLNormalizationLayerFixture = NormalizationLayerFixture<CLTensor, CLNormalizationLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, CLNormalizationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", { DataType::F32 })),
+                                                                                        normalization_layer_data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetNormalizationLayer, CLNormalizationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetNormalizationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        normalization_layer_data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()

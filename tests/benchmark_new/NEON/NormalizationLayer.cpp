@@ -30,25 +30,34 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/NormalizationLayerDataset.h"
+#include "tests/datasets_new/AlexNetNormalizationLayerDataset.h"
+#include "tests/datasets_new/GoogLeNetNormalizationLayerDataset.h"
 #include "tests/fixtures_new/NormalizationLayerFixture.h"
 
 namespace arm_compute
 {
 namespace test
 {
+namespace
+{
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const auto normalization_layer_data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8 });
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
+const auto normalization_layer_data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8 });
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+} // namespace
 using NENormalizationLayerFixture = NormalizationLayerFixture<Tensor, NENormalizationLayer, Accessor>;
 
 TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", { DataType::F32, DataType::QS8 })),
+                                                                                        normalization_layer_data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetNormalizationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        normalization_layer_data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()

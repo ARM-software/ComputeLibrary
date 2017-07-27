@@ -473,6 +473,12 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             break;
         }
         case DataType::F16:
+        {
+            // It doesn't make sense to check [-inf, inf], so hard code it to a big number
+            std::uniform_real_distribution<float> distribution_f16(-100.f, 100.f);
+            fill(tensor, distribution_f16, seed_offset);
+            break;
+        }
         case DataType::F32:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number

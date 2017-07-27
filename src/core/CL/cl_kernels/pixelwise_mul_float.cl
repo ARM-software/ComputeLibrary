@@ -84,7 +84,7 @@ __kernel void pixelwise_mul_float(
     // Perform multiplication
 #ifdef DATA_TYPE_FLOAT
     VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
-    res = CONVERT(in1_data * in2_data * scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
+    res = CONVERT(in1_data * in2_data * (DATA_TYPE_RES)scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
 #else  /* DATA_TYPE_FLOAT */
     VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
     res = CONVERT_OP_FLOAT(CONVERT_OP_FLOAT((convert_float16(in1_data * in2_data) * scale), VEC_DATA_TYPE(DATA_TYPE_RES, 16), ROUND), VEC_DATA_TYPE(DATA_TYPE_OUT, 16), ROUND);

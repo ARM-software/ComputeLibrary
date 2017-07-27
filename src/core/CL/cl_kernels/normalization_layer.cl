@@ -146,7 +146,7 @@ __kernel void normalization_layer_in_map_1D(TENSOR3D_DECLARATION(input),
         acc_vec += vload4(0, (__global DATA_TYPE *)tensor3D_offset(&squared_in, i - current_pos, 0, 0));
     }
 
-    const float4 normalized = pow((float4)kappa + coeff * (float4)acc_vec, beta);
+    const float4 normalized = pow((float4)kappa + coeff * CONVERT(acc_vec, float4), beta);
 
     const float4 normalized_pixel = CONVERT(vload4(0, (__global DATA_TYPE *)in.ptr), float4) / normalized;
 

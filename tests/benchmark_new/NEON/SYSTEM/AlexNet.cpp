@@ -36,13 +36,21 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/ActivationLayerDataset.h"
 #include "tests/fixtures_new/AlexNetFixture.h"
 
 namespace arm_compute
 {
 namespace test
 {
+namespace
+{
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const auto alex_net_data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8 });
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
+const auto alex_net_data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8 });
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+} // namespace
+
 using NEAlexNetFixture = AlexNetFixture<ITensor,
       Tensor,
       SubTensor,
@@ -58,7 +66,7 @@ TEST_SUITE(NEON)
 TEST_SUITE(SYSTEM_TEST)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, NEAlexNetFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::make("DataType", { DataType::F32, DataType::QS8 }),
+                                framework::dataset::combine(alex_net_data_types,
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()

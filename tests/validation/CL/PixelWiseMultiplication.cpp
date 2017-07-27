@@ -38,6 +38,7 @@ using namespace arm_compute::test::validation;
 namespace
 {
 const float tolerance_f32 = 1.f; /**< Tolerance value for comparing reference's output against implementation's output for float input */
+const float tolerance_f16 = 1.f; /**< Tolerance value for comparing reference's output against implementation's output for float input */
 
 /** Compute CL pixel-wise multiplication function.
  *
@@ -87,6 +88,24 @@ CLTensor compute_pixel_wise_multiplication(const TensorShape &shape, DataType dt
 #ifndef DOXYGEN_SKIP_THIS
 BOOST_AUTO_TEST_SUITE(CL)
 BOOST_AUTO_TEST_SUITE(PixelWiseMultiplication)
+
+BOOST_AUTO_TEST_SUITE(Float16)
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * DataType::F16 *ConvertPolicies() * RoundingPolicy::TO_NEAREST_UP,
+                     shape, dt, convert_policy, rounding_policy)
+{
+    constexpr float scale = 1.f / 255.f;
+
+    // Compute function
+    CLTensor dst = compute_pixel_wise_multiplication(shape, dt, dt, dt, scale, convert_policy, rounding_policy);
+
+    // Compute reference
+    RawTensor ref_dst = Reference::compute_reference_pixel_wise_multiplication(shape, dt, dt, dt, scale, convert_policy, rounding_policy);
+
+    // Validate output
+    validate(CLAccessor(dst), ref_dst, tolerance_f16);
+}
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(Float)
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))

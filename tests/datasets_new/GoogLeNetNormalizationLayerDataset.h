@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_NORMALIZATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_NORMALIZATION_LAYER_DATASET
+#ifndef ARM_COMPUTE_TEST_GOOGLENET_NORMALIZATION_LAYER_DATASET
+#define ARM_COMPUTE_TEST_GOOGLENET_NORMALIZATION_LAYER_DATASET
 
 #include "framework/datasets/Datasets.h"
 
@@ -37,22 +37,6 @@ namespace test
 {
 namespace datasets
 {
-class AlexNetNormalizationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<NormalizationLayerInfo>>
-{
-public:
-    AlexNetNormalizationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", { TensorShape(55U, 55U, 96U), TensorShape(27U, 27U, 256U) }),
-        framework::dataset::make("Info", NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
-    }
-    {
-    }
-    AlexNetNormalizationLayerDataset(AlexNetNormalizationLayerDataset &&) = default;
-    ~AlexNetNormalizationLayerDataset()                                   = default;
-};
-
 class GoogLeNetNormalizationLayerDataset final : public
     framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<NormalizationLayerInfo>>
 {
@@ -74,4 +58,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_NORMALIZATION_LAYER_DATASET */
+#endif /* ARM_COMPUTE_TEST_GOOGLENET_NORMALIZATION_LAYER_DATASET */
