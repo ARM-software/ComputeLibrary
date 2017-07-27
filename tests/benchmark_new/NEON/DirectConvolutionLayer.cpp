@@ -34,6 +34,7 @@
 #include "tests/datasets_new/DirectConvolutionLayerDataset.h"
 #include "tests/datasets_new/GoogLeNetConvolutionLayerDataset.h"
 #include "tests/datasets_new/SqueezeNetConvolutionLayerDataset.h"
+#include "tests/datasets_new/YOLOV2ConvolutionLayerDataset.h"
 #include "tests/fixtures_new/ConvolutionLayerFixture.h"
 
 namespace arm_compute
@@ -53,22 +54,35 @@ using NEConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvol
 
 TEST_SUITE(NEON)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(DirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::DirectConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
-
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetDirectConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetDirectConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2DirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace test
 } // namespace arm_compute

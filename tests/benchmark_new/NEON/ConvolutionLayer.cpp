@@ -34,6 +34,7 @@
 #include "tests/datasets_new/GoogLeNetConvolutionLayerDataset.h"
 #include "tests/datasets_new/LeNet5ConvolutionLayerDataset.h"
 #include "tests/datasets_new/SqueezeNetConvolutionLayerDataset.h"
+#include "tests/datasets_new/YOLOV2ConvolutionLayerDataset.h"
 #include "tests/fixtures_new/ConvolutionLayerFixture.h"
 
 namespace arm_compute
@@ -43,9 +44,9 @@ namespace test
 namespace
 {
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8, DataType::QS16 });
 #else  /* ARM_COMPUTE_ENABLE_FP16 */
-const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8, DataType::QS16 });
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 
@@ -55,20 +56,41 @@ TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace test
 } // namespace arm_compute

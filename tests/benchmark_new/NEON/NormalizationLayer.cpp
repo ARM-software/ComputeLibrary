@@ -41,9 +41,9 @@ namespace test
 namespace
 {
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const auto normalization_layer_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F16, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F16, DataType::F32 });
 #else  /* ARM_COMPUTE_ENABLE_FP16 */
-const auto normalization_layer_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F32 });
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 using NENormalizationLayerFixture = NormalizationLayerFixture<Tensor, NENormalizationLayer, Accessor>;
@@ -52,14 +52,25 @@ TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(),
-                                                                                        normalization_layer_data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetNormalizationLayerDataset(),
-                                                                                        normalization_layer_data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetNormalizationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace test
 } // namespace arm_compute

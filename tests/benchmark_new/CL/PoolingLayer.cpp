@@ -34,36 +34,73 @@
 #include "tests/datasets_new/GoogLeNetPoolingLayerDataset.h"
 #include "tests/datasets_new/LeNet5PoolingLayerDataset.h"
 #include "tests/datasets_new/SqueezeNetPoolingLayerDataset.h"
+#include "tests/datasets_new/YOLOV2PoolingLayerDataset.h"
 #include "tests/fixtures_new/PoolingLayerFixture.h"
 
 namespace arm_compute
 {
 namespace test
 {
+namespace
+{
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+} // namespace
+
 using CLPoolingLayerFixture = PoolingLayerFixture<CLTensor, CLPoolingLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetPoolingLayerDataset(),
-                                                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5PoolingLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetPoolingLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetPoolingLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5PoolingLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetPoolingLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace test
 } // namespace arm_compute

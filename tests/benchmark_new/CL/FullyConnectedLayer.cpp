@@ -39,25 +39,46 @@ namespace arm_compute
 {
 namespace test
 {
+namespace
+{
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8, DataType::QS16 });
+} // namespace
+
 using CLFullyConnectedLayerFixture = FullyConnectedLayerFixture<CLTensor, CLFullyConnectedLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
-                                                                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5FullyConnectedLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetFullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetFullyConnectedLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 1, 4 })));
 
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetFullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetFullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 8)));
+TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace test
 } // namespace arm_compute

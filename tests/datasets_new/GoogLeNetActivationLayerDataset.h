@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ACTIVATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_ACTIVATION_LAYER_DATASET
+#ifndef ARM_COMPUTE_TEST_GOOGLENET_ACTIVATION_LAYER_DATASET
+#define ARM_COMPUTE_TEST_GOOGLENET_ACTIVATION_LAYER_DATASET
 
 #include "framework/datasets/Datasets.h"
 
@@ -37,41 +37,6 @@ namespace test
 {
 namespace datasets
 {
-class AlexNetActivationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
-{
-public:
-    AlexNetActivationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", {
-            TensorShape(55U, 55U, 96U), TensorShape(27U, 27U, 256U),
-            TensorShape(13U, 13U, 384U), TensorShape(13U, 13U, 256U),
-            TensorShape(4096U) }),
-        framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-    }
-    {
-    }
-    AlexNetActivationLayerDataset(AlexNetActivationLayerDataset &&) = default;
-    ~AlexNetActivationLayerDataset()                                = default;
-};
-
-class LeNet5ActivationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::SingletonDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
-{
-public:
-    LeNet5ActivationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", TensorShape(500U)),
-        framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-    }
-    {
-    }
-    LeNet5ActivationLayerDataset(LeNet5ActivationLayerDataset &&) = default;
-    ~LeNet5ActivationLayerDataset()                               = default;
-};
-
 class GoogLeNetActivationLayerDataset final : public
     framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
 {
@@ -152,42 +117,7 @@ public:
     GoogLeNetActivationLayerDataset(GoogLeNetActivationLayerDataset &&) = default;
     ~GoogLeNetActivationLayerDataset()                                  = default;
 };
-
-class SqueezeNetActivationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
-{
-public:
-    SqueezeNetActivationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", { // relu_conv1
-            TensorShape(111U, 111U, 64U),
-            // fire2/relu_squeeze1x1, fire3/relu_squeeze1x1
-            TensorShape(55U, 55U, 16U),
-            // fire2/relu_expand1x1, fire2/relu_expand3x3, fire3/relu_expand1x1, fire3/relu_expand3x3
-            TensorShape(55U, 55U, 64U),
-            // fire4/relu_squeeze1x1, fire5/relu_squeeze1x1
-            TensorShape(27U, 27U, 32U),
-            // fire4/relu_expand1x1, fire4/relu_expand3x3, fire5/relu_expand1x1, fire5/relu_expand3x3
-            TensorShape(27U, 27U, 128U),
-            // fire6/relu_squeeze1x1, fire7/relu_squeeze1x1
-            TensorShape(13U, 13U, 48U),
-            // fire6/relu_expand1x1, fire6/relu_expand3x3, fire7/relu_expand1x1, fire7/relu_expand3x3
-            TensorShape(13U, 13U, 192U),
-            // fire8/relu_squeeze1x1, fire9/relu_squeeze1x1
-            TensorShape(13U, 13U, 64U),
-            // fire8/relu_expand1x1, fire8/relu_expand3x3, fire9/relu_expand1x1, fire9/relu_expand3x3
-            TensorShape(13U, 13U, 256U),
-            // relu_conv10
-            TensorShape(13U, 13U, 1000U) }),
-        framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-    }
-    {
-    }
-    SqueezeNetActivationLayerDataset(SqueezeNetActivationLayerDataset &&) = default;
-    ~SqueezeNetActivationLayerDataset()                                   = default;
-};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ACTIVATION_LAYER_DATASET */
+#endif /* ARM_COMPUTE_TEST_GOOGLENET_ACTIVATION_LAYER_DATASET */

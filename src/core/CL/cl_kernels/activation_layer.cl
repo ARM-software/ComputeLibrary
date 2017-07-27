@@ -42,7 +42,7 @@
 
 #else /* FIXED_POINT_POSITION */
 
-#define CONST_ONE (1.f)
+#define CONST_ONE 1.f
 #define ABS_OP(a) fabs((a))
 #define ADD_OP(a, b) ((a) + (b))
 #define SUB_OP(a, b) ((a) - (b))

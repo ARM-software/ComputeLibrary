@@ -25,14 +25,13 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "arm_compute/runtime/CL/functions/CLNormalizationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/AlexNetNormalizationLayerDataset.h"
-#include "tests/datasets_new/GoogLeNetNormalizationLayerDataset.h"
-#include "tests/fixtures_new/NormalizationLayerFixture.h"
+#include "tests/datasets_new/YOLOV2BatchNormalizationLayerDataset.h"
+#include "tests/fixtures_new/BatchNormalizationLayerFixture.h"
 
 namespace arm_compute
 {
@@ -40,31 +39,21 @@ namespace test
 {
 namespace
 {
-const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F16, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8, DataType::QS16 });
 } // namespace
 
-using CLNormalizationLayerFixture = NormalizationLayerFixture<CLTensor, CLNormalizationLayer, CLAccessor>;
+using CLBatchNormalizationLayerFixture = BatchNormalizationLayerFixture<CLTensor, CLBatchNormalizationLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, CLNormalizationLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(),
-                                                                                        data_types),
-                                                            framework::dataset::make("Batches", 1)));
-
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetNormalizationLayer, CLNormalizationLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetNormalizationLayerDataset(),
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2BatchNormalizationLayerDataset(),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
 TEST_SUITE(NIGHTLY)
-REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, CLNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(),
-                                                                                        data_types),
-                                                            framework::dataset::make("Batches", { 4, 8 })));
-
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetNormalizationLayer, CLNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetNormalizationLayerDataset(),
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2BatchNormalizationLayerDataset(),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 TEST_SUITE_END()

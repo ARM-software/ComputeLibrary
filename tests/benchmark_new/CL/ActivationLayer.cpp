@@ -30,37 +30,78 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/ActivationLayerDataset.h"
+#include "tests/datasets_new/AlexNetActivationLayerDataset.h"
+#include "tests/datasets_new/GoogLeNetActivationLayerDataset.h"
+#include "tests/datasets_new/LeNet5ActivationLayerDataset.h"
+#include "tests/datasets_new/SqueezeNetActivationLayerDataset.h"
+#include "tests/datasets_new/YOLOV2ActivationLayerDataset.h"
 #include "tests/fixtures_new/ActivationLayerFixture.h"
 
 namespace arm_compute
 {
 namespace test
 {
+namespace
+{
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8, DataType::QS16 });
+} // namespace
+
 using CLActivationLayerFixture = ActivationLayerFixture<CLTensor, CLActivationLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetActivationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetActivationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetActivationLayerDataset(),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace test
 } // namespace arm_compute
