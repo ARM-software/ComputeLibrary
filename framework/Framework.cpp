@@ -126,11 +126,14 @@ bool Framework::has_test_info() const
 
 void Framework::print_test_info(std::ostream &os) const
 {
-    os << "CONTEXT:\n";
-
-    for(const auto &str : _test_info)
+    if(!_test_info.empty())
     {
-        os << "    " << str << "\n";
+        os << "CONTEXT:\n";
+
+        for(const auto &str : _test_info)
+        {
+            os << "    " << str << "\n";
+        }
     }
 }
 
@@ -390,7 +393,7 @@ bool Framework::run()
 
     if(_log_level > LogLevel::NONE)
     {
-        std::cout << "Executed " << results.size() << " test(s) ("
+        std::cout << "Executed " << _test_results.size() << " test(s) ("
                   << results[TestResult::Status::SUCCESS] << " passed, "
                   << results[TestResult::Status::EXPECTED_FAILURE] << " expected failures, "
                   << results[TestResult::Status::FAILED] << " failed, "
