@@ -60,6 +60,9 @@ public:
     // Inherited methods overridden:
     void run(const Window &window) override;
 
+    // Inherited methods overridden:
+    BorderSize border_size() const override;
+
 protected:
     /** function to perform warp affine or warp perspective on the given window when border mode == UNDEFINED
      *

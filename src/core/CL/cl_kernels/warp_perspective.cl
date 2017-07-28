@@ -92,7 +92,7 @@ __kernel void warp_perspective_nearest_neighbour(
 {
     Image in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
     Image out = CONVERT_TO_IMAGE_STRUCT(out);
-    vstore4(read_texels4(&in, convert_int8(clamp_to_border(apply_perspective_transform(get_current_coords(), build_perspective_mtx()), width, height))), 0, out.ptr);
+    vstore4(read_texels4(&in, convert_int8_rtn(clamp_to_border(apply_perspective_transform(get_current_coords(), build_perspective_mtx()), width, height))), 0, out.ptr);
 }
 
 /** Performs a perspective transform on an image interpolating with the BILINEAR method. Input and output are single channel U8.
@@ -124,5 +124,5 @@ __kernel void warp_perspective_bilinear(
 {
     Image in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
     Image out = CONVERT_TO_IMAGE_STRUCT(out);
-    vstore4(bilinear_interpolate(&in, clamp_to_border(apply_perspective_transform(get_current_coords(), build_perspective_mtx()), width, height), width, height), 0, out.ptr);
+    vstore4(bilinear_interpolate(&in, apply_perspective_transform(get_current_coords(), build_perspective_mtx()), width, height), 0, out.ptr);
 }

@@ -49,6 +49,11 @@ INEWarpKernel::INEWarpKernel()
 {
 }
 
+BorderSize INEWarpKernel::border_size() const
+{
+    return BorderSize(1);
+}
+
 void INEWarpKernel::run(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -93,9 +98,9 @@ void INEWarpKernel::configure(const ITensor *input, ITensor *output, const float
 
     // Reads can occur within the valid region of the input
     AccessWindowStatic input_access(input->info(),
-                                    input_valid_region.anchor[0], input_valid_region.anchor[1],
-                                    input_valid_region.anchor[0] + input_valid_region.shape[0],
-                                    input_valid_region.anchor[1] + input_valid_region.shape[1]);
+                                    input_valid_region.anchor[0] - border_size().left, input_valid_region.anchor[1] - border_size().top,
+                                    input_valid_region.anchor[0] + input_valid_region.shape[0] + border_size().right,
+                                    input_valid_region.anchor[1] + input_valid_region.shape[1] + border_size().bottom);
     AccessWindowHorizontal output_access(output->info(), 0, 1);
 
     update_window_and_padding(win, input_access, output_access);
