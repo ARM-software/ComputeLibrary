@@ -53,6 +53,14 @@ static constexpr const unsigned int max_cl_vector_width = 16;
  */
 std::string get_cl_type_from_data_type(const DataType &dt);
 
+/** Get the size of a data type in number of bits.
+ *
+ * @param[in] dt @ref DataType.
+ *
+ * @return Number of bits in the data type specified.
+ */
+std::string get_data_size_from_data_type(const DataType &dt);
+
 /** Translates fixed point tensor data type to the underlying OpenCL type.
  *
  * @param[in] dt @ref DataType to be translated to OpenCL type.

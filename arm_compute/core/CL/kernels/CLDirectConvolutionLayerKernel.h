@@ -33,7 +33,6 @@ class ICLTensor;
 
 /** Interface for the  direct convolution kernel.
  */
-template <unsigned int kernel_size>
 class CLDirectConvolutionLayerKernel : public ICLKernel
 {
 public:
@@ -52,7 +51,7 @@ public:
     /** Set the input, weights, biases and output tensors.
      *
      * @param[in]  input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
-     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F32.
+     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F16, F32.
      * @param[in]  weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
      *                       The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                       Data type supported:Same as @p input.
@@ -80,7 +79,5 @@ private:
     int              _conv_stride_x;
     int              _conv_stride_y;
 };
-
-using CLDirectConvolutionLayer3x3Kernel = CLDirectConvolutionLayerKernel<3>;
 }
 #endif /*__ARM_COMPUTE_CLDIRECTCONVOLUTIONLAYERKERNEL_H__ */

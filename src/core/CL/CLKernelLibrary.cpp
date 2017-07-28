@@ -145,7 +145,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "copy_to_keypoint", "fast_corners.cl" },
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
-    { "direct_convolution3x3", "direct_convolution.cl" },
+    { "direct_convolution1x1", "direct_convolution1x1.cl" },
+    { "direct_convolution3x3", "direct_convolution3x3.cl" },
     { "erode", "erode.cl" },
     { "fast_corners", "fast_corners.cl" },
     { "fill_image_borders_constant", "fill_border.cl" },
@@ -350,8 +351,12 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/dilate.clembed"
     },
     {
-        "direct_convolution.cl",
-#include "./cl_kernels/direct_convolution.clembed"
+        "direct_convolution1x1.cl",
+#include "./cl_kernels/direct_convolution1x1.clembed"
+    },
+    {
+        "direct_convolution3x3.cl",
+#include "./cl_kernels/direct_convolution3x3.clembed"
     },
     {
         "erode.cl",

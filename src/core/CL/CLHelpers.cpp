@@ -100,6 +100,32 @@ std::string get_cl_type_from_data_type(const DataType &dt)
     }
 }
 
+std::string get_data_size_from_data_type(const DataType &dt)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+        case DataType::QS8:
+        case DataType::S8:
+            return "8";
+        case DataType::U16:
+        case DataType::S16:
+        case DataType::QS16:
+        case DataType::F16:
+            return "16";
+        case DataType::U32:
+        case DataType::S32:
+        case DataType::F32:
+            return "32";
+        case DataType::U64:
+        case DataType::S64:
+            return "64";
+        default:
+            ARM_COMPUTE_ERROR("Unsupported input data type.");
+            return "0";
+    }
+}
+
 std::string get_underlying_cl_type_from_data_type(const DataType &dt)
 {
     switch(dt)

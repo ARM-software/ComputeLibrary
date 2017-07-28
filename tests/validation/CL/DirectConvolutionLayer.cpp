@@ -48,7 +48,24 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance_fp = 1e-3f; /**< Tolerance for floating point tests */
+/** Define tolerance of the direct convolution layer
+ *
+ * @param[in] dt DataType of the tensor.
+ *
+ * @return Tolerance depending on the data type.
+ */
+float direct_convolution_layer_tolerance(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::F16:
+            return 0.1f;
+        case DataType::F32:
+            return 1e-3f;
+        default:
+            return 0.f;
+    }
+}
 
 /** Compute CL direct convolution layer function.
  *
@@ -90,6 +107,7 @@ CLTensor compute_convolution_layer(const TensorShape &src_shape, const TensorSha
     // Fill tensors
     switch(dt)
     {
+        case DataType::F16:
         case DataType::F32:
         {
             std::uniform_real_distribution<> distribution(-1.f, 1.f);
@@ -133,8 +151,29 @@ BOOST_AUTO_TEST_SUITE(DirectConvolutionLayer)
 BOOST_AUTO_TEST_SUITE(Float)
 
 BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * CNNFloatDataTypes() * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(0, 2,
+BOOST_DATA_TEST_CASE(W1x1, DirectConvolutionShapes() * boost::unit_test::data::make({ DataType::F16, DataType::F32 }) * boost::unit_test::data::xrange(1, 4, 1) * boost::unit_test::data::xrange(1, 4,
                      1)
+                     * boost::unit_test::data::make({ 1, 4, 8, 16 }),
+                     input_shape, dt, sx, sy, num_kernels)
+{
+    const unsigned int  kernel_size = 1;
+    const PadStrideInfo conv_info(sx, sy, 0, 0, DimensionRoundingType::FLOOR);
+    const TensorShape   w_shape(kernel_size, kernel_size, input_shape.z(), static_cast<unsigned int>(num_kernels));
+    const TensorShape   b_shape(static_cast<unsigned int>(num_kernels));
+    const TensorShape   d_shape(get_output_shape(input_shape, w_shape, conv_info));
+
+    CLTensor dst = compute_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info);
+
+    RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, 0);
+
+    // Validate output
+    validate(CLAccessor(dst), ref, direct_convolution_layer_tolerance(dt));
+}
+
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * boost::unit_test::data::make({ DataType::F16, DataType::F32 }) * boost::unit_test::data::xrange(1, 3, 1) * boost::unit_test::data::xrange(1, 3,
+                     1)
+                     * boost::unit_test::data::xrange(0, 2, 1)
                      * boost::unit_test::data::xrange(0, 2, 1) * boost::unit_test::data::make({ 1, 4, 8, 16 }),
                      input_shape, dt, sx, sy, px, py, num_kernels)
 {
@@ -149,7 +188,7 @@ BOOST_DATA_TEST_CASE(W3x3, DirectConvolutionShapes() * CNNFloatDataTypes() * boo
     RawTensor ref = Reference::compute_reference_convolution_layer(input_shape, w_shape, b_shape, d_shape, dt, conv_info, 0);
 
     // Validate output
-    validate(CLAccessor(dst), ref, tolerance_fp);
+    validate(CLAccessor(dst), ref, direct_convolution_layer_tolerance(dt));
 }
 BOOST_AUTO_TEST_SUITE_END()
 
