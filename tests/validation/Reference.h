@@ -161,13 +161,6 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_arithmetic_subtraction(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy convert_policy, int fixed_point_position = 0);
-    /** Compute reference bitwise not.
-     *
-     * @param[in] shape Shape of the input and output tensors.
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_bitwise_not(const TensorShape &shape);
     /** Compute reference box3x3 filter.
      *
      * @param[in] shape                 Shape of the input and output tensors.

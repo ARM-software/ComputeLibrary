@@ -150,12 +150,6 @@ public:
      * @param[in]  convert_policy Overflow policy.
      */
     static void arithmetic_subtraction(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, ConvertPolicy convert_policy);
-    /** Function to compute the bitwise not of a tensor.
-     *
-     * @param[in]  src Input tensor.
-     * @param[out] dst Result tensor.
-     */
-    static void bitwise_not(const RawTensor &src, RawTensor &dst);
     /** Function to compute box3x3 filtered result tensor.
      *
      * @param[in]  src                   Input tensor.

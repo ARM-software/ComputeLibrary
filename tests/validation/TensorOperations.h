@@ -630,16 +630,6 @@ void arithmetic_subtraction(const Tensor<T1> &in1, const Tensor<T2> &in2, Tensor
     }
 }
 
-// Bitwise not
-template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-void bitwise_not(const Tensor<T> &in, Tensor<T> &out)
-{
-    for(int i = 0; i < in.num_elements(); ++i)
-    {
-        out[i] = ~in[i];
-    }
-}
-
 // Box3x3 filter
 template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
 void box3x3(const Tensor<T> &in, Tensor<T> &out, BorderMode border_mode, T constant_border_value)

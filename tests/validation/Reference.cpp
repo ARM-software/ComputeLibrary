@@ -239,21 +239,6 @@ RawTensor Reference::compute_reference_arithmetic_subtraction(const TensorShape 
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_bitwise_not(const TensorShape &shape)
-{
-    // Create reference
-    RawTensor ref_src(shape, DataType::U8);
-    RawTensor ref_dst(shape, DataType::U8);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src, 0);
-
-    // Compute reference
-    ReferenceCPP::bitwise_not(ref_src, ref_dst);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference
