@@ -431,16 +431,6 @@ void arithmetic_subtraction(const Tensor<T1> &in1, const Tensor<T2> &in2, Tensor
     }
 }
 
-// Bitwise and
-template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-void bitwise_and(const Tensor<T> &in1, const Tensor<T> &in2, Tensor<T> &out)
-{
-    for(int i = 0; i < in1.num_elements(); ++i)
-    {
-        out[i] = in1[i] & in2[i];
-    }
-}
-
 // Bitwise or
 template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
 void bitwise_or(const Tensor<T> &in1, const Tensor<T> &in2, Tensor<T> &out)
