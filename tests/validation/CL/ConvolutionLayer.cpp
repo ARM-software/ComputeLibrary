@@ -45,7 +45,7 @@ using namespace arm_compute::test::validation;
 
 namespace
 {
-const float tolerance_f16 = 1.1f;   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+const float tolerance_f16 = 0.1f;   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 const float tolerance_q   = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 

@@ -29,5 +29,9 @@
 #define HALF_ENABLE_CPP11_CMATH 0
 #endif /* __ANDROID__ */
 
+// Set style to round to nearest
+#define HALF_ROUND_STYLE 1
+#define HALF_ROUND_TIES_TO_EVEN 1
+
 #include "half/half.hpp"
 #endif /* __ARM_COMPUTE_TEST_HALF_H__ */
