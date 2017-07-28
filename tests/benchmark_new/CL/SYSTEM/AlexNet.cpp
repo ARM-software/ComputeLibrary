@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
+#include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
@@ -48,6 +49,7 @@ using CLAlexNetFixture = AlexNetFixture<ICLTensor,
       CLAccessor,
       CLActivationLayer,
       CLConvolutionLayer,
+      CLDirectConvolutionLayer,
       CLFullyConnectedLayer,
       CLNormalizationLayer,
       CLPoolingLayer,

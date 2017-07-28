@@ -25,6 +25,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
@@ -57,6 +58,7 @@ using NEAlexNetFixture = AlexNetFixture<ITensor,
       Accessor,
       NEActivationLayer,
       NEConvolutionLayer,
+      NEDirectConvolutionLayer,
       NEFullyConnectedLayer,
       NENormalizationLayer,
       NEPoolingLayer,

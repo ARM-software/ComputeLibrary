@@ -39,6 +39,7 @@ template <typename ITensorType,
           typename Accessor,
           typename ActivationLayerFunction,
           typename ConvolutionLayerFunction,
+          typename DirectConvolutionLayerFunction,
           typename FullyConnectedLayerFunction,
           typename NormalizationLayerFunction,
           typename PoolingLayerFunction,
@@ -50,10 +51,10 @@ public:
     template <typename...>
     void setup(DataType data_type, int batches)
     {
-        constexpr bool weights_transposed   = true;
+        constexpr bool weights_reshaped     = true;
         constexpr int  fixed_point_position = 4;
 
-        network.init(data_type, fixed_point_position, batches, weights_transposed);
+        network.init(data_type, fixed_point_position, batches, weights_reshaped);
         network.build();
         network.allocate();
         network.fill_random();
@@ -76,6 +77,7 @@ private:
              Accessor,
              ActivationLayerFunction,
              ConvolutionLayerFunction,
+             DirectConvolutionLayerFunction,
              FullyConnectedLayerFunction,
              NormalizationLayerFunction,
              PoolingLayerFunction,

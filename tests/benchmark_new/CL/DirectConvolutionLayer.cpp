@@ -23,12 +23,12 @@
  */
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/CLTensorAllocator.h"
+#include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
-#include "tests/NEON/Accessor.h"
+#include "tests/CL/CLAccessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets_new/GoogLeNetConvolutionLayerDataset.h"
@@ -39,33 +39,23 @@ namespace arm_compute
 {
 namespace test
 {
-namespace
-{
-#ifdef ARM_COMPUTE_ENABLE_F16
-const auto alexnet_data_types    = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
-const auto googlenet_data_types  = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
-const auto squeezenet_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
-#else  /* ARM_COMPUTE_ENABLE_F16 */
-const auto alexnet_data_types    = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
-const auto googlenet_data_types  = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
-const auto squeezenet_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
-#endif /* ARM_COMPUTE_ENABLE_F16 */
-} // namespace
+using CLConvolutionLayerFixture = ConvolutionLayerFixture<CLTensor, CLDirectConvolutionLayer, CLAccessor>;
 
-using NEConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvolutionLayer, Accessor>;
+TEST_SUITE(CL)
 
-TEST_SUITE(NEON)
-
-REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), alexnet_data_types),
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetDirectConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(),
+                                                                                        framework::dataset::make("DataType", { DataType::F32 })),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetDirectConvolutionLayerDataset(), googlenet_data_types),
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetDirectConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetDirectConvolutionLayerDataset(),
+                                                                                        framework::dataset::make("DataType", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), squeezenet_data_types),
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetDirectConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(),
+                                                                                        framework::dataset::make("DataType", DataType::F32)),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()
