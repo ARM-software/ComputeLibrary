@@ -221,7 +221,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     log_test_start(info);
 
     Profiler   profiler = get_profiler();
-    TestResult result(TestResult::Status::SUCCESS);
+    TestResult result(TestResult::Status::NOT_RUN);
 
     _current_test_result = &result;
 
@@ -247,6 +247,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
             }
 
             test_case->do_teardown();
+
+            // Change status to success if no error has happend
+            if(result.status == TestResult::Status::NOT_RUN)
+            {
+                result.status = TestResult::Status::SUCCESS;
+            }
         }
         catch(const TestError &error)
         {
@@ -314,6 +320,8 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
             std::cerr << "FATAL ERROR: Received unhandled error during fixture creation: '" << error.what() << "'\n";
         }
 
+        result.status = TestResult::Status::CRASHED;
+
         if(_throw_errors)
         {
             throw;
@@ -342,7 +350,11 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         {
             result.status = TestResult::Status::EXPECTED_FAILURE;
         }
-        else if(_stop_on_error)
+    }
+
+    if(result.status == TestResult::Status::FAILED || result.status == TestResult::Status::CRASHED)
+    {
+        if(_stop_on_error)
         {
             throw std::runtime_error("Abort on first error.");
         }

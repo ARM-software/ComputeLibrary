@@ -31,7 +31,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
-#include "tests/validation/half.h"
+#include "tests/validation_new/half.h"
 
 #include <cmath>
 #include <cstddef>

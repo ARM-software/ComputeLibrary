@@ -33,5 +33,6 @@
 #define HALF_ROUND_STYLE 1
 #define HALF_ROUND_TIES_TO_EVEN 1
 
-#include "half/tests/validation_new/half.h"
+#include "half/half.hpp"
+
 #endif /* __ARM_COMPUTE_TEST_HALF_H__ */
