@@ -34,7 +34,7 @@ class ICLTensor;
 
 /** Basic function to run @ref CLArithmeticSubtractionKernel
  *
- * @note The tensor data type for the inputs must be U8, S16, F16, F32
+ * @note The tensor data type for the inputs must be U8/QS8/QS16/S16/F16/F32.
  * @note The function performs an arithmetic subtraction between two tensors.
  */
 class CLArithmeticSubtraction : public ICLSimpleFunction
