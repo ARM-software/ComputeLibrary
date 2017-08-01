@@ -143,6 +143,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "copy_plane", "channel_extract.cl" },
     { "copy_planes_3p", "channel_combine.cl" },
     { "copy_to_keypoint", "fast_corners.cl" },
+    { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
@@ -346,6 +347,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "depth_convert.cl",
 #include "./cl_kernels/depth_convert.clembed"
+    },
+    {
+        "depthwise_convolution.cl",
+#include "./cl_kernels/depthwise_convolution.clembed"
     },
     {
         "derivative.cl",
