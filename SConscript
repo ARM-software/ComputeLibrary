@@ -138,22 +138,22 @@ core_files = Glob('src/core/*.cpp')
 core_files += Glob('src/core/CPP/*.cpp')
 core_files += Glob('src/core/CPP/kernels/*.cpp')
 
-files = Glob('src/runtime/*.cpp')
+runtime_files = Glob('src/runtime/*.cpp')
 # CLHarrisCorners uses the Scheduler to run CPP kernels
-files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
+runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
 
 if env['cppthreads']:
-     files += Glob('src/runtime/CPP/CPPScheduler.cpp')
+     runtime_files += Glob('src/runtime/CPP/CPPScheduler.cpp')
 
 if env['openmp']:
-     files += Glob('src/runtime/OMP/OMPScheduler.cpp')
+     runtime_files += Glob('src/runtime/OMP/OMPScheduler.cpp')
 
 if env['opencl']:
     core_files += Glob('src/core/CL/*.cpp')
     core_files += Glob('src/core/CL/kernels/*.cpp')
 
-    files += Glob('src/runtime/CL/*.cpp')
-    files += Glob('src/runtime/CL/functions/*.cpp')
+    runtime_files += Glob('src/runtime/CL/*.cpp')
+    runtime_files += Glob('src/runtime/CL/functions/*.cpp')
 
     # Generate embed files
     if env['embed_kernels']:
@@ -169,8 +169,8 @@ if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
 
-    files += Glob('src/runtime/NEON/*.cpp')
-    files += Glob('src/runtime/NEON/functions/*.cpp')
+    runtime_files += Glob('src/runtime/NEON/*.cpp')
+    runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
 
 static_core_objects = [arm_compute_env.StaticObject(f) for f in core_files]
 shared_core_objects = [arm_compute_env.SharedObject(f) for f in core_files]
@@ -182,14 +182,14 @@ if env['os'] != 'bare_metal' and not env['standalone']:
     arm_compute_core_so = build_library('arm_compute_core', shared_core_objects, static=False)
     Export('arm_compute_core_so')
 
-shared_objects = [arm_compute_env.SharedObject(f) for f in files]
-static_objects = [arm_compute_env.StaticObject(f) for f in files]
+shared_runtime_objects = [arm_compute_env.SharedObject(f) for f in runtime_files]
+static_runtime_objects = [arm_compute_env.StaticObject(f) for f in runtime_files]
 
-arm_compute_a = build_library('arm_compute-static', static_core_objects + static_objects, static=True)
+arm_compute_a = build_library('arm_compute-static', static_core_objects + static_runtime_objects, static=True)
 Export('arm_compute_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_so = build_library('arm_compute', shared_core_objects + shared_objects, static=False)
+    arm_compute_so = build_library('arm_compute', shared_core_objects + shared_runtime_objects, static=False)
     Export('arm_compute_so')
 
 if env['standalone']:
