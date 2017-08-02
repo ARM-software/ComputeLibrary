@@ -44,9 +44,9 @@ namespace validation
 {
 namespace
 {
-constexpr float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr float tolerance_f16 = 0.1f;   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr float tolerance_q   = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> tolerance_f16(0.1f);   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr AbsoluteTolerance<float> tolerance_q(1.0f);     /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",

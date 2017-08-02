@@ -44,11 +44,11 @@ namespace validation
 {
 namespace
 {
-const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+const AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const float tolerance_f16 = 0.01f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif                             /* ARM_COMPUTE_ENABLE_FP16 */
-const float tolerance_q = 1.0f;    /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+const AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+#endif                                               /* ARM_COMPUTE_ENABLE_FP16 */
+const AbsoluteTolerance<float> tolerance_q(1.0f);    /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",

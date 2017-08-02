@@ -46,12 +46,12 @@ namespace
 {
 /** Tolerance for float operations */
 #ifdef ARM_COMPUTE_ENABLE_FP16
-constexpr float tolerance_f16 = 0.001f;
+constexpr AbsoluteTolerance<float> tolerance_f16(0.001f);
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-constexpr float tolerance_f32 = 0.00001f;
+constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 /** Tolerance for fixed point operations */
-constexpr int8_t  tolerance_qs8  = 2;
-constexpr int16_t tolerance_qs16 = 2;
+constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
+constexpr AbsoluteTolerance<int16_t> tolerance_qs16(2);
 
 /** Input data set. */
 const auto NormalizationDataset = combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),

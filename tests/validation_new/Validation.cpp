@@ -128,17 +128,16 @@ void check_border_element(const IAccessor &tensor, const Coordinates &id,
     {
         const size_t channel_offset = channel * channel_size;
         const double target         = get_double_data(ptr + channel_offset, tensor.data_type());
-        const double ref            = get_double_data(static_cast<const uint8_t *>(border_value) + channel_offset, tensor.data_type());
-        const bool   equal          = is_equal(target, ref);
+        const double reference      = get_double_data(static_cast<const uint8_t *>(border_value) + channel_offset, tensor.data_type());
 
-        ARM_COMPUTE_TEST_INFO("id = " << id);
-        ARM_COMPUTE_TEST_INFO("channel = " << channel);
-        ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
-        ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << ref);
-        ARM_COMPUTE_EXPECT_EQUAL(target, ref, framework::LogLevel::DEBUG);
-
-        if(!equal)
+        if(!compare<AbsoluteTolerance<double>, double>(target, reference))
         {
+            ARM_COMPUTE_TEST_INFO("id = " << id);
+            ARM_COMPUTE_TEST_INFO("channel = " << channel);
+            ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
+            ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << reference);
+            ARM_COMPUTE_EXPECT_EQUAL(target, reference, framework::LogLevel::DEBUG);
+
             ++num_mismatches;
         }
 
@@ -191,17 +190,16 @@ void validate(const IAccessor &tensor, const void *reference_value)
         {
             const size_t channel_offset = channel * channel_size;
             const double target         = get_double_data(ptr + channel_offset, tensor.data_type());
-            const double ref            = get_double_data(reference_value, tensor.data_type());
-            const bool   equal          = is_equal(target, ref);
+            const double reference      = get_double_data(reference_value, tensor.data_type());
 
-            ARM_COMPUTE_TEST_INFO("id = " << id);
-            ARM_COMPUTE_TEST_INFO("channel = " << channel);
-            ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
-            ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << ref);
-            ARM_COMPUTE_EXPECT_EQUAL(target, ref, framework::LogLevel::DEBUG);
-
-            if(!equal)
+            if(!compare<AbsoluteTolerance<double>, double>(target, reference))
             {
+                ARM_COMPUTE_TEST_INFO("id = " << id);
+                ARM_COMPUTE_TEST_INFO("channel = " << channel);
+                ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
+                ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << reference);
+                ARM_COMPUTE_EXPECT_EQUAL(target, reference, framework::LogLevel::DEBUG);
+
                 ++num_mismatches;
             }
 

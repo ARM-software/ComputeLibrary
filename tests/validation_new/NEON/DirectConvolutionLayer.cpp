@@ -43,11 +43,11 @@ namespace validation
 {
 namespace
 {
-constexpr float tolerance_qs = 1.f; /**< Tolerance for fixed point tests */
+constexpr AbsoluteTolerance<float> tolerance_qs(1.f); /**< Tolerance for fixed point tests */
 #ifdef ARM_COMPUTE_ENABLE_FP16
-constexpr float tolerance_fp16 = 0.01f;  /**< Tolerance for half precision floating point tests */
-#endif                                   /* ARM_COMPUTE_ENABLE_FP16 */
-constexpr float tolerance_fp32 = 0.001f; /**< Tolerance for floating point tests */
+constexpr AbsoluteTolerance<float> tolerance_fp16(0.01f);  /**< Tolerance for half precision floating point tests */
+#endif                                                     /* ARM_COMPUTE_ENABLE_FP16 */
+constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
 
 /** Direct convolution data set. */
 const auto data = combine(datasets::SmallDirectConvolutionShapes(),

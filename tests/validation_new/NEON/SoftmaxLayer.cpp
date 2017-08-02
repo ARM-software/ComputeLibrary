@@ -44,12 +44,12 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-constexpr float tolerance_f32 = 0.000001f;
+constexpr AbsoluteTolerance<float> tolerance_f32(0.000001f);
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const float tolerance_f16 = 0.0001f;
+constexpr AbsoluteTolerance<float> tolerance_f16(0.0001f);
 #endif /* ARM_COMPUTE_ENABLE_FP16*/
 /** Tolerance for fixed point operations */
-constexpr int8_t tolerance_fixed_point = 2;
+constexpr AbsoluteTolerance<int8_t> tolerance_fixed_point(2);
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",

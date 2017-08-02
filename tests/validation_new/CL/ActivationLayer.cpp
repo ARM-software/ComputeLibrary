@@ -51,46 +51,48 @@ namespace
  *
  * @return Tolerance depending on the activation function.
  */
-float tolerance(ActivationLayerInfo::ActivationFunction activation, DataType data_type)
+AbsoluteTolerance<float> tolerance(ActivationLayerInfo::ActivationFunction activation, DataType data_type)
 {
+    constexpr float epsilon = std::numeric_limits<float>::epsilon();
+
     switch(activation)
     {
         case ActivationLayerInfo::ActivationFunction::LINEAR:
-            return data_type == DataType::F16 ? 0.2f : 0.f;
+            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.2f : epsilon);
         case ActivationLayerInfo::ActivationFunction::SQUARE:
-            return data_type == DataType::F16 ? 0.1f : 0.f;
+            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.1f : epsilon);
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
             if(is_data_type_fixed_point(data_type))
             {
-                return 5.f;
+                return AbsoluteTolerance<float>(5.f);
             }
             else
             {
-                return data_type == DataType::F16 ? 0.001f : 0.f;
+                return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.001f : epsilon);
             }
         case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
-            return data_type == DataType::F16 ? 0.00001f : 0.f;
+            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.00001f : epsilon);
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
             if(is_data_type_fixed_point(data_type))
             {
-                return 5.f;
+                return AbsoluteTolerance<float>(5.f);
             }
             else
             {
-                return data_type == DataType::F16 ? 0.01f : 0.00001f;
+                return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.01f : 0.00001f);
             }
         case ActivationLayerInfo::ActivationFunction::TANH:
             if(is_data_type_fixed_point(data_type))
             {
-                return 5.f;
+                return AbsoluteTolerance<float>(5.f);
             }
             else
             {
-                return data_type == DataType::F16 ? 0.001f : 0.00001f;
+                return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.001f : 0.00001f);
             }
         default:
-            return 0.f;
+            return AbsoluteTolerance<float>(epsilon);
     }
 }
 

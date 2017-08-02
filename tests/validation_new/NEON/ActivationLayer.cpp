@@ -51,7 +51,7 @@ namespace
  *
  * @return Tolerance depending on the activation function.
  */
-float tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
+AbsoluteTolerance<float> tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
 {
     switch(activation)
     {
@@ -62,17 +62,17 @@ float tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction acti
             switch(data_type)
             {
                 case DataType::QS8:
-                    return 5.f;
+                    return AbsoluteTolerance<float>(5.f);
                 case DataType::QS16:
-                    return 11.f;
+                    return AbsoluteTolerance<float>(11.f);
                 case DataType::F16:
-                    return 0.01f;
+                    return AbsoluteTolerance<float>(0.01f);
                 default:
-                    return 0.00001f;
+                    return AbsoluteTolerance<float>(0.00001f);
             }
             break;
         default:
-            return 0.f;
+            return AbsoluteTolerance<float>(0.f);
     }
 }
 

@@ -43,8 +43,8 @@ namespace validation
 {
 namespace
 {
-constexpr float tolerance_fp16 = 0.1f;   /**< Tolerance for floating point tests */
-constexpr float tolerance_fp32 = 0.001f; /**< Tolerance for floating point tests */
+constexpr AbsoluteTolerance<float> tolerance_fp16(0.1f);   /**< Tolerance for floating point tests */
+constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
 
 /** Direct convolution data set. */
 const auto data = combine(datasets::SmallDirectConvolutionShapes(),
