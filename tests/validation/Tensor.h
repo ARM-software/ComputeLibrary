@@ -55,12 +55,18 @@ public:
 
     T &operator[](size_t offset)
     {
+        ARM_COMPUTE_ERROR_ON(_ptr == nullptr);
+
         return _ptr[offset];
     }
 
     const T &operator[](size_t offset) const
     {
-        return _ptr_const[offset];
+        const T *ptr = (_ptr_const != nullptr) ? _ptr_const : _ptr;
+
+        ARM_COMPUTE_ERROR_ON(ptr == nullptr);
+
+        return ptr[offset];
     }
 
     int num_elements() const
@@ -85,14 +91,15 @@ public:
 
     const T *data() const
     {
-        return (_ptr != nullptr) ? _ptr : _ptr_const;
+        return (_ptr_const != nullptr) ? _ptr_const : _ptr;
     }
+
     T *data()
     {
         return _ptr;
     }
 
-    const T *data_const()
+    const T *data_const() const
     {
         return _ptr_const;
     }
