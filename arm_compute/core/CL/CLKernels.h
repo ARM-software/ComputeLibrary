@@ -50,6 +50,7 @@
 #include "arm_compute/core/CL/kernels/CLErodeKernel.h"
 #include "arm_compute/core/CL/kernels/CLFastCornersKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
+#include "arm_compute/core/CL/kernels/CLFloorKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"

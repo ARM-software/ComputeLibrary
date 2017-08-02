@@ -28,6 +28,14 @@
 
 namespace arm_compute
 {
+/** Calculate floor of a vector.
+ *
+ * @param[in] val Input vector value in F32 format.
+ *
+ * @return The calculated floor vector.
+ */
+float32x4_t vfloorq_f32(float32x4_t val);
+
 /** Calculate inverse square root.
  *
  * @param[in] x Input value.

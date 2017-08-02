@@ -54,6 +54,16 @@ const std::array<float32x4_t, 8> log_tab =
     }
 };
 
+inline float32x4_t vfloorq_f32(float32x4_t val)
+{
+    static const float32x4_t CONST_1 = vdupq_n_f32(1.f);
+
+    const int32x4_t   z = vcvtq_s32_f32(val);
+    const float32x4_t r = vcvtq_f32_s32(z);
+
+    return vbslq_f32(vcgtq_f32(r, val), vsubq_f32(r, CONST_1), r);
+}
+
 inline float32x4_t vinvsqrtq_f32(float32x4_t x)
 {
     float32x4_t sqrt_reciprocal = vrsqrteq_f32(x);

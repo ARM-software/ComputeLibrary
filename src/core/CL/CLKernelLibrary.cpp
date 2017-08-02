@@ -152,6 +152,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "fill_image_borders_constant", "fill_border.cl" },
     { "fill_image_borders_replicate", "fill_border.cl" },
     { "finalize", "optical_flow_pyramid_lk.cl" },
+    { "floor_layer", "floor.cl" },
     { "gaussian1x5_sub_x", "gaussian_pyramid.cl" },
     { "gaussian5x1_sub_y", "gaussian_pyramid.cl" },
     { "gemm_accumulate_biases", "gemm.cl" },
@@ -373,6 +374,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "fixed_point.h",
 #include "./cl_kernels/fixed_point.hembed"
+    },
+    {
+        "floor.cl",
+#include "./cl_kernels/floor.clembed"
     },
     {
         "gaussian_pyramid.cl",
