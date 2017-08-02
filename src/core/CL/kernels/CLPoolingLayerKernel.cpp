@@ -41,7 +41,7 @@
 using namespace arm_compute;
 
 CLPoolingLayerKernel::CLPoolingLayerKernel()
-    : _input(nullptr), _output(nullptr), _pool_info(), _border_size(0)
+    : _input(nullptr), _output(nullptr), _pool_info(), _border_size(0), _num_elems_processed_per_iteration(1)
 {
 }
 
@@ -92,11 +92,21 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pooled_w) || (output->info()->dimension(1) != pooled_h));
 
-    const int num_elements_read_per_iteration = (pool_size == 7) ? 8 : pool_size;
-    const int input_width                     = input->info()->dimension(0);
-    const int input_height                    = input->info()->dimension(1);
-    const int upper_bound_w                   = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elements_read_per_iteration) - input_width;
-    const int upper_bound_h                   = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+    // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenCL kernel where
+    // each thread computes 4 output elements
+    const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3);
+
+    int num_elements_read_per_iteration = (pool_size == 7) ? 8 : pool_size;
+    if(is_pool3x3_stride_le3)
+    {
+        // Change the number of elements processed and number of elements read per iteration for pooling 3x3 with stride less equal than 3
+        _num_elems_processed_per_iteration = 4;
+        num_elements_read_per_iteration    = pool_size * (pool_stride_x + 1);
+    }
+    const int input_width   = input->info()->dimension(0);
+    const int input_height  = input->info()->dimension(1);
+    const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elements_read_per_iteration) - input_width;
+    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
 
     // Set instance variables
     _input              = input;
@@ -110,49 +120,31 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     std::set<std::string> build_opts;
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.emplace(("-DPOOL_" + ((PoolingType::MAX == pool_type) ? std::string("MAX") : std::string("AVG"))));
+    build_opts.emplace(("-DSTRIDE_X=" + support::cpp11::to_string(pool_stride_x)));
+    if(pool_type == PoolingType::AVG)
+    {
+        build_opts.emplace(("-DMAX_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0) + pool_pad_x)));
+        build_opts.emplace(("-DMAX_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1) + pool_pad_y)));
+        build_opts.emplace(("-DSTRIDE_Y=" + support::cpp11::to_string(pool_stride_y)));
+        build_opts.emplace(("-DPAD_X=" + support::cpp11::to_string(pool_pad_x)));
+        build_opts.emplace(("-DPAD_Y=" + support::cpp11::to_string(pool_pad_y)));
+    }
 
     // Create kernel
     std::string kernel_name = "pooling_layer_" + support::cpp11::to_string(pool_size);
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
-
-    // Set static kernel arguments
-    if(pool_type == PoolingType::AVG)
+    if(is_pool3x3_stride_le3)
     {
-        // Create static kernel arguments
-        const cl_int2 max_dims =
-        {
-            {
-                static_cast<cl_int>(input->info()->dimension(0)) + pool_pad_x,
-                static_cast<cl_int>(input->info()->dimension(1)) + pool_pad_y,
-            }
-        };
-        const cl_int2 strides =
-        {
-            {
-                pool_stride_x,
-                pool_stride_y,
-            }
-        };
-        const cl_int2 paddings =
-        {
-            {
-                pool_pad_x,
-                pool_pad_y,
-            }
-        };
-
-        // Set static kernel arguments
-        unsigned int idx = 2 * num_arguments_per_3D_tensor();
-        _kernel.setArg<cl_int2>(idx++, max_dims);
-        _kernel.setArg<cl_int2>(idx++, strides);
-        _kernel.setArg<cl_int2>(idx++, paddings);
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name + "_optimized", build_opts));
+    }
+    else
+    {
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
     }
 
     // Configure kernel window
-    const unsigned int     num_elems_processed_per_iteration = 1;
-    Window                 win                               = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+    Window                 win = calculate_max_window(*output->info(), Steps(_num_elems_processed_per_iteration));
     AccessWindowStatic     input_access(input->info(), -pool_pad_x, -pool_pad_y, input_width + _border_size.right, input_height + _border_size.bottom);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, _num_elems_processed_per_iteration);
     update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
     ICLKernel::configure(win);
@@ -174,7 +166,7 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         // Upsample input by pool size
         Window in_slice(slice);
-        in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - pool_pad_x, in_slice.x().end() * pool_stride_x, pool_stride_x));
+        in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - pool_pad_x, in_slice.x().end() * pool_stride_x, pool_stride_x * _num_elems_processed_per_iteration));
         in_slice.set(Window::DimY, Window::Dimension(in_slice.y().start() - pool_pad_y, in_slice.y().end() * pool_stride_y, pool_stride_y));
 
         // Set inputs

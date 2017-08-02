@@ -232,6 +232,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "pixelwise_mul_int", "pixelwise_mul_int.cl" },
     { "pooling_layer_2", "pooling_layer.cl" },
     { "pooling_layer_3", "pooling_layer.cl" },
+    { "pooling_layer_3_optimized", "pooling_layer.cl" },
     { "pooling_layer_7", "pooling_layer.cl" },
     { "remap_nearest_neighbour", "remap.cl" },
     { "remap_bilinear", "remap.cl" },

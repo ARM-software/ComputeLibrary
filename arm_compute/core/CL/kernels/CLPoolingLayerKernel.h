@@ -49,7 +49,7 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input     Source tensor. Data types supported: F16, F32.
+     * @param[in]  input     Source tensor. Data types supported: F16/F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      *                       Supported pooling sizes : 2, 3 and 7
@@ -65,6 +65,7 @@ private:
     ICLTensor       *_output;
     PoolingLayerInfo _pool_info;
     BorderSize       _border_size;
+    unsigned int     _num_elems_processed_per_iteration;
 };
 }
 #endif /*__ARM_COMPUTE_CLPOOLINGLAYERKERNEL_H__ */
