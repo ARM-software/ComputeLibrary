@@ -222,17 +222,6 @@ void ReferenceCPP::gaussian5x5(const RawTensor &src, RawTensor &dst, BorderMode 
     tensor_operations::gaussian5x5(s, d, border_mode, constant_border_value);
 }
 
-// GEMM
-void ReferenceCPP::gemm(const RawTensor &src1, const RawTensor &src2, const RawTensor &src3,
-                        RawTensor &dst, float alpha, float beta)
-{
-    const TensorVariant s1 = TensorFactory::get_tensor(src1);
-    const TensorVariant s2 = TensorFactory::get_tensor(src2);
-    const TensorVariant s3 = TensorFactory::get_tensor(src3);
-    TensorVariant       d  = TensorFactory::get_tensor(dst);
-
-    boost::apply_visitor(tensor_visitors::gemm_visitor(s1, s2, s3, alpha, beta), d);
-}
 // Non linear filter
 void ReferenceCPP::non_linear_filter(const RawTensor &src, RawTensor &dst, NonLinearFilterFunction function, unsigned int mask_size,
                                      MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value)

@@ -60,6 +60,13 @@ then
     exit -1
 fi
 
+grep -Hnir "ARM_COMPUTE_ENABLE_FP16" ./tests/validation_new/CL | tee bad_style.log
+if [[ $(cat bad_style.log | wc -l) > 0 ]]
+then
+    echo ""
+    echo "ERROR: Found ARM_COMPUTE_ENABLE_FP16 in CL tests though F16 is always supported for OpenCL"
+    exit -1
+fi
 
 spdx_missing=0
 for f in $(find $DIRECTORIES -type f)

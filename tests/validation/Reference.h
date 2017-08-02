@@ -215,21 +215,6 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_gaussian5x5(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value);
-    /** Compute matrix multiply function.
-     *
-     * @param[in]  src_shape1           First input tensor shape
-     * @param[in]  src_shape2           Second input tensor shape
-     * @param[in]  src_shape3           Third input tensor shape
-     * @param[out] dst_shape            Output tensor.
-     * @param[in]  alpha                Weight of the matrix product
-     * @param[in]  beta                 Weight of the third matrix
-     * @param[in]  dt                   Tensor's data type
-     * @param[in]  fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers
-     *
-     * @return Computed output tensor.
-     */
-    static RawTensor compute_reference_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2, const TensorShape &src_shape3,
-                                            const TensorShape &dst_shape, float alpha, float beta, DataType dt, int fixed_point_position = 0);
     /** Compute reference non linear filter function
      *
      * @param[in] shape                 Shape of the input and output tensors.Data type supported: U8

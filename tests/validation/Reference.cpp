@@ -340,35 +340,6 @@ RawTensor Reference::compute_reference_gaussian5x5(const TensorShape &shape, Bor
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2, const TensorShape &src_shape3,
-                                            const TensorShape &dst_shape, float alpha, float beta, DataType dt, int fixed_point_position)
-{
-    RawTensor src1(src_shape1, dt, 1, fixed_point_position);
-    RawTensor src2(src_shape2, dt, 1, fixed_point_position);
-    RawTensor src3(src_shape3, dt, 1, fixed_point_position);
-    RawTensor dst(dst_shape, dt, 1, fixed_point_position);
-
-    // Fill reference
-    if(dt == DataType::F16 || dt == DataType::F32)
-    {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-        library->fill(src1, distribution, 0);
-        library->fill(src2, distribution, 1);
-        library->fill(src3, distribution, 2);
-    }
-    else
-    {
-        library->fill_tensor_uniform(src1, 0);
-        library->fill_tensor_uniform(src2, 1);
-        library->fill_tensor_uniform(src3, 2);
-    }
-
-    // Compute reference
-    ReferenceCPP::gemm(src1, src2, src3, dst, alpha, beta);
-
-    return dst;
-}
-
 RawTensor Reference::compute_reference_non_linear_filter(const TensorShape &shape, NonLinearFilterFunction function, unsigned int mask_size,
                                                          MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value)
 {

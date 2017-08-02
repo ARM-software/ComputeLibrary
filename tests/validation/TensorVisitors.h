@@ -132,29 +132,6 @@ private:
     ConvertPolicy _policy;
     uint32_t      _shift;
 };
-// GEMM visitor
-struct gemm_visitor : public boost::static_visitor<>
-{
-public:
-    explicit gemm_visitor(const TensorVariant &in1, const TensorVariant &in2, const TensorVariant &in3, float alpha, float beta)
-        : _in1(in1), _in2(in2), _in3(in3), _alpha(alpha), _beta(beta)
-    {
-    }
-
-    template <typename T>
-    void operator()(Tensor<T> &out) const
-    {
-        const Tensor<T> &in1 = boost::get<Tensor<T>>(_in1);
-        const Tensor<T> &in2 = boost::get<Tensor<T>>(_in2);
-        const Tensor<T> &in3 = boost::get<Tensor<T>>(_in3);
-        tensor_operations::gemm(in1, in2, in3, out, _alpha, _beta);
-    }
-
-private:
-    const TensorVariant &_in1, &_in2, &_in3;
-    float                _alpha;
-    float                _beta;
-};
 // Pixel-wise Multiplication visitor
 struct pixel_wise_multiplication_visitor : public boost::static_visitor<>
 {

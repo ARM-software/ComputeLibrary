@@ -190,17 +190,6 @@ public:
      * @param[in]  constant_border_value Constant border value if @p border_mode is BorderMode::CONSTANT
      */
     static void gaussian5x5(const RawTensor &src, RawTensor &dst, BorderMode border_mode, uint8_t constant_border_value);
-    /** Compute GEMM function.
-     *
-     * @param[in]  src1  First input tensor
-     * @param[in]  src2  Second input tensor
-     * @param[in]  src3  Third input tensor
-     * @param[out] dst   Output tensr
-     * @param[in]  alpha Weight of the matrix product
-     * @param[in]  beta  Weight of the third matrix
-     */
-    static void gemm(const RawTensor &src1, const RawTensor &src2, const RawTensor &src3,
-                     RawTensor &dst, float alpha, float beta);
     /** Compute non linear filter function.
      *
      * @param[in]  src                   First input tensor
