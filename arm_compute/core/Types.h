@@ -342,6 +342,12 @@ enum class NonLinearFilterFunction : unsigned
     MAX    = 2, /**< Non linear dilate. */
 };
 
+/** Available reduction operations */
+enum class ReductionOperation
+{
+    SUM_SQUARE, /**< Sum of squares */
+};
+
 /** The normalization type used for the normalization layer */
 enum class NormType
 {

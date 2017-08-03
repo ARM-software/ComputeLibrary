@@ -198,6 +198,21 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ConvertPolicy &polic
     return os;
 }
 
+/** Formatted output of the Reduction Operations. */
+inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &op)
+{
+    switch(op)
+    {
+        case ReductionOperation::SUM_SQUARE:
+            os << "SUM_SQUARE";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
 /** Formatted output of the activation function type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo::ActivationFunction &act_function)
 {
@@ -238,6 +253,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
     }
 
     return os;
+}
+
+inline std::string to_string(const ReductionOperation &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
 }
 
 inline std::string to_string(const ActivationLayerInfo::ActivationFunction &function)
