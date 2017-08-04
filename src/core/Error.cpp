@@ -37,7 +37,11 @@ void arm_compute::error(const char *function, const char *file, const int line, 
     vsnprintf(out + offset, sizeof(out) - offset, msg, args);
     va_end(args);
 
+#ifndef ARM_NO_EXCEPTIONS
     throw std::runtime_error(std::string(out));
+#else
+    std::cout << std::string(out) << std::endl;
+#endif // ARM_NO_EXCEPTIONS
 }
 
 void arm_compute::debug(const char *function, const char *file, const int line, const char *msg, ...)
