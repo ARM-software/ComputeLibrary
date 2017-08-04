@@ -25,7 +25,9 @@
 #define __ARM_COMPUTE_OPENCL_H__
 
 /* Configure the Khronos C++ wrapper to target OpenCL 1.2: */
+#ifndef ARM_NO_EXCEPTIONS
 #define CL_HPP_ENABLE_EXCEPTIONS
+#endif // ARM_NO_EXCEPTIONS
 #define CL_HPP_CL_1_2_DEFAULT_BUILD
 #define CL_HPP_TARGET_OPENCL_VERSION 110
 #define CL_HPP_MINIMUM_OPENCL_VERSION 110
