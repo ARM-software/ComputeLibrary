@@ -44,6 +44,17 @@ CLCol2ImKernel::CLCol2ImKernel()
 void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+
+    TensorShape output_shape = input->info()->tensor_shape();
+    output_shape.set(0, convolved_dims.first);
+    output_shape.set(1, convolved_dims.second);
+    output_shape.set(2, input->info()->tensor_shape()[0]);
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
