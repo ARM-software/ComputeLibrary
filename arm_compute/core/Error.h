@@ -28,7 +28,11 @@
  *
  * @param[in] ... Message to display before aborting.
  */
+#ifndef ARM_NO_EXCEPTIONS
 #define ARM_COMPUTE_ERROR(...) ::arm_compute::error(__func__, __FILE__, __LINE__, __VA_ARGS__) // NOLINT
+#else
+#define ARM_COMPUTE_ERROR(...) // NOLINT
+#endif // ARM_NO_EXCEPTIONS
 
 /** Print the given message then throw an std::runtime_error.
  *
@@ -37,7 +41,11 @@
  * @param[in] line Line in which the error occurred.
  * @param[in] ...  Message to display before aborting.
  */
+#ifndef ARM_NO_EXCEPTIONS
 #define ARM_COMPUTE_ERROR_LOC(func, file, line, ...) ::arm_compute::error(func, file, line, __VA_ARGS__) // NOLINT
+#else
+#define ARM_COMPUTE_ERROR_LOC(func, file, line, ...)
+#endif // ARM_NO_EXCEPTIONS
 
 /** To avoid unused variables warnings
  *
