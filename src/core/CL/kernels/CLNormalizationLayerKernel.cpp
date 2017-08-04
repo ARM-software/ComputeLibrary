@@ -83,9 +83,9 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, const ICLTens
     {
         build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
     }
-    build_opts.emplace(("-DCOEFF=" + support::cpp11::to_string(norm_info.scale_coeff())));
-    build_opts.emplace(("-DBETA=" + support::cpp11::to_string(norm_info.beta())));
-    build_opts.emplace(("-DKAPPA=" + support::cpp11::to_string(norm_info.kappa())));
+    build_opts.emplace(("-DCOEFF=" + float_to_string_with_full_precision(norm_info.scale_coeff())));
+    build_opts.emplace(("-DBETA=" + float_to_string_with_full_precision(norm_info.beta())));
+    build_opts.emplace(("-DKAPPA=" + float_to_string_with_full_precision(norm_info.kappa())));
     build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
 
     // Create kernel

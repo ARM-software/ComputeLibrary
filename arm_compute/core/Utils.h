@@ -654,6 +654,20 @@ inline bool is_data_type_fixed_point(DataType dt)
     }
 }
 
+/** Create a string with the float in full precision.
+ *
+ * @param val Floating point value
+ *
+ * @return String with the floating point value.
+ */
+inline std::string float_to_string_with_full_precision(float val)
+{
+    std::stringstream ss;
+    ss.precision(std::numeric_limits<float>::digits10 + 1);
+    ss << val;
+    return ss.str();
+}
+
 /** Print consecutive elements to an output stream.
  *
  * @param[out] s             Output stream to print the elements to.
