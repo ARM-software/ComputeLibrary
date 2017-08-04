@@ -148,16 +148,6 @@ void ReferenceCPP::arithmetic_subtraction(const RawTensor &src1, const RawTensor
     boost::apply_visitor(arithmetic_subtraction_visitor(convert_policy), s1, s2, d);
 }
 
-// Bitwise or
-void ReferenceCPP::bitwise_or(const RawTensor &src1, const RawTensor &src2, RawTensor &dst)
-{
-    ARM_COMPUTE_ERROR_ON(src1.data_type() != DataType::U8 || src2.data_type() != DataType::U8 || dst.data_type() != DataType::U8);
-    const Tensor<uint8_t> s1(src1.shape(), src1.data_type(), src1.fixed_point_position(), reinterpret_cast<const uint8_t *>(src1.data()));
-    const Tensor<uint8_t> s2(src2.shape(), src2.data_type(), src2.fixed_point_position(), reinterpret_cast<const uint8_t *>(src2.data()));
-    Tensor<uint8_t>       d(dst.shape(), dst.data_type(), dst.fixed_point_position(), reinterpret_cast<uint8_t *>(dst.data()));
-    tensor_operations::bitwise_or(s1, s2, d);
-}
-
 // Bitwise xor
 void ReferenceCPP::bitwise_xor(const RawTensor &src1, const RawTensor &src2, RawTensor &dst)
 {
