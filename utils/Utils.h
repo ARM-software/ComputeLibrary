@@ -30,6 +30,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "support/ToolchainSupport.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/core/CL/OpenCL.h"
@@ -401,6 +402,56 @@ void load_trained_data(T &tensor, const std::string &filename)
     }
 }
 
+/** Obtain numpy type string from DataType.
+ *
+ * @param[in] data_type Data type.
+ *
+ * @return numpy type string.
+ */
+inline std::string get_typestring(DataType data_type)
+{
+    // Check endianness
+    const unsigned int i = 1;
+    const char        *c = reinterpret_cast<const char *>(&i);
+    std::string        endianness;
+    if(*c == 1)
+    {
+        endianness = std::string("<");
+    }
+    else
+    {
+        endianness = std::string(">");
+    }
+    const std::string no_endianness("|");
+
+    switch(data_type)
+    {
+        case DataType::U8:
+            return no_endianness + "u" + support::cpp11::to_string(sizeof(uint8_t));
+        case DataType::S8:
+            return no_endianness + "i" + support::cpp11::to_string(sizeof(int8_t));
+        case DataType::U16:
+            return endianness + "u" + support::cpp11::to_string(sizeof(uint16_t));
+        case DataType::S16:
+            return endianness + "i" + support::cpp11::to_string(sizeof(int16_t));
+        case DataType::U32:
+            return endianness + "u" + support::cpp11::to_string(sizeof(uint32_t));
+        case DataType::S32:
+            return endianness + "i" + support::cpp11::to_string(sizeof(int32_t));
+        case DataType::U64:
+            return endianness + "u" + support::cpp11::to_string(sizeof(uint64_t));
+        case DataType::S64:
+            return endianness + "i" + support::cpp11::to_string(sizeof(int64_t));
+        case DataType::F32:
+            return endianness + "f" + support::cpp11::to_string(sizeof(float));
+        case DataType::F64:
+            return endianness + "f" + support::cpp11::to_string(sizeof(double));
+        case DataType::SIZET:
+            return endianness + "u" + support::cpp11::to_string(sizeof(size_t));
+        default:
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+    }
+}
 } // namespace utils
 } // namespace arm_compute
 #endif /* __UTILS_UTILS_H__*/

@@ -27,6 +27,13 @@
 #include "arm_compute/core/Types.h"
 #include "tests/framework/datasets/ContainerDataset.h"
 
+#include "utils/TypePrinter.h"
+
+#include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/Types.h"
+
+#include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/Types.h"
 #include <vector>
 
 namespace arm_compute

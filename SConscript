@@ -192,6 +192,25 @@ if env['os'] != 'bare_metal' and not env['standalone']:
     arm_compute_so = build_library('arm_compute', shared_core_objects + shared_runtime_objects, static=False)
     Export('arm_compute_so')
 
+if env['neon'] and env['opencl']:
+    graph_files = Glob('src/graph/*.cpp')
+    graph_files += Glob('src/graph/nodes/*.cpp')
+
+    graph_files += Glob('src/graph/CL/*.cpp')
+    graph_files += Glob('src/graph/NEON/*.cpp')
+
+    shared_graph_objects = [arm_compute_env.SharedObject(f) for f in graph_files]
+    static_graph_objects = [arm_compute_env.StaticObject(f) for f in graph_files]
+
+    arm_compute_graph_a = build_library('arm_compute_graph-static', static_core_objects + static_runtime_objects + static_graph_objects, static=True)
+    Export('arm_compute_graph_a')
+
+    arm_compute_graph_so = build_library('arm_compute_graph', shared_core_objects + shared_runtime_objects + shared_graph_objects, static=False)
+    Export('arm_compute_graph_so')
+
+    graph_alias = arm_compute_env.Alias("arm_compute_graph", [arm_compute_graph_a, arm_compute_graph_so])
+    Default(graph_alias)
+
 if env['standalone']:
     alias = arm_compute_env.Alias("arm_compute", [arm_compute_a])
 else:

@@ -27,11 +27,11 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLDepthwiseConvolution.h"
 #include "tests/CL/CLAccessor.h"
-#include "tests/TypePrinter.h"
 #include "tests/benchmark/fixtures/DepthwiseConvolutionFixture.h"
 #include "tests/datasets/MobileNetDepthwiseConvolutionDataset.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {

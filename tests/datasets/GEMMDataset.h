@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_GEMM_DATASET
 #define ARM_COMPUTE_TEST_GEMM_DATASET
 
-#include "tests/TypePrinter.h"
+#include "utils/TypePrinter.h"
 
 #include "arm_compute/core/TensorShape.h"
 

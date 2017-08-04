@@ -26,7 +26,7 @@
 
 #include "tests/datasets/DepthwiseConvolutionDataset.h"
 
-#include "tests/TypePrinter.h"
+#include "utils/TypePrinter.h"
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"

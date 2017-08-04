@@ -24,7 +24,6 @@
 
 #include "CL/CLAccessor.h"
 #include "PaddingCalculator.h"
-#include "TypePrinter.h"
 #include "Utils.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
@@ -32,6 +31,7 @@
 #include "tests/validation_old/Reference.h"
 #include "tests/validation_old/Validation.h"
 #include "tests/validation_old/ValidationUserConfiguration.h"
+#include "utils/TypePrinter.h"
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"

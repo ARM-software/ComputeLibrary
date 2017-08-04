@@ -23,8 +23,8 @@
  */
 #include "tests/AssetsLibrary.h"
 
-#include "TypePrinter.h"
 #include "Utils.h"
+#include "utils/TypePrinter.h"
 
 #include "arm_compute/core/ITensor.h"
 

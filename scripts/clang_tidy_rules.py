@@ -49,6 +49,8 @@ def filter_clang_tidy_lines( lines ):
                 ("omp.h" in line) or
                 ("memory" in line and "cast from pointer to smaller type 'uintptr_t' (aka 'unsigned int') loses information" in line) or
                 ("NEMath.inl" in line and "statement expression not allowed at file scope" in line) or
+                ("Utils.h" in line and "no member named 'unmap' in 'arm_compute::Tensor'" in line) or
+                ("Utils.h" in line and "no member named 'map' in 'arm_compute::Tensor'" in line) or
                 "3rdparty" in line):
                 print_context=False
                 continue
@@ -76,6 +78,7 @@ def filter_clang_tidy_lines( lines ):
                ("NEGEMMMatrixMultiplyKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                ("NEPoolingLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                ("NESoftmaxLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
+               ("GraphUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
                ("parameter 'memory_manager' is unused" in line) or
                ("parameter 'memory_manager' is copied for each invocation but only used as a const reference" in line) or
                "3rdparty" in line):

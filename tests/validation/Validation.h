@@ -28,10 +28,10 @@
 #include "arm_compute/core/Types.h"
 #include "tests/IAccessor.h"
 #include "tests/SimpleTensor.h"
-#include "tests/TypePrinter.h"
 #include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Exceptions.h"
+#include "utils/TypePrinter.h"
 
 #include <iomanip>
 #include <ios>

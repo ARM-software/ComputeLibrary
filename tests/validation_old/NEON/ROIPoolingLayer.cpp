@@ -23,7 +23,6 @@
  */
 #include "NEON/Accessor.h"
 #include "NEON/ArrayAccessor.h"
-#include "TypePrinter.h"
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"
@@ -31,6 +30,7 @@
 #include "tests/validation_old/Reference.h"
 #include "tests/validation_old/Validation.h"
 #include "tests/validation_old/ValidationUserConfiguration.h"
+#include "utils/TypePrinter.h"
 
 #include <random>
 #include <vector>

@@ -31,9 +31,9 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "tests/IAccessor.h"
 #include "tests/RawTensor.h"
-#include "tests/TypePrinter.h"
 #include "tests/Utils.h"
 #include "tests/validation_old/half.h"
+#include "utils/TypePrinter.h"
 
 #include <array>
 #include <cmath>

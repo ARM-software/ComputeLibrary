@@ -31,10 +31,10 @@
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
 #include "tests/CL/CLAccessor.h"
-#include "tests/TypePrinter.h"
 #include "tests/benchmark/fixtures/LeNet5Fixture.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {

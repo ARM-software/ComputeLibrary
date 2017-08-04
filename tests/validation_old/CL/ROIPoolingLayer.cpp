@@ -23,7 +23,6 @@
  */
 #include "CL/CLAccessor.h"
 #include "CL/CLArrayAccessor.h"
-#include "TypePrinter.h"
 #include "arm_compute/runtime/CL/CLArray.h"
 #include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
 #include "tests/Globals.h"
@@ -32,6 +31,7 @@
 #include "tests/validation_old/Reference.h"
 #include "tests/validation_old/Validation.h"
 #include "tests/validation_old/ValidationUserConfiguration.h"
+#include "utils/TypePrinter.h"
 
 #include <random>
 #include <vector>

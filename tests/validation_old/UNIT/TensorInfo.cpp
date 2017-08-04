@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "TypePrinter.h"
 #include "tests/validation_old/Validation.h"
+#include "utils/TypePrinter.h"
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"

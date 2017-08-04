@@ -23,8 +23,8 @@
  */
 #include "Utils.h"
 
-#include "TypePrinter.h"
 #include "tests/validation_old/Validation.h"
+#include "utils/TypePrinter.h"
 
 #include "tests/validation_old/boost_wrapper.h"
 

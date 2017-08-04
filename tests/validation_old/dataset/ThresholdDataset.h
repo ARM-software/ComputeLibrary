@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_DATASET_THRESHOLD_DATASET_H__
 #define __ARM_COMPUTE_TEST_DATASET_THRESHOLD_DATASET_H__
 
-#include "TypePrinter.h"
+#include "utils/TypePrinter.h"
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"

@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 #include "CL/CLAccessor.h"
-#include "TypePrinter.h"
 #include "Utils.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/validation_old/Datasets.h"
 #include "tests/validation_old/Validation.h"
+#include "utils/TypePrinter.h"
 
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/Helpers.h"

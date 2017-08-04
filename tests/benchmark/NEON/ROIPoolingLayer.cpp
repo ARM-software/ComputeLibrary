@@ -29,11 +29,11 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/ArrayAccessor.h"
-#include "tests/TypePrinter.h"
 #include "tests/benchmark/fixtures/ROIPoolingLayerFixture.h"
 #include "tests/datasets/ROIPoolingLayerDataset.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {

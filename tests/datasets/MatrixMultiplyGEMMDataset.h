@@ -26,7 +26,7 @@
 
 #include "tests/datasets/GEMMDataset.h"
 
-#include "tests/TypePrinter.h"
+#include "utils/TypePrinter.h"
 
 #include "arm_compute/core/TensorShape.h"
 

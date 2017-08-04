@@ -51,83 +51,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimen
     return os;
 }
 
-//FIXME: Check why this doesn't work and the TensorShape overload is needed
-template <typename T>
-inline std::string to_string(const Dimensions<T> &dimensions)
-{
-    std::stringstream str;
-    str << dimensions;
-    return str.str();
-}
-
-inline std::string to_string(const TensorShape &shape)
-{
-    std::stringstream str;
-    str << shape;
-    return str.str();
-}
-
-/** Formatted output of the Rectangle type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
-{
-    os << rect.width << "x" << rect.height;
-    os << "+" << rect.x << "+" << rect.y;
-
-    return os;
-}
-
-/** Formatted output of the PadStridInfo type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_stride_info)
-{
-    os << pad_stride_info.stride().first << "," << pad_stride_info.stride().second;
-    os << ";";
-    os << pad_stride_info.pad().first << "," << pad_stride_info.pad().second;
-
-    return os;
-}
-
-inline std::string to_string(const PadStrideInfo &pad_stride_info)
-{
-    std::stringstream str;
-    str << pad_stride_info;
-    return str.str();
-}
-
-/** Formatted output of the ROIPoolingInfo type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo &pool_info)
-{
-    os << pool_info.pooled_width() << "x" << pool_info.pooled_height() << "~" << pool_info.spatial_scale();
-    return os;
-}
-
-/** Formatted output of the BorderMode type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const BorderMode &mode)
-{
-    switch(mode)
-    {
-        case BorderMode::UNDEFINED:
-            os << "UNDEFINED";
-            break;
-        case BorderMode::CONSTANT:
-            os << "CONSTANT";
-            break;
-        case BorderMode::REPLICATE:
-            os << "REPLICATE";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-inline std::string to_string(const BorderMode &mode)
-{
-    std::stringstream str;
-    str << mode;
-    return str.str();
-}
-
 /** Formatted output of the NonLinearFilterFunction type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const NonLinearFilterFunction &function)
 {
@@ -187,19 +110,19 @@ inline std::string to_string(const MatrixPattern &pattern)
     return str.str();
 }
 
-/** Formatted output of the InterpolationPolicy type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy &policy)
+/** Formatted output of the RoundingPolicy type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const RoundingPolicy &rounding_policy)
 {
-    switch(policy)
+    switch(rounding_policy)
     {
-        case InterpolationPolicy::NEAREST_NEIGHBOR:
-            os << "NEAREST_NEIGHBOR";
+        case RoundingPolicy::TO_ZERO:
+            os << "TO_ZERO";
             break;
-        case InterpolationPolicy::BILINEAR:
-            os << "BILINEAR";
+        case RoundingPolicy::TO_NEAREST_UP:
+            os << "TO_NEAREST_UP";
             break;
-        case InterpolationPolicy::AREA:
-            os << "AREA";
+        case RoundingPolicy::TO_NEAREST_EVEN:
+            os << "TO_NEAREST_EVEN";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -208,58 +131,20 @@ inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy 
     return os;
 }
 
-inline std::string to_string(const InterpolationPolicy &policy)
+/** Formatted output of the WeightsInfo type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const WeightsInfo &weights_info)
 {
-    std::stringstream str;
-    str << policy;
-    return str.str();
-}
-
-/** Formatted output of the ConversionPolicy type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const ConvertPolicy &policy)
-{
-    switch(policy)
-    {
-        case ConvertPolicy::WRAP:
-            os << "WRAP";
-            break;
-        case ConvertPolicy::SATURATE:
-            os << "SATURATE";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
+    os << weights_info.are_reshaped() << ";";
+    os << weights_info.num_kernels() << ";" << weights_info.kernel_size().first << "," << weights_info.kernel_size().second;
 
     return os;
 }
 
-inline std::string to_string(const ConvertPolicy &policy)
+/** Formatted output of the ROIPoolingInfo type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo &pool_info)
 {
-    std::stringstream str;
-    str << policy;
-    return str.str();
-}
-
-/** Formatted output of the Reduction Operations. */
-inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &op)
-{
-    switch(op)
-    {
-        case ReductionOperation::SUM_SQUARE:
-            os << "SUM_SQUARE";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
+    os << pool_info.pooled_width() << "x" << pool_info.pooled_height() << "~" << pool_info.spatial_scale();
     return os;
-}
-
-inline std::string to_string(const ReductionOperation &op)
-{
-    std::stringstream str;
-    str << op;
-    return str.str();
 }
 
 /** Formatted output of the activation function type. */
@@ -282,9 +167,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
             os << "BOUNDED_RELU";
             break;
-        case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-            os << "LU_BOUNDED_RELU";
-            break;
         case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
             os << "LEAKY_RELU";
             break;
@@ -294,6 +176,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::SQRT:
             os << "SQRT";
             break;
+        case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
+            os << "LU_BOUNDED_RELU";
         case ActivationLayerInfo::ActivationFunction::SQUARE:
             os << "SQUARE";
             break;
@@ -307,17 +191,17 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
     return os;
 }
 
-inline std::string to_string(const ActivationLayerInfo::ActivationFunction &function)
-{
-    std::stringstream str;
-    str << function;
-    return str.str();
-}
-
-inline std::string to_string(const ActivationLayerInfo &info)
+inline std::string to_string(const arm_compute::ActivationLayerInfo &info)
 {
     std::stringstream str;
     str << info.activation();
+    return str.str();
+}
+
+inline std::string to_string(const arm_compute::ActivationLayerInfo::ActivationFunction &function)
+{
+    std::stringstream str;
+    str << function;
     return str.str();
 }
 
@@ -342,14 +226,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
     return os;
 }
 
-inline std::string to_string(const NormType &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
-}
-
-inline std::string to_string(const NormalizationLayerInfo &info)
+inline std::string to_string(const arm_compute::NormalizationLayerInfo &info)
 {
     std::stringstream str;
     str << info.type();
@@ -377,45 +254,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_ty
     return os;
 }
 
-inline std::string to_string(const PoolingType &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
-}
-
 /** Formatted output of @ref PoolingLayerInfo. */
 inline ::std::ostream &operator<<(::std::ostream &os, const PoolingLayerInfo &info)
 {
-    os << info.pool_type() << ";" << info.pool_size() << ";" << info.pad_stride_info();
-
-    return os;
-}
-
-inline std::string to_string(const PoolingLayerInfo &info)
-{
-    std::stringstream str;
-    str << info.pool_type();
-    return str.str();
-}
-
-/** Formatted output of the RoundingPolicy type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const RoundingPolicy &rounding_policy)
-{
-    switch(rounding_policy)
-    {
-        case RoundingPolicy::TO_ZERO:
-            os << "TO_ZERO";
-            break;
-        case RoundingPolicy::TO_NEAREST_UP:
-            os << "TO_NEAREST_UP";
-            break;
-        case RoundingPolicy::TO_NEAREST_EVEN:
-            os << "TO_NEAREST_EVEN";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
+    os << info.pool_type();
 
     return os;
 }
@@ -477,7 +319,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
     return os;
 }
 
-inline std::string to_string(const DataType &data_type)
+inline std::string to_string(const arm_compute::DataType &data_type)
 {
     std::stringstream str;
     str << data_type;
@@ -595,6 +437,27 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Channel &channel)
     return os;
 }
 
+/** Formatted output of the BorderMode type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const BorderMode &mode)
+{
+    switch(mode)
+    {
+        case BorderMode::UNDEFINED:
+            os << "UNDEFINED";
+            break;
+        case BorderMode::CONSTANT:
+            os << "CONSTANT";
+            break;
+        case BorderMode::REPLICATE:
+            os << "REPLICATE";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
 /** Formatted output of the BorderSize type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
 {
@@ -605,5 +468,152 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
 
     return os;
 }
+
+/** Formatted output of the InterpolationPolicy type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy &policy)
+{
+    switch(policy)
+    {
+        case InterpolationPolicy::NEAREST_NEIGHBOR:
+            os << "NEAREST_NEIGHBOR";
+            break;
+        case InterpolationPolicy::BILINEAR:
+            os << "BILINEAR";
+            break;
+        case InterpolationPolicy::AREA:
+            os << "AREA";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+//FIXME: Check why this doesn't work and the TensorShape overload is needed
+template <typename T>
+inline std::string to_string(const Dimensions<T> &dimensions)
+{
+    std::stringstream str;
+    str << dimensions;
+    return str.str();
+}
+
+/** Formatted output of the TensorShape type. */
+inline std::string to_string(const TensorShape &shape)
+{
+    std::stringstream str;
+    str << shape;
+    return str.str();
+}
+
+/** Formatted output of the Rectangle type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
+{
+    os << rect.width << "x" << rect.height;
+    os << "+" << rect.x << "+" << rect.y;
+
+    return os;
+}
+
+/** Formatted output of the PadStridInfo type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_stride_info)
+{
+    os << pad_stride_info.stride().first << "," << pad_stride_info.stride().second;
+    os << ";";
+    os << pad_stride_info.pad().first << "," << pad_stride_info.pad().second;
+
+    return os;
+}
+
+inline std::string to_string(const PadStrideInfo &pad_stride_info)
+{
+    std::stringstream str;
+    str << pad_stride_info;
+    return str.str();
+}
+
+inline std::string to_string(const BorderMode &mode)
+{
+    std::stringstream str;
+    str << mode;
+    return str.str();
+}
+
+inline std::string to_string(const InterpolationPolicy &policy)
+{
+    std::stringstream str;
+    str << policy;
+    return str.str();
+}
+
+/** Formatted output of the ConversionPolicy type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const ConvertPolicy &policy)
+{
+    switch(policy)
+    {
+        case ConvertPolicy::WRAP:
+            os << "WRAP";
+            break;
+        case ConvertPolicy::SATURATE:
+            os << "SATURATE";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const ConvertPolicy &policy)
+{
+    std::stringstream str;
+    str << policy;
+    return str.str();
+}
+
+/** Formatted output of the Reduction Operations. */
+inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &op)
+{
+    switch(op)
+    {
+        case ReductionOperation::SUM_SQUARE:
+            os << "SUM_SQUARE";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const ReductionOperation &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
+}
+
+inline std::string to_string(const NormType &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
+inline std::string to_string(const PoolingType &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
+inline std::string to_string(const PoolingLayerInfo &info)
+{
+    std::stringstream str;
+    str << info.pool_type();
+    return str.str();
+}
+
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

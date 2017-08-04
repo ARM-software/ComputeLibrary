@@ -25,8 +25,8 @@
 #define __ARM_COMPUTE_TEST_REDUCTION_OPERATION_DATASET_H__
 
 #include "arm_compute/core/Types.h"
-#include "tests/TypePrinter.h"
 #include "tests/framework/datasets/ContainerDataset.h"
+#include "utils/TypePrinter.h"
 
 #include <vector>
 

@@ -27,11 +27,11 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
-#include "tests/TypePrinter.h"
 #include "tests/benchmark/fixtures/FloorFixture.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {

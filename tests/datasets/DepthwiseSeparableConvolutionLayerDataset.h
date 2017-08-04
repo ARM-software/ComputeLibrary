@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_DEPTHWISE_SEPARABLE_CONVOLUTION_LAYER_DATASET
 #define ARM_COMPUTE_TEST_DEPTHWISE_SEPARABLE_CONVOLUTION_LAYER_DATASET
 
-#include "tests/TypePrinter.h"
+#include "utils/TypePrinter.h"
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"

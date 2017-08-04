@@ -26,13 +26,13 @@
 #include "TensorFactory.h"
 #include "TensorOperations.h"
 #include "TensorVisitors.h"
-#include "TypePrinter.h"
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "utils/TypePrinter.h"
 
 #include "tests/validation_old/boost_wrapper.h"
 

@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
-#include "tests/TypePrinter.h"
 #include "tests/benchmark/fixtures/PoolingLayerFixture.h"
 #include "tests/datasets/system_tests/alexnet/AlexNetPoolingLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1PoolingLayerDataset.h"
@@ -38,6 +37,7 @@
 #include "tests/datasets/system_tests/yolo/v2/YOLOV2PoolingLayerDataset.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {

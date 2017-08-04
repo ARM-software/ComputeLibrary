@@ -23,11 +23,11 @@
  */
 #include "tests/validation_old/FixedPoint.h"
 
-#include "TypePrinter.h"
 #include "Utils.h"
 #include "support/ToolchainSupport.h"
 #include "tests/validation_old/Validation.h"
 #include "tests/validation_old/ValidationUserConfiguration.h"
+#include "utils/TypePrinter.h"
 
 #include "tests/validation_old/boost_wrapper.h"
 

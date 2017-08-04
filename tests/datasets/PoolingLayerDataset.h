@@ -26,7 +26,7 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "tests/TypePrinter.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
