@@ -42,13 +42,9 @@ namespace test
 namespace
 {
 #ifdef ARM_COMPUTE_ENABLE_F16
-const auto alexnet_data_types    = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
-const auto googlenet_data_types  = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
-const auto squeezenet_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
 #else  /* ARM_COMPUTE_ENABLE_F16 */
-const auto alexnet_data_types    = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
-const auto googlenet_data_types  = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
-const auto squeezenet_data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
 #endif /* ARM_COMPUTE_ENABLE_F16 */
 } // namespace
 
@@ -57,15 +53,15 @@ using NEConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvol
 TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), alexnet_data_types),
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetDirectConvolutionLayerDataset(), googlenet_data_types),
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetDirectConvolutionLayerDataset(), data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), squeezenet_data_types),
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()
