@@ -54,8 +54,10 @@ std::unique_ptr<TensorLibrary> library;
 int main(int argc, char **argv)
 {
     PerformanceProgramOptions options;
+#ifndef ARM_NO_EXCEPTIONS
     try
     {
+#endif // ARM_NO_EXCEPTIONS
         options.parse_commandline(argc, argv);
 
         if(options.wants_help())
@@ -65,6 +67,7 @@ int main(int argc, char **argv)
         }
 
         user_config = PerformanceUserConfiguration(options);
+#ifndef ARM_NO_EXCEPTIONS
     }
     catch(const boost::program_options::required_option &err)
     {
@@ -73,6 +76,7 @@ int main(int argc, char **argv)
         std::cout << options.get_help() << "\n";
         return 1;
     }
+#endif // ARM_NO_EXCEPTIONS
 
     ::benchmark::Initialize(&argc, argv);
 

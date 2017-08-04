@@ -77,8 +77,10 @@ bool init_unit_test()
     int   &argc = boost::unit_test::framework::master_test_suite().argc;
     char **argv = boost::unit_test::framework::master_test_suite().argv;
 
+#ifndef ARM_NO_EXCEPTIONS
     try
     {
+#endif // ARM_NO_EXCEPTIONS
         options.parse_commandline(argc, argv);
 
         if(options.wants_help())
@@ -89,6 +91,7 @@ bool init_unit_test()
         }
 
         user_config = ValidationUserConfiguration(options);
+#ifndef ARM_NO_EXCEPTIONS
     }
     catch(const boost::program_options::required_option &err)
     {
@@ -97,6 +100,7 @@ bool init_unit_test()
         std::cout << options.get_help() << "\n";
         return false;
     }
+#endif // ARM_NO_EXCEPTIONS
 
     std::cout << "Using " << user_config.threads << " CPU " << (user_config.threads == 1 ? "thread" : "threads") << "\n";
     arm_compute::Scheduler::get().set_num_threads(user_config.threads);

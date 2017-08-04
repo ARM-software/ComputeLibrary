@@ -94,8 +94,10 @@ public:
     void open(const std::string &ppm_filename)
     {
         ARM_COMPUTE_ERROR_ON(is_open());
+#ifndef ARM_NO_EXCEPTIONS
         try
         {
+#endif // ARM_NO_EXCEPTIONS
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _fs.open(ppm_filename, std::ios::in | std::ios::binary);
 
@@ -103,11 +105,13 @@ public:
             std::tie(_width, _height, max_val) = parse_ppm_header(_fs);
 
             ARM_COMPUTE_ERROR_ON_MSG(max_val >= 256, "2 bytes per colour channel not supported in file %s", ppm_filename.c_str());
+#ifndef ARM_NO_EXCEPTIONS
         }
         catch(const std::ifstream::failure &e)
         {
             ARM_COMPUTE_ERROR("Accessing %s: %s", ppm_filename.c_str(), e.what());
         }
+#endif // ARM_NO_EXCEPTIONS
     }
     /** Return true if a PPM file is currently open
          */
@@ -144,8 +148,10 @@ public:
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON(image.info()->dimension(0) != _width || image.info()->dimension(1) != _height);
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&image, arm_compute::Format::U8, arm_compute::Format::RGB888);
+#ifndef ARM_NO_EXCEPTIONS
         try
         {
+#endif // ARM_NO_EXCEPTIONS
 #ifdef ARM_COMPUTE_CL
             // Map buffer if creating a CLTensor
             if(std::is_same<typename std::decay<T>::type, arm_compute::CLImage>::value)
@@ -220,11 +226,13 @@ public:
                 image.unmap();
             }
 #endif
+#ifndef ARM_NO_EXCEPTIONS
         }
         catch(const std::ifstream::failure &e)
         {
             ARM_COMPUTE_ERROR("Loading PPM file: %s", e.what());
         }
+#endif // ARM_NO_EXCEPTIONS
     }
 
 private:
@@ -249,8 +257,10 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
     std::ofstream fs;
 
+#ifndef ARM_NO_EXCEPTIONS
     try
     {
+#endif // ARM_NO_EXCEPTIONS
         fs.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
         fs.open(ppm_filename, std::ios::out | std::ios::binary);
 
@@ -314,11 +324,13 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
             tensor.unmap();
         }
 #endif
+#ifndef ARM_NO_EXCEPTIONS
     }
     catch(const std::ofstream::failure &e)
     {
         ARM_COMPUTE_ERROR("Writing %s: (%s)", ppm_filename.c_str(), e.what());
     }
+#endif // ARM_NO_EXCEPTIONS
 }
 } // namespace utils
 } // namespace arm_compute

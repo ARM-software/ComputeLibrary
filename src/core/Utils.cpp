@@ -69,8 +69,8 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
         fs.seekg(0, std::ios::beg);
         // Copy the content of the file
         out.assign(std::istreambuf_iterator<char>(fs), std::istreambuf_iterator<char>());
-    }
 #ifndef ARM_NO_EXCEPTIONS
+    }
     catch(const std::ifstream::failure &e)
     {
         ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
