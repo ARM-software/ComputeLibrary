@@ -45,13 +45,18 @@ public:
     void print_run_footer() override;
     void print_test_header(const TestInfo &info) override;
     void print_test_footer() override;
+    void print_errors_header() override;
+    void print_errors_footer() override;
+    void print_error(const std::exception &error) override;
     void print_measurements(const Profiler::MeasurementsMap &measurements) override;
 
 private:
     void print_separator(bool &flag);
 
-    bool _first_test{ true };
     bool _first_entry{ true };
+    bool _first_test{ true };
+    bool _first_test_entry{ true };
+    bool _first_error{ true };
 };
 } // namespace framework
 } // namespace test

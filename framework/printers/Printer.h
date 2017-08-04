@@ -29,6 +29,7 @@
 #include <fstream>
 #include <iostream>
 #include <ostream>
+#include <stdexcept>
 
 namespace arm_compute
 {
@@ -94,6 +95,18 @@ public:
 
     /** Print footer after a test. */
     virtual void print_test_footer() = 0;
+
+    /** Print header before errors. */
+    virtual void print_errors_header() = 0;
+
+    /** Print footer after errors. */
+    virtual void print_errors_footer() = 0;
+
+    /** Print test error.
+     *
+     * @param[in] error Description of the error.
+     */
+    virtual void print_error(const std::exception &error) = 0;
 
     /** Print measurements for a test.
      *

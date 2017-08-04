@@ -71,10 +71,11 @@ public:
 
     /** Construct error with severity.
      *
-     * @param[in] msg   Error message.
-     * @param[in] level Severity level.
+     * @param[in] msg     Error message.
+     * @param[in] level   Severity level.
+     * @param[in] context Context.
      */
-    TestError(const std::string &msg, LogLevel level);
+    TestError(const std::string &msg, LogLevel level, std::string context = "");
 
     /** Severity of the error.
      *
@@ -82,8 +83,13 @@ public:
      */
     LogLevel level() const;
 
+    const char *what() const noexcept override;
+
 private:
-    LogLevel _level{ LogLevel::ERRORS };
+    LogLevel    _level{ LogLevel::ERRORS };
+    std::string _msg{};
+    std::string _context{};
+    std::string _combined{};
 };
 } // namespace framework
 } // namespace test

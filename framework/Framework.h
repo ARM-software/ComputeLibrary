@@ -187,10 +187,9 @@ public:
 
     /** Tell the framework that the currently running test case failed a non-fatal expectation.
      *
-     * @param[in] msg   Description of the failure.
-     * @param[in] level Severity of the failed expectation.
+     * @param[in] error Description of the error.
      */
-    void log_failed_expectation(const std::string &msg, LogLevel level = LogLevel::ERRORS);
+    void log_failed_expectation(const TestError &error);
 
     /** Number of iterations per test case.
      *

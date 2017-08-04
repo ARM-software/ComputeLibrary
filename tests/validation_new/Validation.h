@@ -308,9 +308,9 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
                 {
                     ARM_COMPUTE_TEST_INFO("id = " << id);
                     ARM_COMPUTE_TEST_INFO("channel = " << c);
-                    ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target_value);
-                    ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << reference_value);
-                    ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << tolerance_value);
+                    ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << framework::make_printable(target_value));
+                    ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << framework::make_printable(reference_value));
+                    ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << framework::make_printable(static_cast<typename U::value_type>(tolerance_value)));
                     ARM_COMPUTE_EXPECT_EQUAL(target_value, reference_value, framework::LogLevel::DEBUG);
 
                     ++num_mismatches;
@@ -335,9 +335,9 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
 template <typename T, typename U>
 void validate(T target, T reference, U tolerance)
 {
-    ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << reference);
-    ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
-    ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << tolerance);
+    ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << framework::make_printable(reference));
+    ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << framework::make_printable(target));
+    ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << framework::make_printable(static_cast<typename U::value_type>(tolerance)));
     ARM_COMPUTE_EXPECT((compare<U, typename U::value_type>(target, reference, tolerance)), framework::LogLevel::ERRORS);
 }
 } // namespace validation

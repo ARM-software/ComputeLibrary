@@ -88,6 +88,19 @@ void PrettyPrinter::print_test_footer()
 {
 }
 
+void PrettyPrinter::print_errors_header()
+{
+}
+
+void PrettyPrinter::print_errors_footer()
+{
+}
+
+void PrettyPrinter::print_error(const std::exception &error)
+{
+    *_stream << begin_color("1") << error.what() << end_color() << "\n";
+}
+
 void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
 {
     for(const auto &instrument : measurements)

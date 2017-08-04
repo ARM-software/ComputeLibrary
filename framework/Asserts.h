@@ -36,8 +36,6 @@ namespace test
 {
 namespace framework
 {
-namespace detail
-{
 // Cast char values to int so that their numeric value are printed.
 inline int make_printable(int8_t value)
 {
@@ -51,7 +49,7 @@ inline unsigned int make_printable(uint8_t value)
 
 // Everything else can be printed as its own type.
 template <typename T>
-inline T &&make_printable(T &&value)
+inline T make_printable(T &&value)
 {
     return value;
 }
@@ -63,6 +61,8 @@ inline T &&make_printable(T &&value)
         arm_compute::test::framework::Framework::get().add_test_info(info.str()); \
     }
 
+namespace detail
+{
 #define ARM_COMPUTE_TEST_COMP_FACTORY(SEVERITY, SEVERITY_NAME, COMP, COMP_NAME, ERROR_CALL)                                            \
     template <typename T, typename U>                                                                                                  \
     void ARM_COMPUTE_##SEVERITY##_##COMP_NAME##_IMPL(T &&x, U &&y, const std::string &x_str, const std::string &y_str, LogLevel level) \
@@ -71,9 +71,9 @@ inline T &&make_printable(T &&value)
         {                                                                                                                              \
             std::stringstream msg;                                                                                                     \
             msg << #SEVERITY_NAME " '" << x_str << " " #COMP " " << y_str << "' failed. ["                                             \
-                << std::boolalpha << arm_compute::test::framework::detail::make_printable(x)                                           \
+                << std::boolalpha << arm_compute::test::framework::make_printable(x)                                                   \
                 << " " #COMP " "                                                                                                       \
-                << std::boolalpha << arm_compute::test::framework::detail::make_printable(y)                                           \
+                << std::boolalpha << arm_compute::test::framework::make_printable(y)                                                   \
                 << "]\n";                                                                                                              \
             arm_compute::test::framework::Framework::get().print_test_info(msg);                                                       \
             ERROR_CALL                                                                                                                 \
@@ -81,10 +81,11 @@ inline T &&make_printable(T &&value)
         arm_compute::test::framework::Framework::get().clear_test_info();                                                              \
     }
 
-ARM_COMPUTE_TEST_COMP_FACTORY(EXPECT, Expectation, ==, EQUAL, arm_compute::test::framework::Framework::get().log_failed_expectation(msg.str(), level);)
-ARM_COMPUTE_TEST_COMP_FACTORY(EXPECT, Expectation, !=, NOT_EQUAL, arm_compute::test::framework::Framework::get().log_failed_expectation(msg.str(), level);)
+ARM_COMPUTE_TEST_COMP_FACTORY(EXPECT, Expectation, ==, EQUAL, arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), level));)
+ARM_COMPUTE_TEST_COMP_FACTORY(EXPECT, Expectation, !=, NOT_EQUAL, arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), level));)
 ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, ==, EQUAL, throw arm_compute::test::framework::TestError(msg.str(), level);)
 ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_compute::test::framework::TestError(msg.str(), level);)
+} // namespace detail
 
 #define ARM_COMPUTE_ASSERT_NOT_EQUAL(X, Y) \
     arm_compute::test::framework::detail::ARM_COMPUTE_ASSERT_NOT_EQUAL_IMPL(X, Y, #X, #Y, LogLevel::ERRORS)
@@ -112,20 +113,19 @@ ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_comput
         arm_compute::test::framework::Framework::get().clear_test_info();                                             \
     } while(false)
 
-#define ARM_COMPUTE_EXPECT(X, LEVEL)                                                                 \
-    do                                                                                               \
-    {                                                                                                \
-        const auto &x = X;                                                                           \
-        if(!x)                                                                                       \
-        {                                                                                            \
-            std::stringstream msg;                                                                   \
-            msg << "Expectation '" #X "' failed.\n";                                                 \
-            arm_compute::test::framework::Framework::get().print_test_info(msg);                     \
-            arm_compute::test::framework::Framework::get().log_failed_expectation(msg.str(), LEVEL); \
-        }                                                                                            \
-        arm_compute::test::framework::Framework::get().clear_test_info();                            \
+#define ARM_COMPUTE_EXPECT(X, LEVEL)                                                                                                          \
+    do                                                                                                                                        \
+    {                                                                                                                                         \
+        const auto &x = X;                                                                                                                    \
+        if(!x)                                                                                                                                \
+        {                                                                                                                                     \
+            std::stringstream msg;                                                                                                            \
+            msg << "Expectation '" #X "' failed.\n";                                                                                          \
+            arm_compute::test::framework::Framework::get().print_test_info(msg);                                                              \
+            arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), LEVEL)); \
+        }                                                                                                                                     \
+        arm_compute::test::framework::Framework::get().clear_test_info();                                                                     \
     } while(false)
-} // namespace detail
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

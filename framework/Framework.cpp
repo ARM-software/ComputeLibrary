@@ -166,11 +166,11 @@ void Framework::log_test_end(const TestInfo &info)
     }
 }
 
-void Framework::log_failed_expectation(const std::string &msg, LogLevel level)
+void Framework::log_failed_expectation(const TestError &error)
 {
-    if(_log_level >= level)
+    if(_log_level >= error.level() && _printer != nullptr)
     {
-        std::cerr << "ERROR: " << msg << "\n";
+        _printer->print_error(error);
     }
 
     if(_current_test_result != nullptr)
@@ -225,6 +225,11 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 
     _current_test_result = &result;
 
+    if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+    {
+        _printer->print_errors_header();
+    }
+
     try
     {
         std::unique_ptr<TestCase> test_case = test_factory.make();
@@ -256,9 +261,9 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(const TestError &error)
         {
-            if(_log_level >= error.level())
+            if(_log_level >= error.level() && _printer != nullptr)
             {
-                std::cerr << "FATAL ERROR: " << error.what() << "\n";
+                _printer->print_error(error);
             }
 
             result.status = TestResult::Status::FAILED;
@@ -271,9 +276,11 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #ifdef ARM_COMPUTE_CL
         catch(const ::cl::Error &error)
         {
-            if(_log_level >= LogLevel::ERRORS)
+            if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
             {
-                std::cerr << "FATAL CL ERROR: " << error.what() << " with code " << error.err() << "\n";
+                std::stringstream stream;
+                stream << "Error code: " << error.err();
+                _printer->print_error(TestError(error.what(), LogLevel::ERRORS, stream.str()));
             }
 
             result.status = TestResult::Status::FAILED;
@@ -286,9 +293,9 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #endif /* ARM_COMPUTE_CL */
         catch(const std::exception &error)
         {
-            if(_log_level >= LogLevel::ERRORS)
+            if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
             {
-                std::cerr << "FATAL ERROR: Received unhandled error: '" << error.what() << "'\n";
+                _printer->print_error(error);
             }
 
             result.status = TestResult::Status::CRASHED;
@@ -300,9 +307,9 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(...)
         {
-            if(_log_level >= LogLevel::ERRORS)
+            if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
             {
-                std::cerr << "FATAL ERROR: Received unhandled exception\n";
+                _printer->print_error(TestError("Received unknown exception"));
             }
 
             result.status = TestResult::Status::CRASHED;
@@ -315,9 +322,9 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     }
     catch(const std::exception &error)
     {
-        if(_log_level >= LogLevel::ERRORS)
+        if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
         {
-            std::cerr << "FATAL ERROR: Received unhandled error during fixture creation: '" << error.what() << "'\n";
+            _printer->print_error(error);
         }
 
         result.status = TestResult::Status::CRASHED;
@@ -329,9 +336,9 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     }
     catch(...)
     {
-        if(_log_level >= LogLevel::ERRORS)
+        if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
         {
-            std::cerr << "FATAL ERROR: Received unhandled exception during fixture creation\n";
+            _printer->print_error(TestError("Received unknown exception"));
         }
 
         result.status = TestResult::Status::CRASHED;
@@ -340,6 +347,11 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         {
             throw;
         }
+    }
+
+    if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+    {
+        _printer->print_errors_footer();
     }
 
     _current_test_result = nullptr;

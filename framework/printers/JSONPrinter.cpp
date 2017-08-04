@@ -78,6 +78,7 @@ void JSONPrinter::print_test_header(const TestInfo &info)
 {
     print_separator(_first_test);
 
+    _first_test_entry = true;
     *_stream << R"(")" << info.name << R"(" : {)";
 }
 
@@ -86,8 +87,32 @@ void JSONPrinter::print_test_footer()
     *_stream << "}";
 }
 
+void JSONPrinter::print_errors_header()
+{
+    print_separator(_first_test_entry);
+
+    _first_error = true;
+    *_stream << R"("errors" : [)";
+}
+
+void JSONPrinter::print_errors_footer()
+{
+    *_stream << "]";
+}
+
+void JSONPrinter::print_error(const std::exception &error)
+{
+    print_separator(_first_error);
+
+    *_stream << R"(")" << error.what() << R"(")";
+}
+
 void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
 {
+    print_separator(_first_test_entry);
+
+    *_stream << R"("measurements" : {)";
+
     for(auto i_it = measurements.cbegin(), i_end = measurements.cend(); i_it != i_end;)
     {
         *_stream << R"(")" << i_it->first << R"(" : {)";
@@ -129,6 +154,8 @@ void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measuremen
             *_stream << ",";
         }
     }
+
+    *_stream << "}";
 }
 } // namespace framework
 } // namespace test
