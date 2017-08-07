@@ -58,11 +58,9 @@ void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor
     // Configure kernel window
     Window win = calculate_max_window(*accum->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic biases_access(biases->info(), 0, 0, biases->info()->dimension(0), biases->info()->dimension(1));
-
     update_window_and_padding(win,
                               AccessWindowHorizontal(accum->info(), 0, num_elems_processed_per_iteration),
-                              biases_access);
+                              AccessWindowStatic(biases->info(), 0, 0, win.x().end(), biases->info()->tensor_shape().y()));
 
     AccessWindowHorizontal output_access(accum->info(), 0, num_elems_processed_per_iteration);
 
