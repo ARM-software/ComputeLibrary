@@ -142,7 +142,7 @@ env['RANLIB'] = prefix + "ranlib"
 
 if not GetOption("help"):
     try:
-        compiler_ver = subprocess.check_output([env['CXX'], "-dumpversion"]).strip()
+        compiler_ver = subprocess.check_output([env['CXX'].strip() + ["-dumpversion"]).strip()
     except OSError:
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
