@@ -346,6 +346,7 @@ enum class NonLinearFilterFunction : unsigned
 enum class ReductionOperation
 {
     SUM_SQUARE, /**< Sum of squares */
+    SUM,        /**< Sum */
 };
 
 /** The normalization type used for the normalization layer */

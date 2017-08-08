@@ -204,6 +204,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "IYUV_to_RGB888_bt709", "color_convert.cl" },
     { "IYUV_to_RGBA8888_bt709", "color_convert.cl" },
     { "IYUV_to_YUV444_bt709", "color_convert.cl" },
+    { "l2_normalize", "l2_normalize.cl" },
     { "lktracker_stage0", "optical_flow_pyramid_lk.cl" },
     { "lktracker_stage1", "optical_flow_pyramid_lk.cl" },
     { "magnitude_phase", "magnitude_phase.cl" },
@@ -235,6 +236,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "pooling_layer_3", "pooling_layer.cl" },
     { "pooling_layer_3_optimized", "pooling_layer.cl" },
     { "pooling_layer_7", "pooling_layer.cl" },
+    { "reduction_operation", "reduction_operation.cl" },
     { "remap_nearest_neighbour", "remap.cl" },
     { "remap_bilinear", "remap.cl" },
     { "reshape_to_columns", "convolution_layer.cl" },
@@ -422,6 +424,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/integral_image.clembed"
     },
     {
+        "l2_normalize.cl",
+#include "./cl_kernels/l2_normalize.clembed"
+    },
+    {
         "magnitude_phase.cl",
 #include "./cl_kernels/magnitude_phase.clembed"
     },
@@ -472,6 +478,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "pooling_layer.cl",
 #include "./cl_kernels/pooling_layer.clembed"
+    },
+    {
+        "reduction_operation.cl",
+#include "./cl_kernels/reduction_operation.clembed"
     },
     {
         "remap.cl",
