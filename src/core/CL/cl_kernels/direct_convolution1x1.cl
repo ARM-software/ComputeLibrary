@@ -113,10 +113,11 @@ inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride3_8(__global const DATA_T
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The data size must be passed at compile time using -DDATA_SIZE e.g. -DDATA_SIZE=32
- * @note The convolution stride x and stride y must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1, _DSTRIDE_Y=1
+ * @note The convolution stride x must be passed at compile time using -DSTRIDE_X e.g. -DSTRIDE_X=1
+ * @note The third dimensions of the weights tensors must be passed at compile time using -DWEIGHTS_DEPTH
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: QS8/F16/F32
+ * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
@@ -144,9 +145,9 @@ inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride3_8(__global const DATA_T
  * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
  * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in W dimension
- * @param[in]  filter_depth                          The depth size of the filter
+ * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
  */
+#if defined(DATA_TYPE) && defined(DATA_SIZE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
 __kernel void direct_convolution1x1(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
@@ -154,8 +155,7 @@ __kernel void direct_convolution1x1(
 #ifdef HAS_BIAS
     VECTOR_DECLARATION(biases),
 #endif /* defined(HAS_BIAS) */
-    unsigned int weights_stride_w,
-    unsigned int filter_depth)
+    unsigned int weights_stride_w)
 {
     Image    src     = CONVERT_TO_IMAGE_STRUCT(src);
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
@@ -172,7 +172,7 @@ __kernel void direct_convolution1x1(
 
     weights.ptr += z_index * weights_stride_w;
 
-    for(int d = 0; d < filter_depth; ++d)
+    for(int d = 0; d < WEIGHTS_DEPTH; ++d)
     {
         DATA_TYPE weight = *(__global DATA_TYPE *)weights.ptr;
         VEC_DATA_TYPE(DATA_TYPE, 8)
@@ -188,3 +188,4 @@ __kernel void direct_convolution1x1(
 
     vstore8(pixels, 0, (__global DATA_TYPE *)dst.ptr);
 }
+#endif // defined(DATA_TYPE) && defined(DATA_SIZE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)

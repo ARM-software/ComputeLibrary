@@ -32,6 +32,7 @@
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "support/ToolchainSupport.h"
 
@@ -49,20 +50,17 @@ BorderSize CLDirectConvolutionLayerKernel::border_size() const
 
 void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
-    const unsigned int kernel_size = weights->info()->dimension(0);
-    ARM_COMPUTE_ERROR_ON_MSG(kernel_size != 1 && kernel_size != 3,
-                             "Kernel sizes other than 1x1 or 3x3 are not supported");
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != weights->info()->dimension(1),
+                             "Only kernel sizes 1x1 and 3x3 are supported");
+    ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != 1 && weights->info()->dimension(0) != 3,
+                             "Only kernel sizes 1x1 and 3x3 are supported");
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(2) != input->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != weights->info()->dimension(1));
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
-    ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) == 1 && (std::get<0>(conv_info.pad()) || std::get<1>(conv_info.pad())),
-                             "Pad > 0 not supported for 1x1 weights");
-    ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) == 3 && (std::get<0>(conv_info.pad()) > 1 || std::get<1>(conv_info.pad()) > 1),
-                             "Pad > 1 not supported for 3x3 weights");
-    ARM_COMPUTE_ERROR_ON_MSG(std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported.");
-    ARM_COMPUTE_ERROR_ON_MSG((kernel_size == 3 && std::get<0>(conv_info.stride()) > 2), "Strides larger than 2 not supported in 3x3 direct convolution!");
+    ARM_COMPUTE_ERROR_ON_MSG((weights->info()->dimension(0) == 1) && std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported for 1x1 convolution.");
+    ARM_COMPUTE_ERROR_ON_MSG((weights->info()->dimension(0) == 3) && std::get<0>(conv_info.stride()) > 2, "Strides larger than 2 not supported for 3x3 convolution.");
 
     if(biases != nullptr)
     {
@@ -71,10 +69,29 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
     }
 
+    const unsigned int kernel_size = weights->info()->dimension(0);
+
+    // Get convolved dimensions
+    unsigned int output_width  = 0;
+    unsigned int output_height = 0;
+    std::tie(output_width, output_height) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_size, kernel_size, conv_info);
+
+    TensorShape output_shape = input->info()->tensor_shape();
+    output_shape.set(0, output_width);
+    output_shape.set(1, output_height);
+    output_shape.set(2, weights->info()->dimension(3));
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+
     _conv_stride_x = std::get<0>(conv_info.stride());
     _conv_stride_y = std::get<1>(conv_info.stride());
-    _conv_pad_x    = std::get<0>(conv_info.pad());
-    _conv_pad_y    = std::get<1>(conv_info.pad());
+    _conv_pad_x    = std::min(std::get<0>(conv_info.pad()), kernel_size / 2);
+    _conv_pad_y    = std::min(std::get<1>(conv_info.pad()), kernel_size / 2);
 
     _input       = input;
     _weights     = weights;
@@ -86,9 +103,9 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     std::set<std::string> options;
     kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
 
-    options.insert("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    options.insert("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
-
+    options.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    options.emplace("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
+    options.emplace("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2)));
     options.emplace("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
 
     if(_biases != nullptr)
@@ -98,33 +115,27 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), options));
 
-    unsigned int idx = (_biases == nullptr) ? 3 * num_arguments_per_3D_tensor() : (num_arguments_per_1D_tensor() + 3 * num_arguments_per_3D_tensor());
-    _kernel.setArg<cl_uint>(idx++, _weights->info()->strides_in_bytes()[3]); // weights_stride_w
-    _kernel.setArg<cl_uint>(idx++, _weights->info()->dimension(2));          // filter depth
-
-    // Using this local workgroup size gives better performance over others that have been tried.
-    _lws_hint = cl::NDRange(4, 1, 8);
-
     // Configure kernel window
     Window win = calculate_max_window(*output->info());
 
-    unsigned int num_elems_read_per_iteration    = 16 * _conv_stride_x;
-    unsigned int num_elems_written_per_iteration = 8;
+    bool is_kernel3x3_stride2 = ((kernel_size == 3) && (_conv_stride_x == 2));
+
+    const unsigned int num_elems_read_per_iteration_x    = 8 + 2 * (kernel_size / 2) + (is_kernel3x3_stride2 ? 7 : 0);
+    const unsigned int num_elems_read_per_iteration_y    = kernel_size;
+    const unsigned int num_elems_written_per_iteration_x = 8;
+    const unsigned int num_elems_written_per_iteration_y = 1;
 
     // Calculate right and bottom border
-    const int input_width    = input->info()->dimension(0);
-    const int input_height   = input->info()->dimension(1);
-    const int upper_bound_w  = ceil_to_multiple(((output->info()->dimension(0) - 1) * _conv_stride_x + kernel_size), num_elems_read_per_iteration) - _conv_pad_x - input_width;
-    const int upper_bound_h  = ((output->info()->dimension(1) - 1) * _conv_stride_y - _conv_pad_y + kernel_size) - input_height;
-    const int padding_right  = std::max(upper_bound_w, static_cast<int>(kernel_size));
-    const int padding_bottom = std::max(upper_bound_h, static_cast<int>(kernel_size));
+    const int input_width  = input->info()->dimension(0) - kernel_size / 2 + _conv_pad_x;
+    const int input_height = input->info()->dimension(1) - kernel_size / 2 + _conv_pad_y;
 
     // Create window and update padding
-    win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration));
-    AccessWindowStatic input_access(input->info(), -_conv_pad_x, -_conv_pad_y, input_width + padding_right, input_height + padding_bottom);
+    win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
 
-    AccessWindowStatic     weights_access(weights->info(), 0, 0, kernel_size, kernel_size);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
+    AccessWindowStatic    input_access(input->info(), -_conv_pad_x, -_conv_pad_y, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
+    AccessWindowStatic    weights_access(weights->info(), 0, 0, kernel_size, kernel_size);
+    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
+
     update_window_and_padding(win, input_access, weights_access, output_access);
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
@@ -157,6 +168,8 @@ void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue 
         slice_biases.use_tensor_dimensions(_biases->info());
         add_1D_tensor_argument(idx1, _biases, slice_biases);
     }
+
+    _kernel.setArg(idx1++, static_cast<unsigned int>(_weights->info()->strides_in_bytes()[3]));
 
     do
     {

@@ -50,8 +50,12 @@ public:
     ~CLDirectConvolutionLayerKernel() = default;
     /** Set the input, weights, biases and output tensors.
      *
+     * @note: DirectConvolution only works in the following configurations:
+     *        1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3
+     *        3x3 convolution with stride_x = 1/2, stride_y = 1/2
+     *
      * @param[in]  input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
-     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F16, F32.
+     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F16/F32.
      * @param[in]  weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
      *                       The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                       Data type supported:Same as @p input.

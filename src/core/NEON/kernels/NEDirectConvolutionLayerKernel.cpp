@@ -30,6 +30,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 
 #include <algorithm>
@@ -952,13 +953,15 @@ BorderSize NEDirectConvolutionLayerKernel::border_size() const
 void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::QS16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QS8, DataType::F16, DataType::QS16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS16, DataType::F16, DataType::QS32, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) == 1 && (std::get<0>(conv_info.pad()) || std::get<1>(conv_info.pad())),
                              "Pad > 0 not supported for 1x1 weights");
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) == 3 && (std::get<0>(conv_info.pad()) > 1 || std::get<1>(conv_info.pad()) > 1),
                              "Pad > 1 not supported for 3x3 weights");
     ARM_COMPUTE_ERROR_ON_MSG(std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported.");
+    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(2) != input->info()->dimension(2));
+    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != weights->info()->dimension(1));
+    ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
 
     const unsigned int conv_stride_x = std::get<0>(conv_info.stride());
     const unsigned int conv_pad_x    = std::get<0>(conv_info.pad());
@@ -970,6 +973,32 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
     _conv_info   = conv_info;
     _kernel_size = weights->info()->dimension(0);
     _border_size = BorderSize(conv_pad_y, conv_pad_x);
+
+    const unsigned int kernel_size = weights->info()->dimension(0);
+
+    // Get convolved dimensions
+    unsigned int output_width  = 0;
+    unsigned int output_height = 0;
+    std::tie(output_width, output_height) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_size, kernel_size, conv_info);
+
+    TensorShape output_shape = input->info()->tensor_shape();
+    output_shape.set(0, output_width);
+    output_shape.set(1, output_height);
+    output_shape.set(2, weights->info()->dimension(3));
+
+    DataType data_type = input->info()->data_type();
+
+    if(is_data_type_fixed_point(data_type))
+    {
+        // Promote data type in case of fixed point
+        data_type = ((data_type == DataType::QS8) ? DataType::QS16 : DataType::QS32);
+    }
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, data_type, input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, output->info()->data_type());
 
     Window win = calculate_max_window(*output->info());
 
