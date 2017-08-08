@@ -24,8 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_NORMALIZATION_LAYER_H__
 #define __ARM_COMPUTE_TEST_NORMALIZATION_LAYER_H__
 
+#include "tests/SimpleTensor.h"
 #include "tests/validation_new/Helpers.h"
-#include "tests/validation_new/SimpleTensor.h"
 
 namespace arm_compute
 {

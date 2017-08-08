@@ -54,7 +54,7 @@ namespace test
  * different image format.
  */
 template <typename T>
-class SimpleTensor final : public IAccessor
+class SimpleTensor : public IAccessor
 {
 public:
     /** Create an uninitialised tensor. */
@@ -163,7 +163,7 @@ public:
     template <typename U>
     friend void swap(SimpleTensor<U> &tensor1, SimpleTensor<U> &tensor2);
 
-private:
+protected:
     Buffer      _buffer{ nullptr };
     TensorShape _shape{};
     Format      _format{ Format::UNKNOWN };
@@ -198,6 +198,8 @@ SimpleTensor<T>::SimpleTensor(const SimpleTensor &tensor)
     : _buffer(nullptr),
       _shape(tensor.shape()),
       _format(tensor.format()),
+      _data_type(tensor.data_type()),
+      _num_channels(tensor.num_channels()),
       _fixed_point_position(tensor.fixed_point_position())
 {
     _buffer = support::cpp14::make_unique<T[]>(tensor.num_elements() * num_channels());
@@ -278,6 +280,7 @@ int SimpleTensor<T>::num_channels() const
         case Format::U16:
         case Format::S32:
         case Format::U32:
+        case Format::F32:
             return 1;
         case Format::RGB888:
             return 3;

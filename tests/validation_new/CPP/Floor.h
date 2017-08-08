@@ -24,8 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_FLOOR_H__
 #define __ARM_COMPUTE_TEST_FLOOR_H__
 
+#include "tests/SimpleTensor.h"
 #include "tests/validation_new/Helpers.h"
-#include "tests/validation_new/SimpleTensor.h"
 
 namespace arm_compute
 {

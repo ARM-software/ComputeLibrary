@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_BITWISE_NOT_H__
 #define __ARM_COMPUTE_TEST_BITWISE_NOT_H__
 
-#include "tests/validation_new/SimpleTensor.h"
+#include "tests/SimpleTensor.h"
 
 namespace arm_compute
 {

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Array.h"
+#include "tests/RawTensor.h"
 
 #include "boost_wrapper.h"
 
@@ -37,7 +38,6 @@ class Tensor;
 
 namespace test
 {
-class RawTensor;
 class IAccessor;
 
 namespace validation

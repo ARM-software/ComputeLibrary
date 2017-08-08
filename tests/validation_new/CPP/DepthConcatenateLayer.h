@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_DEPTHCONCATENATE_LAYER_H__
 #define __ARM_COMPUTE_TEST_DEPTHCONCATENATE_LAYER_H__
 
-#include "tests/validation_new/SimpleTensor.h"
+#include "tests/SimpleTensor.h"
 
 #include <vector>
 

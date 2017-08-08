@@ -427,8 +427,8 @@ void AssetsLibrary::fill(T &&tensor, const std::string &name, Format format) con
     {
         const Coordinates id = index2coord(raw.shape(), offset / raw.element_size());
 
-        const RawTensor::BufferType *const raw_ptr = raw.data() + offset;
-        const auto                         out_ptr = static_cast<RawTensor::BufferType *>(tensor(id));
+        const RawTensor::value_type *const raw_ptr = raw.data() + offset;
+        const auto                         out_ptr = static_cast<RawTensor::value_type *>(tensor(id));
         std::copy_n(raw_ptr, raw.element_size(), out_ptr);
     }
 }
@@ -448,8 +448,8 @@ void AssetsLibrary::fill(T &&tensor, const std::string &name, Format format, Cha
     {
         const Coordinates id = index2coord(raw.shape(), offset / raw.element_size());
 
-        const RawTensor::BufferType *const raw_ptr = raw.data() + offset;
-        const auto                         out_ptr = static_cast<RawTensor::BufferType *>(tensor(id));
+        const RawTensor::value_type *const raw_ptr = raw.data() + offset;
+        const auto                         out_ptr = static_cast<RawTensor::value_type *>(tensor(id));
         std::copy_n(raw_ptr, raw.element_size(), out_ptr);
     }
 }
