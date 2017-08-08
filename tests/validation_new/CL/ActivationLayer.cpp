@@ -53,7 +53,7 @@ namespace
  */
 AbsoluteTolerance<float> tolerance(ActivationLayerInfo::ActivationFunction activation, DataType data_type)
 {
-    constexpr float epsilon = std::numeric_limits<float>::epsilon();
+    constexpr float epsilon = 1e-6f;
 
     switch(activation)
     {
