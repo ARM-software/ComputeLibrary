@@ -96,8 +96,8 @@ NEConvolutionLayer::NEConvolutionLayer()
 void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights);
     ARM_COMPUTE_ERROR_ON(!weights_info.are_reshaped() && weights->info()->dimension(2) != input->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
 
@@ -131,7 +131,6 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     const unsigned int kernel_height = (_are_weights_reshaped) ? weights_info.kernel_size().second : weights->info()->dimension(1);
     std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_width, kernel_height,
                                                  conv_info);
-    ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
     // Check if its a "fully connected" convolution
     _is_fully_connected_convolution = ((conv_w == 1) && (conv_h == 1));
@@ -142,7 +141,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     // Reshape weights if needed
     if(_are_weights_reshaped)
     {
-        mat_weights_cols                         = output->info()->dimension(2);
+        mat_weights_cols                         = weights_info.num_kernels();
         const unsigned int quarter_reshaped_cols = weights->info()->dimension(0) / 4;
         mat_weights_rows                         = (_has_bias ? 1 + quarter_reshaped_cols : quarter_reshaped_cols);
     }
@@ -204,6 +203,8 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         _mm_kernel.configure(&_input_interleaved_reshaped, weights, &_gemm_output, 1.0f);
     }
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
+
+    ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
     // Allocate intermediate tensor
     if(!_are_weights_reshaped)

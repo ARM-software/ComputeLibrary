@@ -251,26 +251,26 @@ public:
         // Configure Layers
         {
             // Layer 1
-            conv1->configure(&input, w[0].get(), b[0].get(), &conv1_out, PadStrideInfo(4, 4, 0, 0), WeightsInfo(_reshaped_weights, 11U, 11U));
+            conv1->configure(&input, w[0].get(), b[0].get(), &conv1_out, PadStrideInfo(4, 4, 0, 0), WeightsInfo(_reshaped_weights, 11U, 11U, 96U));
             act1->configure(&conv1_out, &act1_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
             norm1->configure(&act1_out, &norm1_out, NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f));
             pool1->configure(&norm1_out, &pool1_out, PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
             // Layer 2
-            conv21->configure(pool11_out.get(), w21.get(), b21.get(), conv21_out.get(), PadStrideInfo(1, 1, 2, 2), WeightsInfo(_reshaped_weights, 5U, 5U));
-            conv22->configure(pool12_out.get(), w22.get(), b22.get(), conv22_out.get(), PadStrideInfo(1, 1, 2, 2), WeightsInfo(_reshaped_weights, 5U, 5U));
+            conv21->configure(pool11_out.get(), w21.get(), b21.get(), conv21_out.get(), PadStrideInfo(1, 1, 2, 2), WeightsInfo(_reshaped_weights, 5U, 5U, 128U));
+            conv22->configure(pool12_out.get(), w22.get(), b22.get(), conv22_out.get(), PadStrideInfo(1, 1, 2, 2), WeightsInfo(_reshaped_weights, 5U, 5U, 128U));
             act2->configure(&conv2_out, &act2_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
             norm2->configure(&act2_out, &norm2_out, NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f));
             pool2->configure(&norm2_out, &pool2_out, PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
             // Layer 3
-            conv3->configure(&pool2_out, w[2].get(), b[2].get(), &conv3_out, PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U));
+            conv3->configure(&pool2_out, w[2].get(), b[2].get(), &conv3_out, PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 384U));
             act3->configure(&conv3_out, &act3_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
             // Layer 4
-            conv41->configure(act31_out.get(), w41.get(), b41.get(), conv41_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U));
-            conv42->configure(act32_out.get(), w42.get(), b42.get(), conv42_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U));
+            conv41->configure(act31_out.get(), w41.get(), b41.get(), conv41_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 192U));
+            conv42->configure(act32_out.get(), w42.get(), b42.get(), conv42_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 192U));
             act4->configure(&conv4_out, &act4_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
             // Layer 5
-            conv51->configure(act41_out.get(), w51.get(), b51.get(), conv51_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U));
-            conv52->configure(act42_out.get(), w52.get(), b52.get(), conv52_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U));
+            conv51->configure(act41_out.get(), w51.get(), b51.get(), conv51_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 128U));
+            conv52->configure(act42_out.get(), w52.get(), b52.get(), conv52_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 128U));
             act5->configure(&conv5_out, &act5_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
             pool5->configure(&act5_out, &pool5_out, PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
             // Layer 6

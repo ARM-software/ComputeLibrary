@@ -251,8 +251,8 @@ inline bool auto_init_if_empty(ITensorInfo &info, const TensorShape &shape, int 
     if(info.tensor_shape().total_size() == 0)
     {
         info.set_data_type(data_type);
-        info.set_tensor_shape(shape);
         info.set_num_channels(num_channels);
+        info.set_tensor_shape(shape);
         info.set_fixed_point_position(fixed_point_position);
         return true;
     }

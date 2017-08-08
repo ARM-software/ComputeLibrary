@@ -607,13 +607,13 @@ private:
     float    _kappa;
 };
 
-/** Convolution Layer Weights Information class */
+/** Convolution Layer Weights Information class. This class stores the necessary information to compute convolution layer when the weights are already reshaped */
 class WeightsInfo
 {
 public:
     /** Default constructor */
     WeightsInfo()
-        : _are_reshaped(false), _kernel_width(0), _kernel_height(0)
+        : _are_reshaped(false), _kernel_width(0), _kernel_height(0), _num_kernels(0)
     {
     }
     /** Constructor
@@ -621,9 +621,10 @@ public:
      * @param[in] are_reshaped  True if the weights have been reshaped
      * @param[in] kernel_width  Kernel width.
      * @param[in] kernel_height Kernel height.
+     * @param[in] num_kernels   Number of convolution kernels.
      */
-    WeightsInfo(bool are_reshaped, unsigned int kernel_width, unsigned int kernel_height)
-        : _are_reshaped(are_reshaped), _kernel_width(kernel_width), _kernel_height(kernel_height)
+    WeightsInfo(bool are_reshaped, unsigned int kernel_width, unsigned int kernel_height, unsigned int num_kernels)
+        : _are_reshaped(are_reshaped), _kernel_width(kernel_width), _kernel_height(kernel_height), _num_kernels(num_kernels)
     {
     }
     /** Flag which specifies if the weights tensor has been reshaped.
@@ -633,6 +634,14 @@ public:
     bool are_reshaped() const
     {
         return _are_reshaped;
+    };
+    /** Return the number of convolution kernels
+     *
+     * @return The number of convolution kernels
+     */
+    unsigned int num_kernels() const
+    {
+        return _num_kernels;
     };
     /** Return the width and height of the kernel
      *
@@ -647,6 +656,7 @@ private:
     const bool         _are_reshaped;
     const unsigned int _kernel_width;
     const unsigned int _kernel_height;
+    const unsigned int _num_kernels;
 };
 
 /** IO formatting information class*/
