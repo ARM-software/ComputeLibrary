@@ -97,11 +97,6 @@ public:
     void run() override;
 
 private:
-    void configure_fc_fc_wb(const ITensor *input, const ITensor *weights, ITensor *output);
-    void configure_fc_fc_nb(const ITensor *input, const ITensor *weights, ITensor *output);
-    void configure_conv_fc_wb(const ITensor *input, const ITensor *weights, ITensor *output);
-    void configure_conv_fc_nb(const ITensor *input, const ITensor *weights, ITensor *output);
-
     NEIm2ColKernel                      _im2col_kernel;
     NEFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
     NEGEMMInterleave4x4Kernel           _interleave4x4_kernel;
@@ -111,8 +106,8 @@ private:
     Tensor                              _interleave4x4_output;
     Tensor                              _reshape_weights_output;
     bool                                _are_weights_reshaped;
-    bool                                _is_fc_after_conv;
     bool                                _is_batched_fc_layer;
+    bool                                _linearize_input;
     bool                                _accumulate_biases;
 };
 }

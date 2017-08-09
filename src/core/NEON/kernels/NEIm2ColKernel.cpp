@@ -291,7 +291,10 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                                         _conv_info);
     _has_bias = has_bias;
 
-    unsigned int pad_x, pad_y, stride_x, stride_y = 0;
+    unsigned int pad_x    = 0;
+    unsigned int pad_y    = 0;
+    unsigned int stride_x = 0;
+    unsigned int stride_y = 0;
     std::tie(pad_x, pad_y)       = conv_info.pad();
     std::tie(stride_x, stride_y) = conv_info.stride();
 

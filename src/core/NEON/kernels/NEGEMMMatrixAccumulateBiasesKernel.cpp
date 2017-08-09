@@ -48,7 +48,7 @@ void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(biases, accum);
-    ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() != 1);
+    ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
 
     _biases = biases;
     _accum  = accum;
