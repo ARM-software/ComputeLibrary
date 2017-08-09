@@ -58,52 +58,6 @@ struct is_floating_point
 {
 };
 
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
-void vector_matrix_multiply(const T *in, const T *weights, const T *bias, T *out, int cols_weights, int rows_weights, uint8_t fixed_point_position)
-{
-    for(int x = 0; x < cols_weights; ++x)
-    {
-        T acc(0);
-        for(int y = 0; y < rows_weights; ++y)
-        {
-            acc += in[y] * weights[x + y * cols_weights];
-        }
-        out[x] = acc + bias[x];
-    }
-}
-
-// Vector matrix multiply for fixed point type
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type * = nullptr>
-void vector_matrix_multiply(const T *in, const T *weights, const T *bias, T *out, int cols_weights, int rows_weights, uint8_t fixed_point_position)
-{
-    using namespace fixed_point_arithmetic;
-    using promoted_type = typename fixed_point_arithmetic::traits::promote<T>::type;
-
-    for(int x = 0; x < cols_weights; ++x)
-    {
-        // Reset accumulator
-        fixed_point<promoted_type> acc(0, fixed_point_position);
-
-        for(int y = 0; y < rows_weights; ++y)
-        {
-            const fixed_point<promoted_type> i_value(in[y], fixed_point_position, true);
-            const fixed_point<promoted_type> w_value(weights[x + y * cols_weights], fixed_point_position, true);
-            const fixed_point<promoted_type> iw = i_value * w_value;
-            acc                                 = iw + acc;
-        }
-
-        // Get the bias
-        const fixed_point<T> b(bias[x], fixed_point_position, true);
-
-        // Convert back and accumulate the bias
-        fixed_point<T> res(acc);
-        res = res + b;
-
-        // Store the result
-        out[x] = res.raw();
-    }
-}
-
 // Return a tensor element at a specified coordinate with different border modes
 template <typename T>
 T tensor_elem_at(const Tensor<T> &in, Coordinates coord, BorderMode border_mode, T constant_border_value)
@@ -1114,28 +1068,6 @@ void batch_normalization_layer(const Tensor<T> &in, Tensor<T> &out, const Tensor
                 }
             }
         }
-    }
-}
-
-// Fully connected layer
-template <typename T>
-void fully_connected_layer(const Tensor<T> &in, const Tensor<T> &weights, const Tensor<T> &bias, Tensor<T> &out)
-{
-    ARM_COMPUTE_ERROR_ON(weights.shape().x() != out.shape().x());
-    ARM_COMPUTE_ERROR_ON(weights.shape().y() != in.shape().x() * in.shape().y() * in.shape().z());
-    const int cols_weights = weights.shape().x();
-    const int rows_weights = weights.shape().y();
-    const int num_batches  = in.shape().total_size() / rows_weights;
-
-    for(int k = 0; k < num_batches; ++k)
-    {
-        vector_matrix_multiply<T>(in.data() + k * rows_weights,
-                                  weights.data(),
-                                  bias.data(),
-                                  out.data() + k * cols_weights,
-                                  cols_weights,
-                                  rows_weights,
-                                  in.fixed_point_position());
     }
 }
 

@@ -259,14 +259,6 @@ public:
      */
     static void batch_normalization_layer(const RawTensor &src, RawTensor &dst, const RawTensor &mean, const RawTensor &var, const RawTensor &beta, const RawTensor &gamma, float epsilon,
                                           int fixed_point_position = 0);
-    /** Fully connected layer function
-     *
-     * @param[in]  src     Input tensor
-     * @param[in]  weights Weights tensor.
-     * @param[in]  bias    Bias tensor.
-     * @param[out] dst     Result tensor.
-     */
-    static void fully_connected_layer(const RawTensor &src, const RawTensor &weights, const RawTensor &bias, RawTensor &dst);
     /** Pooling layer of @p src based on the information from @p pool_info.
      *
      * @param[in]  src       Input tensor.

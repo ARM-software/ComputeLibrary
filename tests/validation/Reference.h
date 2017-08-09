@@ -293,20 +293,6 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position = 0);
-    /** Compute reference for fully connected layer function
-     *
-     * @param[in] input_shape          Shape for the input tensor
-     * @param[in] weights_shape        Shape for the weights tensor
-     * @param[in] bias_shape           Shape for the bias tensor
-     * @param[in] output_shape         Shape for the output tensor
-     * @param[in] dt                   Data type to use
-     * @param[in] transpose_weights    Transpose the weights if true
-     * @param[in] fixed_point_position Number of bits for the fractional part of the fixed point numbers
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_fully_connected_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
-                                                             bool transpose_weights, int fixed_point_position);
     /** Compute reference pooling layer.
       *
       * @param[in] shape_in             Shape of the input tensor.

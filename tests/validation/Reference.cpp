@@ -461,46 +461,6 @@ RawTensor Reference::compute_reference_batch_normalization_layer(const TensorSha
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_fully_connected_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
-                                                             DataType dt, bool transpose_weights, int fixed_point_position)
-{
-    // Create reference
-    RawTensor ref_src(input_shape, dt, 1, fixed_point_position);
-    RawTensor ref_bias(bias_shape, dt, 1, fixed_point_position);
-    RawTensor ref_dst(output_shape, dt, 1, fixed_point_position);
-
-    // Swap the first and second dimension of weights' shape if transpose_weights is true
-    TensorShape ws = weights_shape;
-    if(transpose_weights)
-    {
-        const size_t dimx = ws.x();
-        ws.set(0, ws.y());
-        ws.set(1, dimx);
-    }
-
-    RawTensor ref_weights(ws, dt, 1, fixed_point_position);
-
-    // Fill reference
-    if(dt == DataType::F16 || dt == DataType::F32)
-    {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-        library->fill(ref_src, distribution, 0);
-        library->fill(ref_weights, distribution, 1);
-        library->fill(ref_bias, distribution, 2);
-    }
-    else
-    {
-        library->fill_tensor_uniform(ref_src, 0);
-        library->fill_tensor_uniform(ref_weights, 1);
-        library->fill_tensor_uniform(ref_bias, 2);
-    }
-
-    // Compute reference
-    ReferenceCPP::fully_connected_layer(ref_src, ref_weights, ref_bias, ref_dst);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info, int fixed_point_position)
 {
     // Create reference

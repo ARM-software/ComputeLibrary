@@ -232,28 +232,6 @@ private:
     float                _epsilon;
     int                  _fixed_point_position;
 };
-// Fully Connected Layer visitor
-struct fully_connected_layer_visitor : public boost::static_visitor<>
-{
-public:
-    explicit fully_connected_layer_visitor(const TensorVariant &in, const TensorVariant &weights, const TensorVariant &bias)
-        : _in(in), _weights(weights), _bias(bias)
-    {
-    }
-    template <typename T>
-    void operator()(Tensor<T> &out) const
-    {
-        const Tensor<T> &in      = boost::get<Tensor<T>>(_in);
-        const Tensor<T> &weights = boost::get<Tensor<T>>(_weights);
-        const Tensor<T> &bias    = boost::get<Tensor<T>>(_bias);
-        tensor_operations::fully_connected_layer(in, weights, bias, out);
-    }
-
-private:
-    const TensorVariant &_in;
-    const TensorVariant &_weights;
-    const TensorVariant &_bias;
-};
 
 // Pooling layer
 struct pooling_layer_visitor : public boost::static_visitor<>
