@@ -39,6 +39,63 @@
 
 using namespace arm_compute;
 
+namespace
+{
+template <typename T, unsigned int leftx, unsigned int rightx>
+void fill_constant_value_single_channel_special(ITensor *tensor, const Window &window, unsigned int right, unsigned int bottom, const PixelValue &constant_border_value);
+
+template <>
+inline void fill_constant_value_single_channel_special<float, 1u, 1u>(ITensor *tensor, const Window &window, unsigned int right, unsigned int bottom, const PixelValue &constant_border_value)
+{
+    float border_value;
+    constant_border_value.get(border_value);
+    uint8_t *const start_valid_region = tensor->ptr_to_element(tensor->info()->valid_region().anchor);
+    const size_t &width              = tensor->info()->valid_region().shape[0];
+    const size_t &height             = tensor->info()->valid_region().shape[1];
+    const int      stridey            = tensor->info()->strides_in_bytes()[1];
+
+    // Left and right border
+    Window vertical(window);
+    vertical.set(Window::DimY, Window::Dimension(0, height, 1));
+
+    Iterator vertical_it(tensor, vertical);
+
+    execute_window_loop(vertical, [&](const Coordinates &)
+    {
+        const auto row_start = reinterpret_cast<float *>(start_valid_region + vertical_it.offset());
+
+        // Fill left and right borders
+        *(row_start - 1) = border_value;
+        std::fill_n(row_start + width, right, border_value);
+    },
+    vertical_it);
+
+    // Top and bottom border
+    Iterator plane_it(tensor, window);
+
+    // Iterate over all XY planes
+    execute_window_loop(window, [&](const Coordinates &)
+    {
+        uint8_t *base_addr = start_valid_region + plane_it.offset();
+        // Top border
+        const auto row_start = reinterpret_cast<float *>(base_addr - stridey);
+        // Fill top rows including left/right borders
+        std::fill_n(row_start - 1, 1 + width + right, border_value);
+
+        // Bottom border
+        const unsigned low_border_size = height + bottom;
+        for(unsigned int i = height; i < low_border_size; ++i)
+        {
+            const auto row_start = reinterpret_cast<float *>(base_addr + i * stridey);
+
+            // Fill bottom rows including left/right borders
+            std::fill_n(row_start - 1, 1 + width + right, border_value);
+        }
+    },
+    plane_it);
+}
+} // namespace
+
 namespace arm_compute
 {
 class Coordinates;
@@ -112,7 +169,10 @@ void NEFillBorderKernel::run(const Window &window)
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
                 case DataType::F32:
                     static_assert(sizeof(float) == 4, "Float must be 32 bit");
-                    fill_constant_value_single_channel<float>(window);
+                    if(_border_size.left == 1 && _border_size.top == 1)
+                        fill_constant_value_single_channel_special<float, 1u, 1u>(_tensor, window, _border_size.right, _border_size.bottom, _constant_border_value);
+                    else
+                        fill_constant_value_single_channel<float>(window);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Not handled");
@@ -230,6 +290,7 @@ void NEFillBorderKernel::fill_constant_value_single_channel(const Window &window
     uint8_t *const start_valid_region = _tensor->ptr_to_element(_tensor->info()->valid_region().anchor);
     const size_t &width              = _tensor->info()->valid_region().shape[0];
     const size_t &height             = _tensor->info()->valid_region().shape[1];
+    const int      stridey            = _tensor->info()->strides_in_bytes()[1];
 
     // Left and right border
     Window vertical(window);
@@ -253,19 +314,21 @@ void NEFillBorderKernel::fill_constant_value_single_channel(const Window &window
     // Iterate over all XY planes
     execute_window_loop(window, [&](const Coordinates & id)
     {
+        uint8_t *base_addr = start_valid_region + plane_it.offset();
         // Top border
         for(int i = -_border_size.top; i < 0; ++i)
         {
-            const auto row_start = reinterpret_cast<T *>(start_valid_region + plane_it.offset() + i * _tensor->info()->strides_in_bytes()[1]);
+            const auto row_start = reinterpret_cast<T *>(base_addr + i * stridey);
 
             // Fill top rows including left/right borders
             std::fill_n(row_start - _border_size.left, _border_size.left + width + _border_size.right, constant_border_value);
         }
 
         // Bottom border
-        for(unsigned int i = height; i < height + _border_size.bottom; ++i)
+        const unsigned low_border_size = height + _border_size.bottom;
+        for(unsigned int i = height; i < low_border_size; ++i)
         {
-            const auto row_start = reinterpret_cast<T *>(start_valid_region + plane_it.offset() + i * _tensor->info()->strides_in_bytes()[1]);
+            const auto row_start = reinterpret_cast<T *>(base_addr + i * stridey);
 
             // Fill bottom rows including left/right borders
             std::fill_n(row_start - _border_size.left, _border_size.left + width + _border_size.right, constant_border_value);
