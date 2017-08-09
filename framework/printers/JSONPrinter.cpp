@@ -102,9 +102,15 @@ void JSONPrinter::print_errors_footer()
 
 void JSONPrinter::print_error(const std::exception &error)
 {
-    print_separator(_first_error);
+    std::stringstream error_log;
+    error_log.str(error.what());
 
-    *_stream << R"(")" << error.what() << R"(")";
+    for(std::string line; !std::getline(error_log, line).eof();)
+    {
+        print_separator(_first_error);
+
+        *_stream << R"(")" << line << R"(")";
+    }
 }
 
 void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
