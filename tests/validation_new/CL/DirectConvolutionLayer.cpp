@@ -50,6 +50,17 @@ constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(0);  /**< Tolerance for fixed
 constexpr AbsoluteTolerance<int16_t> tolerance_qs16(0); /**< Tolerance for fixed point tests */
 
 /** Direct convolution data set. */
+const auto data_quantized = combine(datasets::SmallDirectConvolutionShapes(),
+                                    combine(framework::dataset::make("StrideX", 1, 3),
+                                            combine(framework::dataset::make("StrideY", 1, 3),
+                                                    combine(concat(combine(framework::dataset::make("PadX", 0),
+                                                                           combine(framework::dataset::make("PadY", 0),
+                                                                                   framework::dataset::make("KernelSize", 1))),
+                                                                   combine(framework::dataset::make("PadX", 0, 2),
+                                                                           combine(framework::dataset::make("PadY", 0, 2),
+                                                                                   framework::dataset::make("KernelSize", { 3 })))),
+                                                            framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+
 const auto data = combine(datasets::SmallDirectConvolutionShapes(),
                           combine(framework::dataset::make("StrideX", 1, 3),
                                   combine(framework::dataset::make("StrideY", 1, 3),
@@ -58,7 +69,7 @@ const auto data = combine(datasets::SmallDirectConvolutionShapes(),
                                                                          framework::dataset::make("KernelSize", 1))),
                                                          combine(framework::dataset::make("PadX", 0, 2),
                                                                  combine(framework::dataset::make("PadY", 0, 2),
-                                                                         framework::dataset::make("KernelSize", 3)))),
+                                                                         framework::dataset::make("KernelSize", { 3, 5 })))),
                                                   framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
 } // namespace
 
@@ -93,7 +104,7 @@ using CLDirectConvolutionLayerFixedPointFixture = DirectConvolutionValidationFix
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::QS8)),
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(data_quantized, framework::dataset::make("DataType", DataType::QS8)),
                                                                                                                     framework::dataset::make("FractionalBits", 2, 7)))
 {
     // Validate output
@@ -102,7 +113,7 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int8_t>, f
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::QS16)),
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(data_quantized, framework::dataset::make("DataType", DataType::QS16)),
                                                                                                                      framework::dataset::make("FractionalBits", 2, 15)))
 {
     // Validate output

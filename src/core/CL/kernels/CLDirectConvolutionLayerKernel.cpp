@@ -53,14 +53,14 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != weights->info()->dimension(1),
-                             "Only kernel sizes 1x1 and 3x3 are supported");
-    ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != 1 && weights->info()->dimension(0) != 3,
-                             "Only kernel sizes 1x1 and 3x3 are supported");
+                             "Weights should have same width as length");
+    ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != 1 && weights->info()->dimension(0) != 3 && weights->info()->dimension(0) != 5,
+                             "Kernel sizes other than 1x1, 3x3 or 5x5 are not supported");
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(2) != input->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != weights->info()->dimension(1));
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
     ARM_COMPUTE_ERROR_ON_MSG((weights->info()->dimension(0) == 1) && std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported for 1x1 convolution.");
-    ARM_COMPUTE_ERROR_ON_MSG((weights->info()->dimension(0) == 3) && std::get<0>(conv_info.stride()) > 2, "Strides larger than 2 not supported for 3x3 convolution.");
+    ARM_COMPUTE_ERROR_ON_MSG((weights->info()->dimension(0) == 3 || weights->info()->dimension(0) == 5) && std::get<0>(conv_info.stride()) > 2, "Strides larger than 2 not supported for 3x3 convolution.");
 
     if(biases != nullptr)
     {
@@ -138,9 +138,9 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     // Configure kernel window
     Window win = calculate_max_window(*output->info());
 
-    bool is_kernel3x3_stride2 = ((kernel_size == 3) && (_conv_stride_x == 2));
+    bool is_stride2 = ((kernel_size != 1) && (_conv_stride_x == 2));
 
-    const unsigned int num_elems_read_per_iteration_x    = 8 + 2 * (kernel_size / 2) + (is_kernel3x3_stride2 ? 7 : 0);
+    const unsigned int num_elems_read_per_iteration_x    = 8 + 2 * (kernel_size / 2) + (is_stride2 ? 6 + kernel_size / 2 : 0);
     const unsigned int num_elems_read_per_iteration_y    = kernel_size;
     const unsigned int num_elems_written_per_iteration_x = 8;
     const unsigned int num_elems_written_per_iteration_y = 1;

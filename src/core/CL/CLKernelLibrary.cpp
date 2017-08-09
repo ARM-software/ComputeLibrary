@@ -147,6 +147,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "dilate", "dilate.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
     { "direct_convolution3x3", "direct_convolution3x3.cl" },
+    { "direct_convolution5x5", "direct_convolution5x5.cl" },
     { "erode", "erode.cl" },
     { "fast_corners", "fast_corners.cl" },
     { "fill_image_borders_constant", "fill_border.cl" },
@@ -358,6 +359,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "direct_convolution3x3.cl",
 #include "./cl_kernels/direct_convolution3x3.clembed"
+    },
+    {
+        "direct_convolution5x5.cl",
+#include "./cl_kernels/direct_convolution5x5.clembed"
     },
     {
         "erode.cl",

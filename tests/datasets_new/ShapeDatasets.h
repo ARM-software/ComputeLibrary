@@ -115,7 +115,7 @@ public:
     SmallDirectConvolutionShapes()
         : ShapeDataset("InputShape",
     {
-        TensorShape{ 3U, 3U, 3U, 2U, 4U, 5U },
+        TensorShape{ 5U, 5U, 3U, 2U, 4U, 5U },
                      TensorShape{ 32U, 37U, 3U },
                      TensorShape{ 13U, 15U, 8U, 3U }
     })

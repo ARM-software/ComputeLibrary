@@ -23,56 +23,48 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-
-#define ADD_OP(a, b) ADD_SAT_OP_EXPAND((a), (b), DATA_TYPE_PROMOTED, 8)
-#define MUL_OP(a, b) MUL_SAT_OP_EXPAND(CONVERT((a), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), CONVERT((b), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), DATA_TYPE_PROMOTED, 8, FIXED_POINT_POSITION)
-
-// There is no need to have a larger intermediate type for qs32 because all the arguments are already promoted
-MULQ_SAT_IMPL(qs32x8, qs32x8)
-
-#else /* FIXED_POINT_POSITION */
-
-#define ADD_OP(a, b) ((a) + (b))
-#define MUL_OP(a, b) ((a) * (b))
-#define CONVERT_SAT(a, b) ((a))
-
-#endif /* FIXED_POINT_POSITION */
+#undef CONVERT_SAT
 
 #if STRIDE_X == 1
-#define CONVOLUTION1x3(acc, src_row_ptr, weights_row_ptr) CONVOLUTION1x3_STRIDE1(acc, src_row_ptr, weights_row_ptr)
+#define CONVOLUTION1x5(acc, src_row_ptr, weights_row_ptr) CONVOLUTION1x5_STRIDE1(acc, src_row_ptr, weights_row_ptr)
 #elif STRIDE_X == 2 /* STRIDE_X == 1 */
-#define CONVOLUTION1x3(acc, src_row_ptr, weights_row_ptr) CONVOLUTION1x3_STRIDE2(acc, src_row_ptr, weights_row_ptr)
+#define CONVOLUTION1x5(acc, src_row_ptr, weights_row_ptr) CONVOLUTION1x5_STRIDE2(acc, src_row_ptr, weights_row_ptr)
 #else /* STRIDE_X not equals 1 or 2 */
 #error "STRIDE_X larger than 2 is not supported"
 #endif /* STRIDE_X == 2 */
 
-#define CONVOLUTION1x3_STRIDE1(acc, src_row_ptr, weights_row_ptr)                                                                                  \
-    ({                                                                                                                                             \
-        VEC_DATA_TYPE(DATA_TYPE, 3)                                                                                                                \
-        weights_values0 = vload3(0, weights_row_ptr);                                                                                              \
-        VEC_DATA_TYPE(DATA_TYPE, 8)                                                                                                                \
-        src0 = vload8(0, src_row_ptr);                                                                                                             \
-        VEC_DATA_TYPE(DATA_TYPE, 2)                                                                                                                \
-        src1 = vload2(0, src_row_ptr + 8);                                                                                                         \
+#define CONVOLUTION1x5_STRIDE1(acc, src_row_ptr, weights_row_ptr)                                                               \
+    ({                                                                                                                          \
+        VEC_DATA_TYPE(DATA_TYPE, 4)                                                                                             \
+        weights_values0          = vload4(0, weights_row_ptr);                                                                  \
+        DATA_TYPE weights_value1 = *(weights_row_ptr + 4);                                                                      \
+        VEC_DATA_TYPE(DATA_TYPE, 8)                                                                                             \
+        src0 = vload8(0, src_row_ptr);                                                                                          \
+        VEC_DATA_TYPE(DATA_TYPE, 4)                                                                                             \
+        src1 = vload4(0, src_row_ptr + 8);                                                                                      \
         \
-        acc = ADD_OP(acc, MUL_OP(src0, (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s0));                                                          \
-        acc = ADD_OP(acc, MUL_OP((VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s1234, src0.s567, src1.s0), (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s1)); \
-        acc = ADD_OP(acc, MUL_OP((VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s234, src0.s567, src1.s01), (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s2)); \
+        acc += src0 * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s0;                                                          \
+        acc += (VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s1234, src0.s567, src1.s0) * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s1; \
+        acc += (VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s234, src0.s567, src1.s01) * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s2; \
+        acc += (VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s345, src0.s67, src1.s012) * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s3; \
+        acc += (VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s45, src0.s67, src1.s0123) * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_value1;     \
     })
 
-#define CONVOLUTION1x3_STRIDE2(acc, src_row_ptr, weights_row_ptr)                                                                               \
-    ({                                                                                                                                          \
-        VEC_DATA_TYPE(DATA_TYPE, 3)                                                                                                             \
-        weights_values0 = vload3(0, weights_row_ptr);                                                                                           \
-        VEC_DATA_TYPE(DATA_TYPE, 16)                                                                                                            \
-        src0           = vload16(0, src_row_ptr);                                                                                               \
-        DATA_TYPE src1 = *(src_row_ptr + 16);                                                                                                   \
+#define CONVOLUTION1x5_STRIDE2(acc, src_row_ptr, weights_row_ptr)                                                               \
+    ({                                                                                                                          \
+        VEC_DATA_TYPE(DATA_TYPE, 4)                                                                                             \
+        weights_values0          = vload4(0, weights_row_ptr);                                                                  \
+        DATA_TYPE weights_value1 = *(weights_row_ptr + 4);                                                                      \
+        VEC_DATA_TYPE(DATA_TYPE, 16)                                                                                            \
+        src0 = vload16(0, src_row_ptr);                                                                                         \
+        VEC_DATA_TYPE(DATA_TYPE, 4)                                                                                             \
+        src1 = vload4(0, src_row_ptr + 16);                                                                                     \
+        acc += src0.even * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s0;                                                     \
+        acc += (VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s1357, src0.s9BDF) * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s1;         \
+        acc += (VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s2468, src0.sACE, src1.s0) * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s2; \
         \
-        acc = ADD_OP(acc, MUL_OP(src0.even, (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s0));                                                  \
-        acc = ADD_OP(acc, MUL_OP((VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s1357, src0.s9BDF), (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s1));      \
-        acc = ADD_OP(acc, MUL_OP((VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s2468, src0.sACE, src1), (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s2)); \
+        acc += (VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s3579, src0.sBDF, src1.s1) * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_values0.s3; \
+        acc += (VEC_DATA_TYPE(DATA_TYPE, 8))(src0.s468a, src0.sCE, src1.s02) * (VEC_DATA_TYPE(DATA_TYPE, 8))weights_value1;     \
     })
 
 /** This kernel performs a direct convolution to convolve the low three dimensions.
@@ -112,7 +104,7 @@ MULQ_SAT_IMPL(qs32x8, qs32x8)
  * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
  */
 #if defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
-__kernel void direct_convolution3x3(
+__kernel void direct_convolution5x5(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights),
@@ -125,7 +117,7 @@ __kernel void direct_convolution3x3(
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
     Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT(dst);
 
-    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)
+    VEC_DATA_TYPE(DATA_TYPE, 8)
     pixels0 = 0;
 
     __global uchar *weights_addr = (__global uchar *)tensor3D_offset(&weights, 0, 0, 0);
@@ -136,9 +128,11 @@ __kernel void direct_convolution3x3(
 
     for(int d = 0; d < WEIGHTS_DEPTH; ++d)
     {
-        CONVOLUTION1x3(pixels0, (__global DATA_TYPE *)(src_addr + 0 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y));
-        CONVOLUTION1x3(pixels0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y));
-        CONVOLUTION1x3(pixels0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y));
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)src_addr, (__global DATA_TYPE *)weights_addr);
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y));
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y));
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)(src_addr + 3 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 3 * weights_stride_y));
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)(src_addr + 4 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 4 * weights_stride_y));
 
         src_addr += src_stride_z;
         weights_addr += weights_stride_z;
@@ -147,9 +141,9 @@ __kernel void direct_convolution3x3(
 #ifdef HAS_BIAS
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 
-    pixels0 = ADD_OP(pixels0, (VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)) * ((__global DATA_TYPE *)(vector_offset(&biases, kernel_index))));
+    pixels0 += (VEC_DATA_TYPE(DATA_TYPE, 8)) * ((__global DATA_TYPE *)(vector_offset(&biases, kernel_index)));
 #endif /* defined(HAS_BIAS) */
 
-    vstore8(CONVERT_SAT(pixels0, VEC_DATA_TYPE(DATA_TYPE, 8)), 0, (__global DATA_TYPE *)dst.ptr);
+    vstore8(pixels0, 0, (__global DATA_TYPE *)dst.ptr);
 }
 #endif // defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
