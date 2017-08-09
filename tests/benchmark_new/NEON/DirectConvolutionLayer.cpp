@@ -31,6 +31,7 @@
 #include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/AlexNetConvolutionLayerDataset.h"
+#include "tests/datasets_new/DirectConvolutionLayerDataset.h"
 #include "tests/datasets_new/GoogLeNetConvolutionLayerDataset.h"
 #include "tests/datasets_new/SqueezeNetConvolutionLayerDataset.h"
 #include "tests/fixtures_new/ConvolutionLayerFixture.h"
@@ -51,6 +52,10 @@ const auto data_types = framework::dataset::make("DataType", { DataType::QS8, Da
 using NEConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvolutionLayer, Accessor>;
 
 TEST_SUITE(NEON)
+
+REGISTER_FIXTURE_DATA_TEST_CASE(DirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::DirectConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), data_types),
