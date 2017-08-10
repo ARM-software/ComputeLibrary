@@ -105,7 +105,7 @@ void JSONPrinter::print_error(const std::exception &error)
     std::stringstream error_log;
     error_log.str(error.what());
 
-    for(std::string line; !std::getline(error_log, line).eof();)
+    for(std::string line; !std::getline(error_log, line).fail();)
     {
         print_separator(_first_error);
 
