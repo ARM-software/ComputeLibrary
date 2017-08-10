@@ -395,7 +395,11 @@ void NEWarpPerspectiveKernel<interpolation>::warp_undefined(const Window &window
     const float start_z0 = M20 * window.x().start();
 
     // Current row
-    int y_cur = window.y().start();
+    int y_cur  = window.y().start();
+    int z_cur  = window.z().start();
+    int d3_cur = window[3].start();
+    int d4_cur = window[4].start();
+    int d5_cur = window[5].start();
 
     // const_x0, const_y0 and const_z0 are the constant parts of x0, y0 and z0 during the row processing
     float const_x0 = M01 * y_cur + M02;
@@ -410,9 +414,13 @@ void NEWarpPerspectiveKernel<interpolation>::warp_undefined(const Window &window
     execute_window_loop(window, [&](const Coordinates & id)
     {
         // Check if we are processing a new row. If so, update the current processed row (y_cur), x0, y0 and z0
-        if(y_cur != id.y())
+        if((y_cur != id.y()) || (z_cur != id.z()) || (d3_cur != id[3]) || (d4_cur != id[4]) || (d5_cur != id[5]))
         {
-            y_cur = id.y();
+            y_cur  = id.y();
+            z_cur  = id.z();
+            d3_cur = id[3];
+            d4_cur = id[4];
+            d5_cur = id[5];
 
             const_x0 = M01 * y_cur + M02;
             const_y0 = M11 * y_cur + M12;
@@ -489,7 +497,11 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
     const float start_z0 = M20 * window.x().start();
 
     // Current row
-    int y_cur = window.y().start();
+    int y_cur  = window.y().start();
+    int z_cur  = window.z().start();
+    int d3_cur = window[3].start();
+    int d4_cur = window[4].start();
+    int d5_cur = window[5].start();
 
     // const_x0, const_y0 and const_z0 are the constant parts of x0, y0 and z0 during the row processing
     float const_x0 = M01 * y_cur + M02;
@@ -503,10 +515,14 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        // Check if we are processing a new row. If so, update the current row (y_cur), x0, y0 and z0
-        if(y_cur != id.y())
+        // Check if we are processing a new row. If so, update the current processed row (y_cur), x0, y0 and z0
+        if((y_cur != id.y()) || (z_cur != id.z()) || (d3_cur != id[3]) || (d4_cur != id[4]) || (d5_cur != id[5]))
         {
-            y_cur = id.y();
+            y_cur  = id.y();
+            z_cur  = id.z();
+            d3_cur = id[3];
+            d4_cur = id[4];
+            d5_cur = id[5];
 
             const_x0 = M01 * y_cur + M02;
             const_y0 = M11 * y_cur + M12;
@@ -593,7 +609,11 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
     const size_t stride = _input->info()->strides_in_bytes()[1];
 
     // Current row
-    int y_cur = window.y().start();
+    int y_cur  = window.y().start();
+    int z_cur  = window.z().start();
+    int d3_cur = window[3].start();
+    int d4_cur = window[4].start();
+    int d5_cur = window[5].start();
 
     // x0 = M00 * x + M01 * y + M02
     // y0 = M10 * x + M11 * y + M12
@@ -627,10 +647,14 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        // Check if we are processing a new row. If so, update the current row (y_cur), x0, y0 and z0
-        if(y_cur != id.y())
+        // Check if we are processing a new row. If so, update the current processed row (y_cur), x0, y0 and z0
+        if((y_cur != id.y()) || (z_cur != id.z()) || (d3_cur != id[3]) || (d4_cur != id[4]) || (d5_cur != id[5]))
         {
-            y_cur = id.y();
+            y_cur  = id.y();
+            z_cur  = id.z();
+            d3_cur = id[3];
+            d4_cur = id[4];
+            d5_cur = id[5];
 
             const_x0 = M01 * y_cur + M02;
             const_y0 = M11 * y_cur + M12;
