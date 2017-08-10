@@ -111,6 +111,17 @@ public:
         _kernel.setArg(idx++, value);
     }
 
+    /** Set the Local-Workgroup-Size hint
+     *
+     * @note This method should be called after the configuration of the kernel
+     *
+     * @param[in] lws_hint Local-Workgroup-Size to use
+     */
+    void set_lws_hint(cl::NDRange &lws_hint)
+    {
+        _lws_hint = lws_hint;
+    }
+
     /** Set the targeted GPU architecture
      *
      * @param[in] target The targeted GPU architecture
