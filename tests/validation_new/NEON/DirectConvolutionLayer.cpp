@@ -50,16 +50,34 @@ constexpr AbsoluteTolerance<float> tolerance_fp16(0.01f);  /**< Tolerance for ha
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
 
 /** Direct convolution data set. */
-const auto data = combine(datasets::SmallDirectConvolutionShapes(),
-                          combine(framework::dataset::make("StrideX", 1, 3),
-                                  combine(framework::dataset::make("StrideY", 1, 3),
-                                          combine(concat(combine(framework::dataset::make("PadX", 0),
-                                                                 combine(framework::dataset::make("PadY", 0),
-                                                                         framework::dataset::make("KernelSize", 1))),
-                                                         combine(framework::dataset::make("PadX", 0, 2),
-                                                                 combine(framework::dataset::make("PadY", 0, 2),
-                                                                         framework::dataset::make("KernelSize", 3)))),
-                                                  framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+const auto data_pad_f32 = concat(concat(combine(framework::dataset::make("PadX", 0),
+                                                combine(framework::dataset::make("PadY", 0),
+                                                        framework::dataset::make("KernelSize", 1))),
+                                        combine(framework::dataset::make("PadX", 0, 2),
+                                                combine(framework::dataset::make("PadY", 0, 2),
+                                                        framework::dataset::make("KernelSize", 3)))),
+                                 combine(framework::dataset::make("PadX", 0, 3),
+                                         combine(framework::dataset::make("PadY", 0, 3),
+                                                 framework::dataset::make("KernelSize", 5))));
+
+const auto data_pad_qs8 = concat(combine(framework::dataset::make("PadX", 0),
+                                         combine(framework::dataset::make("PadY", 0),
+                                                 framework::dataset::make("KernelSize", 1))),
+                                 combine(framework::dataset::make("PadX", 0, 2),
+                                         combine(framework::dataset::make("PadY", 0, 2),
+                                                 framework::dataset::make("KernelSize", 3))));
+
+const auto data_f32 = combine(datasets::SmallDirectConvolutionShapes(),
+                              combine(framework::dataset::make("StrideX", 1, 3),
+                                      combine(framework::dataset::make("StrideY", 1, 3),
+                                              combine(data_pad_f32,
+                                                      framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+
+const auto data_qs8 = combine(datasets::SmallDirectConvolutionShapes(),
+                              combine(framework::dataset::make("StrideX", 1, 3),
+                                      combine(framework::dataset::make("StrideY", 1, 3),
+                                              combine(data_pad_qs8,
+                                                      framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
 
 /** Direct convolution QS16 data set. */
 const auto data_qs16 = combine(datasets::SmallDirectConvolutionShapes(),
@@ -82,7 +100,7 @@ using NEDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<Tenso
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<half_float::half>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<half_float::half>, framework::DatasetMode::ALL, combine(data_f32, framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp16);
@@ -91,7 +109,7 @@ TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(data_f32, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
@@ -105,7 +123,7 @@ using NEDirectConvolutionLayerFixedPointFixture = DirectConvolutionValidationFix
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
 // We test for fixed point precision [4,6]
-FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::QS8)),
+FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(data_qs8, framework::dataset::make("DataType", DataType::QS8)),
                                                                                                                     framework::dataset::make("FractionalBits", 4, 7)))
 {
     // Validate output

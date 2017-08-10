@@ -48,8 +48,14 @@ public:
     NEDirectConvolutionLayer();
     /** Set the input, weights, biases and output tensors.
       *
+      * @note: DirectConvolution only works in the following configurations:
+      *    1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = QS8/QS16/F16/F32
+      *    3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = QS8/F16/F32
+      *    5x5 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F32
+      *
       * @param[in, out] input     Input tensor. Data types supported: QS8/QS16/F16/F32.
       * @param[in]      weights   Set of kernels to convolve the input volume.
+      *                           Supported sizes: 1x1, 3x3 and 5x5.
       *                           The 3rd dimension must be the same as the input's volume 3rd dimension.
       *                           Data type supported: Same as @p input.
       * @param[in]      bias      Set of biases. Data type supported: Same as @p input.
