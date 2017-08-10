@@ -26,7 +26,7 @@
 
 #include "Instrument.h"
 
-#include "benchmark/benchmark_api.h"
+#include "benchmark/benchmark.h"
 
 #include <map>
 #include <memory>

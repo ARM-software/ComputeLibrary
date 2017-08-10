@@ -42,7 +42,7 @@
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
 
-#include "benchmark/benchmark_api.h"
+#include "benchmark/benchmark.h"
 
 using namespace arm_compute;
 using namespace arm_compute::test;

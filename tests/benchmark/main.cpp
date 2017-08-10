@@ -29,7 +29,7 @@
 #include "Utils.h"
 #include "WallClockTimer.h"
 
-#include "benchmark/benchmark_api.h"
+#include "benchmark/benchmark.h"
 
 #ifdef OPENCL
 #include "arm_compute/runtime/CL/CLScheduler.h"
