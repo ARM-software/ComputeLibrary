@@ -98,11 +98,6 @@ public:
     void run() override;
 
 private:
-    void configure_fc_fc_wb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
-    void configure_fc_fc_nb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
-    void configure_conv_fc_wb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
-    void configure_conv_fc_nb(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
-
     CLIm2ColKernel                      _im2col_kernel;
     CLFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
     CLGEMMInterleave4x4Kernel           _interleave4x4_kernel;
@@ -112,8 +107,8 @@ private:
     CLTensor                            _interleave4x4_output;
     CLTensor                            _reshape_weights_output;
     bool                                _are_weights_reshaped;
-    bool                                _is_fc_after_conv;
     bool                                _is_batched_fc_layer;
+    bool                                _linearize_input;
     bool                                _accumulate_biases;
 };
 }

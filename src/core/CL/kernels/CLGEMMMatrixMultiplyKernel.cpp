@@ -103,9 +103,9 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
 
         Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x));
 
-        AccessWindowRectangle input0_access(input0->info(), 0, 0, num_elems_processed_per_iteration_x, 1);
-        AccessWindowRectangle input1_access(input1->info(), 0, 0, num_elems_processed_per_iteration_x, 1);
-        AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_processed_per_iteration_x, 1);
+        AccessWindowStatic     input0_access(input0->info(), 0, 0, input0->info()->tensor_shape().x(), 1);
+        AccessWindowHorizontal input1_access(input1->info(), 0, num_elems_processed_per_iteration_x);
+        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration_x);
 
         update_window_and_padding(win, input0_access, input1_access, output_access);
 
