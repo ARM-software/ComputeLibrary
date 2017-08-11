@@ -72,6 +72,7 @@ public:
     using clRetainContext_func           = cl_int (*)(cl_context context);
     using clReleaseProgram_func          = cl_int (*)(cl_program program);
     using clFlush_func                   = cl_int (*)(cl_command_queue command_queue);
+    using clFinish_func                  = cl_int (*)(cl_command_queue command_queue);
     using clGetProgramInfo_func          = cl_int (*)(cl_program, cl_program_info, size_t, void *, size_t *);
     using clCreateKernel_func            = cl_kernel (*)(cl_program, const char *, cl_int *);
     using clRetainKernel_func            = cl_int (*)(cl_kernel kernel);
@@ -91,6 +92,7 @@ public:
     clCreateKernel_func            clCreateKernel            = nullptr;
     clGetProgramInfo_func          clGetProgramInfo          = nullptr;
     clFlush_func                   clFlush                   = nullptr;
+    clFinish_func                  clFinish                  = nullptr;
     clReleaseProgram_func          clReleaseProgram          = nullptr;
     clRetainContext_func           clRetainContext           = nullptr;
     clCreateProgramWithBinary_func clCreateProgramWithBinary = nullptr;

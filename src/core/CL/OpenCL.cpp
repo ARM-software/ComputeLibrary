@@ -81,6 +81,7 @@ bool CLSymbols::load(const std::string &library)
     clCreateKernel            = reinterpret_cast<clCreateKernel_func>(dlsym(handle, "clCreateKernel"));
     clGetProgramInfo          = reinterpret_cast<clGetProgramInfo_func>(dlsym(handle, "clGetProgramInfo"));
     clFlush                   = reinterpret_cast<clFlush_func>(dlsym(handle, "clFlush"));
+    clFinish                  = reinterpret_cast<clFinish_func>(dlsym(handle, "clFinish"));
     clReleaseProgram          = reinterpret_cast<clReleaseProgram_func>(dlsym(handle, "clReleaseProgram"));
     clRetainContext           = reinterpret_cast<clRetainContext_func>(dlsym(handle, "clRetainContext"));
     clCreateProgramWithBinary = reinterpret_cast<clCreateProgramWithBinary_func>(dlsym(handle, "clCreateProgramWithBinary"));
@@ -428,6 +429,20 @@ cl_int clFlush(cl_command_queue command_queue)
 {
     arm_compute::CLSymbols::get().load_default();
     auto func = arm_compute::CLSymbols::get().clFlush;
+    if(func != nullptr)
+    {
+        return func(command_queue);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clFinish(cl_command_queue command_queue)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clFinish;
     if(func != nullptr)
     {
         return func(command_queue);
