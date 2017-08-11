@@ -1,9 +1,321 @@
+namespace arm_compute
+{
+namespace test
+{
 /**
 @page tests Validation and benchmarks tests
 
 @tableofcontents
 
+@section tests_overview Overview
+
+Benchmark and validation tests are based on the same framework to setup and run
+the tests. In addition to running simple, self-contained test functions the
+framework supports fixtures and data test cases. The former allows to share
+common setup routines between various backends thus reducing the amount of
+duplicated code. The latter can be used to parameterize tests or fixtures with
+different inputs, e.g. different tensor shapes. One limitation is that
+tests/fixtures cannot be parameterized based on the data type if static type
+information is needed within the test (e.g. to validate the results).
+
+@subsection tests_overview_structure Directory structure
+
+    .
+    |-- computer_vision <- Legacy tests. No new test must be added. <!-- FIXME: Remove before release -->
+    |-- framework <- Underlying test framework. Will later be moved into tests. <!-- FIXME: Remove second sentence before release -->
+    `-- tests <- Top level test directory. All files in here are shared among validation and benchmark
+        |-- CL   \
+        |-- NEON -> Backend specific files with helper functions etc.
+        |-- VX   /
+        |-- benchmark_new <- Top level directory for the benchmarking files <!-- FIXME: Make sure this has been renamed before release -->
+        |   |-- CL <- OpenCL backend test cases on a function level
+        |   |   `-- SYSTEM <- OpenCL system tests, e.g. whole networks
+        |   `-- NEON <- Same for NEON
+        |       `-- SYSTEM
+        |-- dataset <- Old datasets for boost. Not to be used for new tests! <!-- FIXME: Remove before release -->
+        |-- datasets_new <- New datasets for benchmark and validation tests. <!-- FIXME: Make sure this has been renamed before release -->
+        |-- fixtures_new <- Fixtures for benchmarking only! Will later be moved into benchmark_new. <!-- FIXME: Make sure this has been renamed before release. Remove second sentence. -->
+        |-- main.cpp <- Main entry point for the tests. Currently shared between validation and benchmarking.
+        |-- model_objects <- Old helper files for system level validation. Not to be used for new tests! <!-- FIXME: Remove before release -->
+        |-- networks_new <- Network classes for system level tests <!-- FIXME: Make sure this has been renamed before release -->
+        |-- validation <- Old validation framework. No new tests must be added! <!-- FIXME: Remove before release -->
+        |   |-- CL   \
+        |   |-- DEMO  \
+        |   |-- NEON --> Backend specific test cases
+        |   |-- UNIT  /
+        |   |-- VX   /
+        |   `-- system_tests -> System level tests
+        |       |-- CL
+        |       `-- NEON
+        `-- validation_new -> New validation tests <!-- FIXME: Make sure this has been renamed before release -->
+            |-- CPP -> C++ reference code
+            |-- CL   \
+            |-- NEON -> Backend specific test cases
+            |-- VX   /
+            `-- fixtures -> Fixtures shared among all backends. Used to setup target function and tensors.
+
+@subsection tests_overview_fixtures Fixtures
+
+Fixtures can be used to share common setup, teardown or even run tasks among
+multiple test cases. For that purpose a fixture can define a `setup`,
+`teardown` and `run` method. Additionally the constructor and destructor might
+also be customized.
+
+An instance of the fixture is created immediately before the actual test is
+executed. After construction the @ref framework::Fixture::setup method is called. Then the test
+function or the fixtures `run` method is invoked. After test execution the
+@ref framework::Fixture::teardown method is called and lastly the fixture is destructed.
+
+@subsubsection tests_overview_fixtures_fixture Fixture
+
+Fixtures for non-parameterized test are straightforward. The custom fixture
+class has to inherit from @ref framework::Fixture and choose to implement any of the
+`setup`, `teardown` or `run` methods. None of the methods takes any arguments
+or returns anything.
+
+    class CustomFixture : public framework::Fixture
+    {
+        void setup()
+        {
+            _ptr = malloc(4000);
+        }
+
+        void run()
+        {
+            ARM_COMPUTE_ASSERT(_ptr != nullptr);
+        }
+
+        void teardown()
+        {
+            free(_ptr);
+        }
+
+        void *_ptr;
+    };
+
+@subsubsection tests_overview_fixtures_data_fixture Data fixture
+
+The advantage of a parameterized fixture is that arguments can be passed to the setup method at runtime. To make this possible the setup method has to be a template with a type parameter for every argument (though the template parameter doesn't have to be used). All other methods remain the same.
+
+    class CustomFixture : public framework::Fixture
+    {
+    #ifdef ALTERNATIVE_DECLARATION
+        template <typename ...>
+        void setup(size_t size)
+        {
+            _ptr = malloc(size);
+        }
+    #else
+        template <typename T>
+        void setup(T size)
+        {
+            _ptr = malloc(size);
+        }
+    #endif
+
+        void run()
+        {
+            ARM_COMPUTE_ASSERT(_ptr != nullptr);
+        }
+
+        void teardown()
+        {
+            free(_ptr);
+        }
+
+        void *_ptr;
+    };
+
+@subsection tests_overview_test_cases Test cases
+
+All following commands can be optionally prefixed with `EXPECTED_FAILURE_` or
+`DISABLED_`.
+
+@subsubsection tests_overview_test_cases_test_case Test case
+
+A simple test case function taking no inputs and having no (shared) state.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the dataset mode in which the test will be active.
+
+
+    TEST_CASE(TestCaseName, DatasetMode::PRECOMMIT)
+    {
+        ARM_COMPUTE_ASSERT_EQUAL(1 + 1, 2);
+    }
+
+@subsubsection tests_overview_test_cases_fixture_fixture_test_case Fixture test case
+
+A simple test case function taking no inputs that inherits from a fixture. The
+test case will have access to all public and protected members of the fixture.
+Only the setup and teardown methods of the fixture will be used. The body of
+this function will be used as test function.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the class name of the fixture.
+- Third argument is the dataset mode in which the test will be active.
+
+
+    class FixtureName : public framework::Fixture
+    {
+        public:
+            void setup() override
+            {
+                _one = 1;
+            }
+
+        protected:
+            int _one;
+    };
+
+    FIXTURE_TEST_CASE(TestCaseName, FixtureName, DatasetMode::PRECOMMIT)
+    {
+        ARM_COMPUTE_ASSERT_EQUAL(_one + 1, 2);
+    }
+
+@subsubsection tests_overview_test_cases_fixture_register_fixture_test_case Registering a fixture as test case
+
+Allows to use a fixture directly as test case. Instead of defining a new test
+function the run method of the fixture will be executed.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the class name of the fixture.
+- Third argument is the dataset mode in which the test will be active.
+
+
+    class FixtureName : public framework::Fixture
+    {
+        public:
+            void setup() override
+            {
+                _one = 1;
+            }
+
+            void run() override
+            {
+                ARM_COMPUTE_ASSERT_EQUAL(_one + 1, 2);
+            }
+
+        protected:
+            int _one;
+    };
+
+    REGISTER_FIXTURE_TEST_CASE(TestCaseName, FixtureName, DatasetMode::PRECOMMIT);
+
+
+@subsubsection tests_overview_test_cases_data_test_case Data test case
+
+A parameterized test case function that has no (shared) state. The dataset will
+be used to generate versions of the test case with different inputs.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the dataset mode in which the test will be active.
+- Third argument is the dataset.
+- Further arguments specify names of the arguments to the test function. The
+  number must match the arity of the dataset.
+
+
+    DATA_TEST_CASE(TestCaseName, DatasetMode::PRECOMMIT, framework::make("Numbers", {1, 2, 3}), num)
+    {
+        ARM_COMPUTE_ASSERT(num < 4);
+    }
+
+@subsubsection tests_overview_test_cases_fixture_data_test_case Fixture data test case
+
+A parameterized test case that inherits from a fixture. The test case will have
+access to all public and protected members of the fixture. Only the setup and
+teardown methods of the fixture will be used. The setup method of the fixture
+needs to be a template and has to accept inputs from the dataset as arguments.
+The body of this function will be used as test function. The dataset will be
+used to generate versions of the test case with different inputs.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the class name of the fixture.
+- Third argument is the dataset mode in which the test will be active.
+- Fourth argument is the dataset.
+
+
+    class FixtureName : public framework::Fixture
+    {
+        public:
+            template <typename T>
+            void setup(T num)
+            {
+                _num = num;
+            }
+
+        protected:
+            int _num;
+    };
+
+    FIXTURE_DATA_TEST_CASE(TestCaseName, FixtureName, DatasetMode::PRECOMMIT, framework::make("Numbers", {1, 2, 3}))
+    {
+        ARM_COMPUTE_ASSERT(_num < 4);
+    }
+
+@subsubsection tests_overview_test_cases_register_fixture_data_test_case Registering a fixture as data test case
+
+Allows to use a fixture directly as parameterized test case. Instead of
+defining a new test function the run method of the fixture will be executed.
+The setup method of the fixture needs to be a template and has to accept inputs
+from the dataset as arguments. The dataset will be used to generate versions of
+the test case with different inputs.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the class name of the fixture.
+- Third argument is the dataset mode in which the test will be active.
+- Fourth argument is the dataset.
+
+
+    class FixtureName : public framework::Fixture
+    {
+        public:
+            template <typename T>
+            void setup(T num)
+            {
+                _num = num;
+            }
+
+            void run() override
+            {
+                ARM_COMPUTE_ASSERT(_num < 4);
+            }
+
+        protected:
+            int _num;
+    };
+
+    REGISTER_FIXTURE_DATA_TEST_CASE(TestCaseName, FixtureName, DatasetMode::PRECOMMIT, framework::make("Numbers", {1, 2, 3}));
+
+@section writing_tests Writing validation tests
+
+Before starting a new test case have a look at the existing ones. They should
+provide a good overview how test cases are structured.
+
+- The C++ reference needs to be added to `tests/validation_new/CPP/`. The
+  reference function is typically a template parameterized by the underlying
+  value type of the `SimpleTensor`. This makes it easy to specialise for
+  different data types.
+- If all backends have a common interface it makes sense to share the setup
+  code. This can be done by adding a fixture in
+  `tests/validation_new/fixtures/`. Inside of the `setup` method of a fixture
+  the tensors can be created and initialised and the function can be configured
+  and run. The actual test will only have to validate the results. To be shared
+  among multiple backends the fixture class is usually a template that accepts
+  the specific types (data, tensor class, function class etc.) as parameters.
+- The actual test cases need to be added for each backend individually.
+  Typically the will be multiple tests for different data types and for
+  different execution modes, e.g. precommit and nightly.
+
 @section building_test_dependencies Building dependencies
+
+@note Only required when tests from the old validation framework need to be run.
 
 The tests currently make use of Boost (Test and Program options) for
 validation. Below are instructions about how to build these 3rd party
@@ -69,6 +381,9 @@ As an alternative output format JSON is supported and can be selected via
 `--log-file` option can be used.
 
 @subsection tests_running_tests_validation Validation
+
+@note The new validation tests have the same interface as the benchmarking tests.
+
 @subsubsection tests_running_tests_validation_filter Filter tests
 All tests can be run by invoking
 
@@ -95,3 +410,5 @@ For a complete list of possible selectors please see: http://www.boost.org/doc/l
 @subsubsection tests_running_tests_validation_verbosity Verbosity
 There are two separate flags to control the verbosity of the test output. `--report_level` controls the verbosity of the summary produced after all tests have been executed. `--log_level` controls the verbosity of the information generated during the execution of tests. All available settings can be found in the Boost documentation for [--report_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/report_level.html) and [--log_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/log_level.html), respectively.
 */
+} // namespace test
+} // namespace arm_compute
