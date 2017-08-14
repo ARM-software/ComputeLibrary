@@ -64,17 +64,13 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
 
     // Create kernel
     std::set<std::string> build_opts = { ("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())) };
+    build_opts.emplace("-DWIDTH_OUTPUT=" + support::cpp11::to_string(_convolved_dims.first));
     if(is_data_type_fixed_point(input->info()->data_type()))
     {
         build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
     }
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts));
-
-    // Set static kernel arguments
-    unsigned int idx = 2 * num_arguments_per_3D_tensor();
-    _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes()[3]);
-    _kernel.setArg<cl_uint>(idx++, _convolved_dims.first);
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -96,6 +92,10 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
 
     Window collapsed_window = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice            = collapsed_window.first_slice_window_3D();
+
+    // Set static kernel arguments
+    unsigned int idx = 2 * num_arguments_per_3D_tensor();
+    _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes()[3]);
 
     do
     {

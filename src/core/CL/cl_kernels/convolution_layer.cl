@@ -241,6 +241,7 @@ __kernel void im2col_kernel3x3_padx0_pady0(
 }
 #endif //defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_X) && defined(PAD_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT)
 
+#if defined(WIDTH_OUTPUT)
 /** This kernel performs a reshaping of the output of the convolution layer.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
@@ -262,22 +263,22 @@ __kernel void im2col_kernel3x3_padx0_pady0(
  * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
- * @param[in]  width                             The output tensor width
  */
 __kernel void col2im(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
-    uint dst_stride_w,
-    uint width)
+    uint dst_stride_w)
 {
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(dst);
 
-    int      idx                         = get_global_id(0) * dst.stride_z + (get_global_id(1) / width) * dst.stride_y + (get_global_id(1) % width) * dst.stride_x + get_global_id(2) * dst_stride_w;
-    __global uchar *tmp_out_ptr          = dst.ptr + idx;
-    *((__global DATA_TYPE *)tmp_out_ptr) = *((__global DATA_TYPE *)(src.ptr));
-}
+    // Compute output offset
+    int idx = get_global_id(0) * dst.stride_z + (get_global_id(1) / WIDTH_OUTPUT) * dst_stride_y + (get_global_id(1) % WIDTH_OUTPUT) * dst_stride_x + get_global_id(2) * dst_stride_w;
 
+    // Store value
+    *((__global DATA_TYPE *)(dst.ptr + idx)) = *((__global DATA_TYPE *)(src.ptr));
+}
+#endif // defined(WIDTH_OUTPUT)
 /** This kernel reshapes the tensor's low three dimensions to single row for GEMM operation
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
