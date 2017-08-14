@@ -50,7 +50,7 @@ BorderSize CLDirectConvolutionLayerKernel::border_size() const
 
 void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != weights->info()->dimension(1),
                              "Only kernel sizes 1x1 and 3x3 are supported");
@@ -102,11 +102,31 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     std::stringstream     kernel_name;
     std::set<std::string> options;
     kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
+    DataType promoted_type = input->info()->data_type();
 
     options.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     options.emplace("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
     options.emplace("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2)));
     options.emplace("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
+
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        options.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+
+        switch(input->info()->data_type())
+        {
+            case DataType::QS8:
+                promoted_type = DataType::QS16;
+                break;
+            case DataType::QS16:
+                promoted_type = DataType::QS32;
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Datatype not supported");
+        }
+    }
+
+    options.emplace("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(promoted_type));
 
     if(_biases != nullptr)
     {

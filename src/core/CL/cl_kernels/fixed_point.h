@@ -168,6 +168,11 @@ ADDQ_SAT_IMPL(qs16x2)
 ADDQ_SAT_IMPL(qs16x4)
 ADDQ_SAT_IMPL(qs16x8)
 ADDQ_SAT_IMPL(qs16x16)
+ADDQ_SAT_IMPL(qs32x1)
+ADDQ_SAT_IMPL(qs32x2)
+ADDQ_SAT_IMPL(qs32x4)
+ADDQ_SAT_IMPL(qs32x8)
+ADDQ_SAT_IMPL(qs32x16)
 
 #define ADD_SAT_OP_EXPAND_STR(a, b, type, size) add_sat_##type##x##size((a), (b))
 #define ADD_SAT_OP_EXPAND(a, b, type, size) ADD_SAT_OP_EXPAND_STR(a, b, type, size)
@@ -213,6 +218,8 @@ SUBQ_SAT_IMPL(qs16x16)
         return CONVERT((res >> (itype)fixed_point_position), type);                    \
     }
 
+MULQ_IMPL(qs8x8, qs16x8)
+MULQ_IMPL(qs16x8, qs32x8)
 MULQ_IMPL(qs8x16, qs16x16)
 MULQ_IMPL(qs16x16, qs32x16)
 
@@ -234,8 +241,9 @@ MULQ_IMPL(qs16x16, qs32x16)
         return CONVERT_SAT((res >> (itype)fixed_point_position), type);                       \
     }
 
-MULQ_SAT_IMPL(qs8x16, qs16x16)
+MULQ_SAT_IMPL(qs8x8, qs16x8)
 MULQ_SAT_IMPL(qs16x8, qs32x8)
+MULQ_SAT_IMPL(qs8x16, qs16x16)
 MULQ_SAT_IMPL(qs16x16, qs32x16)
 
 #define MUL_SAT_OP_EXPAND_STR(a, b, type, size, position) mul_sat_##type##x##size((a), (b), (position))

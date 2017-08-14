@@ -23,6 +23,23 @@
  */
 #include "helpers.h"
 
+#if defined(FIXED_POINT_POSITION)
+#include "fixed_point.h"
+
+#define ADD_OP(a, b) ADD_SAT_OP_EXPAND((a), (b), DATA_TYPE_PROMOTED, 8)
+#define MUL_OP(a, b) MUL_SAT_OP_EXPAND(CONVERT((a), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), CONVERT((b), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), DATA_TYPE_PROMOTED, 8, FIXED_POINT_POSITION)
+
+// There is no need to have a larger intermediate type for qs32 because all the arguments are already promoted
+MULQ_SAT_IMPL(qs32x8, qs32x8)
+
+#else /* FIXED_POINT_POSITION */
+
+#define ADD_OP(a, b) ((a) + (b))
+#define MUL_OP(a, b) ((a) * (b))
+#define CONVERT_SAT(a, b) ((a))
+
+#endif /* FIXED_POINT_POSITION */
+
 #if STRIDE_X == 3
 #define INPUT_PIXEL_STR(data_size) extract_input_stride3_##data_size
 #define INPUT_PIXEL(data_size) INPUT_PIXEL_STR(data_size)
@@ -165,7 +182,7 @@ __kernel void direct_convolution1x1(
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 #endif /* defined(HAS_BIAS) */
 
-    VEC_DATA_TYPE(DATA_TYPE, 8)
+    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)
     pixels = 0;
 
     const uint z_index = get_global_id(2);
@@ -177,15 +194,15 @@ __kernel void direct_convolution1x1(
         DATA_TYPE weight = *(__global DATA_TYPE *)weights.ptr;
         VEC_DATA_TYPE(DATA_TYPE, 8)
         input_pixel = INPUT_PIXEL(DATA_SIZE)((__global DATA_TYPE *)src.ptr);
-        pixels += weight * input_pixel;
+        pixels      = ADD_OP(pixels, MUL_OP((VEC_DATA_TYPE(DATA_TYPE, 8))weight, input_pixel));
         src.ptr += src_stride_z;
         weights.ptr += weights_stride_z;
     }
 
 #ifdef HAS_BIAS
-    pixels += (VEC_DATA_TYPE(DATA_TYPE, 8)) * ((__global DATA_TYPE *)(vector_offset(&biases, z_index)));
+    pixels = ADD_OP(pixels, (VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)) * ((__global DATA_TYPE *)(vector_offset(&biases, z_index))));
 #endif /* defined(HAS_BIAS) */
 
-    vstore8(pixels, 0, (__global DATA_TYPE *)dst.ptr);
+    vstore8(CONVERT_SAT(pixels, VEC_DATA_TYPE(DATA_TYPE, 8)), 0, (__global DATA_TYPE *)dst.ptr);
 }
 #endif // defined(DATA_TYPE) && defined(DATA_SIZE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
