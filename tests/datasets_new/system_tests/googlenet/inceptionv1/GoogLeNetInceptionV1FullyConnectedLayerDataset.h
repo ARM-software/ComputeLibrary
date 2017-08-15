@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GOOGLENET_NORMALIZATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_GOOGLENET_NORMALIZATION_LAYER_DATASET
+#ifndef ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_FULLYCONNECTED_LAYER_DATASET
+#define ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_FULLYCONNECTED_LAYER_DATASET
 
-#include "framework/datasets/Datasets.h"
+#include "tests/datasets_new/FullyConnectedLayerDataset.h"
 
 #include "tests/TypePrinter.h"
 
@@ -37,25 +37,15 @@ namespace test
 {
 namespace datasets
 {
-class GoogLeNetNormalizationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<NormalizationLayerInfo>>
+class GoogLeNetInceptionV1FullyConnectedLayerDataset final : public FullyConnectedLayerDataset
 {
 public:
-    GoogLeNetNormalizationLayerDataset()
-        : CartesianProductDataset
+    GoogLeNetInceptionV1FullyConnectedLayerDataset()
     {
-        framework::dataset::make("Shape", { // conv2/norm2
-            TensorShape(56U, 56U, 192U),
-            // pool1/norm1
-            TensorShape(56U, 56U, 64U) }),
-        framework::dataset::make("Info", NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
+        add_config(TensorShape(1024U), TensorShape(1024U, 1000U), TensorShape(1000U), TensorShape(1000U));
     }
-    {
-    }
-    GoogLeNetNormalizationLayerDataset(GoogLeNetNormalizationLayerDataset &&) = default;
-    ~GoogLeNetNormalizationLayerDataset()                                     = default;
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GOOGLENET_NORMALIZATION_LAYER_DATASET */
+#endif /* ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_FULLYCONNECTED_LAYER_DATASET */

@@ -30,11 +30,11 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/AlexNetActivationLayerDataset.h"
-#include "tests/datasets_new/GoogLeNetActivationLayerDataset.h"
-#include "tests/datasets_new/LeNet5ActivationLayerDataset.h"
-#include "tests/datasets_new/SqueezeNetActivationLayerDataset.h"
-#include "tests/datasets_new/YOLOV2ActivationLayerDataset.h"
+#include "tests/datasets_new/system_tests/alexnet/AlexNetActivationLayerDataset.h"
+#include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ActivationLayerDataset.h"
+#include "tests/datasets_new/system_tests/lenet5/LeNet5ActivationLayerDataset.h"
+#include "tests/datasets_new/system_tests/squeezenet/SqueezeNetActivationLayerDataset.h"
+#include "tests/datasets_new/system_tests/yolo/v2/YOLOV2ActivationLayerDataset.h"
 #include "tests/fixtures_new/ActivationLayerFixture.h"
 
 namespace arm_compute
@@ -60,8 +60,8 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, CLActivationLayerFixture,
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetActivationLayerDataset(),
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ActivationLayerDataset(),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
@@ -86,8 +86,8 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, CLActivationLayerFixture,
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetActivationLayerDataset(),
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ActivationLayerDataset(),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 

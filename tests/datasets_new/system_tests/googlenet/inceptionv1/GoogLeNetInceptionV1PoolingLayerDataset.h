@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GOOGLENET_POOLING_LAYER_DATASET
-#define ARM_COMPUTE_TEST_GOOGLENET_POOLING_LAYER_DATASET
+#ifndef ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_POOLING_LAYER_DATASET
+#define ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_POOLING_LAYER_DATASET
 
 #include "tests/datasets_new/PoolingLayerDataset.h"
 
@@ -37,10 +37,10 @@ namespace test
 {
 namespace datasets
 {
-class GoogLeNetPoolingLayerDataset final : public PoolingLayerDataset
+class GoogLeNetInceptionV1PoolingLayerDataset final : public PoolingLayerDataset
 {
 public:
-    GoogLeNetPoolingLayerDataset()
+    GoogLeNetInceptionV1PoolingLayerDataset()
     {
         // FIXME: Add support for 7x7 pooling layer pool5/7x7_s1
         // pool1/3x3_s2
@@ -68,4 +68,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GOOGLENET_POOLING_LAYER_DATASET */
+#endif /* ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_POOLING_LAYER_DATASET */

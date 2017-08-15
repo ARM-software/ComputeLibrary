@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GOOGLENET_ACTIVATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_GOOGLENET_ACTIVATION_LAYER_DATASET
+#ifndef ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_ACTIVATION_LAYER_DATASET
+#define ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_ACTIVATION_LAYER_DATASET
 
 #include "framework/datasets/Datasets.h"
 
@@ -37,11 +37,11 @@ namespace test
 {
 namespace datasets
 {
-class GoogLeNetActivationLayerDataset final : public
+class GoogLeNetInceptionV1ActivationLayerDataset final : public
     framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
 {
 public:
-    GoogLeNetActivationLayerDataset()
+    GoogLeNetInceptionV1ActivationLayerDataset()
         : CartesianProductDataset
     {
         framework::dataset::make("Shape", { // conv1/relu_7x7
@@ -114,10 +114,10 @@ public:
     }
     {
     }
-    GoogLeNetActivationLayerDataset(GoogLeNetActivationLayerDataset &&) = default;
-    ~GoogLeNetActivationLayerDataset()                                  = default;
+    GoogLeNetInceptionV1ActivationLayerDataset(GoogLeNetInceptionV1ActivationLayerDataset &&) = default;
+    ~GoogLeNetInceptionV1ActivationLayerDataset()                                             = default;
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GOOGLENET_ACTIVATION_LAYER_DATASET */
+#endif /* ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_ACTIVATION_LAYER_DATASET */

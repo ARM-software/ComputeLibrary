@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GOOGLENET_CONVOLUTION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_GOOGLENET_CONVOLUTION_LAYER_DATASET
+#ifndef ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_CONVOLUTION_LAYER_DATASET
+#define ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_CONVOLUTION_LAYER_DATASET
 
 #include "tests/datasets_new/ConvolutionLayerDataset.h"
 
@@ -37,11 +37,11 @@ namespace test
 {
 namespace datasets
 {
-class GoogLeNetConvolutionLayerDataset final : public ConvolutionLayerDataset
+class GoogLeNetInceptionV1ConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:
-    // GoogLeNet inception v1 dataset
-    GoogLeNetConvolutionLayerDataset()
+    // GoogLeNetInceptionV1 inception v1 dataset
+    GoogLeNetInceptionV1ConvolutionLayerDataset()
     {
         // conv1/7x7_s2
         add_config(TensorShape(224U, 224U, 3U), TensorShape(7U, 7U, 3U, 64U), TensorShape(64U), TensorShape(112U, 112U, 64U), PadStrideInfo(2, 2, 3, 3));
@@ -144,11 +144,11 @@ public:
     }
 };
 
-class GoogLeNetDirectConvolutionLayerDataset final : public ConvolutionLayerDataset
+class GoogLeNetInceptionV1DirectConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:
-    // subset of GoogLeNet inception v1 dataset
-    GoogLeNetDirectConvolutionLayerDataset()
+    // subset of GoogLeNetInceptionV1 inception v1 dataset
+    GoogLeNetInceptionV1DirectConvolutionLayerDataset()
     {
         // conv2/3x3_reduce
         add_config(TensorShape(56U, 56U, 64U), TensorShape(1U, 1U, 64U, 64U), TensorShape(64U), TensorShape(56U, 56U, 64U), PadStrideInfo(1, 1, 0, 0));
@@ -234,4 +234,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GOOGLENET_CONVOLUTION_LAYER_DATASET */
+#endif /* ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_CONVOLUTION_LAYER_DATASET */

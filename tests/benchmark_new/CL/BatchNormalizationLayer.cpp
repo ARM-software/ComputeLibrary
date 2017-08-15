@@ -30,7 +30,7 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/YOLOV2BatchNormalizationLayerDataset.h"
+#include "tests/datasets_new/system_tests/yolo/v2/YOLOV2BatchNormalizationLayerDataset.h"
 #include "tests/fixtures_new/BatchNormalizationLayerFixture.h"
 
 namespace arm_compute

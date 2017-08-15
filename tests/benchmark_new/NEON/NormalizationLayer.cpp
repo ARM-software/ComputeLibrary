@@ -30,8 +30,8 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/AlexNetNormalizationLayerDataset.h"
-#include "tests/datasets_new/GoogLeNetNormalizationLayerDataset.h"
+#include "tests/datasets_new/system_tests/alexnet/AlexNetNormalizationLayerDataset.h"
+#include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1NormalizationLayerDataset.h"
 #include "tests/fixtures_new/NormalizationLayerFixture.h"
 
 namespace arm_compute
@@ -55,8 +55,8 @@ REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, NENormalizationLayerF
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetNormalizationLayerDataset(),
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1NormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1NormalizationLayerDataset(),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
@@ -66,8 +66,8 @@ REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, NENormalizationLayerF
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetNormalizationLayerDataset(),
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1NormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1NormalizationLayerDataset(),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 TEST_SUITE_END()

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GOOGLENET_GEMM_DATASET
-#define ARM_COMPUTE_TEST_GOOGLENET_GEMM_DATASET
+#ifndef ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_GEMM_DATASET
+#define ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_GEMM_DATASET
 
 #include "tests/datasets_new/GEMMDataset.h"
 
@@ -36,10 +36,10 @@ namespace test
 {
 namespace datasets
 {
-class GoogLeNetGEMMDataset final : public GEMMDataset
+class GoogLeNetInceptionV1GEMMDataset final : public GEMMDataset
 {
 public:
-    GoogLeNetGEMMDataset()
+    GoogLeNetInceptionV1GEMMDataset()
     {
         add_config(TensorShape(147U, 12544U), TensorShape(64U, 147U), TensorShape(64U, 12544U), TensorShape(64U, 12544U), 1.0f, 0.0f);
         add_config(TensorShape(64U, 3136U), TensorShape(64U, 64U), TensorShape(64U, 3136U), TensorShape(64U, 3136U), 1.0f, 0.0f);
@@ -110,4 +110,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GOOGLENET_GEMM_DATASET */
+#endif /* ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV1_GEMM_DATASET */

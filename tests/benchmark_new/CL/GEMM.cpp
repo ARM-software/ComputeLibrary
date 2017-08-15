@@ -28,8 +28,8 @@
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
 #include "tests/TypePrinter.h"
-#include "tests/datasets_new/GoogLeNetGEMMDataset.h"
 #include "tests/datasets_new/MatrixMultiplyGEMMDataset.h"
+#include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h"
 #include "tests/fixtures_new/GEMMFixture.h"
 
 namespace arm_compute
@@ -45,7 +45,7 @@ using CLGEMMFixture = GEMMFixture<CLTensor, CLGEMM>;
 
 TEST_SUITE(CL)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetGEMMDataset(), data_types));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(), data_types));
 REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(), data_types));
 
 TEST_SUITE_END()
