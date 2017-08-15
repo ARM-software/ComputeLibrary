@@ -32,6 +32,7 @@
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/system_tests/alexnet/AlexNetPoolingLayerDataset.h"
 #include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1PoolingLayerDataset.h"
+#include "tests/datasets_new/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4PoolingLayerDataset.h"
 #include "tests/datasets_new/system_tests/lenet5/LeNet5PoolingLayerDataset.h"
 #include "tests/datasets_new/system_tests/squeezenet/SqueezeNetPoolingLayerDataset.h"
 #include "tests/datasets_new/system_tests/yolo/v2/YOLOV2PoolingLayerDataset.h"
@@ -63,6 +64,9 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5PoolingLayer, NEPoolingLayerFixture, frame
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1PoolingLayerDataset(), data_types), framework::dataset::make("Batches", 1)));
 
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4PoolingLayerDataset(), data_types), framework::dataset::make("Batches", 1)));
+
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(), data_types), framework::dataset::make("Batches", 1)));
 
@@ -78,6 +82,9 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5PoolingLayer, NEPoolingLayerFixture, frame
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));

@@ -32,6 +32,7 @@
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/system_tests/alexnet/AlexNetActivationLayerDataset.h"
 #include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ActivationLayerDataset.h"
+#include "tests/datasets_new/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ActivationLayerDataset.h"
 #include "tests/datasets_new/system_tests/lenet5/LeNet5ActivationLayerDataset.h"
 #include "tests/datasets_new/system_tests/squeezenet/SqueezeNetActivationLayerDataset.h"
 #include "tests/datasets_new/system_tests/yolo/v2/YOLOV2ActivationLayerDataset.h"
@@ -66,6 +67,10 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ActivationLayer, NEActivatio
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ActivationLayerDataset(), data_types),
                                                             framework::dataset::make("Batches", 1)));
 
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ActivationLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetActivationLayerDataset(), data_types),
                                                             framework::dataset::make("Batches", 1)));
@@ -85,6 +90,10 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, NEActivationLayerFixture,
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ActivationLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ActivationLayerDataset(), data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY,

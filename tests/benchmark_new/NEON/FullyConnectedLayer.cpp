@@ -32,6 +32,7 @@
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/system_tests/alexnet/AlexNetFullyConnectedLayerDataset.h"
 #include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1FullyConnectedLayerDataset.h"
+#include "tests/datasets_new/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4FullyConnectedLayerDataset.h"
 #include "tests/datasets_new/system_tests/lenet5/LeNet5FullyConnectedLayerDataset.h"
 #include "tests/fixtures_new/FullyConnectedLayerFixture.h"
 
@@ -67,6 +68,11 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1FullyConnectedLayer, NEFully
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 1, 4 })));
 
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 1, 4 })));
+
 TEST_SUITE(NIGHTLY)
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
@@ -80,6 +86,11 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, NEFullyConnectedLayer
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4FullyConnectedLayerDataset(),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 8)));
 TEST_SUITE_END()

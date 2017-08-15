@@ -32,6 +32,7 @@
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/system_tests/alexnet/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
+#include "tests/datasets_new/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ConvolutionLayerDataset.h"
 #include "tests/datasets_new/system_tests/lenet5/LeNet5ConvolutionLayerDataset.h"
 #include "tests/datasets_new/system_tests/squeezenet/SqueezeNetConvolutionLayerDataset.h"
 #include "tests/datasets_new/system_tests/yolo/v2/YOLOV2ConvolutionLayerDataset.h"
@@ -65,6 +66,11 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ConvolutionLayer, CLConvolut
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 1, 4 })));
 
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 1, 4 })));
+
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(),
                                                                                         data_types),
@@ -83,6 +89,11 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ConvolutionLayer, CLConvolutionLayerFixtur
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 8)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ConvolutionLayerDataset(),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 8)));
 

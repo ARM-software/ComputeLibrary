@@ -30,6 +30,7 @@
 #include "framework/datasets/Datasets.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/TypePrinter.h"
+#include "tests/datasets_new/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4BatchNormalizationLayerDataset.h"
 #include "tests/datasets_new/system_tests/yolo/v2/YOLOV2BatchNormalizationLayerDataset.h"
 #include "tests/fixtures_new/BatchNormalizationLayerFixture.h"
 
@@ -51,9 +52,19 @@ REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizat
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
 TEST_SUITE(NIGHTLY)
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2BatchNormalizationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 TEST_SUITE_END()
