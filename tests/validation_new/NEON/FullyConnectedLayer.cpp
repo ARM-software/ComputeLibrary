@@ -117,7 +117,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
 }
 
 template <typename T>
-using NEFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<Tensor, Accessor, NEFullyConnectedLayer, T>;
+using NEFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
 
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
@@ -156,7 +156,7 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 template <typename T>
-using NEFullyConnectedLayerFixedPointFixture = FullyConnectedLayerValidationFixedPointFixture<Tensor, Accessor, NEFullyConnectedLayer, T>;
+using NEFullyConnectedLayerFixedPointFixture = FullyConnectedLayerValidationFixedPointFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)

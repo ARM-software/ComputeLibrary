@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_MODEL_OBJECTS_ALEXNET_H__
 #define __ARM_COMPUTE_TEST_MODEL_OBJECTS_ALEXNET_H__
 
+#include "arm_compute/runtime/Tensor.h"
+
 #include "AssetsLibrary.h"
 #include "Globals.h"
 #include "Utils.h"
@@ -153,7 +155,7 @@ public:
             b[6].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type, _fixed_point_position));
             b[7].allocator()->init(TensorInfo(TensorShape(1000U), 1, _data_type, _fixed_point_position));
 
-            if(_batches > 1)
+            if(_batches > 1 && std::is_same<TensorType, Tensor>::value)
             {
                 w[5].allocator()->init(TensorInfo(TensorShape(9216U * data_type_size, 4096U / data_type_size), 1, _data_type, _fixed_point_position));
                 w[6].allocator()->init(TensorInfo(TensorShape(4096U * data_type_size, 4096U / data_type_size), 1, _data_type, _fixed_point_position));

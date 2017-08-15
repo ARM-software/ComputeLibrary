@@ -80,16 +80,6 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
         const size_t shape_x = ws.x();
         ws.set(0, ws.y());
         ws.set(1, shape_x);
-
-        // Weights have to be passed reshaped
-        // Transpose 1xW for batched version
-        if(!reshape_weights && dst_shape.y() > 1)
-        {
-            const float  transpose_width = 16.0f / data_size_from_type(data_type);
-            const size_t shape_x         = ws.x();
-            ws.set(0, ws.y() * static_cast<unsigned int>(transpose_width));
-            ws.set(1, static_cast<unsigned int>(std::ceil(shape_x / transpose_width)));
-        }
     }
 
     // Create tensors
@@ -113,7 +103,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
 }
 
 template <typename T>
-using CLFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T>;
+using CLFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T, false>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -150,7 +140,7 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 template <typename T>
-using CLFullyConnectedLayerFixedPointFixture = FullyConnectedLayerValidationFixedPointFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T>;
+using CLFullyConnectedLayerFixedPointFixture = FullyConnectedLayerValidationFixedPointFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T, false>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)

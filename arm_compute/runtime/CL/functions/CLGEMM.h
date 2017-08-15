@@ -76,7 +76,7 @@ private:
     CLGEMMMatrixAdditionKernel _ma_kernel;
     CLTensor                   _tmp_a;
     CLTensor                   _tmp_b;
-    bool                       _run_vector_matrix_multiplication;
+    bool                       _is_interleaved_transposed;
     bool                       _run_addition;
 };
 }

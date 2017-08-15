@@ -197,9 +197,12 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
 
     // Configure kernels
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
+
+    // Configure matrix multiply
     if(_is_fully_connected_convolution)
     {
-        _mm_kernel.configure(&_input_im2col_reshaped, weights, &_gemm_output, 1.0f);
+        // The matrix A and Matrix B have not been reshaped
+        _mm_kernel.configure(&_input_im2col_reshaped, weights, &_gemm_output, 1.0f, false);
     }
     else
     {

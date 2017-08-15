@@ -48,10 +48,10 @@ __kernel void gemm_transpose1x4(IMAGE_DECLARATION(src),
     uint x = get_global_id(0);
     uint y = get_global_id(1);
 
-    /* Compute address for Matrix B - source */
+    // Compute address for Matrix B - source
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 
-    /* Compute address for Matrix B transposed - destination. X and Y are swapped */
+    // Compute address for Matrix B transposed - destination. X and Y are swapped
     uint dst_addr_in_bytes = y * 16 + ((x * dst_stride_y + dst_offset_first_element_in_bytes));
 
     uint4 b0 = vload4(0, (__global uint *)src.ptr);
@@ -288,11 +288,11 @@ __kernel void gemm_accumulate_biases(
 }
 #endif /* DATA_TYPE */
 
-#ifdef WIDTH_MATRIX_B
+#ifdef COLS_B
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_8bit and @ref gemm_transpose1x16 before running the matrix multiplication
  *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_MATRIX_B
+ * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DCOLS_B
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported formats: U8
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -318,14 +318,14 @@ __kernel void gemm_accumulate_biases(
  * @param[in]  c_mult_int                         Multiplied with each element of the matrix C.
  * @param[in]  shift                              Number of bits to shift right the result.
  */
-__kernel void gemm_mm_u8(IMAGE_DECLARATION(src0),
-                         IMAGE_DECLARATION(src1),
-                         IMAGE_DECLARATION(dst),
-                         int a_offset,
-                         int b_offset,
-                         int c_offset,
-                         int c_mult_int,
-                         int shift)
+__kernel void gemm_mm_interleaved_transposed_u8(IMAGE_DECLARATION(src0),
+                                                IMAGE_DECLARATION(src1),
+                                                IMAGE_DECLARATION(dst),
+                                                int a_offset,
+                                                int b_offset,
+                                                int c_offset,
+                                                int c_mult_int,
+                                                int shift)
 {
     /* src_addr.s0 = address of matrix A */
     /* src_addr.s1 = address of matrix B */
@@ -338,7 +338,7 @@ __kernel void gemm_mm_u8(IMAGE_DECLARATION(src0),
     src_addr = src_addr + ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
 
     /* Compute end row address for matrix B */
-    int end_row_mtx_b = src_addr.s1 + WIDTH_MATRIX_B;
+    int end_row_mtx_b = src_addr.s1 + COLS_B;
 
     /* Reset accumulators */
     int16 c00 = 0.0f;
@@ -392,13 +392,13 @@ __kernel void gemm_mm_u8(IMAGE_DECLARATION(src0),
     vstore16(convert_uchar16_sat(c20), 0, (__global uchar *)(offset(&dst, 0, 2)));
     vstore16(convert_uchar16_sat(c30), 0, (__global uchar *)(offset(&dst, 0, 3)));
 }
-#endif /* WIDTH_MATRIX_B */
+#endif /* COLS_B */
 
-#if defined(WIDTH_MATRIX_B) && defined(ALPHA)
+#if defined(COLS_B) && defined(ALPHA)
 /** This OpenCL kernel is optimised for Midgard. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_MATRIX_B and -DALPHA
+ * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -419,9 +419,9 @@ __kernel void gemm_mm_u8(IMAGE_DECLARATION(src0),
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
  */
-__kernel void gemm_mm_f32_midgard(IMAGE_DECLARATION(src0),
-                                  IMAGE_DECLARATION(src1),
-                                  IMAGE_DECLARATION(dst))
+__kernel void gemm_mm_interleaved_transposed_f32_midgard(IMAGE_DECLARATION(src0),
+                                                         IMAGE_DECLARATION(src1),
+                                                         IMAGE_DECLARATION(dst))
 {
     /* src_addr.s0 = address of matrix A */
     /* src_addr.s1 = address of matrix B */
@@ -437,7 +437,7 @@ __kernel void gemm_mm_f32_midgard(IMAGE_DECLARATION(src0),
     src_addr = src_addr >> 2;
 
     /* Compute end row address for matrix B */
-    int end_row_mtx_b = src_addr.s1 + WIDTH_MATRIX_B;
+    int end_row_mtx_b = src_addr.s1 + COLS_B;
 
     /* Reset accumulators */
     float4 c00 = 0.0f;
@@ -497,7 +497,7 @@ __kernel void gemm_mm_f32_midgard(IMAGE_DECLARATION(src0),
 /** This OpenCL kernel is optimised for Bifrost. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_MATRIX_B and -DALPHA
+ * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -518,9 +518,9 @@ __kernel void gemm_mm_f32_midgard(IMAGE_DECLARATION(src0),
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
  */
-__kernel void gemm_mm_f32_bifrost(IMAGE_DECLARATION(src0),
-                                  IMAGE_DECLARATION(src1),
-                                  IMAGE_DECLARATION(dst))
+__kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0),
+                                                         IMAGE_DECLARATION(src1),
+                                                         IMAGE_DECLARATION(dst))
 {
     // src_addr_a = address of matrix A
     // src_addr_b = address of matrix B
@@ -528,7 +528,7 @@ __kernel void gemm_mm_f32_bifrost(IMAGE_DECLARATION(src0),
     __global float *src_addr_b = (__global float *)(src1_ptr + get_global_id(0) * src1_stride_y + src1_offset_first_element_in_bytes);
 
     // Compute end row address for matrix B
-    __global float *src_end_addr_b = src_addr_b + WIDTH_MATRIX_B;
+    __global float *src_end_addr_b = src_addr_b + COLS_B;
 
     // Reset accumulators
     float c00 = 0.0f;
@@ -707,7 +707,7 @@ __kernel void gemm_mm_f32_bifrost(IMAGE_DECLARATION(src0),
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
  *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_MATRIX_B and -DALPHA
+ * @attention The width of matrix B and the alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -728,9 +728,9 @@ __kernel void gemm_mm_f32_bifrost(IMAGE_DECLARATION(src0),
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
  */
-__kernel void gemm_mm_f16(IMAGE_DECLARATION(src0),
-                          IMAGE_DECLARATION(src1),
-                          IMAGE_DECLARATION(dst))
+__kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
+                                                 IMAGE_DECLARATION(src1),
+                                                 IMAGE_DECLARATION(dst))
 {
     /* src_addr.s0 = address of matrix A */
     /* src_addr.s1 = address of matrix B */
@@ -746,7 +746,7 @@ __kernel void gemm_mm_f16(IMAGE_DECLARATION(src0),
     src_addr = src_addr >> 1;
 
     /* Compute end row address for matrix B */
-    int end_row_mtx_b = src_addr.s1 + WIDTH_MATRIX_B;
+    int end_row_mtx_b = src_addr.s1 + COLS_B;
 
     /* Reset accumulators */
     half8 c00 = 0.0f;
@@ -807,7 +807,7 @@ __kernel void gemm_mm_f16(IMAGE_DECLARATION(src0),
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in 8 bit fixed point precision
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_8bit and @ref gemm_transpose1x16 before running the matrix multiplication
  *
- * @attention The width of matrix B, the alpha's value and fixed point position need to be passed at compile time using -DWIDTH_MATRIX_B -DALPHA and -DFIXED_POINT_POSITION
+ * @attention The width of matrix B, the alpha's value and fixed point position need to be passed at compile time using -DCOLS_B -DALPHA and -DFIXED_POINT_POSITION
  *
  * @note: ALPHA must be passed in 8 bit fixed point format
  *
@@ -830,9 +830,9 @@ __kernel void gemm_mm_f16(IMAGE_DECLARATION(src0),
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
  */
-__kernel void gemm_mm_qs8(IMAGE_DECLARATION(src0),
-                          IMAGE_DECLARATION(src1),
-                          IMAGE_DECLARATION(dst))
+__kernel void gemm_mm_interleaved_transposed_qs8(IMAGE_DECLARATION(src0),
+                                                 IMAGE_DECLARATION(src1),
+                                                 IMAGE_DECLARATION(dst))
 {
     /* src_addr.s0 = address of matrix A */
     /* src_addr.s1 = address of matrix B */
@@ -845,7 +845,7 @@ __kernel void gemm_mm_qs8(IMAGE_DECLARATION(src0),
     src_addr = src_addr + ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
 
     /* Compute end row address for matrix B */
-    int end_row_mtx_b = src_addr.s1 + WIDTH_MATRIX_B;
+    int end_row_mtx_b = src_addr.s1 + COLS_B;
 
     /* Reset accumulators */
     short8 c00 = 0.0f;
@@ -899,7 +899,7 @@ __kernel void gemm_mm_qs8(IMAGE_DECLARATION(src0),
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in 16 bit fixed point precision
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
  *
- * @attention The width of matrix B, the alpha's value and fixed point position need to be passed at compile time using -DWIDTH_MATRIX_B -DALPHA and -DFIXED_POINT_POSITION
+ * @attention The width of matrix B, the alpha's value and fixed point position need to be passed at compile time using -DCOLS_B -DALPHA and -DFIXED_POINT_POSITION
  *
  * @note: ALPHA must be passed in 16 bit fixed point format
  *
@@ -922,9 +922,9 @@ __kernel void gemm_mm_qs8(IMAGE_DECLARATION(src0),
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
  */
-__kernel void gemm_mm_qs16(IMAGE_DECLARATION(src0),
-                           IMAGE_DECLARATION(src1),
-                           IMAGE_DECLARATION(dst))
+__kernel void gemm_mm_interleaved_transposed_qs16(IMAGE_DECLARATION(src0),
+                                                  IMAGE_DECLARATION(src1),
+                                                  IMAGE_DECLARATION(dst))
 {
     /* src_addr.s0 = address of matrix A */
     /* src_addr.s1 = address of matrix B */
@@ -940,7 +940,7 @@ __kernel void gemm_mm_qs16(IMAGE_DECLARATION(src0),
     src_addr = src_addr >> 1;
 
     /* Compute end row address for matrix B */
-    int end_row_mtx_b = src_addr.s1 + WIDTH_MATRIX_B;
+    int end_row_mtx_b = src_addr.s1 + COLS_B;
 
     /* Reset accumulators */
     int8 c00 = 0.0f;
@@ -983,14 +983,17 @@ __kernel void gemm_mm_qs16(IMAGE_DECLARATION(src0),
 }
 #endif // defined(FIXED_POINT_POSITION)
 
-#ifdef WIDTH_VECTOR_A
-/** This OpenCL kernel computes the vector by matrix multiplication between the vector A (src0) and matrix B (src1)
+#if defined(COLS_A) && defined(NUM_ELEMS_PROCESSED_PER_THREAD_X) && (NUM_ELEMS_PROCESSED_PER_THREAD_Y)
+#if defined(DATA_TYPE)
+#define VECTOR_TYPE VEC_DATA_TYPE(DATA_TYPE, NUM_ELEMS_PROCESSED_PER_THREAD_X)
+/** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
- * @attention The width of vector A, the width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_VECTOR_A -DWIDTH_MATRIX_B and -DALPHA
+ * @note This OpenCL kernel works with floating point data types (F16/F32)
+ * @note The floating point data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
+ * @note The number of elements processed along the x and y directions must be passed at compile time using -DNUM_ELEMS_PROCESSED_PER_THREAD_X and -DNUM_ELEMS_PROCESSED_PER_THREAD_Y
+ * @note The width of matrix A and the alpha's value need to be passed at compile time using -DCOLS_A and -DALPHA
  *
- * @attention The input vector A and matrix B must not be reshaped
- *
- * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16/F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
@@ -1009,127 +1012,136 @@ __kernel void gemm_mm_qs16(IMAGE_DECLARATION(src0),
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
  */
-__kernel void gemm_vm_f32(IMAGE_DECLARATION(src0),
-                          IMAGE_DECLARATION(src1),
-                          IMAGE_DECLARATION(dst))
+__kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
+                                     IMAGE_DECLARATION(src1),
+                                     IMAGE_DECLARATION(dst))
 {
-    int idx = get_global_id(0) * 4;
+    int idx = get_global_id(0) * NUM_ELEMS_PROCESSED_PER_THREAD_X;
 
-    /* Compute the address for the vector A and matrix B */
+    // Compute starting address for matrix A and Matrix B
     int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
-    src_addr.s1 += idx * sizeof(float);
 
-    int end_row_vec_a = src_addr.s0 + (WIDTH_VECTOR_A * sizeof(float));
+    // Update address for the matrix A
+    src_addr.s0 += get_global_id(1) * src0_stride_y * NUM_ELEMS_PROCESSED_PER_THREAD_Y;
 
-    float4 acc = 0.0f;
+    // Update address for the matrix B
+    src_addr.s1 += idx * sizeof(DATA_TYPE);
 
-    for(; src_addr.s0 <= (end_row_vec_a - 2 * sizeof(float)); src_addr += (int2)(2 * sizeof(float), 2 * src1_stride_y))
+    int end_row_vec_a = src_addr.s0 + (COLS_A * sizeof(DATA_TYPE));
+
+    VECTOR_TYPE acc0 = 0.0f;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    VECTOR_TYPE acc1 = 0.0f;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    VECTOR_TYPE acc2 = 0.0f;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    VECTOR_TYPE acc3 = 0.0f;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+    for(; src_addr.s0 <= (end_row_vec_a - 2 * sizeof(DATA_TYPE)); src_addr += (int2)(2 * sizeof(DATA_TYPE), 2 * src1_stride_y))
     {
-        float2 a0 = vload2(0, (__global float *)(src0_ptr + src_addr.s0));
-        float4 b0 = vload4(0, (__global float *)(src1_ptr + src_addr.s1));
-        float4 b1 = vload4(0, (__global float *)(src1_ptr + src_addr.s1 + src1_stride_y));
+        // Load values from matrix A
+        VEC_DATA_TYPE(DATA_TYPE, 2)
+        a0 = vload2(0, (__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 0 * src0_stride_y));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        VEC_DATA_TYPE(DATA_TYPE, 2)
+        a1 = vload2(0, (__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 1 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        VEC_DATA_TYPE(DATA_TYPE, 2)
+        a2 = vload2(0, (__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 2 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        VEC_DATA_TYPE(DATA_TYPE, 2)
+        a3 = vload2(0, (__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 3 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        // Load values from matrix B
+        VECTOR_TYPE b0 = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, (__global DATA_TYPE *)(src1_ptr + src_addr.s1));
+        VECTOR_TYPE b1 = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, (__global DATA_TYPE *)(src1_ptr + src_addr.s1 + src1_stride_y));
 
-        acc += b0 * (float4)a0.s0;
-        acc += b1 * (float4)a0.s1;
+        // Accumulate
+        acc0 += b0 * (VECTOR_TYPE)a0.s0;
+        acc0 += b1 * (VECTOR_TYPE)a0.s1;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 += b0 * (VECTOR_TYPE)a1.s0;
+        acc1 += b1 * (VECTOR_TYPE)a1.s1;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 += b0 * (VECTOR_TYPE)a2.s0;
+        acc2 += b1 * (VECTOR_TYPE)a2.s1;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 += b0 * (VECTOR_TYPE)a3.s0;
+        acc3 += b1 * (VECTOR_TYPE)a3.s1;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
-    for(; src_addr.s0 < end_row_vec_a; src_addr += (int2)(sizeof(float), src1_stride_y))
+    for(; src_addr.s0 < end_row_vec_a; src_addr += (int2)(sizeof(DATA_TYPE), src1_stride_y))
     {
-        float  a0 = *((__global float *)(src0_ptr + src_addr.s0));
-        float4 b0 = vload4(0, (__global float *)(src1_ptr + src_addr.s1));
+        // Load values from matrix A
+        DATA_TYPE a0 = *((__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 0 * src0_stride_y));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        DATA_TYPE a1 = *((__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 1 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        DATA_TYPE a2 = *((__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 2 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        DATA_TYPE a3 = *((__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 3 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        // Load values from matrix B
+        VECTOR_TYPE b0 = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, (__global DATA_TYPE *)(src1_ptr + src_addr.s1));
 
-        acc += b0 * (float4)a0;
+        // Accumulate
+        acc0 += b0 * (VECTOR_TYPE)a0;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 += b0 * (VECTOR_TYPE)a1;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 += b0 * (VECTOR_TYPE)a2;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 += b0 * (VECTOR_TYPE)a3;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
-    /* Compute destination address */
+    // Compute destination address
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
-    /* Multiply by the weight of vector-matrix product */
-    acc = acc * (float4)ALPHA;
-
-    vstore4(acc, 0, (__global float *)(offset(&dst, 0, 0)));
+    // Multiply by the weight of matrix-matrix product and store the result
+    acc0 = acc0 * (VECTOR_TYPE)ALPHA;
+    VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
+    (acc0, 0, (__global DATA_TYPE *)(offset(&dst, 0, 0)));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    acc1 = acc1 * (VECTOR_TYPE)ALPHA;
+    VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
+    (acc1, 0, (__global DATA_TYPE *)(offset(&dst, 0, 1)));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    acc2 = acc2 * (VECTOR_TYPE)ALPHA;
+    VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
+    (acc2, 0, (__global DATA_TYPE *)(offset(&dst, 0, 2)));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    acc3 = acc3 * (VECTOR_TYPE)ALPHA;
+    VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
+    (acc3, 0, (__global DATA_TYPE *)(offset(&dst, 0, 3)));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 }
-
-/** This OpenCL kernel computes the vector by matrix multiplication between the vector A (src0) and matrix B (src1)
- *
- * @attention The width of vector A, the width of matrix B and the alpha's value need to be passed at compile time using -DWIDTH_VECTOR_A -DWIDTH_MATRIX_B and -DALPHA
- *
- * @attention The input vector A and matrix B must not be reshaped
- *
- * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16
- * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
- * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
- * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
- */
-__kernel void gemm_vm_f16(IMAGE_DECLARATION(src0),
-                          IMAGE_DECLARATION(src1),
-                          IMAGE_DECLARATION(dst))
-{
-    int idx = get_global_id(0) * 8;
-
-    /* Compute the address for the vector A and matrix B */
-    int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
-    src_addr.s1 += idx * sizeof(half);
-
-    int end_row_vec_a = src_addr.s0 + (WIDTH_VECTOR_A * sizeof(half));
-
-    half8 acc = 0.0f;
-
-    for(; src_addr.s0 <= (end_row_vec_a - 4 * sizeof(half)); src_addr += (int2)(4 * sizeof(half), 4 * src1_stride_y))
-    {
-        half4 a0 = vload4(0, (__global half *)(src0_ptr + src_addr.s0));
-        half8 b0 = vload8(0, (__global half *)(src1_ptr + src_addr.s1 + 0 * src1_stride_y));
-        half8 b1 = vload8(0, (__global half *)(src1_ptr + src_addr.s1 + 1 * src1_stride_y));
-        half8 b2 = vload8(0, (__global half *)(src1_ptr + src_addr.s1 + 2 * src1_stride_y));
-        half8 b3 = vload8(0, (__global half *)(src1_ptr + src_addr.s1 + 3 * src1_stride_y));
-
-        acc += b0 * (half8)a0.s0;
-        acc += b1 * (half8)a0.s1;
-        acc += b2 * (half8)a0.s2;
-        acc += b3 * (half8)a0.s3;
-    }
-
-    for(; src_addr.s0 < end_row_vec_a; src_addr += (int2)(sizeof(half), src1_stride_y))
-    {
-        half a0  = *((__global half *)(src0_ptr + src_addr.s0));
-        half8 b0 = vload8(0, (__global half *)(src1_ptr + src_addr.s1));
-
-        acc += b0 * (half8)a0;
-    }
-
-    /* Compute destination address */
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
-
-    /* Multiply by the weight of vector-matrix product */
-    acc = acc * (half8)ALPHA;
-
-    vstore8(acc, 0, (__global half *)(offset(&dst, 0, 0)));
-}
+#endif // defined(DATA_TYPE)
 
 #ifdef FIXED_POINT_POSITION
-/** This OpenCL kernel computes the vector by matrix multiplication between the vector A (src0) and matrix B (src1) in 8 bit fixed point
+/** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
- * @attention The width of vector A, the width of matrix B, the alpha's value and the fixed point position need to be passed at compile time using -DWIDTH_VECTOR_A -DWIDTH_MATRIX_B, -DALPHA and -DFIXED_POINT_POSITION
+ * @note This OpenCL kernel works with fixed point data types QS8
+ * @note The number of elements processed along the x and y directions must be passed at compile time using -DNUM_ELEMS_PROCESSED_PER_THREAD_X and -DNUM_ELEMS_PROCESSED_PER_THREAD_Y
+ * @note The width of matrix A, the number of elements processed per thread along the Y direction and the alpha's value need to be passed at compile time using -DCOLS_A, -DNUM_ELEMS_PROCESSED_PER_THREAD_Y and -DALPHA
+ * @note The fixed point position need to be passed at compile time using -DFIXED_POINT_POSITION
+ * @note The alpha value must be passed in 8 bit fixed point format using -DALPHA
  *
- * @attention The input vector A and matrix B must not be reshaped
- *
- * @note: ALPHA must be passed in 8 bit fixed point format
- *
- * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: QS8
+ * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: QS8/QS16
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
@@ -1148,72 +1160,143 @@ __kernel void gemm_vm_f16(IMAGE_DECLARATION(src0),
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
  */
-__kernel void gemm_vm_qs8(IMAGE_DECLARATION(src0),
+__kernel void gemm_mm_qs8(IMAGE_DECLARATION(src0),
                           IMAGE_DECLARATION(src1),
                           IMAGE_DECLARATION(dst))
 {
-    int idx = get_global_id(0) * 16;
+    int idx = get_global_id(0) * NUM_ELEMS_PROCESSED_PER_THREAD_X;
 
-    /* Compute the address for the vector A and matrix B */
+    // Compute starting address for matrix A and Matrix B
     int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
-    src_addr.s1 += idx;
 
-    int end_row_vec_a = src_addr.s0 + WIDTH_VECTOR_A;
+    // Update address for the matrix A
+    src_addr.s0 += get_global_id(1) * src0_stride_y * NUM_ELEMS_PROCESSED_PER_THREAD_Y;
 
-    short8 acc0 = 0;
-    short8 acc1 = 0;
+    // Update address for the matrix B
+    src_addr.s1 += idx * sizeof(char);
 
-    /* This for loop performs 4 accumulations per iteration */
-    for(; src_addr.s0 <= (end_row_vec_a - 4); src_addr += (int2)(4, 4 * src1_stride_y))
+    int end_row_vec_a = src_addr.s0 + (COLS_A * sizeof(char));
+
+    short8 acc00 = 0;
+    short8 acc01 = 0;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    short8 acc10 = 0;
+    short8 acc11 = 0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    short8 acc20 = 0;
+    short8 acc21 = 0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    short8 acc30 = 0;
+    short8 acc31 = 0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+    // This for loop performs 4 accumulations per iteration
+    for(; src_addr.s0 <= (end_row_vec_a - 2); src_addr += (int2)(2, 2 * src1_stride_y))
     {
-        char4  a0 = vload4(0, (__global char *)(src0_ptr + src_addr.s0));
+        char2 a0 = vload2(0, (__global char *)(src0_ptr + src_addr.s0 + 0 * src0_stride_y));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        char2 a1 = vload2(0, (__global char *)(src0_ptr + src_addr.s0 + 1 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        char2 a2 = vload2(0, (__global char *)(src0_ptr + src_addr.s0 + 2 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        char2 a3 = vload2(0, (__global char *)(src0_ptr + src_addr.s0 + 3 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
         char16 b0 = vload16(0, (__global char *)(src1_ptr + src_addr.s1 + 0 * src1_stride_y));
         char16 b1 = vload16(0, (__global char *)(src1_ptr + src_addr.s1 + 1 * src1_stride_y));
-        char16 b2 = vload16(0, (__global char *)(src1_ptr + src_addr.s1 + 2 * src1_stride_y));
-        char16 b3 = vload16(0, (__global char *)(src1_ptr + src_addr.s1 + 3 * src1_stride_y));
 
-        acc0 = mlal_sat_qs8x8(acc0, (char8)a0.s0, b0.s01234567, FIXED_POINT_POSITION);
-        acc0 = mlal_sat_qs8x8(acc0, (char8)a0.s1, b1.s01234567, FIXED_POINT_POSITION);
-        acc0 = mlal_sat_qs8x8(acc0, (char8)a0.s2, b2.s01234567, FIXED_POINT_POSITION);
-        acc0 = mlal_sat_qs8x8(acc0, (char8)a0.s3, b3.s01234567, FIXED_POINT_POSITION);
-
-        acc1 = mlal_sat_qs8x8(acc1, (char8)a0.s0, b0.s89ABCDEF, FIXED_POINT_POSITION);
-        acc1 = mlal_sat_qs8x8(acc1, (char8)a0.s1, b1.s89ABCDEF, FIXED_POINT_POSITION);
-        acc1 = mlal_sat_qs8x8(acc1, (char8)a0.s2, b2.s89ABCDEF, FIXED_POINT_POSITION);
-        acc1 = mlal_sat_qs8x8(acc1, (char8)a0.s3, b3.s89ABCDEF, FIXED_POINT_POSITION);
+        acc00 = mlal_sat_qs8x8(acc00, (char8)a0.s0, b0.s01234567, FIXED_POINT_POSITION);
+        acc00 = mlal_sat_qs8x8(acc00, (char8)a0.s1, b1.s01234567, FIXED_POINT_POSITION);
+        acc01 = mlal_sat_qs8x8(acc01, (char8)a0.s0, b0.s89ABCDEF, FIXED_POINT_POSITION);
+        acc01 = mlal_sat_qs8x8(acc01, (char8)a0.s1, b1.s89ABCDEF, FIXED_POINT_POSITION);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc10 = mlal_sat_qs8x8(acc10, (char8)a1.s0, b0.s01234567, FIXED_POINT_POSITION);
+        acc10 = mlal_sat_qs8x8(acc10, (char8)a1.s1, b1.s01234567, FIXED_POINT_POSITION);
+        acc11 = mlal_sat_qs8x8(acc11, (char8)a1.s0, b0.s89ABCDEF, FIXED_POINT_POSITION);
+        acc11 = mlal_sat_qs8x8(acc11, (char8)a1.s1, b1.s89ABCDEF, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc20 = mlal_sat_qs8x8(acc20, (char8)a2.s0, b0.s01234567, FIXED_POINT_POSITION);
+        acc20 = mlal_sat_qs8x8(acc20, (char8)a2.s1, b1.s01234567, FIXED_POINT_POSITION);
+        acc21 = mlal_sat_qs8x8(acc21, (char8)a2.s0, b0.s89ABCDEF, FIXED_POINT_POSITION);
+        acc21 = mlal_sat_qs8x8(acc21, (char8)a2.s1, b1.s89ABCDEF, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc30 = mlal_sat_qs8x8(acc30, (char8)a3.s0, b0.s01234567, FIXED_POINT_POSITION);
+        acc30 = mlal_sat_qs8x8(acc30, (char8)a3.s1, b1.s01234567, FIXED_POINT_POSITION);
+        acc31 = mlal_sat_qs8x8(acc31, (char8)a3.s0, b0.s89ABCDEF, FIXED_POINT_POSITION);
+        acc31 = mlal_sat_qs8x8(acc31, (char8)a3.s1, b1.s89ABCDEF, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
-    /* Left-over accumulations */
+    // Left-over accumulations
     for(; src_addr.s0 < end_row_vec_a; src_addr += (int2)(1, src1_stride_y))
     {
-        char   a0 = *((__global char *)(src0_ptr + src_addr.s0));
+        char a0 = *((__global char *)(src0_ptr + src_addr.s0 + 0 * src0_stride_y));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        char a1 = *((__global char *)(src0_ptr + src_addr.s0 + 1 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        char a2 = *((__global char *)(src0_ptr + src_addr.s0 + 2 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        char a3 = *((__global char *)(src0_ptr + src_addr.s0 + 3 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
         char16 b0 = vload16(0, (__global char *)(src1_ptr + src_addr.s1));
 
-        acc0 = mlal_sat_qs8x8(acc0, (char8)a0, b0.s01234567, FIXED_POINT_POSITION);
-        acc1 = mlal_sat_qs8x8(acc1, (char8)a0, b0.s89ABCDEF, FIXED_POINT_POSITION);
+        acc00 = mlal_sat_qs8x8(acc00, (char8)a0, b0.s01234567, FIXED_POINT_POSITION);
+        acc01 = mlal_sat_qs8x8(acc01, (char8)a0, b0.s89ABCDEF, FIXED_POINT_POSITION);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc10 = mlal_sat_qs8x8(acc10, (char8)a1, b0.s01234567, FIXED_POINT_POSITION);
+        acc11 = mlal_sat_qs8x8(acc11, (char8)a1, b0.s89ABCDEF, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc20 = mlal_sat_qs8x8(acc20, (char8)a2, b0.s01234567, FIXED_POINT_POSITION);
+        acc21 = mlal_sat_qs8x8(acc21, (char8)a2, b0.s89ABCDEF, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc30 = mlal_sat_qs8x8(acc30, (char8)a3, b0.s01234567, FIXED_POINT_POSITION);
+        acc31 = mlal_sat_qs8x8(acc31, (char8)a3, b0.s89ABCDEF, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
-    /* Compute destination address */
+    // Compute destination address
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
-    /* Multiply by the weight of matrix product */
-    char16 acc_qs8 = convert_char16_sat((short16)(acc0, acc1));
-
+    // Multiply by the weight of matrix product and store the result
+    char16 acc_qs8;
+    acc_qs8 = convert_char16_sat((short16)(acc00, acc01));
     acc_qs8 = mul_sat_qs8x16(acc_qs8, (char16)ALPHA, FIXED_POINT_POSITION);
-
-    /* Store 16 values */
     vstore16(acc_qs8, 0, (__global char *)(offset(&dst, 0, 0)));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    acc_qs8 = convert_char16_sat((short16)(acc10, acc11));
+    acc_qs8 = mul_sat_qs8x16(acc_qs8, (char16)ALPHA, FIXED_POINT_POSITION);
+    vstore16(acc_qs8, 0, (__global char *)(offset(&dst, 0, 1)));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    acc_qs8 = convert_char16_sat((short16)(acc20, acc21));
+    acc_qs8 = mul_sat_qs8x16(acc_qs8, (char16)ALPHA, FIXED_POINT_POSITION);
+    vstore16(acc_qs8, 0, (__global char *)(offset(&dst, 0, 2)));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    acc_qs8 = convert_char16_sat((short16)(acc30, acc31));
+    acc_qs8 = mul_sat_qs8x16(acc_qs8, (char16)ALPHA, FIXED_POINT_POSITION);
+    vstore16(acc_qs8, 0, (__global char *)(offset(&dst, 0, 3)));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 }
 
-/** This OpenCL kernel computes the vector by matrix multiplication between the vector A (src0) and matrix B (src1) in 16 bit fixed point
+/** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
- * @attention The width of vector A, the width of matrix B, the alpha's value and the fixed point position need to be passed at compile time using -DWIDTH_VECTOR_A -DWIDTH_MATRIX_B, -DALPHA and -DFIXED_POINT_POSITION
+ * @note This OpenCL kernel works with fixed point data types QS16
+ * @note The number of elements processed along the x and y directions must be passed at compile time using -DNUM_ELEMS_PROCESSED_PER_THREAD_X and -DNUM_ELEMS_PROCESSED_PER_THREAD_Y
+ * @note The width of matrix A, the number of elements processed per thread along the Y direction and the alpha's value need to be passed at compile time using -DCOLS_A, -DNUM_ELEMS_PROCESSED_PER_THREAD_Y and -DALPHA
+ * @note The fixed point position need to be passed at compile time using -DFIXED_POINT_POSITION
+ * @note The alpha value must be passed in 16 bit fixed point format using -DALPHA
  *
- * @attention The input vector A and matrix B must not be reshaped
- *
- * @note: ALPHA must be passed in 16 bit fixed point format
- *
- * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: QS16
+ * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: QS8/QS16
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
@@ -1232,59 +1315,120 @@ __kernel void gemm_vm_qs8(IMAGE_DECLARATION(src0),
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
  */
-__kernel void gemm_vm_qs16(IMAGE_DECLARATION(src0),
+__kernel void gemm_mm_qs16(IMAGE_DECLARATION(src0),
                            IMAGE_DECLARATION(src1),
                            IMAGE_DECLARATION(dst))
 {
-    int idx = get_global_id(0) * 8;
+    int idx = get_global_id(0) * NUM_ELEMS_PROCESSED_PER_THREAD_X;
 
-    /* Compute the address for the vector A and matrix B */
+    // Compute starting address for matrix A and Matrix B
     int2 src_addr = ((int2)(src0_offset_first_element_in_bytes, src1_offset_first_element_in_bytes));
+
+    // Update address for the matrix A
+    src_addr.s0 += get_global_id(1) * src0_stride_y * NUM_ELEMS_PROCESSED_PER_THREAD_Y;
+
+    // Update address for the matrix B
     src_addr.s1 += idx * sizeof(short);
 
-    int end_row_vec_a = src_addr.s0 + (WIDTH_VECTOR_A * sizeof(short));
+    int end_row_vec_a = src_addr.s0 + (COLS_A * sizeof(short));
 
-    /* Reset accumulator */
     int8 acc0 = 0;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    int8 acc1 = 0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    int8 acc2 = 0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    int8 acc3 = 0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-    /* This for loop performs 4 accumulations per iteration */
-    for(; src_addr.s0 <= (end_row_vec_a - 4 * sizeof(short)); src_addr += (int2)(4 * sizeof(short), 4 * src1_stride_y))
+    // This for loop performs 4 accumulations per iteration
+    for(; src_addr.s0 <= (end_row_vec_a - 2 * sizeof(short)); src_addr += (int2)(2 * sizeof(short), 2 * src1_stride_y))
     {
-        short4 a0 = vload4(0, (__global short *)(src0_ptr + src_addr.s0));
+        short2 a0 = vload2(0, (__global short *)(src0_ptr + src_addr.s0 + 0 * src0_stride_y));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        short2 a1 = vload2(0, (__global short *)(src0_ptr + src_addr.s0 + 1 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        short2 a2 = vload2(0, (__global short *)(src0_ptr + src_addr.s0 + 2 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        short2 a3 = vload2(0, (__global short *)(src0_ptr + src_addr.s0 + 3 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
         short8 b0 = vload8(0, (__global short *)(src1_ptr + src_addr.s1 + 0 * src1_stride_y));
         short8 b1 = vload8(0, (__global short *)(src1_ptr + src_addr.s1 + 1 * src1_stride_y));
-        short8 b2 = vload8(0, (__global short *)(src1_ptr + src_addr.s1 + 2 * src1_stride_y));
-        short8 b3 = vload8(0, (__global short *)(src1_ptr + src_addr.s1 + 3 * src1_stride_y));
 
         acc0 = mlal_sat_qs16x8(acc0, (short8)a0.s0, b0, FIXED_POINT_POSITION);
         acc0 = mlal_sat_qs16x8(acc0, (short8)a0.s1, b1, FIXED_POINT_POSITION);
-        acc0 = mlal_sat_qs16x8(acc0, (short8)a0.s2, b2, FIXED_POINT_POSITION);
-        acc0 = mlal_sat_qs16x8(acc0, (short8)a0.s3, b3, FIXED_POINT_POSITION);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 = mlal_sat_qs16x8(acc1, (short8)a1.s0, b0, FIXED_POINT_POSITION);
+        acc1 = mlal_sat_qs16x8(acc1, (short8)a1.s1, b1, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 = mlal_sat_qs16x8(acc2, (short8)a2.s0, b0, FIXED_POINT_POSITION);
+        acc2 = mlal_sat_qs16x8(acc2, (short8)a2.s1, b1, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 = mlal_sat_qs16x8(acc3, (short8)a3.s0, b0, FIXED_POINT_POSITION);
+        acc3 = mlal_sat_qs16x8(acc3, (short8)a3.s1, b1, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
-    /* Left-over accumulations */
+    // Left-over accumulations
     for(; src_addr.s0 < end_row_vec_a; src_addr += (int2)(sizeof(short), src1_stride_y))
     {
-        short  a0 = *((__global short *)(src0_ptr + src_addr.s0));
+        short a0 = *((__global short *)(src0_ptr + src_addr.s0 + 0 * src0_stride_y));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        short a1 = *((__global short *)(src0_ptr + src_addr.s0 + 1 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        short a2 = *((__global short *)(src0_ptr + src_addr.s0 + 2 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        short a3 = *((__global short *)(src0_ptr + src_addr.s0 + 3 * src0_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
         short8 b0 = vload8(0, (__global short *)(src1_ptr + src_addr.s1));
 
         acc0 = mlal_sat_qs16x8(acc0, (short8)a0, b0, FIXED_POINT_POSITION);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 = mlal_sat_qs16x8(acc1, (short8)a1, b0, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 = mlal_sat_qs16x8(acc2, (short8)a2, b0, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 = mlal_sat_qs16x8(acc3, (short8)a3, b0, FIXED_POINT_POSITION);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
-    /* Compute destination address */
+    // Compute destination address
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
-    /* Multiply by the weight of matrix product */
-    short8 acc_qs16 = convert_short8_sat(acc0);
-
+    // Multiply by the weight of matrix product and store the result
+    short8 acc_qs16;
+    acc_qs16 = convert_short8_sat(acc0);
     acc_qs16 = mul_sat_qs16x8(acc_qs16, (short8)ALPHA, FIXED_POINT_POSITION);
-
-    /* Store 8 values */
     vstore8(acc_qs16, 0, (__global short *)(offset(&dst, 0, 0)));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    acc_qs16 = convert_short8_sat(acc1);
+    acc_qs16 = mul_sat_qs16x8(acc_qs16, (short8)ALPHA, FIXED_POINT_POSITION);
+    vstore8(acc_qs16, 0, (__global short *)(offset(&dst, 0, 1)));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    acc_qs16 = convert_short8_sat(acc2);
+    acc_qs16 = mul_sat_qs16x8(acc_qs16, (short8)ALPHA, FIXED_POINT_POSITION);
+    vstore8(acc_qs16, 0, (__global short *)(offset(&dst, 0, 2)));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    acc_qs16 = convert_short8_sat(acc3);
+    acc_qs16 = mul_sat_qs16x8(acc_qs16, (short8)ALPHA, FIXED_POINT_POSITION);
+    vstore8(acc_qs16, 0, (__global short *)(offset(&dst, 0, 3)));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 }
-#endif /* defined(FIXED_POINT_POSITION) */
-#endif /* defined(WIDTH_VECTOR_A) */
-#endif /* defined(WIDTH_MATRIX_B) && defined(ALPHA) */
+#endif // defined(FIXED_POINT_POSITION)
+#endif // defined(COLS_A) && defined(NUM_ELEMS_PROCESSED_PER_THREAD_X) && (NUM_ELEMS_PROCESSED_PER_THREAD_Y)
+#endif // defined(COLS_B) && defined(ALPHA)
 
 #ifdef BETA
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
