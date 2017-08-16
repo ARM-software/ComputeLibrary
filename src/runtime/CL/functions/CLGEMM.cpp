@@ -59,6 +59,8 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 
     ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(0) != b->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
 
+    _mm_kernel.set_target(CLScheduler::get().target());
+
     // Check if the first input tensor is a vector. If so, all the kernels for reshaping the tensors can be skipped
     if(a->info()->dimension(1) != 1)
     {
@@ -87,7 +89,6 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         _transpose_kernel.configure(b, &_tmp_b);
 
         // Configure matrix multiply kernel
-        _mm_kernel.set_target(CLScheduler::get().target());
         _mm_kernel.configure(&_tmp_a, &_tmp_b, output, alpha);
 
         // Allocate intermediate tensors

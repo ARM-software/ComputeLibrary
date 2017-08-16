@@ -38,13 +38,21 @@ CLDirectConvolutionLayer::CLDirectConvolutionLayer()
 
 void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
+    // Set GPU target
+    _direct_conv_kernel.set_target(CLScheduler::get().target());
+
+    // Configure direct convolution
     _direct_conv_kernel.configure(input, weights, biases, output, conv_info);
 
+    // Configure border handler
     _input_border_handler.configure(input, _direct_conv_kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
 }
 
 void CLDirectConvolutionLayer::run()
 {
+    // Run border handler
     CLScheduler::get().enqueue(_input_border_handler, false);
+
+    // Run direct convolution
     CLScheduler::get().enqueue(_direct_conv_kernel);
 }

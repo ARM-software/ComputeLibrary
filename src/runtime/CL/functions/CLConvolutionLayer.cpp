@@ -113,6 +113,9 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     const DataType dt                   = input->info()->data_type();
     const int      fixed_point_position = input->info()->fixed_point_position();
 
+    // Set the GPU target for matrix multiply
+    _mm_kernel.set_target(CLScheduler::get().target());
+
     _has_bias             = (biases != nullptr);
     _are_weights_reshaped = weights_info.are_reshaped();
 

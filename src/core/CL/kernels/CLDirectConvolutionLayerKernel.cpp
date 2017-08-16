@@ -99,68 +99,129 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     _biases      = biases;
     _border_size = BorderSize(_conv_pad_y, _conv_pad_x);
 
-    std::stringstream     kernel_name;
     std::set<std::string> options;
-    kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
-    DataType promoted_type = input->info()->data_type();
 
-    options.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    options.emplace("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
-    options.emplace("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2)));
-    options.emplace("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
-
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        options.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
-
-        switch(input->info()->data_type())
-        {
-            case DataType::QS8:
-                promoted_type = DataType::QS16;
-                break;
-            case DataType::QS16:
-                promoted_type = DataType::QS32;
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Datatype not supported");
-        }
-    }
-
-    options.emplace("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(promoted_type));
+    const GPUTarget gpu_target = get_arch_from_target(get_target());
 
     if(_biases != nullptr)
     {
         options.emplace("-DHAS_BIAS");
     }
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), options));
+    if((gpu_target == GPUTarget::BIFROST) && (kernel_size <= 5) && (_conv_stride_x == 1) && (_conv_stride_y == 1) && (input->info()->data_type() == DataType::F32))
+    {
+        options.emplace("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2)));
 
-    // Configure kernel window
-    Window win = calculate_max_window(*output->info());
+        std::string kernel_name = "direct_convolution" + support::cpp11::to_string(kernel_size) + "x" + support::cpp11::to_string(kernel_size) + "_f32_bifrost";
+        _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, options));
 
-    bool is_stride2 = ((kernel_size != 1) && (_conv_stride_x == 2));
+        // Configure kernel window
+        Window win = calculate_max_window(*output->info());
 
-    const unsigned int num_elems_read_per_iteration_x    = 8 + 2 * (kernel_size / 2) + (is_stride2 ? 6 + kernel_size / 2 : 0);
-    const unsigned int num_elems_read_per_iteration_y    = kernel_size;
-    const unsigned int num_elems_written_per_iteration_x = 8;
-    const unsigned int num_elems_written_per_iteration_y = 1;
+        unsigned int num_elems_read_per_iteration_x    = 0;
+        unsigned int num_elems_read_per_iteration_y    = 0;
+        unsigned int num_elems_written_per_iteration_x = 0;
+        unsigned int num_elems_written_per_iteration_y = 0;
 
-    // Calculate right and bottom border
-    const int input_width  = input->info()->dimension(0) - kernel_size / 2 + _conv_pad_x;
-    const int input_height = input->info()->dimension(1) - kernel_size / 2 + _conv_pad_y;
+        switch(kernel_size)
+        {
+            case 3:
+            {
+                num_elems_read_per_iteration_x    = 6;
+                num_elems_read_per_iteration_y    = 5;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_written_per_iteration_y = 3;
+                break;
+            }
+            case 5:
+            {
+                num_elems_read_per_iteration_x    = 8;
+                num_elems_read_per_iteration_y    = 6;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_written_per_iteration_y = 2;
+                break;
+            }
+            default:
+            {
+                ARM_COMPUTE_ERROR("Kernel size not optimized for Bifrost");
+            }
+        }
 
-    // Create window and update padding
-    win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
+        // Calculate right and bottom border
+        const int input_width  = input->info()->dimension(0) - kernel_size / 2 + _conv_pad_x;
+        const int input_height = input->info()->dimension(1) - kernel_size / 2 + _conv_pad_y;
 
-    AccessWindowStatic    input_access(input->info(), -_conv_pad_x, -_conv_pad_y, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
-    AccessWindowStatic    weights_access(weights->info(), 0, 0, kernel_size, kernel_size);
-    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
+        // Create window and update padding
+        win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
 
-    update_window_and_padding(win, input_access, weights_access, output_access);
+        AccessWindowStatic    input_access(input->info(), -_conv_pad_x, -_conv_pad_y, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
+        AccessWindowStatic    weights_access(weights->info(), 0, 0, kernel_size, kernel_size);
+        AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+        update_window_and_padding(win, input_access, weights_access, output_access);
 
-    ICLKernel::configure(win);
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
+        ICLKernel::configure(win);
+    }
+    else
+    {
+        std::stringstream kernel_name;
+        kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
+        DataType promoted_type = input->info()->data_type();
+
+        options.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+        options.emplace("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
+        options.emplace("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2)));
+        options.emplace("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
+
+        if(is_data_type_fixed_point(input->info()->data_type()))
+        {
+            options.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+
+            switch(input->info()->data_type())
+            {
+                case DataType::QS8:
+                    promoted_type = DataType::QS16;
+                    break;
+                case DataType::QS16:
+                    promoted_type = DataType::QS32;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Datatype not supported");
+            }
+        }
+
+        options.emplace("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(promoted_type));
+
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), options));
+
+        // Configure kernel window
+
+        bool is_stride2 = ((kernel_size != 1) && (_conv_stride_x == 2));
+
+        const unsigned int num_elems_read_per_iteration_x    = 8 + 2 * (kernel_size / 2) + (is_stride2 ? 6 + kernel_size / 2 : 0);
+        const unsigned int num_elems_read_per_iteration_y    = kernel_size;
+        const unsigned int num_elems_written_per_iteration_x = 8;
+        const unsigned int num_elems_written_per_iteration_y = 1;
+
+        // Calculate right and bottom border
+        const int input_width  = input->info()->dimension(0) - kernel_size / 2 + _conv_pad_x;
+        const int input_height = input->info()->dimension(1) - kernel_size / 2 + _conv_pad_y;
+
+        // Create window and update padding
+        Window win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
+
+        AccessWindowStatic    input_access(input->info(), -_conv_pad_x, -_conv_pad_y, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
+        AccessWindowStatic    weights_access(weights->info(), 0, 0, kernel_size, kernel_size);
+        AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
+
+        update_window_and_padding(win, input_access, weights_access, output_access);
+
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
+        ICLKernel::configure(win);
+    }
 }
 
 void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue &queue)
