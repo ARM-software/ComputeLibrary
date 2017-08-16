@@ -469,7 +469,8 @@ public:
         ABS,          /**< Absolute */
         SQUARE,       /**< Square */
         SQRT,         /**< Square root */
-        LINEAR        /**< Linear */
+        LINEAR,       /**< Linear */
+        LEAKY_RELU    /**< Leaky ReLU : y = x > 0 ? x : a*x*/
     };
 
     /** Default Constructor
