@@ -26,6 +26,8 @@
 
 #include "tests/validation_new/SimpleTensor.h"
 
+#include <vector>
+
 namespace arm_compute
 {
 namespace test
