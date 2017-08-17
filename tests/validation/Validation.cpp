@@ -288,6 +288,10 @@ void validate(const IAccessor &tensor, const RawTensor &reference, const RawTens
         {
             check_single_element(id, tensor, reference, tolerance_value, wrap_range, min_channels, channel_size, num_mismatches, num_elements);
         }
+        else
+        {
+            ++num_elements;
+        }
     }
 
     const int64_t absolute_tolerance_number = tolerance_number * num_elements;
