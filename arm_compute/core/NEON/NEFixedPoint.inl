@@ -1079,6 +1079,7 @@ inline qint8x8_t vrecip_qs8(qint8x8_t a, int fixed_point_position)
     const qint8x8_t const_48_over_17 = vdup_n_s8(0x5A >> (5 - fixed_point_position));   // 2.823
     const qint8x8_t const_32_over_17 = vdup_n_s8((0x3C >> (5 - fixed_point_position))); // 1.8823
     const qint8x8_t const_one        = vdup_n_s8(1 << fixed_point_position);
+    const qint8x8_t const_two        = vdup_n_s8(2 << fixed_point_position);
 
     // Find shift value
     const qint8x8_t shift_value = vneg_s8(vsub_s8(vdup_n_s8(8), vadd_s8(vclz_s8(a), vdup_n_s8(fixed_point_position))));
@@ -1091,9 +1092,9 @@ inline qint8x8_t vrecip_qs8(qint8x8_t a, int fixed_point_position)
     x                 = vbsl_s8(set_one, const_one, x);
 
     // Use three iterations of Newton-Raphson  method to get the result
-    x = vadd_s8(x, vmul_qs8(x, vsub_s8(const_one, vmul_qs8(temp, x, fixed_point_position)), fixed_point_position));
-    x = vadd_s8(x, vmul_qs8(x, vsub_s8(const_one, vmul_qs8(temp, x, fixed_point_position)), fixed_point_position));
-    x = vadd_s8(x, vmul_qs8(x, vsub_s8(const_one, vmul_qs8(temp, x, fixed_point_position)), fixed_point_position));
+    x = vmul_qs8(x, vsub_s8(const_two, vmul_qs8(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmul_qs8(x, vsub_s8(const_two, vmul_qs8(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmul_qs8(x, vsub_s8(const_two, vmul_qs8(temp, x, fixed_point_position)), fixed_point_position);
 
     return vshl_s8(x, shift_value);
 }
@@ -1104,6 +1105,7 @@ inline qint16x4_t vrecip_qs16(qint16x4_t a, int fixed_point_position)
     const qint16x4_t const_48_over_17 = vdup_n_s16(0x5A5A >> (13 - fixed_point_position)); // 2.823
     const qint16x4_t const_32_over_17 = vdup_n_s16(0x3C3C >> (13 - fixed_point_position)); // 1.8823
     const qint16x4_t const_one        = vdup_n_s16(1 << fixed_point_position);
+    const qint16x4_t const_two        = vdup_n_s16(2 << fixed_point_position);
 
     // Find shift value
     const qint16x4_t shift_value = vneg_s16(vsub_s16(vdup_n_s16(8), vadd_s16(vclz_s16(a), vdup_n_s16(fixed_point_position))));
@@ -1115,12 +1117,11 @@ inline qint16x4_t vrecip_qs16(qint16x4_t a, int fixed_point_position)
     uint16x4_t set_one = vcgt_s16(x, const_one);
     x                  = vbsl_s16(set_one, const_one, x);
 
-    // Use five iterations of Newton-Raphson  method to get the result
-    x = vadd_s16(x, vmul_qs16(x, vsub_s16(const_one, vmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vadd_s16(x, vmul_qs16(x, vsub_s16(const_one, vmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vadd_s16(x, vmul_qs16(x, vsub_s16(const_one, vmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vadd_s16(x, vmul_qs16(x, vsub_s16(const_one, vmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vadd_s16(x, vmul_qs16(x, vsub_s16(const_one, vmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
+    // Use four iterations of Newton-Raphson  method to get the result
+    x = vmul_qs16(x, vsub_s16(const_two, vmul_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmul_qs16(x, vsub_s16(const_two, vmul_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmul_qs16(x, vsub_s16(const_two, vmul_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmul_qs16(x, vsub_s16(const_two, vmul_qs16(temp, x, fixed_point_position)), fixed_point_position);
 
     return vshl_s16(x, shift_value);
 }
@@ -1131,6 +1132,7 @@ inline qint8x8_t vqrecip_qs8(qint8x8_t a, int fixed_point_position)
     const qint8x8_t const_48_over_17 = vdup_n_s8(0x5A >> (5 - fixed_point_position));   // 2.823
     const qint8x8_t const_32_over_17 = vdup_n_s8((0x3C >> (5 - fixed_point_position))); // 1.8823
     const qint8x8_t const_one        = vdup_n_s8(1 << fixed_point_position);
+    const qint8x8_t const_two        = vdup_n_s8(2 << fixed_point_position);
 
     // Find shift value
     const qint8x8_t shift_value = vqneg_s8(vqsub_s8(vdup_n_s8(8), vqadd_s8(vclz_s8(a), vdup_n_s8(fixed_point_position))));
@@ -1143,9 +1145,9 @@ inline qint8x8_t vqrecip_qs8(qint8x8_t a, int fixed_point_position)
     x                 = vbsl_s8(set_one, const_one, x);
 
     // Use three iterations of Newton-Raphson  method to get the result
-    x = vqadd_s8(x, vqmul_qs8(x, vqsub_s8(const_one, vqmul_qs8(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s8(x, vqmul_qs8(x, vqsub_s8(const_one, vqmul_qs8(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s8(x, vqmul_qs8(x, vqsub_s8(const_one, vqmul_qs8(temp, x, fixed_point_position)), fixed_point_position));
+    x = vqmul_qs8(x, vqsub_s8(const_two, vqmul_qs8(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmul_qs8(x, vqsub_s8(const_two, vqmul_qs8(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmul_qs8(x, vqsub_s8(const_two, vqmul_qs8(temp, x, fixed_point_position)), fixed_point_position);
 
     return vqshl_s8(x, shift_value);
 }
@@ -1156,6 +1158,7 @@ inline qint16x4_t vqrecip_qs16(qint16x4_t a, int fixed_point_position)
     const qint16x4_t const_48_over_17 = vdup_n_s16(0x5A5A >> (13 - fixed_point_position)); // 2.823
     const qint16x4_t const_32_over_17 = vdup_n_s16(0x3C3C >> (13 - fixed_point_position)); // 1.8823
     const qint16x4_t const_one        = vdup_n_s16(1 << fixed_point_position);
+    const qint16x4_t const_two        = vdup_n_s16(2 << fixed_point_position);
 
     // Find shift value
     const qint16x4_t shift_value = vqneg_s16(vqsub_s16(vdup_n_s16(8), vqadd_s16(vclz_s16(a), vdup_n_s16(fixed_point_position))));
@@ -1167,12 +1170,11 @@ inline qint16x4_t vqrecip_qs16(qint16x4_t a, int fixed_point_position)
     uint16x4_t set_one = vcgt_s16(x, const_one);
     x                  = vbsl_s16(set_one, const_one, x);
 
-    // Use five iterations of Newton-Raphson  method to get the result
-    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqadd_s16(x, vqmul_qs16(x, vqsub_s16(const_one, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position));
+    // Use four iterations of Newton-Raphson  method to get the result
+    x = vqmul_qs16(x, vqsub_s16(const_two, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmul_qs16(x, vqsub_s16(const_two, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmul_qs16(x, vqsub_s16(const_two, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmul_qs16(x, vqsub_s16(const_two, vqmul_qs16(temp, x, fixed_point_position)), fixed_point_position);
 
     return vqshl_s16(x, shift_value);
 }
@@ -1183,6 +1185,7 @@ inline qint8x16_t vrecipq_qs8(qint8x16_t a, int fixed_point_position)
     const qint8x16_t const_48_over_17 = vdupq_n_s8(0x5A >> (5 - fixed_point_position));   // 2.823
     const qint8x16_t const_32_over_17 = vdupq_n_s8((0x3C >> (5 - fixed_point_position))); // -1.8823
     const qint8x16_t const_one        = vdupq_n_s8(1 << fixed_point_position);
+    const qint8x16_t const_two        = vdupq_n_s8(2 << fixed_point_position);
 
     // Find shift value
     const qint8x16_t shift_value = vnegq_s8(vsubq_s8(vdupq_n_s8(8), vaddq_s8(vclzq_s8(a), vdupq_n_s8(fixed_point_position))));
@@ -1196,9 +1199,9 @@ inline qint8x16_t vrecipq_qs8(qint8x16_t a, int fixed_point_position)
     x                  = vbslq_s8(set_one, const_one, x);
 
     // Use three iterations of Newton-Raphson  method to get the result
-    x = vaddq_s8(x, vmulq_qs8(x, vsubq_s8(const_one, vmulq_qs8(temp, x, fixed_point_position)), fixed_point_position));
-    x = vaddq_s8(x, vmulq_qs8(x, vsubq_s8(const_one, vmulq_qs8(temp, x, fixed_point_position)), fixed_point_position));
-    x = vaddq_s8(x, vmulq_qs8(x, vsubq_s8(const_one, vmulq_qs8(temp, x, fixed_point_position)), fixed_point_position));
+    x = vmulq_qs8(x, vsubq_s8(const_two, vmulq_qs8(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmulq_qs8(x, vsubq_s8(const_two, vmulq_qs8(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmulq_qs8(x, vsubq_s8(const_two, vmulq_qs8(temp, x, fixed_point_position)), fixed_point_position);
 
     return vshlq_s8(x, shift_value);
 }
@@ -1209,6 +1212,7 @@ inline qint16x8_t vrecipq_qs16(qint16x8_t a, int fixed_point_position)
     const qint16x8_t const_48_over_17 = vdupq_n_s16(0x5A56 >> (13 - fixed_point_position)); // 2.823
     const qint16x8_t const_32_over_17 = vdupq_n_s16(0x3C3C >> (13 - fixed_point_position)); // 1.8823
     const qint16x8_t const_one        = vdupq_n_s16(1 << fixed_point_position);
+    const qint16x8_t const_two        = vdupq_n_s16(2 << fixed_point_position);
 
     // Find shift value
     const qint16x8_t shift_value = vnegq_s16(vsubq_s16(vdupq_n_s16(16), vaddq_s16(vclzq_s16(a), vdupq_n_s16(fixed_point_position))));
@@ -1221,12 +1225,11 @@ inline qint16x8_t vrecipq_qs16(qint16x8_t a, int fixed_point_position)
     uint16x8_t set_one = vcgtq_s16(x, const_one);
     x                  = vbslq_s16(set_one, const_one, x);
 
-    // Use five iterations of Newton-Raphson  method to get the result
-    x = vaddq_s16(x, vmulq_qs16(x, vsubq_s16(const_one, vmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vaddq_s16(x, vmulq_qs16(x, vsubq_s16(const_one, vmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vaddq_s16(x, vmulq_qs16(x, vsubq_s16(const_one, vmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vaddq_s16(x, vmulq_qs16(x, vsubq_s16(const_one, vmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vaddq_s16(x, vmulq_qs16(x, vsubq_s16(const_one, vmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
+    // Use four iterations of Newton-Raphson  method to get the result
+    x = vmulq_qs16(x, vsubq_s16(const_two, vmulq_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmulq_qs16(x, vsubq_s16(const_two, vmulq_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmulq_qs16(x, vsubq_s16(const_two, vmulq_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vmulq_qs16(x, vsubq_s16(const_two, vmulq_qs16(temp, x, fixed_point_position)), fixed_point_position);
 
     return vshlq_s16(x, shift_value);
 }
@@ -1237,6 +1240,7 @@ inline qint8x16_t vqrecipq_qs8(qint8x16_t a, int fixed_point_position)
     const qint8x16_t const_48_over_17 = vdupq_n_s8(0x5A >> (5 - fixed_point_position));   // 2.823
     const qint8x16_t const_32_over_17 = vdupq_n_s8((0x3C >> (5 - fixed_point_position))); // -1.8823
     const qint8x16_t const_one        = vdupq_n_s8(1 << fixed_point_position);
+    const qint8x16_t const_two        = vdupq_n_s8(2 << fixed_point_position);
 
     // Find shift value
     const qint8x16_t shift_value = vqnegq_s8(vqsubq_s8(vdupq_n_s8(8), vqaddq_s8(vclzq_s8(a), vdupq_n_s8(fixed_point_position))));
@@ -1250,9 +1254,9 @@ inline qint8x16_t vqrecipq_qs8(qint8x16_t a, int fixed_point_position)
     x                  = vbslq_s8(set_one, const_one, x);
 
     // Use three iterations of Newton-Raphson  method to get the result
-    x = vqaddq_s8(x, vqmulq_qs8(x, vqsubq_s8(const_one, vqmulq_qs8(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqaddq_s8(x, vqmulq_qs8(x, vqsubq_s8(const_one, vqmulq_qs8(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqaddq_s8(x, vqmulq_qs8(x, vqsubq_s8(const_one, vqmulq_qs8(temp, x, fixed_point_position)), fixed_point_position));
+    x = vqmulq_qs8(x, vqsubq_s8(const_two, vqmulq_qs8(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmulq_qs8(x, vqsubq_s8(const_two, vqmulq_qs8(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmulq_qs8(x, vqsubq_s8(const_two, vqmulq_qs8(temp, x, fixed_point_position)), fixed_point_position);
 
     return vqshlq_s8(x, shift_value);
 }
@@ -1263,6 +1267,7 @@ inline qint16x8_t vqrecipq_qs16(qint16x8_t a, int fixed_point_position)
     const qint16x8_t const_48_over_17 = vdupq_n_s16(0x5A56 >> (13 - fixed_point_position)); // 2.823
     const qint16x8_t const_32_over_17 = vdupq_n_s16(0x3C3C >> (13 - fixed_point_position)); // 1.8823
     const qint16x8_t const_one        = vdupq_n_s16(1 << fixed_point_position);
+    const qint16x8_t const_two        = vdupq_n_s16(2 << fixed_point_position);
 
     // Find shift value
     const qint16x8_t shift_value = vqnegq_s16(vqsubq_s16(vdupq_n_s16(16), vqaddq_s16(vclzq_s16(a), vdupq_n_s16(fixed_point_position))));
@@ -1275,12 +1280,11 @@ inline qint16x8_t vqrecipq_qs16(qint16x8_t a, int fixed_point_position)
     uint16x8_t set_one = vcgtq_s16(x, const_one);
     x                  = vbslq_s16(set_one, const_one, x);
 
-    // Use five iterations of Newton-Raphson  method to get the result
-    x = vqaddq_s16(x, vqmulq_qs16(x, vqsubq_s16(const_one, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqaddq_s16(x, vqmulq_qs16(x, vqsubq_s16(const_one, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqaddq_s16(x, vqmulq_qs16(x, vqsubq_s16(const_one, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqaddq_s16(x, vqmulq_qs16(x, vqsubq_s16(const_one, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
-    x = vqaddq_s16(x, vqmulq_qs16(x, vqsubq_s16(const_one, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position));
+    // Use four iterations of Newton-Raphson  method to get the result
+    x = vqmulq_qs16(x, vqsubq_s16(const_two, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmulq_qs16(x, vqsubq_s16(const_two, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmulq_qs16(x, vqsubq_s16(const_two, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position);
+    x = vqmulq_qs16(x, vqsubq_s16(const_two, vqmulq_qs16(temp, x, fixed_point_position)), fixed_point_position);
 
     // Saturate result in case of overflow
     return vbslq_s16(vceqq_s16(a, vdupq_n_s16(0)), vdupq_n_s16(std::numeric_limits<int16_t>::max()), vqshlq_s16(x, shift_value));
