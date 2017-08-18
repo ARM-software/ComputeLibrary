@@ -80,19 +80,25 @@
  * @param[in]  epsilon                              Epsilon parameter in the batch normalization equation
  */
 __kernel void batchnormalization_layer(TENSOR3D_DECLARATION(input),
+#ifndef IN_PLACE
                                        TENSOR3D_DECLARATION(output),
+#endif /* not IN_PLACE */
                                        VECTOR_DECLARATION(mean),
                                        VECTOR_DECLARATION(var),
                                        VECTOR_DECLARATION(beta),
                                        VECTOR_DECLARATION(gamma),
                                        float epsilon)
 {
-    Tensor3D in    = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D out   = CONVERT_TO_TENSOR3D_STRUCT(output);
-    Vector   mean  = CONVERT_TO_VECTOR_STRUCT(mean);
-    Vector   var   = CONVERT_TO_VECTOR_STRUCT(var);
-    Vector   beta  = CONVERT_TO_VECTOR_STRUCT(beta);
-    Vector   gamma = CONVERT_TO_VECTOR_STRUCT(gamma);
+    Tensor3D in = CONVERT_TO_TENSOR3D_STRUCT(input);
+#ifdef IN_PLACE
+    Tensor3D out = in;
+#else  /* IN_PLACE */
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
+#endif /* IN_PLACE */
+    Vector mean  = CONVERT_TO_VECTOR_STRUCT(mean);
+    Vector var   = CONVERT_TO_VECTOR_STRUCT(var);
+    Vector beta  = CONVERT_TO_VECTOR_STRUCT(beta);
+    Vector gamma = CONVERT_TO_VECTOR_STRUCT(gamma);
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     _in = 0;

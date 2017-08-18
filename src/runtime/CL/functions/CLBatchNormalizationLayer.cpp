@@ -37,7 +37,7 @@ CLBatchNormalizationLayer::CLBatchNormalizationLayer()
 {
 }
 
-void CLBatchNormalizationLayer::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon)
+void CLBatchNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon)
 {
     _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon);
 }

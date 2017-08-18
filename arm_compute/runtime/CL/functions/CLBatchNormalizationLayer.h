@@ -46,16 +46,19 @@ public:
     CLBatchNormalizationLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input   Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                     The rest are optional and used for representing batches. Data types supported: QS8/QS16/F32.
-     * @param[in]  mean    Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  var     Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  gamma   Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  beta    Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  epsilon Small value to avoid division with zero.
-     * @param[out] output  Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @note If the output tensor is a nullptr, the batch normalization function will be performed in-place
+     *
+     * @param[in, out] input   Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
+     *                         3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                         The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     * @param[in]      mean    Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      var     Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      gamma   Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      beta    Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      epsilon Small value to avoid division with zero.
+     * @param[out]     output  Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon);
+    void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon);
 
     // Inherited methods overridden:
     void run() override;

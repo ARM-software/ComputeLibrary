@@ -37,7 +37,7 @@ NEBatchNormalizationLayer::NEBatchNormalizationLayer()
 {
 }
 
-void NEBatchNormalizationLayer::configure(const ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon)
+void NEBatchNormalizationLayer::configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon)
 {
     // Configure kernel
     _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon);

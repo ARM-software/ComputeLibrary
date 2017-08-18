@@ -42,20 +42,10 @@ CLBatchNormalizationLayerKernel::CLBatchNormalizationLayerKernel()
 {
 }
 
-void CLBatchNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma,
+void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma,
                                                 float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, mean, var, beta, gamma);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, mean, var, beta, gamma);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != mean->info()->dimension(0));
 
     _input   = input;
     _output  = output;
@@ -65,12 +55,31 @@ void CLBatchNormalizationLayerKernel::configure(const ICLTensor *input, ICLTenso
     _gamma   = gamma;
     _epsilon = epsilon;
 
+    if(output != nullptr)
+    {
+        // Output tensor auto initialization if not yet initialized
+        auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, mean, var, beta, gamma);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, mean, var, beta, gamma);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var, beta, gamma);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var, beta, gamma);
+    }
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
+    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != mean->info()->dimension(0));
+
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
 
     // Set build options
     std::set<std::string> build_opts;
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
+    build_opts.emplace(output == nullptr ? "-DIN_PLACE" : "");
     if(is_data_type_fixed_point(input->info()->data_type()))
     {
         build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
@@ -84,14 +93,18 @@ void CLBatchNormalizationLayerKernel::configure(const ICLTensor *input, ICLTenso
     _kernel.setArg<cl_float>(idx++, _epsilon);
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-
-    update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, input->info()->valid_region());
-
+    if(output != nullptr)
+    {
+        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+        update_window_and_padding(win, input_access, output_access);
+        output_access.set_valid_region(win, input->info()->valid_region());
+    }
+    else
+    {
+        update_window_and_padding(win, input_access);
+    }
     ICLKernel::configure(win);
 }
 
@@ -115,7 +128,10 @@ void CLBatchNormalizationLayerKernel::run(const Window &window, cl::CommandQueue
     {
         idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _output, slice);
+        if(_output != nullptr)
+        {
+            add_3D_tensor_argument(idx, _output, slice);
+        }
         enqueue(queue, *this, slice);
     }
     while(window.slide_window_slice_3D(slice));
