@@ -35,6 +35,7 @@
 #include "tests/datasets_new/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4PoolingLayerDataset.h"
 #include "tests/datasets_new/system_tests/lenet5/LeNet5PoolingLayerDataset.h"
 #include "tests/datasets_new/system_tests/squeezenet/SqueezeNetPoolingLayerDataset.h"
+#include "tests/datasets_new/system_tests/vgg/vgg16/VGG16PoolingLayerDataset.h"
 #include "tests/datasets_new/system_tests/yolo/v2/YOLOV2PoolingLayerDataset.h"
 #include "tests/fixtures_new/PoolingLayerFixture.h"
 
@@ -70,6 +71,9 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4PoolingLayer, NEPoolingLayer
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(), data_types), framework::dataset::make("Batches", 1)));
 
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(), data_types), framework::dataset::make("Batches", 1)));
+
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(), data_types), framework::dataset::make("Batches", 1)));
 
@@ -88,6 +92,9 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4PoolingLayer, NEPoolingLayer
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));

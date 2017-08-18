@@ -34,6 +34,7 @@
 #include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1FullyConnectedLayerDataset.h"
 #include "tests/datasets_new/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4FullyConnectedLayerDataset.h"
 #include "tests/datasets_new/system_tests/lenet5/LeNet5FullyConnectedLayerDataset.h"
+#include "tests/datasets_new/system_tests/vgg/vgg16/VGG16FullyConnectedLayerDataset.h"
 #include "tests/fixtures_new/FullyConnectedLayerFixture.h"
 
 namespace arm_compute
@@ -56,43 +57,53 @@ TEST_SUITE(NEON)
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
                                                                                         data_types),
-                                                            framework::dataset::make("Batches", { 1, 4 })));
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5FullyConnectedLayerDataset(),
                                                                                         data_types),
-                                                            framework::dataset::make("Batches", { 1, 4 })));
+                                                            framework::dataset::make("Batches", 1)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1FullyConnectedLayerDataset(),
                                                                                         data_types),
-                                                            framework::dataset::make("Batches", { 1, 4 })));
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4FullyConnectedLayerDataset(),
                                                                                         data_types),
-                                                            framework::dataset::make("Batches", { 1, 4 })));
+                                                            framework::dataset::make("Batches", 1)));
 
 TEST_SUITE(NIGHTLY)
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
                                                                                         data_types),
-                                                            framework::dataset::make("Batches", 8)));
+                                                            framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5FullyConnectedLayerDataset(),
                                                                                         data_types),
-                                                            framework::dataset::make("Batches", 8)));
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1FullyConnectedLayerDataset(),
                                                                                         data_types),
-                                                            framework::dataset::make("Batches", 8)));
+                                                            framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4FullyConnectedLayerDataset(),
                                                                                         data_types),
-                                                            framework::dataset::make("Batches", 8)));
+                                                            framework::dataset::make("Batches", { 4, 8 })));
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace test
