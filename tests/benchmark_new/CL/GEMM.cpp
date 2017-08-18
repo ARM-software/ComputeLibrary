@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
+#include "tests/CL/CLAccessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/MatrixMultiplyGEMMDataset.h"
 #include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h"
@@ -41,7 +42,7 @@ namespace
 const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
 } // namespace
 
-using CLGEMMFixture = GEMMFixture<CLTensor, CLGEMM>;
+using CLGEMMFixture = GEMMFixture<CLTensor, CLGEMM, CLAccessor>;
 
 TEST_SUITE(CL)
 

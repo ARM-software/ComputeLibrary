@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "framework/Macros.h"
 #include "framework/datasets/Datasets.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/TypePrinter.h"
 #include "tests/datasets_new/MatrixMultiplyGEMMDataset.h"
 #include "tests/datasets_new/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h"
@@ -49,7 +50,7 @@ const auto data_types = framework::dataset::make("DataType",
 });
 } // namespace
 
-using NEGEMMFixture = GEMMFixture<Tensor, NEGEMM>;
+using NEGEMMFixture = GEMMFixture<Tensor, NEGEMM, Accessor>;
 
 TEST_SUITE(NEON)
 

@@ -35,7 +35,7 @@ namespace arm_compute
 namespace test
 {
 /** Fixture that can be used for NEON and CL */
-template <typename TensorType, typename Function>
+template <typename TensorType, typename Function, typename Accessor>
 class GEMMFixture : public framework::Fixture
 {
 public:
@@ -58,6 +58,10 @@ public:
         b.allocator()->allocate();
         c.allocator()->allocate();
         dst.allocator()->allocate();
+
+        library->fill_tensor_uniform(Accessor(a), 0);
+        library->fill_tensor_uniform(Accessor(b), 1);
+        library->fill_tensor_uniform(Accessor(c), 2);
     }
 
     void run()
