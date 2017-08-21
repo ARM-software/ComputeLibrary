@@ -70,9 +70,16 @@ public:
     SmallShapes()
         : ShapeDataset("Shape",
     {
+        // Batch size 1
         TensorShape{ 7U, 7U },
                      TensorShape{ 27U, 13U, 2U },
-                     TensorShape{ 128U, 64U, 1U, 3U }
+                     TensorShape{ 128U, 64U, 1U, 3U },
+                     // Batch size 4
+                     TensorShape{ 7U, 7U, 4U },
+                     TensorShape{ 27U, 13U, 2U, 4U },
+                     TensorShape{ 128U, 64U, 1U, 3U, 4U },
+                     // Arbitrary batch size
+                     TensorShape{ 7U, 7U, 5U }
     })
     {
     }
@@ -85,9 +92,20 @@ public:
     LargeShapes()
         : ShapeDataset("Shape",
     {
+        // Batch size 1
         TensorShape{ 1920U, 1080U },
                      TensorShape{ 1245U, 652U, 1U, 3U },
-                     TensorShape{ 4160U, 3120U }
+                     TensorShape{ 4160U, 3120U },
+                     // Batch size 4
+                     TensorShape{ 1920U, 1080U, 4U },
+                     TensorShape{ 1245U, 652U, 1U, 3U, 4U },
+                     TensorShape{ 4160U, 3120U, 4U },
+                     // Batch size 8
+                     TensorShape{ 1920U, 1080U, 8U },
+                     TensorShape{ 1245U, 652U, 1U, 3U, 8U },
+                     TensorShape{ 4160U, 3120U, 8U },
+                     // Arbitrary batch size
+                     TensorShape{ 1920U, 1080U, 5U },
     })
     {
     }
@@ -115,9 +133,20 @@ public:
     SmallDirectConvolutionShapes()
         : ShapeDataset("InputShape",
     {
-        TensorShape{ 5U, 5U, 3U, 2U, 4U, 5U },
+        // Batch size 1
+        TensorShape{ 5U, 5U, 3U },
                      TensorShape{ 32U, 37U, 3U },
-                     TensorShape{ 13U, 15U, 8U, 3U }
+                     TensorShape{ 13U, 15U, 8U },
+                     // Batch size 4
+                     TensorShape{ 5U, 5U, 3U, 4U },
+                     TensorShape{ 32U, 37U, 3U, 4U },
+                     TensorShape{ 13U, 15U, 8U, 4U },
+                     // Batch size 8
+                     TensorShape{ 5U, 5U, 3U, 8U },
+                     TensorShape{ 32U, 37U, 3U, 8U },
+                     TensorShape{ 13U, 15U, 8U, 8U },
+                     // Arbitrary batch size
+                     TensorShape{ 32U, 37U, 3U, 8U }
     })
     {
     }
