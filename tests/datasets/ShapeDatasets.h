@@ -198,6 +198,21 @@ public:
     }
 };
 
+/** Data set containing small tensor shapes for deconvolution. */
+class SmallDeconvolutionShapes final : public ShapeDataset
+{
+public:
+    SmallDeconvolutionShapes()
+        : ShapeDataset("InputShape",
+    {
+        TensorShape{ 2U, 3U, 3U, 2U },
+                     TensorShape{ 5U, 5U, 3U },
+                     TensorShape{ 11U, 13U, 4U, 3U }
+    })
+    {
+    }
+};
+
 /** Data set containing small tensor shapes for direct convolution. */
 class SmallDirectConvolutionShapes final : public ShapeDataset
 {

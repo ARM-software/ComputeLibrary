@@ -180,8 +180,10 @@ void NEScaleKernel::scale_nearest(const Window &window)
                 const auto           offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
                 const uint8_t *const in_ptr      = in.ptr();
 
-                const int in_yi      = std::floor((id.y() + 0.5f) * hr);
-                const int offset_row = in_yi * input_stride;
+                const int in_yi         = std::floor((id.y() + 0.5f) * hr);
+                const int in_yi_clamped = std::min(static_cast<int>(_input->info()->dimension(1)), std::max(in_yi, -1));
+                ARM_COMPUTE_ERROR_ON(in_yi_clamped < -1 || in_yi_clamped > static_cast<int>(_input->info()->dimension(1)));
+                const int offset_row = in_yi_clamped * input_stride;
 
                 tmp = vsetq_lane_u8(in_ptr[offsets_ptr[0] + offset_row], tmp, 0);
                 tmp = vsetq_lane_u8(in_ptr[offsets_ptr[1] + offset_row], tmp, 1);

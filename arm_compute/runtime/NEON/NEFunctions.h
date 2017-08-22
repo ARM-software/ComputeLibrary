@@ -42,6 +42,8 @@
 #include "arm_compute/runtime/NEON/functions/NEColorConvert.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolution.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayerUpsample.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConcatenate.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConvert.h"
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"

@@ -562,6 +562,38 @@ inline DataType data_type_for_convolution_matrix(const int16_t *conv, size_t siz
     }
 }
 
+/** Returns expected shape for the deconvolution output tensor.
+ *
+ * @param[in] out_dims widht and height of the output tensor, these values can be obtained with the function deconvolution_output_dimensions.
+ * @param[in] input    Shape of the input tensor.
+ * @param[in] weights  Shape of the weights tensor.
+ *
+ * @return Deconvolution output tensor shape.
+ */
+TensorShape deconvolution_output_shape(const std::pair<unsigned int, unsigned int> &out_dims, TensorShape input, TensorShape weights);
+
+/** Returns expected width and height of the deconvolution's output tensor.
+ *
+ * @param[in] in_width      Width of input tensor (Number of columns)
+ * @param[in] in_height     Height of input tensor (Number of rows)
+ * @param[in] kernel_width  Kernel width.
+ * @param[in] kernel_height Kernel height.
+ * @param[in] padx          X axis padding.
+ * @param[in] pady          Y axis padding.
+ * @param[in] ax            The number of zeros added to right edge of the input.
+ * @param[in] ay            The number of zeros added to top edge of the input.
+ * @param[in] upscalex      How much to scale the X axis.
+ * @param[in] upscaley      How much to scale the Y axis.
+ * @param[in] round         Rounding policy to be used when computing the output's dimensions.
+ *
+ * @return A pair with the new width in the first position and the new height in the second.
+ */
+
+const std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
+                                                                            unsigned int kernel_width, unsigned int kernel_height,
+                                                                            unsigned int padx, unsigned int pady, unsigned int ax, unsigned int ay,
+                                                                            float upscalex, float upscaley, DimensionRoundingType round);
+
 /** Returns expected width and height of output scaled tensor depending on dimensions rounding mode.
  *
  * @param[in] width           Width of input tensor (Number of columns)

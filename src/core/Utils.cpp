@@ -247,6 +247,43 @@ std::string arm_compute::lower_string(const std::string &val)
     return res;
 }
 
+TensorShape arm_compute::deconvolution_output_shape(const std::pair<unsigned int, unsigned int> &out_dims, TensorShape input, TensorShape weights)
+{
+    TensorShape out_shape(input);
+    out_shape.set(0, out_dims.first);
+    out_shape.set(1, out_dims.second);
+    out_shape.set(2, weights[3]);
+    return out_shape;
+}
+
+const std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(
+    unsigned int in_width, unsigned int in_height, unsigned int kernel_width, unsigned int kernel_height, unsigned int padx, unsigned int pady,
+    unsigned int ax, unsigned int ay, float upscalex, float upscaley, DimensionRoundingType round)
+{
+    ARM_COMPUTE_ERROR_ON(in_width < 1 || in_height < 1);
+    ARM_COMPUTE_ERROR_ON(((in_width - 1) * upscalex + kernel_width + ax) < 2.f * padx);
+    ARM_COMPUTE_ERROR_ON(((in_height - 1) * upscaley + kernel_height + ay) < 2.f * pady);
+    const float fw = (in_width - 1) * upscalex - 2.f * padx + kernel_width + ax;
+    const float fh = (in_height - 1) * upscaley - 2.f * pady + kernel_height + ay;
+    int         w  = 0;
+    int         h  = 0;
+    switch(round)
+    {
+        case DimensionRoundingType::FLOOR:
+            w = std::floor(fw);
+            h = std::floor(fh);
+            break;
+        case DimensionRoundingType::CEIL:
+            w = std::ceil(fw);
+            h = std::ceil(fh);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not supported");
+            break;
+    }
+    return std::make_pair<unsigned int, unsigned int>(w, h);
+}
+
 const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height,
                                                                            unsigned int kernel_width, unsigned int kernel_height,
                                                                            const PadStrideInfo &pad_stride_info)
