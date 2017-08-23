@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_ICLKERNEL_H__
 #define __ARM_COMPUTE_ICLKERNEL_H__
 
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/IKernel.h"
@@ -175,6 +176,6 @@ protected:
  *
  * @note If any dimension of the lws is greater than the global workgroup size then no lws will be passed.
  */
-void enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint = cl::Range_128_1);
+void enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint = CLKernelLibrary::get().default_ndrange());
 }
 #endif /*__ARM_COMPUTE_ICLKERNEL_H__ */
