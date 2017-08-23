@@ -57,37 +57,42 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
     const size_t input_width   = src.shape().x();
     const size_t input_height  = src.shape().y();
     const size_t input_depth   = src.shape().z();
+    const int    num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
 
-    const size_t filter_half_size = filter_width / 2;
-    const size_t pad_x            = std::min(filter_half_size, static_cast<size_t>(conv_info.pad().first));
-    const size_t pad_y            = std::min(filter_half_size, static_cast<size_t>(conv_info.pad().second));
-    const size_t minimum_x        = -pad_x + filter_half_size;
-    const size_t minimum_y        = -pad_y + filter_half_size;
+    const size_t filter_half_width  = filter_width / 2;
+    const size_t filter_half_height = filter_height / 2;
+    const size_t pad_x              = std::min(filter_half_width, static_cast<size_t>(conv_info.pad().first));
+    const size_t pad_y              = std::min(filter_half_height, static_cast<size_t>(conv_info.pad().second));
+    const size_t minimum_x          = -pad_x + filter_half_width;
+    const size_t minimum_y          = -pad_y + filter_half_height;
 
     int out_pos = 0;
-    for(size_t z = 0; z < input_depth; ++z)
+    for(int r = 0; r < num_batches; ++r)
     {
-        for(size_t y = minimum_y; y < input_height + pad_y - filter_half_size; y += conv_info.stride().second)
+        for(size_t z = 0; z < input_depth; ++z)
         {
-            for(size_t x = minimum_x; x < input_width + pad_x - filter_half_size; x += conv_info.stride().first)
+            for(size_t y = minimum_y; y < input_height - minimum_y; y += conv_info.stride().second)
             {
-                Coordinates coords(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
-                size_t      filter_offset = filter_plane * z;
-
-                T val = 0;
-                for(int j = y - filter_half_size; j <= static_cast<int>(y + filter_half_size); ++j)
+                for(size_t x = minimum_x; x < input_width - minimum_x; x += conv_info.stride().first)
                 {
-                    for(int i = x - filter_half_size; i <= static_cast<int>(x + filter_half_size); ++i)
+                    Coordinates coords(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z), static_cast<int>(r));
+                    size_t      filter_offset = filter_plane * z;
+
+                    T val = 0;
+                    for(int j = y - filter_half_height; j <= static_cast<int>(y + filter_half_height); ++j)
                     {
-                        coords.set(0, i);
-                        coords.set(1, j);
-                        val += *(weights.data() + filter_offset) * tensor_elem_at(src, coords, BorderMode::CONSTANT, 0.f);
-                        ++filter_offset;
+                        for(int i = x - filter_half_width; i <= static_cast<int>(x + filter_half_width); ++i)
+                        {
+                            coords.set(0, i);
+                            coords.set(1, j);
+                            val += *(weights.data() + filter_offset) * tensor_elem_at(src, coords, BorderMode::CONSTANT, 0.f);
+                            ++filter_offset;
+                        }
                     }
+                    coords.set(0, x);
+                    coords.set(1, y);
+                    dst[out_pos++] = saturate_cast<T>(val);
                 }
-                coords.set(0, x);
-                coords.set(1, y);
-                dst[out_pos++] = saturate_cast<T>(val);
             }
         }
     }

@@ -21,39 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CL_DEPTHWISE_CONVOLUTION_H__
-#define __ARM_COMPUTE_CL_DEPTHWISE_CONVOLUTION_H__
+#ifndef __ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__
+#define __ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__
 
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseConvolution3x3Kernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseIm2ColKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseVectorToTensorKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseWeightsReshapeKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/IFunction.h"
-
-#include <cstdint>
 
 namespace arm_compute
 {
 class ICLTensor;
 
-/** Basic function to execute depthwise convolution. This function calls the following OpenCL kernels:
+/** Basic function to execute a depthwise convolution for kernel size 3x3xC. This function calls the following OpenCL kernels:
  *
- * -# @ref CLFillBorderKernel (executed if border_mode == CONSTANT or border_mode == REPLICATE)
- * -# @ref CLDepthwiseConvolutionKernel
+ * -# @ref CLDepthwiseConvolution3x3Kernel
+ * -# @ref CLFillBorderKernel (if pad_x or pad_y > 0)
  *
  */
-class CLDepthwiseConvolution : public IFunction
+class CLDepthwiseConvolution3x3 : public IFunction
 {
 public:
     /** Default constructor */
-    CLDepthwiseConvolution();
+    CLDepthwiseConvolution3x3();
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in]  input     Source tensor. DataType supported: F32. (Written to only for border filling).
-     * @param[out] output    Destination tensor. DataType supported: F32.
-     * @param[in]  weights   Weights tensor. These are 3D tensors with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in]  conv_info Padding and stride information to use for the convolution. DataType supported: F32.
+     * @param[in, out] input     Source tensor. Data type supported: F32. (Written to only for border filling).
+     * @param[out]     output    Destination tensor. Data type supported: same as @p input.
+     * @param[in]      weights   Weights tensor. These are 3D tensors with shape [3, 3, IFM]. Data type supported: Same as @p input.
+     * @param[in]      conv_info Padding and stride information to use for the convolution.
      */
     void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const PadStrideInfo &conv_info);
 
@@ -61,8 +62,45 @@ public:
     void run() override;
 
 private:
-    CLDepthwiseConvolutionKernel _kernel;
-    CLFillBorderKernel           _border_handler;
+    CLDepthwiseConvolution3x3Kernel _kernel;
+    CLFillBorderKernel              _border_handler;
+};
+
+/** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:
+ *
+ * -# @ref CLDepthwiseIm2ColKernel
+ * -# @ref CLGEMMMatrixVectorMultiplyKernel
+ * -# @ref CLDepthwiseWeightsReshapeKernel
+ * -# @ref CLFillBorderKernel (if pad_x or pad_y > 0)
+ *
+ */
+class CLDepthwiseConvolution : public IFunction
+{
+public:
+    /** Default constructor */
+    CLDepthwiseConvolution();
+    /** Initialize the function's source, destination, weights and convolution information.
+     *
+     * @param[in, out] input     Source tensor. Data type supported: F32. (Written to only for border filling).
+     * @param[out]     output    Destination tensor. Data type supported: same as @p input.
+     * @param[in]      weights   Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
+     * @param[in]      conv_info Padding and stride information to use for the convolution.
+     */
+    void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const PadStrideInfo &conv_info);
+
+    // Inherited methods overriden:
+    void run() override;
+
+private:
+    CLDepthwiseIm2ColKernel          _im2col_kernel;
+    CLDepthwiseWeightsReshapeKernel  _weights_reshape_kernel;
+    CLGEMMMatrixVectorMultiplyKernel _v2mm_kernel;
+    CLDepthwiseVectorToTensorKernel  _vector_to_tensor_kernel;
+    CLFillBorderKernel               _v2mm_input_fill_border;
+    CLFillBorderKernel               _v2mm_weights_fill_border;
+    CLTensor                         _input_reshaped;
+    CLTensor                         _weights_reshaped;
+    CLTensor                         _v2mm_output;
 };
 }
-#endif /*__ARM_COMPUTE_CL_DEPTHWISE_CONVOLUTION_H__ */
+#endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__ */

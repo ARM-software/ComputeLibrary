@@ -117,6 +117,9 @@ __kernel void reshape_to_columns(
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  filter_depth                      The depth of the used filter
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
+ * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col_generic(
     TENSOR3D_DECLARATION(src),
@@ -192,6 +195,9 @@ __kernel void im2col_generic(
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  filter_depth                      The depth of the used filter
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
+ * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col_kernel3x3_padx0_pady0(
     TENSOR3D_DECLARATION(src),
@@ -279,6 +285,7 @@ __kernel void col2im(
     *((__global DATA_TYPE *)(dst.ptr + idx)) = *((__global DATA_TYPE *)(src.ptr));
 }
 #endif // defined(WIDTH_OUTPUT)
+
 /** This kernel reshapes the tensor's low three dimensions to single row for GEMM operation
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float

@@ -145,6 +145,9 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "copy_planes_3p", "channel_combine.cl" },
     { "copy_to_keypoint", "fast_corners.cl" },
     { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
+    { "depthwise_im2col", "depthwise_convolution.cl" },
+    { "depthwise_vector_to_tensor", "depthwise_convolution.cl" },
+    { "depthwise_weights_reshape", "depthwise_convolution.cl" },
     { "dequantization_layer", "dequantization_layer.cl" },
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
@@ -170,6 +173,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_ma_f32", "gemm.cl" },
     { "gemm_ma_qs8", "gemm.cl" },
     { "gemm_ma_qs16", "gemm.cl" },
+    { "gemm_mv", "gemv.cl" },
     { "gemm_mm_interleaved_transposed_u8", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f16", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f32_midgard", "gemm.cl" },
@@ -412,6 +416,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "gemm.cl",
 #include "./cl_kernels/gemm.clembed"
+    },
+    {
+        "gemv.cl",
+#include "./cl_kernels/gemv.clembed"
     },
     {
         "harris_corners.cl",

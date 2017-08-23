@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseConvolution3x3Kernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
@@ -36,17 +36,17 @@
 
 using namespace arm_compute;
 
-CLDepthwiseConvolutionKernel::CLDepthwiseConvolutionKernel()
+CLDepthwiseConvolution3x3Kernel::CLDepthwiseConvolution3x3Kernel()
     : _border_size(0), _input(), _output(), _weights(), _conv_stride_x(0), _conv_stride_y(0), _conv_pad_x(0), _conv_pad_y(0)
 {
 }
 
-BorderSize CLDepthwiseConvolutionKernel::border_size() const
+BorderSize CLDepthwiseConvolution3x3Kernel::border_size() const
 {
     return _border_size;
 }
 
-void CLDepthwiseConvolutionKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const PadStrideInfo &conv_info)
+void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
@@ -91,7 +91,7 @@ void CLDepthwiseConvolutionKernel::configure(const ICLTensor *input, ICLTensor *
     ICLKernel::configure(win);
 }
 
-void CLDepthwiseConvolutionKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLDepthwiseConvolution3x3Kernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);

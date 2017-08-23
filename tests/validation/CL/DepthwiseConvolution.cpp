@@ -27,8 +27,7 @@
 #include "arm_compute/runtime/CL/functions/CLDepthwiseConvolution.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
-#include "tests/datasets/LargeDepthwiseConvolutionDataset.h"
-#include "tests/datasets/SmallDepthwiseConvolutionDataset.h"
+#include "tests/datasets/DepthwiseConvolutionDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -47,18 +46,18 @@ constexpr RelativeTolerance<float> tolerance_f32(0.01f); /**< Tolerance value fo
 } // namespace
 
 TEST_SUITE(CL)
-TEST_SUITE(DepthwiseConvolution)
+TEST_SUITE(DepthwiseConvolutionLayer)
 
 template <typename T>
 using CLDepthwiseConvolutionFixture = DepthwiseConvolutionValidationFixture<CLTensor, CLAccessor, CLDepthwiseConvolution, T>;
 
 // FIXME: COMPMID-523 fix the bug in depthwise convolution
-DISABLED_FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::PRECOMMIT, datasets::SmallDepthwiseConvolutionDataset())
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::PRECOMMIT, datasets::SmallDepthwiseConvolutionDataset())
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-DISABLED_FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::NIGHTLY, datasets::LargeDepthwiseConvolutionDataset())
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::NIGHTLY, datasets::LargeDepthwiseConvolutionDataset())
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }

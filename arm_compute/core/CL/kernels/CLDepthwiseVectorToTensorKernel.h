@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONKERNEL_H__
-#define __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONKERNEL_H__
+#ifndef __ARM_COMPUTE_CLDEPTHWISEVECTORTOTENSORKERNEL_H__
+#define __ARM_COMPUTE_CLDEPTHWISEVECTORTOTENSORKERNEL_H__
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -30,43 +30,41 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the kernel to run a 3x3 depthwise convolution on a tensor.
- */
-class CLDepthwiseConvolutionKernel : public ICLKernel
+/** Interface for the depthwise vector to tensor kernel.
+ *
+ *  This kernel takes the 1D tensor that's been produced by the MatrixVectorMultiply
+ *  kernel and reshapes it to given width and height (previously calculated, based
+ *  on input/weights dimensions and convolution strides and padding).
+ *
+ **/
+class CLDepthwiseVectorToTensorKernel : public ICLKernel
 {
 public:
     /** Default constructor */
-    CLDepthwiseConvolutionKernel();
+    CLDepthwiseVectorToTensorKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLDepthwiseConvolutionKernel(const CLDepthwiseConvolutionKernel &) = delete;
+    CLDepthwiseVectorToTensorKernel(const CLDepthwiseVectorToTensorKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLDepthwiseConvolutionKernel &operator=(const CLDepthwiseConvolutionKernel &) = delete;
-    /** Default Move Constructor. */
-    CLDepthwiseConvolutionKernel(CLDepthwiseConvolutionKernel &&) = default;
-    /** Default move assignment operator. */
-    CLDepthwiseConvolutionKernel &operator=(CLDepthwiseConvolutionKernel &&) = default;
-    /** Initialize the function's source, destination, conv and border_size.
+    CLDepthwiseVectorToTensorKernel &operator=(const CLDepthwiseVectorToTensorKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    CLDepthwiseVectorToTensorKernel(CLDepthwiseVectorToTensorKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    CLDepthwiseVectorToTensorKernel &operator=(CLDepthwiseVectorToTensorKernel &&) = default;
+    /** Set the input and output of the kernel.
      *
-     * @param[in]  input     Source tensor. DataType supported: F32.
-     * @param[out] output    Destination tensor. DataType supported: F32.
-     * @param[in]  weights   Weights tensor. These are 3D tensors with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in]  conv_info Padding and stride information to use for the convolution. DataType supported: F32.
+     * @param[in]  input  The input vector to convert. Data type supported: F32.
+     * @param[out] output The output tensor. 3 lower dimensions represent a single input [width, height, IFM]. Data type supported: same as @p input.
+     * @param[in]  conv_w The converted tensor's width.
+     * @param[in]  conv_h The converted tensor's height.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const PadStrideInfo &conv_info);
+    void configure(const ICLTensor *input, ICLTensor *output, size_t conv_w, size_t conv_h);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
-    BorderSize border_size() const override;
 
 private:
-    BorderSize       _border_size;
     const ICLTensor *_input;
     ICLTensor       *_output;
-    const ICLTensor *_weights;
-    unsigned int     _conv_stride_x;
-    unsigned int     _conv_stride_y;
-    unsigned int     _conv_pad_x;
-    unsigned int     _conv_pad_y;
 };
-} // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTIONKERNEL_H__ */
+} // arm_compute
+#endif /*__ARM_COMPUTE_CLDEPTHWISEVECTORTOTENSORKERNEL_H__ */

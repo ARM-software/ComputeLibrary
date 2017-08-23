@@ -99,6 +99,7 @@ bool CLSymbols::load(const std::string &library)
     clReleaseMemObject        = reinterpret_cast<clReleaseMemObject_func>(dlsym(handle, "clReleaseMemObject"));
     clGetDeviceInfo           = reinterpret_cast<clGetDeviceInfo_func>(dlsym(handle, "clGetDeviceInfo"));
     clGetDeviceIDs            = reinterpret_cast<clGetDeviceIDs_func>(dlsym(handle, "clGetDeviceIDs"));
+    clRetainEvent             = reinterpret_cast<clRetainEvent_func>(dlsym(handle, "clRetainEvent"));
 
     dlclose(handle);
 
@@ -611,6 +612,19 @@ cl_int clGetDeviceInfo(cl_device_id   device,
     if(func != nullptr)
     {
         return func(device, param_name, param_value_size, param_value, param_value_size_ret);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clRetainEvent(cl_event event)
+{
+    auto func = arm_compute::CLSymbols::get().clRetainEvent;
+    if(func != nullptr)
+    {
+        return func(event);
     }
     else
     {

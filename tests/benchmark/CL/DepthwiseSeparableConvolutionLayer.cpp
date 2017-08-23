@@ -44,7 +44,7 @@ TEST_SUITE(CL)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetDepthwiseSeparableConvolutionLayer, CLDepthwiseSeparableConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::MobileNetDepthwiseSeparableConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1 })));
 
 TEST_SUITE_END()
 } // namespace test
