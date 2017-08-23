@@ -57,6 +57,8 @@ public:
     int         fixed_point_position() const override;
     const void *operator()(const Coordinates &coord) const override;
     void *operator()(const Coordinates &coord) override;
+    const void *data() const;
+    void       *data();
 
 private:
     Tensor &_tensor;
@@ -110,6 +112,16 @@ inline PaddingSize Accessor::padding() const
 inline int Accessor::fixed_point_position() const
 {
     return _tensor.info()->fixed_point_position();
+}
+
+inline const void *Accessor::data() const
+{
+    return _tensor.buffer();
+}
+
+inline void *Accessor::data()
+{
+    return _tensor.buffer();
 }
 
 inline const void *Accessor::operator()(const Coordinates &coord) const

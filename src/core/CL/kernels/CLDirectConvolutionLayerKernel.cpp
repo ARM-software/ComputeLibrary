@@ -246,7 +246,7 @@ void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue 
     if(_biases != nullptr)
     {
         Window slice_biases;
-        slice_biases.use_tensor_dimensions(_biases->info());
+        slice_biases.use_tensor_dimensions(_biases->info()->tensor_shape());
         add_1D_tensor_argument(idx1, _biases, slice_biases);
     }
 

@@ -120,7 +120,7 @@ void NEFillBorderKernel::configure(ITensor *tensor, BorderSize border_size, Bord
     Window win;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     win.set(Window::DimY, Window::Dimension(0, 1, 1));
-    win.use_tensor_dimensions(_tensor->info(), Window::DimZ);
+    win.use_tensor_dimensions(_tensor->info()->tensor_shape(), Window::DimZ);
     INEKernel::configure(win);
 }
 

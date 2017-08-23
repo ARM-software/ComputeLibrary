@@ -157,10 +157,10 @@ public:
 
     /** Use the tensor's dimensions to fill the window dimensions.
      *
-     * @param[in] info            Tensor information to copy the dimensions from.
+     * @param[in] shape           @ref TensorShape to copy the dimensions from.
      * @param[in] first_dimension Only copy dimensions which are greater or equal to this value.
      */
-    void use_tensor_dimensions(const ITensorInfo *info, size_t first_dimension = Window::DimX);
+    void use_tensor_dimensions(const TensorShape &shape, size_t first_dimension = Window::DimX);
 
     /** Shift the values of a given dimension by the given shift_value
      *

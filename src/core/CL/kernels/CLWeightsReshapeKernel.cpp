@@ -107,7 +107,7 @@ void CLWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
     Window out_window;
-    out_window.use_tensor_dimensions(_output->info());
+    out_window.use_tensor_dimensions(_output->info()->tensor_shape());
 
     Window in_slice  = window.first_slice_window_3D();
     Window out_slice = out_window.first_slice_window_2D();
@@ -117,7 +117,7 @@ void CLWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
 
     if(_biases != nullptr)
     {
-        biases_window.use_tensor_dimensions(_biases->info());
+        biases_window.use_tensor_dimensions(_biases->info()->tensor_shape());
         biases_slice = biases_window.first_slice_window_1D();
     }
 

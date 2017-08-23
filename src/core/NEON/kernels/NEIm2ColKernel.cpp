@@ -231,7 +231,7 @@ void NEIm2ColKernel::run_reduced(const Window &window)
     in_window.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Window out_window;
-    out_window.use_tensor_dimensions(_output->info());
+    out_window.use_tensor_dimensions(_output->info()->tensor_shape());
     out_window.set(Window::DimX, Window::Dimension(out_window.x().start(), out_window.x().end(), in_width));
 
     Window in_slice  = in_window.first_slice_window_3D();

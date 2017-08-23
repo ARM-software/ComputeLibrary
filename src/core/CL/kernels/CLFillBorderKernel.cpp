@@ -157,7 +157,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     Window win;
     win.set(Window::DimX, Window::Dimension(0, total_valid_width + valid_height));
     win.set(Window::DimY, Window::Dimension(0, 1, 1));
-    win.use_tensor_dimensions(tensor->info(), Window::DimZ);
+    win.use_tensor_dimensions(tensor->info()->tensor_shape(), Window::DimZ);
     ICLKernel::configure(win);
 }
 

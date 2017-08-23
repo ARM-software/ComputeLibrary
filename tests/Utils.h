@@ -476,6 +476,57 @@ inline void fill_array(ArrayAccessor_T &&array, const std::vector<T> &v)
     array.resize(v.size());
     std::memcpy(array.buffer(), v.data(), v.size() * sizeof(T));
 }
+
+/** Obtain numpy type string from DataType.
+ *
+ * @param[in] data_type Data type.
+ *
+ * @return numpy type string.
+ */
+inline std::string get_typestring(DataType data_type)
+{
+    // Check endianness
+    const unsigned int i = 1;
+    const char        *c = reinterpret_cast<const char *>(&i);
+    std::string        endianness;
+    if(*c == 1)
+    {
+        endianness = std::string("<");
+    }
+    else
+    {
+        endianness = std::string(">");
+    }
+    const std::string no_endianness("|");
+
+    switch(data_type)
+    {
+        case DataType::U8:
+            return no_endianness + "u" + support::cpp11::to_string(sizeof(uint8_t));
+        case DataType::S8:
+            return no_endianness + "i" + support::cpp11::to_string(sizeof(int8_t));
+        case DataType::U16:
+            return endianness + "u" + support::cpp11::to_string(sizeof(uint16_t));
+        case DataType::S16:
+            return endianness + "i" + support::cpp11::to_string(sizeof(int16_t));
+        case DataType::U32:
+            return endianness + "u" + support::cpp11::to_string(sizeof(uint32_t));
+        case DataType::S32:
+            return endianness + "i" + support::cpp11::to_string(sizeof(int32_t));
+        case DataType::U64:
+            return endianness + "u" + support::cpp11::to_string(sizeof(uint64_t));
+        case DataType::S64:
+            return endianness + "i" + support::cpp11::to_string(sizeof(int64_t));
+        case DataType::F32:
+            return endianness + "f" + support::cpp11::to_string(sizeof(float));
+        case DataType::F64:
+            return endianness + "f" + support::cpp11::to_string(sizeof(double));
+        case DataType::SIZET:
+            return endianness + "u" + support::cpp11::to_string(sizeof(size_t));
+        default:
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+    }
+}
 } // namespace test
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_UTILS_H__ */

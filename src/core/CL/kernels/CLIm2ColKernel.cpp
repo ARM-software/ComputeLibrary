@@ -182,7 +182,7 @@ void CLIm2ColKernel::run_reduced(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
     Window out_window;
-    out_window.use_tensor_dimensions(_output->info());
+    out_window.use_tensor_dimensions(_output->info()->tensor_shape());
 
     Window out_slice = out_window.first_slice_window_1D();
     Window in_slice  = window.first_slice_window_3D();

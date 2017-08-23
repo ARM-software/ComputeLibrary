@@ -63,6 +63,8 @@ public:
     int         fixed_point_position() const override;
     const void *operator()(const Coordinates &coord) const override;
     void *operator()(const Coordinates &coord) override;
+    const void *data() const;
+    void       *data();
 
 private:
     CLTensor &_tensor;
@@ -122,6 +124,16 @@ inline PaddingSize CLAccessor::padding() const
 inline int CLAccessor::fixed_point_position() const
 {
     return _tensor.info()->fixed_point_position();
+}
+
+inline const void *CLAccessor::data() const
+{
+    return _tensor.buffer();
+}
+
+inline void *CLAccessor::data()
+{
+    return _tensor.buffer();
 }
 
 inline const void *CLAccessor::operator()(const Coordinates &coord) const

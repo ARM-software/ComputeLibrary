@@ -31,6 +31,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "libnpy/npy.hpp"
 #include "tests/RawTensor.h"
 #include "tests/TensorCache.h"
 #include "tests/Utils.h"
@@ -42,6 +43,7 @@
 #include <random>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 namespace arm_compute
 {
@@ -290,10 +292,22 @@ public:
     template <typename T, typename D>
     void fill_tensor_uniform(T &&tensor, std::random_device::result_type seed_offset, D low, D high) const;
 
-    /** Fills the specified @p tensor with data loaded from binary in specified path.
+    /** Fills the specified @p tensor with data loaded from .npy (numpy binary) in specified path.
      *
      * @param[in, out] tensor To be filled tensor.
      * @param[in]      name   Data file.
+     *
+     * @note The numpy array stored in the binary .npy file must be row-major in the sense that it
+     * must store elements within a row consecutively in the memory, then rows within a 2D slice,
+     * then 2D slices within a 3D slice and so on. Note that it imposes no restrictions on what
+     * indexing convention is used in the numpy array. That is, the numpy array can be either fortran
+     * style or C style as long as it adheres to the rule above.
+     *
+     * More concretely, the orders of dimensions for each style are as follows:
+     * C-style (numpy default):
+     *      array[HigherDims..., Z, Y, X]
+     * Fortran style:
+     *      array[X, Y, Z, HigherDims...]
      */
     template <typename T>
     void fill_layer_data(T &&tensor, std::string name) const;
@@ -644,30 +658,77 @@ void AssetsLibrary::fill_layer_data(T &&tensor, std::string name) const
 #else  /* _WIN32 */
     const std::string path_separator("/");
 #endif /* _WIN32 */
-
     const std::string path = _library_path + path_separator + name;
 
+    std::vector<unsigned long> shape;
+
     // Open file
-    std::ifstream file(path, std::ios::in | std::ios::binary);
-    if(!file.good())
+    std::ifstream stream(path, std::ios::in | std::ios::binary);
+    ARM_COMPUTE_ERROR_ON_MSG(!stream.good(), "Failed to load binary data");
+    // Check magic bytes and version number
+    unsigned char v_major = 0;
+    unsigned char v_minor = 0;
+    npy::read_magic(stream, &v_major, &v_minor);
+
+    // Read header
+    std::string header;
+    if(v_major == 1 && v_minor == 0)
     {
-        throw std::runtime_error("Could not load binary data: " + path);
+        header = npy::read_header_1_0(stream);
+    }
+    else if(v_major == 2 && v_minor == 0)
+    {
+        header = npy::read_header_2_0(stream);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Unsupported file format version");
     }
 
-    Window window;
-    for(unsigned int d = 0; d < tensor.shape().num_dimensions(); ++d)
+    // Parse header
+    bool        fortran_order = false;
+    std::string typestr;
+    npy::ParseHeader(header, typestr, &fortran_order, shape);
+
+    // Check if the typestring matches the given one
+    std::string expect_typestr = get_typestring(tensor.data_type());
+    ARM_COMPUTE_ERROR_ON_MSG(typestr != expect_typestr, "Typestrings mismatch");
+
+    // Validate tensor shape
+    ARM_COMPUTE_ERROR_ON_MSG(shape.size() != tensor.shape().num_dimensions(), "Tensor ranks mismatch");
+    if(fortran_order)
     {
-        window.set(d, Window::Dimension(0, tensor.shape()[d], 1));
+        for(size_t i = 0; i < shape.size(); ++i)
+        {
+            ARM_COMPUTE_ERROR_ON_MSG(tensor.shape()[i] != shape[i], "Tensor dimensions mismatch");
+        }
+    }
+    else
+    {
+        for(size_t i = 0; i < shape.size(); ++i)
+        {
+            ARM_COMPUTE_ERROR_ON_MSG(tensor.shape()[i] != shape[shape.size() - i - 1], "Tensor dimensions mismatch");
+        }
     }
 
-    //FIXME : Replace with normal loop
-    execute_window_loop(window, [&](const Coordinates & id)
+    // Read data
+    if(tensor.padding().empty())
     {
-        float val;
-        file.read(reinterpret_cast<char *>(&val), sizeof(float));
-        void *const out_ptr = tensor(id);
-        store_value_with_data_type(out_ptr, val, tensor.data_type());
-    });
+        // If tensor has no padding read directly from stream.
+        stream.read(reinterpret_cast<char *>(tensor.data()), tensor.size());
+    }
+    else
+    {
+        // If tensor has padding accessing tensor elements through execution window.
+        Window window;
+        window.use_tensor_dimensions(tensor.shape());
+
+        //FIXME : Replace with normal loop
+        execute_window_loop(window, [&](const Coordinates & id)
+        {
+            stream.read(reinterpret_cast<char *>(tensor(id)), tensor.element_size());
+        });
+    }
 }
 } // namespace test
 } // namespace arm_compute

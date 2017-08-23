@@ -101,7 +101,7 @@ void CLLocallyConnectedMatrixMultiplyKernel::run(const Window &window, cl::Comma
     Window slice = window.first_slice_window_2D();
 
     Window matrix_b_window;
-    matrix_b_window.use_tensor_dimensions(_input1->info());
+    matrix_b_window.use_tensor_dimensions(_input1->info()->tensor_shape());
     Window slice_matrix_b = matrix_b_window.first_slice_window_3D();
 
     do

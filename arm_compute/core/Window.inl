@@ -201,11 +201,11 @@ inline Window          Window::first_slice_window() const
     return slice;
 }
 
-inline void Window::use_tensor_dimensions(const ITensorInfo *info, size_t first_dimension)
+inline void Window::use_tensor_dimensions(const TensorShape &shape, size_t first_dimension)
 {
-    for(unsigned int n = first_dimension; n < info->num_dimensions(); ++n)
+    for(unsigned int n = first_dimension; n < shape.num_dimensions(); ++n)
     {
-        set(n, Window::Dimension(0, std::max(info->dimension(n), static_cast<size_t>(1))));
+        set(n, Window::Dimension(0, std::max(shape[n], static_cast<size_t>(1))));
     }
 }
 }
