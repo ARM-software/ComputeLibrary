@@ -86,6 +86,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_s
     return os;
 }
 
+inline std::string to_string(const PadStrideInfo &pad_stride_info)
+{
+    std::stringstream str;
+    str << pad_stride_info;
+    return str.str();
+}
+
 /** Formatted output of the ROIPoolingInfo type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo &pool_info)
 {
@@ -329,12 +336,26 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_ty
     return os;
 }
 
+inline std::string to_string(const PoolingType &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
 /** Formatted output of @ref PoolingLayerInfo. */
 inline ::std::ostream &operator<<(::std::ostream &os, const PoolingLayerInfo &info)
 {
     os << info.pool_type();
 
     return os;
+}
+
+inline std::string to_string(const PoolingLayerInfo &info)
+{
+    std::stringstream str;
+    str << info.pool_type();
+    return str.str();
 }
 
 /** Formatted output of the RoundingPolicy type. */

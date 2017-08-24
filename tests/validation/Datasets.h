@@ -37,7 +37,6 @@
 #include "dataset/MatrixPatternDataset.h"
 #include "dataset/NonLinearFilterFunctionDataset.h"
 #include "dataset/NormalizationTypeDataset.h"
-#include "dataset/PoolingLayerDataset.h"
 #include "dataset/PoolingTypesDataset.h"
 #include "dataset/RoundingPolicyDataset.h"
 #include "dataset/ShapeDatasets.h"
@@ -172,12 +171,6 @@ struct is_dataset<arm_compute::test::InterpolationPolicies> : boost::mpl::true_
 /// Register the data set with Boost
 template <>
 struct is_dataset<arm_compute::test::NormalizationTypes> : boost::mpl::true_
-{
-};
-
-/// Register the data set with Boost
-template <>
-struct is_dataset<arm_compute::test::RandomPoolingLayerDataset> : boost::mpl::true_
 {
 };
 

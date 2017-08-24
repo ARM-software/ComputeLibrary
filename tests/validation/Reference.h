@@ -293,17 +293,6 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position = 0);
-    /** Compute reference pooling layer.
-      *
-      * @param[in] shape_in             Shape of the input tensor.
-      * @param[in] shape_out            Shape of the output tensor.
-      * @param[in] dt                   Data type of input and output tensors.
-      * @param[in] pool_info            Pooling Layer information.
-      * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers.
-      *
-      * @return Computed raw tensor.
-      */
-    static RawTensor compute_reference_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info, int fixed_point_position = 0);
     /** Compute reference roi pooling layer.
      *
      * @param[in] shape     Shape of the input tensor.

@@ -281,14 +281,6 @@ void ReferenceCPP::batch_normalization_layer(const RawTensor &src, RawTensor &ds
     boost::apply_visitor(tensor_visitors::batch_normalization_layer_visitor(s, m, v, b, g, epsilon, fixed_point_position), d);
 }
 
-// Pooling Layer
-void ReferenceCPP::pooling_layer(const RawTensor &src, RawTensor &dst, PoolingLayerInfo pool_info)
-{
-    const TensorVariant s = TensorFactory::get_tensor(src);
-    TensorVariant       d = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(tensor_visitors::pooling_layer_visitor(s, pool_info), d);
-}
-
 // ROI Pooling Layer
 void ReferenceCPP::roi_pooling_layer(const RawTensor &src, RawTensor &dst, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
 {

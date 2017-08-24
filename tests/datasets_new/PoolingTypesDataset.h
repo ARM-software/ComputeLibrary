@@ -21,14 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ALEXNET_ACTIVATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_ALEXNET_ACTIVATION_LAYER_DATASET
+#ifndef __ARM_COMPUTE_TEST_POOLING_TYPES_DATASET_H__
+#define __ARM_COMPUTE_TEST_POOLING_TYPES_DATASET_H__
 
-#include "framework/datasets/Datasets.h"
-
-#include "tests/TypePrinter.h"
-
-#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
@@ -37,22 +32,18 @@ namespace test
 {
 namespace datasets
 {
-class AlexNetActivationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
+class PoolingTypes final : public framework::dataset::ContainerDataset<std::vector<PoolingType>>
 {
 public:
-    AlexNetActivationLayerDataset()
-        : CartesianProductDataset
+    PoolingTypes()
+        : ContainerDataset("PoolType",
     {
-        framework::dataset::make("Shape", { TensorShape(55U, 55U, 96U), TensorShape(27U, 27U, 256U), TensorShape(13U, 13U, 384U), TensorShape(13U, 13U, 256U), TensorShape(4096U) }),
-        framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-    }
+        PoolingType::MAX, PoolingType::AVG
+    })
     {
     }
-    AlexNetActivationLayerDataset(AlexNetActivationLayerDataset &&) = default;
-    ~AlexNetActivationLayerDataset()                                = default;
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ALEXNET_ACTIVATION_LAYER_DATASET */
+#endif /* __ARM_COMPUTE_TEST_NORMALIZATION_TYPES_DATASET_H__ */

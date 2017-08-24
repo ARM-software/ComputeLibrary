@@ -233,27 +233,6 @@ private:
     int                  _fixed_point_position;
 };
 
-// Pooling layer
-struct pooling_layer_visitor : public boost::static_visitor<>
-{
-public:
-    explicit pooling_layer_visitor(const TensorVariant &in, PoolingLayerInfo pool_info)
-        : _in(in), _pool_info(pool_info)
-    {
-    }
-
-    template <typename T>
-    void operator()(Tensor<T> &out) const
-    {
-        const Tensor<T> &in = boost::get<Tensor<T>>(_in);
-        tensor_operations::pooling_layer(in, out, _pool_info);
-    }
-
-private:
-    const TensorVariant &_in;
-    PoolingLayerInfo     _pool_info;
-};
-
 // ROI Pooling layer
 struct roi_pooling_layer_visitor : public boost::static_visitor<>
 {

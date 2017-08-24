@@ -461,39 +461,6 @@ RawTensor Reference::compute_reference_batch_normalization_layer(const TensorSha
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_pooling_layer(const TensorShape &shape_in, const TensorShape &shape_out, DataType dt, PoolingLayerInfo pool_info, int fixed_point_position)
-{
-    // Create reference
-    RawTensor ref_src(shape_in, dt, 1, fixed_point_position);
-    RawTensor ref_dst(shape_out, dt, 1, fixed_point_position);
-
-    // Fill reference
-    int min = 0;
-    int max = 0;
-    switch(dt)
-    {
-        case DataType::F32:
-        case DataType::F16:
-            min = -1;
-            max = 1;
-            break;
-        case DataType::QS8:
-        case DataType::QS16:
-            min = -(1 << fixed_point_position);
-            max = (1 << fixed_point_position);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("DataType not supported.");
-    }
-    std::uniform_real_distribution<> distribution(min, max);
-    library->fill(ref_src, distribution, 0.0);
-
-    // Compute reference
-    ReferenceCPP::pooling_layer(ref_src, ref_dst, pool_info);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
 {
     TensorShape shape_dst;

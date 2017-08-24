@@ -21,38 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ALEXNET_ACTIVATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_ALEXNET_ACTIVATION_LAYER_DATASET
+#ifndef __ARM_COMPUTE_TEST_POOLING_LAYER_H__
+#define __ARM_COMPUTE_TEST_POOLING_LAYER_H__
 
-#include "framework/datasets/Datasets.h"
-
-#include "tests/TypePrinter.h"
-
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
+#include "tests/SimpleTensor.h"
+#include "tests/validation_new/Helpers.h"
 
 namespace arm_compute
 {
 namespace test
 {
-namespace datasets
+namespace validation
 {
-class AlexNetActivationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
+namespace reference
 {
-public:
-    AlexNetActivationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", { TensorShape(55U, 55U, 96U), TensorShape(27U, 27U, 256U), TensorShape(13U, 13U, 384U), TensorShape(13U, 13U, 256U), TensorShape(4096U) }),
-        framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-    }
-    {
-    }
-    AlexNetActivationLayerDataset(AlexNetActivationLayerDataset &&) = default;
-    ~AlexNetActivationLayerDataset()                                = default;
-};
-} // namespace datasets
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
+SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info);
+
+template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info);
+} // namespace reference
+} // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ALEXNET_ACTIVATION_LAYER_DATASET */
+#endif /* __ARM_COMPUTE_TEST_POOLING_LAYER_H__ */

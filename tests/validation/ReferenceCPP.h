@@ -259,13 +259,6 @@ public:
      */
     static void batch_normalization_layer(const RawTensor &src, RawTensor &dst, const RawTensor &mean, const RawTensor &var, const RawTensor &beta, const RawTensor &gamma, float epsilon,
                                           int fixed_point_position = 0);
-    /** Pooling layer of @p src based on the information from @p pool_info.
-     *
-     * @param[in]  src       Input tensor.
-     * @param[out] dst       Result tensor.
-     * @param[in]  pool_info Pooling Layer information.
-     */
-    static void pooling_layer(const RawTensor &src, RawTensor &dst, PoolingLayerInfo pool_info);
     /** ROI Pooling layer of @p src based on the information from @p pool_info and @p rois.
      *
      * @param[in]  src       Input tensor.

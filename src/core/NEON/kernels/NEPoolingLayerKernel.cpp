@@ -111,9 +111,6 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON(supported_pool_sizes.find(pool_size) == supported_pool_sizes.end());
     ARM_COMPUTE_ERROR_ON(7 == pool_size && input->info()->data_type() != DataType::F32);
     ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
@@ -341,7 +338,7 @@ void NEPoolingLayerKernel::pooling2_q8(const Window &window_input, const Window 
         }
         if(pool_stride_x == 1)
         {
-            const qint8x8x2_t res = vzip_s8(lower_res, upper_res);
+            const qint8x8x2_t res = { { lower_res, upper_res } };
             vst2_s8(reinterpret_cast<qint8_t *>(output.ptr()), res);
         }
         else
@@ -405,7 +402,7 @@ void NEPoolingLayerKernel::pooling2_q16(const Window &window_input, const Window
         }
         if(pool_stride_x == 1)
         {
-            const qint16x4x2_t res = vzip_s16(lower_res, upper_res);
+            const qint16x4x2_t res = { { lower_res, upper_res } };
             vst2_s16(reinterpret_cast<qint16_t *>(output.ptr()), res);
         }
         else
