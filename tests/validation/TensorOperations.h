@@ -472,29 +472,6 @@ void min_max_location(const Tensor<T1> &in, void *min, void *max, IArray<Coordin
     }
 }
 
-// Mean Standard Deviation
-template <typename T1>
-void mean_and_standard_deviation(const Tensor<T1> &in, float &mean, float &std_dev)
-{
-    int num_elements = in.num_elements();
-
-    // Calculate mean
-    mean = 0.f;
-    for(int i = 0; i < num_elements; ++i)
-    {
-        mean += in[i];
-    }
-    mean /= num_elements;
-
-    // Calculate standard deviation
-    std_dev = 0.f;
-    for(int i = 0; i < num_elements; ++i)
-    {
-        std_dev += (mean - in[i]) * (mean - in[i]);
-    }
-    std_dev = sqrt(std_dev / num_elements);
-}
-
 // Integral Image
 void integral_image(const Tensor<uint8_t> &in, Tensor<uint32_t> &out)
 {

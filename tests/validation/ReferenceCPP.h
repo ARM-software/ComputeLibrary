@@ -94,13 +94,6 @@ public:
      * @param[out] max_count Number of maximum values found
      */
     static void min_max_location(const RawTensor &src, void *min, void *max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count);
-    /** Function to compute the mean and standard deviation of a tensor.
-     *
-     * @param[in]  src     Input tensor.
-     * @param[out] mean    Mean of the tensor.
-     * @param[out] std_dev Standard deviation of the tensor
-     */
-    static void mean_and_standard_deviation(const RawTensor &src, float &mean, float &std_dev);
     /** Function to compute the integral image of a tensor.
      *
      * @param[in]  src Input tensor.

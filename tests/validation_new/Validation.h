@@ -232,7 +232,7 @@ struct compare<AbsoluteTolerance<U>, U> : public compare_base<AbsoluteTolerance<
 {
     using compare_base<AbsoluteTolerance<U>>::compare_base;
 
-    operator bool()
+    operator bool() const
     {
         if(!std::isfinite(this->_target) || !std::isfinite(this->_reference))
         {
@@ -252,7 +252,7 @@ struct compare<RelativeTolerance, U> : public compare_base<RelativeTolerance>
 {
     using compare_base<RelativeTolerance>::compare_base;
 
-    operator bool()
+    operator bool() const
     {
         if(!std::isfinite(_target) || !std::isfinite(_reference))
         {

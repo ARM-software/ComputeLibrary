@@ -90,13 +90,6 @@ public:
     static void compute_reference_min_max_location(const TensorShape &shape, DataType dt_in, void *min, void *max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc,
                                                    uint32_t &min_count,
                                                    uint32_t &max_count);
-    /** Compute reference mean and standard deviation.
-     *
-     * @param[in] shape Shape of the input tensors.
-     *
-     * @return Computed mean and standard deviation.
-     */
-    static std::pair<float, float> compute_reference_mean_and_standard_deviation(const TensorShape &shape);
     /** Compute reference integral image.
      *
      * @param[in] shape Shape of the input and output tensors.

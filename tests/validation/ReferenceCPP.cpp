@@ -111,14 +111,6 @@ void ReferenceCPP::absolute_difference(const RawTensor &src1, const RawTensor &s
     boost::apply_visitor(absolute_difference_visitor(), s1, s2, d);
 }
 
-// Mean and standard deviation
-void ReferenceCPP::mean_and_standard_deviation(const RawTensor &src, float &mean, float &std_dev)
-{
-    ARM_COMPUTE_ERROR_ON(src.data_type() != DataType::U8);
-    const Tensor<uint8_t> s(src.shape(), src.data_type(), src.fixed_point_position(), reinterpret_cast<const uint8_t *>(src.data()));
-    tensor_operations::mean_and_standard_deviation(s, mean, std_dev);
-}
-
 // Integral image
 void ReferenceCPP::integral_image(const RawTensor &src, RawTensor &dst)
 {
