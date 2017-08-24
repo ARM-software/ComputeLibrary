@@ -187,23 +187,6 @@ RawTensor Reference::compute_reference_accumulate_weighted(const TensorShape &sh
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_arithmetic_addition(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy convert_policy, int fixed_point_position)
-{
-    // Create reference
-    RawTensor ref_src1(shape, dt_in0, 1, fixed_point_position);
-    RawTensor ref_src2(shape, dt_in1, 1, fixed_point_position);
-    RawTensor ref_dst(shape, dt_out, 1, fixed_point_position);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src1, 0);
-    library->fill_tensor_uniform(ref_src2, 1);
-
-    // Compute reference
-    ReferenceCPP::arithmetic_addition(ref_src1, ref_src2, ref_dst, convert_policy);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_arithmetic_subtraction(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy convert_policy, int fixed_point_position)
 {
     // Create reference

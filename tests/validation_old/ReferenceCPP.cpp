@@ -147,15 +147,6 @@ void ReferenceCPP::accumulate_weighted(const RawTensor &src, RawTensor &dst, flo
     tensor_operations::accumulate_weighted(s, d, alpha);
 }
 
-// Arithmetic addition
-void ReferenceCPP::arithmetic_addition(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, ConvertPolicy convert_policy)
-{
-    const TensorVariant s1 = TensorFactory::get_tensor(src1);
-    const TensorVariant s2 = TensorFactory::get_tensor(src2);
-    TensorVariant       d  = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(arithmetic_addition_visitor(convert_policy), s1, s2, d);
-}
-
 // Arithmetic subtraction
 void ReferenceCPP::arithmetic_subtraction(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, ConvertPolicy convert_policy)
 {

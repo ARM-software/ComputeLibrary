@@ -219,6 +219,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ConvertPolicy &polic
     return os;
 }
 
+inline std::string to_string(const ConvertPolicy &policy)
+{
+    std::stringstream str;
+    str << policy;
+    return str.str();
+}
+
 /** Formatted output of the Reduction Operations. */
 inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &op)
 {
@@ -232,6 +239,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
     }
 
     return os;
+}
+
+inline std::string to_string(const ReductionOperation &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
 }
 
 /** Formatted output of the activation function type. */
@@ -277,13 +291,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
     }
 
     return os;
-}
-
-inline std::string to_string(const ReductionOperation &op)
-{
-    std::stringstream str;
-    str << op;
-    return str.str();
 }
 
 inline std::string to_string(const ActivationLayerInfo::ActivationFunction &function)
