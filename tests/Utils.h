@@ -192,18 +192,22 @@ inline I foldl(F &&func, I &&initial, T &&value, Vs &&... values)
 inline ValidRegion shape_to_valid_region(TensorShape shape, bool border_undefined = false, BorderSize border_size = BorderSize(0))
 {
     Coordinates anchor;
-    anchor.set(std::max(0, static_cast<int>(shape.num_dimensions()) - 1), 0);
+    anchor.set_num_dimensions(shape.num_dimensions());
+
     if(border_undefined)
     {
         ARM_COMPUTE_ERROR_ON(shape.num_dimensions() < 2);
+
         anchor.set(0, border_size.left);
         anchor.set(1, border_size.top);
-        const int x_dim_shape = shape.x() - border_size.left - border_size.right;
-        const int y_dim_shape = shape.y() - border_size.top - border_size.bottom;
-        ARM_COMPUTE_ERROR_ON(x_dim_shape < 0 || y_dim_shape < 0);
-        shape.set(0, x_dim_shape);
-        shape.set(1, y_dim_shape);
+
+        const int valid_shape_x = std::max(0, static_cast<int>(shape.x()) - static_cast<int>(border_size.left) - static_cast<int>(border_size.right));
+        const int valid_shape_y = std::max(0, static_cast<int>(shape.y()) - static_cast<int>(border_size.top) - static_cast<int>(border_size.bottom));
+
+        shape.set(0, valid_shape_x);
+        shape.set(1, valid_shape_y);
     }
+
     return ValidRegion(std::move(anchor), std::move(shape));
 }
 
@@ -355,13 +359,13 @@ inline int coord2index(const TensorShape &shape, const Coordinates &coord)
  */
 inline bool match_shape(Coordinates &coords, const TensorShape &shape)
 {
-    auto check_nz = [](unsigned int i)
+    auto check_nz = [](int i)
     {
         return i != 0;
     };
 
-    unsigned int coords_dims = coords.num_dimensions();
-    unsigned int shape_dims  = shape.num_dimensions();
+    const int coords_dims = coords.num_dimensions();
+    const int shape_dims  = shape.num_dimensions();
 
     // Increase coordinates scenario
     if(coords_dims < shape_dims)
@@ -380,17 +384,23 @@ inline bool match_shape(Coordinates &coords, const TensorShape &shape)
 }
 
 /** Check if a coordinate is within a valid region */
-inline bool is_in_valid_region(const ValidRegion &valid_region, const Coordinates &coord)
+inline bool is_in_valid_region(const ValidRegion &valid_region, Coordinates coord)
 {
-    Coordinates coords(coord);
-    ARM_COMPUTE_ERROR_ON_MSG(!match_shape(coords, valid_region.shape), "Shapes of valid region and coordinates do not agree");
-    for(int d = 0; static_cast<size_t>(d) < coords.num_dimensions(); ++d)
+    const bool match = match_shape(coord, valid_region.shape);
+
+    if(!match)
     {
-        if(coords[d] < valid_region.start(d) || coords[d] >= valid_region.end(d))
+        return false;
+    }
+
+    for(int d = 0; static_cast<size_t>(d) < coord.num_dimensions(); ++d)
+    {
+        if(coord[d] < valid_region.start(d) || coord[d] >= valid_region.end(d))
         {
             return false;
         }
     }
+
     return true;
 }
 

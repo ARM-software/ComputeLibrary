@@ -50,7 +50,7 @@ Window arm_compute::calculate_max_window(const ITensorInfo &info, const Steps &s
                    anchor[0] + border_size.left,
                    // Skip the border right of the image
                    // Make sure the window width is a multiple of the step size
-                   anchor[0] + border_size.left + ceil_to_multiple(shape[0] - border_size.left - border_size.right, steps[0]),
+                   anchor[0] + border_size.left + ceil_to_multiple(std::max(0, static_cast<int>(shape[0]) - static_cast<int>(border_size.left) - static_cast<int>(border_size.right)), steps[0]),
                    steps[0]));
 
     size_t             n            = 1;
@@ -62,7 +62,7 @@ Window arm_compute::calculate_max_window(const ITensorInfo &info, const Steps &s
                        // Skip the border above the image
                        anchor[1] + border_size.top,
                        // Skip the border below the image
-                       anchor[1] + border_size.top + ceil_to_multiple(shape[1] - border_size.top - border_size.bottom, steps[1]),
+                       anchor[1] + border_size.top + ceil_to_multiple(std::max(0, static_cast<int>(shape[1]) - static_cast<int>(border_size.top) - static_cast<int>(border_size.bottom)), steps[1]),
                        steps[1]));
 
         ++n;
@@ -137,7 +137,7 @@ Window arm_compute::calculate_max_window_horizontal(const ITensorInfo &info, con
                    anchor[0] + border_size.left,
                    // Skip the border right of the image
                    // Make sure the window width is a multiple of the step size
-                   anchor[0] + border_size.left + ceil_to_multiple(shape[0] - border_size.left - border_size.right, steps[0]),
+                   anchor[0] + border_size.left + ceil_to_multiple(std::max(0, static_cast<int>(shape[0]) - static_cast<int>(border_size.left) - static_cast<int>(border_size.right)), steps[0]),
                    steps[0]));
 
     size_t             n            = 1;
