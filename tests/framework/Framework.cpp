@@ -427,7 +427,7 @@ bool Framework::run()
                   << results[TestResult::Status::DISABLED] << " disabled) in " << runtime.count() << " second(s)\n";
     }
 
-    int num_successful_tests = results[TestResult::Status::SUCCESS] + results[TestResult::Status::EXPECTED_FAILURE];
+    int num_successful_tests = results[TestResult::Status::SUCCESS] + results[TestResult::Status::EXPECTED_FAILURE] + results[TestResult::Status::DISABLED];
 
     return (static_cast<unsigned int>(num_successful_tests) == _test_results.size());
 }

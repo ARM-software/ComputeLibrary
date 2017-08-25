@@ -44,9 +44,10 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr AbsoluteTolerance<float> tolerance_f16(0.1f);   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float> tolerance_q(1.0f);     /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+RelativeTolerance<float>            tolerance_f32(0.001f);                /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr AbsoluteTolerance<float>  tolerance_q(1.0f);                    /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -107,14 +108,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionLayerFixture<half_float::half>, fr
                                                 DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeConvolutionLayerDataset(),
                                                                                                                        framework::dataset::make("DataType",
                                                                                                                                DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 TEST_SUITE_END()
 

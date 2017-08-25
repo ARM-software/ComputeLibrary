@@ -44,7 +44,7 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-constexpr RelativeTolerance tolerance_f32(0.00001f);
+RelativeTolerance<float> tolerance_f32(0.00001f);
 } // namespace
 
 TEST_SUITE(NEON)

@@ -37,8 +37,8 @@ namespace validation
 {
 namespace
 {
-constexpr RelativeTolerance tolerance_rel_high_error(0.05f);
-constexpr RelativeTolerance tolerance_rel_low_error(0.0005f);
+RelativeTolerance<float> tolerance_rel_high_error(0.05f);
+RelativeTolerance<float> tolerance_rel_low_error(0.0005f);
 } // namespace
 
 TEST_SUITE(NEON)

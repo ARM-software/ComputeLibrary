@@ -44,8 +44,9 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-constexpr AbsoluteTolerance<float> tolerance_f16(0.002f);
-constexpr AbsoluteTolerance<float> tolerance_f32(0.000001f);
+RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2));
+RelativeTolerance<float>            tolerance_f32(0.001f);
+
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int8_t> tolerance_fixed_point(2);
 

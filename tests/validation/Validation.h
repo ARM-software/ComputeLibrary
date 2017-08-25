@@ -77,11 +77,12 @@ private:
 };
 
 /** Class reprensenting a relative tolerance value. */
+template <typename T>
 class RelativeTolerance
 {
 public:
     /** Underlying type. */
-    using value_type = double;
+    using value_type = T;
 
     /* Default constructor.
      *
@@ -105,7 +106,7 @@ public:
     }
 
 private:
-    value_type _value{ 0 };
+    value_type _value{ std::numeric_limits<T>::epsilon() };
 };
 
 /** Print AbsoluteTolerance type. */
@@ -118,9 +119,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const AbsoluteTolerance<T>
 }
 
 /** Print RelativeTolerance type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const RelativeTolerance &tolerance)
+template <typename T>
+inline ::std::ostream &operator<<(::std::ostream &os, const RelativeTolerance<T> &tolerance)
 {
-    os << static_cast<typename RelativeTolerance::value_type>(tolerance);
+    os << static_cast<typename RelativeTolerance<T>::value_type>(tolerance);
 
     return os;
 }
@@ -248,24 +250,38 @@ struct compare<AbsoluteTolerance<U>, U> : public compare_base<AbsoluteTolerance<
 };
 
 template <typename U>
-struct compare<RelativeTolerance, U> : public compare_base<RelativeTolerance>
+struct compare<RelativeTolerance<U>, U> : public compare_base<RelativeTolerance<U>>
 {
-    using compare_base<RelativeTolerance>::compare_base;
+    using compare_base<RelativeTolerance<U>>::compare_base;
 
     operator bool() const
     {
-        if(!std::isfinite(_target) || !std::isfinite(_reference))
+        if(!std::isfinite(this->_target) || !std::isfinite(this->_reference))
         {
             return false;
         }
-        else if(_target == _reference)
+        else if(this->_target == this->_reference)
         {
             return true;
         }
 
-        const double relative_change = std::abs(static_cast<double>(_target - _reference)) / _reference;
+        const U epsilon = (std::is_same<half_float::half, typename std::remove_cv<U>::type>::value || (this->_reference == 0)) ? static_cast<U>(0.01) : std::numeric_limits<U>::epsilon();
 
-        return relative_change <= _tolerance;
+        if(std::abs(static_cast<double>(this->_reference) - static_cast<double>(this->_target)) <= epsilon)
+        {
+            return true;
+        }
+        else
+        {
+            if(static_cast<double>(this->_reference) == 0.0f) // We have checked whether _reference and _target is closing. If _reference is 0 but not closed to _target, it should return false
+            {
+                return false;
+            }
+
+            const double relative_change = std::abs(static_cast<double>(this->_target) - static_cast<double>(this->_reference)) / this->_reference;
+
+            return relative_change <= static_cast<U>(this->_tolerance);
+        }
     }
 };
 
