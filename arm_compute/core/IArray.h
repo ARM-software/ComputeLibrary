@@ -30,11 +30,11 @@
 
 namespace arm_compute
 {
-class KeyPoint;
-class Coordinates2D;
-class DetectionWindow;
+struct KeyPoint;
+struct Coordinates2D;
+struct DetectionWindow;
 class Size2D;
-class ROI;
+struct ROI;
 
 /** Array of type T */
 template <class T>
