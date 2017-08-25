@@ -82,6 +82,9 @@ __kernel void activation_layer(
     data = sqrt(data);
 #elif defined LINEAR
     data = (VEC_DATA_TYPE(DATA_TYPE, 16))A * data + (VEC_DATA_TYPE(DATA_TYPE, 16))B;
+#elif defined LEAKY_RELU
+    VEC_DATA_TYPE(int, 16) flag = isgreater(data, (VEC_DATA_TYPE(DATA_TYPE, 16))0.0);
+    data = select((VEC_DATA_TYPE(DATA_TYPE, 16))A * data, data, flag);
 #endif
 
     // Store result

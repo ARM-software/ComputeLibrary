@@ -160,6 +160,7 @@ const std::string &arm_compute::string_from_activation_func(ActivationLayerInfo:
         { ActivationLayerInfo::ActivationFunction::SQRT, "SQRT" },
         { ActivationLayerInfo::ActivationFunction::SQUARE, "SQUARE" },
         { ActivationLayerInfo::ActivationFunction::TANH, "TANH" },
+        { ActivationLayerInfo::ActivationFunction::LEAKY_RELU, "LEAKY_RELU" },
     };
 
     return act_map[act];
