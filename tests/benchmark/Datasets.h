@@ -36,7 +36,7 @@
 #include "dataset/PoolingLayerDataset.h"
 #include "dataset/ShapeDatasets.h"
 
-#include "benchmark/benchmark_api.h"
+#include "benchmark/benchmark.h"
 
 #include <array>
 

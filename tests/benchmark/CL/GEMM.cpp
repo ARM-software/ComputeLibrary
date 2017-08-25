@@ -36,7 +36,7 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 
-#include "benchmark/benchmark_api.h"
+#include "benchmark/benchmark.h"
 
 using namespace arm_compute;
 using namespace arm_compute::test;
