@@ -74,13 +74,6 @@ public:
      */
     static KeyPointArray compute_reference_harris_corners(const TensorShape &shape, float threshold, float min_dist, float sensitivity,
                                                           int32_t gradient_size, int32_t block_size, BorderMode border_mode, uint8_t constant_border_value);
-    /** Compute reference integral image.
-     *
-     * @param[in] shape Shape of the input and output tensors.
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_integral_image(const TensorShape &shape);
     /** Compute reference absolute difference.
      *
      * @param[in] shape  Shape of the input and output tensors.

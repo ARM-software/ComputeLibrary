@@ -94,21 +94,6 @@ KeyPointArray Reference::compute_reference_harris_corners(const TensorShape &sha
     return corners;
 }
 
-RawTensor Reference::compute_reference_integral_image(const TensorShape &shape)
-{
-    // Create reference
-    RawTensor ref_src(shape, DataType::U8);
-    RawTensor ref_dst(shape, DataType::U32);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src, 0);
-
-    // Compute reference
-    ReferenceCPP::integral_image(ref_src, ref_dst);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_absolute_difference(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out)
 {
     // Create reference
