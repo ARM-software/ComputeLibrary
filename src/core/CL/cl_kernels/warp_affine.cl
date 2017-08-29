@@ -84,7 +84,7 @@ __kernel void warp_affine_nearest_neighbour(
 {
     Image in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
     Image out = CONVERT_TO_IMAGE_STRUCT(out);
-    vstore4(read_texels4(&in, convert_int8(clamp_to_border(apply_affine_transform(get_current_coords(), build_affine_mtx()), width, height))), 0, out.ptr);
+    vstore4(read_texels4(&in, convert_int8_rtn(clamp_to_border(apply_affine_transform(get_current_coords(), build_affine_mtx()), width, height))), 0, out.ptr);
 }
 
 /** Performs an affine transform on an image interpolating with the BILINEAR method. Input and output are single channel U8.
@@ -116,5 +116,5 @@ __kernel void warp_affine_bilinear(
 {
     Image in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
     Image out = CONVERT_TO_IMAGE_STRUCT(out);
-    vstore4(bilinear_interpolate(&in, clamp_to_border(apply_affine_transform(get_current_coords(), build_affine_mtx()), width, height), width, height), 0, out.ptr);
+    vstore4(bilinear_interpolate(&in, apply_affine_transform(get_current_coords(), build_affine_mtx()), width, height), 0, out.ptr);
 }

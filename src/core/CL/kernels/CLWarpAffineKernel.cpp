@@ -88,8 +88,11 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
 
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowStatic     output_access(output->info(), 0, 0, output->info()->dimension(0), output->info()->dimension(1));
+    int       total_right  = ceil_to_multiple(input->info()->dimension(0), num_elems_processed_per_iteration);
+    const int access_right = total_right + (((total_right - input->info()->dimension(0)) == 0) ? border_size().right : 0);
+
+    AccessWindowStatic     input_access(input->info(), -border_size().left, -border_size().top, access_right, input->info()->dimension(1) + border_size().bottom);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, input_access, output_access);
 
