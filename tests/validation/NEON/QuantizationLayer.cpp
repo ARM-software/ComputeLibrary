@@ -44,12 +44,17 @@ namespace
 {
 /** Tolerance for quantization */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
+
+const auto QuantizationShapes = concat(concat(concat(datasets::Small3DShapes(),
+                                                     datasets::Large3DShapes()),
+                                              datasets::Small4DShapes()),
+                                       datasets::Large4DShapes());
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(QuantizationLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("DataType", DataType::F32)), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(QuantizationShapes, framework::dataset::make("DataType", DataType::F32)), shape, data_type)
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
@@ -78,12 +83,14 @@ using NEQuantizationLayerFixture = QuantizationValidationFixture<Tensor, Accesso
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEQuantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEQuantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
+                                                                                                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEQuantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEQuantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+                                                                                                             framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);

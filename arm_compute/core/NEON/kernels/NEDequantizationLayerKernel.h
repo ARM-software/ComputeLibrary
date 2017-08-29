@@ -30,7 +30,11 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Interface for the dequantization layer kernel. */
+/** Interface for the dequantization layer kernel.
+ *
+ * @note The implementation supports only 3D input tensors
+ *
+ */
 class NEDequantizationLayerKernel : public INEKernel
 {
 public:
@@ -48,12 +52,12 @@ public:
     ~NEDequantizationLayerKernel() = default;
     /** Set input, output, min and max.
      *
-     * @param[in]  input  Source tensor. Data types supported: U8.
-     * @param[out] output Destination tensor. Data types supported: F32.
-     * @param[in]  min    Minimum value of the input tensor.
-     * @param[in]  max    Maximum value of the input tensor.
+     * @param[in]  input   Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data type supported: U8.
+     * @param[out] output  Destination tensor with the same dimensions of input. Data type supported: F32.
+     * @param[in]  min_max Pointer to the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
+     *                     The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32
      */
-    void configure(const ITensor *input, ITensor *output, const float *min, const float *max);
+    void configure(const ITensor *input, ITensor *output, const ITensor *min_max);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -61,8 +65,7 @@ public:
 private:
     const ITensor *_input;
     ITensor       *_output;
-    const float   *_min;
-    const float   *_max;
+    const ITensor *_min_max;
 };
 }
 #endif /*__ARM_COMPUTE_NEDEQUANTIZATIONLAYERKERNEL_H__ */

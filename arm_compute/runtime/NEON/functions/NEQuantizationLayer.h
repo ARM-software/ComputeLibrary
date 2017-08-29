@@ -26,7 +26,7 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEMinMaxLocationKernel.h"
+#include "arm_compute/core/NEON/kernels/NEMinMaxLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -38,7 +38,9 @@ class ITensor;
 
 /** Basic function to simulate a quantization layer. This function calls the following NEON kernels:
  *
- * -# @ref NEMinMaxKernel
+ * @note The implementation supports only 3D input tensors
+ *
+ * -# @ref NEMinMaxLayerKernel
  * -# @ref NEQuantizationLayerKernel
  *
  */
@@ -49,8 +51,8 @@ public:
     NEQuantizationLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32
-     * @param[out] output Destination tensor. Data types supported: U8
+     * @param[in]  input  Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: F32
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: U8
      */
     void configure(const ITensor *input, ITensor *output);
 
@@ -59,9 +61,8 @@ public:
 
 private:
     NEQuantizationLayerKernel _quantize_kernel;
-    NEMinMaxKernel            _min_max_kernel;
-    float                     _min;
-    float                     _max;
+    NEMinMaxLayerKernel       _min_max_kernel;
+    Tensor                    _min_max;
 };
 }
 #endif /* __ARM_COMPUTE_NEQUANTIZATIONLAYER_H__ */

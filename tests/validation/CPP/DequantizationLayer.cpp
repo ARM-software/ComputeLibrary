@@ -32,23 +32,35 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type>
-SimpleTensor<float> dequantization_layer(const SimpleTensor<T> &src, float min, float max)
+SimpleTensor<float> dequantization_layer(const SimpleTensor<T> &src, const SimpleTensor<float> &min_max)
 {
     // Create reference
     SimpleTensor<float> dst{ src.shape(), DataType::F32 };
 
-    const float range   = max - min;
-    const float scaling = range / 255.0f;
+    // Compute reference
+    const int width       = src.shape().x();
+    const int height      = src.shape().y();
+    const int depth       = src.shape().z();
+    const int stride_w    = width * height * depth;
+    const int num_batches = min_max.shape().total_size_upper(1);
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    for(int k = 0; k < num_batches; ++k)
     {
-        dst[i] = (static_cast<float>(src[i]) * scaling) + min;
+        const float min     = min_max[k * 2 + 0];
+        const float max     = min_max[k * 2 + 1];
+        const float range   = max - min;
+        const float scaling = range / 255.0f;
+
+        for(int i = 0; i < stride_w; ++i)
+        {
+            dst[i + k * stride_w] = (static_cast<float>(src[i + k * stride_w]) * scaling) + min;
+        }
     }
 
     return dst;
 }
 
-template SimpleTensor<float> dequantization_layer(const SimpleTensor<uint8_t> &src, float min, float max);
+template SimpleTensor<float> dequantization_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<float> &min_max);
 } // namespace reference
 } // namespace validation
 } // namespace test

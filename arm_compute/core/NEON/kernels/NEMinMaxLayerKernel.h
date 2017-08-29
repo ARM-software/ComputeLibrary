@@ -21,51 +21,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H__
-#define __ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H__
+
+#ifndef __ARM_COMPUTE_NEMINMAXLAYERKERNEL_H__
+#define __ARM_COMPUTE_NEMINMAXLAYERKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
+
+#include <cstdint>
+#include <mutex>
 
 namespace arm_compute
 {
 class ITensor;
 
-/** Interface for the quantization layer kernel.
- *
- * @note The implementation supports only 3D input tensors
- *
- */
-class NEQuantizationLayerKernel : public INEKernel
+/** Interface for the kernel to perform min max search on a 3D tensor. */
+class NEMinMaxLayerKernel : public INEKernel
 {
 public:
     /** Default constructor */
-    NEQuantizationLayerKernel();
+    NEMinMaxLayerKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEQuantizationLayerKernel(const NEQuantizationLayerKernel &) = delete;
+    NEMinMaxLayerKernel(const NEMinMaxLayerKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEQuantizationLayerKernel &operator=(const NEQuantizationLayerKernel &) = delete;
-    /** Default Move Constructor. */
-    NEQuantizationLayerKernel(NEQuantizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
-    NEQuantizationLayerKernel &operator=(NEQuantizationLayerKernel &&) = default;
+    NEMinMaxLayerKernel &operator=(const NEMinMaxLayerKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    NEMinMaxLayerKernel(NEMinMaxLayerKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    NEMinMaxLayerKernel &operator=(NEMinMaxLayerKernel &&) = default;
     /** Default destructor */
-    ~NEQuantizationLayerKernel() = default;
-    /** Set the input, output, min and max.
+    ~NEMinMaxLayerKernel() = default;
+
+    /** Initialise the kernel's input and outputs.
      *
-     * @param[in]  input   Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: F32.
-     * @param[out] output  Destination tensor with the same dimensions of input. Data types supported: U8.
-     * @param[in]  min_max Pointer to the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                     The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32
+     * @note output[0] = minimum
+     * @note output[1] = maximum
+     *
+     * @param[in]  input  Input tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data type supported: F32.
+     * @param[out] output Output tensor with shape [2, batches, ...] which stores the minimum and maximum value for each 3D input tensor.
+     *                    The dimensions over the second must match the batched dimensions of the input tensor. Data types supported: F32
      */
-    void configure(const ITensor *input, ITensor *output, const ITensor *min_max);
+    void configure(const ITensor *input, ITensor *output);
+    /** Resets global minimum and maximum. */
+    void reset();
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
+    void update_min_max(float *out_ptr, float min, float max);
     const ITensor *_input;
     ITensor       *_output;
-    const ITensor *_min_max;
+    std::mutex     _mtx;
 };
 }
-#endif /*__ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H__ */
+#endif /* __ARM_COMPUTE_NEMINMAXLAYERKERNEL_H__ */

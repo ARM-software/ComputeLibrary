@@ -36,7 +36,7 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-SimpleTensor<float> dequantization_layer(const SimpleTensor<T> &src, float min, float max);
+SimpleTensor<float> dequantization_layer(const SimpleTensor<T> &src, const SimpleTensor<float> &min_max);
 } // namespace reference
 } // namespace validation
 } // namespace test

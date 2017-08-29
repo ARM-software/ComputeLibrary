@@ -60,19 +60,48 @@ SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src)
     // Create reference
     SimpleTensor<uint8_t> dst{ src.shape(), DataType::U8 };
 
-    // Compute min and max of the tensor using Min-Max layer
-    float min = 0.f;
-    float max = 0.f;
+    const int width       = src.shape().x();
+    const int height      = src.shape().y();
+    const int depth       = src.shape().z();
+    const int stride_w    = width * height * depth;
+    const int num_batches = src.shape().total_size_upper(3);
 
-    compute_min_max(src, &min, &max);
-
-    const float range = max - min;
-
-    for(int i = 0; i < src.num_elements(); ++i)
+    for(int k = 0; k < num_batches; ++k)
     {
-        // map values to range [0.0, 1.0]
-        const float normalized = (src[i] - min) / range;
-        dst[i]                 = static_cast<uint8_t>(std::min(255.0f, normalized * 256.0f));
+        // Compute min and max of the 3D tensor
+        float min = src[0];
+        float max = src[0];
+
+        // Look for min and max values
+        for(int i = 1; i < stride_w; ++i)
+        {
+            float val = src[i + k * stride_w];
+            if(val < min)
+            {
+                min = val;
+            }
+            if(val > max)
+            {
+                max = val;
+            }
+        }
+
+        // Saturate the result in case min = max
+        if(min == max)
+        {
+            min = 0.0f;
+            max = 1.0f;
+        }
+
+        const float range = max - min;
+
+        for(int i = 0; i < stride_w; ++i)
+        {
+            // map values to range [0.0, 1.0]
+            float       val        = src[i + k * stride_w];
+            const float normalized = (val - min) / range;
+            dst[i + k * stride_w]  = static_cast<uint8_t>(std::min(255.0f, normalized * 256.0f));
+        }
     }
 
     return dst;

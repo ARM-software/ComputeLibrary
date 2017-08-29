@@ -24,9 +24,7 @@
 
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 using namespace arm_compute;
@@ -36,10 +34,10 @@ NEDequantizationLayer::NEDequantizationLayer()
 {
 }
 
-void NEDequantizationLayer::configure(const ITensor *input, ITensor *output, const float *min, const float *max)
+void NEDequantizationLayer::configure(const ITensor *input, ITensor *output, const ITensor *min_max)
 {
-    // Configure kernels
-    _dequantize_kernel.configure(input, output, min, max);
+    // Configure kernel
+    _dequantize_kernel.configure(input, output, min_max);
 }
 
 void NEDequantizationLayer::run()

@@ -30,17 +30,20 @@
 using namespace arm_compute;
 
 NEQuantizationLayer::NEQuantizationLayer()
-    : _quantize_kernel(), _min_max_kernel(), _min(0.f), _max(0.f)
+    : _quantize_kernel(), _min_max_kernel(), _min_max()
 {
 }
 
 void NEQuantizationLayer::configure(const ITensor *input, ITensor *output)
 {
-    // Configure min-max kernel
-    _min_max_kernel.configure(input, &_min, &_max);
+    // Configure min-max kernel. _min_max tensor will be auto-configured within the kernel
+    _min_max_kernel.configure(input, &_min_max);
 
     // Configure quantize kernel
-    _quantize_kernel.configure(input, output, &_min, &_max);
+    _quantize_kernel.configure(input, output, &_min_max);
+
+    // Allocate min_max tensor
+    _min_max.allocator()->allocate();
 }
 
 void NEQuantizationLayer::run()
