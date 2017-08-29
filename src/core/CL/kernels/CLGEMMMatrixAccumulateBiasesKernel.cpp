@@ -66,7 +66,7 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
 
     Window win = calculate_max_window(*_accum->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic     biases_access(biases->info(), 0, 0, biases->info()->dimension(0), biases->info()->dimension(1));
+    AccessWindowStatic     biases_access(biases->info(), 0, 0, ceil_to_multiple(biases->info()->dimension(0), num_elems_processed_per_iteration), biases->info()->dimension(1));
     AccessWindowHorizontal accum_access(_accum->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, biases_access, accum_access);
