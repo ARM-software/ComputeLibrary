@@ -97,8 +97,6 @@ public:
                      TensorShape{ 4160U, 3120U },
                      // Batch size 4
                      TensorShape{ 1245U, 652U, 1U, 4U },
-                     // Batch size 8
-                     TensorShape{ 1245U, 652U, 1U, 8U },
     })
     {
     }
