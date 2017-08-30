@@ -23,7 +23,8 @@
  */
 #include "PrettyPrinter.h"
 
-#include "tests/framework/Framework.h"
+#include "../Framework.h"
+#include "../instruments/Measurement.h"
 
 #include <algorithm>
 
@@ -112,12 +113,12 @@ void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurem
     {
         *_stream << begin_color("3") << "  " << instrument.first << ":";
 
-        auto add_measurements = [](double a, const Instrument::Measurement & b)
+        auto add_measurements = [](double a, const Measurement & b)
         {
             return a + b.value;
         };
 
-        auto cmp_measurements = [](const Instrument::Measurement & a, const Instrument::Measurement & b)
+        auto cmp_measurements = [](const Measurement & a, const Measurement & b)
         {
             return a.value < b.value;
         };
@@ -132,7 +133,7 @@ void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurem
             num_values -= 2;
         }
 
-        Instrument::Measurement avg{ sum_values / num_values, minmax_values.first->unit };
+        Measurement avg{ sum_values / num_values, minmax_values.first->unit };
 
         *_stream << "    ";
         *_stream << "AVG=" << avg << ", ";

@@ -43,10 +43,6 @@ vars.Update(framework_env)
 
 Help(new_options.GenerateHelpText(framework_env))
 
-if env['os'] == 'android' and framework_env['pmu']:
-    print("pmu=1 is not supported for os=android")
-    Exit(1)
-
 if(env['opencl']):
     framework_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
 

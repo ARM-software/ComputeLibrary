@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_TEST_PROFILER
 
 #include "instruments/Instrument.h"
+#include "instruments/Measurement.h"
 
 #include <map>
 #include <memory>
@@ -45,7 +46,7 @@ class Profiler
 {
 public:
     /** Mapping from instrument ids to their measurements. */
-    using MeasurementsMap = std::map<std::string, std::vector<Instrument::Measurement>>;
+    using MeasurementsMap = std::map<std::string, std::vector<Measurement>>;
 
     /** Add @p instrument to the performance monitor.
      *

@@ -34,7 +34,6 @@ SConscript('./validation_old/SConscript', duplicate=0)
 variables = [
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", True),
-    BoolVariable("pmu", "Enable PMU counters", False),
     BoolVariable("validation_tests", "Build validation test programs", True),
     BoolVariable("benchmark_tests", "Build benchmark test programs", True)
 ]

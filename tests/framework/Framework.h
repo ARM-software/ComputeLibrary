@@ -313,7 +313,7 @@ private:
     using create_function = std::unique_ptr<Instrument>();
     std::map<InstrumentType, create_function *> _available_instruments{};
 
-    InstrumentType           _instruments{ InstrumentType::NONE };
+    std::set<InstrumentType> _instruments{ InstrumentType::NONE };
     TestFilter               _test_filter{};
     LogLevel                 _log_level{ LogLevel::ALL };
     TestResult              *_current_test_result{ nullptr };

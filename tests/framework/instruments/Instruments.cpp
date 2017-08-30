@@ -41,8 +41,9 @@ InstrumentType instrument_type_from_name(const std::string &name)
         { "all", InstrumentType::ALL },
         { "none", InstrumentType::NONE },
         { "wall_clock", InstrumentType::WALL_CLOCK_TIMER },
-        { "cycles", InstrumentType::PMU_CYCLE_COUNTER },
-        { "instructions", InstrumentType::PMU_INSTRUCTION_COUNTER },
+        { "pmu", InstrumentType::PMU },
+        { "pmu_cycles", InstrumentType::PMU_CYCLE_COUNTER },
+        { "pmu_instructions", InstrumentType::PMU_INSTRUCTION_COUNTER },
     };
 
     try

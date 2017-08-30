@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_TEST_PMU_COUNTER
 
 #include "Instrument.h"
+#include "PMU.h"
 
 namespace arm_compute
 {
@@ -33,36 +34,18 @@ namespace test
 namespace framework
 {
 /** Implementation of an instrument to count CPU cycles. */
-class CycleCounter : public Instrument
+class PMUCounter : public Instrument
 {
 public:
-    /** Initialise the cycle counter. */
-    CycleCounter();
-
-    std::string id() const override;
-    void        start() override;
-    void        stop() override;
-    Measurement measurement() const override;
+    std::string     id() const override;
+    void            start() override;
+    void            stop() override;
+    MeasurementsMap measurements() const override;
 
 private:
-    long      _fd{ -1 };
+    PMU       _pmu_cycles{ PERF_COUNT_HW_CPU_CYCLES };
+    PMU       _pmu_instructions{ PERF_COUNT_HW_INSTRUCTIONS };
     long long _cycles{ 0 };
-};
-
-/** Implementation of an instrument to count executed CPU instructions. */
-class InstructionCounter : public Instrument
-{
-public:
-    /** Initialise the instruction counter. */
-    InstructionCounter();
-
-    std::string id() const override;
-    void        start() override;
-    void        stop() override;
-    Measurement measurement() const override;
-
-private:
-    long      _fd{ -1 };
     long long _instructions{ 0 };
 };
 } // namespace framework

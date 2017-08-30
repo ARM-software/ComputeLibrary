@@ -47,10 +47,10 @@ void WallClockTimer::stop()
     _stop = std::chrono::high_resolution_clock::now();
 }
 
-Instrument::Measurement WallClockTimer::measurement() const
+Instrument::MeasurementsMap WallClockTimer::measurements() const
 {
     const auto delta = std::chrono::duration_cast<std::chrono::microseconds>(_stop - _start);
-    return Instrument::Measurement(delta.count(), "us");
+    return MeasurementsMap{ { "Wall clock time", Measurement(delta.count(), "us") } };
 }
 } // namespace framework
 } // namespace test

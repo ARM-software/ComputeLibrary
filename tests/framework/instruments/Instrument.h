@@ -25,9 +25,10 @@
 #define ARM_COMPUTE_TEST_INSTRUMENT
 
 #include "../Utils.h"
+#include "Measurement.h"
 
+#include <map>
 #include <memory>
-#include <ostream>
 #include <string>
 
 namespace arm_compute
@@ -47,20 +48,6 @@ public:
     template <typename T>
     static std::unique_ptr<Instrument> make_instrument();
 
-    /** Struct representing measurement consisting of value and unit. */
-    struct Measurement final
-    {
-        Measurement(double value, std::string unit)
-            : value{ value }, unit{ std::move(unit) }
-        {
-        }
-
-        friend std::ostream &operator<<(std::ostream &os, const Measurement &measurement);
-
-        double      value;
-        std::string unit;
-    };
-
     Instrument()                   = default;
     Instrument(const Instrument &) = default;
     Instrument(Instrument &&)      = default;
@@ -77,15 +64,11 @@ public:
     /** Stop measuring. */
     virtual void stop() = 0;
 
-    /** Return the latest measurement. */
-    virtual Measurement measurement() const = 0;
-};
+    using MeasurementsMap = std::map<std::string, Measurement>;
 
-inline std::ostream &operator<<(std::ostream &os, const Instrument::Measurement &measurement)
-{
-    os << measurement.value << measurement.unit;
-    return os;
-}
+    /** Return the latest measurement. */
+    virtual MeasurementsMap measurements() const = 0;
+};
 
 template <typename T>
 inline std::unique_ptr<Instrument> Instrument::make_instrument()

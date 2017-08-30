@@ -45,8 +45,7 @@ Framework::Framework()
 {
     _available_instruments.emplace(InstrumentType::WALL_CLOCK_TIMER, Instrument::make_instrument<WallClockTimer>);
 #ifdef PMU_ENABLED
-    _available_instruments.emplace(InstrumentType::PMU_CYCLE_COUNTER, Instrument::make_instrument<CycleCounter>);
-    _available_instruments.emplace(InstrumentType::PMU_INSTRUCTION_COUNTER, Instrument::make_instrument<InstructionCounter>);
+    _available_instruments.emplace(InstrumentType::PMU, Instrument::make_instrument<PMUCounter>);
 #endif /* PMU_ENABLED */
 }
 
@@ -86,12 +85,7 @@ void Framework::init(const std::vector<InstrumentType> &instruments, int num_ite
     _num_iterations = num_iterations;
     _log_level      = log_level;
 
-    _instruments = InstrumentType::NONE;
-
-    for(const auto &instrument : instruments)
-    {
-        _instruments |= instrument;
-    }
+    _instruments = std::set<InstrumentType>(instruments.begin(), instruments.end());
 }
 
 std::string Framework::current_suite_name() const
@@ -461,9 +455,23 @@ Profiler Framework::get_profiler() const
 {
     Profiler profiler;
 
+    const bool all_instruments = std::any_of(
+                                     _instruments.begin(),
+                                     _instruments.end(),
+                                     [](InstrumentType type) -> bool { return type == InstrumentType::ALL; });
+
+    auto is_selected = [&](InstrumentType instrument) -> bool
+    {
+        return std::find_if(_instruments.begin(), _instruments.end(), [&](InstrumentType type) -> bool {
+            const auto group = static_cast<InstrumentType>(static_cast<uint64_t>(type) & 0xFF00);
+            return group == instrument;
+        })
+        != _instruments.end();
+    };
+
     for(const auto &instrument : _available_instruments)
     {
-        if((instrument.first & _instruments) != InstrumentType::NONE)
+        if(all_instruments || is_selected(instrument.first))
         {
             profiler.add(instrument.second());
         }

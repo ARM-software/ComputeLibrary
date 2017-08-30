@@ -40,31 +40,13 @@ enum class InstrumentType : unsigned int
 {
     ALL                     = ~0U,
     NONE                    = 0,
-    WALL_CLOCK_TIMER        = 1,
-    PMU_CYCLE_COUNTER       = 2,
-    PMU_INSTRUCTION_COUNTER = 4
+    WALL_CLOCK_TIMER        = 0x0100,
+    PMU                     = 0x0200,
+    PMU_CYCLE_COUNTER       = 0x0201,
+    PMU_INSTRUCTION_COUNTER = 0x0202,
 };
 
 InstrumentType instrument_type_from_name(const std::string &name);
-
-inline InstrumentType operator&(InstrumentType t1, InstrumentType t2)
-{
-    using type = std::underlying_type<InstrumentType>::type;
-    return static_cast<InstrumentType>(static_cast<type>(t1) & static_cast<type>(t2));
-}
-
-inline InstrumentType operator|(InstrumentType t1, InstrumentType t2)
-{
-    using type = std::underlying_type<InstrumentType>::type;
-    return static_cast<InstrumentType>(static_cast<type>(t1) | static_cast<type>(t2));
-}
-
-inline InstrumentType &operator|=(InstrumentType &t1, InstrumentType t2)
-{
-    using type = std::underlying_type<InstrumentType>::type;
-    t1         = static_cast<InstrumentType>(static_cast<type>(t1) | static_cast<type>(t2));
-    return t1;
-}
 
 inline ::std::stringstream &operator>>(::std::stringstream &stream, InstrumentType &instrument)
 {
@@ -80,6 +62,9 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentTy
     {
         case InstrumentType::WALL_CLOCK_TIMER:
             stream << "WALL_CLOCK_TIMER";
+            break;
+        case InstrumentType::PMU:
+            stream << "PMU";
             break;
         case InstrumentType::PMU_CYCLE_COUNTER:
             stream << "PMU_CYCLE_COUNTER";

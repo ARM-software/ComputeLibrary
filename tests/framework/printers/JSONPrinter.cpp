@@ -23,7 +23,8 @@
  */
 #include "JSONPrinter.h"
 
-#include "tests/framework/Framework.h"
+#include "../Framework.h"
+#include "../instruments/Measurement.h"
 
 #include <algorithm>
 
@@ -133,12 +134,12 @@ void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measuremen
     {
         *_stream << R"(")" << i_it->first << R"(" : {)";
 
-        auto add_measurements = [](double a, const Instrument::Measurement & b)
+        auto add_measurements = [](double a, const Measurement & b)
         {
             return a + b.value;
         };
 
-        auto cmp_measurements = [](const Instrument::Measurement & a, const Instrument::Measurement & b)
+        auto cmp_measurements = [](const Measurement & a, const Measurement & b)
         {
             return a.value < b.value;
         };
@@ -153,7 +154,7 @@ void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measuremen
             num_values -= 2;
         }
 
-        auto measurement_to_string = [](const Instrument::Measurement & measurement)
+        auto measurement_to_string = [](const Measurement & measurement)
         {
             return support::cpp11::to_string(measurement.value);
         };

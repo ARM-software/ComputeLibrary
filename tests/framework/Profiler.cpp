@@ -54,7 +54,10 @@ void Profiler::stop()
 
     for(const auto &instrument : _instruments)
     {
-        _measurements[instrument->id()].push_back(instrument->measurement());
+        for(const auto &measurement : instrument->measurements())
+        {
+            _measurements[instrument->id() + "/" + measurement.first].push_back(measurement.second);
+        }
     }
 }
 

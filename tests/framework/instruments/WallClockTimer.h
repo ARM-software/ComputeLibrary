@@ -38,10 +38,10 @@ namespace framework
 class WallClockTimer : public Instrument
 {
 public:
-    std::string id() const override;
-    void        start() override;
-    void        stop() override;
-    Measurement measurement() const override;
+    std::string     id() const override;
+    void            start() override;
+    void            stop() override;
+    MeasurementsMap measurements() const override;
 
 private:
     std::chrono::high_resolution_clock::time_point _start{};
