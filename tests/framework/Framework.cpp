@@ -47,6 +47,9 @@ Framework::Framework()
 #ifdef PMU_ENABLED
     _available_instruments.emplace(InstrumentType::PMU, Instrument::make_instrument<PMUCounter>);
 #endif /* PMU_ENABLED */
+#ifdef MALI_ENABLED
+    _available_instruments.emplace(InstrumentType::MALI, Instrument::make_instrument<MaliCounter>);
+#endif /* MALI_ENABLED */
 }
 
 std::set<InstrumentType> Framework::available_instruments() const

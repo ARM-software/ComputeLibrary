@@ -27,7 +27,8 @@ Import('vars')
 
 # vars is imported from arm_compute:
 variables = [
-    BoolVariable("pmu", "Enable PMU counters", False)
+    BoolVariable("pmu", "Enable PMU counters", False),
+    BoolVariable("mali", "Enable Mali hardware counters", False)
 ]
 
 # We need a separate set of Variables for the Help message (Otherwise the global variables will get displayed twice)
@@ -60,6 +61,12 @@ if not framework_env['pmu']:
     files = [f for f in files if "PMU" not in os.path.basename(str(f))]
 else:
     framework_env.Append(CPPDEFINES = ['PMU_ENABLED'])
+
+if not framework_env['mali']:
+    # Remove MALI files
+    files = [f for f in files if "MaliCounter" not in os.path.basename(str(f))]
+else:
+    framework_env.Append(CPPDEFINES = ['MALI_ENABLED'])
 
 arm_compute_test_framework = framework_env.StaticLibrary('arm_compute_test_framework', files)
 

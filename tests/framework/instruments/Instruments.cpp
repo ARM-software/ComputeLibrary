@@ -44,6 +44,7 @@ InstrumentType instrument_type_from_name(const std::string &name)
         { "pmu", InstrumentType::PMU },
         { "pmu_cycles", InstrumentType::PMU_CYCLE_COUNTER },
         { "pmu_instructions", InstrumentType::PMU_INSTRUCTION_COUNTER },
+        { "mali", InstrumentType::MALI },
     };
 
     try
