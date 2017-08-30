@@ -66,12 +66,12 @@ public:
             std::stringstream description;
             description << "In=" << *_src_it << ":";
             description << "Filter=" << *_filter_it << ":";
-            description << "Depthwise Out=" << *_depthwise_out_it << ":";
+            description << "DepthwiseOut=" << *_depthwise_out_it << ":";
             description << "Weights=" << *_weights_it << ":";
             description << "Biases=" << *_biases_it << ":";
             description << "Out=" << *_dst_it << ":";
-            description << "Depthwise Info=" << *_depthwise_infos_it;
-            description << "Pointwise Info=" << *_pointwise_infos_it;
+            description << "DepthwiseInfo=" << *_depthwise_infos_it << ":";
+            description << "PointwiseInfo=" << *_pointwise_infos_it;
             return description.str();
         }
 
