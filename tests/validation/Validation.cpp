@@ -442,9 +442,11 @@ void validate(float target, float ref, float tolerance_abs_error, float toleranc
     BOOST_TEST(equal);
 }
 
-void validate(IArray<KeyPoint> &target, IArray<KeyPoint> &ref)
+void validate(IArray<KeyPoint> &target, IArray<KeyPoint> &ref, int64_t tolerance)
 {
-    BOOST_TEST(target.num_values() == ref.num_values());
+    int64_t num_mismatches = 0;
+
+    BOOST_TEST_WARN(target.num_values() == ref.num_values());
 
     for(size_t i = 0; i < target.num_values(); ++i)
     {
@@ -453,14 +455,22 @@ void validate(IArray<KeyPoint> &target, IArray<KeyPoint> &ref)
             return key.x == target.at(i).x && key.y == target.at(i).y;
         });
 
-        BOOST_TEST(ref_val != ref.buffer() + ref.num_values());
-        BOOST_TEST(target.at(i).tracking_status == ref_val->tracking_status);
+        const KeyPoint &key = target.at(i);
 
-        validate(target.at(i).strength, ref_val->strength);
-        validate(target.at(i).scale, ref_val->scale);
-        validate(target.at(i).orientation, ref_val->orientation);
-        validate(target.at(i).error, ref_val->error);
+        if((ref_val == ref.buffer() + ref.num_values()) || !(is_equal(key.strength, ref_val->strength) && is_equal(key.scale, ref_val->scale) && is_equal(key.orientation, ref_val->orientation)
+                                                             && is_equal(key.tracking_status, ref_val->tracking_status) && is_equal(key.error, ref_val->error)))
+        {
+            ++num_mismatches;
+
+            BOOST_TEST_WARN(is_equal(key.strength, ref_val->strength));
+            BOOST_TEST_WARN(is_equal(key.scale, ref_val->scale));
+            BOOST_TEST_WARN(is_equal(key.orientation, ref_val->orientation));
+            BOOST_TEST_WARN(is_equal(key.tracking_status, ref_val->tracking_status));
+            BOOST_TEST_WARN(is_equal(key.error, ref_val->error));
+        }
     }
+
+    BOOST_TEST(num_mismatches <= tolerance);
 }
 } // namespace validation
 } // namespace test

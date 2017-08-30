@@ -186,7 +186,7 @@ void validate_min_max_loc(T min, T ref_min, T max, T ref_max,
  *
  * - All values should match
  */
-void validate(IArray<KeyPoint> &target, IArray<KeyPoint> &ref);
+void validate(IArray<KeyPoint> &target, IArray<KeyPoint> &ref, int64_t tolerance = 0);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

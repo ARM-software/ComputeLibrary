@@ -178,7 +178,7 @@ BOOST_DATA_TEST_CASE(RunSmall, Small2DShapes() * BorderModes() * boost::unit_tes
 
     // Validate output
     dst.map();
-    validate(dst, ref_dst);
+    validate(dst, ref_dst, 1);
     dst.unmap();
 }
 
