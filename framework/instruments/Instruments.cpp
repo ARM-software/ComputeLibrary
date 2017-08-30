@@ -23,6 +23,8 @@
  */
 #include "Instruments.h"
 
+#include "framework/Utils.h"
+
 #include <map>
 #include <stdexcept>
 
@@ -45,7 +47,7 @@ InstrumentType instrument_type_from_name(const std::string &name)
 
     try
     {
-        return types.at(name);
+        return types.at(tolower(name));
     }
     catch(const std::out_of_range &)
     {

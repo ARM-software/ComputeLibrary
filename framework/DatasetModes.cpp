@@ -23,6 +23,8 @@
  */
 #include "DatasetModes.h"
 
+#include "Utils.h"
+
 #include <map>
 
 namespace arm_compute
@@ -42,7 +44,7 @@ DatasetMode dataset_mode_from_name(const std::string &name)
 
     try
     {
-        return modes.at(name);
+        return modes.at(tolower(name));
     }
     catch(const std::out_of_range &)
     {

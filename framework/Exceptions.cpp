@@ -23,6 +23,8 @@
  */
 #include "Exceptions.h"
 
+#include "Utils.h"
+
 #include <map>
 #include <sstream>
 
@@ -47,7 +49,7 @@ LogLevel log_level_from_name(const std::string &name)
 
     try
     {
-        return levels.at(name);
+        return levels.at(tolower(name));
     }
     catch(const std::out_of_range &)
     {

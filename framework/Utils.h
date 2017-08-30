@@ -137,6 +137,21 @@ std::string join(T && first, T && last, const std::string &separator)
 {
     return join(std::forward<T>(first), std::forward<T>(last), separator, support::cpp11::to_string);
 }
+
+/** Convert string to lower case.
+ *
+ * @param[in] string To be converted string.
+ *
+ * @return Lower case string.
+ */
+inline std::string tolower(std::string string)
+{
+    std::transform(string.begin(), string.end(), string.begin(), [](unsigned char c)
+    {
+        return std::tolower(c);
+    });
+    return string;
+}
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

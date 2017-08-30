@@ -23,6 +23,8 @@
  */
 #include "Printers.h"
 
+#include "framework/Utils.h"
+
 #include <map>
 #include <stdexcept>
 
@@ -43,7 +45,7 @@ LogFormat log_format_from_name(const std::string &name)
 
     try
     {
-        return formats.at(name);
+        return formats.at(tolower(name));
     }
     catch(const std::out_of_range &)
     {
