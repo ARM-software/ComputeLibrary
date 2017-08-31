@@ -98,7 +98,7 @@ void PrettyPrinter::print_errors_footer()
 
 void PrettyPrinter::print_error(const std::exception &error)
 {
-    *_stream << begin_color("1") << error.what() << end_color() << "\n";
+    *_stream << begin_color("1") << "ERROR: " << error.what() << end_color() << "\n";
 }
 
 void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
