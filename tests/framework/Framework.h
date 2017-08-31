@@ -191,6 +191,12 @@ public:
      */
     void log_failed_expectation(const TestError &error);
 
+    /** Print the debug information that has already been logged
+     *
+     * @param[in] info Description of the log info.
+     */
+    void log_info(const std::string &info);
+
     /** Number of iterations per test case.
      *
      * @return Number of iterations per test case.
@@ -269,6 +275,12 @@ public:
      * @return Vector with all test ids.
      */
     std::vector<TestInfo> test_infos() const;
+
+    /** Get the current logging level
+     *
+     * @return The current logging level.
+     */
+    LogLevel log_level() const;
 
 private:
     Framework();

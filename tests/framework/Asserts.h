@@ -54,6 +54,14 @@ inline T make_printable(T &&value)
     return value;
 }
 
+inline void ARM_COMPUTE_PRINT_INFO()
+{
+    std::stringstream msg;
+    arm_compute::test::framework::Framework::get().print_test_info(msg);
+    arm_compute::test::framework::Framework::get().log_info(msg.str());
+    arm_compute::test::framework::Framework::get().clear_test_info();
+}
+
 #define ARM_COMPUTE_TEST_INFO(INFO)                                               \
     {                                                                             \
         std::stringstream info;                                                   \
@@ -126,6 +134,7 @@ ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_comput
         }                                                                                                                                     \
         arm_compute::test::framework::Framework::get().clear_test_info();                                                                     \
     } while(false)
+
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

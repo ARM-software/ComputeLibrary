@@ -96,6 +96,11 @@ void PrettyPrinter::print_errors_footer()
 {
 }
 
+void PrettyPrinter::print_info(const std::string &info)
+{
+    *_stream << begin_color("1") << "INFO: " << info << end_color() << "\n";
+}
+
 void PrettyPrinter::print_error(const std::exception &error)
 {
     *_stream << begin_color("1") << "ERROR: " << error.what() << end_color() << "\n";

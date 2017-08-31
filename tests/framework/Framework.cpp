@@ -179,6 +179,14 @@ void Framework::log_failed_expectation(const TestError &error)
     }
 }
 
+void Framework::log_info(const std::string &info)
+{
+    if(_log_level >= LogLevel::DEBUG && _printer != nullptr)
+    {
+        _printer->print_info(info);
+    }
+}
+
 int Framework::num_iterations() const
 {
     return _num_iterations;
@@ -488,6 +496,11 @@ std::vector<TestInfo> Framework::test_infos() const
     }
 
     return ids;
+}
+
+LogLevel Framework::log_level() const
+{
+    return _log_level;
 }
 } // namespace framework
 } // namespace test

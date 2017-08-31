@@ -108,6 +108,12 @@ public:
      */
     virtual void print_error(const std::exception &error) = 0;
 
+    /** Print test log info.
+     *
+     * @param[in] info Description of the log.
+     */
+    virtual void print_info(const std::string &info) = 0;
+
     /** Print measurements for a test.
      *
      * @param[in] measurements Measurements as collected by a @ref Profiler.

@@ -316,7 +316,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
                     ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << framework::make_printable(target_value));
                     ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << framework::make_printable(reference_value));
                     ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << framework::make_printable(static_cast<typename U::value_type>(tolerance_value)));
-                    ARM_COMPUTE_EXPECT_EQUAL(target_value, reference_value, framework::LogLevel::DEBUG);
+                    framework::ARM_COMPUTE_PRINT_INFO();
 
                     ++num_mismatches;
                 }

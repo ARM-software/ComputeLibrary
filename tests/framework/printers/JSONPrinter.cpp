@@ -113,6 +113,16 @@ void JSONPrinter::print_error(const std::exception &error)
     }
 }
 
+void JSONPrinter::print_info(const std::string &info)
+{
+    std::istringstream iss(info);
+    for(std::string line; !std::getline(iss, line).fail();)
+    {
+        print_separator(_first_error);
+        *_stream << R"(")" << line << R"(")";
+    }
+}
+
 void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
 {
     print_separator(_first_test_entry);
