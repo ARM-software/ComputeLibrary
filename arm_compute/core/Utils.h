@@ -609,6 +609,13 @@ const std::string &string_from_border_mode(BorderMode border_mode);
  * @return The string describing the normalization type.
  */
 const std::string &string_from_norm_type(NormType type);
+/** Translates a given pooling type to a string.
+ *
+ * @param[in] type @ref PoolingType to be translated to string.
+ *
+ * @return The string describing the pooling type.
+ */
+const std::string &string_from_pooling_type(PoolingType type);
 /** Lower a given string.
  *
  * @param[in] val Given string to lower.

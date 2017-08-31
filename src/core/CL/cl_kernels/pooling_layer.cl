@@ -33,18 +33,32 @@
 #define POOL_OP(x, y) (max((x), (y)))
 #endif /* POOL_AVG */
 
-#define DIV_OP1(x, y) DIV_SAT_OP_EXPAND((x), y, DATA_TYPE, FIXED_POINT_POSITION)
+#define DIV_OP1(x, y) DIV_SAT_OP_EXPAND((x), (y), DATA_TYPE, FIXED_POINT_POSITION)
 #define DIV_OP(x, y) DIV_OP1(x, y << FIXED_POINT_POSITION)
+#define SQRT_OP(x) DIV_OP1((1 << FIXED_POINT_POSITION), (INVSQRT_OP_EXPAND((x), DATA_TYPE, 1, FIXED_POINT_POSITION)))
+
+#if defined(POOL_L2)
+#define POW2_OP(x, vec_size) MUL_SAT_OP_EXPAND((x), (x), DATA_TYPE, vec_size, FIXED_POINT_POSITION)
+#else /* defined(POOL_L2) */
+#define POW2_OP(x, vec_size) (x)
+#endif /* defined(POOL_L2) */
 
 #else /* FIXED_POINT_POSITION */
 
-#if defined(POOL_AVG)
+#if defined(POOL_AVG) || defined(POOL_L2)
 #define POOL_OP(x, y) ((x) + (y))
-#else /* POOL_AVG */
+#else /* defined(POOL_AVG) || defined(POOL_L2) */
 #define POOL_OP(x, y) (fmax((x), (y)))
-#endif /* POOL_AVG */
+#endif /* defined(POOL_AVG) || defined(POOL_L2) */
+
+#if defined(POOL_L2)
+#define POW2_OP(x, vec_size) ((x) * (x))
+#else /* defined(POOL_L2) */
+#define POW2_OP(x, vec_size) (x)
+#endif /* defined(POOL_L2) */
 
 #define DIV_OP(x, y) (x * (1.f / y))
+#define SQRT_OP(x) sqrt((x))
 
 #endif /* FIXED_POINT_POSITION */
 
@@ -70,6 +84,12 @@
         data20 = vload4(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 2, 0));                                                          \
         VEC_DATA_TYPE(DATA_TYPE, 2)                                                                                                          \
         data21 = vload2(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 2, 0) + 4);                                                      \
+        data00 = POW2_OP(data00, 4);                                                                                                         \
+        data01 = POW2_OP(data01, 2);                                                                                                         \
+        data10 = POW2_OP(data10, 4);                                                                                                         \
+        data11 = POW2_OP(data11, 2);                                                                                                         \
+        data20 = POW2_OP(data20, 4);                                                                                                         \
+        data21 = POW2_OP(data21, 2);                                                                                                         \
         \
         VEC_DATA_TYPE(DATA_TYPE, 8)                                                                                                          \
         values00 = (VEC_DATA_TYPE(DATA_TYPE, 8))(data00.s01212323);                                                                          \
@@ -104,6 +124,12 @@
         VEC_DATA_TYPE(DATA_TYPE, 8)                                                                                                          \
         data20           = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 2, 0));                                                \
         DATA_TYPE data21 = *((__global DATA_TYPE *)tensor3D_offset(&input, 0, 2, 0) + 8);                                                    \
+        data00           = POW2_OP(data00, 8);                                                                                               \
+        data01           = POW2_OP(data01, 1);                                                                                               \
+        data10           = POW2_OP(data10, 8);                                                                                               \
+        data11           = POW2_OP(data11, 1);                                                                                               \
+        data20           = POW2_OP(data20, 8);                                                                                               \
+        data21           = POW2_OP(data21, 1);                                                                                               \
         \
         VEC_DATA_TYPE(DATA_TYPE, 8)                                                                                                          \
         values00 = (VEC_DATA_TYPE(DATA_TYPE, 8))(data00.s01223445);                                                                          \
@@ -141,6 +167,12 @@
         data20 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 2, 0));                                                  \
         VEC_DATA_TYPE(DATA_TYPE, 4)                                                                                                  \
         data21 = vload4(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 2, 0) + 8);                                              \
+        data00 = POW2_OP(data00, 8);                                                                                                 \
+        data01 = POW2_OP(data01, 4);                                                                                                 \
+        data10 = POW2_OP(data10, 8);                                                                                                 \
+        data11 = POW2_OP(data11, 4);                                                                                                 \
+        data20 = POW2_OP(data20, 8);                                                                                                 \
+        data21 = POW2_OP(data21, 4);                                                                                                 \
         \
         data00 = POOL_OP(data00, data10);                                                                                            \
         data01 = POOL_OP(data01, data11);                                                                                            \
@@ -165,7 +197,7 @@ DATA_TYPE calculate_avg_scale(const int pool_size, const int upper_bound_w, cons
  *
  * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note In case of average pooling the following information must be passed at compile time:
- *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
+ *       -DPOOL_AVG or -DPOOL_L2 must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
@@ -201,14 +233,25 @@ __kernel void pooling_layer_2(
     VEC_DATA_TYPE(DATA_TYPE, 2)
     data1 = vload2(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 1, 0));
 
+#if defined(POOL_L2)
+    // Raise to power of 2 for L2 Pooling
+    data0 = POW2_OP(data0, 2);
+    data1 = POW2_OP(data1, 2);
+#endif /* defined(POOL_L2) */
+
     // Perform calculations
     data0         = POOL_OP(data0, data1);
     DATA_TYPE res = POOL_OP(data0.s0, data0.s1);
 
-    // Divide by pool region in case of average pooling
-#ifdef POOL_AVG
+#if defined(POOL_AVG) || defined(POOL_L2)
+    // Divide by pool region in case of average or l2 pooling
     res = DIV_OP(res, calculate_avg_scale(2, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
-#endif /* POOL_AVG */
+#endif /* defined(POOL_AVG) || defined(POOL_L2) */
+
+#if defined(POOL_L2)
+    // Take square root of the result in L2 pooling
+    res = SQRT_OP(res);
+#endif /* defined(POOL_L2) */
 
     // Store result
     *(__global DATA_TYPE *)output.ptr = res;
@@ -218,7 +261,7 @@ __kernel void pooling_layer_2(
  *
  * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note In case of average pooling the following information must be passed at compile time:
- *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
+ *       -DPOOL_AVG or -DPOOL_L2 must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
@@ -256,15 +299,27 @@ __kernel void pooling_layer_3(
     VEC_DATA_TYPE(DATA_TYPE, 3)
     data2 = vload3(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 2, 0));
 
+#if defined(POOL_L2)
+    // Raise to power of 2 for L2 Pooling
+    data0 = POW2_OP(data0, 3);
+    data1 = POW2_OP(data1, 3);
+    data2 = POW2_OP(data2, 3);
+#endif /* defined(POOL_L2) */
+
     // Perform calculations
     data0         = POOL_OP(data0, data1);
     data0         = POOL_OP(data0, data2);
     DATA_TYPE res = POOL_OP(POOL_OP(data0.s0, data0.s1), data0.s2);
 
+#if defined(POOL_AVG) || defined(POOL_L2)
     // Divide by pool region in case of average pooling
-#ifdef POOL_AVG
     res = DIV_OP(res, calculate_avg_scale(3, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
-#endif /* POOL_AVG */
+#endif /* defined(POOL_AVG) || defined(POOL_L2) */
+
+#if defined(POOL_L2)
+    // Take square root of the result in L2 pooling
+    res = SQRT_OP(res);
+#endif /* defined(POOL_L2) */
 
     // Store result
     *(__global DATA_TYPE *)output.ptr = res;
@@ -290,7 +345,7 @@ calculate_avg_scale4(const int pool_size, const int upper_bound_w, const int upp
  *
  * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note In case of average pooling the following information must be passed at compile time:
- *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
+ *       -DPOOL_AVG or -DPOOL_L2 must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
@@ -326,10 +381,15 @@ __kernel void pooling_layer_3_optimized(
     // Perform pooling 3x3 for 4 output elements
     POOLING3x3(res, input, output);
 
+#if defined(POOL_AVG) || defined(POOL_L2)
     // Divide by pool region in case of average pooling
-#ifdef POOL_AVG
     res *= calculate_avg_scale4(3, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y);
-#endif // POOL_AVG
+#endif /* defined(POOL_AVG) || defined(POOL_L2) */
+
+#if defined(POOL_L2)
+    // Take square root of the result in L2 pooling
+    res = SQRT_OP(res);
+#endif /* defined(POOL_L2) */
 
     vstore4(res, 0, (__global DATA_TYPE *)output.ptr);
 }
@@ -339,7 +399,7 @@ __kernel void pooling_layer_3_optimized(
  *
  * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note In case of average pooling the following information must be passed at compile time:
- *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
+ *       -DPOOL_AVG or -DPOOL_L2 must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
@@ -385,6 +445,17 @@ __kernel void pooling_layer_7(
     VEC_DATA_TYPE(DATA_TYPE, 8)
     data6 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 6, 0));
 
+#if defined(POOL_L2)
+    // Raise to power of 2 for L2 Pooling
+    data0 = POW2_OP(data0, 8);
+    data1 = POW2_OP(data1, 8);
+    data2 = POW2_OP(data2, 8);
+    data3 = POW2_OP(data3, 8);
+    data4 = POW2_OP(data4, 8);
+    data5 = POW2_OP(data5, 8);
+    data6 = POW2_OP(data6, 8);
+#endif /* defined(POOL_L2) */
+
     // Pool operation of all rows
     data0 = POOL_OP(data0, data1);
     data2 = POOL_OP(data2, data3);
@@ -394,11 +465,11 @@ __kernel void pooling_layer_7(
     data0 = POOL_OP(data0, data4);
 
     // Set last element
-#ifdef POOL_AVG
+#if defined(POOL_AVG) || defined(POOL_L2)
     data0.s7 = 0;
-#else  /* POOL_AVG */
+#else  /* defined(POOL_AVG) || defined(POOL_L2) */
     data0.s7 = data0.s6;
-#endif /* POOL_AVG */
+#endif /* defined(POOL_AVG) || defined(POOL_L2) */
 
     // Reduce result
     VEC_DATA_TYPE(DATA_TYPE, 4)
@@ -407,10 +478,15 @@ __kernel void pooling_layer_7(
     reduce2       = POOL_OP(reduce4.s01, reduce4.s23);
     DATA_TYPE res = POOL_OP(reduce2.s0, reduce2.s1);
 
+#if defined(POOL_AVG) || defined(POOL_L2)
     // Divide by pool region in case of average pooling
-#ifdef POOL_AVG
     res = DIV_OP(res, calculate_avg_scale(7, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
-#endif /* POOL_AVG */
+#endif /* defined(POOL_AVG) || defined(POOL_L2) */
+
+#if defined(POOL_L2)
+    // Take square root of the result in L2 pooling
+    res = SQRT_OP(res);
+#endif /* defined(POOL_L2) */
 
     // Store result
     *(__global DATA_TYPE *)output.ptr = res;
@@ -419,9 +495,9 @@ __kernel void pooling_layer_7(
 #if defined(POOL_SIZE)
 
 // Set the initial value for the pooling operation accordingly with the data type
-#if defined(POOL_AVG)
+#if defined(POOL_AVG) || defined(POOL_L2)
 #define INITIAL_VALUE 0
-#else // POOL_AVG
+#else /* defined(POOL_AVG) || defined(POOL_L2) */
 #ifdef FIXED_POINT_POSITION
 #define MIN_VAL_EXPAND(type) type##_MIN
 #define MIN_VAL(type) MIN_VAL_EXPAND(type)
@@ -485,6 +561,10 @@ __kernel void pooling_layer_N(
         {
             VEC_DATA_TYPE(DATA_TYPE, 8)
             data0 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, x, y, 0));
+#if defined(POOL_L2)
+            // Raise to power of 2 for L2 Pooling
+            data0 *= data0;
+#endif /* defined(POOL_L2) */
             vdata = POOL_OP(vdata, data0);
         }
 
@@ -492,7 +572,11 @@ __kernel void pooling_layer_N(
         for(; x < (int)POOL_SIZE; ++x)
         {
             DATA_TYPE data0 = *((__global DATA_TYPE *)tensor3D_offset(&input, x, y, 0));
-            sdata           = POOL_OP(sdata, data0);
+#if defined(POOL_L2)
+            // Raise to power of 2 for L2 Pooling
+            data0 *= data0;
+#endif /* defined(POOL_L2) */
+            sdata = POOL_OP(sdata, data0);
         }
     }
 
@@ -504,10 +588,15 @@ __kernel void pooling_layer_N(
     DATA_TYPE res = POOL_OP(reduce2.s0, reduce2.s1);
     res           = POOL_OP(res, sdata);
 
+#if defined(POOL_AVG) || defined(POOL_L2)
     // Divide by pool region in case of average pooling
-#ifdef POOL_AVG
     res = DIV_OP(res, calculate_avg_scale(POOL_SIZE, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
-#endif /* POOL_AVG */
+#endif /* defined(POOL_AVG) || defined(POOL_L2) */
+
+#if defined(POOL_L2)
+    // Take square root of the result in L2 pooling
+    res = SQRT_OP(res);
+#endif /* defined(POOL_L2) */
 
     // Store result
     *(__global DATA_TYPE *)output.ptr = res;

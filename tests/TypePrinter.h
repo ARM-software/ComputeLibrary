@@ -367,6 +367,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_ty
         case PoolingType::MAX:
             os << "MAX";
             break;
+        case PoolingType::L2:
+            os << "L2";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

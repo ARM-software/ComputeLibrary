@@ -42,17 +42,23 @@ float32x4_t vfloorq_f32(float32x4_t val);
  *
  * @return The calculated inverse square root.
  */
-float32x4_t vinvsqrtq_f32(float32x4_t x);
+float32x2_t vinvsqrt_f32(float32x2_t x);
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
 /** Calculate inverse square root.
  *
  * @param[in] x Input value.
  *
  * @return The calculated inverse square root.
  */
-float16x8_t vinvsqrtq_f16(float16x8_t x);
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+float32x4_t vinvsqrtq_f32(float32x4_t x);
+
+/** Calculate reciprocal.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated reciprocal.
+ */
+float32x2_t vinv_f32(float32x2_t x);
 
 /** Calculate reciprocal.
  *
@@ -122,6 +128,31 @@ float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
  * @return The calculated Hyperbolic Tangent.
  */
 float16x8_t vtanhq_f16(float16x8_t val);
+
+/** Calculate reciprocal.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated reciprocal.
+ */
+float16x4_t vinv_f16(float16x4_t x);
+
+/** Calculate reciprocal.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated reciprocal.
+ */
+float16x8_t vinvq_f16(float16x8_t x);
+
+/** Calculate inverse square root.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated inverse square root.
+ */
+float16x4_t vinvsqrt_f16(float16x4_t x);
+
 /** Calculate inverse square root.
  *
  * @param[in] x Input value.
@@ -129,6 +160,7 @@ float16x8_t vtanhq_f16(float16x8_t val);
  * @return The calculated inverse square root.
  */
 float16x8_t vinvsqrtq_f16(float16x8_t x);
+
 /** Calculate exponential
  *
  * @param[in] x Input vector value in F16 format.
@@ -136,6 +168,7 @@ float16x8_t vinvsqrtq_f16(float16x8_t x);
  * @return The calculated exponent.
  */
 float16x8_t vexpq_f16(float16x8_t x);
+
 /** Calculate n power of a number.
  *
  * pow(x,n) = e^(n*log(x))

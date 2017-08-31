@@ -104,7 +104,7 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
             }
         }
     }
-    else // Average pooling
+    else // Average or l2 pooling
     {
         for(int r = 0; r < upper_dims; ++r)
         {
@@ -123,14 +123,29 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
                     wend       = std::min(wend, w_src);
                     hend       = std::min(hend, h_src);
 
-                    for(int y = hstart; y < hend; ++y)
+                    if(type == PoolingType::AVG)
                     {
-                        for(int x = wstart; x < wend; ++x)
+                        for(int y = hstart; y < hend; ++y)
                         {
-                            avg_val += src[r * h_src * w_src + y * w_src + x];
+                            for(int x = wstart; x < wend; ++x)
+                            {
+                                avg_val += src[r * h_src * w_src + y * w_src + x];
+                            }
                         }
+                        dst[r * h_dst * w_dst + h * w_dst + w] = avg_val / pool;
                     }
-                    dst[r * h_dst * w_dst + h * w_dst + w] = avg_val / pool;
+                    else
+                    {
+                        for(int y = hstart; y < hend; ++y)
+                        {
+                            for(int x = wstart; x < wend; ++x)
+                            {
+                                const T val = src[r * h_src * w_src + y * w_src + x];
+                                avg_val += val * val;
+                            }
+                        }
+                        dst[r * h_dst * w_dst + h * w_dst + w] = std::sqrt(avg_val / pool);
+                    }
                 }
             }
         }
@@ -192,7 +207,7 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
             }
         }
     }
-    else // Average pooling
+    else // Average or l2 pooling
     {
         for(int r = 0; r < upper_dims; ++r)
         {
@@ -213,18 +228,35 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
                     using namespace fixed_point_arithmetic;
 
                     const int            fixed_point_position = src.fixed_point_position();
+                    const fixed_point<T> const_1(1, fixed_point_position);
                     const fixed_point<T> invpool_fp(1.f / static_cast<float>(pool), fixed_point_position);
                     fixed_point<T>       avg_val(0, fixed_point_position, true);
 
-                    for(int y = hstart; y < hend; ++y)
+                    if(type == PoolingType::AVG)
                     {
-                        for(int x = wstart; x < wend; ++x)
+                        for(int y = hstart; y < hend; ++y)
                         {
-                            const fixed_point<T> in_fp(src[r * h_src * w_src + y * w_src + x], fixed_point_position, true);
-                            avg_val = add(avg_val, in_fp);
+                            for(int x = wstart; x < wend; ++x)
+                            {
+                                const fixed_point<T> in_fp(src[r * h_src * w_src + y * w_src + x], fixed_point_position, true);
+                                avg_val = add(avg_val, in_fp);
+                            }
                         }
+                        dst[r * h_dst * w_dst + h * w_dst + w] = mul(avg_val, invpool_fp).raw();
                     }
-                    dst[r * h_dst * w_dst + h * w_dst + w] = mul(avg_val, invpool_fp).raw();
+                    else
+                    {
+                        for(int y = hstart; y < hend; ++y)
+                        {
+                            for(int x = wstart; x < wend; ++x)
+                            {
+                                const fixed_point<T> in_fp(src[r * h_src * w_src + y * w_src + x], fixed_point_position, true);
+                                avg_val = add(avg_val, mul(in_fp, in_fp));
+                            }
+                        }
+                        auto res                               = div(const_1, (inv_sqrt(mul(avg_val, invpool_fp))));
+                        dst[r * h_dst * w_dst + h * w_dst + w] = res.raw();
+                    }
                 }
             }
         }

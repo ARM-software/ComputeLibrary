@@ -64,6 +64,15 @@ inline float32x4_t vfloorq_f32(float32x4_t val)
     return vbslq_f32(vcgtq_f32(r, val), vsubq_f32(r, CONST_1), r);
 }
 
+inline float32x2_t vinvsqrt_f32(float32x2_t x)
+{
+    float32x2_t sqrt_reciprocal = vrsqrte_f32(x);
+    sqrt_reciprocal             = vmul_f32(vrsqrts_f32(vmul_f32(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
+    sqrt_reciprocal             = vmul_f32(vrsqrts_f32(vmul_f32(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
+
+    return sqrt_reciprocal;
+}
+
 inline float32x4_t vinvsqrtq_f32(float32x4_t x)
 {
     float32x4_t sqrt_reciprocal = vrsqrteq_f32(x);
@@ -71,6 +80,14 @@ inline float32x4_t vinvsqrtq_f32(float32x4_t x)
     sqrt_reciprocal             = vmulq_f32(vrsqrtsq_f32(vmulq_f32(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
 
     return sqrt_reciprocal;
+}
+
+inline float32x2_t vinv_f32(float32x2_t x)
+{
+    float32x2_t recip = vrecpe_f32(x);
+    recip             = vmul_f32(vrecps_f32(x, recip), recip);
+    recip             = vmul_f32(vrecps_f32(x, recip), recip);
+    return recip;
 }
 
 inline float32x4_t vinvq_f32(float32x4_t x)
@@ -182,12 +199,28 @@ const std::array<float16x8_t, 8> log_tab_f16 =
     }
 };
 
+inline float16x4_t vinvsqrt_f16(float16x4_t x)
+{
+    float16x4_t sqrt_reciprocal = vrsqrte_f16(x);
+    sqrt_reciprocal             = vmul_f16(vrsqrts_f16(vmul_f16(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
+    sqrt_reciprocal             = vmul_f16(vrsqrts_f16(vmul_f16(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
+    return sqrt_reciprocal;
+}
+
 inline float16x8_t vinvsqrtq_f16(float16x8_t x)
 {
     float16x8_t sqrt_reciprocal = vrsqrteq_f16(x);
     sqrt_reciprocal             = vmulq_f16(vrsqrtsq_f16(vmulq_f16(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
     sqrt_reciprocal             = vmulq_f16(vrsqrtsq_f16(vmulq_f16(x, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal);
     return sqrt_reciprocal;
+}
+
+inline float16x4_t vinv_f16(float16x4_t x)
+{
+    float16x4_t recip = vrecpe_f16(x);
+    recip             = vmul_f16(vrecps_f16(x, recip), recip);
+    recip             = vmul_f16(vrecps_f16(x, recip), recip);
+    return recip;
 }
 
 inline float16x8_t vinvq_f16(float16x8_t x)

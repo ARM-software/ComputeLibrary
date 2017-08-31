@@ -48,7 +48,7 @@ const auto PoolingLayerDatasetFP = combine(combine(datasets::PoolingTypes(), fra
                                            framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) }));
 
 /** Input data set for quantized data types */
-const auto PoolingLayerDatasetQS = combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { 2, 3 })),
+const auto PoolingLayerDatasetQS = combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3 })),
                                            framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) }));
 
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for float types */

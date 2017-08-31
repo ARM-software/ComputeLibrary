@@ -228,6 +228,18 @@ const std::string &arm_compute::string_from_norm_type(NormType type)
     return norm_type_map[type];
 }
 
+const std::string &arm_compute::string_from_pooling_type(PoolingType type)
+{
+    static std::map<PoolingType, const std::string> pool_type_map =
+    {
+        { PoolingType::MAX, "MAX" },
+        { PoolingType::AVG, "AVG" },
+        { PoolingType::L2, "L2" },
+    };
+
+    return pool_type_map[type];
+}
+
 std::string arm_compute::lower_string(const std::string &val)
 {
     std::string res = val;

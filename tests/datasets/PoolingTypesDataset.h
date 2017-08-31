@@ -41,7 +41,7 @@ public:
     PoolingTypes()
         : ContainerDataset("PoolType",
     {
-        PoolingType::MAX, PoolingType::AVG
+        PoolingType::MAX, PoolingType::AVG, PoolingType::L2
     })
     {
     }

@@ -101,14 +101,14 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     // Set build options
     std::set<std::string> build_opts;
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    build_opts.emplace(("-DPOOL_" + ((PoolingType::MAX == pool_type) ? std::string("MAX") : std::string("AVG"))));
+    build_opts.emplace(("-DPOOL_" + string_from_pooling_type(pool_type)));
     if(is_data_type_fixed_point(input->info()->data_type()))
     {
         build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
     }
 
     build_opts.emplace(("-DSTRIDE_X=" + support::cpp11::to_string(pool_stride_x)));
-    if(pool_type == PoolingType::AVG)
+    if(pool_type != PoolingType::MAX)
     {
         build_opts.emplace(("-DMAX_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0) + pool_pad_x)));
         build_opts.emplace(("-DMAX_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1) + pool_pad_y)));

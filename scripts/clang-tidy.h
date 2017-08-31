@@ -1,6 +1,11 @@
 #include <arm_neon.h>
 //FIXME: Remove this file before the release
 
+inline float16x4_t vrsqrts_f16 (float16x4_t, float16x4_t)
+{
+  return vdup_n_f16(0);
+}
+
 inline float16x8_t vrsqrtsq_f16 (float16x8_t, float16x8_t)
 {
   return vdupq_n_f16(0);
@@ -121,6 +126,11 @@ inline float16x4_t vbsl_f16 (uint16x4_t,float16x4_t, float16x4_t)
   return vdup_n_f16(0);
 }
 
+inline float16x4_t vrsqrte_f16(float16x4_t)
+{
+   return vdup_n_f16(0);
+}
+
 inline float16x8_t vrsqrteq_f16(float16x8_t)
 {
    return vdupq_n_f16(0);
@@ -131,9 +141,19 @@ inline float16x8_t vfmsq_f16 (float16x8_t, float16x8_t, float16x8_t)
    return vdupq_n_f16(0);
 }
 
+inline float16x4_t vrecpe_f16 (float16x4_t)
+{
+   return vdup_n_f16(0);
+}
+
 inline float16x8_t vrecpeq_f16 (float16x8_t)
 {
    return vdupq_n_f16(0);
+}
+
+inline float16x4_t vrecps_f16 (float16x4_t, float16x4_t)
+{
+   return vdup_n_f16(0);
 }
 
 inline float16x8_t vrecpsq_f16 (float16x8_t, float16x8_t)

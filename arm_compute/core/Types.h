@@ -398,7 +398,8 @@ enum class DimensionRoundingType
 enum class PoolingType
 {
     MAX, /**< Max Pooling */
-    AVG  /**< Average Pooling */
+    AVG, /**< Average Pooling */
+    L2   /**< L2 Pooling */
 };
 
 /** Padding and stride information class */

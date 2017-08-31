@@ -241,9 +241,17 @@ MULQ_IMPL(qs16x16, qs32x16)
         return CONVERT_SAT((res >> (itype)fixed_point_position), type);                       \
     }
 
+MULQ_SAT_IMPL(qs8x1, qs16x1)
+MULQ_SAT_IMPL(qs8x2, qs16x2)
+MULQ_SAT_IMPL(qs8x3, qs16x3)
+MULQ_SAT_IMPL(qs8x4, qs16x4)
 MULQ_SAT_IMPL(qs8x8, qs16x8)
-MULQ_SAT_IMPL(qs16x8, qs32x8)
 MULQ_SAT_IMPL(qs8x16, qs16x16)
+MULQ_SAT_IMPL(qs16x1, qs32x1)
+MULQ_SAT_IMPL(qs16x2, qs32x2)
+MULQ_SAT_IMPL(qs16x3, qs32x3)
+MULQ_SAT_IMPL(qs16x4, qs32x4)
+MULQ_SAT_IMPL(qs16x8, qs32x8)
 MULQ_SAT_IMPL(qs16x16, qs32x16)
 
 #define MUL_SAT_OP_EXPAND_STR(a, b, type, size, position) mul_sat_##type##x##size((a), (b), (position))
@@ -411,7 +419,7 @@ LOGQ_IMPL(qs16, qs16x16, 16)
     {                                                                                                                                                                                                                                  \
         type const_three = (type)(3 << (fixed_point_position));                                                                                                                                                                        \
         type shift_value = (type)(16 - stype##_SHIFT) - (clz(VopA) + (type)fixed_point_position);                                                                                                                                      \
-        type temp        = select(VopA >> shift_value, select((type)stype##_MAX, VopA << (-shift_value), clz(VopA) > (-shift_value)), shift_value < (type)0);                                                                          \
+        type temp        = select((type)(VopA >> shift_value), select((type)stype##_MAX, (type)(VopA << (-shift_value)), (type)(clz(VopA) > (-shift_value))), (type)(shift_value < (type)0));                                          \
         type x           = temp;                                                                                                                                                                                                       \
         x                = MUL_SAT_OP_EXPAND(x, sub_sat(const_three, MUL_SAT_OP_EXPAND(MUL_SAT_OP_EXPAND(x, x, stype, size, fixed_point_position), temp, stype, size, fixed_point_position)), stype, size, fixed_point_position) >> 1; \
         x                = MUL_SAT_OP_EXPAND(x, sub_sat(const_three, MUL_SAT_OP_EXPAND(MUL_SAT_OP_EXPAND(x, x, stype, size, fixed_point_position), temp, stype, size, fixed_point_position)), stype, size, fixed_point_position) >> 1; \
@@ -422,9 +430,11 @@ LOGQ_IMPL(qs16, qs16x16, 16)
             x = MUL_SAT_OP_EXPAND(x, sub_sat(const_three, MUL_SAT_OP_EXPAND(MUL_SAT_OP_EXPAND(x, x, stype, size, fixed_point_position), temp, stype, size, fixed_point_position)), stype, size, fixed_point_position) >> 1;            \
         }                                                                                                                                                                                                                              \
         type shift_value2 = select(shift_value >> 1, (-shift_value) >> 1, shift_value < (type)0);                                                                                                                                      \
-        return select(x >> shift_value2, select((type)stype##_MAX, x << shift_value2, clz(x) > shift_value2), shift_value < (type)0); /* Saturate result if needed */                                                                  \
+        return select((type)(x >> shift_value2), select((type)stype##_MAX, (type)(x << shift_value2), (type)(clz(x) > shift_value2)), (type)(shift_value < (type)0)); /* Saturate result if needed */                                  \
     }
 
+INVSQRTQ_IMPL(qs8, qs8x1, 1)
+INVSQRTQ_IMPL(qs16, qs16x1, 1)
 INVSQRTQ_IMPL(qs8, qs8x16, 16)
 INVSQRTQ_IMPL(qs16, qs16x8, 8)
 
