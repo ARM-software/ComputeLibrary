@@ -25,10 +25,10 @@
 #define __ARM_COMPUTE_NEHISTOGRAMKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "support/Mutex.h"
 
 #include <cstddef>
 #include <cstdint>
-#include <mutex>
 
 namespace arm_compute
 {
@@ -122,7 +122,7 @@ private:
     IDistribution1D              *_output;
     uint32_t                     *_local_hist;
     uint32_t                     *_window_lut;
-    std::mutex                    _hist_mtx;
+    arm_compute::Mutex            _hist_mtx;
     static constexpr unsigned int _max_range_size{ 256 }; ///< 256 possible pixel values as we handle only U8 images
 };
 }

@@ -176,7 +176,7 @@ void NEHOGDetectorKernel::run(const Window &window)
                 win.idx_class = _idx_class;
                 win.score     = score;
 
-                std::unique_lock<std::mutex> lock(_mutex);
+                std::unique_lock<arm_compute::Mutex> lock(_mutex);
                 _detection_windows->push_back(win);
                 lock.unlock();
             }

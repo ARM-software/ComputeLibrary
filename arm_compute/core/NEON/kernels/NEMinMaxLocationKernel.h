@@ -26,9 +26,9 @@
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "support/Mutex.h"
 
 #include <cstdint>
-#include <mutex>
 
 namespace arm_compute
 {
@@ -92,10 +92,10 @@ private:
     template <typename T>
     void update_min_max(T min, T max);
 
-    const IImage *_input; /**< Input image. */
-    void         *_min;   /**< Minimum value. */
-    void         *_max;   /**< Maximum value. */
-    std::mutex    _mtx;   /**< Mutex used for result reduction. */
+    const IImage      *_input; /**< Input image. */
+    void              *_min;   /**< Minimum value. */
+    void              *_max;   /**< Maximum value. */
+    arm_compute::Mutex _mtx;   /**< Mutex used for result reduction. */
 };
 
 /** Interface for the kernel to find min max locations of an image. */

@@ -103,8 +103,11 @@ prefix = ""
 if env['arch'] == 'armv7a':
     env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
 
-    if env['os'] in ['linux', 'bare_metal']:
+    if env['os'] == 'linux':
         prefix = "arm-linux-gnueabihf-"
+        env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
+    elif env['os'] == 'bare_metal':
+        prefix = "arm-none-eabi-"
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
     elif env['os'] == 'android':
         prefix = "arm-linux-androideabi-"
@@ -112,8 +115,10 @@ if env['arch'] == 'armv7a':
 elif env['arch'] == 'arm64-v8a':
     env.Append(CXXFLAGS = ['-march=armv8-a'])
 
-    if env['os'] in ['linux', 'bare_metal']:
+    if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
+    elif env['os'] == 'bare_metal':
+        prefix = "aarch64-none-elf-"
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
 elif env['arch'] == 'arm64-v8.2-a':
@@ -174,8 +179,10 @@ if env['os'] == 'android':
     env.Append(LINKFLAGS = ['-pie', '-static-libstdc++'])
 elif env['os'] == 'bare_metal':
     env.Append(LINKFLAGS = ['-static'])
+    env.Append(LINKFLAGS = ['-specs=rdimon.specs'])
     env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(CPPDEFINES = ['NO_MULTI_THREADING'])
+    env.Append(CPPDEFINES = ['BARE_METAL'])
 
 if env['opencl']:
     if env['os'] == 'bare_metal':

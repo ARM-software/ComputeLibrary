@@ -37,12 +37,12 @@ using namespace arm_compute;
 
 namespace
 {
-inline void check_corner(float x, float y, float strength, InternalKeypoint *output, int32_t *num_corner_candidates, std::mutex *corner_candidates_mutex)
+inline void check_corner(float x, float y, float strength, InternalKeypoint *output, int32_t *num_corner_candidates, arm_compute::Mutex *corner_candidates_mutex)
 {
     if(strength != 0.0f)
     {
         /* Set index and update num_corner_candidate */
-        std::unique_lock<std::mutex> lock(*corner_candidates_mutex);
+        std::unique_lock<arm_compute::Mutex> lock(*corner_candidates_mutex);
 
         const int32_t idx = *num_corner_candidates;
 
@@ -55,7 +55,7 @@ inline void check_corner(float x, float y, float strength, InternalKeypoint *out
     }
 }
 
-inline void corner_candidates(const float *__restrict input, InternalKeypoint *__restrict output, int32_t x, int32_t y, int32_t *num_corner_candidates, std::mutex *corner_candidates_mutex)
+inline void corner_candidates(const float *__restrict input, InternalKeypoint *__restrict output, int32_t x, int32_t y, int32_t *num_corner_candidates, arm_compute::Mutex *corner_candidates_mutex)
 {
     check_corner(x, y, *input, output, num_corner_candidates, corner_candidates_mutex);
 }

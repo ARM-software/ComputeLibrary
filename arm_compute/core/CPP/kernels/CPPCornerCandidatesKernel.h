@@ -26,9 +26,9 @@
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "support/Mutex.h"
 
 #include <cstdint>
-#include <mutex>
 
 namespace arm_compute
 {
@@ -65,10 +65,10 @@ public:
     void run(const Window &window) override;
 
 private:
-    int32_t          *_num_corner_candidates;   /**< Number of corner candidates */
-    std::mutex        _corner_candidates_mutex; /**< Mutex to preventing race conditions */
-    const IImage     *_input;                   /**< Source image - Harris score */
-    InternalKeypoint *_output;                  /**< Array of NEInternalKeypoint */
+    int32_t           *_num_corner_candidates;   /**< Number of corner candidates */
+    arm_compute::Mutex _corner_candidates_mutex; /**< Mutex to preventing race conditions */
+    const IImage      *_input;                   /**< Source image - Harris score */
+    InternalKeypoint *_output;                   /**< Array of NEInternalKeypoint */
 };
 } //namespace arm_compute
 #endif /* __ARM_COMPUTE_CPPCORNERCANDIDATESKERNEL_H__ */

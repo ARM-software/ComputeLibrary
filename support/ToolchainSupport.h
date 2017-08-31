@@ -40,7 +40,7 @@ namespace support
 {
 namespace cpp11
 {
-#ifdef __ANDROID__
+#if(__ANDROID__ || BARE_METAL)
 /** Convert integer and float values to string.
  *
  * @note This function implements the same behaviour as std::to_string. The
@@ -154,7 +154,7 @@ inline T copysign(T x, T y)
 {
     return ::copysign(x, y);
 }
-#else  /* __ANDROID__ */
+#else  /* (__ANDROID__ || BARE_METAL) */
 /** Convert integer and float values to string.
  *
  * @note This function acts as a convenience wrapper around std::to_string. The
@@ -260,7 +260,7 @@ inline T copysign(T x, T y)
 {
     return std::copysign(x, y);
 }
-#endif /* __ANDROID__ */
+#endif /* (__ANDROID__ || BARE_METAL) */
 
 inline std::string to_string(bool value)
 {

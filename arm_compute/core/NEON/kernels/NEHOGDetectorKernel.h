@@ -27,8 +27,7 @@
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/IHOG.h"
 #include "arm_compute/core/NEON/INEKernel.h"
-
-#include <mutex>
+#include "support/Mutex.h"
 
 namespace arm_compute
 {
@@ -80,7 +79,7 @@ private:
     size_t                 _detection_window_width;
     size_t                 _detection_window_height;
     size_t                 _max_num_detection_windows;
-    std::mutex             _mutex;
+    arm_compute::Mutex     _mutex;
 };
 }
 
