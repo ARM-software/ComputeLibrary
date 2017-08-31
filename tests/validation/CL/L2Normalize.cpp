@@ -33,7 +33,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/L2NormalizeFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {

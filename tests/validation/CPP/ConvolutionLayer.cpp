@@ -25,7 +25,6 @@
 
 #include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -193,8 +192,8 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
 
 template SimpleTensor<float> convolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
                                                const PadStrideInfo &info);
-template SimpleTensor<half_float::half> convolution_layer(const SimpleTensor<half_float::half> &src, const SimpleTensor<half_float::half> &weights, const SimpleTensor<half_float::half> &bias,
-                                                          const TensorShape &output_shape, const PadStrideInfo &info);
+template SimpleTensor<half> convolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
+                                              const PadStrideInfo &info);
 template SimpleTensor<qint8_t> convolution_layer(const SimpleTensor<qint8_t> &src, const SimpleTensor<qint8_t> &weights, const SimpleTensor<qint8_t> &bias, const TensorShape &output_shape,
                                                  const PadStrideInfo &info);
 template SimpleTensor<qint16_t> convolution_layer(const SimpleTensor<qint16_t> &src, const SimpleTensor<qint16_t> &weights, const SimpleTensor<qint16_t> &bias, const TensorShape &output_shape,

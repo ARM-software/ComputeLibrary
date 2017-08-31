@@ -31,7 +31,6 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
-#include "tests/validation/half.h"
 
 #include <cmath>
 #include <cstddef>
@@ -99,7 +98,7 @@ template <> struct promote<int16_t> { using type = int32_t; };
 template <> struct promote<uint32_t> { using type = uint64_t; };
 template <> struct promote<int32_t> { using type = int64_t; };
 template <> struct promote<float> { using type = float; };
-template <> struct promote<half_float::half> { using type = half_float::half; };
+template <> struct promote<half> { using type = half; };
 
 
 template <typename T>
@@ -253,7 +252,7 @@ void store_value_with_data_type(void *ptr, T value, DataType data_type)
             *reinterpret_cast<int64_t *>(ptr) = value;
             break;
         case DataType::F16:
-            *reinterpret_cast<half_float::half *>(ptr) = value;
+            *reinterpret_cast<half *>(ptr) = value;
             break;
         case DataType::F32:
             *reinterpret_cast<float *>(ptr) = value;

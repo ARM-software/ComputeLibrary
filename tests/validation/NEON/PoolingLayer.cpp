@@ -34,7 +34,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/PoolingLayerFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -86,14 +85,14 @@ TEST_SUITE_END()
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixture<half_float::half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP,
-                                                                                                               framework::dataset::make("DataType", DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP,
+                                                                                                   framework::dataset::make("DataType", DataType::F16))))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
-                                                                                                                   framework::dataset::make("DataType", DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
+                                                                                                       framework::dataset::make("DataType", DataType::F16))))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);

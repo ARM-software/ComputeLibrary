@@ -57,8 +57,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<float>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<half_float::half>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType",
-                                                                                                               DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType",
+                                                                                                   DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

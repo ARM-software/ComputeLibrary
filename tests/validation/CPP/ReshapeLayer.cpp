@@ -23,7 +23,7 @@
  */
 #include "ReshapeLayer.h"
 
-#include "tests/validation/half.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
@@ -49,7 +49,7 @@ template SimpleTensor<uint16_t> reshape_layer(const SimpleTensor<uint16_t> &src,
 template SimpleTensor<int16_t> reshape_layer(const SimpleTensor<int16_t> &src, const TensorShape &output_shape);
 template SimpleTensor<uint32_t> reshape_layer(const SimpleTensor<uint32_t> &src, const TensorShape &output_shape);
 template SimpleTensor<int32_t> reshape_layer(const SimpleTensor<int32_t> &src, const TensorShape &output_shape);
-template SimpleTensor<half_float::half> reshape_layer(const SimpleTensor<half_float::half> &src, const TensorShape &output_shape);
+template SimpleTensor<half> reshape_layer(const SimpleTensor<half> &src, const TensorShape &output_shape);
 template SimpleTensor<float> reshape_layer(const SimpleTensor<float> &src, const TensorShape &output_shape);
 } // namespace reference
 } // namespace validation

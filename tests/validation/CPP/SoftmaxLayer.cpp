@@ -23,8 +23,8 @@
  */
 #include "SoftmaxLayer.h"
 
+#include "arm_compute/core/Types.h"
 #include "tests/validation/FixedPoint.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -113,7 +113,7 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src)
 }
 
 template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src);
-template SimpleTensor<half_float::half> softmax_layer(const SimpleTensor<half_float::half> &src);
+template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src);
 template SimpleTensor<qint8_t> softmax_layer(const SimpleTensor<qint8_t> &src);
 template SimpleTensor<qint16_t> softmax_layer(const SimpleTensor<qint16_t> &src);
 } // namespace reference

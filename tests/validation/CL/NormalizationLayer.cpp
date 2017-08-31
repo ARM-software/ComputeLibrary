@@ -34,7 +34,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/NormalizationLayerFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -45,8 +44,8 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2));
-RelativeTolerance<float>            tolerance_f32(0.05f);
+RelativeTolerance<half>  tolerance_f16(half(0.2));
+RelativeTolerance<float> tolerance_f32(0.05f);
 
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
@@ -68,12 +67,12 @@ using CLNormalizationLayerFixture = NormalizationValidationFixture<CLTensor, CLA
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

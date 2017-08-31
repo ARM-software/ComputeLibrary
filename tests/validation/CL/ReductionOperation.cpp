@@ -34,7 +34,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ReductionOperationFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {

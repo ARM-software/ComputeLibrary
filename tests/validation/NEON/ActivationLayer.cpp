@@ -34,7 +34,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ActivationLayerFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -144,16 +143,16 @@ using NEActivationLayerFixture = ActivationValidationFixture<Tensor, Accessor, N
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset),
-                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                                DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset),
+                                                                                                            framework::dataset::make("DataType",
+                                                                                                                    DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance(_data_type, _function));
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
-                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                              DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
+                                                                                                          framework::dataset::make("DataType",
+                                                                                                                  DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance(_data_type, _function));

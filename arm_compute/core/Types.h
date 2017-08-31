@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/TensorShape.h"
+#include "support/Half.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -34,6 +35,9 @@
 
 namespace arm_compute
 {
+/** 16-bit floating point type */
+using half = half_float::half;
+
 /** Image colour formats */
 enum class Format
 {

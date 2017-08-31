@@ -29,7 +29,6 @@
 #include "Utils.h"
 
 #include "tests/validation/Helpers.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {

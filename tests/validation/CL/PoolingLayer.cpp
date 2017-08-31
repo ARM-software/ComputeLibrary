@@ -34,7 +34,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/PoolingLayerFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -81,14 +80,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<float>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<half_float::half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP,
-                                                                                                               framework::dataset::make("DataType", DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP,
+                                                                                                   framework::dataset::make("DataType", DataType::F16))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
-                                                                                                                   framework::dataset::make("DataType", DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
+                                                                                                       framework::dataset::make("DataType", DataType::F16))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

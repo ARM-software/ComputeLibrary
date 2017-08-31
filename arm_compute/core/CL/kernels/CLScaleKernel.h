@@ -31,16 +31,14 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the warp affine kernel.*/
+/** Interface for the scale kernel */
 class CLScaleKernel : public ICLSimple2DKernel
 {
 public:
     /** Initialise the kernel's inputs, output and interpolation policy
      *
-     * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
-     *
-     * @param[in]  input            Source tensor. Data types supported: U8, S16.
-     * @param[out] output           Destination tensor. Data types supported: U8, S16 (Must be the same as the input tensor).
+     * @param[in]  input            Source tensor. Data types supported: U8/S16/F16/F32
+     * @param[out] output           Destination tensor. Data types supported: Same as @p input
      *                              All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]  policy           Interpolation type to use
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.

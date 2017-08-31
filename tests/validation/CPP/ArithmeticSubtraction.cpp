@@ -25,7 +25,6 @@
 
 #include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -54,8 +53,7 @@ SimpleTensor<T> arithmetic_subtraction(const SimpleTensor<T> &src1, const Simple
 template SimpleTensor<uint8_t> arithmetic_subtraction(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<int16_t> arithmetic_subtraction(const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<int8_t> arithmetic_subtraction(const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
-template SimpleTensor<half_float::half> arithmetic_subtraction(const SimpleTensor<half_float::half> &src1, const SimpleTensor<half_float::half> &src2, DataType dst_data_type,
-                                                               ConvertPolicy convert_policy);
+template SimpleTensor<half> arithmetic_subtraction(const SimpleTensor<half> &src1, const SimpleTensor<half> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<float> arithmetic_subtraction(const SimpleTensor<float> &src1, const SimpleTensor<float> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 } // namespace reference
 } // namespace validation

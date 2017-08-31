@@ -24,11 +24,9 @@
 #ifndef __ARM_COMPUTE_PIXELVALUE_H__
 #define __ARM_COMPUTE_PIXELVALUE_H__
 
-#include <cstdint>
+#include "arm_compute/core/Types.h"
 
-#if ARM_COMPUTE_ENABLE_FP16
-#include <arm_fp16.h> // needed for float16_t
-#endif                /* ARM_COMPUTE_ENABLE_FP16 */
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -86,17 +84,15 @@ public:
     {
         value.s32 = v;
     }
-#if ARM_COMPUTE_ENABLE_FP16
     /** Initialize the union with a F16 pixel value
      *
      * @param[in] v F16 value.
      */
-    PixelValue(float16_t v)
+    PixelValue(half v)
         : PixelValue()
     {
         value.f16 = v;
     }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
     /** Initialize the union with a F32 pixel value
      *
      * @param[in] v F32 value.
@@ -111,19 +107,17 @@ public:
      */
     union
         {
-            uint8_t rgb[3];  /**< 3 channels: RGB888 */
-            uint8_t yuv[3];  /**< 3 channels: Any YUV format */
-            uint8_t rgbx[4]; /**< 4 channels: RGBX8888 */
-            float   f32;     /**< Single channel float 32 */
-#if ARM_COMPUTE_ENABLE_FP16
-            float16_t f16; /**< Single channel F16 */
-#endif                 /* ARM_COMPUTE_ENABLE_FP16 */
-            uint8_t  u8;   /**< Single channel U8 */
-            int8_t   s8;   /**< Single channel S8 */
-            uint16_t u16;  /**< Single channel U16 */
-            int16_t  s16;  /**< Single channel S16 */
-            uint32_t u32;  /**< Single channel U32 */
-            int32_t  s32;  /**< Single channel S32 */
+            uint8_t  rgb[3];  /**< 3 channels: RGB888 */
+            uint8_t  yuv[3];  /**< 3 channels: Any YUV format */
+            uint8_t  rgbx[4]; /**< 4 channels: RGBX8888 */
+            float    f32;     /**< Single channel float 32 */
+            half     f16;     /**< Single channel F16 */
+            uint8_t  u8;      /**< Single channel U8 */
+            int8_t   s8;      /**< Single channel S8 */
+            uint16_t u16;     /**< Single channel U16 */
+            int16_t  s16;     /**< Single channel S16 */
+            uint32_t u32;     /**< Single channel U32 */
+            int32_t  s32;     /**< Single channel S32 */
         } value;
     /** Interpret the pixel value as a U8
      *
@@ -173,16 +167,14 @@ public:
     {
         v = value.s32;
     }
-#if ARM_COMPUTE_ENABLE_FP16
     /** Interpret the pixel value as a F16
      *
      * @param[out] v Returned value
      */
-    void get(float16_t &v) const
+    void get(half &v) const
     {
         v = value.f16;
     }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
     /** Interpret the pixel value as a F32
      *
      * @param[out] v Returned value

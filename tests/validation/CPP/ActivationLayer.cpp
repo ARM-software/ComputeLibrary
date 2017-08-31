@@ -23,9 +23,9 @@
  */
 #include "ActivationLayer.h"
 
+#include "arm_compute/core/Types.h"
 #include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -155,7 +155,7 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
 }
 
 template SimpleTensor<float> activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info);
-template SimpleTensor<half_float::half> activation_layer(const SimpleTensor<half_float::half> &src, ActivationLayerInfo info);
+template SimpleTensor<half> activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info);
 template SimpleTensor<qint8_t> activation_layer(const SimpleTensor<qint8_t> &src, ActivationLayerInfo info);
 template SimpleTensor<qint16_t> activation_layer(const SimpleTensor<qint16_t> &src, ActivationLayerInfo info);
 } // namespace reference

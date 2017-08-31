@@ -27,7 +27,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "tests/Globals.h"
-#include "tests/validation/half.h"
 
 #include <random>
 #include <type_traits>
@@ -45,7 +44,7 @@ struct is_floating_point : public std::is_floating_point<T>
 };
 
 template <>
-struct is_floating_point<half_float::half> : public std::true_type
+struct is_floating_point<half> : public std::true_type
 {
 };
 

@@ -33,7 +33,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/FullyConnectedLayerFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -44,9 +43,9 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-RelativeTolerance<float>            tolerance_f32(0.001f);
-RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2));
-constexpr float                     tolerance_num = 0.07f; /**< Tolerance number */
+RelativeTolerance<float> tolerance_f32(0.001f);
+RelativeTolerance<half>  tolerance_f16(half(0.2));
+constexpr float          tolerance_num = 0.07f; /**< Tolerance number */
 
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<float> tolerance_fixed_point(1.f);
@@ -109,16 +108,16 @@ using CLFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<CLTens
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                       FullyConnectedParameters),
-                       framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+                                                                                                                        FullyConnectedParameters),
+                                                                                                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(),
-                       FullyConnectedParameters),
-                       framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(),
+                                                                                                                      FullyConnectedParameters),
+                                                                                                              framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);

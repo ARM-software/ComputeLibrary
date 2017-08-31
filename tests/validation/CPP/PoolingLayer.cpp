@@ -23,8 +23,8 @@
  */
 #include "PoolingLayer.h"
 
+#include "arm_compute/core/Types.h"
 #include "tests/validation/FixedPoint.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -234,7 +234,7 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
 }
 
 template SimpleTensor<float> pooling_layer(const SimpleTensor<float> &src, PoolingLayerInfo info);
-template SimpleTensor<half_float::half> pooling_layer(const SimpleTensor<half_float::half> &src, PoolingLayerInfo info);
+template SimpleTensor<half> pooling_layer(const SimpleTensor<half> &src, PoolingLayerInfo info);
 template SimpleTensor<qint8_t> pooling_layer(const SimpleTensor<qint8_t> &src, PoolingLayerInfo info);
 template SimpleTensor<qint16_t> pooling_layer(const SimpleTensor<qint16_t> &src, PoolingLayerInfo info);
 } // namespace reference

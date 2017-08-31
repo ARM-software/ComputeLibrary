@@ -33,7 +33,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DirectConvolutionLayerFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -44,9 +43,9 @@ namespace validation
 namespace
 {
 // COMPMID-517 Invesitgate the mismatch to see whether it is a real bug
-RelativeTolerance<half_float::half> tolerance_fp16(half_float::half(0.2)); /**< Tolerance for floating point tests */
-RelativeTolerance<float>            tolerance_fp32(0.02f);                 /**< Tolerance for floating point tests */
-constexpr float                     tolerance_num = 0.07f;                 /**< Tolerance number */
+RelativeTolerance<half>  tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
+RelativeTolerance<float> tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
+constexpr float          tolerance_num = 0.07f;     /**< Tolerance number */
 
 constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(0);  /**< Tolerance for fixed point tests */
 constexpr AbsoluteTolerance<int16_t> tolerance_qs16(0); /**< Tolerance for fixed point tests */
@@ -85,7 +84,7 @@ using CLDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<CLTen
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<half_float::half>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);

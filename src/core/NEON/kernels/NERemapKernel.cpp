@@ -192,24 +192,24 @@ void NERemapKernel::remap_bilinear(const Window &window)
         const uint8_t *in_ptr   = in.ptr();
 
         uint8x8_t tmp0 = vdup_n_u8(0);
-        tmp0           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[0], mapy_ptr[0]), tmp0, 0);
-        tmp0           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[1], mapy_ptr[1]), tmp0, 1);
-        tmp0           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[2], mapy_ptr[2]), tmp0, 2);
-        tmp0           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[3], mapy_ptr[3]), tmp0, 3);
-        tmp0           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[4], mapy_ptr[4]), tmp0, 4);
-        tmp0           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[5], mapy_ptr[5]), tmp0, 5);
-        tmp0           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[6], mapy_ptr[6]), tmp0, 6);
-        tmp0           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[7], mapy_ptr[7]), tmp0, 7);
+        tmp0           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[0], mapy_ptr[0]), tmp0, 0);
+        tmp0           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[1], mapy_ptr[1]), tmp0, 1);
+        tmp0           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[2], mapy_ptr[2]), tmp0, 2);
+        tmp0           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[3], mapy_ptr[3]), tmp0, 3);
+        tmp0           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[4], mapy_ptr[4]), tmp0, 4);
+        tmp0           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[5], mapy_ptr[5]), tmp0, 5);
+        tmp0           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[6], mapy_ptr[6]), tmp0, 6);
+        tmp0           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[7], mapy_ptr[7]), tmp0, 7);
 
         uint8x8_t tmp1 = vdup_n_u8(0);
-        tmp1           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[8], mapy_ptr[8]), tmp1, 0);
-        tmp1           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[9], mapy_ptr[9]), tmp1, 1);
-        tmp1           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[10], mapy_ptr[10]), tmp1, 2);
-        tmp1           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[11], mapy_ptr[11]), tmp1, 3);
-        tmp1           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[12], mapy_ptr[12]), tmp1, 4);
-        tmp1           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[13], mapy_ptr[13]), tmp1, 5);
-        tmp1           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[14], mapy_ptr[14]), tmp1, 6);
-        tmp1           = vset_lane_u8(pixel_bilinear_c1u8_clamp(in_ptr, in_stride, width, height, mapx_ptr[15], mapy_ptr[15]), tmp1, 7);
+        tmp1           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[8], mapy_ptr[8]), tmp1, 0);
+        tmp1           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[9], mapy_ptr[9]), tmp1, 1);
+        tmp1           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[10], mapy_ptr[10]), tmp1, 2);
+        tmp1           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[11], mapy_ptr[11]), tmp1, 3);
+        tmp1           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[12], mapy_ptr[12]), tmp1, 4);
+        tmp1           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[13], mapy_ptr[13]), tmp1, 5);
+        tmp1           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[14], mapy_ptr[14]), tmp1, 6);
+        tmp1           = vset_lane_u8(pixel_bilinear_c1_clamp(in_ptr, in_stride, width, height, mapx_ptr[15], mapy_ptr[15]), tmp1, 7);
 
         vst1q_u8(out.ptr(), vcombine_u8(tmp0, tmp1));
     },

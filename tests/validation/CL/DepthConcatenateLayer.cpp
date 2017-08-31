@@ -32,7 +32,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DepthConcatenateLayerFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -50,14 +49,14 @@ using CLDepthConcatenateLayerFixture = DepthConcatenateValidationFixture<CLTenso
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConcatenateLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                       DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                                  DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType",
-                       DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType",
+                                                                                                                DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

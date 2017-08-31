@@ -177,7 +177,7 @@ void NEWarpAffineKernel<interpolation>::warp_undefined(const Window &window)
                     *out.ptr() = nearest_interpolation(in.ptr(), x0, y0, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, x0, y0);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, x0, y0);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -256,7 +256,7 @@ void NEWarpAffineKernel<interpolation>::warp_constant(const Window &window)
                     *out.ptr() = nearest_interpolation(in.ptr(), x0, y0, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, x0, y0);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, x0, y0);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -336,7 +336,7 @@ void NEWarpAffineKernel<interpolation>::warp_replicate(const Window &window)
                     *out.ptr() = nearest_interpolation(in.ptr(), x0, y0, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, x0, y0);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, x0, y0);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -445,7 +445,7 @@ void NEWarpPerspectiveKernel<interpolation>::warp_undefined(const Window &window
                     *out.ptr() = nearest_interpolation(in.ptr(), xn, yn, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, xn, yn);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, xn, yn);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -546,7 +546,7 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
                     *out.ptr() = nearest_interpolation(in.ptr(), xn, yn, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, xn, yn);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, xn, yn);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -678,7 +678,7 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
                     *out.ptr() = nearest_interpolation(in.ptr(), xn, yn, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, xn, yn);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, xn, yn);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");

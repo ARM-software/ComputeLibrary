@@ -34,7 +34,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ActivationLayerFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -162,16 +161,16 @@ using CLActivationLayerFixture = ActivationValidationFixture<CLTensor, CLAccesso
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset),
-                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                                DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset),
+                                                                                                            framework::dataset::make("DataType",
+                                                                                                                    DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLActivationLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
-                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                              DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLActivationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
+                                                                                                          framework::dataset::make("DataType",
+                                                                                                                  DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));

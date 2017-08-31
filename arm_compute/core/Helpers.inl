@@ -29,55 +29,6 @@
 
 namespace arm_compute
 {
-inline uint8_t delta_bilinear_c1u8(const uint8_t *pixel_ptr, size_t stride, float dx, float dy)
-{
-    ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
-
-    const float dx1 = 1.0f - dx;
-    const float dy1 = 1.0f - dy;
-
-    const float a00 = *pixel_ptr;
-    const float a01 = *(pixel_ptr + 1);
-    const float a10 = *(pixel_ptr + stride);
-    const float a11 = *(pixel_ptr + stride + 1);
-
-    const float w1 = dx1 * dy1;
-    const float w2 = dx * dy1;
-    const float w3 = dx1 * dy;
-    const float w4 = dx * dy;
-
-    return a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4;
-}
-
-inline uint8_t pixel_bilinear_c1u8(const uint8_t *first_pixel_ptr, size_t stride, float x, float y)
-{
-    ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
-
-    const int32_t xi = std::floor(x);
-    const int32_t yi = std::floor(y);
-
-    const float dx = x - xi;
-    const float dy = y - yi;
-
-    return delta_bilinear_c1u8(first_pixel_ptr + xi + yi * stride, stride, dx, dy);
-}
-
-inline uint8_t pixel_bilinear_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float x, float y)
-{
-    ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
-
-    x = std::max(-1.f, std::min(x, static_cast<float>(width)));
-    y = std::max(-1.f, std::min(y, static_cast<float>(height)));
-
-    const float xi = std::floor(x);
-    const float yi = std::floor(y);
-
-    const float dx = x - xi;
-    const float dy = y - yi;
-
-    return delta_bilinear_c1u8(first_pixel_ptr + static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride, stride, dx, dy);
-}
-
 inline uint8_t pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float wr, float hr, int x, int y)
 {
     ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);

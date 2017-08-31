@@ -26,8 +26,8 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "tests/validation/half.h"
 
 #include <array>
 #include <cmath>
@@ -79,7 +79,7 @@ double get_double_data(const void *ptr, DataType data_type)
         case DataType::S64:
             return *reinterpret_cast<const int64_t *>(ptr);
         case DataType::F16:
-            return *reinterpret_cast<const half_float::half *>(ptr);
+            return *reinterpret_cast<const half *>(ptr);
         case DataType::F32:
             return *reinterpret_cast<const float *>(ptr);
         case DataType::F64:

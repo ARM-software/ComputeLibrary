@@ -56,7 +56,7 @@ public:
         const float                            scale_x = distribution_float(generator);
         const float                            scale_y = distribution_float(generator);
         std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
-        uint8_t                                constant_border_value = distribution_u8(generator);
+        T                                      constant_border_value = static_cast<T>(distribution_u8(generator));
 
         _target    = compute_target(shape, scale_x, scale_y, policy, border_mode, constant_border_value);
         _reference = compute_reference(shape, scale_x, scale_y, policy, border_mode, constant_border_value);
@@ -70,7 +70,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape, const float scale_x, const float scale_y,
-                              InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
+                              InterpolationPolicy policy, BorderMode border_mode, T constant_border_value)
     {
         // Create tensors
         TensorType  src = create_tensor<TensorType>(shape, _data_type);
@@ -103,7 +103,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, const float scale_x, const float scale_y,
-                                      InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
+                                      InterpolationPolicy policy, BorderMode border_mode, T constant_border_value)
     {
         // Create reference
         SimpleTensor<T> src{ shape, _data_type };

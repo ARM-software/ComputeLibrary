@@ -23,8 +23,8 @@
  */
 #include "GEMM.h"
 
+#include "arm_compute/core/Types.h"
 #include "tests/validation/FixedPoint.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -113,7 +113,7 @@ SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
 }
 
 template SimpleTensor<float> gemm(const SimpleTensor<float> &a, const SimpleTensor<float> &b, const SimpleTensor<float> &c, float alpha, float beta);
-template SimpleTensor<half_float::half> gemm(const SimpleTensor<half_float::half> &a, const SimpleTensor<half_float::half> &b, const SimpleTensor<half_float::half> &c, float alpha, float beta);
+template SimpleTensor<half> gemm(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
 template SimpleTensor<qint8_t> gemm(const SimpleTensor<qint8_t> &a, const SimpleTensor<qint8_t> &b, const SimpleTensor<qint8_t> &c, float alpha, float beta);
 template SimpleTensor<qint16_t> gemm(const SimpleTensor<qint16_t> &a, const SimpleTensor<qint16_t> &b, const SimpleTensor<qint16_t> &c, float alpha, float beta);
 } // namespace reference

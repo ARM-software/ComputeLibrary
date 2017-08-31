@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_HALF_H__
-#define __ARM_COMPUTE_TEST_HALF_H__
+#ifndef __ARM_COMPUTE_HALF_H__
+#define __ARM_COMPUTE_HALF_H__
 
 #ifdef __ANDROID__
 // Android toolchain is broken and doesn't support all CPP11 math functions.
@@ -35,4 +35,4 @@
 
 #include "half/half.hpp"
 
-#endif /* __ARM_COMPUTE_TEST_HALF_H__ */
+#endif /* __ARM_COMPUTE_HALF_H__ */

@@ -32,7 +32,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DepthConcatenateLayerFixture.h"
-#include "tests/validation/half.h"
 
 namespace arm_compute
 {
@@ -51,14 +50,14 @@ using NEDepthConcatenateLayerFixture = DepthConcatenateValidationFixture<Tensor,
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                       DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                                  DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateShapes(), framework::dataset::make("DataType",
-                       DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateShapes(), framework::dataset::make("DataType",
+                                                                                                                DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

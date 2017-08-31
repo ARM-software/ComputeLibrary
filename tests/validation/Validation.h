@@ -269,7 +269,7 @@ struct compare<RelativeTolerance<U>> : public compare_base<RelativeTolerance<U>>
             return true;
         }
 
-        const U epsilon = (std::is_same<half_float::half, typename std::remove_cv<U>::type>::value || (this->_reference == 0)) ? static_cast<U>(0.01) : std::numeric_limits<U>::epsilon();
+        const U epsilon = (std::is_same<half, typename std::remove_cv<U>::type>::value || (this->_reference == 0)) ? static_cast<U>(0.01) : std::numeric_limits<U>::epsilon();
 
         if(std::abs(static_cast<double>(this->_reference) - static_cast<double>(this->_target)) <= epsilon)
         {

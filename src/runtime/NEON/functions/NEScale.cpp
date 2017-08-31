@@ -95,7 +95,7 @@ NEScale::NEScale() // NOLINT
 {
 }
 
-void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
+void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == input);
     ARM_COMPUTE_ERROR_ON(nullptr == output);
