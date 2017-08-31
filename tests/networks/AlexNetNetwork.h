@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_MODEL_OBJECTS_ALEXNET_H__
 #define __ARM_COMPUTE_TEST_MODEL_OBJECTS_ALEXNET_H__
 
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include "tests/AssetsLibrary.h"
@@ -80,55 +81,64 @@ public:
             w[7].allocator()->init(TensorInfo(TensorShape(4096U, 1000U), 1, _data_type, _fixed_point_position));
             b[7].allocator()->init(TensorInfo(TensorShape(1000U), 1, _data_type, _fixed_point_position));
 
-            w21 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates()));
-            w22 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates(0, 0, 0, 128)));
-            b21 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates()));
-            b22 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates(128)));
+            w11 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates()));
+            w12 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates(0, 0, 0, 128)));
+            b11 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates()));
+            b12 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates(128)));
 
-            w41 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates()));
-            w42 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates(0, 0, 0, 192)));
-            b41 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates()));
-            b42 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates(192)));
+            w31 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates()));
+            w32 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates(0, 0, 0, 192)));
+            b31 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates()));
+            b32 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates(192)));
 
-            w51 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates()));
-            w52 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates(0, 0, 0, 128)));
-            b51 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates()));
-            b52 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates(128)));
+            w41 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates()));
+            w42 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates(0, 0, 0, 128)));
+            b41 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates()));
+            b42 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates(128)));
         }
         else
         {
-            auto reshape = [&](unsigned int width, unsigned int height) -> TensorShape
+            auto reshape = [&](unsigned int width, unsigned int height, bool convolution_layer) -> TensorShape
             {
-                const int interleave_width = 16 / arm_compute::data_size_from_type(_data_type);
+                const bool is_optimised = std::is_same<ITensorType, ITensor>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && data_type == DataType::F32;
 
-                return TensorShape{ width * interleave_width, static_cast<unsigned int>(std::ceil(static_cast<float>(height) / interleave_width)) };
+                if(convolution_layer && is_optimised)
+                {
+                    return TensorShape{ height, width };
+                }
+                else
+                {
+                    const int interleave_width = 16 / arm_compute::data_size_from_type(_data_type);
+
+                    return TensorShape{ width * interleave_width, static_cast<unsigned int>(std::ceil(static_cast<float>(height) / interleave_width)) };
+                }
             };
 
             // Create tensor for the reshaped weights
-            w[0].allocator()->init(TensorInfo(reshape(366U, 96U), 1, _data_type, _fixed_point_position));
+            w[0].allocator()->init(TensorInfo(reshape(366U, 96U, true), 1, _data_type, _fixed_point_position));
 
             // Configure the direct convolution's weights. Direct convolution doesn't need reshape weights
             if(!_is_direct_conv)
             {
-                auto w21_tensor = std::unique_ptr<TensorType>(new TensorType());
-                auto w22_tensor = std::unique_ptr<TensorType>(new TensorType());
+                auto w11_tensor = std::unique_ptr<TensorType>(new TensorType());
+                auto w12_tensor = std::unique_ptr<TensorType>(new TensorType());
+                auto w31_tensor = std::unique_ptr<TensorType>(new TensorType());
+                auto w32_tensor = std::unique_ptr<TensorType>(new TensorType());
                 auto w41_tensor = std::unique_ptr<TensorType>(new TensorType());
                 auto w42_tensor = std::unique_ptr<TensorType>(new TensorType());
-                auto w51_tensor = std::unique_ptr<TensorType>(new TensorType());
-                auto w52_tensor = std::unique_ptr<TensorType>(new TensorType());
-                w21_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U), 1, _data_type, _fixed_point_position));
-                w22_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U), 1, _data_type, _fixed_point_position));
-                w41_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U), 1, _data_type, _fixed_point_position));
-                w42_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U), 1, _data_type, _fixed_point_position));
-                w51_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U), 1, _data_type, _fixed_point_position));
-                w52_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U), 1, _data_type, _fixed_point_position));
-                w[2].allocator()->init(TensorInfo(reshape(2560U, 384U), 1, _data_type, _fixed_point_position));
-                w21 = std::move(w21_tensor);
-                w22 = std::move(w22_tensor);
+                w11_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U, true), 1, _data_type, _fixed_point_position));
+                w12_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U, true), 1, _data_type, _fixed_point_position));
+                w31_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U, true), 1, _data_type, _fixed_point_position));
+                w32_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U, true), 1, _data_type, _fixed_point_position));
+                w41_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U, true), 1, _data_type, _fixed_point_position));
+                w42_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U, true), 1, _data_type, _fixed_point_position));
+                w[2].allocator()->init(TensorInfo(reshape(2560U, 384U, true), 1, _data_type, _fixed_point_position));
+                w11 = std::move(w11_tensor);
+                w12 = std::move(w12_tensor);
+                w31 = std::move(w31_tensor);
+                w32 = std::move(w32_tensor);
                 w41 = std::move(w41_tensor);
                 w42 = std::move(w42_tensor);
-                w51 = std::move(w51_tensor);
-                w52 = std::move(w52_tensor);
             }
             else
             {
@@ -140,20 +150,20 @@ public:
                 b[3].allocator()->init(TensorInfo(TensorShape(384U), 1, _data_type, _fixed_point_position));
                 w[4].allocator()->init(TensorInfo(TensorShape(3U, 3U, 192U, 256U), 1, _data_type, _fixed_point_position));
                 b[4].allocator()->init(TensorInfo(TensorShape(256U), 1, _data_type, _fixed_point_position));
-                w21 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates()));
-                w22 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates(0, 0, 0, 128)));
-                b21 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates()));
-                b22 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates(128)));
+                w11 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates()));
+                w12 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates(0, 0, 0, 128)));
+                b11 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates()));
+                b12 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates(128)));
 
-                w41 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates()));
-                w42 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates(0, 0, 0, 192)));
-                b41 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates()));
-                b42 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates(192)));
+                w31 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates()));
+                w32 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates(0, 0, 0, 192)));
+                b31 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates()));
+                b32 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates(192)));
 
-                w51 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates()));
-                w52 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates(0, 0, 0, 128)));
-                b51 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates()));
-                b52 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates(128)));
+                w41 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates()));
+                w42 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates(0, 0, 0, 128)));
+                b41 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates()));
+                b42 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates(128)));
             }
 
             b[5].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type, _fixed_point_position));
@@ -162,9 +172,9 @@ public:
 
             if(_batches > 1 && std::is_same<TensorType, Tensor>::value)
             {
-                w[5].allocator()->init(TensorInfo(reshape(9216U, 4096U), 1, _data_type, _fixed_point_position));
-                w[6].allocator()->init(TensorInfo(reshape(4096U, 4096U), 1, _data_type, _fixed_point_position));
-                w[7].allocator()->init(TensorInfo(reshape(4096U, 1000U), 1, _data_type, _fixed_point_position));
+                w[5].allocator()->init(TensorInfo(reshape(9216U, 4096U, false), 1, _data_type, _fixed_point_position));
+                w[6].allocator()->init(TensorInfo(reshape(4096U, 4096U, false), 1, _data_type, _fixed_point_position));
+                w[7].allocator()->init(TensorInfo(reshape(4096U, 1000U, false), 1, _data_type, _fixed_point_position));
             }
             else
             {
@@ -230,8 +240,8 @@ public:
         norm1.configure(&act1_out, &norm1_out, NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f));
         pool1.configure(&norm1_out, &pool1_out, PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
         // Layer 2
-        conv21.configure(pool11_out.get(), w21.get(), b21.get(), conv21_out.get(), PadStrideInfo(1, 1, 2, 2), WeightsInfo(_reshaped_weights, 5U, 5U, 128U));
-        conv22.configure(pool12_out.get(), w22.get(), b22.get(), conv22_out.get(), PadStrideInfo(1, 1, 2, 2), WeightsInfo(_reshaped_weights, 5U, 5U, 128U));
+        conv21.configure(pool11_out.get(), w11.get(), b11.get(), conv21_out.get(), PadStrideInfo(1, 1, 2, 2), WeightsInfo(_reshaped_weights, 5U, 5U, 128U));
+        conv22.configure(pool12_out.get(), w12.get(), b12.get(), conv22_out.get(), PadStrideInfo(1, 1, 2, 2), WeightsInfo(_reshaped_weights, 5U, 5U, 128U));
         act2.configure(&conv2_out, &act2_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
         norm2.configure(&act2_out, &norm2_out, NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f));
         pool2.configure(&norm2_out, &pool2_out, PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
@@ -240,12 +250,12 @@ public:
         conv3.configure(&pool2_out, &w[2], b2, &conv3_out, PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 384U));
         act3.configure(&conv3_out, &act3_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
         // Layer 4
-        conv41.configure(act31_out.get(), w41.get(), b41.get(), conv41_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 192U));
-        conv42.configure(act32_out.get(), w42.get(), b42.get(), conv42_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 192U));
+        conv41.configure(act31_out.get(), w31.get(), b31.get(), conv41_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 192U));
+        conv42.configure(act32_out.get(), w32.get(), b32.get(), conv42_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 192U));
         act4.configure(&conv4_out, &act4_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
         // Layer 5
-        conv51.configure(act41_out.get(), w51.get(), b51.get(), conv51_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 128U));
-        conv52.configure(act42_out.get(), w52.get(), b52.get(), conv52_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 128U));
+        conv51.configure(act41_out.get(), w41.get(), b41.get(), conv51_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 128U));
+        conv52.configure(act42_out.get(), w42.get(), b42.get(), conv52_out.get(), PadStrideInfo(1, 1, 1, 1), WeightsInfo(_reshaped_weights, 3U, 3U, 128U));
         act5.configure(&conv5_out, &act5_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
         pool5.configure(&act5_out, &pool5_out, PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
         // Layer 6
@@ -291,12 +301,12 @@ public:
 
             if(!_is_direct_conv)
             {
-                dynamic_cast<TensorType *>(w21.get())->allocator()->allocate();
-                dynamic_cast<TensorType *>(w22.get())->allocator()->allocate();
+                dynamic_cast<TensorType *>(w11.get())->allocator()->allocate();
+                dynamic_cast<TensorType *>(w12.get())->allocator()->allocate();
+                dynamic_cast<TensorType *>(w31.get())->allocator()->allocate();
+                dynamic_cast<TensorType *>(w32.get())->allocator()->allocate();
                 dynamic_cast<TensorType *>(w41.get())->allocator()->allocate();
                 dynamic_cast<TensorType *>(w42.get())->allocator()->allocate();
-                dynamic_cast<TensorType *>(w51.get())->allocator()->allocate();
-                dynamic_cast<TensorType *>(w52.get())->allocator()->allocate();
             }
             else
             {
@@ -359,12 +369,12 @@ public:
 
             if(!_is_direct_conv)
             {
-                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w21.get())), 9);
-                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w22.get())), 10);
-                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w41.get())), 11);
-                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w42.get())), 12);
-                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w51.get())), 13);
-                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w52.get())), 14);
+                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w11.get())), 9);
+                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w12.get())), 10);
+                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w31.get())), 11);
+                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w32.get())), 12);
+                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w41.get())), 13);
+                library->fill_tensor_uniform(Accessor(*dynamic_cast<TensorType *>(w42.get())), 14);
             }
             else
             {
@@ -481,18 +491,18 @@ public:
             }
         }
 
-        w21.reset();
-        w22.reset();
-        b21.reset();
-        b21.reset();
+        w11.reset();
+        w12.reset();
+        b11.reset();
+        b11.reset();
+        w31.reset();
+        w32.reset();
+        b31.reset();
+        b32.reset();
         w41.reset();
         w42.reset();
         b41.reset();
         b42.reset();
-        w51.reset();
-        w52.reset();
-        b51.reset();
-        b52.reset();
 
         conv1_out.allocator()->free();
         act1_out.allocator()->free();
@@ -595,9 +605,9 @@ private:
 
     TensorType input{}, output{};
     std::array<TensorType, 8> w{ {} }, b{ {} };
-    std::unique_ptr<ITensorType> w21{ nullptr }, w22{ nullptr }, b21{ nullptr }, b22{ nullptr };
+    std::unique_ptr<ITensorType> w11{ nullptr }, w12{ nullptr }, b11{ nullptr }, b12{ nullptr };
+    std::unique_ptr<ITensorType> w31{ nullptr }, w32{ nullptr }, b31{ nullptr }, b32{ nullptr };
     std::unique_ptr<ITensorType> w41{ nullptr }, w42{ nullptr }, b41{ nullptr }, b42{ nullptr };
-    std::unique_ptr<ITensorType> w51{ nullptr }, w52{ nullptr }, b51{ nullptr }, b52{ nullptr };
 
     TensorType conv1_out{}, act1_out{}, norm1_out{}, pool1_out{};
     TensorType conv2_out{}, act2_out{}, pool2_out{}, norm2_out{};

@@ -48,11 +48,18 @@ enum class CPUTarget
     A75_DOT = (A75 | DOT),
 };
 
+struct CPUInfo
+{
+    CPUTarget CPU{ CPUTarget::INTRINSICS };
+    int       L1_size{ 0 };
+    int       L2_size{ 0 };
+};
+
 struct ThreadInfo
 {
-    int       thread_id{ 0 };
-    int       num_threads{ 1 };
-    CPUTarget cpu{ CPUTarget::INTRINSICS };
+    int     thread_id{ 0 };
+    int     num_threads{ 1 };
+    CPUInfo cpu_info{};
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPP_TYPES_H__ */

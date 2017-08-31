@@ -23,17 +23,25 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 
+#include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "support/ToolchainSupport.h"
+
+namespace arm_compute
+{
+#include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemm_12x8.hpp"
+} // namespace arm_compute
 
 #include <cmath>
 #include <tuple>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _weights_reshape_kernel(), _weights_transposed_kernel(), _weights_reshaped(), _transpose1xW(false)
 {
@@ -69,8 +77,10 @@ void NEConvolutionLayerReshapeWeights::configure(const ITensor *weights, const I
 
         _weights_reshaped.allocator()->init(info_wr);
         _memory_group.manage(&_weights_reshaped);
+
         _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
         _weights_transposed_kernel.configure(&_weights_reshaped, output);
+
         _weights_reshaped.allocator()->allocate();
     }
     else
@@ -84,6 +94,7 @@ void NEConvolutionLayerReshapeWeights::run()
     _memory_group.acquire();
 
     NEScheduler::get().schedule(&_weights_reshape_kernel, 3);
+
     if(_transpose1xW)
     {
         NEScheduler::get().schedule(&_weights_transposed_kernel, Window::DimY);
@@ -93,8 +104,8 @@ void NEConvolutionLayerReshapeWeights::run()
 }
 
 NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(),
-      _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _has_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false)
+    : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_optimised_kernel(nullptr), _output_col2im_kernel(),
+      _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _workspace(), _has_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false)
 {
 }
 
@@ -137,45 +148,72 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_width, kernel_height,
                                                  conv_info);
 
-    // Check if its a "fully connected" convolution
+    // Check if its a "fully connected" convolution, i.e. the output size is 1x1xnum_kernels
     _is_fully_connected_convolution = ((conv_w == 1) && (conv_h == 1));
+
+#if defined(__aarch64__)
+    if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && dt == DataType::F32)
+    {
+        _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch64Kernel>();
+    }
+#endif /* defined(__aarch64__) */
 
     unsigned int mat_weights_cols = weights->info()->dimension(3);
     unsigned int mat_weights_rows = weights->info()->dimension(0) * weights->info()->dimension(1) * weights->info()->dimension(2) + (_has_bias ? 1 : 0);
 
     // Reshape weights if needed
-    if(_are_weights_reshaped)
+    if(_mm_optimised_kernel != nullptr)
     {
-        mat_weights_cols                         = weights_info.num_kernels();
-        const unsigned int quarter_reshaped_cols = weights->info()->dimension(0) / 4;
-        mat_weights_rows                         = (_has_bias ? 1 + quarter_reshaped_cols : quarter_reshaped_cols);
-    }
-    else
-    {
-        if(_is_fully_connected_convolution)
+        if(_are_weights_reshaped)
         {
-            // Create tensor to store the reshaped weights
-            TensorShape shape_wr(mat_weights_cols, mat_weights_rows);
-            TensorInfo  info_wr(shape_wr, 1, dt, fixed_point_position);
-            _weights_reshaped.allocator()->init(info_wr);
-            _reshape_weights.configure(weights, biases, &_weights_reshaped, false /* 1xW transpose */);
+            mat_weights_cols = weights_info.num_kernels();
+            mat_weights_rows = weights->info()->dimension(1);
         }
         else
         {
-            // Create tensor to store transposed weights
-            const float transpose_width = 16.0f / input->info()->element_size();
-            TensorShape shape_wt(mat_weights_rows * static_cast<unsigned int>(transpose_width), static_cast<unsigned int>(std::ceil(mat_weights_cols / transpose_width)));
-            TensorInfo  info_wt(shape_wt, 1, dt, fixed_point_position);
-            _weights_reshaped.allocator()->init(info_wt);
-            _reshape_weights.configure(weights, biases, &_weights_reshaped, true /* 1xW transpose */);
+            TensorShape reshaped_weights_shape{ mat_weights_cols, mat_weights_rows };
+
+            // Create tensor to store the reshaped weights
+            _weights_reshaped.allocator()->init(TensorInfo(reshaped_weights_shape, 1, dt, fixed_point_position));
+            _reshape_weights.configure(weights, biases, &_weights_reshaped, false /* 1xW transpose */);
+            weights = &_weights_reshaped;
         }
-        weights = &_weights_reshaped;
+    }
+    else
+    {
+        if(_are_weights_reshaped)
+        {
+            mat_weights_cols = weights_info.num_kernels();
+            mat_weights_rows = weights->info()->dimension(0) / 4 + (_has_bias ? 1 : 0);
+        }
+        else
+        {
+            TensorShape reshaped_weights_shape;
+
+            if(_is_fully_connected_convolution)
+            {
+                reshaped_weights_shape = TensorShape{ mat_weights_cols, mat_weights_rows };
+            }
+            else
+            {
+                // Create tensor to store transposed weights
+                const float transpose_width = 16.0f / input->info()->element_size();
+                reshaped_weights_shape      = TensorShape{ mat_weights_rows *static_cast<unsigned int>(transpose_width),
+                                                           static_cast<unsigned int>(std::ceil(mat_weights_cols / transpose_width)) };
+            }
+
+            // Create tensor to store the reshaped weights
+            _weights_reshaped.allocator()->init(TensorInfo(reshaped_weights_shape, 1, dt, fixed_point_position));
+            _reshape_weights.configure(weights, biases, &_weights_reshaped, !_is_fully_connected_convolution /* 1xW transpose */);
+            weights = &_weights_reshaped;
+        }
     }
 
     // Create tensor to store im2col reshaped inputs
     const unsigned int mat_input_cols = mat_weights_rows;
     const unsigned int mat_input_rows = conv_w * conv_h;
-    TensorShape        shape_im2col   = input->info()->tensor_shape();
+
+    TensorShape shape_im2col(input->info()->tensor_shape());
     shape_im2col.set(0, mat_input_cols);
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
@@ -185,7 +223,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     // Create tensor (interleave) to prepare input tensor for GEMM
     if(!_is_fully_connected_convolution)
     {
-        TensorShape shape_interleaved = shape_im2col;
+        TensorShape shape_interleaved(shape_im2col);
         shape_interleaved.set(0, shape_interleaved.x() * 4);
         shape_interleaved.set(1, std::ceil(shape_interleaved.y() / 4.f));
         _input_interleaved_reshaped.allocator()->init(TensorInfo(shape_interleaved, 1, dt, fixed_point_position));
@@ -193,7 +231,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     }
 
     // Create GEMM output tensor
-    TensorShape shape_gemm = _input_im2col_reshaped.info()->tensor_shape();
+    TensorShape shape_gemm(_input_im2col_reshaped.info()->tensor_shape());
     shape_gemm.set(0, mat_weights_cols);
     shape_gemm.set(1, mat_input_rows);
     _gemm_output.allocator()->init(TensorInfo(shape_gemm, 1, dt, fixed_point_position));
@@ -201,16 +239,49 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
 
     // Configure kernels
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
-    if(_is_fully_connected_convolution)
+
+#if defined(__aarch64__)
+    if(_mm_optimised_kernel != nullptr)
     {
-        _mm_kernel.configure(&_input_im2col_reshaped, weights, &_gemm_output, 1.0f);
+        struct CPUInfo ci = NEScheduler::get().cpu_info();
+
+        const int M = _gemm_output.info()->tensor_shape().y();
+        const int N = _gemm_output.info()->tensor_shape().x();
+        const int K = _input_im2col_reshaped.info()->tensor_shape().x();
+
+        GemmInterleaved<sgemm_12x8, float, float> gemm(&ci, M, N, K, false, false);
+
+        constexpr size_t alignment = 4096;
+        _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
+        _memory_group.manage(&_workspace);
+
+        // Configure matrix multiplication kernel
+        if(_is_fully_connected_convolution)
+        {
+            _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace, 1.f, 0.f, false, false);
+        }
+        else
+        {
+            _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace);
+        }
+
+        _workspace.allocator()->allocate();
     }
     else
+#endif /* defined(__aarch64__) */
     {
-        _input_interleave_kernel.configure(&_input_im2col_reshaped, &_input_interleaved_reshaped);
-        _mm_kernel.configure(&_input_interleaved_reshaped, weights, &_gemm_output, 1.0f);
-        _input_interleaved_reshaped.allocator()->allocate();
+        if(_is_fully_connected_convolution)
+        {
+            _mm_kernel.configure(&_input_im2col_reshaped, weights, &_gemm_output, 1.0f);
+        }
+        else
+        {
+            _input_interleave_kernel.configure(&_input_im2col_reshaped, &_input_interleaved_reshaped);
+            _mm_kernel.configure(&_input_interleaved_reshaped, weights, &_gemm_output, 1.0f);
+            _input_interleaved_reshaped.allocator()->allocate();
+        }
     }
+
     _input_im2col_reshaped.allocator()->allocate();
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
     _gemm_output.allocator()->allocate();
@@ -237,17 +308,26 @@ void NEConvolutionLayer::run()
 
     // Run input reshaping
     NEScheduler::get().schedule(&_input_im2col_kernel, Window::DimY);
-    if(!_is_fully_connected_convolution)
-    {
-        // Run interleave
-        NEScheduler::get().schedule(&_input_interleave_kernel, Window::DimY);
-    }
 
     // Runs matrix multiply on reshaped matrices
-    NEScheduler::get().schedule(&_mm_kernel, Window::DimY);
+    if(_mm_optimised_kernel != nullptr)
+    {
+        NEScheduler::get().schedule(_mm_optimised_kernel.get(), Window::DimY);
+    }
+    else
+    {
+        if(!_is_fully_connected_convolution)
+        {
+            // Run interleave
+            NEScheduler::get().schedule(&_input_interleave_kernel, Window::DimY);
+        }
+
+        NEScheduler::get().schedule(&_mm_kernel, Window::DimY);
+    }
 
     // Reshape output matrix
     NEScheduler::get().schedule(&_output_col2im_kernel, Window::DimY);
 
     _memory_group.release();
 }
+} // namespace arm_compute

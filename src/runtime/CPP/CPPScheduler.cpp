@@ -178,7 +178,7 @@ void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
 
     /** [Scheduler example] */
     ThreadInfo info;
-    info.cpu = _target;
+    info.cpu_info = _info;
 
     const Window      &max_window     = kernel->window();
     const unsigned int num_iterations = max_window.num_iterations(split_dimension);

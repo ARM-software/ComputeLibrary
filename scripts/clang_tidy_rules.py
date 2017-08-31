@@ -42,12 +42,16 @@ def filter_clang_tidy_lines( lines ):
     for i in range(0, len(lines)):
         line = lines[i]
 
+        if "/assembly/" in line:
+            continue
+
         if "error:" in line:
             if (("Utils.cpp" in line and "'arm_compute_version.embed' file not found" in line) or
                 ("cl2.hpp" in line and "cast from pointer to smaller type 'cl_context_properties' (aka 'int') loses information" in line) or
                 ("arm_fp16.h" in line) or
                 ("omp.h" in line) or
-                ("memory" in line and "cast from pointer to smaller type 'uintptr_t' (aka 'unsigned int') loses information" in line) or
+                ("cast from pointer to smaller type 'uintptr_t' (aka 'unsigned int') loses information" in line) or
+                ("cast from pointer to smaller type 'std::uintptr_t' (aka 'unsigned int') loses information" in line) or
                 ("NEMath.inl" in line and "statement expression not allowed at file scope" in line) or
                 ("Utils.h" in line and "no member named 'unmap' in 'arm_compute::Tensor'" in line) or
                 ("Utils.h" in line and "no member named 'map' in 'arm_compute::Tensor'" in line) or

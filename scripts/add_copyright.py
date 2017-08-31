@@ -71,7 +71,7 @@ for top in ['./arm_compute', './tests','./src','./examples','./utils/','./framew
                 content = fd.read()
                 _, extension = os.path.splitext(f)
 
-                if extension in ['.cpp', '.h', '.inl', '.cl']:
+                if extension in ['.cpp', '.h', '.hpp', '.inl', '.cl']:
                     if not  content.startswith('/*'):
                         add_cpp_copyright(path, content)
                 elif extension == '.py' or f in ['SConstruct', 'SConscript']:

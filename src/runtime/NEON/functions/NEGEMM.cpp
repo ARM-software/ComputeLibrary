@@ -26,18 +26,27 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "support/ToolchainSupport.h"
+
+namespace arm_compute
+{
+#include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemm_12x8.hpp"
+} // namespace arm_compute
 
 #include <cmath>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _run_vector_matrix_multiplication(false), _run_addition(false)
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _mm_optimised_kernel(nullptr), _ma_kernel(), _tmp_a(), _tmp_b(), _workspace(),
+      _run_vector_matrix_multiplication(false), _run_addition(false)
 {
 }
 
@@ -57,57 +66,94 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
         ARM_COMPUTE_ERROR_ON_MSG(c->info()->dimension(1) != d->info()->dimension(1), "The C matrix must have the same number of columns as the output matrix");
     }
 
-    // Check if the first input tensor is a vector. If so, all the kernels for reshaping the tensors can be skipped
-    if((a->info()->dimension(1) == 1))
-    {
-        _run_vector_matrix_multiplication = true;
+    _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
 
+#if defined(__aarch64__)
+    if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
+    {
+        _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch64Kernel>();
+    }
+#endif /* defined(__aarch64__) */
+
+    // Check if the first input tensor is a vector.
+    // If so, all the kernels for reshaping the tensors can be skipped
+    if(_run_vector_matrix_multiplication)
+    {
         // Configure the matrix multiply kernel
         _mm_kernel.configure(a, b, d, alpha);
+
+        // Configure matrix addition kernel
+        if(beta != 0 && c != nullptr)
+        {
+            _ma_kernel.configure(c, d, beta);
+            _run_addition = true;
+        }
     }
     else
     {
-        _run_vector_matrix_multiplication = false;
+#if defined(__aarch64__)
+        if(_mm_optimised_kernel != nullptr)
+        {
+            struct CPUInfo ci = NEScheduler::get().cpu_info();
 
-        TensorShape shape_tmp_a = a->info()->tensor_shape();
-        TensorShape shape_tmp_b = b->info()->tensor_shape();
+            const int M = d->info()->tensor_shape().y();
+            const int N = d->info()->tensor_shape().x();
+            const int K = a->info()->tensor_shape().x();
 
-        shape_tmp_a.set(0, a->info()->dimension(0) * 4);
-        shape_tmp_a.set(1, std::ceil(a->info()->dimension(1) / 4.0f));
+            GemmInterleaved<sgemm_12x8, float, float> gemm(&ci, M, N, K, false, false);
 
-        const unsigned int transpose_w = 16 / data_size_from_type(b->info()->data_type());
-        shape_tmp_b.set(0, b->info()->dimension(1) * transpose_w);
-        shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / static_cast<float>(transpose_w)));
+            constexpr size_t alignment = 4096;
+            _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
+            _memory_group.manage(&_workspace);
 
-        TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type(), a->info()->fixed_point_position());
-        TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type(), a->info()->fixed_point_position());
+            // Configure matrix multiplication kernel
+            _mm_optimised_kernel->configure(a, b, d, &_workspace, alpha, 0.f);
 
-        _tmp_a.allocator()->init(info_a);
-        _tmp_b.allocator()->init(info_b);
+            _workspace.allocator()->allocate();
+        }
+        else
+#endif /* defined(__aarch64__) */
+        {
+            TensorShape shape_tmp_a = a->info()->tensor_shape();
+            TensorShape shape_tmp_b = b->info()->tensor_shape();
 
-        // Manage intermediate buffers
-        _memory_group.manage(&_tmp_a);
-        _memory_group.manage(&_tmp_b);
+            shape_tmp_a.set(0, a->info()->dimension(0) * 4);
+            shape_tmp_a.set(1, std::ceil(a->info()->dimension(1) / 4.0f));
 
-        // Configure interleave kernel
-        _interleave_kernel.configure(a, &_tmp_a);
+            const unsigned int transpose_w = 16 / data_size_from_type(b->info()->data_type());
+            shape_tmp_b.set(0, b->info()->dimension(1) * transpose_w);
+            shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / static_cast<float>(transpose_w)));
 
-        // Configure transpose kernel
-        _transpose_kernel.configure(b, &_tmp_b);
+            TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type(), a->info()->fixed_point_position());
+            TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type(), a->info()->fixed_point_position());
 
-        // Configure matrix multiplication kernel
-        _mm_kernel.configure(&_tmp_a, &_tmp_b, d, alpha);
+            _tmp_a.allocator()->init(info_a);
+            _tmp_b.allocator()->init(info_b);
 
-        // Allocate once the all configure methods have been called
-        _tmp_a.allocator()->allocate();
-        _tmp_b.allocator()->allocate();
-    }
+            // Manage intermediate buffers
+            _memory_group.manage(&_tmp_a);
+            _memory_group.manage(&_tmp_b);
 
-    // Configure matrix addition kernel
-    if(beta != 0 && c != nullptr)
-    {
-        _ma_kernel.configure(c, d, beta);
-        _run_addition = true;
+            // Configure interleave kernel
+            _interleave_kernel.configure(a, &_tmp_a);
+
+            // Configure transpose kernel
+            _transpose_kernel.configure(b, &_tmp_b);
+
+            // Configure matrix multiplication kernel
+            _mm_kernel.configure(&_tmp_a, &_tmp_b, d, alpha);
+
+            // Allocate once the all configure methods have been called
+            _tmp_a.allocator()->allocate();
+            _tmp_b.allocator()->allocate();
+
+            // Configure matrix addition kernel
+            if(beta != 0 && c != nullptr)
+            {
+                _ma_kernel.configure(c, d, beta);
+                _run_addition = true;
+            }
+        }
     }
 }
 
@@ -115,23 +161,31 @@ void NEGEMM::run()
 {
     _memory_group.acquire();
 
-    if(!_run_vector_matrix_multiplication)
+    if(_mm_optimised_kernel != nullptr)
     {
-        // Run interleave kernel
-        NEScheduler::get().schedule(&_interleave_kernel, Window::DimY);
-
-        // Run transpose kernel
-        NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
+        NEScheduler::get().schedule(_mm_optimised_kernel.get(), Window::DimY);
+        _memory_group.release();
     }
-
-    // Run matrix multiply kernel
-    NEScheduler::get().schedule(&_mm_kernel, _run_vector_matrix_multiplication ? Window::DimX : Window::DimY);
-
-    _memory_group.release();
-
-    // Run matrix addition kernel
-    if(_run_addition)
+    else
     {
-        NEScheduler::get().schedule(&_ma_kernel, Window::DimY);
+        if(!_run_vector_matrix_multiplication)
+        {
+            // Run interleave kernel
+            NEScheduler::get().schedule(&_interleave_kernel, Window::DimY);
+
+            // Run transpose kernel
+            NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
+        }
+
+        NEScheduler::get().schedule(&_mm_kernel, _run_vector_matrix_multiplication ? Window::DimX : Window::DimY);
+
+        _memory_group.release();
+
+        // Run matrix addition kernel
+        if(_run_addition)
+        {
+            NEScheduler::get().schedule(&_ma_kernel, Window::DimY);
+        }
     }
 }
+} // namespace arm_compute

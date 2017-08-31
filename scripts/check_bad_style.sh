@@ -5,7 +5,7 @@ set -e
 
 DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./support"
 
-grep -HrnP "/\*\*$" $DIRECTORIES | tee bad_style.log
+grep -HrnP --exclude-dir=assembly "/\*\*$" $DIRECTORIES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))
 then
     echo ""
@@ -13,7 +13,7 @@ then
     exit -1
 fi
 
-grep -Hnr --exclude=Doxyfile "@brief" $DIRECTORIES | tee bad_style.log
+grep -Hnr --exclude-dir=assembly --exclude=Doxyfile "@brief" $DIRECTORIES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))
 then
     echo ""
@@ -21,7 +21,7 @@ then
     exit -1
 fi
 
-grep -HnRE "\buint " --exclude-dir=cl_kernels $DIRECTORIES | tee bad_style.log
+grep -HnRE --exclude-dir=assembly "\buint " --exclude-dir=cl_kernels $DIRECTORIES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -29,7 +29,7 @@ then
     exit -1
 fi
 
-grep -HnR "float32_t" $DIRECTORIES | tee bad_style.log
+grep -HnR --exclude-dir=assembly "float32_t" $DIRECTORIES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -37,7 +37,7 @@ then
     exit -1
 fi
 
-grep -Hnir "arm[_ ]\?cv" $DIRECTORIES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly "arm[_ ]\?cv" $DIRECTORIES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -45,7 +45,7 @@ then
     exit -1
 fi
 
-grep -Hnir "#.*defined[^(]" $DIRECTORIES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly "#.*defined[^(]" $DIRECTORIES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -53,7 +53,7 @@ then
     exit -1
 fi
 
-grep -Hnir "#else$\|#endif$" $DIRECTORIES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly "#else$\|#endif$" $DIRECTORIES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -61,7 +61,7 @@ then
     exit -1
 fi
 
-grep -Hnir "ARM_COMPUTE_ENABLE_FP16" ./tests/validation/CL | tee bad_style.log
+grep -Hnir --exclude-dir=assembly "ARM_COMPUTE_ENABLE_FP16" ./tests/validation/CL | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""

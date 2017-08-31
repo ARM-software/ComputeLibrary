@@ -35,23 +35,23 @@ class IScheduler
 {
 public:
     /** Default constructor. */
-    IScheduler()
-        : _target(CPUTarget::INTRINSICS)
-    {
-    }
+    IScheduler();
 
     /** Destructor. */
     virtual ~IScheduler() = default;
+
     /** Sets the number of threads the scheduler will use to run the kernels.
      *
      * @param[in] num_threads If set to 0, then one thread per CPU core available on the system will be used, otherwise the number of threads specified.
      */
     virtual void set_num_threads(unsigned int num_threads) = 0;
+
     /** Returns the number of threads that the SingleThreadScheduler has in his pool.
      *
      * @return Number of threads available in SingleThreadScheduler.
      */
     virtual unsigned int num_threads() const = 0;
+
     /** Runs the kernel in the same thread as the caller synchronously.
      *
      * @param[in] kernel          Kernel to execute.
@@ -65,24 +65,14 @@ public:
      */
     void set_target(CPUTarget target);
 
-    /** Return the current CPU target.
+    /** Get CPU info.
      *
-     * @return Target CPU.
+     * @return CPU info.
      */
-    CPUTarget target() const;
+    CPUInfo cpu_info() const;
 
 protected:
-    CPUTarget _target;
+    CPUInfo _info{};
 };
-
-inline void IScheduler::set_target(CPUTarget target)
-{
-    _target = target;
-}
-
-inline CPUTarget IScheduler::target() const
-{
-    return _target;
-}
 }
 #endif /* __ARM_COMPUTE_ISCHEDULER_H__ */

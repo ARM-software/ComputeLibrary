@@ -28,6 +28,11 @@ else
 fi
 for f in $files
 do
+    if [[ $f == *"/assembly/"* ]]
+    then
+        continue
+    fi
+
 	sed -i 's/\t/    /g' $f
 	clang-format -i -style=file $f
 	astyle -n -q $ASTYLE_PARAMETERS $f

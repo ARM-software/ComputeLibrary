@@ -85,10 +85,10 @@ void gemm_interleave_16bit_elements(const ITensor *input, ITensor *output, const
         const uint16x4x4_t data =
         {
             {
-                vld1_u16(reinterpret_cast<uint16_t *>(in.ptr() + 0 * in_stride)),
-                vld1_u16(reinterpret_cast<uint16_t *>(in.ptr() + 1 * in_stride)),
-                vld1_u16(reinterpret_cast<uint16_t *>(in.ptr() + 2 * in_stride)),
-                vld1_u16(reinterpret_cast<uint16_t *>(in.ptr() + 3 * in_stride)),
+                vld1_u16(reinterpret_cast<const uint16_t *>(in.ptr() + 0 * in_stride)),
+                vld1_u16(reinterpret_cast<const uint16_t *>(in.ptr() + 1 * in_stride)),
+                vld1_u16(reinterpret_cast<const uint16_t *>(in.ptr() + 2 * in_stride)),
+                vld1_u16(reinterpret_cast<const uint16_t *>(in.ptr() + 3 * in_stride)),
             }
         };
         vst4_u16(reinterpret_cast<uint16_t *>(out.ptr()), data);
@@ -113,10 +113,10 @@ void gemm_interleave_32bit_elements(const ITensor *input, ITensor *output, const
         const uint32x4x4_t data =
         {
             {
-                vld1q_u32(reinterpret_cast<uint32_t *>(in.ptr() + 0 * in_stride)),
-                vld1q_u32(reinterpret_cast<uint32_t *>(in.ptr() + 1 * in_stride)),
-                vld1q_u32(reinterpret_cast<uint32_t *>(in.ptr() + 2 * in_stride)),
-                vld1q_u32(reinterpret_cast<uint32_t *>(in.ptr() + 3 * in_stride))
+                vld1q_u32(reinterpret_cast<const uint32_t *>(in.ptr() + 0 * in_stride)),
+                vld1q_u32(reinterpret_cast<const uint32_t *>(in.ptr() + 1 * in_stride)),
+                vld1q_u32(reinterpret_cast<const uint32_t *>(in.ptr() + 2 * in_stride)),
+                vld1q_u32(reinterpret_cast<const uint32_t *>(in.ptr() + 3 * in_stride))
             }
         };
         vst4q_u32(reinterpret_cast<uint32_t *>(out.ptr()), data);

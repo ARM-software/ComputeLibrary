@@ -21,36 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/SingleThreadScheduler.h"
+#ifndef __ARM_COMPUTE_NEGEMMAARCH64KERNEL_H__
+#define __ARM_COMPUTE_NEGEMMAARCH64KERNEL_H__
 
-#include "arm_compute/core/CPP/ICPPKernel.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 
 namespace arm_compute
 {
-SingleThreadScheduler &SingleThreadScheduler::get()
-{
-    static SingleThreadScheduler scheduler;
-    return scheduler;
-}
+class ITensor;
 
-void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
+/** AArch64 NEON kernel to multiply two input matrices "A" and "B". */
+class NEGEMMAArch64Kernel : public NEGEMMAssemblyBaseKernel
 {
-    ARM_COMPUTE_UNUSED(num_threads);
-    ARM_COMPUTE_ERROR_ON(num_threads != 1);
-}
+public:
+    // Inherited methods overridden:
+    void run(const Window &window, const ThreadInfo &info) override;
 
-void SingleThreadScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
-{
-    ARM_COMPUTE_UNUSED(split_dimension);
-    ThreadInfo info;
-    info.cpu_info = cpu_info();
-    kernel->run(kernel->window(), info);
-}
-
-unsigned int SingleThreadScheduler::num_threads() const
-{
-    return 1;
-}
+protected:
+    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;
+};
 } // namespace arm_compute
+#endif /*__ARM_COMPUTE_NEGEMMAARCH64KERNEL_H__*/
