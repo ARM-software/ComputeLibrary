@@ -48,15 +48,15 @@ public:
         // inception_stem3_pool
         add_config(TensorShape(71U, 71U, 192U), TensorShape(35U, 35U, 192U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // inception_a1_pool_ave, inception_a2_pool_ave, inception_a3_pool_ave, inception_a4_pool_ave
-        add_config(TensorShape(35U, 35U, 384U), TensorShape(3U, 3U, 384U), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(35U, 35U, 384U), TensorShape(35U, 35U, 384U), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
         // reduction_a_pool
         add_config(TensorShape(35U, 35U, 384U), TensorShape(17U, 17U, 384U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // inception_b1_pool_ave, inception_b2_pool_ave, inception_b3_pool_ave, inception_b4_pool_ave, inception_b5_pool_ave, inception_b6_pool_ave, inception_b7_pool_ave
-        add_config(TensorShape(17U, 17U, 1024U), TensorShape(3U, 3U, 1024U), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(17U, 17U, 1024U), TensorShape(17U, 17U, 1024U), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
         // reduction_b_pool
         add_config(TensorShape(17U, 17U, 1024U), TensorShape(8U, 8U, 1024U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // inception_c1_pool_ave, inception_c2_pool_ave, inception_c3_pool_ave
-        add_config(TensorShape(8U, 8U, 1536U), TensorShape(3U, 3U, 1536U), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(8U, 8U, 1536U), TensorShape(8U, 8U, 1536U), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
     }
 };
 } // namespace datasets

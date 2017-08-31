@@ -97,10 +97,15 @@ public:
         }
         else
         {
-            const unsigned int data_type_size = 16 / arm_compute::data_size_from_type(_data_type);
+            auto reshape = [&](unsigned int width, unsigned int height) -> TensorShape
+            {
+                const int interleave_width = 16 / arm_compute::data_size_from_type(_data_type);
+
+                return TensorShape{ width * interleave_width, static_cast<unsigned int>(std::ceil(static_cast<float>(height) / interleave_width)) };
+            };
 
             // Create tensor for the reshaped weights
-            w[0].allocator()->init(TensorInfo(TensorShape(366U * data_type_size, 96U / data_type_size), 1, _data_type, _fixed_point_position));
+            w[0].allocator()->init(TensorInfo(reshape(366U, 96U), 1, _data_type, _fixed_point_position));
 
             // Configure the direct convolution's weights. Direct convolution doesn't need reshape weights
             if(!_is_direct_conv)
@@ -111,13 +116,13 @@ public:
                 auto w42_tensor = std::unique_ptr<TensorType>(new TensorType());
                 auto w51_tensor = std::unique_ptr<TensorType>(new TensorType());
                 auto w52_tensor = std::unique_ptr<TensorType>(new TensorType());
-                w21_tensor->allocator()->init(TensorInfo(TensorShape(1248U * data_type_size, 128U / data_type_size), 1, _data_type, _fixed_point_position));
-                w22_tensor->allocator()->init(TensorInfo(TensorShape(1248U * data_type_size, 128U / data_type_size), 1, _data_type, _fixed_point_position));
-                w41_tensor->allocator()->init(TensorInfo(TensorShape(1920U * data_type_size, 192U / data_type_size), 1, _data_type, _fixed_point_position));
-                w42_tensor->allocator()->init(TensorInfo(TensorShape(1920U * data_type_size, 192U / data_type_size), 1, _data_type, _fixed_point_position));
-                w51_tensor->allocator()->init(TensorInfo(TensorShape(1920U * data_type_size, 128U / data_type_size), 1, _data_type, _fixed_point_position));
-                w52_tensor->allocator()->init(TensorInfo(TensorShape(1920U * data_type_size, 128U / data_type_size), 1, _data_type, _fixed_point_position));
-                w[2].allocator()->init(TensorInfo(TensorShape(2560U * data_type_size, 384U / data_type_size), 1, _data_type, _fixed_point_position));
+                w21_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U), 1, _data_type, _fixed_point_position));
+                w22_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U), 1, _data_type, _fixed_point_position));
+                w41_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U), 1, _data_type, _fixed_point_position));
+                w42_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U), 1, _data_type, _fixed_point_position));
+                w51_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U), 1, _data_type, _fixed_point_position));
+                w52_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U), 1, _data_type, _fixed_point_position));
+                w[2].allocator()->init(TensorInfo(reshape(2560U, 384U), 1, _data_type, _fixed_point_position));
                 w21 = std::move(w21_tensor);
                 w22 = std::move(w22_tensor);
                 w41 = std::move(w41_tensor);
@@ -157,9 +162,9 @@ public:
 
             if(_batches > 1 && std::is_same<TensorType, Tensor>::value)
             {
-                w[5].allocator()->init(TensorInfo(TensorShape(9216U * data_type_size, 4096U / data_type_size), 1, _data_type, _fixed_point_position));
-                w[6].allocator()->init(TensorInfo(TensorShape(4096U * data_type_size, 4096U / data_type_size), 1, _data_type, _fixed_point_position));
-                w[7].allocator()->init(TensorInfo(TensorShape(4096U * data_type_size, 1000U / data_type_size), 1, _data_type, _fixed_point_position));
+                w[5].allocator()->init(TensorInfo(reshape(9216U, 4096U), 1, _data_type, _fixed_point_position));
+                w[6].allocator()->init(TensorInfo(reshape(4096U, 4096U), 1, _data_type, _fixed_point_position));
+                w[7].allocator()->init(TensorInfo(reshape(4096U, 1000U), 1, _data_type, _fixed_point_position));
             }
             else
             {

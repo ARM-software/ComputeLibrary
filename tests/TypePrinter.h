@@ -360,7 +360,7 @@ inline std::string to_string(const PoolingType &type)
 /** Formatted output of @ref PoolingLayerInfo. */
 inline ::std::ostream &operator<<(::std::ostream &os, const PoolingLayerInfo &info)
 {
-    os << info.pool_type();
+    os << info.pool_type() << ";" << info.pool_size() << ";" << info.pad_stride_info();
 
     return os;
 }
