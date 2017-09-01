@@ -69,27 +69,27 @@ inline ListOption<T>::ListOption(std::string name, std::initializer_list<T> &&de
 template <typename T>
 bool ListOption<T>::parse(std::string value)
 {
+    _is_set = true;
+
     try
     {
         std::stringstream stream{ value };
-        T                 typed_value{};
+        std::string       item;
 
-        while(stream.good())
+        while(!std::getline(stream, item, ',').fail())
         {
-            stream >> typed_value;
+            std::stringstream item_stream(item);
+            T                 typed_value{};
 
-            if(!stream.fail())
+            item_stream >> typed_value;
+
+            if(!item_stream.fail())
             {
                 _values.emplace_back(typed_value);
             }
 
-            if(!stream.eof())
-            {
-                stream.ignore(1, ',');
-            }
+            _is_set = _is_set && !item_stream.fail();
         }
-
-        _is_set = !stream.fail();
 
         return _is_set;
     }

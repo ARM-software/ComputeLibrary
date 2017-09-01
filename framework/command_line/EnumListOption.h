@@ -85,17 +85,21 @@ bool EnumListOption<T>::parse(std::string value)
 {
     // Remove default values
     _values.clear();
+    _is_set = true;
 
     try
     {
         std::stringstream stream{ value };
-        T                 typed_value{};
+        std::string       item;
 
-        while(stream.good())
+        while(!std::getline(stream, item, ',').fail())
         {
-            stream >> typed_value;
+            std::stringstream item_stream(item);
+            T                 typed_value{};
 
-            if(!stream.fail())
+            item_stream >> typed_value;
+
+            if(!item_stream.fail())
             {
                 if(_allowed_values.count(typed_value) == 0)
                 {
@@ -106,13 +110,8 @@ bool EnumListOption<T>::parse(std::string value)
                 _values.emplace_back(typed_value);
             }
 
-            if(!stream.eof())
-            {
-                stream.ignore(1, ',');
-            }
+            _is_set = _is_set && !item_stream.fail();
         }
-
-        _is_set = !stream.fail();
 
         return _is_set;
     }
@@ -133,7 +132,7 @@ std::string EnumListOption<T>::help() const
         msg << value << ",";
     }
 
-    msg << "} - " << _help;
+    msg << "}[,{...}[,...]] - " << _help;
 
     return msg.str();
 }
