@@ -78,24 +78,6 @@ public:
         tensor_operations::absolute_difference(in1, in2, out);
     }
 };
-// Arithmetic Subtraction visitor
-struct arithmetic_subtraction_visitor : public boost::static_visitor<>
-{
-public:
-    explicit arithmetic_subtraction_visitor(ConvertPolicy convert_policy)
-        : _policy(convert_policy)
-    {
-    }
-
-    template <typename T1, typename T2, typename T3>
-    void operator()(const Tensor<T1> &in1, const Tensor<T2> &in2, Tensor<T3> &out) const
-    {
-        tensor_operations::arithmetic_subtraction(in1, in2, out, _policy);
-    }
-
-private:
-    ConvertPolicy _policy;
-};
 // Depth Convert visitor
 struct depth_convert_visitor : public boost::static_visitor<>
 {

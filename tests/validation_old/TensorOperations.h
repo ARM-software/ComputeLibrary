@@ -577,19 +577,6 @@ void accumulate_weighted(const Tensor<T> &in, Tensor<T> &out, float alpha)
     }
 }
 
-// Arithmetic Subtraction
-template <typename T1, typename T2, typename T3>
-void arithmetic_subtraction(const Tensor<T1> &in1, const Tensor<T2> &in2, Tensor<T3> &out, ConvertPolicy convert_policy)
-{
-    using intermediate_type = typename common_promoted_signed_type<T1, T2, T3>::intermediate_type;
-
-    for(int i = 0; i < in1.num_elements(); ++i)
-    {
-        intermediate_type val = static_cast<intermediate_type>(in1[i]) - static_cast<intermediate_type>(in2[i]);
-        out[i]                = (convert_policy == ConvertPolicy::SATURATE) ? saturate_cast<T3>(val) : static_cast<T3>(val);
-    }
-}
-
 // Depth conversion
 template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&is_floating_point<T2>::value, int >::type = 0 >
 void depth_convert(const Tensor<T1> &in, Tensor<T2> &out, ConvertPolicy policy, uint32_t shift)

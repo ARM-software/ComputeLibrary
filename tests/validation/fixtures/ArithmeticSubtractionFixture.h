@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ARITHMETIC_ADDITION_FIXTURE
-#define ARM_COMPUTE_TEST_ARITHMETIC_ADDITION_FIXTURE
+#ifndef ARM_COMPUTE_TEST_ARITHMETIC_SUBTRACTION_FIXTURE
+#define ARM_COMPUTE_TEST_ARITHMETIC_SUBTRACTION_FIXTURE
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -31,7 +31,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/ArithmeticAddition.h"
+#include "tests/validation/CPP/ArithmeticSubtraction.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -41,7 +41,7 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionValidationFixedPointFixture : public framework::Fixture
+class ArithmeticSubtractionValidationFixedPointFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -67,8 +67,8 @@ protected:
         TensorType dst      = create_tensor<TensorType>(shape, output_data_type, 1, fixed_point_position);
 
         // Create and configure function
-        FunctionType add;
-        add.configure(&ref_src1, &ref_src2, &dst, convert_policy);
+        FunctionType sub;
+        sub.configure(&ref_src1, &ref_src2, &dst, convert_policy);
 
         ARM_COMPUTE_EXPECT(ref_src1.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(ref_src2.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -88,7 +88,7 @@ protected:
         fill(AccessorType(ref_src2), 1);
 
         // Compute function
-        add.run();
+        sub.run();
 
         return dst;
     }
@@ -103,7 +103,7 @@ protected:
         fill(ref_src1, 0);
         fill(ref_src2, 1);
 
-        return reference::arithmetic_addition<T>(ref_src1, ref_src2, output_data_type, convert_policy);
+        return reference::arithmetic_subtraction<T>(ref_src1, ref_src2, output_data_type, convert_policy);
     }
 
     TensorType      _target{};
@@ -111,16 +111,16 @@ protected:
     int             _fractional_bits{};
 };
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionValidationFixture : public ArithmeticAdditionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
+class ArithmeticSubtractionValidationFixture : public ArithmeticSubtractionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
-        ArithmeticAdditionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type0, data_type1, output_data_type, convert_policy, 0);
+        ArithmeticSubtractionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type0, data_type1, output_data_type, convert_policy, 0);
     }
 };
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ARITHMETIC_ADDITION_FIXTURE */
+#endif /* ARM_COMPUTE_TEST_ARITHMETIC_SUBTRACTION_FIXTURE */

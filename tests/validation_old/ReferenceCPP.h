@@ -127,14 +127,6 @@ public:
      * @param[in]      alpha A float value within the range of [0, 1]
      */
     static void accumulate_weighted(const RawTensor &src, RawTensor &dst, float alpha);
-    /** Arithmetic subtraction of @p src2 from @p src1
-     *
-     * @param[in]  src1           First tensor.
-     * @param[in]  src2           Second tensor.
-     * @param[out] dst            Result tensor.
-     * @param[in]  convert_policy Overflow policy.
-     */
-    static void arithmetic_subtraction(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, ConvertPolicy convert_policy);
     /** Depth conversion from @p src to @p dst
      *
      * @param[in]  src    First tensor.

@@ -130,18 +130,6 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_accumulate_weighted(const TensorShape &shape, float alpha);
-    /** Compute reference arithmetic subtraction.
-     *
-     * @param[in] shape                Shape of the input and output tensors.
-     * @param[in] dt_in0               Data type of first input tensor.
-     * @param[in] dt_in1               Data type of second input tensor.
-     * @param[in] dt_out               Data type of the output tensor.
-     * @param[in] convert_policy       Overflow policy of the operation.
-     * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_arithmetic_subtraction(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy convert_policy, int fixed_point_position = 0);
     /** Compute reference depth convert.
      *
      * @param[in] shape                    Shape of the input and output tensors.
