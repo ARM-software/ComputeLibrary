@@ -590,19 +590,6 @@ void arithmetic_subtraction(const Tensor<T1> &in1, const Tensor<T2> &in2, Tensor
     }
 }
 
-// Box3x3 filter
-template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-void box3x3(const Tensor<T> &in, Tensor<T> &out, BorderMode border_mode, T constant_border_value)
-{
-    const std::array<T, 9> filter{ { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
-    float scale = 1.f / static_cast<float>(filter.size());
-    for(int element_idx = 0; element_idx < in.num_elements(); ++element_idx)
-    {
-        const Coordinates id = index2coord(in.shape(), element_idx);
-        apply_2d_spatial_filter(id, in, out, TensorShape(3U, 3U), filter.data(), scale, border_mode, constant_border_value);
-    }
-}
-
 // Depth conversion
 template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&is_floating_point<T2>::value, int >::type = 0 >
 void depth_convert(const Tensor<T1> &in, Tensor<T2> &out, ConvertPolicy policy, uint32_t shift)

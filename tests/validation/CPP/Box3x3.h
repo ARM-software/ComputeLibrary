@@ -21,19 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_VALIDATION_UTILS_H__
-#define __ARM_COMPUTE_TEST_VALIDATION_UTILS_H__
+#ifndef __ARM_COMPUTE_TEST_BOX3X3_H__
+#define __ARM_COMPUTE_TEST_BOX3X3_H__
 
-#include "arm_compute/core/Types.h"
-#include "tests/Globals.h"
-#include "tests/ILutAccessor.h"
-#include "tests/Types.h"
-
-#include <array>
-#include <random>
-#include <type_traits>
-#include <utility>
-#include <vector>
+#include "tests/SimpleTensor.h"
 
 namespace arm_compute
 {
@@ -41,16 +32,12 @@ namespace test
 {
 namespace validation
 {
+namespace reference
+{
 template <typename T>
-T tensor_elem_at(const SimpleTensor<T> &in, Coordinates coord, BorderMode border_mode, T constant_border_value);
-
-template <typename T>
-T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, uint8_t constant_border_value);
-
-template <typename T1, typename T2, typename T3>
-void apply_2d_spatial_filter(Coordinates coord, const SimpleTensor<T1> &in, SimpleTensor<T3> &out, const TensorShape &filter_shape, const T2 *filter_itr, float scale, BorderMode border_mode,
-                             T1 constant_border_value = 0);
+SimpleTensor<T> box3x3(const SimpleTensor<T> &src, BorderMode border_mode, T constant_border_value);
+} // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_VALIDATION_UTILS_H__ */
+#endif /* __ARM_COMPUTE_TEST_BOX3X3_H__ */

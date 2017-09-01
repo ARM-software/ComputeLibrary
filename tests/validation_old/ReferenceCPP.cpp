@@ -156,15 +156,6 @@ void ReferenceCPP::arithmetic_subtraction(const RawTensor &src1, const RawTensor
     boost::apply_visitor(arithmetic_subtraction_visitor(convert_policy), s1, s2, d);
 }
 
-// Box3x3 filter
-void ReferenceCPP::box3x3(const RawTensor &src, RawTensor &dst, BorderMode border_mode, uint8_t constant_border_value)
-{
-    ARM_COMPUTE_ERROR_ON(src.data_type() != DataType::U8 || dst.data_type() != DataType::U8);
-    const Tensor<uint8_t> s(src.shape(), src.data_type(), src.fixed_point_position(), reinterpret_cast<const uint8_t *>(src.data()));
-    Tensor<uint8_t>       d(dst.shape(), dst.data_type(), dst.fixed_point_position(), reinterpret_cast<uint8_t *>(dst.data()));
-    tensor_operations::box3x3(s, d, border_mode, constant_border_value);
-}
-
 // Depth conversion
 void ReferenceCPP::depth_convert(const RawTensor &src, RawTensor &dst, ConvertPolicy policy, uint32_t shift)
 {

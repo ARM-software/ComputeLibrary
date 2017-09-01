@@ -142,15 +142,6 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_arithmetic_subtraction(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy convert_policy, int fixed_point_position = 0);
-    /** Compute reference box3x3 filter.
-     *
-     * @param[in] shape                 Shape of the input and output tensors.
-     * @param[in] border_mode           BorderMode used by the input tensor.
-     * @param[in] constant_border_value Constant to use if @p border_mode == CONSTANT.
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_box3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value);
     /** Compute reference depth convert.
      *
      * @param[in] shape                    Shape of the input and output tensors.

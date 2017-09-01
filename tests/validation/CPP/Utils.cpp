@@ -88,6 +88,43 @@ T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn,
 }
 template uint8_t bilinear_policy(const SimpleTensor<uint8_t> &in, Coordinates id, float xn, float yn, BorderMode border_mode, uint8_t constant_border_value);
 
+/* Apply 2D spatial filter on a single element of @p in at coordinates @p coord
+ *
+ * - filter sizes have to be odd number
+ * - Row major order of filter assumed
+ * - TO_ZERO rounding policy assumed
+ * - SATURATE convert policy assumed
+ *
+ */
+template <typename T1, typename T2, typename T3>
+void apply_2d_spatial_filter(Coordinates coord, const SimpleTensor<T1> &in, SimpleTensor<T3> &out, const TensorShape &filter_shape, const T2 *filter_itr, float scale, BorderMode border_mode,
+                             T1 constant_border_value)
+{
+    double    val = 0;
+    const int x   = coord.x();
+    const int y   = coord.y();
+    for(int j = y - static_cast<int>(filter_shape[1] / 2); j <= y + static_cast<int>(filter_shape[1] / 2); ++j)
+    {
+        for(int i = x - static_cast<int>(filter_shape[0] / 2); i <= x + static_cast<int>(filter_shape[0] / 2); ++i)
+        {
+            coord.set(0, i);
+            coord.set(1, j);
+            val += static_cast<double>(*filter_itr) * tensor_elem_at(in, coord, border_mode, constant_border_value);
+            ++filter_itr;
+        }
+    }
+    coord.set(0, x);
+    coord.set(1, y);
+    const double rounded_val = support::cpp11::trunc(val * static_cast<double>(scale));
+    out[coord2index(in.shape(), coord)] = saturate_cast<T3>(rounded_val);
+}
+template void apply_2d_spatial_filter(Coordinates coord, const SimpleTensor<float> &in, SimpleTensor<float> &out, const TensorShape &filter_shape, const float *filter_itr, float scale,
+                                      BorderMode border_mode,
+                                      float      constant_border_value);
+template void apply_2d_spatial_filter(Coordinates coord, const SimpleTensor<uint8_t> &in, SimpleTensor<uint8_t> &out, const TensorShape &filter_shape, const uint8_t *filter_itr, float scale,
+                                      BorderMode border_mode,
+                                      uint8_t    constant_border_value);
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

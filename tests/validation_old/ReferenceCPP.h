@@ -135,14 +135,6 @@ public:
      * @param[in]  convert_policy Overflow policy.
      */
     static void arithmetic_subtraction(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, ConvertPolicy convert_policy);
-    /** Function to compute box3x3 filtered result tensor.
-     *
-     * @param[in]  src                   Input tensor.
-     * @param[out] dst                   Result tensor.
-     * @param[in]  border_mode           Border mode.
-     * @param[in]  constant_border_value Constant border value if @p border_mode is BorderMode::CONSTANT.
-     */
-    static void box3x3(const RawTensor &src, RawTensor &dst, BorderMode border_mode, uint8_t constant_border_value);
     /** Depth conversion from @p src to @p dst
      *
      * @param[in]  src    First tensor.

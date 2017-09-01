@@ -21,19 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_VALIDATION_UTILS_H__
-#define __ARM_COMPUTE_TEST_VALIDATION_UTILS_H__
+#include "arm_compute/core/Helpers.h"
 
-#include "arm_compute/core/Types.h"
-#include "tests/Globals.h"
-#include "tests/ILutAccessor.h"
-#include "tests/Types.h"
-
-#include <array>
-#include <random>
-#include <type_traits>
-#include <utility>
-#include <vector>
+#include "Box3x3.h"
+#include "Utils.h"
 
 namespace arm_compute
 {
@@ -41,16 +32,24 @@ namespace test
 {
 namespace validation
 {
+namespace reference
+{
 template <typename T>
-T tensor_elem_at(const SimpleTensor<T> &in, Coordinates coord, BorderMode border_mode, T constant_border_value);
+SimpleTensor<T> box3x3(const SimpleTensor<T> &src, BorderMode border_mode, T constant_border_value)
+{
+    SimpleTensor<T> dst(src.shape(), src.data_type());
+    const std::array<T, 9> filter{ { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+    const float scale = 1.f / static_cast<float>(filter.size());
+    for(int element_idx = 0; element_idx < src.num_elements(); ++element_idx)
+    {
+        const Coordinates id = index2coord(src.shape(), element_idx);
+        apply_2d_spatial_filter(id, src, dst, TensorShape(3U, 3U), filter.data(), scale, border_mode, constant_border_value);
+    }
+    return dst;
+}
 
-template <typename T>
-T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, uint8_t constant_border_value);
-
-template <typename T1, typename T2, typename T3>
-void apply_2d_spatial_filter(Coordinates coord, const SimpleTensor<T1> &in, SimpleTensor<T3> &out, const TensorShape &filter_shape, const T2 *filter_itr, float scale, BorderMode border_mode,
-                             T1 constant_border_value = 0);
+template SimpleTensor<uint8_t> box3x3(const SimpleTensor<uint8_t> &src, BorderMode border_mode, uint8_t constant_border_value);
+} // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_VALIDATION_UTILS_H__ */
