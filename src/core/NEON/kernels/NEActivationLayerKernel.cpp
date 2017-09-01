@@ -73,6 +73,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, float> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, float> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, float> },
+        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float> },
         { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float> },
@@ -89,6 +90,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, float16_t> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, float16_t> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, float16_t> },
+        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float16_t> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float16_t> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float16_t> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float16_t> },
@@ -104,6 +106,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qint8_t> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qint8_t> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qint8_t> },
+        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qint8_t> },
         { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, qint8_t> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, qint8_t> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, qint8_t> },
@@ -118,6 +121,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qint16_t> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qint16_t> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qint16_t> },
+        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qint16_t> },
         { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, qint16_t> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, qint16_t> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, qint16_t> },
@@ -208,6 +212,15 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                     {
                         vminq_f16(a, vmaxq_f16(CONST_0, in.val[0])),
                         vminq_f16(a, vmaxq_f16(CONST_0, in.val[1]))
+                    }
+                };
+                break;
+            case ActivationFunction::LU_BOUNDED_RELU:
+                tmp =
+                {
+                    {
+                        vminq_f16(a, vmaxq_f16(b, in.val[0])),
+                        vminq_f16(a, vmaxq_f16(b, in.val[1]))
                     }
                 };
                 break;
@@ -370,6 +383,17 @@ typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationL
                     }
                 };
                 break;
+            case ActivationFunction::LU_BOUNDED_RELU:
+                tmp =
+                {
+                    {
+                        vminq_f32(a, vmaxq_f32(b, in.val[0])),
+                        vminq_f32(a, vmaxq_f32(b, in.val[1])),
+                        vminq_f32(a, vmaxq_f32(b, in.val[2])),
+                        vminq_f32(a, vmaxq_f32(b, in.val[3])),
+                    }
+                };
+                break;
             case ActivationFunction::LEAKY_RELU:
                 tmp =
                 {
@@ -471,6 +495,9 @@ typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivation
             case ActivationFunction::BOUNDED_RELU:
                 tmp = vminq_qs8(a, vmaxq_qs8(CONST_0, in));
                 break;
+            case ActivationFunction::LU_BOUNDED_RELU:
+                tmp = vminq_qs8(a, vmaxq_qs8(b, in));
+                break;
             case ActivationFunction::LEAKY_RELU:
                 tmp = vbslq_s8(vcgtq_s8(in, CONST_0), in, vmulq_qs8(a, in, fixed_point_position));
                 break;
@@ -559,6 +586,15 @@ typename std::enable_if<std::is_same<T, qint16_t>::value, void>::type NEActivati
                     {
                         vminq_qs16(a, vmaxq_qs16(CONST_0, in.val[0])),
                         vminq_qs16(a, vmaxq_qs16(CONST_0, in.val[1])),
+                    }
+                };
+                break;
+            case ActivationFunction::LU_BOUNDED_RELU:
+                tmp =
+                {
+                    {
+                        vminq_qs16(a, vmaxq_qs16(b, in.val[0])),
+                        vminq_qs16(a, vmaxq_qs16(b, in.val[1])),
                     }
                 };
                 break;

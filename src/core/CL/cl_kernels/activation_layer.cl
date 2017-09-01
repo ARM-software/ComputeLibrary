@@ -76,6 +76,11 @@ inline TYPE brelu_op(TYPE x)
 {
     return min((TYPE)A_VAL, max(0, x));
 }
+// Lower Upper Bounded RELU Activation
+inline TYPE lu_brelu_op(TYPE x)
+{
+    return min(max(x, (TYPE)B_VAL), (TYPE)A_VAL);
+}
 // Leaky RELU Activation
 inline TYPE lrelu_op(TYPE x)
 {

@@ -66,6 +66,9 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
             case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
                 dst[i] = std::min<T>(a, std::max(static_cast<T>(0), x));
                 break;
+            case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
+                dst[i] = std::min<T>(a, std::max<T>(b, x));
+                break;
             case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
                 dst[i] = (x > 0) ? x : a * x;
                 break;
@@ -124,6 +127,9 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
                 break;
             case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
                 dst[i] = min(a, max(const_0, x)).raw();
+                break;
+            case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
+                dst[i] = min(a, max(b, x)).raw();
                 break;
             case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
                 dst[i] = (x > const_0) ? x.raw() : mul(a, x).raw();

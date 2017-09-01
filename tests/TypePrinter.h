@@ -254,6 +254,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
             os << "BOUNDED_RELU";
             break;
+        case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
+            os << "LU_BOUNDED_RELU";
+            break;
         case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
             os << "LEAKY_RELU";
             break;

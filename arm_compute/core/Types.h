@@ -509,24 +509,25 @@ public:
     /** Available activation functions */
     enum class ActivationFunction
     {
-        LOGISTIC,     /**< Logistic */
-        TANH,         /**< Hyperbolic tangent */
-        RELU,         /**< Rectifier */
-        BOUNDED_RELU, /**< Bounded Rectifier */
-        LEAKY_RELU,   /**< Leaky Rectifier */
-        SOFT_RELU,    /**< Soft Rectifier */
-        ABS,          /**< Absolute */
-        SQUARE,       /**< Square */
-        SQRT,         /**< Square root */
-        LINEAR        /**< Linear */
+        LOGISTIC,        /**< Logistic ( \f$ f(x) = \frac{1}{1 + e^{-x}} \f$ ) */
+        TANH,            /**< Hyperbolic tangent ( \f$ f(x) = a \cdot tanh(b \cdot x) \f$ ) */
+        RELU,            /**< Rectifier ( \f$ f(x) = max(0,x) \f$ ) */
+        BOUNDED_RELU,    /**< Upper Bounded Rectifier ( \f$ f(x) = min(a, max(0,x)) \f$ ) */
+        LU_BOUNDED_RELU, /**< Lower and Upper Bounded Rectifier ( \f$ f(x) = min(a, max(b,x)) \f$ ) */
+        LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
+        SOFT_RELU,       /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
+        ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
+        SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
+        SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
+        LINEAR           /**< Linear ( \f$ f(x)= ax + b \f$ ) */
     };
 
     /** Default Constructor
      *
      * @param[in] f The activation function to use.
      * @param[in] a (Optional) The alpha parameter used by some activation functions
-     *              (@ref ActivationFunction::BOUNDED_RELU, @ref ActivationFunction::LINEAR, @ref ActivationFunction::TANH).
-     * @param[in] b (Optional) The beta parameter used by some activation functions (@ref ActivationFunction::LINEAR, @ref ActivationFunction::TANH).
+     *              (@ref ActivationFunction::BOUNDED_RELU, @ref ActivationFunction::LU_BOUNDED_RELU, @ref ActivationFunction::LINEAR, @ref ActivationFunction::TANH).
+     * @param[in] b (Optional) The beta parameter used by some activation functions (@ref ActivationFunction::LINEAR, @ref ActivationFunction::LU_BOUNDED_RELU, @ref ActivationFunction::TANH).
      */
     ActivationLayerInfo(ActivationFunction f, float a = 0.0f, float b = 0.0f)
         : _act(f), _a(a), _b(b)
