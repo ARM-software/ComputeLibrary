@@ -56,12 +56,10 @@ public:
         add_config(TensorShape(71U, 71U, 96U), TensorShape(96U), 0.000010f);
         // inception_stem3_3x3_s2_bn, reduction_a_3x3_2_reduce_bn
         add_config(TensorShape(35U, 35U, 192U), TensorShape(192U), 0.000010f);
-        // inception_a1_1x1_2_bn, inception_a1_3x3_bn, inception_a1_3x3_2_bn, inception_a1_3x3_3_bn, inception_a2_1x1_2_bn, inception_a2_3x3_bn, inception_a2_3x3_2_bn, inception_a2_3x3_3_bn, inception_a3_1x1_2_bn, inception_a3_3x3_bn, inception_a3_3x3_2_bn, inception_a3_3x3_3_bn, inception_a4_1x1_2_bn, inception_a4_3x3_bn, inception_a4_3x3_2_bn, inception_a4_3x3_3_bn
+        // inception_a1_1x1_2_bn, inception_a1_3x3_bn, inception_a1_3x3_2_bn, inception_a1_3x3_3_bn, inception_a1_1x1_bn, inception_a2_1x1_2_bn, inception_a2_3x3_bn, inception_a2_3x3_2_bn, inception_a2_3x3_3_bn, inception_a2_1x1_bn, inception_a3_1x1_2_bn, inception_a3_3x3_bn, inception_a3_3x3_2_bn, inception_a3_3x3_3_bn, inception_a3_1x1_bn, inception_a4_1x1_2_bn, inception_a4_3x3_bn, inception_a4_3x3_2_bn, inception_a4_3x3_3_bn, inception_a4_1x1_bn
         add_config(TensorShape(35U, 35U, 96U), TensorShape(96U), 0.000010f);
         // inception_a1_3x3_reduce_bn, inception_a1_3x3_2_reduce_bn, inception_a2_3x3_reduce_bn, inception_a2_3x3_2_reduce_bn, inception_a3_3x3_reduce_bn, inception_a3_3x3_2_reduce_bn, inception_a4_3x3_reduce_bn, inception_a4_3x3_2_reduce_bn
         add_config(TensorShape(35U, 35U, 64U), TensorShape(64U), 0.000010f);
-        // inception_a1_1x1_bn, inception_a2_1x1_bn, inception_a3_1x1_bn, inception_a4_1x1_bn
-        add_config(TensorShape(3U, 3U, 96U), TensorShape(96U), 0.000010f);
         // reduction_a_3x3_bn, inception_b1_1x1_2_bn, inception_b2_1x1_2_bn, inception_b3_1x1_2_bn, inception_b4_1x1_2_bn, inception_b5_1x1_2_bn, inception_b6_1x1_2_bn, inception_b7_1x1_2_bn
         add_config(TensorShape(17U, 17U, 384U), TensorShape(384U), 0.000010f);
         // reduction_a_3x3_2_bn
@@ -73,14 +71,14 @@ public:
         // inception_b1_1x7_bn, inception_b1_1x7_2_bn, inception_b1_7x1_3_bn, inception_b2_1x7_bn, inception_b2_1x7_2_bn, inception_b2_7x1_3_bn, inception_b3_1x7_bn, inception_b3_1x7_2_bn, inception_b3_7x1_3_bn, inception_b4_1x7_bn, inception_b4_1x7_2_bn, inception_b4_7x1_3_bn, inception_b5_1x7_bn, inception_b5_1x7_2_bn, inception_b5_7x1_3_bn, inception_b6_1x7_bn, inception_b6_1x7_2_bn, inception_b6_7x1_3_bn, inception_b7_1x7_bn, inception_b7_1x7_2_bn, inception_b7_7x1_3_bn
         add_config(TensorShape(17U, 17U, 224U), TensorShape(224U), 0.000010f);
         // inception_b1_1x1_bn, inception_b2_1x1_bn, inception_b3_1x1_bn, inception_b4_1x1_bn, inception_b5_1x1_bn, inception_b6_1x1_bn, inception_b7_1x1_bn
-        add_config(TensorShape(3U, 3U, 128U), TensorShape(128U), 0.000010f);
+        add_config(TensorShape(17U, 17U, 128U), TensorShape(128U), 0.000010f);
         // reduction_b_3x3_bn
         add_config(TensorShape(8U, 8U, 192U), TensorShape(192U), 0.000010f);
         // reduction_b_7x1_bn
         add_config(TensorShape(17U, 17U, 320U), TensorShape(320U), 0.000010f);
         // reduction_b_3x3_2_bn
         add_config(TensorShape(8U, 8U, 320U), TensorShape(320U), 0.000010f);
-        // inception_c1_1x1_2_bn, inception_c1_1x3_bn, inception_c1_3x1_bn, inception_c1_1x3_3_bn, inception_c1_3x1_3_bn, inception_c2_1x1_2_bn, inception_c2_1x3_bn, inception_c2_3x1_bn, inception_c2_1x3_3_bn, inception_c2_3x1_3_bn, inception_c3_1x1_2_bn, inception_c3_1x3_bn, inception_c3_3x1_bn, inception_c3_1x3_3_bn, inception_c3_3x1_3_bn
+        // inception_c1_1x1_2_bn, inception_c1_1x3_bn, inception_c1_3x1_bn, inception_c1_1x3_3_bn, inception_c1_3x1_3_bn, inception_c1_1x1_bn, inception_c2_1x1_2_bn, inception_c2_1x3_bn, inception_c2_3x1_bn, inception_c2_1x3_3_bn, inception_c2_3x1_3_bn, inception_c2_1x1_bn, inception_c3_1x1_2_bn, inception_c3_1x3_bn, inception_c3_3x1_bn, inception_c3_1x3_3_bn, inception_c3_3x1_3_bn, inception_c3_1x1_bn
         add_config(TensorShape(8U, 8U, 256U), TensorShape(256U), 0.000010f);
         // inception_c1_1x1_3_bn, inception_c1_1x1_4_bn, inception_c2_1x1_3_bn, inception_c2_1x1_4_bn, inception_c3_1x1_3_bn, inception_c3_1x1_4_bn
         add_config(TensorShape(8U, 8U, 384U), TensorShape(384U), 0.000010f);
@@ -88,8 +86,6 @@ public:
         add_config(TensorShape(8U, 8U, 448U), TensorShape(448U), 0.000010f);
         // inception_c1_1x3_2_bn, inception_c2_1x3_2_bn, inception_c3_1x3_2_bn
         add_config(TensorShape(8U, 8U, 512U), TensorShape(512U), 0.000010f);
-        // inception_c1_1x1_bn, inception_c2_1x1_bn, inception_c3_1x1_bn
-        add_config(TensorShape(3U, 3U, 256U), TensorShape(256U), 0.000010f);
     }
 };
 } // namespace datasets
