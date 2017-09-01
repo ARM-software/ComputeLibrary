@@ -55,7 +55,7 @@ public:
         {
             std::stringstream description;
             description << "In=" << *_tensor_shape_it << ":";
-            description << "Info=" << *_infos_it;
+            description << "Info=" << *_infos_it << ":";
             description << "NumROIS=" << *_num_rois_it;
             return description.str();
         }
