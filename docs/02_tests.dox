@@ -22,36 +22,36 @@ information is needed within the test (e.g. to validate the results).
 
     .
     |-- computer_vision <- Legacy tests. No new test must be added. <!-- FIXME: Remove before release -->
-    |-- framework <- Underlying test framework. Will later be moved into tests. <!-- FIXME: Remove second sentence before release -->
-    `-- tests <- Top level test directory. All files in here are shared among validation and benchmark
+    `-- tests <- Top level test directory. All files in here are shared among validation and benchmark.
+        |-- framework <- Underlying test framework.
         |-- CL   \
         |-- NEON -> Backend specific files with helper functions etc.
-        |-- VX   /
-        |-- benchmark_new <- Top level directory for the benchmarking files <!-- FIXME: Make sure this has been renamed before release -->
-        |   |-- CL <- OpenCL backend test cases on a function level
+        |-- VX   / <!-- FIXME: Remove VX -->
+        |-- benchmark <- Top level directory for the benchmarking files.
+        |   |-- fixtures <- Fixtures for benchmark tests.
+        |   |-- CL <- OpenCL backend test cases on a function level.
         |   |   `-- SYSTEM <- OpenCL system tests, e.g. whole networks
         |   `-- NEON <- Same for NEON
         |       `-- SYSTEM
-        |-- dataset <- Old datasets for boost. Not to be used for new tests! <!-- FIXME: Remove before release -->
-        |-- datasets_new <- New datasets for benchmark and validation tests. <!-- FIXME: Make sure this has been renamed before release -->
-        |-- fixtures_new <- Fixtures for benchmarking only! Will later be moved into benchmark_new. <!-- FIXME: Make sure this has been renamed before release. Remove second sentence. -->
+        |-- datasets <- Datasets for benchmark and validation tests.
         |-- main.cpp <- Main entry point for the tests. Currently shared between validation and benchmarking.
-        |-- model_objects <- Old helper files for system level validation. Not to be used for new tests! <!-- FIXME: Remove before release -->
-        |-- networks_new <- Network classes for system level tests <!-- FIXME: Make sure this has been renamed before release -->
-        |-- validation <- Old validation framework. No new tests must be added! <!-- FIXME: Remove before release -->
+        |-- networks <- Network classes for system level tests.
+        |-- validation_old <- Old validation framework. No new tests must be added! <!-- FIXME: Remove before release -->
+        |   |-- dataset <- Old datasets for boost. Not to be used for new tests! <!-- FIXME: Remove before release -->
+        |   |-- model_objects <- Old helper files for system level validation. Not to be used for new tests! <!-- FIXME: Remove before release -->
         |   |-- CL   \
         |   |-- DEMO  \
         |   |-- NEON --> Backend specific test cases
         |   |-- UNIT  /
-        |   |-- VX   /
+        |   |-- VX   / <!-- FIXME: Remove VX -->
         |   `-- system_tests -> System level tests
         |       |-- CL
         |       `-- NEON
-        `-- validation_new -> New validation tests <!-- FIXME: Make sure this has been renamed before release -->
+        `-- validation -> Top level directory for validation files.
             |-- CPP -> C++ reference code
             |-- CL   \
             |-- NEON -> Backend specific test cases
-            |-- VX   /
+            |-- VX   / <!-- FIXME: Remove VX -->
             `-- fixtures -> Fixtures shared among all backends. Used to setup target function and tensors.
 
 @subsection tests_overview_fixtures Fixtures
@@ -313,6 +313,7 @@ provide a good overview how test cases are structured.
   Typically the will be multiple tests for different data types and for
   different execution modes, e.g. precommit and nightly.
 
+<!-- FIXME: Remove before release -->
 @section building_test_dependencies Building dependencies
 
 @note Only required when tests from the old validation framework need to be run.
@@ -341,6 +342,7 @@ the ```toolset=``` option to choose the right compiler. Moreover,
 After executing the build command the libraries
 ```libboost_program_options.a``` and ```libboost_unit_test_framework.a``` can
 be found in ```./stage/lib```.
+<!-- FIXME: end remove -->
 
 @section tests_running_tests Running tests
 @subsection tests_running_tests_benchmarking Benchmarking
@@ -380,6 +382,7 @@ As an alternative output format JSON is supported and can be selected via
 `--log-format=json`. To write the output to a file instead of stdout the
 `--log-file` option can be used.
 
+<!-- FIXME: Remove before release and change above to benchmark and validation -->
 @subsection tests_running_tests_validation Validation
 
 @note The new validation tests have the same interface as the benchmarking tests.

@@ -21,44 +21,123 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_REFERENCE_VALIDATION_H__
-#define __ARM_COMPUTE_TEST_REFERENCE_VALIDATION_H__
+#ifndef __ARM_COMPUTE_TEST_VALIDATION_H__
+#define __ARM_COMPUTE_TEST_VALIDATION_H__
 
+#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/Array.h"
-#include "tests/RawTensor.h"
+#include "tests/IAccessor.h"
+#include "tests/SimpleTensor.h"
+#include "tests/TypePrinter.h"
+#include "tests/Utils.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Exceptions.h"
 
-#include "boost_wrapper.h"
-
+#include <iomanip>
+#include <ios>
 #include <vector>
 
 namespace arm_compute
 {
-class Tensor;
-
 namespace test
 {
-class IAccessor;
-
 namespace validation
 {
+/** Class reprensenting an absolute tolerance value. */
 template <typename T>
-boost::test_tools::predicate_result compare_dimensions(const Dimensions<T> &dimensions1, const Dimensions<T> &dimensions2)
+class AbsoluteTolerance
+{
+public:
+    /** Underlying type. */
+    using value_type = T;
+
+    /* Default constructor.
+     *
+     * Initialises the tolerance to 0.
+     */
+    AbsoluteTolerance() = default;
+
+    /** Constructor.
+     *
+     * @param[in] value Absolute tolerance value.
+     */
+    explicit constexpr AbsoluteTolerance(T value)
+        : _value{ value }
+    {
+    }
+
+    /** Implicit conversion to the underlying type. */
+    constexpr operator T() const
+    {
+        return _value;
+    }
+
+private:
+    T _value{ std::numeric_limits<T>::epsilon() };
+};
+
+/** Class reprensenting a relative tolerance value. */
+class RelativeTolerance
+{
+public:
+    /** Underlying type. */
+    using value_type = double;
+
+    /* Default constructor.
+     *
+     * Initialises the tolerance to 0.
+     */
+    RelativeTolerance() = default;
+
+    /** Constructor.
+     *
+     * @param[in] value Relative tolerance value.
+     */
+    explicit constexpr RelativeTolerance(value_type value)
+        : _value{ value }
+    {
+    }
+
+    /** Implicit conversion to the underlying type. */
+    constexpr operator value_type() const
+    {
+        return _value;
+    }
+
+private:
+    value_type _value{ 0 };
+};
+
+/** Print AbsoluteTolerance type. */
+template <typename T>
+inline ::std::ostream &operator<<(::std::ostream &os, const AbsoluteTolerance<T> &tolerance)
+{
+    os << static_cast<typename AbsoluteTolerance<T>::value_type>(tolerance);
+
+    return os;
+}
+
+/** Print RelativeTolerance type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const RelativeTolerance &tolerance)
+{
+    os << static_cast<typename RelativeTolerance::value_type>(tolerance);
+
+    return os;
+}
+
+template <typename T>
+bool compare_dimensions(const Dimensions<T> &dimensions1, const Dimensions<T> &dimensions2)
 {
     if(dimensions1.num_dimensions() != dimensions2.num_dimensions())
     {
-        boost::test_tools::predicate_result result(false);
-        result.message() << "Different dimensionality [" << dimensions1.num_dimensions() << "!=" << dimensions2.num_dimensions() << "]";
-        return result;
+        return false;
     }
 
     for(unsigned int i = 0; i < dimensions1.num_dimensions(); ++i)
     {
         if(dimensions1[i] != dimensions2[i])
         {
-            boost::test_tools::predicate_result result(false);
-            result.message() << "Mismatch in dimension " << i << " [" << dimensions1[i] << "!=" << dimensions2[i] << "]";
-            return result;
+            return false;
         }
     }
 
@@ -89,7 +168,8 @@ void validate(const arm_compute::PaddingSize &padding, const arm_compute::Paddin
  * reference tensor and test tensor is multiple of wrap_range), but such errors would be detected by
  * other test cases.
  */
-void validate(const IAccessor &tensor, const RawTensor &reference, float tolerance_value = 0.f, float tolerance_number = 0.f, uint64_t wrap_range = 0);
+template <typename T, typename U = AbsoluteTolerance<T>>
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value = U(), float tolerance_number = 0.f);
 
 /** Validate tensors with valid region.
  *
@@ -101,19 +181,8 @@ void validate(const IAccessor &tensor, const RawTensor &reference, float toleran
  * reference tensor and test tensor is multiple of wrap_range), but such errors would be detected by
  * other test cases.
  */
-void validate(const IAccessor &tensor, const RawTensor &reference, const ValidRegion &valid_region, float tolerance_value = 0.f, float tolerance_number = 0.f, uint64_t wrap_range = 0);
-
-/** Validate tensors with valid mask.
- *
- * - Dimensionality has to be the same.
- * - All values have to match.
- *
- * @note: wrap_range allows cases where reference tensor rounds up to the wrapping point, causing it to wrap around to
- * zero while the test tensor stays at wrapping point to pass. This may permit true erroneous cases (difference between
- * reference tensor and test tensor is multiple of wrap_range), but such errors would be detected by
- * other test cases.
- */
-void validate(const IAccessor &tensor, const RawTensor &reference, const RawTensor &valid_mask, float tolerance_value = 0.f, float tolerance_number = 0.f, uint64_t wrap_range = 0);
+template <typename T, typename U = AbsoluteTolerance<T>>
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value = U(), float tolerance_number = 0.f);
 
 /** Validate tensors against constant value.
  *
@@ -139,54 +208,143 @@ void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned 
  *
  * - All values should match
  */
-void validate(float target, float ref, float tolerance_abs_error = std::numeric_limits<float>::epsilon(), float tolerance_relative_error = 0.0001f);
+template <typename T, typename U>
+void validate(T target, T reference, U tolerance = AbsoluteTolerance<T>());
 
-/** Validate min max location.
- *
- * - All values should match
- */
 template <typename T>
-void validate_min_max_loc(T min, T ref_min, T max, T ref_max,
-                          IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &ref_min_loc, IArray<Coordinates2D> &max_loc, IArray<Coordinates2D> &ref_max_loc,
-                          uint32_t min_count, uint32_t ref_min_count, uint32_t max_count, uint32_t ref_max_count)
+struct compare_base
 {
-    BOOST_TEST(min == ref_min);
-    BOOST_TEST(max == ref_max);
-
-    BOOST_TEST(min_count == min_loc.num_values());
-    BOOST_TEST(max_count == max_loc.num_values());
-    BOOST_TEST(ref_min_count == ref_min_loc.num_values());
-    BOOST_TEST(ref_max_count == ref_max_loc.num_values());
-
-    BOOST_TEST(min_count == ref_min_count);
-    BOOST_TEST(max_count == ref_max_count);
-
-    for(uint32_t i = 0; i < min_count; i++)
+    compare_base(typename T::value_type target, typename T::value_type reference, T tolerance = T(0))
+        : _target{ target }, _reference{ reference }, _tolerance{ tolerance }
     {
-        Coordinates2D *same_coords = std::find_if(ref_min_loc.buffer(), ref_min_loc.buffer() + min_count, [&min_loc, i](Coordinates2D coord)
-        {
-            return coord.x == min_loc.at(i).x && coord.y == min_loc.at(i).y;
-        });
-
-        BOOST_TEST(same_coords != ref_min_loc.buffer() + min_count);
     }
 
-    for(uint32_t i = 0; i < max_count; i++)
-    {
-        Coordinates2D *same_coords = std::find_if(ref_max_loc.buffer(), ref_max_loc.buffer() + max_count, [&max_loc, i](Coordinates2D coord)
-        {
-            return coord.x == max_loc.at(i).x && coord.y == max_loc.at(i).y;
-        });
+    typename T::value_type _target{};
+    typename T::value_type _reference{};
+    T                      _tolerance{};
+};
 
-        BOOST_TEST(same_coords != ref_max_loc.buffer() + max_count);
+template <typename T, typename U>
+struct compare;
+
+template <typename U>
+struct compare<AbsoluteTolerance<U>, U> : public compare_base<AbsoluteTolerance<U>>
+{
+    using compare_base<AbsoluteTolerance<U>>::compare_base;
+
+    operator bool() const
+    {
+        if(!std::isfinite(this->_target) || !std::isfinite(this->_reference))
+        {
+            return false;
+        }
+        else if(this->_target == this->_reference)
+        {
+            return true;
+        }
+
+        return static_cast<U>(std::abs(this->_target - this->_reference)) <= static_cast<U>(this->_tolerance);
+    }
+};
+
+template <typename U>
+struct compare<RelativeTolerance, U> : public compare_base<RelativeTolerance>
+{
+    using compare_base<RelativeTolerance>::compare_base;
+
+    operator bool() const
+    {
+        if(!std::isfinite(_target) || !std::isfinite(_reference))
+        {
+            return false;
+        }
+        else if(_target == _reference)
+        {
+            return true;
+        }
+
+        const double relative_change = std::abs(static_cast<double>(_target - _reference)) / _reference;
+
+        return relative_change <= _tolerance;
+    }
+};
+
+template <typename T, typename U>
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value, float tolerance_number)
+{
+    // Validate with valid region covering the entire shape
+    validate(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number);
+}
+
+template <typename T, typename U>
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value, float tolerance_number)
+{
+    int64_t num_mismatches = 0;
+    int64_t num_elements   = 0;
+
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.element_size(), reference.element_size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.data_type(), reference.data_type(), framework::LogLevel::ERRORS);
+
+    if(reference.format() != Format::UNKNOWN)
+    {
+        ARM_COMPUTE_EXPECT_EQUAL(tensor.format(), reference.format(), framework::LogLevel::ERRORS);
+    }
+
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()), framework::LogLevel::ERRORS);
+
+    const int min_elements = std::min(tensor.num_elements(), reference.num_elements());
+    const int min_channels = std::min(tensor.num_channels(), reference.num_channels());
+
+    // Iterate over all elements within valid region, e.g. U8, S16, RGB888, ...
+    for(int element_idx = 0; element_idx < min_elements; ++element_idx)
+    {
+        const Coordinates id = index2coord(reference.shape(), element_idx);
+
+        if(is_in_valid_region(valid_region, id))
+        {
+            // Iterate over all channels within one element
+            for(int c = 0; c < min_channels; ++c)
+            {
+                const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
+                const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
+
+                if(!compare<U, typename U::value_type>(target_value, reference_value, tolerance_value))
+                {
+                    ARM_COMPUTE_TEST_INFO("id = " << id);
+                    ARM_COMPUTE_TEST_INFO("channel = " << c);
+                    ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << framework::make_printable(target_value));
+                    ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << framework::make_printable(reference_value));
+                    ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << framework::make_printable(static_cast<typename U::value_type>(tolerance_value)));
+                    ARM_COMPUTE_EXPECT_EQUAL(target_value, reference_value, framework::LogLevel::DEBUG);
+
+                    ++num_mismatches;
+                }
+
+                ++num_elements;
+            }
+        }
+    }
+
+    if(num_elements > 0)
+    {
+        const int64_t absolute_tolerance_number = tolerance_number * num_elements;
+        const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
+
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
+                              << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number << "%)");
+        ARM_COMPUTE_EXPECT(num_mismatches <= absolute_tolerance_number, framework::LogLevel::ERRORS);
     }
 }
 
-/** Validate KeyPoint arrays.
- *
- * - All values should match
- */
-void validate(IArray<KeyPoint> &target, IArray<KeyPoint> &ref, int64_t tolerance = 0);
+template <typename T, typename U>
+void validate(T target, T reference, U tolerance)
+{
+    ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << framework::make_printable(reference));
+    ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << framework::make_printable(target));
+    ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << framework::make_printable(static_cast<typename U::value_type>(tolerance)));
+    ARM_COMPUTE_EXPECT((compare<U, typename U::value_type>(target, reference, tolerance)), framework::LogLevel::ERRORS);
+}
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

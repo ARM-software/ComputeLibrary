@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "framework/DatasetModes.h"
-#include "framework/Exceptions.h"
-#include "framework/Framework.h"
-#include "framework/Macros.h"
-#include "framework/command_line/CommandLineOptions.h"
-#include "framework/command_line/CommandLineParser.h"
-#include "framework/instruments/Instruments.h"
-#include "framework/printers/Printers.h"
 #include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
+#include "tests/framework/DatasetModes.h"
+#include "tests/framework/Exceptions.h"
+#include "tests/framework/Framework.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/command_line/CommandLineOptions.h"
+#include "tests/framework/command_line/CommandLineParser.h"
+#include "tests/framework/instruments/Instruments.h"
+#include "tests/framework/printers/Printers.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"

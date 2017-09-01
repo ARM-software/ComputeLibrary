@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_GLOBALS_H__
 #define __ARM_COMPUTE_TEST_GLOBALS_H__
 
-#include "AssetsLibrary.h"
+#include "tests/AssetsLibrary.h"
 
 #include <memory>
 

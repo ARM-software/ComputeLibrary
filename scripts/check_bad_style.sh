@@ -2,7 +2,7 @@
 
 set -e
 
-DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./framework ./support"
+DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./support"
 
 grep -HrnP "/\*\*$" $DIRECTORIES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))
@@ -60,7 +60,7 @@ then
     exit -1
 fi
 
-grep -Hnir "ARM_COMPUTE_ENABLE_FP16" ./tests/validation_new/CL | tee bad_style.log
+grep -Hnir "ARM_COMPUTE_ENABLE_FP16" ./tests/validation/CL | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""

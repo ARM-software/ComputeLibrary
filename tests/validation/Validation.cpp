@@ -25,22 +25,14 @@
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/FixedPoint.h"
-#include "arm_compute/core/IArray.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "tests/IAccessor.h"
-#include "tests/RawTensor.h"
-#include "tests/TypePrinter.h"
-#include "tests/Utils.h"
 #include "tests/validation/half.h"
 
 #include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <iomanip>
-#include <vector>
 
 namespace arm_compute
 {
@@ -99,39 +91,6 @@ double get_double_data(const void *ptr, DataType data_type)
     }
 }
 
-bool is_equal(double target, double ref, double max_absolute_error = std::numeric_limits<double>::epsilon(), double max_relative_error = 0.0001f)
-{
-    if(!std::isfinite(target) || !std::isfinite(ref))
-    {
-        return false;
-    }
-
-    // No need further check if they are equal
-    if(ref == target)
-    {
-        return true;
-    }
-
-    // Need this check for the situation when the two values close to zero but have different sign
-    if(std::abs(std::abs(ref) - std::abs(target)) <= max_absolute_error)
-    {
-        return true;
-    }
-
-    double relative_error = 0;
-
-    if(std::abs(target) > std::abs(ref))
-    {
-        relative_error = std::abs((target - ref) / target);
-    }
-    else
-    {
-        relative_error = std::abs((ref - target) / ref);
-    }
-
-    return relative_error <= max_relative_error;
-}
-
 void check_border_element(const IAccessor &tensor, const Coordinates &id,
                           const BorderMode &border_mode, const void *border_value,
                           int64_t &num_elements, int64_t &num_mismatches)
@@ -142,7 +101,25 @@ void check_border_element(const IAccessor &tensor, const Coordinates &id,
     if(border_mode == BorderMode::REPLICATE)
     {
         Coordinates border_id{ id };
-        border_id.set(1, 0);
+
+        if(id.x() < 0)
+        {
+            border_id.set(0, 0);
+        }
+        else if(static_cast<size_t>(id.x()) >= tensor.shape().x())
+        {
+            border_id.set(0, tensor.shape().x() - 1);
+        }
+
+        if(id.y() < 0)
+        {
+            border_id.set(1, 0);
+        }
+        else if(static_cast<size_t>(id.y()) >= tensor.shape().y())
+        {
+            border_id.set(1, tensor.shape().y() - 1);
+        }
+
         border_value = tensor(border_id);
     }
 
@@ -151,52 +128,19 @@ void check_border_element(const IAccessor &tensor, const Coordinates &id,
     {
         const size_t channel_offset = channel * channel_size;
         const double target         = get_double_data(ptr + channel_offset, tensor.data_type());
-        const double ref            = get_double_data(static_cast<const uint8_t *>(border_value) + channel_offset, tensor.data_type());
-        const bool   equal          = is_equal(target, ref);
+        const double reference      = get_double_data(static_cast<const uint8_t *>(border_value) + channel_offset, tensor.data_type());
 
-        BOOST_TEST_INFO("id = " << id);
-        BOOST_TEST_INFO("channel = " << channel);
-        BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
-        BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
-        BOOST_TEST_WARN(equal);
-
-        if(!equal)
+        if(!compare<AbsoluteTolerance<double>, double>(target, reference))
         {
+            ARM_COMPUTE_TEST_INFO("id = " << id);
+            ARM_COMPUTE_TEST_INFO("channel = " << channel);
+            ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
+            ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << reference);
+            ARM_COMPUTE_EXPECT_EQUAL(target, reference, framework::LogLevel::DEBUG);
+
             ++num_mismatches;
         }
 
-        ++num_elements;
-    }
-}
-
-void check_single_element(const Coordinates &id, const IAccessor &tensor, const RawTensor &reference, float tolerance_value,
-                          uint64_t wrap_range, int min_channels, size_t channel_size, int64_t &num_mismatches, int64_t &num_elements)
-{
-    const auto ptr     = static_cast<const uint8_t *>(tensor(id));
-    const auto ref_ptr = static_cast<const uint8_t *>(reference(id));
-
-    // Iterate over all channels within one element
-    for(int channel = 0; channel < min_channels; ++channel)
-    {
-        const size_t channel_offset = channel * channel_size;
-        const double target         = get_double_data(ptr + channel_offset, reference.data_type());
-        const double ref            = get_double_data(ref_ptr + channel_offset, reference.data_type());
-        bool         equal          = is_equal(target, ref, tolerance_value);
-
-        if(wrap_range != 0 && !equal)
-        {
-            equal = is_equal(target, ref, wrap_range - tolerance_value);
-        }
-
-        if(!equal)
-        {
-            BOOST_TEST_INFO("id = " << id);
-            BOOST_TEST_INFO("channel = " << channel);
-            BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
-            BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
-            BOOST_TEST_WARN(equal);
-            ++num_mismatches;
-        }
         ++num_elements;
     }
 }
@@ -204,107 +148,31 @@ void check_single_element(const Coordinates &id, const IAccessor &tensor, const 
 
 void validate(const arm_compute::ValidRegion &region, const arm_compute::ValidRegion &reference)
 {
-    BOOST_TEST(region.anchor.num_dimensions() == reference.anchor.num_dimensions());
-    BOOST_TEST(region.shape.num_dimensions() == reference.shape.num_dimensions());
+    ARM_COMPUTE_EXPECT_EQUAL(region.anchor.num_dimensions(), reference.anchor.num_dimensions(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(region.shape.num_dimensions(), reference.shape.num_dimensions(), framework::LogLevel::ERRORS);
 
     for(unsigned int d = 0; d < region.anchor.num_dimensions(); ++d)
     {
-        BOOST_TEST(region.anchor[d] == reference.anchor[d]);
+        ARM_COMPUTE_EXPECT_EQUAL(region.anchor[d], reference.anchor[d], framework::LogLevel::ERRORS);
     }
 
     for(unsigned int d = 0; d < region.shape.num_dimensions(); ++d)
     {
-        BOOST_TEST(region.shape[d] == reference.shape[d]);
+        ARM_COMPUTE_EXPECT_EQUAL(region.shape[d], reference.shape[d], framework::LogLevel::ERRORS);
     }
 }
 
 void validate(const arm_compute::PaddingSize &padding, const arm_compute::PaddingSize &reference)
 {
-    BOOST_TEST(padding.top == reference.top);
-    BOOST_TEST(padding.right == reference.right);
-    BOOST_TEST(padding.bottom == reference.bottom);
-    BOOST_TEST(padding.left == reference.left);
-}
-
-void validate(const IAccessor &tensor, const RawTensor &reference, float tolerance_value, float tolerance_number, uint64_t wrap_range)
-{
-    // Validate with valid region covering the entire shape
-    validate(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number, wrap_range);
-}
-
-void validate(const IAccessor &tensor, const RawTensor &reference, const ValidRegion &valid_region, float tolerance_value, float tolerance_number, uint64_t wrap_range)
-{
-    int64_t num_mismatches = 0;
-    int64_t num_elements   = 0;
-
-    BOOST_TEST(tensor.element_size() == reference.element_size());
-    BOOST_TEST(tensor.format() == reference.format());
-    BOOST_TEST(tensor.data_type() == reference.data_type());
-    BOOST_TEST(tensor.num_channels() == reference.num_channels());
-    BOOST_TEST(compare_dimensions(tensor.shape(), reference.shape()));
-
-    const int    min_elements = std::min(tensor.num_elements(), reference.num_elements());
-    const int    min_channels = std::min(tensor.num_channels(), reference.num_channels());
-    const size_t channel_size = element_size_from_data_type(reference.data_type());
-
-    // Iterate over all elements within valid region, e.g. U8, S16, RGB888, ...
-    for(int element_idx = 0; element_idx < min_elements; ++element_idx)
-    {
-        const Coordinates id = index2coord(reference.shape(), element_idx);
-        if(is_in_valid_region(valid_region, id))
-        {
-            check_single_element(id, tensor, reference, tolerance_value, wrap_range, min_channels, channel_size, num_mismatches, num_elements);
-        }
-    }
-
-    const int64_t absolute_tolerance_number = tolerance_number * num_elements;
-    const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
-
-    BOOST_TEST(num_mismatches <= absolute_tolerance_number,
-               num_mismatches << " values (" << std::setprecision(2) << percent_mismatches
-               << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number << "%)");
-}
-
-void validate(const IAccessor &tensor, const RawTensor &reference, const RawTensor &valid_mask, float tolerance_value, float tolerance_number, uint64_t wrap_range)
-{
-    int64_t num_mismatches = 0;
-    int64_t num_elements   = 0;
-
-    BOOST_TEST(tensor.element_size() == reference.element_size());
-    BOOST_TEST(tensor.format() == reference.format());
-    BOOST_TEST(tensor.data_type() == reference.data_type());
-    BOOST_TEST(tensor.num_channels() == reference.num_channels());
-    BOOST_TEST(compare_dimensions(tensor.shape(), reference.shape()));
-
-    const int    min_elements = std::min(tensor.num_elements(), reference.num_elements());
-    const int    min_channels = std::min(tensor.num_channels(), reference.num_channels());
-    const size_t channel_size = element_size_from_data_type(reference.data_type());
-
-    // Iterate over all elements within valid region, e.g. U8, S16, RGB888, ...
-    for(int element_idx = 0; element_idx < min_elements; ++element_idx)
-    {
-        const Coordinates id = index2coord(reference.shape(), element_idx);
-        if(valid_mask[element_idx] == 1)
-        {
-            check_single_element(id, tensor, reference, tolerance_value, wrap_range, min_channels, channel_size, num_mismatches, num_elements);
-        }
-        else
-        {
-            ++num_elements;
-        }
-    }
-
-    const int64_t absolute_tolerance_number = tolerance_number * num_elements;
-    const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
-
-    BOOST_TEST(num_mismatches <= absolute_tolerance_number,
-               num_mismatches << " values (" << std::setprecision(2) << percent_mismatches
-               << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number << "%)");
+    ARM_COMPUTE_EXPECT_EQUAL(padding.top, reference.top, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.right, reference.right, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.bottom, reference.bottom, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.left, reference.left, framework::LogLevel::ERRORS);
 }
 
 void validate(const IAccessor &tensor, const void *reference_value)
 {
-    BOOST_TEST_REQUIRE((reference_value != nullptr));
+    ARM_COMPUTE_ASSERT(reference_value != nullptr);
 
     int64_t      num_mismatches = 0;
     int64_t      num_elements   = 0;
@@ -322,17 +190,16 @@ void validate(const IAccessor &tensor, const void *reference_value)
         {
             const size_t channel_offset = channel * channel_size;
             const double target         = get_double_data(ptr + channel_offset, tensor.data_type());
-            const double ref            = get_double_data(reference_value, tensor.data_type());
-            const bool   equal          = is_equal(target, ref);
+            const double reference      = get_double_data(reference_value, tensor.data_type());
 
-            BOOST_TEST_INFO("id = " << id);
-            BOOST_TEST_INFO("channel = " << channel);
-            BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
-            BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
-            BOOST_TEST_WARN(equal);
-
-            if(!equal)
+            if(!compare<AbsoluteTolerance<double>, double>(target, reference))
             {
+                ARM_COMPUTE_TEST_INFO("id = " << id);
+                ARM_COMPUTE_TEST_INFO("channel = " << channel);
+                ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << target);
+                ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << reference);
+                ARM_COMPUTE_EXPECT_EQUAL(target, reference, framework::LogLevel::DEBUG);
+
                 ++num_mismatches;
             }
 
@@ -340,10 +207,13 @@ void validate(const IAccessor &tensor, const void *reference_value)
         }
     }
 
-    const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements * 100.f;
+    if(num_elements > 0)
+    {
+        const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
-    BOOST_TEST(num_mismatches == 0,
-               num_mismatches << " values (" << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0, framework::LogLevel::ERRORS);
+    }
 }
 
 void validate(const IAccessor &tensor, BorderSize border_size, const BorderMode &border_mode, const void *border_value)
@@ -354,7 +224,7 @@ void validate(const IAccessor &tensor, BorderSize border_size, const BorderMode 
     }
     else if(border_mode == BorderMode::CONSTANT)
     {
-        BOOST_TEST((border_value != nullptr));
+        ARM_COMPUTE_ASSERT(border_value != nullptr);
     }
 
     int64_t   num_mismatches = 0;
@@ -414,63 +284,23 @@ void validate(const IAccessor &tensor, BorderSize border_size, const BorderMode 
         }
     }
 
-    const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements * 100.f;
+    if(num_elements > 0)
+    {
+        const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
-    BOOST_TEST(num_mismatches == 0,
-               num_mismatches << " values (" << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0, framework::LogLevel::ERRORS);
+    }
 }
 
 void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned int> expected_labels)
 {
-    ARM_COMPUTE_UNUSED(classified_labels);
-    ARM_COMPUTE_UNUSED(expected_labels);
-    BOOST_TEST(expected_labels.size() != 0);
-    BOOST_TEST(classified_labels.size() == expected_labels.size());
+    ARM_COMPUTE_EXPECT_EQUAL(classified_labels.size(), expected_labels.size(), framework::LogLevel::ERRORS);
 
     for(unsigned int i = 0; i < expected_labels.size(); ++i)
     {
-        BOOST_TEST(classified_labels[i] == expected_labels[i]);
+        ARM_COMPUTE_EXPECT_EQUAL(classified_labels[i], expected_labels[i], framework::LogLevel::ERRORS);
     }
-}
-
-void validate(float target, float ref, float tolerance_abs_error, float tolerance_relative_error)
-{
-    const bool equal = is_equal(target, ref, tolerance_abs_error, tolerance_relative_error);
-
-    BOOST_TEST_INFO("reference = " << std::setprecision(5) << ref);
-    BOOST_TEST_INFO("target = " << std::setprecision(5) << target);
-    BOOST_TEST(equal);
-}
-
-void validate(IArray<KeyPoint> &target, IArray<KeyPoint> &ref, int64_t tolerance)
-{
-    int64_t num_mismatches = 0;
-
-    BOOST_TEST_WARN(target.num_values() == ref.num_values());
-
-    for(size_t i = 0; i < target.num_values(); ++i)
-    {
-        KeyPoint *ref_val = std::find_if(ref.buffer(), ref.buffer() + ref.num_values(), [&target, i](KeyPoint key)
-        {
-            return key.x == target.at(i).x && key.y == target.at(i).y;
-        });
-
-        const KeyPoint &key = target.at(i);
-
-        if((ref_val == ref.buffer() + ref.num_values()) || !(is_equal(key.strength, ref_val->strength) && is_equal(key.scale, ref_val->scale) && is_equal(key.orientation, ref_val->orientation)
-                                                             && is_equal(key.tracking_status, ref_val->tracking_status) && is_equal(key.error, ref_val->error)))
-        {
-            ++num_mismatches;
-
-            BOOST_TEST_WARN(is_equal(key.strength, ref_val->strength));
-            BOOST_TEST_WARN(is_equal(key.scale, ref_val->scale));
-            BOOST_TEST_WARN(is_equal(key.orientation, ref_val->orientation));
-            BOOST_TEST_WARN(is_equal(key.tracking_status, ref_val->tracking_status));
-            BOOST_TEST_WARN(is_equal(key.error, ref_val->error));
-        }
-    }
-
-    BOOST_TEST(num_mismatches <= tolerance);
 }
 } // namespace validation
 } // namespace test

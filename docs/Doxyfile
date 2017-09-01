@@ -776,7 +776,6 @@ INPUT                  = ./docs/00_introduction.dox \
                          ./scripts/ \
                          ./src/core/CL/cl_kernels/ \
                          ./examples/ \
-                         ./framework/ \
                          ./tests/ \
                          ./utils/ \
                          ./support/

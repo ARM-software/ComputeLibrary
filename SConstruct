@@ -217,5 +217,4 @@ if env['opencl']:
 if env['examples']:
     SConscript('./examples/SConscript', variant_dir='#build/%s/examples' % env['build_dir'], duplicate=0)
 
-SConscript('./framework/SConscript', variant_dir='#build/%s/framework' % env['build_dir'], duplicate=0)
 SConscript('./tests/SConscript', variant_dir='#build/%s/tests' % env['build_dir'], duplicate=0)

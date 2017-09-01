@@ -34,4 +34,5 @@
 #define HALF_ROUND_TIES_TO_EVEN 1
 
 #include "half/half.hpp"
+
 #endif /* __ARM_COMPUTE_TEST_HALF_H__ */
