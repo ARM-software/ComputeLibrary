@@ -1,0 +1,7 @@
+Import("env")
+
+opencl = env.SharedLibrary("OpenCL", "opencl_stubs.c")
+alias = Alias("opencl", opencl)
+Default(alias)
+
+Export("opencl")

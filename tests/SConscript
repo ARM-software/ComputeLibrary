@@ -1,0 +1,150 @@
+# Copyright (c) 2017 ARM Limited.
+#
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+import SCons
+import os.path
+
+Import('env')
+Import('vars')
+Import('arm_compute_a')
+Import('arm_compute_so')
+
+# vars is imported from arm_compute:
+variables = [
+    #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
+    BoolVariable("internal_only", "Enable ARM internal only tests", True),
+    BoolVariable("pmu", "Enable PMU counters", False),
+    BoolVariable("validation_tests", "Build validation test programs", True),
+    BoolVariable("benchmark_tests", "Build validation test programs", True)
+]
+
+# We need a separate set of Variables for the Help message (Otherwise the global variables will get displayed twice)
+new_options = Variables('scons')
+
+for v in variables:
+    new_options.Add(v)
+    vars.Add(v)
+
+# Clone the environment to make sure we're not polluting the arm_compute one:
+common_env = env.Clone()
+vars.Update(common_env)
+
+Help(new_options.GenerateHelpText(common_env))
+
+if env['os'] in ['android', 'bare_metal']:
+    common_env.Append(LIBS = [arm_compute_a])
+    arm_compute_lib = arm_compute_a
+else:
+    common_env.Append(LIBS = ["arm_compute"])
+    arm_compute_lib = arm_compute_so
+
+if env['arch'] == 'arm64-v8.2-a' and ( common_env['validation_tests'] or common_env['benchmark_tests']):
+    print("validation_tests=1 and benchmark_tests=1 are not currently supported for arch=arm64-v8.2-a")
+    Exit(1)
+
+#FIXME Delete before release
+if common_env['internal_only']:
+    common_env.Append(CPPDEFINES=['INTERNAL_ONLY'])
+
+common_env.Append(CPPPATH = [".", "#3rdparty/include"])
+common_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
+common_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
+common_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
+common_env.Append(LIBS = ['boost_program_options'])
+common_env.Append(CXXFLAGS = ['-Wno-missing-field-initializers'])
+
+validation_env = common_env.Clone()
+benchmark_env = common_env.Clone()
+
+validation_env.Append(CPPDEFINES=['BOOST'])
+# overloaded virtual function "benchmark::Fixture::SetUp" is only partially overridden
+benchmark_env.Append(CPPFLAGS=['-Wno-overloaded-virtual'])
+
+files = Glob('*.cpp')
+
+common_objects = [ common_env.StaticObject( f ) for f in files ]
+
+validation_env.Append(LIBS = ['boost_unit_test_framework'])
+benchmark_env.Append(LIBS = ['benchmark'])
+
+files_validation = Glob('validation/*.cpp')
+files_benchmark = Glob('benchmark/*.cpp')
+
+if env['os'] == 'android' or not common_env['pmu']:
+    if env['os'] == 'android' and common_env['pmu']:
+        if env['Werror']:
+            print("pmu=1 is not supported for os=android")
+            Exit(1)
+        else:
+            print("pmu=1 is not supported for os=android")
+
+    files_benchmark = [f for f in files_benchmark if "PMU" not in os.path.basename(str(f))]
+
+# Add unit tests
+files_validation += Glob('validation/UNIT/*.cpp')
+files_validation += Glob('validation/UNIT/*/*.cpp')
+
+if env['opencl']:
+    Import('opencl')
+
+    benchmark_env.Append(CPPDEFINES=['OPENCL'])
+
+    files_validation += Glob('validation/CL/*.cpp')
+    files_validation += Glob('validation/CL/*/*.cpp')
+    files_validation += Glob('validation/system_tests/CL/*.cpp')
+    files_benchmark += Glob('benchmark/CL/*/*.cpp')
+    files_benchmark += Glob('benchmark/CL/*.cpp')
+    files_benchmark += Glob('benchmark/system_tests/CL/*.cpp')
+
+    validation_env.Append(LIBS = "OpenCL")
+    benchmark_env.Append(LIBS = "OpenCL")
+
+if env['neon']:
+    files_validation += Glob('validation/NEON/*.cpp')
+    files_validation += Glob('validation/NEON/*/*.cpp')
+    files_validation += Glob('validation/system_tests/NEON/*.cpp')
+    files_benchmark += Glob('benchmark/NEON/*/*.cpp')
+    files_benchmark += Glob('benchmark/NEON/*.cpp')
+    files_benchmark += Glob('benchmark/system_tests/NEON/*.cpp')
+
+if env['os'] == 'android':
+    validation_env.Append(LIBS = ["log"])
+    benchmark_env.Append(LIBS = ["log"])
+else:
+    benchmark_env.Append(LIBS = ["rt"])
+
+if common_env['validation_tests']:
+    arm_compute_validation = validation_env.Program('arm_compute_validation',
+                                                   files_validation + common_objects)
+    Depends(arm_compute_validation, arm_compute_lib)
+    if env['opencl']:
+        Depends(arm_compute_validation, opencl)
+    Default(arm_compute_validation)
+    Export('arm_compute_validation')
+if common_env['benchmark_tests']:
+    arm_compute_benchmark = benchmark_env.Program('arm_compute_benchmark',
+                                                 files_benchmark + common_objects)
+    Depends(arm_compute_benchmark, arm_compute_lib)
+    if env['opencl']:
+        Depends(arm_compute_benchmark, opencl)
+    Default(arm_compute_benchmark)
+    Export('arm_compute_benchmark')
+

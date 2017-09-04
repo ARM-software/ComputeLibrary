@@ -1,0 +1,93 @@
+/**
+@page tests Test architecture
+
+@tableofcontents
+
+@section building_test_dependencies Building dependencies
+
+The tests currently make use of Boost (Test and Program options) for validation
+and Google Benchmark for performance runs. Below are instructions about how to
+build these 3rd party libraries.
+
+@subsection building_boost Building Boost
+
+First follow the instructions from the Boost library on how to setup the Boost
+build system
+(http://www.boost.org/doc/libs/1_64_0/more/getting_started/index.html).
+Afterwards the required libraries can be build with:
+
+    ./b2 --with-program_options --with-test link=static \
+    define=BOOST_TEST_ALTERNATIVE_INIT_API
+
+Additionally, depending on your environment, it might be necessary to specify
+the ```toolset=``` option to choose the right compiler. Moreover,
+```address-model=32``` can be used to force building for 32bit and
+```target-os=android``` must be specified to build for Android.
+
+After executing the build command the libraries
+```libboost_program_options.a``` and ```libboost_unit_test_framework.a``` can
+be found in ```./stage/lib```.
+
+@subsection building_google_benchmark Building Google Benchmark
+
+Instructions on how to build Google Benchmark using CMake can be found in their
+repository: https://github.com/google/benchmark. For example, building for
+Android 32bit can be achieved via
+
+    cmake -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CXX_COMPILER=arm-linux-androideabi-clang++ \
+    -DBENCHMARK_ENABLE_LTO=false -DBENCHMARK_ENABLE_TESTING=false ..
+
+The library required by the compute library is ```libbenchmark.a```.
+
+@section tests_running_tests Running tests
+@subsection tests_running_tests_benchmarking Benchmarking
+@subsubsection tests_running_tests_benchmarking_filter Filter tests
+All tests can be run by invoking
+
+    ./arm_compute_benchmark -- ./data
+
+where `./data` contains the assets needed by the tests.
+
+If only a subset of the tests has to be executed the `--benchmark_filter` option takes a regular expression to select matching tests.
+
+    ./arm_compute_benchmark --benchmark_filter=neon_bitwise_and ./data
+
+All available tests can be displayed with the `--benchmark_list_tests` switch.
+
+    ./arm_compute_benchmark --benchmark_list_tests ./data
+
+@subsubsection tests_running_tests_benchmarking_runtime Runtime
+By default every test is run multiple *iterations* until a minimum time is reached. The minimum time (in seconds) can be controlled with the `--benchmark_min_time` flag. However, each test might have a hard coded value for the number of iterations or minimum execution time. In that case the command line argument is ignored for those specific tests.
+Additionally it is possible to specify multiple *repetitions* (`--benchmark_repetitions`) which will run each test multiple times (including the iterations). The average and standard deviation for all repetitions is automatically computed and reported.
+
+@subsubsection tests_running_tests_benchmarking_verbosity Verbosity
+The verbosity of the test output can be controlled via the `--v` flag. Though it should hardly ever be necessary.
+
+@subsection tests_running_tests_validation Validation
+@subsubsection tests_running_tests_validation_filter Filter tests
+All tests can be run by invoking
+
+    ./arm_compute_validation -- ./data
+
+where `./data` contains the assets needed by the tests.
+
+As running all tests can take a lot of time the suite is split into "precommit" and "nightly" tests. The precommit tests will be fast to execute but still cover the most important features. In contrast the nightly tests offer more extensive coverage but take longer. The different subsets can be selected from the command line as follows:
+
+    ./arm_compute_validation -t @precommit -- ./data
+    ./arm_compute_validation -t @nightly -- ./data
+
+Additionally it is possible to select specific suites or tests:
+
+    ./arm_compute_validation -t CL -- ./data
+    ./arm_compute_validation -t NEON/BitwiseAnd/RunSmall/_0 -- ./data
+
+All available tests can be displayed with the `--list_content` switch.
+
+    ./arm_compute_validation --list_content -- ./data
+
+For a complete list of possible selectors please see: http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/runtime_config/test_unit_filtering.html
+
+@subsubsection tests_running_tests_validation_verbosity Verbosity
+There are two separate flags to control the verbosity of the test output. `--report_level` controls the verbosity of the summary produced after all tests have been executed. `--log_level` controls the verbosity of the information generated during the execution of tests. All available settings can be found in the Boost documentation for [--report_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/report_level.html) and [--log_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/log_level.html), respectively.
+*/

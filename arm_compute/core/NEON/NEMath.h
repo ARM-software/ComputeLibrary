@@ -1,0 +1,96 @@
+/*
+ * Copyright (c) 2016, 2017 ARM Limited.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#ifndef __ARM_COMPUTE_NEMATH_H__
+#define __ARM_COMPUTE_NEMATH_H__
+
+#include <arm_neon.h>
+
+namespace arm_compute
+{
+/** Calculate inverse square root.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated inverse square root.
+ */
+float32x4_t vinvsqrtq_f32(float32x4_t x);
+
+/** Calculate reciprocal.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated reciprocal.
+ */
+float32x4_t vinvq_f32(float32x4_t x);
+
+/** Perform a 7th degree polynomial approximation using Estrin's method.
+ *
+ * @param[in] x      Input vector value in F32 format.
+ * @param[in] coeffs Polynomial coefficients table.
+ *
+ * @return The calculated approximation.
+ */
+float32x4_t vtaylor_polyq_f32(float32x4_t x, const std::array<float32x4_t, 8> &coeffs);
+
+/** Calculate exponential
+ *
+ * @param[in] x Input vector value in F32 format.
+ *
+ * @return The calculated exponent.
+ */
+float32x4_t vexpq_f32(float32x4_t x);
+
+/** Calculate logarithm
+ *
+ * @param[in] x Input vector value in F32 format.
+ *
+ * @return The calculated logarithm.
+ */
+float32x4_t vlogq_f32(float32x4_t x);
+
+/** Calculate hyperbolic tangent.
+ *
+ * tanh(x) = (e^2x - 1)/(e^2x + 1)
+ *
+ * @note We clamp x to [-5,5] to avoid overflowing issues.
+ *
+ * @param[in] val Input vector value in F32 format.
+ *
+ * @return The calculated Hyperbolic Tangent.
+ */
+float32x4_t vtanhq_f32(float32x4_t val);
+
+/** Calculate n power of a number.
+ *
+ * pow(x,n) = e^(n*log(x))
+ *
+ * @param[in] val Input vector value in F32 format.
+ * @param[in] n   Powers to raise the input to.
+ *
+ * @return The calculated power.
+ */
+float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
+}
+#include "arm_compute/core/NEON/NEMath.inl"
+#endif /* __ARM_COMPUTE_NEMATH_H__ */
