@@ -147,14 +147,6 @@ void ReferenceCPP::accumulate_weighted(const RawTensor &src, RawTensor &dst, flo
     tensor_operations::accumulate_weighted(s, d, alpha);
 }
 
-// Depth conversion
-void ReferenceCPP::depth_convert(const RawTensor &src, RawTensor &dst, ConvertPolicy policy, uint32_t shift)
-{
-    const TensorVariant s = TensorFactory::get_tensor(src);
-    TensorVariant       d = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(tensor_visitors::depth_convert_visitor(policy, shift), s, d);
-}
-
 // Gaussian3x3 filter
 void ReferenceCPP::gaussian3x3(const RawTensor &src, RawTensor &dst, BorderMode border_mode, uint8_t constant_border_value)
 {

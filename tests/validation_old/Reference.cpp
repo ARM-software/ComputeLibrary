@@ -187,21 +187,6 @@ RawTensor Reference::compute_reference_accumulate_weighted(const TensorShape &sh
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy,
-                                                     uint32_t shift, uint32_t fixed_point_position_in, uint32_t fixed_point_position_out)
-{
-    RawTensor ref_src(shape, dt_in, 1, fixed_point_position_in);
-    RawTensor ref_dst(shape, dt_out, 1, fixed_point_position_out);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src, 0);
-
-    // Compute reference
-    ReferenceCPP::depth_convert(ref_src, ref_dst, policy, shift);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_gaussian3x3(const TensorShape &shape, BorderMode border_mode, uint8_t constant_border_value)
 {
     // Create reference

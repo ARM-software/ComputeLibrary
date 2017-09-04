@@ -78,25 +78,6 @@ public:
         tensor_operations::absolute_difference(in1, in2, out);
     }
 };
-// Depth Convert visitor
-struct depth_convert_visitor : public boost::static_visitor<>
-{
-public:
-    explicit depth_convert_visitor(ConvertPolicy policy, uint32_t shift)
-        : _policy(policy), _shift(shift)
-    {
-    }
-
-    template <typename T1, typename T2>
-    void operator()(const Tensor<T1> &in, Tensor<T2> &out) const
-    {
-        tensor_operations::depth_convert(in, out, _policy, _shift);
-    }
-
-private:
-    ConvertPolicy _policy;
-    uint32_t      _shift;
-};
 // Pixel-wise Multiplication visitor
 struct pixel_wise_multiplication_visitor : public boost::static_visitor<>
 {

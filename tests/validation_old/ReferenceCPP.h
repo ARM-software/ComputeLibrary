@@ -127,14 +127,6 @@ public:
      * @param[in]      alpha A float value within the range of [0, 1]
      */
     static void accumulate_weighted(const RawTensor &src, RawTensor &dst, float alpha);
-    /** Depth conversion from @p src to @p dst
-     *
-     * @param[in]  src    First tensor.
-     * @param[out] dst    Result tensor.
-     * @param[in]  policy Overflow policy.
-     * @param[in]  shift  Value for down/up conversions.
-     */
-    static void depth_convert(const RawTensor &src, RawTensor &dst, ConvertPolicy policy, uint32_t shift);
     /** Function to compute gaussian3x3 filtered result tensor.
      *
      * @param[in]  src                   Input tensor.
