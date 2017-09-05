@@ -72,18 +72,6 @@ std::pair<RawTensor, RawTensor> Reference::compute_reference_sobel_5x5(const Ten
 
     return std::make_pair(ref_dst_x, ref_dst_y);
 }
-void Reference::compute_reference_min_max_location(const TensorShape &shape, DataType dt_in, void *min, void *max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc,
-                                                   uint32_t &min_count, uint32_t &max_count)
-{
-    // Create reference
-    RawTensor ref_src(shape, dt_in);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src, 0);
-
-    // Compute reference
-    ReferenceCPP::min_max_location(ref_src, min, max, min_loc, max_loc, min_count, max_count);
-}
 
 KeyPointArray Reference::compute_reference_harris_corners(const TensorShape &shape, float threshold, float min_dist, float sensitivity,
                                                           int32_t gradient_size, int32_t block_size, BorderMode border_mode, uint8_t constant_border_value)

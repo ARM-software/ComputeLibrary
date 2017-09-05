@@ -60,7 +60,7 @@ public:
         _array.unmap();
     }
 
-    int num_values() const override
+    size_t num_values() const override
     {
         return _array.num_values();
     }
@@ -73,6 +73,13 @@ public:
     void resize(size_t num) override
     {
         _array.resize(num);
+    }
+
+    T &at(size_t index) const override
+    {
+        ARM_COMPUTE_ERROR_ON(_array.buffer() == nullptr);
+        ARM_COMPUTE_ERROR_ON(index >= num_values());
+        return _array.buffer()[index];
     }
 
 private:

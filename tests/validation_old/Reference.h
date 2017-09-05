@@ -74,22 +74,6 @@ public:
      */
     static KeyPointArray compute_reference_harris_corners(const TensorShape &shape, float threshold, float min_dist, float sensitivity,
                                                           int32_t gradient_size, int32_t block_size, BorderMode border_mode, uint8_t constant_border_value);
-    /** Compute min max location.
-     *
-     * @param[in]  shape     Shape of the input tensors.
-     * @param[in]  dt_in     Data type of input tensor.
-     * @param[out] min       Minimum value of tensor
-     * @param[out] max       Maximum value of tensor
-     * @param[out] min_loc   Array with locations of minimum values
-     * @param[out] max_loc   Array with locations of maximum values
-     * @param[out] min_count Number of minimum values found
-     * @param[out] max_count Number of maximum values found
-     *
-     * @return Computed minimum, maximum values and their locations.
-     */
-    static void compute_reference_min_max_location(const TensorShape &shape, DataType dt_in, void *min, void *max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc,
-                                                   uint32_t &min_count,
-                                                   uint32_t &max_count);
     /** Compute reference integral image.
      *
      * @param[in] shape Shape of the input and output tensors.

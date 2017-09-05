@@ -41,7 +41,7 @@ public:
     virtual ~IArrayAccessor() = default;
 
     /** Number of elements of the tensor. */
-    virtual int num_values() const = 0;
+    virtual size_t num_values() const = 0;
 
     /** Access to the buffer.
      *
@@ -54,6 +54,14 @@ public:
      *  @param[in] num The new array size in number of elements
      */
     virtual void resize(size_t num) = 0;
+
+    /** Reference to the element of the array located at the given index
+     *
+     * @param[in] index Index of the element
+     *
+     * @return A reference to the element of the array located at the given index.
+     */
+    virtual T &at(size_t index) const = 0;
 };
 } // namespace test
 } // namespace arm_compute

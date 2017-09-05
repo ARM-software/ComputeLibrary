@@ -28,6 +28,7 @@
 #include "arm_compute/core/Types.h"
 #include "tests/IAccessor.h"
 #include "tests/SimpleTensor.h"
+#include "tests/Types.h"
 #include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Exceptions.h"
@@ -365,6 +366,37 @@ void validate(T target, T reference, U tolerance)
     ARM_COMPUTE_TEST_INFO("tolerance = " << std::setprecision(5) << framework::make_printable(static_cast<typename U::value_type>(tolerance)));
     ARM_COMPUTE_EXPECT((compare<U>(target, reference, tolerance)), framework::LogLevel::ERRORS);
 }
+
+template <typename T, typename U>
+void validate_min_max_loc(const MinMaxLocationValues<T> &target, const MinMaxLocationValues<U> &reference)
+{
+    ARM_COMPUTE_EXPECT_EQUAL(target.min, reference.min, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(target.max, reference.max, framework::LogLevel::ERRORS);
+
+    ARM_COMPUTE_EXPECT_EQUAL(target.min_loc.size(), reference.min_loc.size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(target.max_loc.size(), reference.max_loc.size(), framework::LogLevel::ERRORS);
+
+    for(uint32_t i = 0; i < target.min_loc.size(); ++i)
+    {
+        const auto same_coords = std::find_if(reference.min_loc.begin(), reference.min_loc.end(), [&target, i](Coordinates2D coord)
+        {
+            return coord.x == target.min_loc.at(i).x && coord.y == target.min_loc.at(i).y;
+        });
+
+        ARM_COMPUTE_EXPECT(same_coords != reference.min_loc.end(), framework::LogLevel::ERRORS);
+    }
+
+    for(uint32_t i = 0; i < target.max_loc.size(); ++i)
+    {
+        const auto same_coords = std::find_if(reference.max_loc.begin(), reference.max_loc.end(), [&target, i](Coordinates2D coord)
+        {
+            return coord.x == target.max_loc.at(i).x && coord.y == target.max_loc.at(i).y;
+        });
+
+        ARM_COMPUTE_EXPECT(same_coords != reference.max_loc.end(), framework::LogLevel::ERRORS);
+    }
+}
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

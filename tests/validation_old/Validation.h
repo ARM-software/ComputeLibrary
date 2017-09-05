@@ -141,47 +141,6 @@ void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned 
  */
 void validate(float target, float ref, float tolerance_abs_error = std::numeric_limits<float>::epsilon(), float tolerance_relative_error = 0.0001f);
 
-/** Validate min max location.
- *
- * - All values should match
- */
-template <typename T>
-void validate_min_max_loc(T min, T ref_min, T max, T ref_max,
-                          IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &ref_min_loc, IArray<Coordinates2D> &max_loc, IArray<Coordinates2D> &ref_max_loc,
-                          uint32_t min_count, uint32_t ref_min_count, uint32_t max_count, uint32_t ref_max_count)
-{
-    BOOST_TEST(min == ref_min);
-    BOOST_TEST(max == ref_max);
-
-    BOOST_TEST(min_count == min_loc.num_values());
-    BOOST_TEST(max_count == max_loc.num_values());
-    BOOST_TEST(ref_min_count == ref_min_loc.num_values());
-    BOOST_TEST(ref_max_count == ref_max_loc.num_values());
-
-    BOOST_TEST(min_count == ref_min_count);
-    BOOST_TEST(max_count == ref_max_count);
-
-    for(uint32_t i = 0; i < min_count; i++)
-    {
-        Coordinates2D *same_coords = std::find_if(ref_min_loc.buffer(), ref_min_loc.buffer() + min_count, [&min_loc, i](Coordinates2D coord)
-        {
-            return coord.x == min_loc.at(i).x && coord.y == min_loc.at(i).y;
-        });
-
-        BOOST_TEST(same_coords != ref_min_loc.buffer() + min_count);
-    }
-
-    for(uint32_t i = 0; i < max_count; i++)
-    {
-        Coordinates2D *same_coords = std::find_if(ref_max_loc.buffer(), ref_max_loc.buffer() + max_count, [&max_loc, i](Coordinates2D coord)
-        {
-            return coord.x == max_loc.at(i).x && coord.y == max_loc.at(i).y;
-        });
-
-        BOOST_TEST(same_coords != ref_max_loc.buffer() + max_count);
-    }
-}
-
 /** Validate KeyPoint arrays.
  *
  * - All values should match

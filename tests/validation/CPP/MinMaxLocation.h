@@ -21,31 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_TYPES_H__
-#define __ARM_COMPUTE_TEST_TYPES_H__
+#ifndef __ARM_COMPUTE_TEST_MIN_MAX_LOCATION_H__
+#define __ARM_COMPUTE_TEST_MIN_MAX_LOCATION_H__
 
-#include "arm_compute/core/Types.h"
-
-#include <vector>
+#include "tests/SimpleTensor.h"
+#include "tests/Types.h"
 
 namespace arm_compute
 {
-/** Fixed point operation */
-enum class FixedPointOp
+namespace test
 {
-    EXP,       /**< Exponential */
-    LOG,       /**< Logarithm */
-    INV_SQRT,  /**< Inverse square root */
-    RECIPROCAL /**< Reciprocal */
-};
-
-template <typename MinMaxType>
-struct MinMaxLocationValues
+namespace validation
 {
-    MinMaxType                 min{};
-    MinMaxType                 max{};
-    std::vector<Coordinates2D> min_loc{};
-    std::vector<Coordinates2D> max_loc{};
-};
+namespace reference
+{
+template <typename T>
+MinMaxLocationValues<T> min_max_location(const SimpleTensor<T> &src);
+} // namespace reference
+} // namespace validation
+} // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_TYPES_H__ */
+#endif /* __ARM_COMPUTE_TEST_MIN_MAX_LOCATION_H__ */

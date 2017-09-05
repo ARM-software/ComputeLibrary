@@ -95,13 +95,6 @@ void ReferenceCPP::harris_corners(RawTensor &src, RawTensor &Gx, RawTensor &Gy, 
     }
 }
 
-// Minimum maximum location
-void ReferenceCPP::min_max_location(const RawTensor &src, void *min, void *max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count)
-{
-    const TensorVariant s = TensorFactory::get_tensor(src);
-    boost::apply_visitor(tensor_visitors::min_max_location_visitor(min, max, min_loc, max_loc, min_count, max_count), s);
-}
-
 // Absolute difference
 void ReferenceCPP::absolute_difference(const RawTensor &src1, const RawTensor &src2, RawTensor &dst)
 {

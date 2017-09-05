@@ -83,17 +83,6 @@ public:
      */
     static void harris_corners(RawTensor &src, RawTensor &Gx, RawTensor &Gy, const RawTensor &candidates, const RawTensor &non_maxima, float threshold, float min_dist, float sensitivity,
                                int32_t gradient_size, int32_t block_size, KeyPointArray &corners, BorderMode border_mode, uint8_t constant_border_value);
-    /** Function to compute the min max values and their location in a tensor.
-     *
-     * @param[in]  src       Input tensor.
-     * @param[out] min       Minimum value of the tensor.
-     * @param[out] max       Maximum value of the tensor
-     * @param[out] min_loc   Array with locations of minimum values
-     * @param[out] max_loc   Array with locations of maximum values
-     * @param[out] min_count Number of minimum values found
-     * @param[out] max_count Number of maximum values found
-     */
-    static void min_max_location(const RawTensor &src, void *min, void *max, IArray<Coordinates2D> &min_loc, IArray<Coordinates2D> &max_loc, uint32_t &min_count, uint32_t &max_count);
     /** Function to compute the integral image of a tensor.
      *
      * @param[in]  src Input tensor.
