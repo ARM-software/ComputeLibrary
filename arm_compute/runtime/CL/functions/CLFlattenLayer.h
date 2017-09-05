@@ -21,32 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPOOLINGLAYER_H__
-#define __ARM_COMPUTE_CLPOOLINGLAYER_H__
-
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#ifndef __ARM_COMPUTE_CLFLATTENLAYER_H__
+#define __ARM_COMPUTE_CLFLATTENLAYER_H__
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
-/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following OpenCL kernels:
- *
- * -# @ref CLFillBorderKernel (executed if padding size is different from zero)
- * -# @ref CLPoolingLayerKernel
- */
-class CLPoolingLayer : public ICLSimpleFunction
+/** Basic function to execute flatten. This function calls the following OpenCL kernel:
+*
+* -# @ref CLIm2ColKernel
+*
+*/
+class CLFlattenLayer : public ICLSimpleFunction
 {
 public:
-    /** Set the input and output tensors.
+    /** Initialise the kernel's input and output.
      *
-     * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: QS8/QS16/F16/F32.
-     * @param[out]    output    Destination tensor. Data types supported: Same as @p input.
-     * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[in]  input  First input tensor to flatten with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: QS8/QS16/F16/F32
+     * @param[out] output Output tensor with shape [w*h*d, input_batches] where:
+     *             w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      */
-    void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
+    void configure(const ICLTensor *input, ICLTensor *output);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLPOOLINGLAYER_H__ */
+
+#endif /* __ARM_COMPUTE_CLFLATTENLAYER_H__ */

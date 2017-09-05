@@ -21,32 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPOOLINGLAYER_H__
-#define __ARM_COMPUTE_CLPOOLINGLAYER_H__
+#include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
 
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
+#include "arm_compute/core/Size2D.h"
+#include "support/ToolchainSupport.h"
 
-#include "arm_compute/core/Types.h"
+using namespace arm_compute;
 
-namespace arm_compute
+void CLFlattenLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
-class ICLTensor;
-
-/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following OpenCL kernels:
- *
- * -# @ref CLFillBorderKernel (executed if padding size is different from zero)
- * -# @ref CLPoolingLayerKernel
- */
-class CLPoolingLayer : public ICLSimpleFunction
-{
-public:
-    /** Set the input and output tensors.
-     *
-     * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: QS8/QS16/F16/F32.
-     * @param[out]    output    Destination tensor. Data types supported: Same as @p input.
-     * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
-     */
-    void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
-};
-} // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLPOOLINGLAYER_H__ */
+    auto k = arm_compute::support::cpp14::make_unique<CLIm2ColKernel>();
+    k->configure(input, output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
+    _kernel = std::move(k);
+}

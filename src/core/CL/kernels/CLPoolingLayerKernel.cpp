@@ -64,13 +64,10 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
-    static const std::set<int> supported_pool_sizes = { 2, 3, 7 };
-    ARM_COMPUTE_UNUSED(supported_pool_sizes);
-
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON(supported_pool_sizes.find(pool_size) == supported_pool_sizes.end());
     ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
+    ARM_COMPUTE_ERROR_ON(pool_size > 7 && is_data_type_fixed_point(input->info()->data_type()));
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
@@ -92,29 +89,14 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pooled_w) || (output->info()->dimension(1) != pooled_h));
 
-    // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenCL kernel where
-    // each thread computes 4 output elements
-    const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(input->info()->data_type());
-
-    int num_elements_read_per_iteration = (pool_size == 7) ? 8 : pool_size;
-    if(is_pool3x3_stride_le3)
-    {
-        // Change the number of elements processed and number of elements read per iteration for pooling 3x3 with stride less equal than 3
-        _num_elems_processed_per_iteration = 4;
-        num_elements_read_per_iteration    = pool_size * (pool_stride_x + 1);
-    }
-    const int input_width   = input->info()->dimension(0);
-    const int input_height  = input->info()->dimension(1);
-    const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elements_read_per_iteration) - input_width;
-    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+    const int input_width  = input->info()->dimension(0);
+    const int input_height = input->info()->dimension(1);
 
     // Set instance variables
-    _input              = input;
-    _output             = output;
-    _pool_info          = pool_info;
-    _border_size        = BorderSize(pool_pad_y, pool_pad_x);
-    _border_size.right  = std::max(upper_bound_w, pool_pad_x);
-    _border_size.bottom = std::max(upper_bound_h, pool_pad_y);
+    _input       = input;
+    _output      = output;
+    _pool_info   = pool_info;
+    _border_size = BorderSize(pool_pad_y, pool_pad_x);
 
     // Set build options
     std::set<std::string> build_opts;
@@ -136,14 +118,52 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     }
 
     // Create kernel
-    std::string kernel_name = "pooling_layer_" + support::cpp11::to_string(pool_size);
-    if(is_pool3x3_stride_le3)
+    if(pool_size <= 7)
     {
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name + "_optimized", build_opts));
+        // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenCL kernel where
+        // each thread computes 4 output elements
+        const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(input->info()->data_type());
+
+        int num_elements_read_per_iteration = (pool_size == 7) ? 8 : pool_size;
+        if(is_pool3x3_stride_le3)
+        {
+            // Change the number of elements processed and number of elements read per iteration for pooling 3x3 with stride less equal than 3
+            _num_elems_processed_per_iteration = 4;
+            num_elements_read_per_iteration    = pool_size * (pool_stride_x + 1);
+        }
+
+        const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elements_read_per_iteration) - input_width;
+        const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+
+        _border_size.right  = std::max(upper_bound_w, pool_pad_x);
+        _border_size.bottom = std::max(upper_bound_h, pool_pad_y);
+
+        std::string kernel_name = "pooling_layer_" + support::cpp11::to_string(pool_size);
+        if(is_pool3x3_stride_le3)
+        {
+            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name + "_optimized", build_opts));
+        }
+        else
+        {
+            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+        }
     }
-    else
+    else // Run general case
     {
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+        _num_elems_processed_per_iteration = 1;
+
+        const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + pool_size) - input_width;
+        const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+
+        _border_size.right  = std::max(upper_bound_w, pool_pad_x);
+        _border_size.bottom = std::max(upper_bound_h, pool_pad_y);
+
+        build_opts.emplace(("-DPOOL_SIZE=" + support::cpp11::to_string(pool_size)));
+        if(input->info()->data_type() == DataType::F16)
+        {
+            build_opts.emplace("-DFP16");
+        }
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("pooling_layer_N", build_opts));
     }
 
     // Configure kernel window

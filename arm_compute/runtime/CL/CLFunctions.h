@@ -53,6 +53,7 @@
 #include "arm_compute/runtime/CL/functions/CLErode.h"
 #include "arm_compute/runtime/CL/functions/CLFastCorners.h"
 #include "arm_compute/runtime/CL/functions/CLFillBorder.h"
+#include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
 #include "arm_compute/runtime/CL/functions/CLFloor.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"

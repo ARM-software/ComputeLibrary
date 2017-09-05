@@ -239,6 +239,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "pooling_layer_3", "pooling_layer.cl" },
     { "pooling_layer_3_optimized", "pooling_layer.cl" },
     { "pooling_layer_7", "pooling_layer.cl" },
+    { "pooling_layer_N", "pooling_layer.cl" },
     { "quantization_layer", "quantization_layer.cl" },
     { "reduction_operation", "reduction_operation.cl" },
     { "remap_nearest_neighbour", "remap.cl" },

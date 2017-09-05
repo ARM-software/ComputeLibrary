@@ -44,7 +44,7 @@ namespace validation
 namespace
 {
 /** Input data set for float data types */
-const auto PoolingLayerDatasetFP = combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { 2, 3, 7 })),
+const auto PoolingLayerDatasetFP = combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { 2, 3, 7, 9 })),
                                            framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) }));
 
 /** Input data set for quantized data types */

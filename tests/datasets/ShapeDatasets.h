@@ -101,14 +101,14 @@ public:
         : ShapeDataset("Shape",
     {
         // Batch size 1
-        TensorShape{ 7U, 7U },
+        TensorShape{ 9U, 9U },
                      TensorShape{ 27U, 13U, 2U },
                      TensorShape{ 128U, 64U, 1U, 3U },
                      // Batch size 4
-                     TensorShape{ 7U, 7U, 3U, 4U },
+                     TensorShape{ 9U, 9U, 3U, 4U },
                      TensorShape{ 27U, 13U, 2U, 4U },
                      // Arbitrary batch size
-                     TensorShape{ 7U, 7U, 3U, 5U }
+                     TensorShape{ 9U, 9U, 3U, 5U }
     })
     {
     }
@@ -213,6 +213,25 @@ public:
         TensorShape{ 322U, 243U },
                      TensorShape{ 463U, 879U },
                      TensorShape{ 416U, 651U }
+    })
+    {
+    }
+};
+
+/** Data set containing global pooling tensor shapes. */
+class GlobalPoolingShapes final : public ShapeDataset
+{
+public:
+    GlobalPoolingShapes()
+        : ShapeDataset("Shape",
+    {
+        // Batch size 1
+        TensorShape{ 9U, 9U },
+                     TensorShape{ 13U, 13U, 2U },
+                     TensorShape{ 27U, 27U, 1U, 3U },
+                     // Batch size 4
+                     TensorShape{ 31U, 31U, 3U, 4U },
+                     TensorShape{ 34U, 34U, 2U, 4U }
     })
     {
     }

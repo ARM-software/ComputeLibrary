@@ -49,10 +49,11 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input     Source tensor. Data types supported: F16/F32.
+     * @note QS8 and QS16 are supported only for pool sizes 3, 5 and 7
+     *
+     * @param[in]  input     Source tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
-     *                       Supported pooling sizes : 2, 3 and 7
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
 
@@ -67,5 +68,5 @@ private:
     BorderSize       _border_size;
     unsigned int     _num_elems_processed_per_iteration;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLPOOLINGLAYERKERNEL_H__ */

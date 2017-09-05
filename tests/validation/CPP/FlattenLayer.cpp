@@ -21,32 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPOOLINGLAYER_H__
-#define __ARM_COMPUTE_CLPOOLINGLAYER_H__
+#include "FlattenLayer.h"
 
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
-
-#include "arm_compute/core/Types.h"
+#include "tests/validation/FixedPoint.h"
 
 namespace arm_compute
 {
-class ICLTensor;
-
-/** Basic function to simulate a pooling layer with the specified pooling operation. This function calls the following OpenCL kernels:
- *
- * -# @ref CLFillBorderKernel (executed if padding size is different from zero)
- * -# @ref CLPoolingLayerKernel
- */
-class CLPoolingLayer : public ICLSimpleFunction
+namespace test
 {
-public:
-    /** Set the input and output tensors.
-     *
-     * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: QS8/QS16/F16/F32.
-     * @param[out]    output    Destination tensor. Data types supported: Same as @p input.
-     * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
-     */
-    void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
-};
+namespace validation
+{
+namespace reference
+{
+template <typename T>
+SimpleTensor<T> flatten_layer(const SimpleTensor<T> &src)
+{
+    TensorShape shape_flatten(src.shape());
+    shape_flatten.set(0, src.shape()[0] * src.shape()[1] * src.shape()[2]);
+    shape_flatten.remove_dimension(1);
+    shape_flatten.remove_dimension(1);
+    SimpleTensor<T> dst(shape_flatten, src.data_type(), 1, src.fixed_point_position());
+
+    // Note: Since the reference implementation does not use padding bytes, we can copy directly the content of the source tensor
+    std::copy(src.data(), src.data() + src.num_elements(), dst.data());
+
+    return dst;
+}
+
+template SimpleTensor<float> flatten_layer(const SimpleTensor<float> &src);
+template SimpleTensor<half> flatten_layer(const SimpleTensor<half> &src);
+template SimpleTensor<qint8_t> flatten_layer(const SimpleTensor<qint8_t> &src);
+template SimpleTensor<qint16_t> flatten_layer(const SimpleTensor<qint16_t> &src);
+} // namespace reference
+} // namespace validation
+} // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLPOOLINGLAYER_H__ */
