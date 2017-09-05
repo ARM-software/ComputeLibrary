@@ -44,6 +44,11 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
+constexpr AbsoluteTolerance<uint8_t> tolerance(1);
+} // namespace
+
 TEST_SUITE(NEON)
 TEST_SUITE(Scale)
 
@@ -105,7 +110,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode
     ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(Accessor(_target), _reference, valid_region);
+    validate(Accessor(_target), _reference, valid_region, tolerance);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
@@ -117,7 +122,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode
     ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(Accessor(_target), _reference, valid_region);
+    validate(Accessor(_target), _reference, valid_region, tolerance);
 }
 
 TEST_SUITE_END()
