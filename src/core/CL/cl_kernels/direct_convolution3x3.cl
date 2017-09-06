@@ -288,11 +288,11 @@ __kernel void direct_convolution3x3_f32_bifrost(
 #ifdef HAS_BIAS
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 
-    float4 bias = (float4) * ((__global float *)(vector_offset(&biases, kernel_index)));
+    float bias = (float) * ((__global float *)(vector_offset(&biases, kernel_index)));
 
-    pixels0 += bias;
-    pixels1 += bias;
-    pixels2 += bias;
+    pixels0 += (float4)bias;
+    pixels1 += (float4)bias;
+    pixels2 += (float4)bias;
 #endif /* defined(HAS_BIAS) */
 
     vstore4(pixels0, 0, (__global float *)(dst.ptr + 0 * dst_stride_y));

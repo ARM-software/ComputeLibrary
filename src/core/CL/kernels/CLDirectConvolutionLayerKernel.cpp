@@ -108,7 +108,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         options.emplace("-DHAS_BIAS");
     }
 
-    if((gpu_target == GPUTarget::BIFROST) && (kernel_size <= 5) && (kernel_size != 1) && (_conv_stride_x == 1) && (_conv_stride_y == 1) && (input->info()->data_type() == DataType::F32))
+    if((gpu_target == GPUTarget::BIFROST) && (kernel_size <= 5) && (_conv_stride_x == 1) && (_conv_stride_y == 1) && (input->info()->data_type() == DataType::F32))
     {
         options.emplace("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2)));
 
@@ -125,6 +125,14 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 
         switch(kernel_size)
         {
+            case 1:
+            {
+                num_elems_read_per_iteration_x    = 4;
+                num_elems_read_per_iteration_y    = 4;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_written_per_iteration_y = 4;
+                break;
+            }
             case 3:
             {
                 num_elems_read_per_iteration_x    = 6;
