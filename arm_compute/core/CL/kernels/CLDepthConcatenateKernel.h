@@ -71,6 +71,7 @@ private:
     ICLTensor       *_output;
     int              _top_bottom;
     int              _left_right;
+    unsigned int     _depth_offset;
 };
 }
 #endif /* __ARM_COMPUTE_CLDEPTHCONCATENATEKERNEL_H__ */

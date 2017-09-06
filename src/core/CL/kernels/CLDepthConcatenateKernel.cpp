@@ -42,7 +42,7 @@
 using namespace arm_compute;
 
 CLDepthConcatenateKernel::CLDepthConcatenateKernel()
-    : _input(nullptr), _output(nullptr), _top_bottom(0), _left_right(0)
+    : _input(nullptr), _output(nullptr), _top_bottom(0), _left_right(0), _depth_offset(0)
 {
 }
 
@@ -75,8 +75,9 @@ void CLDepthConcatenateKernel::configure(const ICLTensor *input, unsigned int de
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) - input->info()->dimension(0)) % 2);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) - input->info()->dimension(1)) % 2);
 
-    _input  = input;
-    _output = output;
+    _input        = input;
+    _output       = output;
+    _depth_offset = depth_offset;
 
     // Add build options
     auto                  config = configs_map.find(static_cast<int>(input->info()->element_size()));
@@ -91,8 +92,6 @@ void CLDepthConcatenateKernel::configure(const ICLTensor *input, unsigned int de
     _left_right = (output->info()->dimension(0) - input->info()->dimension(0)) / 2;
     _top_bottom = (output->info()->dimension(1) - input->info()->dimension(1)) / 2;
 
-    const int offset_to_first_elements_in_bytes = depth_offset * output->info()->strides_in_bytes()[2];
-
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
     const unsigned int num_elems_read_per_iteration      = 16 / input->info()->element_size();
     const unsigned int num_rows_read_per_iteration       = 1;
@@ -106,6 +105,18 @@ void CLDepthConcatenateKernel::configure(const ICLTensor *input, unsigned int de
     update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
 
+    ICLKernel::configure(win);
+}
+
+void CLDepthConcatenateKernel::run(const Window &window, cl::CommandQueue &queue)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+
+    Window slice = window.first_slice_window_3D();
+
+    const int offset_to_first_elements_in_bytes = _depth_offset * _output->info()->strides_in_bytes()[2];
+
     unsigned int  idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
     const cl_int3 offsets =
     {
@@ -116,16 +127,6 @@ void CLDepthConcatenateKernel::configure(const ICLTensor *input, unsigned int de
         }
     };
     _kernel.setArg<cl_int3>(idx, offsets);
-
-    ICLKernel::configure(win);
-}
-
-void CLDepthConcatenateKernel::run(const Window &window, cl::CommandQueue &queue)
-{
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
-
-    Window slice = window.first_slice_window_3D();
 
     do
     {
