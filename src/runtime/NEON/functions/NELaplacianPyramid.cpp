@@ -36,8 +36,14 @@
 
 using namespace arm_compute;
 
-NELaplacianPyramid::NELaplacianPyramid()
-    : _num_levels(0), _gaussian_pyr_function(), _convf(), _subf(), _gauss_pyr(), _conv_pyr(), _depth_function()
+NELaplacianPyramid::NELaplacianPyramid() // NOLINT
+    : _num_levels(0),
+      _gaussian_pyr_function(),
+      _convf(),
+      _subf(),
+      _gauss_pyr(),
+      _conv_pyr(),
+      _depth_function()
 {
 }
 

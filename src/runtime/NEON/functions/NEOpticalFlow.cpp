@@ -37,8 +37,16 @@
 
 using namespace arm_compute;
 
-NEOpticalFlow::NEOpticalFlow()
-    : _func_scharr(), _kernel_tracker(), _scharr_gx(), _scharr_gy(), _new_points(nullptr), _new_points_estimates(nullptr), _old_points(nullptr), _new_points_internal(), _old_points_internal(),
+NEOpticalFlow::NEOpticalFlow() // NOLINT
+    : _func_scharr(),
+      _kernel_tracker(),
+      _scharr_gx(),
+      _scharr_gy(),
+      _new_points(nullptr),
+      _new_points_estimates(nullptr),
+      _old_points(nullptr),
+      _new_points_internal(),
+      _old_points_internal(),
       _num_levels(0)
 {
 }

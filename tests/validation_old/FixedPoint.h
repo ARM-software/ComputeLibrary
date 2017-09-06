@@ -24,8 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_VALIDATION_FIXEDPOINT_H__
 #define __ARM_COMPUTE_TEST_VALIDATION_FIXEDPOINT_H__
 
-#include "Utils.h"
 #include "support/ToolchainSupport.h"
+#include "tests/Utils.h"
 
 #include <cassert>
 #include <cstdint>

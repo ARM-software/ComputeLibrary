@@ -34,8 +34,11 @@
 
 using namespace arm_compute;
 
-NELaplacianReconstruct::NELaplacianReconstruct()
-    : _tmp_pyr(), _addf(), _scalef(), _depthf()
+NELaplacianReconstruct::NELaplacianReconstruct() // NOLINT
+    : _tmp_pyr(),
+      _addf(),
+      _scalef(),
+      _depthf()
 {
 }
 

@@ -30,8 +30,11 @@
 
 using namespace arm_compute;
 
-NEHOGGradient::NEHOGGradient()
-    : _derivative(), _mag_phase(nullptr), _gx(), _gy()
+NEHOGGradient::NEHOGGradient() // NOLINT
+    : _derivative(),
+      _mag_phase(nullptr),
+      _gx(),
+      _gy()
 {
 }
 

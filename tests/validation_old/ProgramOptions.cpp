@@ -23,10 +23,9 @@
  */
 #include "ProgramOptions.h"
 
-#include "TypePrinter.h"
-#include "TypeReader.h"
-
 #include "arm_compute/core/Types.h"
+#include "tests/TypePrinter.h"
+#include "tests/TypeReader.h"
 
 #include <random>
 #include <sstream>

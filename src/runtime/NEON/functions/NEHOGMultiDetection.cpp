@@ -32,9 +32,21 @@
 
 using namespace arm_compute;
 
-NEHOGMultiDetection::NEHOGMultiDetection()
-    : _gradient_kernel(), _orient_bin_kernel(), _block_norm_kernel(), _hog_detect_kernel(), _non_maxima_kernel(), _hog_space(), _hog_norm_space(), _detection_windows(), _mag(), _phase(),
-      _non_maxima_suppression(false), _num_orient_bin_kernel(0), _num_block_norm_kernel(0), _num_hog_detect_kernel(0)
+NEHOGMultiDetection::NEHOGMultiDetection() // NOLINT
+    : _gradient_kernel(),
+      _orient_bin_kernel(),
+      _block_norm_kernel(),
+      _hog_detect_kernel(),
+      _non_maxima_kernel(),
+      _hog_space(),
+      _hog_norm_space(),
+      _detection_windows(),
+      _mag(),
+      _phase(),
+      _non_maxima_suppression(false),
+      _num_orient_bin_kernel(0),
+      _num_block_norm_kernel(0),
+      _num_hog_detect_kernel(0)
 {
 }
 

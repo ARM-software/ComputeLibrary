@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./framework ./support"
+DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./support"
 
 if [ $# -eq 0 ]
 then
@@ -45,13 +45,13 @@ fi
 ARMV7_GCC_PATH=$(dirname $ARMV7_GCC)/..
 AARCH64_GCC_PATH=$(dirname $AARCH64_GCC)/..
 
-INCLUDE_PATHS="-Iinclude -I. -I3rdparty/include -Ikernels -Itests -Icomputer_vision -Iframework"
+INCLUDE_PATHS="-Iinclude -I. -I3rdparty/include -Ikernels -Icomputer_vision"
 
 function armv7
 {
     USE_BOOST=""
 
-    if [[ "$1" == *tests/validation* ]]
+    if [[ "$1" == *tests/validation_old* ]]
     then
         USE_BOOST="-DBOOST"
     fi
@@ -71,7 +71,7 @@ function aarch64
 {
     USE_BOOST=""
 
-    if [[ "$1" == *tests/validation* ]]
+    if [[ "$1" == *tests/validation_old* ]]
     then
         USE_BOOST="-DBOOST"
     fi

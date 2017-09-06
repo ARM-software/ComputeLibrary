@@ -41,8 +41,20 @@
 
 using namespace arm_compute;
 
-NEHarrisCorners::NEHarrisCorners()
-    : _sobel(), _harris_score(), _non_max_suppr(), _candidates(), _sort_euclidean(), _border_gx(), _border_gy(), _gx(), _gy(), _score(), _nonmax(), _corners_list(), _num_corner_candidates(0)
+NEHarrisCorners::NEHarrisCorners() // NOLINT
+    : _sobel(),
+      _harris_score(),
+      _non_max_suppr(),
+      _candidates(),
+      _sort_euclidean(),
+      _border_gx(),
+      _border_gy(),
+      _gx(),
+      _gy(),
+      _score(),
+      _nonmax(),
+      _corners_list(),
+      _num_corner_candidates(0)
 {
 }
 

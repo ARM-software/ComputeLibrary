@@ -27,8 +27,9 @@
 
 using namespace arm_compute;
 
-INESimpleFunction::INESimpleFunction()
-    : _kernel(), _border_handler()
+INESimpleFunction::INESimpleFunction() // NOLINT
+    : _kernel(),
+      _border_handler()
 {
 }
 

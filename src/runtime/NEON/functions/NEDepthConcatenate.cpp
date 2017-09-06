@@ -32,12 +32,15 @@
 
 using namespace arm_compute;
 
-NEDepthConcatenate::NEDepthConcatenate()
-    : _inputs_vector(), _concat_kernels_vector(), _border_handlers_vector(), _num_inputs(0)
+NEDepthConcatenate::NEDepthConcatenate() // NOLINT
+    : _inputs_vector(),
+      _concat_kernels_vector(),
+      _border_handlers_vector(),
+      _num_inputs(0)
 {
 }
 
-void NEDepthConcatenate::configure(std::vector<ITensor *> inputs_vector, ITensor *output)
+void NEDepthConcatenate::configure(std::vector<ITensor *> inputs_vector, ITensor *output) // NOLINT
 {
     ARM_COMPUTE_ERROR_ON(inputs_vector.size() < 2);
 

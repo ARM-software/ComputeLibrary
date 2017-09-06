@@ -23,10 +23,9 @@
  */
 #include "tests/AssetsLibrary.h"
 
-#include "TypePrinter.h"
-#include "Utils.h"
-
 #include "arm_compute/core/ITensor.h"
+#include "tests/TypePrinter.h"
+#include "tests/Utils.h"
 
 #include <cctype>
 #include <fstream>

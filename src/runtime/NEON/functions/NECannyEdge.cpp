@@ -41,8 +41,19 @@
 
 using namespace arm_compute;
 
-NECannyEdge::NECannyEdge()
-    : _sobel(), _gradient(), _non_max_suppr(), _edge_trace(), _border_mag_gradient(), _border_edge_trace(), _gx(), _gy(), _magnitude(), _phase(), _nonmax(), _output(nullptr)
+NECannyEdge::NECannyEdge() // NOLINT
+    : _sobel(),
+      _gradient(),
+      _non_max_suppr(),
+      _edge_trace(),
+      _border_mag_gradient(),
+      _border_edge_trace(),
+      _gx(),
+      _gy(),
+      _magnitude(),
+      _phase(),
+      _nonmax(),
+      _output(nullptr)
 {
 }
 

@@ -35,8 +35,21 @@
 
 using namespace arm_compute;
 
-CLCannyEdge::CLCannyEdge()
-    : _sobel(nullptr), _gradient(), _border_mag_gradient(), _non_max_suppr(), _edge_trace(), _gx(), _gy(), _mag(), _phase(), _nonmax(), _visited(), _recorded(), _l1_list_counter(), _l1_stack()
+CLCannyEdge::CLCannyEdge() // NOLINT
+    : _sobel(),
+      _gradient(),
+      _border_mag_gradient(),
+      _non_max_suppr(),
+      _edge_trace(),
+      _gx(),
+      _gy(),
+      _mag(),
+      _phase(),
+      _nonmax(),
+      _visited(),
+      _recorded(),
+      _l1_list_counter(),
+      _l1_stack()
 {
 }
 

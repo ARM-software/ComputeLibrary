@@ -24,9 +24,9 @@
 #ifndef __ARM_COMPUTE_TEST_REFERENCE_REFERENCE_H__
 #define __ARM_COMPUTE_TEST_REFERENCE_REFERENCE_H__
 
-#include "RawTensor.h"
-#include "Types.h"
 #include "arm_compute/runtime/Array.h"
+#include "tests/RawTensor.h"
+#include "tests/Types.h"
 
 #include <map>
 #include <vector>

@@ -36,8 +36,14 @@
 
 using namespace arm_compute;
 
-CLLaplacianPyramid::CLLaplacianPyramid()
-    : _num_levels(0), _gaussian_pyr_function(), _convf(), _subf(), _depth_function(), _gauss_pyr(), _conv_pyr()
+CLLaplacianPyramid::CLLaplacianPyramid() // NOLINT
+    : _num_levels(0),
+      _gaussian_pyr_function(),
+      _convf(),
+      _subf(),
+      _depth_function(),
+      _gauss_pyr(),
+      _conv_pyr()
 {
 }
 

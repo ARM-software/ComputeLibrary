@@ -37,9 +37,22 @@
 
 using namespace arm_compute;
 
-CLOpticalFlow::CLOpticalFlow()
-    : _tracker_init_kernel(), _tracker_stage0_kernel(), _tracker_stage1_kernel(), _tracker_finalize_kernel(), _func_scharr(), _scharr_gx(), _scharr_gy(), _old_points(nullptr),
-      _new_points_estimates(nullptr), _new_points(nullptr), _old_points_internal(), _new_points_internal(), _coefficient_table(), _old_values(), _num_levels(0)
+CLOpticalFlow::CLOpticalFlow() // NOLINT
+    : _tracker_init_kernel(),
+      _tracker_stage0_kernel(),
+      _tracker_stage1_kernel(),
+      _tracker_finalize_kernel(),
+      _func_scharr(),
+      _scharr_gx(),
+      _scharr_gy(),
+      _old_points(nullptr),
+      _new_points_estimates(nullptr),
+      _new_points(nullptr),
+      _old_points_internal(),
+      _new_points_internal(),
+      _coefficient_table(),
+      _old_values(),
+      _num_levels(0)
 {
 }
 

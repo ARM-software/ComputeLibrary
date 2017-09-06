@@ -32,12 +32,15 @@
 
 using namespace arm_compute;
 
-CLDepthConcatenate::CLDepthConcatenate()
-    : _inputs_vector(), _concat_kernels_vector(), _border_handlers_vector(), _num_inputs(0)
+CLDepthConcatenate::CLDepthConcatenate() // NOLINT
+    : _inputs_vector(),
+      _concat_kernels_vector(),
+      _border_handlers_vector(),
+      _num_inputs(0)
 {
 }
 
-void CLDepthConcatenate::configure(std::vector<ICLTensor *> inputs_vector, ICLTensor *output)
+void CLDepthConcatenate::configure(std::vector<ICLTensor *> inputs_vector, ICLTensor *output) // NOLINT
 {
     ARM_COMPUTE_ERROR_ON(inputs_vector.size() < 2);
 

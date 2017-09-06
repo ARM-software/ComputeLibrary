@@ -86,8 +86,10 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
 }
 } // namespace
 
-NEScale::NEScale()
-    : _offsets(), _dx(), _dy()
+NEScale::NEScale() // NOLINT
+    : _offsets(),
+      _dx(),
+      _dy()
 {
 }
 

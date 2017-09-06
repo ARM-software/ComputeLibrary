@@ -46,8 +46,10 @@ NEGaussianPyramid::NEGaussianPyramid()
 {
 }
 
-NEGaussianPyramidHalf::NEGaussianPyramidHalf()
-    : _border_handler(), _horizontal_reduction(), _vertical_reduction()
+NEGaussianPyramidHalf::NEGaussianPyramidHalf() // NOLINT
+    : _border_handler(),
+      _horizontal_reduction(),
+      _vertical_reduction()
 {
 }
 
@@ -113,8 +115,10 @@ void NEGaussianPyramidHalf::run()
     }
 }
 
-NEGaussianPyramidOrb::NEGaussianPyramidOrb()
-    : _offsets(), _gaus5x5(), _scale_nearest()
+NEGaussianPyramidOrb::NEGaussianPyramidOrb() // NOLINT
+    : _offsets(),
+      _gaus5x5(),
+      _scale_nearest()
 {
 }
 

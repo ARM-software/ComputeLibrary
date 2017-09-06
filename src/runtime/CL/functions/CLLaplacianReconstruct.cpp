@@ -34,8 +34,11 @@
 
 using namespace arm_compute;
 
-CLLaplacianReconstruct::CLLaplacianReconstruct()
-    : _tmp_pyr(), _addf(), _scalef(), _depthf()
+CLLaplacianReconstruct::CLLaplacianReconstruct() // NOLINT
+    : _tmp_pyr(),
+      _addf(),
+      _scalef(),
+      _depthf()
 {
 }
 

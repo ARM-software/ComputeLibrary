@@ -48,8 +48,10 @@ CLGaussianPyramid::CLGaussianPyramid()
 {
 }
 
-CLGaussianPyramidHalf::CLGaussianPyramidHalf()
-    : _border_handler(), _horizontal_reduction(), _vertical_reduction()
+CLGaussianPyramidHalf::CLGaussianPyramidHalf() // NOLINT
+    : _border_handler(),
+      _horizontal_reduction(),
+      _vertical_reduction()
 {
 }
 
@@ -119,8 +121,9 @@ void CLGaussianPyramidHalf::run()
     }
 }
 
-CLGaussianPyramidOrb::CLGaussianPyramidOrb()
-    : _gauss5x5(), _scale_nearest()
+CLGaussianPyramidOrb::CLGaussianPyramidOrb() // NOLINT
+    : _gauss5x5(),
+      _scale_nearest()
 {
 }
 
