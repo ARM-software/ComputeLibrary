@@ -472,6 +472,22 @@ bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_positio
  * @return The corrispondent valid region
  */
 ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined);
+/** Convert a linear index into n-dimensional coordinates.
+ *
+ * @param[in] shape Shape of the n-dimensional tensor.
+ * @param[in] index Linear index specifying the i-th element.
+ *
+ * @return n-dimensional coordinates.
+ */
+inline Coordinates index2coords(const TensorShape &shape, int index);
+/** Convert n-dimensional coordinates into a linear index.
+ *
+ * @param[in] shape Shape of the n-dimensional tensor.
+ * @param[in] coord N-dimensional coordinates.
+ *
+ * @return linead index
+ */
+inline int coords2index(const TensorShape &shape, const Coordinates &coord);
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

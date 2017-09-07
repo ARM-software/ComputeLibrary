@@ -88,6 +88,7 @@
 #include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEReductionOperationKernel.h"
 #include "arm_compute/core/NEON/kernels/NERemapKernel.h"
+#include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScharr3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NESobel3x3Kernel.h"

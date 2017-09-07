@@ -87,6 +87,7 @@
 #include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "arm_compute/runtime/CL/functions/CLRemap.h"
+#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 #include "arm_compute/runtime/CL/functions/CLScharr3x3.h"
 #include "arm_compute/runtime/CL/functions/CLSobel3x3.h"

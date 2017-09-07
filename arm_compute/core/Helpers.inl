@@ -333,4 +333,41 @@ inline ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, con
 
     return ValidRegion(std::move(anchor), std::move(new_dst_shape));
 }
+
+inline Coordinates index2coords(const TensorShape &shape, int index)
+{
+    int num_elements = shape.total_size();
+
+    ARM_COMPUTE_ERROR_ON_MSG(index < 0 || index >= num_elements, "Index has to be in [0, num_elements]!");
+    ARM_COMPUTE_ERROR_ON_MSG(num_elements == 0, "Cannot create coordinate from empty shape!");
+
+    Coordinates coord{ 0 };
+
+    for(int d = shape.num_dimensions() - 1; d >= 0; --d)
+    {
+        num_elements /= shape[d];
+        coord.set(d, index / num_elements);
+        index %= num_elements;
+    }
+
+    return coord;
+}
+
+inline int coords2index(const TensorShape &shape, const Coordinates &coord)
+{
+    int num_elements = shape.total_size();
+    ARM_COMPUTE_UNUSED(num_elements);
+    ARM_COMPUTE_ERROR_ON_MSG(num_elements == 0, "Cannot create linear index from empty shape!");
+
+    int index  = 0;
+    int stride = 1;
+
+    for(unsigned int d = 0; d < coord.num_dimensions(); ++d)
+    {
+        index += coord[d] * stride;
+        stride *= shape[d];
+    }
+
+    return index;
+}
 } // namespace arm_compute
