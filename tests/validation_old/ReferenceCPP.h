@@ -116,22 +116,6 @@ public:
      * @param[in]      alpha A float value within the range of [0, 1]
      */
     static void accumulate_weighted(const RawTensor &src, RawTensor &dst, float alpha);
-    /** Function to compute gaussian3x3 filtered result tensor.
-     *
-     * @param[in]  src                   Input tensor.
-     * @param[out] dst                   Result tensor.
-     * @param[in]  border_mode           Border mode
-     * @param[in]  constant_border_value Constant border value if @p border_mode is BorderMode::CONSTANT
-     */
-    static void gaussian3x3(const RawTensor &src, RawTensor &dst, BorderMode border_mode, uint8_t constant_border_value);
-    /** Function to compute gaussian5x5 filtered result tensor.
-     *
-     * @param[in]  src                   Input tensor.
-     * @param[out] dst                   Result tensor.
-     * @param[in]  border_mode           Border mode
-     * @param[in]  constant_border_value Constant border value if @p border_mode is BorderMode::CONSTANT
-     */
-    static void gaussian5x5(const RawTensor &src, RawTensor &dst, BorderMode border_mode, uint8_t constant_border_value);
     /** Compute non linear filter function.
      *
      * @param[in]  src                   First input tensor

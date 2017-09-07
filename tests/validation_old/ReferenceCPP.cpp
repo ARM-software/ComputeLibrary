@@ -140,24 +140,6 @@ void ReferenceCPP::accumulate_weighted(const RawTensor &src, RawTensor &dst, flo
     tensor_operations::accumulate_weighted(s, d, alpha);
 }
 
-// Gaussian3x3 filter
-void ReferenceCPP::gaussian3x3(const RawTensor &src, RawTensor &dst, BorderMode border_mode, uint8_t constant_border_value)
-{
-    ARM_COMPUTE_ERROR_ON(src.data_type() != DataType::U8 || dst.data_type() != DataType::U8);
-    const Tensor<uint8_t> s(src.shape(), src.data_type(), src.fixed_point_position(), reinterpret_cast<const uint8_t *>(src.data()));
-    Tensor<uint8_t>       d(dst.shape(), dst.data_type(), dst.fixed_point_position(), reinterpret_cast<uint8_t *>(dst.data()));
-    tensor_operations::gaussian3x3(s, d, border_mode, constant_border_value);
-}
-
-// Gaussian5x5 filter
-void ReferenceCPP::gaussian5x5(const RawTensor &src, RawTensor &dst, BorderMode border_mode, uint8_t constant_border_value)
-{
-    ARM_COMPUTE_ERROR_ON(src.data_type() != DataType::U8 || dst.data_type() != DataType::U8);
-    const Tensor<uint8_t> s(src.shape(), src.data_type(), src.fixed_point_position(), reinterpret_cast<const uint8_t *>(src.data()));
-    Tensor<uint8_t>       d(dst.shape(), dst.data_type(), dst.fixed_point_position(), reinterpret_cast<uint8_t *>(dst.data()));
-    tensor_operations::gaussian5x5(s, d, border_mode, constant_border_value);
-}
-
 // Non linear filter
 void ReferenceCPP::non_linear_filter(const RawTensor &src, RawTensor &dst, NonLinearFilterFunction function, unsigned int mask_size,
                                      MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value)

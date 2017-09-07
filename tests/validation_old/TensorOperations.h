@@ -511,38 +511,6 @@ void accumulate_weighted(const Tensor<T> &in, Tensor<T> &out, float alpha)
     }
 }
 
-// Gaussian3x3 filter
-template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-void gaussian3x3(const Tensor<T> &in, Tensor<T> &out, BorderMode border_mode, T constant_border_value)
-{
-    const std::array<T, 9> filter{ { 1, 2, 1, 2, 4, 2, 1, 2, 1 } };
-    const float scale = 1.f / 16.f;
-    for(int element_idx = 0; element_idx < in.num_elements(); ++element_idx)
-    {
-        const Coordinates id = index2coord(in.shape(), element_idx);
-        apply_2d_spatial_filter(id, in, out, TensorShape(3U, 3U), filter.data(), scale, border_mode, constant_border_value);
-    }
-}
-
-// Gaussian5x5 filter
-template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-void gaussian5x5(const Tensor<T> &in, Tensor<T> &out, BorderMode border_mode, T constant_border_value)
-{
-    const std::array<T, 25> filter{ {
-            1, 4, 6, 4, 1,
-            4, 16, 24, 16, 4,
-            6, 24, 36, 24, 6,
-            4, 16, 24, 16, 4,
-            1, 4, 6, 4, 1
-        } };
-    const float scale = 1.f / 256.f;
-    for(int element_idx = 0; element_idx < in.num_elements(); ++element_idx)
-    {
-        const Coordinates id = index2coord(in.shape(), element_idx);
-        apply_2d_spatial_filter(id, in, out, TensorShape(5U, 5U), filter.data(), scale, border_mode, constant_border_value);
-    }
-}
-
 // Non linear filter
 template <typename T>
 void non_linear_filter(const Tensor<T> &in, Tensor<T> &out, NonLinearFilterFunction function, unsigned int mask_size,
