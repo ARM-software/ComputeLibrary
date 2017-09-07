@@ -1677,8 +1677,9 @@ void NEGradientKernel::configure(const ITensor *gx, const ITensor *gy, ITensor *
     INEKernel::configure(win);
 }
 
-void NEGradientKernel::run(const Window &window)
+void NEGradientKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -1758,8 +1759,9 @@ void NEEdgeNonMaxSuppressionKernel::configure(const ITensor *magnitude, const IT
     INEKernel::configure(win);
 }
 
-void NEEdgeNonMaxSuppressionKernel::run(const Window &window)
+void NEEdgeNonMaxSuppressionKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -1838,8 +1840,9 @@ void NEEdgeTraceKernel::configure(ITensor *input, ITensor *output)
     INEKernel::configure(win);
 }
 
-void NEEdgeTraceKernel::run(const Window &window)
+void NEEdgeTraceKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     Iterator input(_input, window);

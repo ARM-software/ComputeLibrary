@@ -61,7 +61,7 @@ public:
     void configure(ITensor *input, BorderSize border_size, const PixelValue &constant_border_value = PixelValue());
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     template <typename T>

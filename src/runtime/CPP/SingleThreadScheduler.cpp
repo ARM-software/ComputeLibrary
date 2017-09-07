@@ -38,12 +38,15 @@ SingleThreadScheduler &SingleThreadScheduler::get()
 void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
 {
     ARM_COMPUTE_UNUSED(num_threads);
+    ARM_COMPUTE_ERROR_ON(num_threads != 1);
 }
 
 void SingleThreadScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
 {
     ARM_COMPUTE_UNUSED(split_dimension);
-    kernel->run(kernel->window());
+    ThreadInfo info;
+    info.cpu = _target;
+    kernel->run(kernel->window(), info);
 }
 
 unsigned int SingleThreadScheduler::num_threads() const

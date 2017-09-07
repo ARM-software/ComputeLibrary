@@ -639,8 +639,9 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
     INEKernel::configure(win);
 }
 
-void NEPixelWiseMultiplicationKernel::run(const Window &window)
+void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

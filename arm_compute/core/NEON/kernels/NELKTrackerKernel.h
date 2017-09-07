@@ -91,7 +91,7 @@ public:
                    size_t level, size_t num_levels, float pyramid_scale);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:

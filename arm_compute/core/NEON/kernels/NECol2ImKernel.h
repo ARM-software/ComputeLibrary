@@ -74,7 +74,7 @@ public:
     void configure(const ITensor *input, ITensor *output, std::pair<unsigned int, unsigned int> convolved_dims);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Template function to run the col2im

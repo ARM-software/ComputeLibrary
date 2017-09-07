@@ -41,7 +41,7 @@ public:
      */
     void configure(const ITensor *input, ITensor *output);
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 };
 }
 #endif /*__ARM_COMPUTE_NEFLOORKERNEL_H__ */

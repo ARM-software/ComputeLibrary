@@ -35,6 +35,6 @@ INESimpleFunction::INESimpleFunction() // NOLINT
 
 void INESimpleFunction::run()
 {
-    _border_handler.run(_border_handler.window());
+    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
     NEScheduler::get().schedule(_kernel.get(), Window::DimY);
 }

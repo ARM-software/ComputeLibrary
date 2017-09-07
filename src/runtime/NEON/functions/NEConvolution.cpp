@@ -94,7 +94,7 @@ void NEConvolutionSquare<matrix_size>::configure(ITensor *input, ITensor *output
 template <unsigned int matrix_size>
 void                   NEConvolutionSquare<matrix_size>::run()
 {
-    _border_handler.run(_border_handler.window());
+    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
 
     if(_is_separable)
     {

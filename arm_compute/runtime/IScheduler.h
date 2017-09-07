@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_ISCHEDULER_H__
 #define __ARM_COMPUTE_ISCHEDULER_H__
 
+#include "arm_compute/core/CPP/CPPTypes.h"
+
 namespace arm_compute
 {
 class ICPPKernel;
@@ -32,6 +34,12 @@ class ICPPKernel;
 class IScheduler
 {
 public:
+    /** Default constructor. */
+    IScheduler()
+        : _target(CPUTarget::INTRINSICS)
+    {
+    }
+
     /** Destructor. */
     virtual ~IScheduler() = default;
     /** Sets the number of threads the scheduler will use to run the kernels.
@@ -50,6 +58,31 @@ public:
      * @param[in] split_dimension Dimension along which to split the kernel's execution window.
      */
     virtual void schedule(ICPPKernel *kernel, unsigned int split_dimension) = 0;
+
+    /** Sets the target CPU architecture.
+     *
+     * @param[in] target Target CPU.
+     */
+    void set_target(CPUTarget target);
+
+    /** Return the current CPU target.
+     *
+     * @return Target CPU.
+     */
+    CPUTarget target() const;
+
+protected:
+    CPUTarget _target;
 };
+
+inline void IScheduler::set_target(CPUTarget target)
+{
+    _target = target;
+}
+
+inline CPUTarget IScheduler::target() const
+{
+    return _target;
+}
 }
 #endif /* __ARM_COMPUTE_ISCHEDULER_H__ */

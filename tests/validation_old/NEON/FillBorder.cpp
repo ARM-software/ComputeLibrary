@@ -74,7 +74,7 @@ BOOST_DATA_TEST_CASE(FillBorder, BorderModes() * boost::unit_test::data::make({ 
     fill_border.configure(&src, border_size, border_mode, border_value);
 
     // Run kernel
-    fill_border.run(fill_border.window());
+    fill_border.run(fill_border.window(), ThreadInfo());
 
     // Validate border
     border_size.limit(padding);

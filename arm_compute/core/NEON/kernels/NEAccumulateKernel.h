@@ -48,7 +48,7 @@ public:
     void configure(const ITensor *input, ITensor *accum);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 };
 
 /** Interface for the accumulate weighted kernel
@@ -74,7 +74,7 @@ public:
     void configure(const ITensor *input, float alpha, ITensor *accum);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 protected:
     float _alpha;
@@ -86,7 +86,7 @@ class NEAccumulateWeightedFP16Kernel : public NEAccumulateWeightedKernel
 {
 public:
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 };
 #else  /* ARM_COMPUTE_ENABLE_FP16 */
 using NEAccumulateWeightedFP16Kernel = NEAccumulateWeightedKernel;
@@ -113,7 +113,7 @@ public:
     void configure(const ITensor *input, uint32_t shift, ITensor *accum);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     uint32_t _shift;

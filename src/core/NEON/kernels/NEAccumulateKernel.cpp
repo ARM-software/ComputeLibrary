@@ -114,8 +114,9 @@ void acc_we_v16_u8(const void *__restrict input, void *__restrict accum, float16
 }
 } // namespace fp16
 
-void NEAccumulateWeightedFP16Kernel::run(const Window &window)
+void NEAccumulateWeightedFP16Kernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 
@@ -262,8 +263,9 @@ void NEAccumulateKernel::configure(const ITensor *input, ITensor *accum)
     INESimpleKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
-void NEAccumulateKernel::run(const Window &window)
+void NEAccumulateKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
     Iterator input(_input, window);
@@ -300,8 +302,9 @@ void NEAccumulateWeightedKernel::configure(const ITensor *input, float alpha, IT
     INESimpleKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
-void NEAccumulateWeightedKernel::run(const Window &window)
+void NEAccumulateWeightedKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 
@@ -342,8 +345,9 @@ void NEAccumulateSquaredKernel::configure(const ITensor *input, uint32_t shift, 
     INESimpleKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
-void NEAccumulateSquaredKernel::run(const Window &window)
+void NEAccumulateSquaredKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
     Iterator input(_input, window);

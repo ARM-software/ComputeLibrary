@@ -79,7 +79,7 @@ public:
     void configure(const ITensor *input, const ITensor *bias, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using WeightsReshapeKernel = void(const ITensor *input, const ITensor *bias, ITensor *output, const Window &window);

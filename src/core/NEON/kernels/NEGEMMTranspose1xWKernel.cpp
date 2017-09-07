@@ -81,8 +81,9 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
     INEKernel::configure(win);
 }
 
-void NEGEMMTranspose1xWKernel::run(const Window &window)
+void NEGEMMTranspose1xWKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 

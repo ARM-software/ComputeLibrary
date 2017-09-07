@@ -116,8 +116,9 @@ void NECol2ImKernel::configure(const ITensor *input, ITensor *output, std::pair<
     INEKernel::configure(win);
 }
 
-void NECol2ImKernel::run(const Window &window)
+void NECol2ImKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

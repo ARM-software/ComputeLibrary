@@ -56,7 +56,7 @@ public:
     void configure(InternalKeypoint *in_out, IKeyPointArray *output, const int32_t *num_corner_candidates, float min_distance);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
 private:

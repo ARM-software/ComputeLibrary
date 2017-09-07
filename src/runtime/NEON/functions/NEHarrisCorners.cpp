@@ -207,8 +207,8 @@ void NEHarrisCorners::run()
     _sobel->run();
 
     // Fill border before harris score kernel
-    _border_gx.run(_border_gx.window());
-    _border_gy.run(_border_gy.window());
+    NEScheduler::get().schedule(&_border_gx, Window::DimZ);
+    NEScheduler::get().schedule(&_border_gy, Window::DimZ);
 
     // Run harris score kernel
     NEScheduler::get().schedule(_harris_score.get(), Window::DimY);
@@ -220,5 +220,5 @@ void NEHarrisCorners::run()
     NEScheduler::get().schedule(&_candidates, Window::DimY);
 
     // Run sort & euclidean distance
-    _sort_euclidean.run(_sort_euclidean.window());
+    NEScheduler::get().schedule(&_sort_euclidean, Window::DimY);
 }

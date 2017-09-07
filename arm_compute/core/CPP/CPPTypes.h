@@ -47,5 +47,12 @@ enum class CPUTarget
     A75     = (ARMV8_2 | A7x | 0x5),
     A75_DOT = (A75 | DOT),
 };
+
+struct ThreadInfo
+{
+    int       thread_id{ 0 };
+    int       num_threads{ 1 };
+    CPUTarget cpu{ CPUTarget::INTRINSICS };
+};
 }
 #endif /* __ARM_COMPUTE_CPP_TYPES_H__ */

@@ -59,7 +59,7 @@ public:
     void configure(ITensor *input, const ITensor *bias, ITensor *output = nullptr);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using BiasAccumulateKernel = void(ITensor *input, const ITensor *bias, const Window window, ITensor *output);

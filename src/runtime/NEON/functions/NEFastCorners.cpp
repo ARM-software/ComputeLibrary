@@ -88,7 +88,7 @@ void NEFastCorners::configure(IImage *input, float threshold, bool nonmax_suppre
 
 void NEFastCorners::run()
 {
-    _border_handler.run(_border_handler.window());
+    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
 
     NEScheduler::get().schedule(&_fast_corners_kernel, Window::DimY);
 

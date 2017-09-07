@@ -109,7 +109,7 @@ void NEGaussianPyramidHalf::run()
 
     for(unsigned int i = 0; i < num_levels - 1; ++i)
     {
-        _border_handler[i].run(_border_handler[i].window());
+        NEScheduler::get().schedule(_border_handler.get() + i, Window::DimZ);
         NEScheduler::get().schedule(_horizontal_reduction.get() + i, Window::DimY);
         NEScheduler::get().schedule(_vertical_reduction.get() + i, Window::DimY);
     }

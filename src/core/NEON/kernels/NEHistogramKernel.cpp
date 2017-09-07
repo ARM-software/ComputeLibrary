@@ -66,7 +66,7 @@ NEHistogramKernel::NEHistogramKernel()
 {
 }
 
-void NEHistogramKernel::histogram_U8(Window win)
+void NEHistogramKernel::histogram_U8(Window win, const ThreadInfo &info)
 {
     ARM_COMPUTE_ERROR_ON(_output->buffer() == nullptr);
 
@@ -74,7 +74,7 @@ void NEHistogramKernel::histogram_U8(Window win)
     const int32_t         offset     = _output->offset();
     const uint32_t        offrange   = offset + _output->range();
     const uint32_t *const w_lut      = _window_lut;
-    uint32_t *const       local_hist = _local_hist + win.thread_id() * bins;
+    uint32_t *const       local_hist = _local_hist + info.thread_id * bins;
 
     // Clear local_histogram
     std::fill_n(local_hist, bins, 0);
@@ -129,8 +129,9 @@ void NEHistogramKernel::histogram_U8(Window win)
     merge_histogram(_output->buffer(), local_hist, bins);
 }
 
-void NEHistogramKernel::histogram_fixed_U8(Window win)
+void NEHistogramKernel::histogram_fixed_U8(Window win, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON(_output->buffer() == nullptr);
 
     std::array<uint32_t, _max_range_size> local_hist{ { 0 } };
@@ -242,11 +243,11 @@ void NEHistogramKernel::configure(const IImage *input, IDistribution1D *output)
     INEKernel::configure(win);
 }
 
-void NEHistogramKernel::run(const Window &window)
+void NEHistogramKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (this->*_func)(window);
+    (this->*_func)(window, info);
 }

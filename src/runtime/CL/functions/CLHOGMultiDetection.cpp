@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/CL/CLArray.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/Scheduler.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
@@ -246,7 +247,7 @@ void CLHOGMultiDetection::run()
     {
         // Map detection windows array before computing non maxima suppression
         _detection_windows->map(CLScheduler::get().queue(), true);
-        _non_maxima_kernel->run(_non_maxima_kernel->window());
+        Scheduler::get().schedule(_non_maxima_kernel.get(), Window::DimY);
         _detection_windows->unmap(CLScheduler::get().queue());
     }
 }

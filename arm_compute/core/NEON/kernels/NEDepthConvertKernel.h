@@ -71,7 +71,7 @@ public:
     void configure(ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift = 0);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     ITensor      *_input;

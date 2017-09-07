@@ -80,8 +80,9 @@ void NEMinMaxKernel::configure(const IImage *input, void *min, void *max)
     INEKernel::configure(win);
 }
 
-void NEMinMaxKernel::run(const Window &window)
+void NEMinMaxKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -400,8 +401,9 @@ void NEMinMaxLocationKernel::configure(const IImage *input, void *min, void *max
     INEKernel::configure(win);
 }
 
-void NEMinMaxLocationKernel::run(const Window &window)
+void NEMinMaxLocationKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

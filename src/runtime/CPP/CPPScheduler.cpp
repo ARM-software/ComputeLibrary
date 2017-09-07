@@ -52,7 +52,7 @@ public:
      * This function will return as soon as the kernel has been sent to the worker thread.
      * wait() needs to be called to ensure the execution is complete.
      */
-    void start(ICPPKernel *kernel, const Window &window);
+    void start(ICPPKernel *kernel, const Window &window, const ThreadInfo &info);
     /** Wait for the current kernel execution to complete
      */
     void wait();
@@ -64,13 +64,14 @@ private:
     std::thread        _thread;
     ICPPKernel        *_kernel{ nullptr };
     Window             _window;
+    ThreadInfo         _info;
     sem_t              _wait_for_work;
     sem_t              _job_complete;
     std::exception_ptr _current_exception;
 };
 
 Thread::Thread()
-    : _thread(), _window(), _wait_for_work(), _job_complete(), _current_exception(nullptr)
+    : _thread(), _window(), _info(), _wait_for_work(), _job_complete(), _current_exception(nullptr)
 {
     int ret = sem_init(&_wait_for_work, 0, 0);
     ARM_COMPUTE_ERROR_ON(ret < 0);
@@ -87,7 +88,7 @@ Thread::~Thread()
 {
     ARM_COMPUTE_ERROR_ON(!_thread.joinable());
 
-    start(nullptr, Window());
+    start(nullptr, Window(), ThreadInfo());
     _thread.join();
 
     int ret = sem_destroy(&_wait_for_work);
@@ -99,10 +100,11 @@ Thread::~Thread()
     ARM_COMPUTE_UNUSED(ret);
 }
 
-void Thread::start(ICPPKernel *kernel, const Window &window)
+void Thread::start(ICPPKernel *kernel, const Window &window, const ThreadInfo &info)
 {
     _kernel = kernel;
     _window = window;
+    _info   = info;
     int ret = sem_post(&_wait_for_work);
     ARM_COMPUTE_UNUSED(ret);
     ARM_COMPUTE_ERROR_ON(ret < 0);
@@ -133,7 +135,7 @@ void Thread::worker_thread()
         try
         {
             _window.validate();
-            _kernel->run(_window);
+            _kernel->run(_window, _info);
         }
         catch(...)
         {
@@ -163,8 +165,7 @@ CPPScheduler &CPPScheduler::get()
 
 CPPScheduler::CPPScheduler()
     : _num_threads(std::thread::hardware_concurrency()),
-      _threads(std::unique_ptr<Thread[], void(*)(Thread *)>(new Thread[std::thread::hardware_concurrency() - 1], delete_threads)),
-      _target(CPUTarget::INTRINSICS)
+      _threads(std::unique_ptr<Thread[], void(*)(Thread *)>(new Thread[std::thread::hardware_concurrency() - 1], delete_threads))
 {
 }
 
@@ -179,50 +180,42 @@ unsigned int CPPScheduler::num_threads() const
     return _num_threads;
 }
 
-void CPPScheduler::set_target(CPUTarget target)
-{
-    _target = target;
-}
-
-CPUTarget CPPScheduler::target() const
-{
-    return _target;
-}
-
 void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 
     /** [Scheduler example] */
+    ThreadInfo info;
+    info.cpu = _target;
+
     const Window      &max_window     = kernel->window();
     const unsigned int num_iterations = max_window.num_iterations(split_dimension);
-    const unsigned int num_threads    = std::min(num_iterations, _num_threads);
+    info.num_threads                  = std::min(num_iterations, _num_threads);
 
-    if(!kernel->is_parallelisable() || 1 == num_threads)
+    if(!kernel->is_parallelisable() || info.num_threads == 1)
     {
-        kernel->run(max_window);
+        kernel->run(max_window, info);
     }
     else
     {
-        for(unsigned int t = 0; t < num_threads; ++t)
+        for(int t = 0; t < info.num_threads; ++t)
         {
-            Window win = max_window.split_window(split_dimension, t, num_threads);
-            win.set_thread_id(t);
-            win.set_num_threads(num_threads);
+            Window win     = max_window.split_window(split_dimension, t, info.num_threads);
+            info.thread_id = t;
 
-            if(t != num_threads - 1)
+            if(t != info.num_threads - 1)
             {
-                _threads[t].start(kernel, win);
+                _threads[t].start(kernel, win, info);
             }
             else
             {
-                kernel->run(win);
+                kernel->run(win, info);
             }
         }
 
         try
         {
-            for(unsigned int t = 1; t < num_threads; ++t)
+            for(int t = 1; t < info.num_threads; ++t)
             {
                 _threads[t - 1].wait();
             }

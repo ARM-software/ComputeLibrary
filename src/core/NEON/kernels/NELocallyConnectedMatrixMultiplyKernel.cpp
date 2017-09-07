@@ -49,7 +49,7 @@ class Coordinates;
 
 namespace
 {
-void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window)
+void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info)
 {
 #ifdef ARM_COMPUTE_ENABLE_FP16
     const auto width_matrix_b  = static_cast<int>(output->info()->dimension(0));
@@ -57,8 +57,8 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
     const auto num_elems_vec_a = static_cast<int>(input0->info()->dimension(0));
 
     // The implementation computes 16 elements per iteration
-    const int window_start_x = 16 * window.thread_id();
-    const int window_step_x  = 16 * window.num_threads();
+    const int window_start_x = 16 * info.thread_id;
+    const int window_step_x  = 16 * info.num_threads;
     // Make sure (window_end_x - window_start_x) is a multiple of window_step_x
     const int window_end_x = ceil_to_multiple(width_matrix_b - window_start_x, window_step_x) + window_start_x;
 
@@ -169,15 +169,15 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 }
 
-void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window)
+void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info)
 {
     const auto width_matrix_b  = static_cast<int>(output->info()->dimension(0));
     const auto in_b_stride     = static_cast<int>(input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type()));
     const auto num_elems_vec_a = static_cast<int>(input0->info()->dimension(0));
 
     // The implementation computes 16 elements per iteration
-    const int window_start_x = 16 * window.thread_id();
-    const int window_step_x  = 16 * window.num_threads();
+    const int window_start_x = 16 * info.thread_id;
+    const int window_step_x  = 16 * info.num_threads;
     // Make sure (window_end_x - window_start_x) is a multiple of window_step_x
     const int window_end_x = ceil_to_multiple(width_matrix_b - window_start_x, window_step_x) + window_start_x;
 
@@ -337,7 +337,7 @@ void NELocallyConnectedMatrixMultiplyKernel::configure(const ITensor *input0, co
     INEKernel::configure(win);
 }
 
-void NELocallyConnectedMatrixMultiplyKernel::run(const Window &window)
+void NELocallyConnectedMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
@@ -346,12 +346,12 @@ void NELocallyConnectedMatrixMultiplyKernel::run(const Window &window)
     {
         case DataType::F16:
         {
-            vector_matrix_multiply_f16(_input0, _input1, _output, window);
+            vector_matrix_multiply_f16(_input0, _input1, _output, window, info);
             break;
         }
         case DataType::F32:
         {
-            vector_matrix_multiply_f32(_input0, _input1, _output, window);
+            vector_matrix_multiply_f32(_input0, _input1, _output, window, info);
             break;
         }
         default:

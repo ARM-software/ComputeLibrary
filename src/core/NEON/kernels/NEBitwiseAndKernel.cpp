@@ -93,8 +93,9 @@ void NEBitwiseAndKernel::configure(const ITensor *input1, const ITensor *input2,
     INEKernel::configure(win);
 }
 
-void NEBitwiseAndKernel::run(const Window &window)
+void NEBitwiseAndKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     Iterator input1(_input1, window);

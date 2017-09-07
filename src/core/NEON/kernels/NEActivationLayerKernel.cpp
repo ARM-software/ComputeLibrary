@@ -653,8 +653,9 @@ typename std::enable_if<std::is_same<T, qint16_t>::value, void>::type NEActivati
     input, output);
 }
 
-void NEActivationLayerKernel::run(const Window &window)
+void NEActivationLayerKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

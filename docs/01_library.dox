@@ -83,7 +83,7 @@ This is the very basic implementation used in the NEON runtime library by all th
 
 @sa CPPScheduler.
 
-@note Some kernels like for example @ref NEHistogramKernel need some local temporary buffer to perform their calculations. In order to avoid memory corruption between threads, the local buffer must be of size: ```memory_needed_per_thread * num_threads``` and each subwindow must be initialized by calling @ref Window::set_thread_id() with a unique thread_id between 0 and num_threads.
+@note Some kernels like for example @ref NEHistogramKernel need some local temporary buffer to perform their calculations. In order to avoid memory corruption between threads, the local buffer must be of size: ```memory_needed_per_thread * num_threads``` and a unique thread_id between 0 and num_threads must be assigned to the @ref ThreadInfo object passed to the ```run``` function.
 
 @subsection S4_2_4 Functions
 

@@ -63,7 +63,7 @@ public:
     void reset();
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Performs the min/max algorithm on U8 images on a given window.
@@ -130,7 +130,7 @@ public:
                    uint32_t *min_count = nullptr, uint32_t *max_count = nullptr);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
 private:

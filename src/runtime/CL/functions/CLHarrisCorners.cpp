@@ -165,6 +165,6 @@ void CLHarrisCorners::run()
     _nonmax.unmap();
 
     _corners->map(CLScheduler::get().queue(), true);
-    _sort_euclidean.run(_sort_euclidean.window());
+    Scheduler::get().schedule(&_sort_euclidean, Window::DimY);
     _corners->unmap(CLScheduler::get().queue());
 }

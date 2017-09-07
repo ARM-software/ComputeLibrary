@@ -415,8 +415,9 @@ void NEMagnitudePhaseFP16Kernel<mag_type, phase_type>::magnitude_phase(const Win
 }
 
 template <MagnitudeType mag_type, PhaseType phase_type>
-void NEMagnitudePhaseFP16Kernel<mag_type, phase_type>::run(const Window &window)
+void NEMagnitudePhaseFP16Kernel<mag_type, phase_type>::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -854,8 +855,9 @@ void NEMagnitudePhaseKernel<mag_type, phase_type>::magnitude_phase(const Window 
 }
 
 template <MagnitudeType mag_type, PhaseType phase_type>
-void NEMagnitudePhaseKernel<mag_type, phase_type>::run(const Window &window)
+void NEMagnitudePhaseKernel<mag_type, phase_type>::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

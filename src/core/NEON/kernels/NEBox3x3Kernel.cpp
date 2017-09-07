@@ -34,8 +34,9 @@
 using namespace arm_compute;
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
-void NEBox3x3FP16Kernel::run(const Window &window)
+void NEBox3x3FP16Kernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 
@@ -144,8 +145,9 @@ void NEBox3x3Kernel::configure(const ITensor *input, ITensor *output, bool borde
     INEKernel::configure(win);
 }
 
-void NEBox3x3Kernel::run(const Window &window)
+void NEBox3x3Kernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 

@@ -75,7 +75,7 @@ void NESobel5x5::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
 
 void NESobel5x5::run()
 {
-    _border_handler.run(_border_handler.window());
+    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
     NEScheduler::get().schedule(&_sobel_hor, Window::DimY);
     NEScheduler::get().schedule(&_sobel_vert, Window::DimY);
 }

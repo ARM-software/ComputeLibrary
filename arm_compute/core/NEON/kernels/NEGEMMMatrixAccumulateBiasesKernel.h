@@ -53,7 +53,7 @@ public:
     void configure(ITensor *accum, const ITensor *biases);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     ITensor       *_accum;

@@ -89,7 +89,7 @@ public:
     // Inherited methods overridden:
     void configure(const IImage *input1, const IImage *input2, IImage *output, float norm_factor, float strength_thresh, float sensitivity, bool border_undefined) override;
     BorderSize border_size() const override;
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised harris score functions */
@@ -110,7 +110,7 @@ public:
     // Inherited methods overridden:
     void configure(const IImage *input1, const IImage *input2, IImage *output, float norm_factor, float strength_thresh, float sensitivity, bool border_undefined) override;
     BorderSize border_size() const override;
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using HarrisScoreFunction = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int32_t input_stride,

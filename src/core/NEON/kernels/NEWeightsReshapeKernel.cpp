@@ -165,8 +165,9 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
     INEKernel::configure(window);
 }
 
-void NEWeightsReshapeKernel::run(const Window &window)
+void NEWeightsReshapeKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

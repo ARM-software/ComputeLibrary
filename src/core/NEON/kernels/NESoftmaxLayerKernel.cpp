@@ -239,8 +239,9 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
     INEKernel::configure(win);
 }
 
-void NELogits1DMaxKernel::run(const Window &window)
+void NELogits1DMaxKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -560,8 +561,9 @@ void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor 
     INEKernel::configure(win);
 }
 
-void NELogits1DShiftExpSumKernel::run(const Window &window)
+void NELogits1DShiftExpSumKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -758,8 +760,9 @@ void NELogits1DNormKernel::configure(const ITensor *input, const ITensor *sum, I
     INEKernel::configure(win);
 }
 
-void NELogits1DNormKernel::run(const Window &window)
+void NELogits1DNormKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

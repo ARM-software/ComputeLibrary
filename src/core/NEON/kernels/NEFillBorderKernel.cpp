@@ -124,8 +124,10 @@ void NEFillBorderKernel::configure(ITensor *tensor, BorderSize border_size, Bord
     INEKernel::configure(win);
 }
 
-void NEFillBorderKernel::run(const Window &window)
+void NEFillBorderKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
+
     // If there is no border: early exit
     if(_border_size.empty())
     {

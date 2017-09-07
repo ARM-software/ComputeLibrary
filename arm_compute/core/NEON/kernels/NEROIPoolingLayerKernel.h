@@ -64,7 +64,7 @@ public:
     void configure(const ITensor *input, const IROIArray *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     const ITensor      *_input;

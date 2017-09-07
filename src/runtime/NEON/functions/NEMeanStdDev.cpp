@@ -43,6 +43,6 @@ void NEMeanStdDev::run()
     _global_sum         = 0;
     _global_sum_squared = 0;
 
-    _fill_border_kernel.run(_fill_border_kernel.window());
+    NEScheduler::get().schedule(&_fill_border_kernel, Window::DimZ);
     NEScheduler::get().schedule(&_mean_stddev_kernel, Window::DimY);
 }

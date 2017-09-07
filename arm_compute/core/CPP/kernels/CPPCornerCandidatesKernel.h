@@ -62,7 +62,7 @@ public:
     void configure(const IImage *input, InternalKeypoint *output, int32_t *num_corner_candidates);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     int32_t           *_num_corner_candidates;   /**< Number of corner candidates */

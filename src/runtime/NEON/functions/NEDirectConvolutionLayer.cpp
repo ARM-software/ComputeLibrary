@@ -85,7 +85,7 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
 
 void NEDirectConvolutionLayer::run()
 {
-    _input_border_handler.run(_input_border_handler.window());
+    NEScheduler::get().schedule(&_input_border_handler, Window::DimZ);
 
     NEScheduler::get().schedule(&_conv_kernel, Window::DimZ);
     NEScheduler::get().schedule(&_accumulate_bias_kernel, Window::DimY);

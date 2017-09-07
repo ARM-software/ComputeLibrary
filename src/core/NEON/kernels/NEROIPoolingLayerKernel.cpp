@@ -79,8 +79,9 @@ void NEROIPoolingLayerKernel::configure(const ITensor *input, const IROIArray *r
     INEKernel::configure(window);
 }
 
-void NEROIPoolingLayerKernel::run(const Window &window)
+void NEROIPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

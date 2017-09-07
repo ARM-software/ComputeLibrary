@@ -64,7 +64,7 @@ public:
     void configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:

@@ -47,6 +47,6 @@ void NEDerivative::configure(ITensor *input, ITensor *output_x, ITensor *output_
 
 void NEDerivative::run()
 {
-    _border_handler.run(_border_handler.window());
+    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
     NEScheduler::get().schedule(&_kernel, Window::DimY);
 }

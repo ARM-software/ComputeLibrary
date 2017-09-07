@@ -159,8 +159,9 @@ void NEDepthConcatenateKernel::configure(const ITensor *input, unsigned int dept
     INEKernel::configure(win);
 }
 
-void NEDepthConcatenateKernel::run(const Window &window)
+void NEDepthConcatenateKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

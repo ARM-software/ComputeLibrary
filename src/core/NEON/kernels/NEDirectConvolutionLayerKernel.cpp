@@ -1378,8 +1378,9 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
     INEKernel::configure(win);
 }
 
-void NEDirectConvolutionLayerKernel::run(const Window &window)
+void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_input->buffer() == nullptr);

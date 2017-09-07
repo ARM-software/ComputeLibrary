@@ -161,7 +161,7 @@ void NECannyEdge::run()
     _sobel->run();
 
     // Fill border before non-maxima suppression. Nop for border mode undefined.
-    _border_mag_gradient.run(_border_mag_gradient.window());
+    NEScheduler::get().schedule(&_border_mag_gradient, Window::DimZ);
 
     // Run gradient
     NEScheduler::get().schedule(_gradient.get(), Window::DimY);
@@ -173,8 +173,8 @@ void NECannyEdge::run()
     memset(_output->buffer(), 0, _output->info()->total_size());
 
     // Fill border before edge trace
-    _border_edge_trace.run(_border_edge_trace.window());
+    NEScheduler::get().schedule(&_border_edge_trace, Window::DimZ);
 
     // Run edge tracing
-    _edge_trace.run(_edge_trace.window());
+    NEScheduler::get().schedule(&_edge_trace, Window::DimY);
 }

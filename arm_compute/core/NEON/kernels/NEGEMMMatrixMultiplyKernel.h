@@ -63,7 +63,7 @@ public:
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output, float alpha);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     const ITensor *_input0;

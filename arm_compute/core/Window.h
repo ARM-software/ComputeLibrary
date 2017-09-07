@@ -48,7 +48,7 @@ public:
 
     /** Default constructor: create a window containing a single element. */
     constexpr Window()
-        : _dims(), _thread_id(0), _num_threads(1)
+        : _dims()
     {
     }
     /** Copy constructor
@@ -293,38 +293,6 @@ public:
     {
         return slide_window_slice<4>(slice);
     }
-    /** Sets the ID of the thread that the window is associated with.
-     *
-     * @param id ID of the thread that the window is associated with.
-     */
-    void set_thread_id(unsigned int id)
-    {
-        _thread_id = id;
-    }
-    /** Sets the number of threads dispatched that the window is associated with.
-     *
-     * @param num_threads The number of threads dispatched that the window is associated with.
-     */
-    void set_num_threads(unsigned int num_threads)
-    {
-        _num_threads = num_threads;
-    }
-    /** Get the ID of the thread that the window is associated with.
-     *
-     * @return ID of the thread that the window is associated with.
-     */
-    constexpr unsigned int thread_id() const
-    {
-        return _thread_id;
-    }
-    /** Get the number of threads dispatched that the window is associated with.
-     *
-     * @return The number of threads dispatched that the window is associated with.
-     */
-    constexpr unsigned int num_threads() const
-    {
-        return _num_threads;
-    }
 
     /* Collapse the dimensions higher than @p first if possible.
      *
@@ -358,8 +326,6 @@ private:
 
 private:
     std::array<Dimension, Coordinates::num_max_dimensions> _dims;
-    unsigned int _thread_id;
-    unsigned int _num_threads;
 };
 }
 #include "Window.inl"

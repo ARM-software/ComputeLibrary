@@ -805,8 +805,9 @@ void NEPoolingLayerKernel::pooling7_f32(const Window &window_input, const Window
     input, output);
 }
 
-void NEPoolingLayerKernel::run(const Window &window)
+void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

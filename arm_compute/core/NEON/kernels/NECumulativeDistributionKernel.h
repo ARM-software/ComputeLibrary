@@ -64,7 +64,7 @@ public:
     void configure(const IImage *input, const IDistribution1D *distribution, IDistribution1D *cumulative_sum, ILut *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
 private:

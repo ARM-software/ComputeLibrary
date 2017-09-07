@@ -59,7 +59,7 @@ public:
     void configure(const IImage *input, IImage *output, uint8_t threshold, bool non_max_suppression, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:

@@ -68,7 +68,7 @@ public:
     void configure(const IMultiImage *input, Channel channel, IImage *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Extract one channel from a two channel planar tensor.

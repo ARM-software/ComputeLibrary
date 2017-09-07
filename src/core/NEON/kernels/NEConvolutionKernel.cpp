@@ -621,8 +621,9 @@ void NEConvolutionKernel<9>::convolution(const Window &win)
 }
 
 template <unsigned int matrix_size>
-void NEConvolutionKernel<matrix_size>::run(const Window &window)
+void NEConvolutionKernel<matrix_size>::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
@@ -694,8 +695,9 @@ void NESeparableConvolutionHorKernel<matrix_size>::configure(const ITensor *inpu
 }
 
 template <unsigned int matrix_size>
-void NESeparableConvolutionHorKernel<matrix_size>::run(const Window &window)
+void NESeparableConvolutionHorKernel<matrix_size>::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     switch(_output->info()->data_type())
@@ -1131,8 +1133,9 @@ void NESeparableConvolutionVertKernel<matrix_size>::configure(const ITensor *inp
 }
 
 template <unsigned int matrix_size>
-void NESeparableConvolutionVertKernel<matrix_size>::run(const Window &window)
+void NESeparableConvolutionVertKernel<matrix_size>::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
@@ -1464,8 +1467,9 @@ void NEConvolutionRectangleKernel::configure(const ITensor *input, ITensor *outp
     INEKernel::configure(win);
 }
 
-void NEConvolutionRectangleKernel::run(const Window &window)
+void NEConvolutionRectangleKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

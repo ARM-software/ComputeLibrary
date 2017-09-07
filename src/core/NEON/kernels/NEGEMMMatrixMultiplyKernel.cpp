@@ -51,7 +51,7 @@ class Coordinates;
 namespace
 {
 template <bool multiply_alpha>
-void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, float alpha)
+void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info, float alpha)
 {
 #ifdef ARM_COMPUTE_ENABLE_FP16
     const auto width_matrix_b  = static_cast<int>(output->info()->dimension(0));
@@ -59,8 +59,8 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
     const auto num_elems_vec_a = static_cast<int>(input0->info()->dimension(0));
 
     // The implementation computes 32 elements per iteration
-    const int window_start_x = 32 * window.thread_id();
-    const int window_step_x  = 32 * window.num_threads();
+    const int window_start_x = 32 * info.thread_id;
+    const int window_step_x  = 32 * info.num_threads;
     const int window_end_x   = ceil_to_multiple(width_matrix_b - window_start_x, window_step_x) + window_start_x;
     ARM_COMPUTE_ERROR_ON_MSG((window_end_x - window_start_x) % window_step_x, " (window_end_x - window_start_x) must be multiple of window_step_x");
 
@@ -192,15 +192,15 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
 }
 
 template <bool multiply_alpha>
-void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, float alpha)
+void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info, float alpha)
 {
     const auto width_matrix_b  = static_cast<int>(output->info()->dimension(0));
     const auto in_b_stride     = static_cast<int>(input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type()));
     const auto num_elems_vec_a = static_cast<int>(input0->info()->dimension(0));
 
     // The implementation computes 16 elements per iteration
-    const int window_start_x = 16 * window.thread_id();
-    const int window_step_x  = 16 * window.num_threads();
+    const int window_start_x = 16 * info.thread_id;
+    const int window_step_x  = 16 * info.num_threads;
     // Make sure (window_end_x - window_start_x) is a multiple of window_step_x
     const int window_end_x = ceil_to_multiple(width_matrix_b - window_start_x, window_step_x) + window_start_x;
 
@@ -348,7 +348,7 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
 }
 
 template <bool multiply_alpha>
-void vector_matrix_multiply_qs8(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, float alpha)
+void vector_matrix_multiply_qs8(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info, float alpha)
 {
     const auto width_matrix_b       = static_cast<int>(output->info()->dimension(0));
     const auto in_b_stride          = static_cast<int>(input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type()));
@@ -356,8 +356,8 @@ void vector_matrix_multiply_qs8(const ITensor *input0, const ITensor *input1, IT
     const int  fixed_point_position = input0->info()->fixed_point_position();
 
     // The implementation computes 32 elements per iteration
-    const int window_start_x = 32 * window.thread_id();
-    const int window_step_x  = 32 * window.num_threads();
+    const int window_start_x = 32 * info.thread_id;
+    const int window_step_x  = 32 * info.num_threads;
     // Make sure (window_end_x - window_start_x) is a multiple of window_step_x
     const int window_end_x = ceil_to_multiple(width_matrix_b - window_start_x, window_step_x) + window_start_x;
 
@@ -476,7 +476,7 @@ void vector_matrix_multiply_qs8(const ITensor *input0, const ITensor *input1, IT
 }
 
 template <bool multiply_alpha>
-void vector_matrix_multiply_qs16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, float alpha)
+void vector_matrix_multiply_qs16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info, float alpha)
 {
     const auto width_matrix_b       = static_cast<int>(output->info()->dimension(0));
     const auto in_b_stride          = static_cast<int>(input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type()));
@@ -484,8 +484,8 @@ void vector_matrix_multiply_qs16(const ITensor *input0, const ITensor *input1, I
     const int  fixed_point_position = input0->info()->fixed_point_position();
 
     // The implementation computes 16 elements per iteration
-    const int window_start_x = 16 * window.thread_id();
-    const int window_step_x  = 16 * window.num_threads();
+    const int window_start_x = 16 * info.thread_id;
+    const int window_step_x  = 16 * info.num_threads;
     // Make sure (window_end_x - window_start_x) is a multiple of window_step_x
     const int window_end_x = ceil_to_multiple(width_matrix_b - window_start_x, window_step_x) + window_start_x;
     ARM_COMPUTE_ERROR_ON_MSG((window_end_x - window_start_x) % window_step_x, " (window_end_x - window_start_x) must be multiple of window_step_x");
@@ -1522,7 +1522,7 @@ void NEGEMMMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor 
     }
 }
 
-void NEGEMMMatrixMultiplyKernel::run(const Window &window)
+void NEGEMMMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
@@ -1536,27 +1536,27 @@ void NEGEMMMatrixMultiplyKernel::run(const Window &window)
         {
             case DataType::F32:
             {
-                multiply_alpha ? vector_matrix_multiply_f32<true>(_input0, _input1, _output, window, _alpha) :
-                vector_matrix_multiply_f32<false>(_input0, _input1, _output, window, _alpha);
+                multiply_alpha ? vector_matrix_multiply_f32<true>(_input0, _input1, _output, window, info, _alpha) :
+                vector_matrix_multiply_f32<false>(_input0, _input1, _output, window, info, _alpha);
                 break;
             }
             case DataType::QS8:
             {
-                multiply_alpha ? vector_matrix_multiply_qs8<true>(_input0, _input1, _output, window, _alpha) :
-                vector_matrix_multiply_qs8<false>(_input0, _input1, _output, window, _alpha);
+                multiply_alpha ? vector_matrix_multiply_qs8<true>(_input0, _input1, _output, window, info, _alpha) :
+                vector_matrix_multiply_qs8<false>(_input0, _input1, _output, window, info, _alpha);
                 break;
             }
             case DataType::QS16:
             {
-                multiply_alpha ? vector_matrix_multiply_qs16<true>(_input0, _input1, _output, window, _alpha) :
-                vector_matrix_multiply_qs16<false>(_input0, _input1, _output, window, _alpha);
+                multiply_alpha ? vector_matrix_multiply_qs16<true>(_input0, _input1, _output, window, info, _alpha) :
+                vector_matrix_multiply_qs16<false>(_input0, _input1, _output, window, info, _alpha);
                 break;
             }
 #ifdef ARM_COMPUTE_ENABLE_FP16
             case DataType::F16:
             {
-                multiply_alpha ? vector_matrix_multiply_f16<true>(_input0, _input1, _output, window, _alpha) :
-                vector_matrix_multiply_f16<false>(_input0, _input1, _output, window, _alpha);
+                multiply_alpha ? vector_matrix_multiply_f16<true>(_input0, _input1, _output, window, info, _alpha) :
+                vector_matrix_multiply_f16<false>(_input0, _input1, _output, window, info, _alpha);
                 break;
             }
 #endif /* ARM_COMPUTE_ENABLE_FP16 */

@@ -47,20 +47,9 @@ public:
      * @note The width of the window has to be a multiple of num_elems_processed_per_iteration().
      *
      * @param[in] window Region on which to execute the kernel. (Must be a region of the window returned by window())
+     * @param[in] info   Info about executing thread and CPU.
      */
-    virtual void run(const Window &window) = 0;
-
-    /** Sets the target CPU architecture.
-     *
-     * @param[in] target CPU target.
-     */
-    void set_target(CPUTarget target)
-    {
-        _target = target;
-    }
-
-protected:
-    CPUTarget _target{ CPUTarget::INTRINSICS };
+    virtual void run(const Window &window, const ThreadInfo &info) = 0;
 };
 }
 #endif /*__ARM_COMPUTE_ICPPKERNEL_H__ */

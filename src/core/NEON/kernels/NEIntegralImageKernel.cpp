@@ -71,8 +71,9 @@ bool NEIntegralImageKernel::is_parallelisable() const
     return false;
 }
 
-void NEIntegralImageKernel::run(const Window &window)
+void NEIntegralImageKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 

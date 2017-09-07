@@ -45,7 +45,7 @@ public:
     void configure(const ITensor *input, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -82,7 +82,7 @@ public:
     void configure(const ITensor *input, const ITensor *max, ITensor *output, ITensor *sum);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using Logits1DShiftExpSumFunction = void(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window);
@@ -120,7 +120,7 @@ public:
     void configure(const ITensor *input, const ITensor *sum, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using Logits1DNormFunction = void(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window);

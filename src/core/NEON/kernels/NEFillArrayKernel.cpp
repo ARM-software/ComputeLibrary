@@ -62,8 +62,9 @@ bool NEFillArrayKernel::is_parallelisable() const
     return false;
 }
 
-void NEFillArrayKernel::run(const Window &window)
+void NEFillArrayKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

@@ -61,7 +61,7 @@ public:
     void configure(const IImage *input, uint8_t threshold, IKeyPointArray *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
 private:

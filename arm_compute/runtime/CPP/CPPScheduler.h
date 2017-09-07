@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_CPPSCHEDULER_H__
 #define __ARM_COMPUTE_CPPSCHEDULER_H__
 
-#include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/runtime/IScheduler.h"
 
 #include <memory>
@@ -48,18 +47,6 @@ public:
      */
     unsigned int num_threads() const override;
 
-    /** Sets the target CPU architecture.
-     *
-     * @param[in] target Target CPU.
-     */
-    void set_target(CPUTarget target);
-
-    /** Return the current CPU target.
-     *
-     * @return Target CPU.
-     */
-    CPUTarget target() const;
-
     /** Access the scheduler singleton
      *
      * @return The scheduler
@@ -82,7 +69,6 @@ private:
 
     unsigned int _num_threads;
     std::unique_ptr<Thread[], void (*)(Thread *)> _threads;
-    CPUTarget _target;
 };
 }
 #endif /* __ARM_COMPUTE_CPPSCHEDULER_H__ */

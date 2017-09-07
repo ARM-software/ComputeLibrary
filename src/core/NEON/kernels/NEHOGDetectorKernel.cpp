@@ -92,8 +92,9 @@ void NEHOGDetectorKernel::configure(const ITensor *input, const IHOG *hog, IDete
     INEKernel::configure(win);
 }
 
-void NEHOGDetectorKernel::run(const Window &window)
+void NEHOGDetectorKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_hog_descriptor == nullptr);

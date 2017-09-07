@@ -216,8 +216,9 @@ void NERemapKernel::remap_bilinear(const Window &window)
     in, out, mapx, mapy);
 }
 
-void NERemapKernel::run(const Window &window)
+void NERemapKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

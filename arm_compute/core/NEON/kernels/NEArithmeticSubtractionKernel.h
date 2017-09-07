@@ -70,7 +70,7 @@ public:
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised sub functions

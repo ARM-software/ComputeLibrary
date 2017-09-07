@@ -88,8 +88,9 @@ void NESobel3x3Kernel::configure(const ITensor *input, ITensor *output_x, ITenso
     INEKernel::configure(win);
 }
 
-void NESobel3x3Kernel::run(const Window &window)
+void NESobel3x3Kernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

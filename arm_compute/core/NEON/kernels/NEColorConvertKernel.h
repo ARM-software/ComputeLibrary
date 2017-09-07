@@ -76,7 +76,7 @@ public:
     void configure(const IMultiImage *input, IMultiImage *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using ColorConvertFunction = void(const void *__restrict input_ptr, void *__restrict output_ptr, const Window &win);

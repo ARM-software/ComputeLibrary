@@ -58,7 +58,7 @@ public:
     virtual void configure(const ITensor *input, ITensor *output, const float *matrix, BorderMode border_mode, uint8_t constant_border_value);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
     // Inherited methods overridden:
     BorderSize border_size() const override;

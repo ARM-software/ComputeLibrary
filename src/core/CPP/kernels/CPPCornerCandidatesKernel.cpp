@@ -93,8 +93,9 @@ void CPPCornerCandidatesKernel::configure(const IImage *input, InternalKeypoint 
     INEKernel::configure(win);
 }
 
-void CPPCornerCandidatesKernel::run(const Window &window)
+void CPPCornerCandidatesKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     Iterator input(_input, window);

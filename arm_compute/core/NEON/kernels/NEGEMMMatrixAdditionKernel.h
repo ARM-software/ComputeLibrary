@@ -62,7 +62,7 @@ public:
     void configure(const ITensor *input, ITensor *output, float beta);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the matrix addition functions

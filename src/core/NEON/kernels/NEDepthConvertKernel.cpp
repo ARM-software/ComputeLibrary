@@ -120,8 +120,9 @@ void NEDepthConvertKernel::configure(ITensor *input, ITensor *output, ConvertPol
     ICPPKernel::configure(win);
 }
 
-void NEDepthConvertKernel::run(const Window &window)
+void NEDepthConvertKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(nullptr == _input);

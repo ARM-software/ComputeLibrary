@@ -42,7 +42,7 @@ public:
     void configure(const ITensor *input, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
     bool       is_parallelisable() const override;
 };

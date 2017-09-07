@@ -61,7 +61,7 @@ public:
     void configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using ActivationFunction = ActivationLayerInfo::ActivationFunction;

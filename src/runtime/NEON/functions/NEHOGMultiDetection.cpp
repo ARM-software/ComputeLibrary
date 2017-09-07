@@ -239,6 +239,6 @@ void NEHOGMultiDetection::run()
     // Run non-maxima suppression kernel if enabled
     if(_non_maxima_suppression)
     {
-        _non_maxima_kernel->run(_non_maxima_kernel->window());
+        NEScheduler::get().schedule(_non_maxima_kernel.get(), Window::DimY);
     }
 }
