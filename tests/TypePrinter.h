@@ -149,6 +149,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NonLinearFilterFunct
     return os;
 }
 
+inline std::string to_string(const NonLinearFilterFunction &function)
+{
+    std::stringstream str;
+    str << function;
+    return str.str();
+}
+
 /** Formatted output of the MatrixPattern type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const MatrixPattern &pattern)
 {
@@ -171,6 +178,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const MatrixPattern &patte
     }
 
     return os;
+}
+
+inline std::string to_string(const MatrixPattern &pattern)
+{
+    std::stringstream str;
+    str << pattern;
+    return str.str();
 }
 
 /** Formatted output of the InterpolationPolicy type. */

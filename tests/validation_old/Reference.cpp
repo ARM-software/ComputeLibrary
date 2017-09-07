@@ -217,22 +217,6 @@ RawTensor Reference::compute_reference_gaussian5x5(const TensorShape &shape, Bor
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_non_linear_filter(const TensorShape &shape, NonLinearFilterFunction function, unsigned int mask_size,
-                                                         MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value)
-{
-    // Create reference
-    RawTensor ref_src(shape, DataType::U8);
-    RawTensor ref_dst(shape, DataType::U8);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src, 0);
-
-    // Compute reference
-    ReferenceCPP::non_linear_filter(ref_src, ref_dst, function, mask_size, pattern, mask, border_mode, constant_border_value);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_pixel_wise_multiplication(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, float scale, ConvertPolicy convert_policy,
                                                                  RoundingPolicy rounding_policy)
 {
