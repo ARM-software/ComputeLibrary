@@ -165,7 +165,7 @@ CPPScheduler &CPPScheduler::get()
 
 CPPScheduler::CPPScheduler()
     : _num_threads(std::thread::hardware_concurrency()),
-      _threads(std::unique_ptr<Thread[], void(*)(Thread *)>(new Thread[std::thread::hardware_concurrency() - 1], delete_threads))
+      _threads(std::unique_ptr<Thread[], void(*)(Thread *)>(new Thread[_num_threads - 1], delete_threads))
 {
 }
 
@@ -173,6 +173,7 @@ void CPPScheduler::set_num_threads(unsigned int num_threads)
 {
     const unsigned int num_cores = std::thread::hardware_concurrency();
     _num_threads                 = num_threads == 0 ? num_cores : num_threads;
+    _threads.reset(new Thread[_num_threads - 1]);
 }
 
 unsigned int CPPScheduler::num_threads() const
