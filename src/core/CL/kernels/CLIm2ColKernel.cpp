@@ -123,6 +123,15 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     }
 
     ICLKernel::configure(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "im2col_";
+    _config_id += (run_img2col_reduced ? "reduced_" : "");
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLIm2ColKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -159,9 +168,6 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
     slice_out.set(Window::DimX, Window::Dimension(0, _output->info()->dimension(0), _num_elems_processed_per_iteration));
     slice_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), 1));
     slice_out.set(Window::DimZ, Window::Dimension(0, 1, 1));
-
-    // Set the local-workgroup size
-    _lws_hint = cl::NDRange(4, 4, 4);
 
     do
     {

@@ -30,6 +30,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLTuner.h"
 
 namespace arm_compute
 {
@@ -41,6 +42,10 @@ class CLScheduler
 private:
     /** Constructor */
     CLScheduler();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLScheduler(const CLScheduler &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLScheduler &operator=(const CLScheduler &) = delete;
 
 public:
     /** Access the scheduler singleton.
@@ -50,11 +55,13 @@ public:
     static CLScheduler &get();
     /** Initialises the context and command queue used by the scheduler to default values
      *  and sets a default device and kernel path for the @ref CLKernelLibrary.
+     *
+     * @param[in] cl_tuner (Optional) Pointer to ICLTuner (default=nullptr)
      */
-    void default_init()
+    void default_init(ICLTuner *cl_tuner = nullptr)
     {
         CLKernelLibrary::get().init("./cl_kernels/", cl::Context::getDefault(), cl::Device::getDefault());
-        init(cl::Context::getDefault(), cl::CommandQueue::getDefault(), cl::Device::getDefault());
+        init(cl::Context::getDefault(), cl::CommandQueue::getDefault(), cl::Device::getDefault(), cl_tuner);
     }
     /** Schedule the execution of the passed kernel if possible.
      *
@@ -65,17 +72,20 @@ public:
 
     /** Initialises the context and command queue to be used by the scheduler.
      *
-     * @param[in] context A CL context.
-     * @param[in] queue   A CL command queue.
-     * @param[in] device  A CL device.
+     * @param[in] context  A CL context.
+     * @param[in] queue    A CL command queue.
+     * @param[in] device   A CL device.
+     * @param[in] cl_tuner (Optional) Pointer to OpenCL tuner (default=nullptr)
+     *                     Note: It is caller's responsibility to release the allocated memory for CLTuner
      */
     void init(cl::Context context = cl::Context::getDefault(), cl::CommandQueue queue = cl::CommandQueue::getDefault(),
-              cl::Device device = cl::Device::getDefault())
+              cl::Device device = cl::Device::getDefault(), ICLTuner *cl_tuner = nullptr)
     {
         _context        = std::move(context);
         _queue          = std::move(queue);
         _target         = get_target_from_device(device);
         _is_initialised = true;
+        _cl_tuner       = cl_tuner;
     }
 
     /** Accessor for the associated CL context.
@@ -153,10 +163,21 @@ public:
     }
 
 private:
+    /** Tune OpenCL kernel
+     *
+     * @note This method uses a brute force approach to find the optimal LWS
+     *
+     * @param[in] kernel Kernel to tune
+     *
+     * @return The optimal LWS for the specified kernel
+     */
+    cl::NDRange tune_kernel(ICLKernel &kernel);
+
     cl::Context      _context;
     cl::CommandQueue _queue;
     GPUTarget        _target;
     bool             _is_initialised;
+    ICLTuner        *_cl_tuner;
 };
 }
 #endif /* __ARM_COMPUTE_CLSCHEDULER_H__ */

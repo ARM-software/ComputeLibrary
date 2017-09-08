@@ -81,6 +81,14 @@ void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *out
     output_access.set_valid_region(win, input->info()->valid_region());
 
     ICLKernel::configure(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "interleave4x4_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLGEMMInterleave4x4Kernel::run(const Window &window, cl::CommandQueue &queue)

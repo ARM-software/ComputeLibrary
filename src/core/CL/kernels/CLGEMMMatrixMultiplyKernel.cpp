@@ -157,6 +157,17 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         output_access.set_valid_region(win, ValidRegion(coord, output->info()->tensor_shape()));
 
         ICLKernel::configure(win);
+
+        // Set config_id for enabling LWS tuning
+        _config_id = "gemm_";
+        _config_id += (is_interleaved_transposed ? "reshaped_" : "");
+        _config_id += lower_string(string_from_data_type(input0->info()->data_type()));
+        _config_id += "_";
+        _config_id += support::cpp11::to_string(output->info()->dimension(1));
+        _config_id += "_";
+        _config_id += support::cpp11::to_string(output->info()->dimension(0));
+        _config_id += "_";
+        _config_id += (is_interleaved_transposed ? support::cpp11::to_string(input1->info()->dimension(0)) : support::cpp11::to_string(input1->info()->dimension(1)));
     }
 }
 

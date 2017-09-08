@@ -29,6 +29,8 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/IKernel.h"
 
+#include <string>
+
 namespace arm_compute
 {
 template <typename T>
@@ -140,6 +142,21 @@ public:
         _lws_hint = lws_hint;
     }
 
+    /** Get the configuration ID
+     *
+     * @note The configuration ID can be used by the caller to distinguish different calls of the same OpenCL kernel
+     *       In particular, this method can be used by CLScheduler to keep track of the best LWS for each configuration of the same kernel.
+     *       The configuration ID should be provided only for the kernels potentially affected by the LWS geometry
+     *
+     * @note This method should be called after the configuration of the kernel
+     *
+     * @return configuration id string
+     */
+    const std::string &config_id() const
+    {
+        return _config_id;
+    }
+
     /** Set the targeted GPU architecture
      *
      * @param[in] target The targeted GPU architecture
@@ -191,9 +208,10 @@ private:
     unsigned int           num_arguments_per_tensor() const;
 
 protected:
-    cl::Kernel  _kernel;   /**< OpenCL kernel to run */
-    cl::NDRange _lws_hint; /**< Local workgroup size hint for the OpenCL kernel */
-    GPUTarget   _target;   /**< The targeted GPU */
+    cl::Kernel  _kernel;    /**< OpenCL kernel to run */
+    cl::NDRange _lws_hint;  /**< Local workgroup size hint for the OpenCL kernel */
+    GPUTarget   _target;    /**< The targeted GPU */
+    std::string _config_id; /**< Configuration ID */
 };
 
 /** Add the kernel to the command queue with the given window.

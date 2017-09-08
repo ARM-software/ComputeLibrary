@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,42 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/CLScheduler.h"
+#ifndef __ARM_COMPUTE_ICLTUNER_H__
+#define __ARM_COMPUTE_ICLTUNER_H__
 
-#include "arm_compute/core/CL/ICLKernel.h"
-#include "arm_compute/runtime/CL/CLTuner.h"
-
-using namespace arm_compute;
-
-CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner()
+namespace arm_compute
 {
-}
+class ICLKernel;
 
-CLScheduler &CLScheduler::get()
+/** Basic interface for tuning the OpenCL kernels */
+class ICLTuner
 {
-    static CLScheduler scheduler;
-    return scheduler;
+public:
+    /** Virtual destructor */
+    virtual ~ICLTuner() = default;
+    /** Tune OpenCL kernel
+     *
+     * @param[in] kernel Kernel to tune
+     */
+    virtual void tune_kernel(ICLKernel &kernel) = 0;
+};
 }
-
-void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(!_is_initialised,
-                             "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
-                             or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
-
-    // Tune the kernel if the CLTuner has been provided
-    if(_cl_tuner != nullptr)
-    {
-        // Tune the OpenCL kernel
-        _cl_tuner->tune_kernel(kernel);
-    }
-
-    // Run kernel
-    kernel.run(kernel.window(), _queue);
-
-    if(flush)
-    {
-        _queue.flush();
-    }
-}
+#endif /*__ARM_COMPUTE_ICLTUNER_H__ */

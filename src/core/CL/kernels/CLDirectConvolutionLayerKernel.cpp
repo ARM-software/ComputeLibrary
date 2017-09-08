@@ -230,6 +230,24 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 
         ICLKernel::configure(win);
     }
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "direct_convolution_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(kernel_size);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(_conv_pad_x);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(_conv_pad_y);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(_conv_stride_x);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(_conv_stride_y);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue &queue)
