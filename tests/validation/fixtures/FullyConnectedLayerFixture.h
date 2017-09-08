@@ -34,6 +34,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/CPP/FullyConnectedLayer.h"
+#include "tests/validation/CPP/Utils.h"
 #include "tests/validation/Helpers.h"
 
 #include <random>
@@ -44,38 +45,6 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
-RawTensor transpose(const RawTensor &src, int interleave = 1)
-{
-    // Create reference
-    TensorShape dst_shape(src.shape());
-    dst_shape.set(0, src.shape().y() * interleave);
-    dst_shape.set(1, std::ceil(src.shape().x() / static_cast<float>(interleave)));
-
-    RawTensor dst{ dst_shape, src.data_type() };
-
-    // Compute reference
-    uint8_t *out_ptr = dst.data();
-
-    for(int i = 0; i < dst.num_elements(); i += interleave)
-    {
-        Coordinates coord   = index2coord(dst.shape(), i);
-        size_t      coord_x = coord.x();
-        coord.set(0, coord.y() * interleave);
-        coord.set(1, coord_x / interleave);
-
-        const int num_elements = std::min<int>(interleave, src.shape().x() - coord.x());
-
-        std::copy_n(static_cast<const uint8_t *>(src(coord)), num_elements * src.element_size(), out_ptr);
-
-        out_ptr += interleave * dst.element_size();
-    }
-
-    return dst;
-}
-} // namespace
-
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool run_interleave>
 class FullyConnectedLayerValidationFixedPointFixture : public framework::Fixture
 {

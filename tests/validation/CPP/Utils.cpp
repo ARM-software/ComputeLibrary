@@ -125,6 +125,34 @@ template void apply_2d_spatial_filter(Coordinates coord, const SimpleTensor<uint
                                       BorderMode border_mode,
                                       uint8_t    constant_border_value);
 
+RawTensor transpose(const RawTensor &src, int chunk_width)
+{
+    // Create reference
+    TensorShape dst_shape(src.shape());
+    dst_shape.set(0, src.shape().y() * chunk_width);
+    dst_shape.set(1, std::ceil(src.shape().x() / static_cast<float>(chunk_width)));
+
+    RawTensor dst{ dst_shape, src.data_type() };
+
+    // Compute reference
+    uint8_t *out_ptr = dst.data();
+
+    for(int i = 0; i < dst.num_elements(); i += chunk_width)
+    {
+        Coordinates coord   = index2coord(dst.shape(), i);
+        size_t      coord_x = coord.x();
+        coord.set(0, coord.y() * chunk_width);
+        coord.set(1, coord_x / chunk_width);
+
+        const int num_elements = std::min<int>(chunk_width, src.shape().x() - coord.x());
+
+        std::copy_n(static_cast<const uint8_t *>(src(coord)), num_elements * src.element_size(), out_ptr);
+
+        out_ptr += chunk_width * dst.element_size();
+    }
+
+    return dst;
+}
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

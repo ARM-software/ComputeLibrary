@@ -44,6 +44,8 @@ namespace arm_compute
 {
 namespace test
 {
+class RawTensor;
+
 /** Simple tensor object that stores elements in a consecutive chunk of memory.
  *
  * It can be created by either loading an image from a file which also
@@ -93,6 +95,8 @@ public:
 
     using value_type = T;
     using Buffer     = std::unique_ptr<value_type[]>;
+
+    friend class RawTensor;
 
     /** Return value at @p offset in the buffer.
      *

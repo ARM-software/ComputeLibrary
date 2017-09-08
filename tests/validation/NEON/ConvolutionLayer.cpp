@@ -107,16 +107,16 @@ using NEConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor,
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("DataType",
-                                                DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("DataType",
-                                                                                                                               DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                       framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
@@ -125,14 +125,16 @@ TEST_SUITE_END()
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallConvolutionLayerDataset(), framework::dataset::make("DataType",
-                                                                                                              DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                      framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                              framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeConvolutionLayerDataset(), framework::dataset::make("DataType",
-                                                                                                            DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                    framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                            framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -146,17 +148,17 @@ using NEConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixtu
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
 // We test for fixed point precision [4,6]
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("DataType",
-                                                DataType::QS8)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("DataType", DataType::QS8)),
                        framework::dataset::make("FractionalBits", 4, 7)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("DataType",
-                                                                                                                               DataType::QS8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                       framework::dataset::make("DataType", DataType::QS8)),
                                                                                                                        framework::dataset::make("FractionalBits", 4, 7)))
 {
     // Validate output
@@ -166,17 +168,17 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 // Testing for fixed point position [1,14)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("DataType",
-                                                DataType::QS16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("DataType", DataType::QS16)),
                        framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
-                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                                DataType::QS16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                        framework::dataset::make("DataType", DataType::QS16)),
                                                                                                                         framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output

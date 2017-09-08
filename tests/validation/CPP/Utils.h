@@ -50,6 +50,8 @@ T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn,
 template <typename T1, typename T2, typename T3>
 void apply_2d_spatial_filter(Coordinates coord, const SimpleTensor<T1> &in, SimpleTensor<T3> &out, const TensorShape &filter_shape, const T2 *filter_itr, float scale, BorderMode border_mode,
                              T1 constant_border_value = 0);
+
+RawTensor transpose(const RawTensor &src, int chunk_width = 1);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
