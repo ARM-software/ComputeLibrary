@@ -21,31 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#ifndef __ARM_COMPUTE_RUNTIME_TYPES_H__
+#define __ARM_COMPUTE_RUNTIME_TYPES_H__
 
-using namespace arm_compute;
+#include <map>
 
-Tensor::Tensor()
-    : _allocator(this)
+namespace arm_compute
 {
-}
-
-ITensorInfo *Tensor::info() const
+/** Mapping type */
+enum class MappingType
 {
-    return &_allocator.info();
-}
+    BLOBS,  /**< Mappings are in blob granularity */
+    OFFSETS /**< Mappings are in offset granularity in the same blob */
+};
 
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
+/** A map of (handle, index/offset), where handle is the memory handle of the object
+ * to provide the memory for and index/offset is the buffer/offset from the pool that should be used
+ *
+ * @note All objects are pre-pinned to specific buffers to avoid any relevant overheads
+ */
+using MemoryMappings = std::map<void **, size_t>;
 
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
+/** A map of the groups and memory mappings */
+using GroupMappings = std::map<size_t, MemoryMappings>;
 
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
-}
+} // arm_compute
+#endif /* __ARM_COMPUTE_RUNTIME_TYPES_H__ */

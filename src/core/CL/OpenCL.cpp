@@ -95,6 +95,7 @@ bool CLSymbols::load(const std::string &library)
     clReleaseContext          = reinterpret_cast<clReleaseContext_func>(dlsym(handle, "clReleaseContext"));
     clRetainCommandQueue      = reinterpret_cast<clRetainCommandQueue_func>(dlsym(handle, "clRetainCommandQueue"));
     clEnqueueUnmapMemObject   = reinterpret_cast<clEnqueueUnmapMemObject_func>(dlsym(handle, "clEnqueueUnmapMemObject"));
+    clRetainMemObject         = reinterpret_cast<clRetainMemObject_func>(dlsym(handle, "clRetainMemObject"));
     clReleaseMemObject        = reinterpret_cast<clReleaseMemObject_func>(dlsym(handle, "clReleaseMemObject"));
     clGetDeviceInfo           = reinterpret_cast<clGetDeviceInfo_func>(dlsym(handle, "clGetDeviceInfo"));
     clGetDeviceIDs            = reinterpret_cast<clGetDeviceIDs_func>(dlsym(handle, "clGetDeviceIDs"));
@@ -168,6 +169,20 @@ cl_int clSetKernelArg(
     if(func != nullptr)
     {
         return func(kernel, arg_index, arg_size, arg_value);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clRetainMemObject(cl_mem memobj)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clRetainMemObject;
+    if(func != nullptr)
+    {
+        return func(memobj);
     }
     else
     {

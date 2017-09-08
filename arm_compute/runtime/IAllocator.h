@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#ifndef __ARM_COMPUTE_IALLOCATOR_H__
+#define __ARM_COMPUTE_IALLOCATOR_H__
 
-using namespace arm_compute;
+#include <cstddef>
 
-Tensor::Tensor()
-    : _allocator(this)
+namespace arm_compute
 {
-}
-
-ITensorInfo *Tensor::info() const
+/** Allocator interface */
+class IAllocator
 {
-    return &_allocator.info();
-}
-
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
-}
+public:
+    /** Default virtual destructor. */
+    virtual ~IAllocator() = default;
+    /** Interface to be implemented by the child class to allocate bytes
+     *
+     * @param[in] size      Size to allocate
+     * @param[in] alignment Alignment that the returned pointer should comply with
+     *
+     * @return A pointer to the allocated memory
+     */
+    virtual void *allocate(size_t size, size_t alignment) = 0;
+    /** Interface to be implemented by the child class to free the allocated tensor */
+    virtual void free(void *ptr) = 0;
+};
+} // arm_compute
+#endif /*__ARM_COMPUTE_IALLOCATOR_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef __ARM_COMPUTE_MEMORYGROUP_H__
+#define __ARM_COMPUTE_MEMORYGROUP_H__
+
+#include "arm_compute/runtime/MemoryGroupBase.h"
+
 #include "arm_compute/runtime/Tensor.h"
 
-using namespace arm_compute;
-
-Tensor::Tensor()
-    : _allocator(this)
+namespace arm_compute
 {
-}
+using MemoryGroup = MemoryGroupBase<Tensor>;
 
-ITensorInfo *Tensor::info() const
+template <>
+inline void MemoryGroupBase<Tensor>::associate_memory_group(Tensor *obj)
 {
-    return &_allocator.info();
+    ARM_COMPUTE_ERROR_ON(obj == nullptr);
+    auto allocator = dynamic_cast<TensorAllocator *>(obj->allocator());
+    ARM_COMPUTE_ERROR_ON(allocator == nullptr);
+    allocator->set_associated_memory_group(this);
 }
-
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
-}
+} // arm_compute
+#endif /*__ARM_COMPUTE_MEMORYGROUP_H__ */

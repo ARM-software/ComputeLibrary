@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#ifndef __ARM_COMPUTE_CLBUFFERALLOCATOR_H__
+#define __ARM_COMPUTE_CLBUFFERALLOCATOR_H__
 
-using namespace arm_compute;
+#include "arm_compute/runtime/IAllocator.h"
 
-Tensor::Tensor()
-    : _allocator(this)
+#include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include <cstddef>
+
+namespace arm_compute
 {
-}
-
-ITensorInfo *Tensor::info() const
+/** Default OpenCL cl buffer allocator implementation */
+class CLBufferAllocator : public IAllocator
 {
-    return &_allocator.info();
-}
+public:
+    /** Default constructor */
+    explicit CLBufferAllocator(cl::Context context = CLScheduler::get().context());
 
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
+    // Inherited methods overridden:
+    void *allocate(size_t size, size_t alignment) override;
+    void free(void *ptr) override;
 
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
-}
+private:
+    cl::Context _context;
+};
+} // arm_compute
+#endif /*__ARM_COMPUTE_CLBUFFERALLOCATOR_H__ */

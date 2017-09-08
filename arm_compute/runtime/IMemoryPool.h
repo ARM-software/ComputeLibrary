@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#ifndef __ARM_COMPUTE_IMEMORYPOOL_H__
+#define __ARM_COMPUTE_IMEMORYPOOL_H__
 
-using namespace arm_compute;
+#include "arm_compute/runtime/Types.h"
 
-Tensor::Tensor()
-    : _allocator(this)
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <vector>
+
+namespace arm_compute
 {
-}
-
-ITensorInfo *Tensor::info() const
+/** Memory Pool Inteface */
+class IMemoryPool
 {
-    return &_allocator.info();
-}
-
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
-}
+public:
+    /** Default Virtual Destructor */
+    virtual ~IMemoryPool() = default;
+    /** Sets occupant to the memory pool
+     *
+     * @param[in] handles A vector of pairs (handle, index)
+     */
+    virtual void acquire(MemoryMappings &handles) = 0;
+    /** Releases a memory block
+     *
+     * @param[in] handles A vector containing a pair of handles and indices
+     */
+    virtual void release(MemoryMappings &handles) = 0;
+    /** Returns the mapping types that this pool accepts
+     *
+     * @return the mapping type of the memory
+     */
+    virtual MappingType mapping_type() const = 0;
+    /** Duplicates the existing memory pool
+     *
+     * @return A duplicate of the existing pool
+     */
+    virtual std::unique_ptr<IMemoryPool> duplicate() = 0;
+};
+} // arm_compute
+#endif /* __ARM_COMPUTE_IMEMORYPOOL_H__ */

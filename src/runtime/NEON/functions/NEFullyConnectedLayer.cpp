@@ -32,8 +32,8 @@
 
 namespace arm_compute
 {
-NEFullyConnectedLayerReshapeWeights::NEFullyConnectedLayerReshapeWeights()
-    : _transpose_kernel(), _transpose1xW_kernel(), _transpose_output(), _transpose_weights(false), _is_batched_fc_layer(false)
+NEFullyConnectedLayerReshapeWeights::NEFullyConnectedLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _transpose_kernel(), _transpose1xW_kernel(), _transpose_output(), _transpose_weights(false), _is_batched_fc_layer(false)
 {
 }
 
@@ -58,6 +58,7 @@ void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITenso
             // Initialize the output tensor for transpose
             TensorShape shape_transposed(input->info()->dimension(1), input->info()->dimension(0));
             _transpose_output.allocator()->init(TensorInfo(shape_transposed, 1, data_type, fixed_point_position));
+            _memory_group.manage(&_transpose_output);
             _transpose_kernel.configure(input, &_transpose_output);
 
             // Configure transpose 1xW kernel
@@ -87,6 +88,8 @@ void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITenso
 
 void NEFullyConnectedLayerReshapeWeights::run()
 {
+    _memory_group.acquire();
+
     if(_transpose_weights)
     {
         NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
@@ -96,11 +99,13 @@ void NEFullyConnectedLayerReshapeWeights::run()
     {
         NEScheduler::get().schedule(&_transpose1xW_kernel, Window::DimY);
     }
+
+    _memory_group.release();
 }
 
-NEFullyConnectedLayer::NEFullyConnectedLayer()
-    : _im2col_kernel(), _reshape_weights_kernel(), _interleave4x4_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(), _interleave4x4_output(), _reshape_weights_output(),
-      _are_weights_reshaped(false), _is_batched_fc_layer(false), _linearize_input(false), _accumulate_biases(false)
+NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _im2col_kernel(), _reshape_weights_kernel(), _interleave4x4_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(), _interleave4x4_output(),
+      _reshape_weights_output(), _are_weights_reshaped(false), _is_batched_fc_layer(false), _linearize_input(false), _accumulate_biases(false)
 {
 }
 
@@ -191,6 +196,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
         _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, data_type, fixed_point_position));
 
         // Configure im2col kernel
+        _memory_group.manage(&_im2col_output);
         _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
 
         multiply_input = &_im2col_output;
@@ -204,6 +210,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
         _interleave4x4_output.allocator()->init(TensorInfo(shape_interleaved, 1, data_type, fixed_point_position));
 
         // Configure interleave4x4 kernel
+        _memory_group.manage(&_interleave4x4_output);
         _interleave4x4_kernel.configure(multiply_input, &_interleave4x4_output);
 
         multiply_input = &_interleave4x4_output;
@@ -248,6 +255,8 @@ void NEFullyConnectedLayer::run()
         _reshape_weights_kernel.run();
     }
 
+    _memory_group.acquire();
+
     // Linearize input if it comes from a convolutional layer
     if(_linearize_input)
     {
@@ -268,5 +277,7 @@ void NEFullyConnectedLayer::run()
     {
         NEScheduler::get().schedule(&_accumulate_biases_kernel, Window::DimY);
     }
+
+    _memory_group.release();
 }
 } // namespace arm_compute

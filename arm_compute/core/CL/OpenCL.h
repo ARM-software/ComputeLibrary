@@ -57,6 +57,7 @@ public:
     using clBuildProgram_func            = cl_int (*)(cl_program, cl_uint, const cl_device_id *, const char *, void (*pfn_notify)(cl_program, void *), void *);
     using clEnqueueNDRangeKernel_func    = cl_int (*)(cl_command_queue, cl_kernel, cl_uint, const size_t *, const size_t *, const size_t *, cl_uint, const cl_event *, cl_event *);
     using clSetKernelArg_func            = cl_int (*)(cl_kernel, cl_uint, size_t, const void *);
+    using clRetainMemObject_func         = cl_int (*)(cl_mem);
     using clReleaseMemObject_func        = cl_int (*)(cl_mem);
     using clEnqueueUnmapMemObject_func   = cl_int (*)(cl_command_queue, cl_mem, void *, cl_uint, const cl_event *, cl_event *);
     using clRetainCommandQueue_func      = cl_int (*)(cl_command_queue command_queue);
@@ -106,6 +107,7 @@ public:
     clReleaseContext_func          clReleaseContext          = nullptr;
     clRetainCommandQueue_func      clRetainCommandQueue      = nullptr;
     clEnqueueUnmapMemObject_func   clEnqueueUnmapMemObject   = nullptr;
+    clRetainMemObject_func         clRetainMemObject         = nullptr;
     clReleaseMemObject_func        clReleaseMemObject        = nullptr;
     clGetDeviceInfo_func           clGetDeviceInfo           = nullptr;
     clGetDeviceIDs_func            clGetDeviceIDs            = nullptr;

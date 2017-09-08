@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#ifndef __ARM_COMPUTE_IMEMORYGROUP_H__
+#define __ARM_COMPUTE_IMEMORYGROUP_H__
 
-using namespace arm_compute;
+#include "arm_compute/runtime/Types.h"
 
-Tensor::Tensor()
-    : _allocator(this)
+namespace arm_compute
 {
-}
-
-ITensorInfo *Tensor::info() const
+/** Memory group interface */
+class IMemoryGroup
 {
-    return &_allocator.info();
-}
-
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
-}
+public:
+    /** Default virtual destructor */
+    virtual ~IMemoryGroup() = default;
+    /** Acquires backing memory for the whole group */
+    virtual void acquire() = 0;
+    /** Releases backing memory of the whole group */
+    virtual void release() = 0;
+    /** Gets the memory mapping of the group */
+    virtual MemoryMappings &mappings() = 0;
+};
+} // arm_compute
+#endif /*__ARM_COMPUTE_IMEMORYGROUP_H__ */

@@ -34,7 +34,11 @@
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -48,7 +52,7 @@ class CLConvolutionLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    CLConvolutionLayerReshapeWeights();
+    CLConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QS16/F16/F32.
@@ -62,6 +66,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup            _memory_group;
     CLWeightsReshapeKernel   _weights_reshape_kernel;
     CLGEMMTranspose1xWKernel _weights_transposed_kernel;
     CLTensor                 _weights_reshaped;
@@ -81,7 +86,7 @@ class CLConvolutionLayer : public IFunction
 {
 public:
     /** Default constructor */
-    CLConvolutionLayer();
+    CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -101,6 +106,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup                    _memory_group;
     CLConvolutionLayerReshapeWeights _reshape_weights;
     CLIm2ColKernel                   _input_im2col_kernel;
     CLGEMMInterleave4x4Kernel        _input_interleave_kernel;

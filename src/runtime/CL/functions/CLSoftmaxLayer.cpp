@@ -25,12 +25,13 @@
 
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 using namespace arm_compute;
 
-CLSoftmaxLayer::CLSoftmaxLayer()
-    : _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _max(), _sum(), _tmp()
+CLSoftmaxLayer::CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _max(), _sum(), _tmp()
 {
 }
 
@@ -47,6 +48,11 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output)
     _max.allocator()->init(tensor_info_max_sum);
     _sum.allocator()->init(tensor_info_max_sum);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_tmp);
+    _memory_group.manage(&_max);
+    _memory_group.manage(&_sum);
+
     // Configure Kernels
     _max_kernel.configure(input, &_max);
     _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum);
@@ -60,7 +66,11 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output)
 
 void CLSoftmaxLayer::run()
 {
+    _memory_group.acquire();
+
     CLScheduler::get().enqueue(_max_kernel, false);
     CLScheduler::get().enqueue(_shift_exp_sum_kernel, false);
     CLScheduler::get().enqueue(_norm_kernel);
+
+    _memory_group.release();
 }

@@ -311,9 +311,13 @@ inline ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, con
     Coordinates anchor;
     anchor.set_num_dimensions(src_info.tensor_shape().num_dimensions());
     TensorShape new_dst_shape(dst_shape);
-    anchor.set(0, (policy == InterpolationPolicy::BILINEAR && border_undefined) ? ((static_cast<int>(src_info.valid_region().anchor[0]) + border_size.left + 0.5f) * wr - 0.5f) :
+    anchor.set(0, (policy == InterpolationPolicy::BILINEAR
+                   && border_undefined) ?
+               ((static_cast<int>(src_info.valid_region().anchor[0]) + border_size.left + 0.5f) * wr - 0.5f) :
                ((static_cast<int>(src_info.valid_region().anchor[0]) + 0.5f) * wr - 0.5f));
-    anchor.set(1, (policy == InterpolationPolicy::BILINEAR && border_undefined) ? ((static_cast<int>(src_info.valid_region().anchor[1]) + border_size.top + 0.5f) * hr - 0.5f) :
+    anchor.set(1, (policy == InterpolationPolicy::BILINEAR
+                   && border_undefined) ?
+               ((static_cast<int>(src_info.valid_region().anchor[1]) + border_size.top + 0.5f) * hr - 0.5f) :
                ((static_cast<int>(src_info.valid_region().anchor[1]) + 0.5f) * hr - 0.5f));
     float shape_out_x = (policy == InterpolationPolicy::BILINEAR
                          && border_undefined) ?

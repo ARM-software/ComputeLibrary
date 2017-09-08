@@ -74,6 +74,7 @@ def filter_clang_tidy_lines( lines ):
                ("NEGEMMMatrixMultiplyKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                ("NEPoolingLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                ("NESoftmaxLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
+               ("parameter 'memory_manager' is unused" in line) or
                "3rdparty" in line):
                 print_context=False
                 continue

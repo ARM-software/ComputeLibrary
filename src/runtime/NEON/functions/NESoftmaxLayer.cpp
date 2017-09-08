@@ -31,8 +31,8 @@
 
 using namespace arm_compute;
 
-NESoftmaxLayer::NESoftmaxLayer()
-    : _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _fill_border_kernel(), _max(), _sum(), _tmp()
+NESoftmaxLayer::NESoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _fill_border_kernel(), _max(), _sum(), _tmp()
 {
 }
 
@@ -50,6 +50,11 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
     _max.allocator()->init(tensor_info_max_sum);
     _sum.allocator()->init(tensor_info_max_sum);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_tmp);
+    _memory_group.manage(&_max);
+    _memory_group.manage(&_sum);
+
     // Configure Kernels
     _max_kernel.configure(input, &_max);
     _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum);
@@ -64,8 +69,12 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
 
 void NESoftmaxLayer::run()
 {
+    _memory_group.acquire();
+
     NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
     NEScheduler::get().schedule(&_max_kernel, Window::DimY);
     NEScheduler::get().schedule(&_shift_exp_sum_kernel, Window::DimY);
     NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
+
+    _memory_group.release();
 }

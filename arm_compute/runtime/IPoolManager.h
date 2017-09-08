@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#ifndef __ARM_COMPUTE_IPOOLMANAGER_H__
+#define __ARM_COMPUTE_IPOOLMANAGER_H__
 
-using namespace arm_compute;
+#include <memory>
 
-Tensor::Tensor()
-    : _allocator(this)
+namespace arm_compute
 {
-}
+class IMemoryPool;
 
-ITensorInfo *Tensor::info() const
+/** Memory pool manager interface */
+class IPoolManager
 {
-    return &_allocator.info();
-}
-
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
-}
+public:
+    /** Default virtual destructor */
+    virtual ~IPoolManager() = default;
+    /** Locks a pool for execution
+     *
+     * @return Locked pool that workload will be mapped on
+     */
+    virtual IMemoryPool *lock_pool() = 0;
+    /** Releases memory pool
+     *
+     * @param[in] pool Memory pool to release
+     */
+    virtual void unlock_pool(IMemoryPool *pool) = 0;
+    /** Register pool to be managed by the pool
+     *
+     * @note Ownership of the pools is being transferred to the pool manager
+     *
+     * @param[in] pool Pool to be managed
+     */
+    virtual void register_pool(std::unique_ptr<IMemoryPool> pool) = 0;
+};
+} // arm_compute
+#endif /*__ARM_COMPUTE_IPOOLMANAGER_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#ifndef __ARM_COMPUTE_IMEMORYMANAGER_H__
+#define __ARM_COMPUTE_IMEMORYMANAGER_H__
 
-using namespace arm_compute;
+#include "arm_compute/runtime/ILifetimeManager.h"
+#include "arm_compute/runtime/IPoolManager.h"
 
-Tensor::Tensor()
-    : _allocator(this)
+#include <cstddef>
+
+namespace arm_compute
 {
-}
+class IMemoryGroup;
 
-ITensorInfo *Tensor::info() const
+/** Memory manager interface to handle allocations of backing memory */
+class IMemoryManager
 {
-    return &_allocator.info();
-}
-
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
-}
+public:
+    /** Default virtual destructor */
+    virtual ~IMemoryManager() = default;
+    /** Returns the lifetime manager used by the memory manager
+     *
+     * @return The lifetime manager
+     */
+    virtual ILifetimeManager *lifetime_manager() = 0;
+    /** Returns the pool manager used by the memory manager
+     *
+     * @return The pool manager
+     */
+    virtual IPoolManager *pool_manager() = 0;
+    /** Finalize memory manager */
+    virtual void finalize() = 0;
+};
+} // arm_compute
+#endif /*__ARM_COMPUTE_IMEMORYMANAGER_H__ */

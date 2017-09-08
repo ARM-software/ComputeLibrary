@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#ifndef __ARM_COMPUTE_ALLOCATOR_H__
+#define __ARM_COMPUTE_ALLOCATOR_H__
 
-using namespace arm_compute;
+#include "arm_compute/runtime/IAllocator.h"
 
-Tensor::Tensor()
-    : _allocator(this)
+#include <cstddef>
+
+namespace arm_compute
 {
-}
-
-ITensorInfo *Tensor::info() const
+/** Default malloc allocator implementation */
+class Allocator : public IAllocator
 {
-    return &_allocator.info();
-}
+public:
+    /** Default constructor */
+    Allocator() = default;
 
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
-}
+    // Inherited methods overridden:
+    void *allocate(size_t size, size_t alignment) override;
+    void free(void *ptr) override;
+};
+} // arm_compute
+#endif /*__ARM_COMPUTE_ALLOCATOR_H__ */

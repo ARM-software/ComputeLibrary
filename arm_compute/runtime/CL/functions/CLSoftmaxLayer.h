@@ -25,8 +25,12 @@
 #define __ARM_COMPUTE_CLSOFTMAXLAYER_H__
 
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -46,7 +50,7 @@ class CLSoftmaxLayer : public IFunction
 {
 public:
     /** Constructor */
-    CLSoftmaxLayer();
+    CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
@@ -58,6 +62,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup               _memory_group;
     CLLogits1DMaxKernel         _max_kernel;
     CLLogits1DShiftExpSumKernel _shift_exp_sum_kernel;
     CLLogits1DNormKernel        _norm_kernel;

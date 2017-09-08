@@ -34,6 +34,7 @@
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -48,7 +49,7 @@ class NEConvolutionLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayerReshapeWeights();
+    NEConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QS16/F32.
@@ -62,6 +63,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup              _memory_group;
     NEWeightsReshapeKernel   _weights_reshape_kernel;
     NEGEMMTranspose1xWKernel _weights_transposed_kernel;
     Tensor                   _weights_reshaped;
@@ -79,7 +81,7 @@ class NEConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayer();
+    NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -98,6 +100,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                      _memory_group;
     NEIm2ColKernel                   _input_im2col_kernel;
     NEGEMMInterleave4x4Kernel        _input_interleave_kernel;
     NEConvolutionLayerReshapeWeights _reshape_weights;

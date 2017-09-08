@@ -30,12 +30,13 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include <cmath>
+#include <memory>
 #include <tuple>
 
 using namespace arm_compute;
 
-CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights()
-    : _weights_reshape_kernel(), _weights_transposed_kernel(), _weights_reshaped(), _transpose1xW(false)
+CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _weights_reshape_kernel(), _weights_transposed_kernel(), _weights_reshaped(), _transpose1xW(false)
 {
 }
 
@@ -68,6 +69,7 @@ void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const
         TensorInfo         info_wr(shape_wr, 1, dt, fixed_point_position);
 
         _weights_reshaped.allocator()->init(info_wr);
+        _memory_group.manage(&_weights_reshaped);
         _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
         _weights_transposed_kernel.configure(&_weights_reshaped, output);
         _weights_reshaped.allocator()->allocate();
@@ -80,17 +82,21 @@ void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const
 
 void CLConvolutionLayerReshapeWeights::run()
 {
+    _memory_group.acquire();
+
     cl::CommandQueue q = CLScheduler::get().queue();
     CLScheduler::get().enqueue(_weights_reshape_kernel);
     if(_transpose1xW)
     {
         CLScheduler::get().enqueue(_weights_transposed_kernel);
     }
+
+    _memory_group.release();
 }
 
-CLConvolutionLayer::CLConvolutionLayer()
-    : _reshape_weights(), _input_im2col_kernel(), _input_interleave_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(),
-      _weights_transposed(), _gemm_output(), _has_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false)
+CLConvolutionLayer::CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _reshape_weights(), _input_im2col_kernel(), _input_interleave_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(),
+      _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _has_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false)
 {
 }
 
@@ -179,6 +185,7 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
     _input_im2col_reshaped.allocator()->init(TensorInfo(shape_im2col, 1, dt, fixed_point_position));
+    _memory_group.manage(&_input_im2col_reshaped);
 
     // Create tensor (interleave) to prepare input tensor for GEMM
     if(!_is_fully_connected_convolution)
@@ -187,6 +194,7 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
         shape_interleaved.set(0, shape_interleaved.x() * 4);
         shape_interleaved.set(1, std::ceil(shape_interleaved.y() / 4.f));
         _input_interleaved_reshaped.allocator()->init(TensorInfo(shape_interleaved, 1, dt, fixed_point_position));
+        _memory_group.manage(&_input_interleaved_reshaped);
     }
 
     // Create GEMM output tensor
@@ -194,6 +202,7 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     shape_gemm.set(0, mat_weights_cols);
     shape_gemm.set(1, mat_input_rows);
     _gemm_output.allocator()->init(TensorInfo(shape_gemm, 1, dt, fixed_point_position));
+    _memory_group.manage(&_gemm_output);
 
     // Configure kernels
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
@@ -208,8 +217,11 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     {
         _input_interleave_kernel.configure(&_input_im2col_reshaped, &_input_interleaved_reshaped);
         _mm_kernel.configure(&_input_interleaved_reshaped, weights, &_gemm_output, 1.0f);
+        _input_interleaved_reshaped.allocator()->allocate();
     }
+    _input_im2col_reshaped.allocator()->allocate();
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
+    _gemm_output.allocator()->allocate();
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
@@ -218,12 +230,6 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     {
         _weights_reshaped.allocator()->allocate();
     }
-    _input_im2col_reshaped.allocator()->allocate();
-    if(!_is_fully_connected_convolution)
-    {
-        _input_interleaved_reshaped.allocator()->allocate();
-    }
-    _gemm_output.allocator()->allocate();
 }
 
 void CLConvolutionLayer::run()
@@ -234,6 +240,8 @@ void CLConvolutionLayer::run()
         _are_weights_reshaped = true;
         _reshape_weights.run();
     }
+
+    _memory_group.acquire();
 
     // Run input reshaping
     CLScheduler::get().enqueue(_input_im2col_kernel);
@@ -247,4 +255,6 @@ void CLConvolutionLayer::run()
 
     // Reshape output matrix
     CLScheduler::get().enqueue(_output_col2im_kernel, false);
+
+    _memory_group.release();
 }

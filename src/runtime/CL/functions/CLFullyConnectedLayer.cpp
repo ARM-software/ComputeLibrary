@@ -39,9 +39,9 @@ void CLFullyConnectedLayerReshapeWeights::configure(const ICLTensor *input, ICLT
     _kernel = std::move(k);
 }
 
-CLFullyConnectedLayer::CLFullyConnectedLayer()
-    : _im2col_kernel(), _reshape_weights_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(), _reshape_weights_output(), _are_weights_reshaped(true), _is_fc_after_conv(true),
-      _accumulate_biases(false)
+CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _im2col_kernel(), _reshape_weights_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(), _reshape_weights_output(),
+      _are_weights_reshaped(true), _is_fc_after_conv(true), _accumulate_biases(false)
 {
 }
 
@@ -63,6 +63,7 @@ void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLT
     _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, dt, fixed_point_position));
 
     // Configure im2col kernel
+    _memory_group.manage(&_im2col_output);
     _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
 
     // Configure matrix multiply kernel
@@ -158,6 +159,8 @@ void CLFullyConnectedLayer::run()
         _reshape_weights_kernel.run();
     }
 
+    _memory_group.acquire();
+
     // Linearize input if it comes from a convolutional layer
     if(_is_fc_after_conv)
     {
@@ -172,4 +175,6 @@ void CLFullyConnectedLayer::run()
     {
         CLScheduler::get().enqueue(_accumulate_biases_kernel);
     }
+
+    _memory_group.release();
 }

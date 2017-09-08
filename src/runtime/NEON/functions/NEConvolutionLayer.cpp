@@ -34,8 +34,8 @@
 
 using namespace arm_compute;
 
-NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights()
-    : _weights_reshape_kernel(), _weights_transposed_kernel(), _weights_reshaped(), _transpose1xW(false)
+NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _weights_reshape_kernel(), _weights_transposed_kernel(), _weights_reshaped(), _transpose1xW(false)
 {
 }
 
@@ -68,6 +68,7 @@ void NEConvolutionLayerReshapeWeights::configure(const ITensor *weights, const I
         TensorInfo         info_wr(shape_wr, 1, weights->info()->data_type(), weights->info()->fixed_point_position());
 
         _weights_reshaped.allocator()->init(info_wr);
+        _memory_group.manage(&_weights_reshaped);
         _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
         _weights_transposed_kernel.configure(&_weights_reshaped, output);
         _weights_reshaped.allocator()->allocate();
@@ -80,16 +81,20 @@ void NEConvolutionLayerReshapeWeights::configure(const ITensor *weights, const I
 
 void NEConvolutionLayerReshapeWeights::run()
 {
+    _memory_group.acquire();
+
     NEScheduler::get().schedule(&_weights_reshape_kernel, 3);
     if(_transpose1xW)
     {
         NEScheduler::get().schedule(&_weights_transposed_kernel, Window::DimY);
     }
+
+    _memory_group.release();
 }
 
-NEConvolutionLayer::NEConvolutionLayer()
-    : _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(),
-      _gemm_output(), _has_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false)
+NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(),
+      _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _has_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false)
 {
 }
 
@@ -175,6 +180,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
     _input_im2col_reshaped.allocator()->init(TensorInfo(shape_im2col, 1, dt, fixed_point_position));
+    _memory_group.manage(&_input_im2col_reshaped);
 
     // Create tensor (interleave) to prepare input tensor for GEMM
     if(!_is_fully_connected_convolution)
@@ -183,6 +189,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         shape_interleaved.set(0, shape_interleaved.x() * 4);
         shape_interleaved.set(1, std::ceil(shape_interleaved.y() / 4.f));
         _input_interleaved_reshaped.allocator()->init(TensorInfo(shape_interleaved, 1, dt, fixed_point_position));
+        _memory_group.manage(&_input_interleaved_reshaped);
     }
 
     // Create GEMM output tensor
@@ -190,6 +197,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     shape_gemm.set(0, mat_weights_cols);
     shape_gemm.set(1, mat_input_rows);
     _gemm_output.allocator()->init(TensorInfo(shape_gemm, 1, dt, fixed_point_position));
+    _memory_group.manage(&_gemm_output);
 
     // Configure kernels
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
@@ -201,8 +209,11 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     {
         _input_interleave_kernel.configure(&_input_im2col_reshaped, &_input_interleaved_reshaped);
         _mm_kernel.configure(&_input_interleaved_reshaped, weights, &_gemm_output, 1.0f);
+        _input_interleaved_reshaped.allocator()->allocate();
     }
+    _input_im2col_reshaped.allocator()->allocate();
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
+    _gemm_output.allocator()->allocate();
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
@@ -211,12 +222,6 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     {
         _weights_reshaped.allocator()->allocate();
     }
-    _input_im2col_reshaped.allocator()->allocate();
-    if(!_is_fully_connected_convolution)
-    {
-        _input_interleaved_reshaped.allocator()->allocate();
-    }
-    _gemm_output.allocator()->allocate();
 }
 
 void NEConvolutionLayer::run()
@@ -227,6 +232,8 @@ void NEConvolutionLayer::run()
         _are_weights_reshaped = true;
         _reshape_weights.run();
     }
+
+    _memory_group.acquire();
 
     // Run input reshaping
     NEScheduler::get().schedule(&_input_im2col_kernel, Window::DimY);
@@ -241,4 +248,6 @@ void NEConvolutionLayer::run()
 
     // Reshape output matrix
     NEScheduler::get().schedule(&_output_col2im_kernel, Window::DimY);
+
+    _memory_group.release();
 }

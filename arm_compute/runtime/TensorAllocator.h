@@ -34,13 +34,27 @@ namespace arm_compute
 {
 class Coordinates;
 class TensorInfo;
+class Tensor;
+template <typename>
+class MemoryGroupBase;
+using MemoryGroup = MemoryGroupBase<Tensor>;
 
 /** Basic implementation of a CPU memory tensor allocator. */
 class TensorAllocator : public ITensorAllocator
 {
 public:
     /** Default constructor. */
-    TensorAllocator();
+    TensorAllocator(Tensor *owner = nullptr);
+    /** Default destructor */
+    ~TensorAllocator();
+    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    TensorAllocator(const TensorAllocator &) = delete;
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    TensorAllocator &operator=(const TensorAllocator &) = delete;
+    /** Allow instances of this class to be moved */
+    TensorAllocator(TensorAllocator &&) noexcept;
+    /** Allow instances of this class to be moved */
+    TensorAllocator &operator=(TensorAllocator &&) noexcept;
 
     /** Make ITensorAllocator's init methods available */
     using ITensorAllocator::init;
@@ -72,6 +86,11 @@ public:
      *
      */
     void free() override;
+    /** Associates the tensor with a memory group
+     *
+     * @param[in] associated_memory_group Memory group to associate the tensor with
+     */
+    void set_associated_memory_group(MemoryGroup *associated_memory_group);
 
 protected:
     /** No-op for CPU memory
@@ -84,7 +103,9 @@ protected:
     void unlock() override;
 
 private:
-    std::shared_ptr<std::vector<uint8_t>> _buffer; /**< CPU memory allocation. */
+    MemoryGroup *_associated_memory_group; /**< Registered memory manager */
+    uint8_t     *_buffer;                  /**< CPU memory allocation. */
+    Tensor      *_owner;                   /**< Owner of the allocator */
 };
 }
 #endif /* __ARM_COMPUTE_TENSORALLOCATOR_H__ */

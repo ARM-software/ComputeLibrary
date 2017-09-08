@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/Allocator.h"
+
+#include "arm_compute/core/Error.h"
+
+#include <cstddef>
 
 using namespace arm_compute;
 
-Tensor::Tensor()
-    : _allocator(this)
+void *Allocator::allocate(size_t size, size_t alignment)
 {
+    ARM_COMPUTE_UNUSED(alignment);
+    return ::operator new(size);
 }
 
-ITensorInfo *Tensor::info() const
+void Allocator::free(void *ptr)
 {
-    return &_allocator.info();
-}
-
-ITensorInfo *Tensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
+    ::operator delete(ptr);
 }

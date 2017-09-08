@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/CL/CLBufferAllocator.h"
+
+#include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/Error.h"
+
+#include <cstddef>
 
 using namespace arm_compute;
 
-Tensor::Tensor()
-    : _allocator(this)
+CLBufferAllocator::CLBufferAllocator(cl::Context context)
+    : _context(std::move(context))
 {
 }
 
-ITensorInfo *Tensor::info() const
+void *CLBufferAllocator::allocate(size_t size, size_t alignment)
 {
-    return &_allocator.info();
+    ARM_COMPUTE_UNUSED(alignment);
+    cl_mem buf = clCreateBuffer(_context.get(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size, nullptr, nullptr);
+    return static_cast<void *>(buf);
 }
 
-ITensorInfo *Tensor::info()
+void CLBufferAllocator::free(void *ptr)
 {
-    return &_allocator.info();
-}
-
-uint8_t *Tensor::buffer() const
-{
-    return _allocator.data();
-}
-
-TensorAllocator *Tensor::allocator()
-{
-    return &_allocator;
+    ARM_COMPUTE_ERROR_ON(ptr == nullptr);
+    clReleaseMemObject(static_cast<cl_mem>(ptr));
 }
