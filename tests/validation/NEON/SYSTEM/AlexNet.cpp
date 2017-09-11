@@ -96,7 +96,8 @@ std::vector<unsigned int> compute_alexnet(DataType dt, unsigned int batches, std
 TEST_SUITE(NEON)
 TEST_SUITE(SYSTEM_TESTS)
 
-TEST_CASE(AlexNet, framework::DatasetMode::PRECOMMIT)
+//FIXME: COMPMID-526
+DISABLED_TEST_CASE(AlexNet, framework::DatasetMode::PRECOMMIT)
 {
     // Compute alexnet
     std::vector<unsigned int> classified_labels = compute_alexnet(DataType::F32, 1, "cnn_data/imagenet_data/cat.npy");

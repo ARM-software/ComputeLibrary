@@ -297,7 +297,9 @@ void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned 
 {
     ARM_COMPUTE_EXPECT_EQUAL(classified_labels.size(), expected_labels.size(), framework::LogLevel::ERRORS);
 
-    for(unsigned int i = 0; i < expected_labels.size(); ++i)
+    const int min_num = std::min(classified_labels.size(), expected_labels.size());
+
+    for(int i = 0; i < min_num; ++i)
     {
         ARM_COMPUTE_EXPECT_EQUAL(classified_labels[i], expected_labels[i], framework::LogLevel::ERRORS);
     }
