@@ -56,7 +56,7 @@ BOOST_DATA_TEST_CASE(AutoPadding,
                                                       PaddingSize{ 4, 36, 4, 4 }
                                                     })
                      ^ boost::unit_test::data::make({ Strides{},
-                                                      Strides{ 1U },
+                                                      Strides{ 1U, 50U },
                                                       Strides{ 1U, 50U },
                                                       Strides{ 1U, 50U, 900U },
                                                       Strides{ 1U, 50U, 900U, 9000U },

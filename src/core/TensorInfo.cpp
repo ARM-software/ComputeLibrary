@@ -244,13 +244,13 @@ std::tuple<Strides, size_t, size_t> TensorInfo::calculate_padding_requirements(c
         {
             if(_tensor_shape.total_size() > 0)
             {
-                required_strides    = Strides(stride_x);
+                required_strides    = Strides(stride_x, stride_x);
                 required_total_size = stride_z;
             }
             break;
         }
         case 1:
-            required_strides    = compute_strides(*this, stride_x);
+            required_strides    = compute_strides(*this, stride_x, stride_y);
             required_total_size = stride_z;
             break;
         case 2:
