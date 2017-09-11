@@ -43,9 +43,10 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float>           tolerance_f32(0.001f);    /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
-RelativeTolerance<half>            tolerance_f16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
-constexpr AbsoluteTolerance<float> tolerance_q(1.0f);        /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+RelativeTolerance<float>            tolerance_f32(0.001f);    /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
+RelativeTolerance<half_float::half> tolerance_f16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
+constexpr AbsoluteTolerance<float>  tolerance_q(1.0f);        /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+constexpr float                     tolerance_num = 0.02f;    /**< Tolerance number */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -92,13 +93,13 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(), framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(), framework::dataset::make("DataType",
                                                                                                DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 TEST_SUITE_END()
 

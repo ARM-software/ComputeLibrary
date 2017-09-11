@@ -114,6 +114,27 @@ public:
     }
 };
 
+/** Data set containing medium tensor shapes. */
+class MediumShapes final : public ShapeDataset
+{
+public:
+    MediumShapes()
+        : ShapeDataset("Shape",
+    {
+        // Batch size 1
+        TensorShape{ 37U, 37U },
+                     TensorShape{ 27U, 33U, 2U },
+                     TensorShape{ 128U, 64U, 1U, 3U },
+                     // Batch size 4
+                     TensorShape{ 37U, 37U, 3U, 4U },
+                     TensorShape{ 27U, 33U, 2U, 4U },
+                     // Arbitrary batch size
+                     TensorShape{ 37U, 37U, 3U, 5U }
+    })
+    {
+    }
+};
+
 /** Data set containing large tensor shapes. */
 class LargeShapes final : public ShapeDataset
 {
@@ -185,17 +206,13 @@ public:
         : ShapeDataset("InputShape",
     {
         // Batch size 1
-        TensorShape{ 5U, 5U, 3U },
+        TensorShape{ 35U, 35U, 3U },
                      TensorShape{ 32U, 37U, 3U },
-                     TensorShape{ 13U, 15U, 8U },
                      // Batch size 4
-                     TensorShape{ 5U, 5U, 3U, 4U },
                      TensorShape{ 32U, 37U, 3U, 4U },
-                     TensorShape{ 13U, 15U, 8U, 4U },
                      // Batch size 8
-                     TensorShape{ 5U, 5U, 3U, 8U },
                      TensorShape{ 32U, 37U, 3U, 8U },
-                     TensorShape{ 13U, 15U, 8U, 8U },
+                     TensorShape{ 33U, 35U, 8U, 8U },
                      // Arbitrary batch size
                      TensorShape{ 32U, 37U, 3U, 8U }
     })

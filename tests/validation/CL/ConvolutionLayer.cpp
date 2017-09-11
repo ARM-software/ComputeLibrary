@@ -43,10 +43,10 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float>           tolerance_f32(0.001f);    /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-RelativeTolerance<half>            tolerance_f16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float> tolerance_q(1.0f);        /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
-constexpr float                    tolerance_num = 0.07f;    /**< Tolerance number */
+RelativeTolerance<float>            tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr AbsoluteTolerance<float>  tolerance_q(1.0f);                    /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",

@@ -57,14 +57,14 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
 /** Tolerance */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
 constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
-RelativeTolerance<float>             tolerance_f32(0.01);
+RelativeTolerance<float>             tolerance_f32(0.05);
 RelativeTolerance<half>              tolerance_f16(half(0.1));
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(Scale)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), ScaleDataTypes),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::MediumShapes(), datasets::LargeShapes()), ScaleDataTypes),
                                                                            framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                    datasets::BorderModes()),
                shape, data_type, policy, border_mode)

@@ -98,9 +98,12 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     ICLKernel::configure(win);
 
     // Set static kernel arguments
+    const float scale_x = static_cast<float>(input->info()->dimension(0)) / output->info()->dimension(0);
+    const float scale_y = static_cast<float>(input->info()->dimension(1)) / output->info()->dimension(1);
+
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg<float>(idx++, input->info()->dimension(0));
     _kernel.setArg<float>(idx++, input->info()->dimension(1));
-    _kernel.setArg<float>(idx++, output->info()->dimension(0));
-    _kernel.setArg<float>(idx++, output->info()->dimension(1));
+    _kernel.setArg<float>(idx++, scale_x);
+    _kernel.setArg<float>(idx++, scale_y);
 }
