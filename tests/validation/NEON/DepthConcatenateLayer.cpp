@@ -46,7 +46,7 @@ TEST_SUITE(DepthConcatenateLayer)
 //TODO(COMPMID-415): Add configuration test?
 
 template <typename T>
-using NEDepthConcatenateLayerFixture = DepthConcatenateValidationFixture<Tensor, Accessor, NEDepthConcatenate, T>;
+using NEDepthConcatenateLayerFixture = DepthConcatenateValidationFixture<Tensor, ITensor, Accessor, NEDepthConcatenate, T>;
 
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16

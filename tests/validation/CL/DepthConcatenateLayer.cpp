@@ -46,7 +46,7 @@ TEST_SUITE(DepthConcatenateLayer)
 //TODO(COMPMID-415): Add configuration test?
 
 template <typename T>
-using CLDepthConcatenateLayerFixture = DepthConcatenateValidationFixture<CLTensor, CLAccessor, CLDepthConcatenate, T>;
+using CLDepthConcatenateLayerFixture = DepthConcatenateValidationFixture<CLTensor, ICLTensor, CLAccessor, CLDepthConcatenate, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)

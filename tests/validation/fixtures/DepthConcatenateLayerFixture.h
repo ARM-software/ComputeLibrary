@@ -38,16 +38,11 @@
 
 namespace arm_compute
 {
-class ITensor;
-class Tensor;
-class ICLTensor;
-class CLTensor;
-
 namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename ITensorType, typename AccessorType, typename FunctionType, typename T>
 class DepthConcatenateValidationFixture : public framework::Fixture
 {
 public:
@@ -99,8 +94,6 @@ protected:
 
     TensorType compute_target(std::vector<TensorShape> shapes, DataType data_type)
     {
-        using ITensorType = typename std::conditional<std::is_same<TensorType, Tensor>::value, ITensor, ICLTensor>::type;
-
         std::vector<TensorType>    srcs;
         std::vector<ITensorType *> src_ptrs;
 
