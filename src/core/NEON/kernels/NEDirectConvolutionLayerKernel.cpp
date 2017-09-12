@@ -1234,7 +1234,8 @@ inline void convolve_5x5(const Window &window, unsigned int num_elems_read_per_i
 } // namespace
 
 NEDirectConvolutionLayerKernel::NEDirectConvolutionLayerKernel()
-    : _input(nullptr), _weights(nullptr), _output(nullptr), _conv_info(), _border_size(0), _kernel_size(0), _num_elems_read_per_iteration(0), _num_elems_written_per_iteration(0)
+    : _input(nullptr), _weights(nullptr), _output(nullptr), _conv_info(), _border_size(0), _kernel_size(0), _num_weight_elems_read_per_row(0), _num_elems_read_per_iteration(0),
+      _num_elems_written_per_iteration(0)
 {
 }
 
@@ -1296,8 +1297,6 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, output->info()->data_type());
 
-    Window win = calculate_max_window(*output->info());
-
     switch(_kernel_size)
     {
         case 1:
@@ -1318,13 +1317,8 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
                     ARM_COMPUTE_ERROR("Data type not supported.");
                     break;
             }
-
-            _num_elems_read_per_iteration = conv_stride_x * _num_elems_written_per_iteration;
-            win                           = calculate_max_window(*output->info(), Steps(_num_elems_written_per_iteration));
-            AccessWindowHorizontal input_access(input->info(), 0, _num_elems_read_per_iteration);
-            AccessWindowHorizontal output_access(output->info(), 0, _num_elems_written_per_iteration);
-            update_window_and_padding(win, input_access, output_access);
-            output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+            _num_weight_elems_read_per_row = kernel_size;
+            _num_elems_read_per_iteration  = conv_stride_x * _num_elems_written_per_iteration;
             break;
         }
         case 3:
@@ -1333,6 +1327,7 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
             switch(input->info()->data_type())
             {
                 case DataType::F32:
+                    _num_weight_elems_read_per_row   = 4 + _kernel_size - 1;
                     _num_elems_read_per_iteration    = 12;
                     _num_elems_written_per_iteration = 16 >> conv_stride_x;
                     break;
@@ -1341,6 +1336,7 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
                 case DataType::QS8:
                 case DataType::QS16:
+                    _num_weight_elems_read_per_row   = 8 + _kernel_size - 1;
                     _num_elems_read_per_iteration    = 24;
                     _num_elems_written_per_iteration = 32 >> conv_stride_x;
                     break;
@@ -1348,32 +1344,30 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
                     ARM_COMPUTE_ERROR("Data type not supported.");
                     break;
             }
-
-            // Calculate right and bottom border
-            const unsigned int conv_stride_y = std::get<1>(_conv_info.stride());
-            const int          input_width   = input->info()->dimension(0);
-            const int          input_height  = input->info()->dimension(1);
-            const int          upper_bound_w = ceil_to_multiple(((output->info()->dimension(0) - 1) * conv_stride_x + _kernel_size), _num_elems_read_per_iteration) - conv_pad_x - input_width;
-            const int          upper_bound_h = ((output->info()->dimension(1) - 1) * conv_stride_y - conv_pad_y + _kernel_size) - input_height;
-            _border_size.right               = std::max(upper_bound_w, static_cast<int>(_kernel_size));
-            _border_size.bottom              = std::max(upper_bound_h, static_cast<int>(_kernel_size));
-
-            // Create window and update padding
-            win = calculate_max_window(*output->info(), Steps(_num_elems_written_per_iteration));
-            AccessWindowStatic     input_access(input->info(), -conv_pad_x, -conv_pad_y, input_width + _border_size.right, input_height + _border_size.bottom);
-            AccessWindowStatic     weights_access(weights->info(), 0, 0, _kernel_size, _kernel_size);
-            AccessWindowHorizontal output_access(output->info(), 0, _num_elems_written_per_iteration);
-            update_window_and_padding(win, input_access, weights_access, output_access);
-            output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-            break;
         }
+        break;
         default:
         {
             ARM_COMPUTE_ERROR("Not implemented");
             break;
         }
     }
+
+    // Calculate right and bottom border
+    const unsigned int conv_stride_y = std::get<1>(_conv_info.stride());
+    const int          input_width   = input->info()->dimension(0);
+    const int          input_height  = input->info()->dimension(1);
+    const int          upper_bound_w = ceil_to_multiple(((output->info()->dimension(0) - 1) * conv_stride_x + _kernel_size), _num_elems_read_per_iteration) - conv_pad_x - input_width;
+    const int          upper_bound_h = ((output->info()->dimension(1) - 1) * conv_stride_y - conv_pad_y + _kernel_size) - input_height;
+    _border_size.right               = std::max(upper_bound_w, static_cast<int>(_kernel_size));
+    _border_size.bottom              = std::max(upper_bound_h, static_cast<int>(_kernel_size));
+
+    Window                 win = calculate_max_window(*output->info(), Steps(_num_elems_written_per_iteration));
+    AccessWindowStatic     input_access(input->info(), -conv_pad_x, -conv_pad_y, input_width + _border_size.right, input_height + _border_size.bottom);
+    AccessWindowStatic     weights_access(weights->info(), 0, 0, _num_weight_elems_read_per_row, _kernel_size);
+    AccessWindowHorizontal output_access(output->info(), 0, _num_elems_written_per_iteration);
+    update_window_and_padding(win, input_access, weights_access, output_access);
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }

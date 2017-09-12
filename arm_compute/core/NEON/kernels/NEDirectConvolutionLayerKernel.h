@@ -74,6 +74,7 @@ private:
     PadStrideInfo  _conv_info;
     BorderSize     _border_size;
     unsigned int   _kernel_size;
+    unsigned int   _num_weight_elems_read_per_row;
     unsigned int   _num_elems_read_per_iteration;
     unsigned int   _num_elems_written_per_iteration;
 };
