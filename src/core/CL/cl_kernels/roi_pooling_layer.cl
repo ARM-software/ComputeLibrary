@@ -138,24 +138,23 @@ __kernel void roi_pooling_layer(
     // Load roi parameters
     // roi is laid out as follows:
     // { x, y, width, height, batch_index }
-    const ushort8 roi     = vload8(0, (__global ushort *)vector_offset(&rois, pw));
-    const int2 roi_anchor = convert_int2_sat(round(convert_float2(roi.s01) * (float)SPATIAL_SCALE));
-    const int2 roi_dims   = convert_int2_sat(fmax(round(convert_float2(roi.s23) * (float)SPATIAL_SCALE), 1.f));
-
-    // Determine pooled region in input image to pooled region in output image ratio
-    const float2 pool_region_ratio = convert_float2(roi_dims) / (float2)(POOLED_DIM_X, POOLED_DIM_Y);
+    const ushort4 roi      = vload4(0, (__global ushort *)vector_offset(&rois, pw));
+    const ushort roi_batch = *((__global ushort *)vector_offset(&rois, pw) + 4);
+    const int2 roi_anchor  = convert_int2_sat(round(convert_float2(roi.s01) * (float)SPATIAL_SCALE));
+    const int2 roi_dims    = convert_int2_sat(fmax(round(convert_float2(roi.s23) * (float)SPATIAL_SCALE), 1.f));
 
     // Calculate pooled region start and end
     const float2 spatial_indx     = (float2)(px, py);
+    const float2 pooled_dims      = (float2)(POOLED_DIM_X, POOLED_DIM_Y);
     const int2   max_spatial_dims = (int2)(MAX_DIM_X, MAX_DIM_Y);
-    int2         region_start     = convert_int2_sat(floor(spatial_indx * pool_region_ratio)) + roi_anchor;
-    int2         region_end       = convert_int2_sat(ceil((spatial_indx + 1) * pool_region_ratio)) + roi_anchor;
+    int2         region_start     = convert_int2_sat(floor(spatial_indx / pooled_dims * convert_float2(roi_dims))) + roi_anchor;
+    int2         region_end       = convert_int2_sat(floor((spatial_indx + 1) / pooled_dims * convert_float2(roi_dims))) + roi_anchor;
 
     region_start = clamp(region_start, 0, max_spatial_dims);
     region_end   = clamp(region_end, 0, max_spatial_dims);
 
     // Move input and output pointer across the fourth dimension
-    input.ptr += roi.s4 * input_stride_w;
+    input.ptr += roi_batch * input_stride_w;
     output.ptr += pw * output_stride_w;
 
     for(int pz = 0; pz < MAX_DIM_Z; ++pz)

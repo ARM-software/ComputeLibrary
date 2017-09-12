@@ -1037,10 +1037,6 @@ void roi_pooling_layer(const Tensor<T> &in, Tensor<T> &out, const std::vector<RO
         int roi_width   = std::max(support::cpp11::round(roi.rect.width * roi_scale), 1.f);
         int roi_height  = std::max(support::cpp11::round(roi.rect.height * roi_scale), 1.f);
 
-        // Determine pooling regions
-        float pool_region_size_x = static_cast<float>(roi_width) / pool_w;
-        float pool_region_size_y = static_cast<float>(roi_height) / pool_h;
-
         // Iterate through all channel
         for(int fm = 0; fm < fms; ++fm)
         {
@@ -1049,10 +1045,10 @@ void roi_pooling_layer(const Tensor<T> &in, Tensor<T> &out, const std::vector<RO
             {
                 for(int px = 0; px < pool_w; ++px)
                 {
-                    int region_start_x = static_cast<int>(std::floor(px * pool_region_size_x));
-                    int region_end_x   = static_cast<int>(std::ceil((px + 1) * pool_region_size_x));
-                    int region_start_y = static_cast<int>(std::floor(py * pool_region_size_y));
-                    int region_end_y   = static_cast<int>(std::ceil((py + 1) * pool_region_size_y));
+                    int region_start_x = static_cast<int>(std::floor((static_cast<float>(px) / pool_w) * roi_width));
+                    int region_end_x   = static_cast<int>(std::floor((static_cast<float>(px + 1) / pool_w) * roi_width));
+                    int region_start_y = static_cast<int>(std::floor((static_cast<float>(py) / pool_h) * roi_height));
+                    int region_end_y   = static_cast<int>(std::floor((static_cast<float>(py + 1) / pool_h) * roi_height));
 
                     region_start_x = std::min(std::max(region_start_x + roi_start_x, 0), width_in);
                     region_end_x   = std::min(std::max(region_end_x + roi_start_x, 0), width_in);

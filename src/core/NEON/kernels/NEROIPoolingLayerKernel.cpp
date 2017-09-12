@@ -105,10 +105,6 @@ void NEROIPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
         const int roi_width    = std::max(support::cpp11::round(curr_roi.rect.width * spatial_scale), 1.f);
         const int roi_height   = std::max(support::cpp11::round(curr_roi.rect.height * spatial_scale), 1.f);
 
-        // Determine pooling regions
-        const auto pool_region_size_x = static_cast<float>(roi_width) / pooled_w;
-        const auto pool_region_size_y = static_cast<float>(roi_height) / pooled_h;
-
         // Iterate through all feature maps
         for(int fm = 0; fm < fms; ++fm)
         {
@@ -117,10 +113,10 @@ void NEROIPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
             {
                 for(int px = 0; px < pooled_w; ++px)
                 {
-                    auto region_start_x = static_cast<int>(std::floor(px * pool_region_size_x));
-                    auto region_end_x   = static_cast<int>(std::ceil((px + 1) * pool_region_size_x));
-                    auto region_start_y = static_cast<int>(std::floor(py * pool_region_size_y));
-                    auto region_end_y   = static_cast<int>(std::ceil((py + 1) * pool_region_size_y));
+                    auto region_start_x = static_cast<int>(std::floor((static_cast<float>(px) / pooled_w) * roi_width));
+                    auto region_end_x   = static_cast<int>(std::floor((static_cast<float>(px + 1) / pooled_w) * roi_width));
+                    auto region_start_y = static_cast<int>(std::floor((static_cast<float>(py) / pooled_h) * roi_height));
+                    auto region_end_y   = static_cast<int>(std::floor((static_cast<float>(py + 1) / pooled_h) * roi_height));
 
                     region_start_x = std::min(std::max(region_start_x + roi_anchor_x, 0), width);
                     region_end_x   = std::min(std::max(region_end_x + roi_anchor_x, 0), width);
