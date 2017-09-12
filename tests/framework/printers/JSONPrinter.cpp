@@ -46,6 +46,31 @@ void JSONPrinter::print_separator(bool &flag)
     }
 }
 
+template <typename T>
+void JSONPrinter::print_strings(T &&first, T &&last)
+{
+    bool              first_entry = true;
+    std::stringstream log;
+
+    while(first != last)
+    {
+        print_separator(first_entry);
+
+        *_stream << R"(")";
+
+        log.str(*first);
+
+        for(std::string line; !std::getline(log, line).fail();)
+        {
+            *_stream << line << "; ";
+        }
+
+        *_stream << R"(")";
+
+        ++first;
+    }
+}
+
 void JSONPrinter::print_entry(const std::string &name, const std::string &value)
 {
     print_separator(_first_entry);
@@ -90,38 +115,43 @@ void JSONPrinter::print_test_footer()
 
 void JSONPrinter::print_errors_header()
 {
-    print_separator(_first_test_entry);
-
-    _first_error = true;
-    *_stream << R"("errors" : [)";
+    _errors.clear();
+    _expected_errors.clear();
+    _infos.clear();
 }
 
 void JSONPrinter::print_errors_footer()
 {
+    print_separator(_first_test_entry);
+
+    *_stream << R"("errors" : [)";
+    print_strings(_errors.begin(), _errors.end());
+    *_stream << "]";
+
+    *_stream << R"(, "expected_errors" : [)";
+    print_strings(_expected_errors.begin(), _expected_errors.end());
+    *_stream << "]";
+
+    *_stream << R"(, "infos" : [)";
+    print_strings(_infos.begin(), _infos.end());
     *_stream << "]";
 }
 
-void JSONPrinter::print_error(const std::exception &error)
+void JSONPrinter::print_error(const std::exception &error, bool expected)
 {
-    std::stringstream error_log;
-    error_log.str(error.what());
-
-    for(std::string line; !std::getline(error_log, line).fail();)
+    if(expected)
     {
-        print_separator(_first_error);
-
-        *_stream << R"(")" << line << R"(")";
+        _expected_errors.emplace_back(error.what());
+    }
+    else
+    {
+        _errors.emplace_back(error.what());
     }
 }
 
 void JSONPrinter::print_info(const std::string &info)
 {
-    std::istringstream iss(info);
-    for(std::string line; !std::getline(iss, line).fail();)
-    {
-        print_separator(_first_error);
-        *_stream << R"(")" << line << R"(")";
-    }
+    _infos.push_back(info);
 }
 
 void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)

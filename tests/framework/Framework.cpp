@@ -164,7 +164,8 @@ void Framework::log_failed_expectation(const TestError &error)
 {
     if(_log_level >= error.level() && _printer != nullptr)
     {
-        _printer->print_error(error);
+        constexpr bool expected_error = true;
+        _printer->print_error(error, expected_error);
     }
 
     if(_current_test_result != nullptr)
@@ -232,6 +233,8 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         _printer->print_errors_header();
     }
 
+    const bool is_expected_failure = test_factory.status() == TestCaseFactory::Status::EXPECTED_FAILURE;
+
     try
     {
         std::unique_ptr<TestCase> test_case = test_factory.make();
@@ -265,7 +268,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         {
             if(_log_level >= error.level() && _printer != nullptr)
             {
-                _printer->print_error(error);
+                _printer->print_error(error, is_expected_failure);
             }
 
             result.status = TestResult::Status::FAILED;
@@ -282,7 +285,8 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
             {
                 std::stringstream stream;
                 stream << "Error code: " << error.err();
-                _printer->print_error(TestError(error.what(), LogLevel::ERRORS, stream.str()));
+                TestError test_error(error.what(), LogLevel::ERRORS, stream.str());
+                _printer->print_error(test_error, is_expected_failure);
             }
 
             result.status = TestResult::Status::FAILED;
@@ -297,7 +301,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         {
             if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
             {
-                _printer->print_error(error);
+                _printer->print_error(error, is_expected_failure);
             }
 
             result.status = TestResult::Status::CRASHED;
@@ -311,7 +315,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         {
             if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
             {
-                _printer->print_error(TestError("Received unknown exception"));
+                _printer->print_error(TestError("Received unknown exception"), is_expected_failure);
             }
 
             result.status = TestResult::Status::CRASHED;
@@ -326,7 +330,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     {
         if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
         {
-            _printer->print_error(error);
+            _printer->print_error(error, is_expected_failure);
         }
 
         result.status = TestResult::Status::CRASHED;
@@ -340,7 +344,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     {
         if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
         {
-            _printer->print_error(TestError("Received unknown exception"));
+            _printer->print_error(TestError("Received unknown exception"), is_expected_failure);
         }
 
         result.status = TestResult::Status::CRASHED;

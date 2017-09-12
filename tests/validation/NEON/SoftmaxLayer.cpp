@@ -49,7 +49,7 @@ constexpr AbsoluteTolerance<float> tolerance_f32(0.000001f);
 constexpr AbsoluteTolerance<float> tolerance_f16(0.0001f);
 #endif /* ARM_COMPUTE_ENABLE_FP16*/
 /** Tolerance for fixed point operations */
-constexpr AbsoluteTolerance<int8_t> tolerance_fixed_point(2);
+constexpr AbsoluteTolerance<int16_t> tolerance_fixed_point(2);
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -151,15 +151,17 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 // Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
-FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                      DataType::QS16)),
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
+                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                              DataType::QS16)),
                                                                                                                       framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fixed_point);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                    DataType::QS16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::QS16)),
                                                                                                                     framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output

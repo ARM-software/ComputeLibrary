@@ -102,9 +102,10 @@ void PrettyPrinter::print_info(const std::string &info)
     *_stream << begin_color("1") << "INFO: " << info << end_color() << "\n";
 }
 
-void PrettyPrinter::print_error(const std::exception &error)
+void PrettyPrinter::print_error(const std::exception &error, bool expected)
 {
-    *_stream << begin_color("1") << "ERROR: " << error.what() << end_color() << "\n";
+    std::string prefix = expected ? "EXPECTED ERROR: " : "ERROR: ";
+    *_stream << begin_color("1") << prefix << error.what() << end_color() << "\n";
 }
 
 void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)

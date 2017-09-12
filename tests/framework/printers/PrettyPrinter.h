@@ -53,7 +53,7 @@ public:
     void print_test_footer() override;
     void print_errors_header() override;
     void print_errors_footer() override;
-    void print_error(const std::exception &error) override;
+    void print_error(const std::exception &error, bool expected) override;
     void print_info(const std::string &info) override;
     void print_measurements(const Profiler::MeasurementsMap &measurements) override;
 

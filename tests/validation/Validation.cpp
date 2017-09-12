@@ -130,7 +130,7 @@ void check_border_element(const IAccessor &tensor, const Coordinates &id,
         const double target         = get_double_data(ptr + channel_offset, tensor.data_type());
         const double reference      = get_double_data(static_cast<const uint8_t *>(border_value) + channel_offset, tensor.data_type());
 
-        if(!compare<AbsoluteTolerance<double>, double>(target, reference))
+        if(!compare<AbsoluteTolerance<double>>(target, reference))
         {
             ARM_COMPUTE_TEST_INFO("id = " << id);
             ARM_COMPUTE_TEST_INFO("channel = " << channel);
@@ -192,7 +192,7 @@ void validate(const IAccessor &tensor, const void *reference_value)
             const double target         = get_double_data(ptr + channel_offset, tensor.data_type());
             const double reference      = get_double_data(reference_value, tensor.data_type());
 
-            if(!compare<AbsoluteTolerance<double>, double>(target, reference))
+            if(!compare<AbsoluteTolerance<double>>(target, reference))
             {
                 ARM_COMPUTE_TEST_INFO("id = " << id);
                 ARM_COMPUTE_TEST_INFO("channel = " << channel);

@@ -104,9 +104,10 @@ public:
 
     /** Print test error.
      *
-     * @param[in] error Description of the error.
+     * @param[in] error    Description of the error.
+     * @param[in] expected Whether the error was expected or not.
      */
-    virtual void print_error(const std::exception &error) = 0;
+    virtual void print_error(const std::exception &error, bool expected) = 0;
 
     /** Print test log info.
      *

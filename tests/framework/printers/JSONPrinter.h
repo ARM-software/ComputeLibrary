@@ -26,6 +26,8 @@
 
 #include "Printer.h"
 
+#include <list>
+
 namespace arm_compute
 {
 namespace test
@@ -47,17 +49,22 @@ public:
     void print_test_footer() override;
     void print_errors_header() override;
     void print_errors_footer() override;
-    void print_error(const std::exception &error) override;
+    void print_error(const std::exception &error, bool expected) override;
     void print_info(const std::string &info) override;
     void print_measurements(const Profiler::MeasurementsMap &measurements) override;
 
 private:
     void print_separator(bool &flag);
+    template <typename T>
+    void print_strings(T &&first, T &&last);
+
+    std::list<std::string> _infos{};
+    std::list<std::string> _errors{};
+    std::list<std::string> _expected_errors{};
 
     bool _first_entry{ true };
     bool _first_test{ true };
     bool _first_test_entry{ true };
-    bool _first_error{ true };
 };
 } // namespace framework
 } // namespace test
