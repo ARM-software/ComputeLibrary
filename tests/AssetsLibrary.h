@@ -35,7 +35,7 @@
 #include "tests/RawTensor.h"
 #include "tests/TensorCache.h"
 #include "tests/Utils.h"
-#include "tests/validation_old/half.h"
+#include "tests/validation/half.h"
 
 #include <algorithm>
 #include <cstddef>
