@@ -71,15 +71,12 @@ void OMPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
     }
     else
     {
-        #pragma omp parallel num_threads(info.num_threads)
+        #pragma omp parallel private(info) num_threads(info.num_threads)
         {
-            #pragma omp for
-            for(int t = 0; t < info.num_threads; ++t)
-            {
-                Window win     = max_window.split_window(split_dimension, t, info.num_threads);
-                info.thread_id = t;
-                kernel->run(win, info);
-            }
+            const int tid  = omp_get_thread_num();
+            Window win     = max_window.split_window(split_dimension, tid, info.num_threads);
+            info.thread_id = tid;
+            kernel->run(win, info);
         }
     }
 }
