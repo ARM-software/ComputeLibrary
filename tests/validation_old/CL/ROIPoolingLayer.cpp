@@ -85,7 +85,8 @@ BOOST_AUTO_TEST_SUITE(CL)
 BOOST_AUTO_TEST_SUITE(ROIPoolingLayer)
 
 BOOST_AUTO_TEST_SUITE(Float)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
+//FIXME: COMPMID-528
+BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::disabled())
 BOOST_DATA_TEST_CASE(RunSmall, boost::unit_test::data::make({ DataType::F16, DataType::F32 }) * boost::unit_test::data::make({ 10, 20, 40 }) * boost::unit_test::data::make({ 7, 9 }) *
                      boost::unit_test::data::make({ 1.f / 8.f, 1.f / 16.f }),
                      dt, num_rois, roi_pool_size, roi_scale)
