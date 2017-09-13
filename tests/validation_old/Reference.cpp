@@ -226,21 +226,6 @@ RawTensor Reference::compute_reference_fixed_point_pixel_wise_multiplication(con
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
-{
-    // Create reference
-    RawTensor ref_src(shape, DataType::U8);
-    RawTensor ref_dst(shape, DataType::U8);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src, 0);
-
-    // Compute reference
-    ReferenceCPP::threshold(ref_src, ref_dst, threshold, false_value, true_value, type, upper);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_warp_perspective(const TensorShape &shape, RawTensor &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode,
                                                         uint8_t constant_border_value)
 {

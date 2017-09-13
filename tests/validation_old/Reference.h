@@ -154,19 +154,6 @@ public:
      */
     static RawTensor compute_reference_fixed_point_pixel_wise_multiplication(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, float scale, int fixed_point_position,
                                                                              ConvertPolicy convert_policy, RoundingPolicy rounding_policy);
-    /** Compute reference threshold.
-     *
-     * @param[in] shape       Shape of the input and output tensors.
-     * @param[in] threshold   Threshold. When the threshold type is RANGE, this is used as the lower threshold.
-     * @param[in] false_value value to set when the condition is not respected.
-     * @param[in] true_value  value to set when the condition is respected.
-     * @param[in] type        Thresholding type. Either RANGE or BINARY.
-     * @param[in] upper       Upper threshold. Only used when the thresholding type is RANGE.
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper);
-
     /** Compute reference Warp Perspective.
      *
      * @param[in]  shape                 Shape of the input and output tensors.
@@ -180,7 +167,6 @@ public:
      */
     static RawTensor compute_reference_warp_perspective(const TensorShape &shape, RawTensor &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode,
                                                         uint8_t constant_border_value);
-
     /** Compute reference roi pooling layer.
      *
      * @param[in] shape     Shape of the input tensor.
