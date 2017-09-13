@@ -45,6 +45,9 @@ for v in variables:
     new_options.Add(v)
     vars.Add(v)
 
+# Disable floating-point expression contraction (e.g. fused multiply-add operations)
+env.Append(CXXFLAGS = ['-ffp-contract=off'])
+
 # Clone the environment to make sure we're not polluting the arm_compute one:
 test_env = env.Clone()
 vars.Update(test_env)
