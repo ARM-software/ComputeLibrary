@@ -202,6 +202,22 @@ public:
     {
     }
 };
+
+/** Data set containing 2D tensor shapes for DepthConcatenate. */
+class DepthConcatenateShapes final : public ShapeDataset
+{
+public:
+    DepthConcatenateShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 322U, 243U },
+                     TensorShape{ 463U, 879U },
+                     TensorShape{ 416U, 651U }
+    })
+    {
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

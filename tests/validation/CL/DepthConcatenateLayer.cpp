@@ -71,7 +71,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConcatenateLayerFixture<float>, framewor
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)))
 {
     // Validate output
@@ -89,7 +89,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConcatenateLayerFixture<int8_t>, framewo
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateShapes(),
                                                                                                                   framework::dataset::make("DataType",
                                                                                                                           DataType::QS8)))
 {
@@ -106,7 +106,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConcatenateLayerFixture<int16_t>, framew
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateShapes(),
                                                                                                                    framework::dataset::make("DataType",
                                                                                                                            DataType::QS16)))
 {
