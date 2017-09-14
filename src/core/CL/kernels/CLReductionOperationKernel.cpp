@@ -126,7 +126,8 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
     in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
 
     // Set local sums buffer
-    _kernel.setArg(num_arguments_per_1D_tensor() * 2, _lws_hint[0], nullptr);
+    unsigned int local_sum_size = _lws_hint[0] * _input->info()->element_size();
+    _kernel.setArg(num_arguments_per_1D_tensor() * 2, local_sum_size, nullptr);
 
     do
     {
