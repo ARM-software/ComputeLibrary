@@ -201,6 +201,7 @@ else:
 
 if env['asserts']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ASSERTS_ENABLED'])
+    env.Append(CXXFLAGS = ['-fstack-protector-strong'])
 
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
