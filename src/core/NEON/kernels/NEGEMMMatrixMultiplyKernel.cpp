@@ -1513,7 +1513,7 @@ void NEGEMMMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor 
 
         update_window_and_padding(win,
                                   AccessWindowRectangle(input0->info(), 0, 0, 4, 1, 1.f, 0.25f),
-                                  AccessWindowTranspose(input1->info(), 0, 0, 4, 1, 0.f, 0.25f),
+                                  AccessWindowStatic(input1->info(), 0, 0, input1->info()->tensor_shape().x(), ceil_to_multiple(input1->info()->tensor_shape().y(), 4)),
                                   output_access);
 
         output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));

@@ -148,20 +148,18 @@ using NEConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixtu
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
 // We test for fixed point precision [4,6]
-//FIXME: COMPMID-532
-DISABLED_FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                framework::dataset::make("ReshapeWeights", { true, false })),
-                                framework::dataset::make("DataType", DataType::QS8)),
-                                framework::dataset::make("FractionalBits", 4, 7)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("DataType", DataType::QS8)),
+                       framework::dataset::make("FractionalBits", 4, 7)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
 }
-//FIXME: COMPMID-532
-DISABLED_FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
-                                framework::dataset::make("ReshapeWeights", { true, false })),
-                                framework::dataset::make("DataType", DataType::QS8)),
-                                framework::dataset::make("FractionalBits", 4, 7)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                       framework::dataset::make("DataType", DataType::QS8)),
+                                                                                                                       framework::dataset::make("FractionalBits", 4, 7)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
