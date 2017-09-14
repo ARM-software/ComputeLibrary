@@ -253,23 +253,6 @@ RawTensor Reference::compute_reference_fixed_point_pixel_wise_multiplication(con
     return ref_dst;
 }
 
-template <typename T>
-RawTensor Reference::compute_reference_table_lookup(const TensorShape &shape, DataType dt_inout, std::map<T, T> &lut)
-{
-    // Create reference
-    RawTensor ref_src(shape, dt_inout);
-    RawTensor ref_dst(shape, dt_inout);
-    // Fill reference
-    library->fill_tensor_uniform(ref_src, 0);
-
-    // Compute reference
-    ReferenceCPP::table_lookup(ref_src, ref_dst, lut);
-
-    return ref_dst;
-}
-template RawTensor arm_compute::test::validation::Reference::compute_reference_table_lookup<uint8_t>(const TensorShape &shape, DataType dt_inout, std::map<uint8_t, uint8_t> &lut);
-template RawTensor arm_compute::test::validation::Reference::compute_reference_table_lookup<int16_t>(const TensorShape &shape, DataType dt_inout, std::map<int16_t, int16_t> &lut);
-
 RawTensor Reference::compute_reference_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
     // Create reference

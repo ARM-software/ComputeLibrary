@@ -740,16 +740,6 @@ void fixed_point_pixel_wise_multiplication(const Tensor<T> &in1, const Tensor<T>
     }
 }
 
-//Table Lookup
-template <typename T, typename T1>
-void table_lookup(const Tensor<T> &in, Tensor<T> &out, std::map<T1, T1> &lut)
-{
-    for(int i = 0; i < in.num_elements(); ++i)
-    {
-        out[i] = static_cast<T>(lut[in[i]]);
-    }
-}
-
 // Threshold
 template <typename T>
 void threshold(const Tensor<T> &in, Tensor<T> &out, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)

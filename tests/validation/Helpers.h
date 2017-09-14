@@ -185,6 +185,23 @@ inline void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPatt
  * @return The shape of output concatenated tensor.
  */
 TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &input_shapes);
+
+/** Helper function to fill the Lut random by a ILutAccessor.
+ *
+ * @param[in,out] table Accessor at the Lut.
+ *
+ */
+template <typename T>
+void fill_lookuptable(T &&table)
+{
+    std::mt19937                                          generator(library->seed());
+    std::uniform_int_distribution<typename T::value_type> distribution(std::numeric_limits<typename T::value_type>::min(), std::numeric_limits<typename T::value_type>::max());
+
+    for(int i = std::numeric_limits<typename T::value_type>::min(); i <= std::numeric_limits<typename T::value_type>::max(); i++)
+    {
+        table[i] = distribution(generator);
+    }
+}
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

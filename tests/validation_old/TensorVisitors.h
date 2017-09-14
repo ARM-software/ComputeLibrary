@@ -127,29 +127,6 @@ private:
     ConvertPolicy        _convert_policy;
     RoundingPolicy       _rounding_policy;
 };
-// Table lookup operation
-template <typename T1>
-struct table_lookup : public boost::static_visitor<>
-{
-public:
-    explicit table_lookup(const TensorVariant &in, std::map<T1, T1> &lut)
-        : _in(in), _lut(lut)
-    {
-    }
-
-    template <typename T>
-    void operator()(Tensor<T> &out) const
-    {
-        const auto &in = boost::get<Tensor<T>>(_in);
-        tensor_operations::table_lookup(in, out, _lut);
-    }
-
-private:
-    const TensorVariant &_in;
-    std::map<T1, T1> &_lut;
-};
-template struct arm_compute::test::validation::tensor_visitors::table_lookup<uint8_t>;
-template struct arm_compute::test::validation::tensor_visitors::table_lookup<int16_t>;
 
 // Batch Normalization Layer visitor
 struct batch_normalization_layer_visitor : public boost::static_visitor<>

@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_NEON_LUTACCESSOR_H__
 #define __ARM_COMPUTE_TEST_NEON_LUTACCESSOR_H__
 
-#include "ILutAccessor.h"
+#include "tests/ILutAccessor.h"
 
 #include "arm_compute/runtime/Lut.h"
 

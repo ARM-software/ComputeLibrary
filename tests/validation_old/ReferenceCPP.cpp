@@ -193,19 +193,6 @@ void ReferenceCPP::fixed_point_pixel_wise_multiplication(const RawTensor &src1, 
     boost::apply_visitor(tensor_visitors::fixed_point_pixel_wise_multiplication_visitor(s1, s2, scale, convert_policy, rounding_policy), d);
 }
 
-// Table lookup
-template <typename T>
-void ReferenceCPP::table_lookup(const RawTensor &src, RawTensor &dst, std::map<T, T> &lut)
-{
-    const TensorVariant s = TensorFactory::get_tensor(src);
-    TensorVariant       d = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(tensor_visitors::table_lookup<T>(s, lut), d);
-}
-#ifndef DOXYGEN_SKIP_THIS
-template void arm_compute::test::validation::ReferenceCPP::table_lookup<uint8_t>(const RawTensor &src, RawTensor &dst, std::map<uint8_t, uint8_t> &lut);
-template void arm_compute::test::validation::ReferenceCPP::table_lookup<int16_t>(const RawTensor &src, RawTensor &dst, std::map<int16_t, int16_t> &lut);
-#endif /* DOXYGEN_SKIP_THIS */
-
 // Threshold
 void ReferenceCPP::threshold(const RawTensor &src, RawTensor &dst, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {

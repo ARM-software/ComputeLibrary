@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_CL_CLLUTACCESSOR_H__
 #define __ARM_COMPUTE_TEST_CL_CLLUTACCESSOR_H__
 
-#include "ILutAccessor.h"
+#include "tests/ILutAccessor.h"
 
 #include "arm_compute/runtime/CL/CLLut.h"
 
