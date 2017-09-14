@@ -6,7 +6,7 @@ import os
 
 Target = collections.namedtuple('Target', 'name prefix')
 
-targets = [Target("NEON", "NE"), Target("CL", "CL"), Target("CPP", "CPP")]
+targets = [Target("NEON", "NE"), Target("CL", "CL"), Target("CPP", "CPP"), Target("GLES_COMPUTE", "GC")]
 
 armcv_path = "arm_compute"
 core_path = armcv_path + "/core/"
