@@ -31,7 +31,6 @@
 #include <condition_variable>
 #include <iostream>
 #include <mutex>
-#include <semaphore.h>
 #include <system_error>
 #include <thread>
 
