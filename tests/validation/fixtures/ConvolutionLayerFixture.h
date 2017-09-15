@@ -88,7 +88,7 @@ protected:
         {
             // Check if its a "fully connected" convolution
             const bool is_fully_connected_convolution = (output_shape.x() == 1 && output_shape.y() == 1);
-            const bool is_optimised                   = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && data_type == DataType::F32;
+            const bool is_optimised                   = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV7 && data_type == DataType::F32;
 
             reshaped_weights_shape.collapse(3);
 
@@ -143,7 +143,7 @@ protected:
         if(!reshape_weights)
         {
             const bool is_fully_connected_convolution = (output_shape.x() == 1 && output_shape.y() == 1);
-            const bool is_optimised                   = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && data_type == DataType::F32;
+            const bool is_optimised                   = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV7 && data_type == DataType::F32;
 
             TensorShape     tmp_weights_shape(weights_shape);
             SimpleTensor<T> tmp_weights(tmp_weights_shape, data_type, 1, fixed_point_position);

@@ -21,12 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "a32_interleave_6way_32bit.hpp"
-#include "a32_transpose_interleave_8way_32bit.hpp"
-//#include "a64_interleave_8way_16bit.hpp"
-#include "a64_interleave_8way_32bit.hpp"
-//#include "a64_interleave_8way_half_to_float.hpp"
-//#include "a64_transpose_interleave_12way_16bit.hpp"
-//#include "a64_transpose_interleave_12way_half_to_float.hpp"
-//#include "a64_transpose_interleave_24way_16bit.hpp"
-#include "transpose_interleave_common.hpp"
+#ifndef __ARM_COMPUTE_NEGEMMAARCH32KERNEL_H__
+#define __ARM_COMPUTE_NEGEMMAARCH32KERNEL_H__
+
+#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
+
+namespace arm_compute
+{
+class ITensor;
+
+/** AArch32/armv7a NEON kernel to multiply two input matrices "A" and "B". */
+class NEGEMMAArch32Kernel : public NEGEMMAssemblyBaseKernel
+{
+public:
+    // Inherited methods overridden:
+    void run(const Window &window, const ThreadInfo &info) override;
+
+protected:
+    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;
+};
+} // namespace arm_compute
+#endif /*__ARM_COMPUTE_NEGEMMAARCH32KERNEL_H__*/

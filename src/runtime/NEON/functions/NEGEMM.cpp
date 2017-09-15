@@ -26,6 +26,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/kernels/arm32/NEGEMMAArch32Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -37,6 +38,7 @@
 namespace arm_compute
 {
 #include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a32_sgemm_8x6.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemm_12x8.hpp"
 } // namespace arm_compute
 
@@ -68,13 +70,6 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
 
-#if defined(__aarch64__)
-    if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
-    {
-        _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch64Kernel>();
-    }
-#endif /* defined(__aarch64__) */
-
     // Check if the first input tensor is a vector.
     // If so, all the kernels for reshaping the tensors can be skipped
     if(_run_vector_matrix_multiplication)
@@ -91,7 +86,19 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     }
     else
     {
-#if defined(__aarch64__)
+#if defined(__arm__)
+        if(NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
+        {
+            _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch32Kernel>();
+        }
+#elif defined(__aarch64__)
+        if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
+        {
+            _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch64Kernel>();
+        }
+#endif /* defined(__arm__) || defined(__aarch64__) */
+
+#if defined(__arm__) || defined(__aarch64__)
         if(_mm_optimised_kernel != nullptr)
         {
             struct CPUInfo ci = NEScheduler::get().cpu_info();
@@ -100,7 +107,11 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             const int N = d->info()->tensor_shape().x();
             const int K = a->info()->tensor_shape().x();
 
+#if defined(__arm__)
+            GemmInterleaved<sgemm_8x6, float, float> gemm(&ci, M, N, K, false, false);
+#elif defined(__aarch64__)
             GemmInterleaved<sgemm_12x8, float, float> gemm(&ci, M, N, K, false, false);
+#endif /* defined(__arm__) || defined(__aarch64__) */
 
             constexpr size_t alignment = 4096;
             _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
@@ -112,7 +123,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             _workspace.allocator()->allocate();
         }
         else
-#endif /* defined(__aarch64__) */
+#endif /* defined(__arm__) || defined(__aarch64__) */
         {
             TensorShape shape_tmp_a = a->info()->tensor_shape();
             TensorShape shape_tmp_b = b->info()->tensor_shape();

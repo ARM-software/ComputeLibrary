@@ -135,11 +135,13 @@ IScheduler::IScheduler()
             _info.CPU = CPUTarget::A53;
             break;
         default:
-#ifdef __aarch64__
+#ifdef __arm__
+            _info.CPU = CPUTarget::ARMV7;
+#elif __aarch64__
             _info.CPU = CPUTarget::ARMV8;
-#else  /* __aarch64__ */
+#else  /* __arm__ || __aarch64__ */
             _info.CPU = CPUTarget::INTRINSICS;
-#endif /* __aarch64__ */
+#endif /* __arm__ || __aarch64__ */
             break;
     }
 

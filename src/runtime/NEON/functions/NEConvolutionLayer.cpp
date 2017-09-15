@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 
+#include "arm_compute/core/NEON/kernels/arm32/NEGEMMAArch32Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Size2D.h"
@@ -34,6 +35,7 @@
 namespace arm_compute
 {
 #include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a32_sgemm_8x6.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemm_12x8.hpp"
 } // namespace arm_compute
 
@@ -151,12 +153,17 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     // Check if its a "fully connected" convolution, i.e. the output size is 1x1xnum_kernels
     _is_fully_connected_convolution = ((conv_w == 1) && (conv_h == 1));
 
-#if defined(__aarch64__)
+#if defined(__arm__)
+    if(NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && dt == DataType::F32)
+    {
+        _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch32Kernel>();
+    }
+#elif defined(__aarch64__)
     if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && dt == DataType::F32)
     {
         _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch64Kernel>();
     }
-#endif /* defined(__aarch64__) */
+#endif /* defined(__arm__) || defined(__aarch64__) */
 
     unsigned int mat_weights_cols = weights->info()->dimension(3);
     unsigned int mat_weights_rows = weights->info()->dimension(0) * weights->info()->dimension(1) * weights->info()->dimension(2) + (_has_bias ? 1 : 0);
@@ -240,7 +247,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     // Configure kernels
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
 
-#if defined(__aarch64__)
+#if defined(__arm__) || defined(__aarch64__)
     if(_mm_optimised_kernel != nullptr)
     {
         struct CPUInfo ci = NEScheduler::get().cpu_info();
@@ -249,7 +256,11 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         const int N = _gemm_output.info()->tensor_shape().x();
         const int K = _input_im2col_reshaped.info()->tensor_shape().x();
 
+#if defined(__arm__)
+        GemmInterleaved<sgemm_8x6, float, float> gemm(&ci, M, N, K, false, false);
+#elif defined(__aarch64__)
         GemmInterleaved<sgemm_12x8, float, float> gemm(&ci, M, N, K, false, false);
+#endif /* defined(__arm__) || defined(__aarch64__) */
 
         constexpr size_t alignment = 4096;
         _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
@@ -268,7 +279,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         _workspace.allocator()->allocate();
     }
     else
-#endif /* defined(__aarch64__) */
+#endif /* defined(__arm__) || defined(__aarch64__) */
     {
         if(_is_fully_connected_convolution)
         {

@@ -21,4 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "a32_merge_float_8x6.hpp"
 #include "a64_merge_float_12x8.hpp"
+//#include "a64_merge_float_to_half_12x8.hpp"
+//#include "a64_merge_half_24x8.hpp"
+//#include "a64_merge_int32_12x8.hpp"
