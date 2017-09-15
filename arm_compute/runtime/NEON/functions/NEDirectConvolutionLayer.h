@@ -29,7 +29,11 @@
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -45,7 +49,7 @@ class NEDirectConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEDirectConvolutionLayer();
+    NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input, weights, biases and output tensors.
       *
       * @note: DirectConvolution only works in the following configurations:
@@ -69,6 +73,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                                  _memory_group;
     NEDirectConvolutionLayerBiasAccumulateKernel _accumulate_bias_kernel;
     NEDirectConvolutionLayerKernel               _conv_kernel;
     NEFillBorderKernel                           _input_border_handler;

@@ -36,8 +36,8 @@
 
 using namespace arm_compute;
 
-NEGEMM::NEGEMM()
-    : _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _run_vector_matrix_multiplication(false), _run_addition(false)
+NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _run_vector_matrix_multiplication(false), _run_addition(false)
 {
 }
 
@@ -85,6 +85,10 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
         _tmp_a.allocator()->init(info_a);
         _tmp_b.allocator()->init(info_b);
 
+        // Manage intermediate buffers
+        _memory_group.manage(&_tmp_a);
+        _memory_group.manage(&_tmp_b);
+
         // Configure interleave kernel
         _interleave_kernel.configure(a, &_tmp_a);
 
@@ -109,6 +113,8 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
 void NEGEMM::run()
 {
+    _memory_group.acquire();
+
     if(!_run_vector_matrix_multiplication)
     {
         // Run interleave kernel
@@ -120,6 +126,8 @@ void NEGEMM::run()
 
     // Run matrix multiply kernel
     NEScheduler::get().schedule(&_mm_kernel, _run_vector_matrix_multiplication ? Window::DimX : Window::DimY);
+
+    _memory_group.release();
 
     // Run matrix addition kernel
     if(_run_addition)

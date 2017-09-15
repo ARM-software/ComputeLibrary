@@ -32,8 +32,9 @@
 
 using namespace arm_compute;
 
-NEHOGMultiDetection::NEHOGMultiDetection() // NOLINT
-    : _gradient_kernel(),
+NEHOGMultiDetection::NEHOGMultiDetection(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _gradient_kernel(),
       _orient_bin_kernel(),
       _block_norm_kernel(),
       _hog_detect_kernel(),
@@ -139,6 +140,10 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
     TensorInfo info_phase(shape_img, Format::U8);
     _phase.allocator()->init(info_phase);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_mag);
+    _memory_group.manage(&_phase);
+
     // Initialise gradient kernel
     _gradient_kernel.configure(input, &_mag, &_phase, phase_type, border_mode, constant_border_value);
 
@@ -164,9 +169,16 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
         TensorInfo info_space(shape_hog_space, num_bins, DataType::F32);
         _hog_space[i].allocator()->init(info_space);
 
+        // Manage intermediate buffers
+        _memory_group.manage(_hog_space.get() + i);
+
         // Initialise orientation binning kernel
         _orient_bin_kernel[i].configure(&_mag, &_phase, _hog_space.get() + i, multi_hog->model(idx_multi_hog)->info());
     }
+
+    // Allocate intermediate tensors
+    _mag.allocator()->allocate();
+    _phase.allocator()->allocate();
 
     // Configure NETensor for the normalized HOG space and block normalization kernel
     for(size_t i = 0; i < _num_block_norm_kernel; ++i)
@@ -178,8 +190,17 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
         TensorInfo tensor_info(*(multi_hog->model(idx_multi_hog)->info()), width, height);
         _hog_norm_space[i].allocator()->init(tensor_info);
 
+        // Manage intermediate buffers
+        _memory_group.manage(_hog_norm_space.get() + i);
+
         // Initialize block normalization kernel
         _block_norm_kernel[i].configure(_hog_space.get() + idx_orient_bin, _hog_norm_space.get() + i, multi_hog->model(idx_multi_hog)->info());
+    }
+
+    // Allocate intermediate tensors
+    for(size_t i = 0; i < _num_orient_bin_kernel; ++i)
+    {
+        _hog_space[i].allocator()->allocate();
     }
 
     // Configure HOG detector kernel
@@ -194,14 +215,6 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
     _non_maxima_kernel->configure(_detection_windows, min_distance);
 
     // Allocate intermediate tensors
-    _mag.allocator()->allocate();
-    _phase.allocator()->allocate();
-
-    for(size_t i = 0; i < _num_orient_bin_kernel; ++i)
-    {
-        _hog_space[i].allocator()->allocate();
-    }
-
     for(size_t i = 0; i < _num_block_norm_kernel; ++i)
     {
         _hog_norm_space[i].allocator()->allocate();
@@ -211,6 +224,8 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
 void NEHOGMultiDetection::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_detection_windows == nullptr, "Unconfigured function");
+
+    _memory_group.acquire();
 
     // Reset detection window
     _detection_windows->clear();
@@ -241,4 +256,6 @@ void NEHOGMultiDetection::run()
     {
         NEScheduler::get().schedule(_non_maxima_kernel.get(), Window::DimY);
     }
+
+    _memory_group.release();
 }

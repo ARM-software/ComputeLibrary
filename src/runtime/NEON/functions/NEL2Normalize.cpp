@@ -28,13 +28,16 @@
 
 using namespace arm_compute;
 
-NEL2Normalize::NEL2Normalize()
-    : _reduce_func(), _normalize_kernel(), _sumsq()
+NEL2Normalize::NEL2Normalize(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _reduce_func(), _normalize_kernel(), _sumsq()
 {
 }
 
 void NEL2Normalize::configure(ITensor *input, ITensor *output, unsigned int axis, float epsilon)
 {
+    // Manage intermediate buffers
+    _memory_group.manage(&_sumsq);
+
     // Configure Kernels
     _reduce_func.configure(input, &_sumsq, axis, ReductionOperation::SUM_SQUARE);
     _normalize_kernel.configure(input, &_sumsq, output, axis, epsilon);
@@ -45,6 +48,10 @@ void NEL2Normalize::configure(ITensor *input, ITensor *output, unsigned int axis
 
 void NEL2Normalize::run()
 {
+    _memory_group.acquire();
+
     _reduce_func.run();
     NEScheduler::get().schedule(&_normalize_kernel, Window::DimY);
+
+    _memory_group.release();
 }

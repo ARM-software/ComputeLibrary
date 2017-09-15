@@ -33,8 +33,8 @@
 
 using namespace arm_compute;
 
-NEDirectConvolutionLayer::NEDirectConvolutionLayer()
-    : _accumulate_bias_kernel(), _conv_kernel(), _input_border_handler(), _accumulator()
+NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _accumulate_bias_kernel(), _conv_kernel(), _input_border_handler(), _accumulator()
 {
 }
 
@@ -45,6 +45,9 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
     {
         _accumulator.allocator()->free();
     }
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_accumulator);
 
     // Allocate the intermediate accumulator tensor in case of fixed point input
     switch(output->info()->data_type())
@@ -87,6 +90,10 @@ void NEDirectConvolutionLayer::run()
 {
     NEScheduler::get().schedule(&_input_border_handler, Window::DimZ);
 
+    _memory_group.acquire();
+
     NEScheduler::get().schedule(&_conv_kernel, Window::DimZ);
     NEScheduler::get().schedule(&_accumulate_bias_kernel, Window::DimY);
+
+    _memory_group.release();
 }

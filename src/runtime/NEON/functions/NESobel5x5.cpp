@@ -32,8 +32,8 @@
 
 using namespace arm_compute;
 
-NESobel5x5::NESobel5x5()
-    : _sobel_hor(), _sobel_vert(), _tmp_x(), _tmp_y(), _border_handler()
+NESobel5x5::NESobel5x5(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _sobel_hor(), _sobel_vert(), _tmp_x(), _tmp_y(), _border_handler()
 {
 }
 
@@ -50,6 +50,8 @@ void NESobel5x5::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
     {
         _tmp_x.allocator()->init(tensor_info);
         _tmp_y.allocator()->init(tensor_info);
+        _memory_group.manage(&_tmp_x);
+        _memory_group.manage(&_tmp_y);
         _sobel_hor.configure(input, &_tmp_x, &_tmp_y, border_mode == BorderMode::UNDEFINED);
         _sobel_vert.configure(&_tmp_x, &_tmp_y, output_x, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
@@ -58,6 +60,7 @@ void NESobel5x5::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
     else if(run_sobel_x)
     {
         _tmp_x.allocator()->init(tensor_info);
+        _memory_group.manage(&_tmp_x);
         _sobel_hor.configure(input, &_tmp_x, nullptr, border_mode == BorderMode::UNDEFINED);
         _sobel_vert.configure(&_tmp_x, nullptr, output_x, nullptr, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
@@ -65,6 +68,7 @@ void NESobel5x5::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
     else if(run_sobel_y)
     {
         _tmp_y.allocator()->init(tensor_info);
+        _memory_group.manage(&_tmp_y);
         _sobel_hor.configure(input, nullptr, &_tmp_y, border_mode == BorderMode::UNDEFINED);
         _sobel_vert.configure(nullptr, &_tmp_y, nullptr, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_y.allocator()->allocate();
@@ -76,6 +80,11 @@ void NESobel5x5::configure(ITensor *input, ITensor *output_x, ITensor *output_y,
 void NESobel5x5::run()
 {
     NEScheduler::get().schedule(&_border_handler, Window::DimZ);
+
+    _memory_group.acquire();
+
     NEScheduler::get().schedule(&_sobel_hor, Window::DimY);
     NEScheduler::get().schedule(&_sobel_vert, Window::DimY);
+
+    _memory_group.release();
 }

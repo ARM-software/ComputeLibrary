@@ -32,8 +32,8 @@
 
 using namespace arm_compute;
 
-NEGaussian5x5::NEGaussian5x5()
-    : _kernel_hor(), _kernel_vert(), _tmp(), _border_handler()
+NEGaussian5x5::NEGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _kernel_hor(), _kernel_vert(), _tmp(), _border_handler()
 {
 }
 
@@ -42,6 +42,9 @@ void NEGaussian5x5::configure(ITensor *input, ITensor *output, BorderMode border
     // Init temporary buffer
     TensorInfo tensor_info(input->info()->tensor_shape(), 1, DataType::S16);
     _tmp.allocator()->init(tensor_info);
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_tmp);
 
     // Create and configure kernels for the two passes
     _kernel_hor.configure(input, &_tmp, border_mode == BorderMode::UNDEFINED);
@@ -54,7 +57,11 @@ void NEGaussian5x5::configure(ITensor *input, ITensor *output, BorderMode border
 
 void NEGaussian5x5::run()
 {
+    _memory_group.acquire();
+
     NEScheduler::get().schedule(&_border_handler, Window::DimZ);
     NEScheduler::get().schedule(&_kernel_hor, Window::DimY);
     NEScheduler::get().schedule(&_kernel_vert, Window::DimY);
+
+    _memory_group.release();
 }

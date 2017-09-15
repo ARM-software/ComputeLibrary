@@ -41,8 +41,9 @@
 
 using namespace arm_compute;
 
-NECannyEdge::NECannyEdge() // NOLINT
-    : _sobel(),
+NECannyEdge::NECannyEdge(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _sobel(),
       _gradient(),
       _non_max_suppr(),
       _edge_trace(),
@@ -93,6 +94,10 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     _phase.allocator()->init(info);
     _nonmax.allocator()->init(info);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_gx);
+    _memory_group.manage(&_gy);
+
     // Configure/Init sobelNxN
     if(gradient_size == 3)
     {
@@ -117,6 +122,10 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
         ARM_COMPUTE_ERROR("Gradient size not supported\n");
     }
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_magnitude);
+    _memory_group.manage(&_phase);
+
     // Configure gradient
     if(use_fp16)
     {
@@ -131,12 +140,23 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
         _gradient = std::move(k);
     }
 
+    // Allocate intermediate tensors
+    _gx.allocator()->allocate();
+    _gy.allocator()->allocate();
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_nonmax);
+
     // Configure non-maxima suppression
     _non_max_suppr.configure(&_magnitude, &_phase, &_nonmax, upper_thr, lower_thr, border_mode == BorderMode::UNDEFINED);
 
     // Fill border around magnitude image as non-maxima suppression will access
     // it. If border mode is undefined filling the border is a nop.
     _border_mag_gradient.configure(&_magnitude, _non_max_suppr.border_size(), border_mode, constant_border_value);
+
+    // Allocate intermediate tensors
+    _phase.allocator()->allocate();
+    _magnitude.allocator()->allocate();
 
     // Configure edge tracing
     _edge_trace.configure(&_nonmax, output);
@@ -145,10 +165,6 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     _border_edge_trace.configure(&_nonmax, _edge_trace.border_size(), BorderMode::CONSTANT, 0);
 
     // Allocate intermediate tensors
-    _gx.allocator()->allocate();
-    _gy.allocator()->allocate();
-    _phase.allocator()->allocate();
-    _magnitude.allocator()->allocate();
     _nonmax.allocator()->allocate();
 }
 
@@ -156,6 +172,8 @@ void NECannyEdge::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
     ARM_COMPUTE_ERROR_ON(_output == nullptr);
+
+    _memory_group.acquire();
 
     // Run sobelNxN
     _sobel->run();
@@ -177,4 +195,6 @@ void NECannyEdge::run()
 
     // Run edge tracing
     NEScheduler::get().schedule(&_edge_trace, Window::DimY);
+
+    _memory_group.release();
 }

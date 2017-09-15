@@ -33,8 +33,9 @@
 
 using namespace arm_compute;
 
-NELocallyConnectedLayer::NELocallyConnectedLayer()
-    : _input_im2col_kernel(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(), _is_first_run(false)
+NELocallyConnectedLayer::NELocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(),
+      _is_first_run(false)
 {
 }
 
@@ -102,6 +103,10 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
     shape_gemm.set(1, mat_input_rows);
     _gemm_output.allocator()->init(TensorInfo(shape_gemm, 1, input->info()->data_type()));
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_input_im2col_reshaped);
+    _memory_group.manage(&_gemm_output);
+
     // Configure kernels
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
     _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
@@ -123,6 +128,8 @@ void NELocallyConnectedLayer::run()
         NEScheduler::get().schedule(&_weights_reshape_kernel, 3);
     }
 
+    _memory_group.acquire();
+
     // Run input reshaping
     NEScheduler::get().schedule(&_input_im2col_kernel, Window::DimY);
 
@@ -131,4 +138,6 @@ void NELocallyConnectedLayer::run()
 
     // Reshape output matrix
     NEScheduler::get().schedule(&_output_col2im_kernel, Window::DimY);
+
+    _memory_group.release();
 }

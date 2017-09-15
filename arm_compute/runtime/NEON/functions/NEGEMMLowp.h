@@ -32,6 +32,10 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -48,7 +52,7 @@ class NEGEMMLowp : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMLowp();
+    NEGEMMLowp(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the kernel's inputs, output
     *
     * @note GEMM_LOWP:  low precision GEMM kernel
@@ -75,6 +79,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                    _memory_group;
     NEGEMMInterleave4x4Kernel      _interleave_kernel;
     NEGEMMTranspose1xWKernel       _transpose_kernel;
     NEGEMMLowpMatrixMultiplyKernel _mm_kernel;

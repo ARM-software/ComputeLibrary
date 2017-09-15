@@ -26,8 +26,12 @@
 
 #include "arm_compute/core/NEON/kernels/NEHOGDescriptorKernel.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEHOGGradient.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -43,7 +47,7 @@ class NEHOGDescriptor : public IFunction
 {
 public:
     /** Default constructor */
-    NEHOGDescriptor();
+    NEHOGDescriptor(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source, destination, HOG data-object and border mode
      *
      * @param[in, out] input                 Input tensor. Data type supported: U8
@@ -59,6 +63,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                   _memory_group;
     NEHOGGradient                 _gradient;
     NEHOGOrientationBinningKernel _orient_bin;
     NEHOGBlockNormalizationKernel _block_norm;

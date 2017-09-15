@@ -26,8 +26,12 @@
 
 #include "arm_compute/core/NEON/kernels/NEL2NormalizeKernel.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -43,7 +47,7 @@ class NEL2Normalize : public IFunction
 {
 public:
     /** Constructor */
-    NEL2Normalize();
+    NEL2Normalize(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in, out] input   Source tensor. Data types supported: F32. (Written to only for border_size != 0)
@@ -57,6 +61,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup          _memory_group;
     NEReductionOperation _reduce_func;
     NEL2NormalizeKernel  _normalize_kernel;
     Tensor               _sumsq;

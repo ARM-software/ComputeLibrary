@@ -31,7 +31,11 @@
 #include "arm_compute/core/NEON/kernels/NELocallyConnectedMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -48,7 +52,7 @@ class NELocallyConnectedLayer : public IFunction
 {
 public:
     /** Default constructor */
-    NELocallyConnectedLayer();
+    NELocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -66,6 +70,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                            _memory_group;
     NEIm2ColKernel                         _input_im2col_kernel;
     NEWeightsReshapeKernel                 _weights_reshape_kernel;
     NELocallyConnectedMatrixMultiplyKernel _mm_kernel;

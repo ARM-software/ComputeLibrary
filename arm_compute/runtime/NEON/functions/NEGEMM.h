@@ -30,7 +30,11 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -46,7 +50,7 @@ class NEGEMM : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMM();
+    NEGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the kernel's inputs, output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
@@ -65,6 +69,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                _memory_group;
     NEGEMMInterleave4x4Kernel  _interleave_kernel;
     NEGEMMTranspose1xWKernel   _transpose_kernel;
     NEGEMMMatrixMultiplyKernel _mm_kernel;

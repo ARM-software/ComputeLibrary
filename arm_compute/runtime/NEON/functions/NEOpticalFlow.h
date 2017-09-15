@@ -29,6 +29,8 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEScharr3x3.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -51,7 +53,7 @@ class NEOpticalFlow : public IFunction
 {
 public:
     /** Constructor */
-    NEOpticalFlow();
+    NEOpticalFlow(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEOpticalFlow(const NEOpticalFlow &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -80,6 +82,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                          _memory_group;
     std::unique_ptr<NEScharr3x3[]>       _func_scharr;
     std::unique_ptr<NELKTrackerKernel[]> _kernel_tracker;
     std::unique_ptr<Tensor[]>            _scharr_gx;

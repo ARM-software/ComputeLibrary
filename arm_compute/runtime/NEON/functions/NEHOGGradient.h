@@ -27,6 +27,8 @@
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEDerivative.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -46,7 +48,7 @@ class NEHOGGradient : public IFunction
 {
 public:
     /** Default constructor */
-    NEHOGGradient();
+    NEHOGGradient(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source, destinations, phase type and border mode
      *
      * @param[in, out] input                 Input tensor. Data type supported: U8.
@@ -63,6 +65,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                _memory_group;
     NEDerivative               _derivative;
     std::unique_ptr<INEKernel> _mag_phase;
     Tensor                     _gx;

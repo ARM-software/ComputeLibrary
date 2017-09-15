@@ -28,6 +28,8 @@
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <cstdint>
@@ -55,7 +57,7 @@ public:
      *
      * Initialize Sobel kernel to nullptr.
      */
-    NECannyEdge();
+    NECannyEdge(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NECannyEdge(const NECannyEdge &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -80,6 +82,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                   _memory_group;        /**< Function's memory group */
     std::unique_ptr<IFunction>    _sobel;               /**< Pointer to Sobel kernel */
     std::unique_ptr<INEKernel>    _gradient;            /**< Gradient kernel */
     NEEdgeNonMaxSuppressionKernel _non_max_suppr;       /**< Non-Maxima suppression kernel */

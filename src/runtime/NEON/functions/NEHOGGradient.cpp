@@ -30,8 +30,9 @@
 
 using namespace arm_compute;
 
-NEHOGGradient::NEHOGGradient() // NOLINT
-    : _derivative(),
+NEHOGGradient::NEHOGGradient(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _derivative(),
       _mag_phase(nullptr),
       _gx(),
       _gy()
@@ -50,6 +51,10 @@ void NEHOGGradient::configure(ITensor *input, ITensor *output_magnitude, ITensor
     TensorInfo info(shape_img, Format::S16);
     _gx.allocator()->init(info);
     _gy.allocator()->init(info);
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_gx);
+    _memory_group.manage(&_gy);
 
     // Initialise derivate kernel
     _derivative.configure(input, &_gx, &_gy, border_mode, constant_border_value);
@@ -75,9 +80,13 @@ void NEHOGGradient::configure(ITensor *input, ITensor *output_magnitude, ITensor
 
 void NEHOGGradient::run()
 {
+    _memory_group.acquire();
+
     // Run derivative
     _derivative.run();
 
     // Run magnitude/phase kernel
     NEScheduler::get().schedule(_mag_phase.get(), Window::DimY);
+
+    _memory_group.release();
 }

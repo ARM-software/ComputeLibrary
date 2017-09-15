@@ -48,8 +48,8 @@ void NEConvolution3x3::configure(ITensor *input, ITensor *output, const int16_t 
 }
 
 template <unsigned int matrix_size>
-NEConvolutionSquare<matrix_size>::NEConvolutionSquare()
-    : _tmp(), _is_separable(false), _kernel_hor(), _kernel_vert(), _kernel(), _border_handler()
+NEConvolutionSquare<matrix_size>::NEConvolutionSquare(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _tmp(), _is_separable(false), _kernel_hor(), _kernel_vert(), _kernel(), _border_handler()
 {
 }
 
@@ -72,6 +72,10 @@ void NEConvolutionSquare<matrix_size>::configure(ITensor *input, ITensor *output
 
         _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, intermediate_type));
 
+        // Manage intermediate buffers
+        _memory_group.manage(&_tmp);
+
+        // Calculate scale
         if(scale == 0)
         {
             scale = calculate_matrix_scale(conv, matrix_size);
@@ -98,8 +102,12 @@ void                   NEConvolutionSquare<matrix_size>::run()
 
     if(_is_separable)
     {
+        _memory_group.acquire();
+
         NEScheduler::get().schedule(&_kernel_hor, Window::DimY);
         NEScheduler::get().schedule(&_kernel_vert, Window::DimY);
+
+        _memory_group.release();
     }
     else
     {

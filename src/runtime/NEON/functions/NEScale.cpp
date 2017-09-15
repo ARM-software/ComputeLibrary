@@ -27,10 +27,10 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "support/ToolchainSupport.h"
 
@@ -86,10 +86,13 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
 }
 } // namespace
 
-NEScale::NEScale() // NOLINT
-    : _offsets(),
+NEScale::NEScale(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _offsets(),
       _dx(),
-      _dy()
+      _dy(),
+      _scale_kernel(),
+      _border_handler()
 {
 }
 
@@ -119,8 +122,6 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         policy = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
 
-    auto k = arm_compute::support::cpp14::make_unique<NEScaleKernel>();
-
     // Check if the border mode is UNDEFINED
     const bool border_undefined = border_mode == BorderMode::UNDEFINED;
 
@@ -130,8 +131,9 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         {
             TensorInfo tensor_info_offsets(shape, Format::S32);
             _offsets.allocator()->init(tensor_info_offsets);
+            _memory_group.manage(&_offsets);
 
-            k->configure(input, nullptr, nullptr, &_offsets, output, policy, border_undefined);
+            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_undefined);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -149,7 +151,12 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dx.allocator()->init(tensor_info_dxdy);
             _dy.allocator()->init(tensor_info_dxdy);
 
-            k->configure(input, &_dx, &_dy, &_offsets, output, policy, border_undefined);
+            // Manage intermediate buffers
+            _memory_group.manage(&_offsets);
+            _memory_group.manage(&_dx);
+            _memory_group.manage(&_dy);
+
+            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_undefined);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -162,13 +169,22 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         }
         case InterpolationPolicy::AREA:
         {
-            k->configure(input, nullptr, nullptr, nullptr, output, policy, border_undefined);
+            _scale_kernel.configure(input, nullptr, nullptr, nullptr, output, policy, border_undefined);
             break;
         }
         default:
             ARM_COMPUTE_ERROR("Unsupported interpolation mode");
     }
 
-    _kernel = std::move(k);
-    _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler.configure(input, _scale_kernel.border_size(), border_mode, PixelValue(constant_border_value));
+}
+
+void NEScale::run()
+{
+    _memory_group.acquire();
+
+    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
+    NEScheduler::get().schedule(&_scale_kernel, Window::DimY);
+
+    _memory_group.release();
 }

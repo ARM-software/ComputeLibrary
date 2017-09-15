@@ -37,8 +37,9 @@
 
 using namespace arm_compute;
 
-NEOpticalFlow::NEOpticalFlow() // NOLINT
-    : _func_scharr(),
+NEOpticalFlow::NEOpticalFlow(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _func_scharr(),
       _kernel_tracker(),
       _scharr_gx(),
       _scharr_gy(),
@@ -97,6 +98,10 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
         _scharr_gx[i].allocator()->init(tensor_info);
         _scharr_gy[i].allocator()->init(tensor_info);
 
+        // Manage intermediate buffers
+        _memory_group.manage(_scharr_gx.get() + i);
+        _memory_group.manage(_scharr_gy.get() + i);
+
         // Init Scharr kernel
         _func_scharr[i].configure(old_ith_input, _scharr_gx.get() + i, _scharr_gy.get() + i, border_mode, constant_border_value);
 
@@ -116,6 +121,8 @@ void NEOpticalFlow::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_num_levels == 0, "Unconfigured function");
 
+    _memory_group.acquire();
+
     for(unsigned int level = _num_levels; level > 0; --level)
     {
         // Run Scharr kernel
@@ -124,4 +131,6 @@ void NEOpticalFlow::run()
         // Run Lucas-Kanade kernel
         NEScheduler::get().schedule(_kernel_tracker.get() + level - 1, Window::DimX);
     }
+
+    _memory_group.release();
 }

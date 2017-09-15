@@ -29,9 +29,12 @@
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NENormalizationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
-#include "arm_compute/core/Types.h"
+#include <memory>
 
 namespace arm_compute
 {
@@ -48,7 +51,7 @@ class NENormalizationLayer : public IFunction
 {
 public:
     /** Default constructor */
-    NENormalizationLayer();
+    NENormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
@@ -62,6 +65,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                     _memory_group;    /**< Function memory group */
     NENormalizationLayerKernel      _norm_kernel;     /**< Normalization layer kernel */
     NEPixelWiseMultiplicationKernel _multiply_kernel; /**< Pixel multiplication kernel */
     NEFillBorderKernel              _border_handler;  /**< Kernel to handle  borders */
