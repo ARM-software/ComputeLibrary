@@ -38,8 +38,8 @@
 
 using namespace arm_compute;
 
-CLGEMM::CLGEMM()
-    : _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _is_interleaved_transposed(false), _run_addition(false)
+CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _is_interleaved_transposed(false), _run_addition(false)
 {
 }
 
@@ -86,6 +86,10 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type(), b->info()->fixed_point_position());
         _tmp_b.allocator()->init(info_b);
 
+        // Manage intermediate buffers
+        _memory_group.manage(&_tmp_a);
+        _memory_group.manage(&_tmp_b);
+
         // Configure interleave kernel
         _interleave_kernel.configure(a, &_tmp_a);
 
@@ -115,6 +119,8 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 
 void CLGEMM::run()
 {
+    _memory_group.acquire();
+
     if(_is_interleaved_transposed)
     {
         // Run interleave kernel
@@ -132,4 +138,6 @@ void CLGEMM::run()
     {
         CLScheduler::get().enqueue(_ma_kernel);
     }
+
+    _memory_group.release();
 }

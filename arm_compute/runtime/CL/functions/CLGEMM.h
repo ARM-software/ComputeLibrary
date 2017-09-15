@@ -29,8 +29,12 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -48,7 +52,7 @@ class CLGEMM : public IFunction
 {
 public:
     /** Default constructor. */
-    CLGEMM();
+    CLGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the kernel's inputs and output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
@@ -70,6 +74,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup              _memory_group;
     CLGEMMInterleave4x4Kernel  _interleave_kernel;
     CLGEMMTranspose1xWKernel   _transpose_kernel;
     CLGEMMMatrixMultiplyKernel _mm_kernel;

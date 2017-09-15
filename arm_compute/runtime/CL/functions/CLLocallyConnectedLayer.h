@@ -31,7 +31,11 @@
 #include "arm_compute/core/CL/kernels/CLLocallyConnectedMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -48,7 +52,7 @@ class CLLocallyConnectedLayer : public IFunction
 {
 public:
     /** Default constructor */
-    CLLocallyConnectedLayer();
+    CLLocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -66,6 +70,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup                          _memory_group;
     CLIm2ColKernel                         _input_im2col_kernel;
     CLWeightsReshapeKernel                 _weights_reshape_kernel;
     CLLocallyConnectedMatrixMultiplyKernel _mm_kernel;

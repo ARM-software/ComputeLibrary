@@ -35,8 +35,8 @@
 
 using namespace arm_compute;
 
-CLReductionOperation::CLReductionOperation()
-    : _sums_vector(), _reduction_kernels_vector(), _border_handlers_vector(), _num_of_stages()
+CLReductionOperation::CLReductionOperation(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _sums_vector(), _reduction_kernels_vector(), _border_handlers_vector(), _num_of_stages()
 {
 }
 
@@ -59,6 +59,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
         shape.set(0, ceil(shape.x() / 128.f));
         auto *tensor = new CLTensor;
         tensor->allocator()->init(TensorInfo(shape, input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+        _memory_group.manage(tensor);
         _sums_vector.push_back(tensor);
     }
 
@@ -76,9 +77,13 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
 
 void CLReductionOperation::run()
 {
+    _memory_group.acquire();
+
     for(unsigned int i = 0; i < _num_of_stages; ++i)
     {
         CLScheduler::get().enqueue(_border_handlers_vector[i], false);
         CLScheduler::get().enqueue(_reduction_kernels_vector[i], false);
     }
+
+    _memory_group.release();
 }

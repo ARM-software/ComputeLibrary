@@ -34,13 +34,16 @@
 
 using namespace arm_compute;
 
-CLL2Normalize::CLL2Normalize()
-    : _reduce_func(), _normalize_kernel(), _sumsq()
+CLL2Normalize::CLL2Normalize(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _reduce_func(), _normalize_kernel(), _sumsq()
 {
 }
 
 void CLL2Normalize::configure(ICLTensor *input, ICLTensor *output, unsigned int axis, float epsilon)
 {
+    // Manage intermediate buffers
+    _memory_group.manage(&_sumsq);
+
     // Configure kernels
     _reduce_func.configure(input, &_sumsq, axis, ReductionOperation::SUM_SQUARE);
     _normalize_kernel.configure(input, &_sumsq, output, axis, epsilon);
@@ -51,6 +54,10 @@ void CLL2Normalize::configure(ICLTensor *input, ICLTensor *output, unsigned int 
 
 void CLL2Normalize::run()
 {
+    _memory_group.acquire();
+
     _reduce_func.run();
     CLScheduler::get().enqueue(_normalize_kernel, true);
+
+    _memory_group.release();
 }

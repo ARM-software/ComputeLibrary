@@ -26,11 +26,14 @@
 
 #include "arm_compute/core/CL/kernels/CLL2NormalizeKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -42,7 +45,7 @@ class CLL2Normalize : public IFunction
 {
 public:
     /** Constructor */
-    CLL2Normalize();
+    CLL2Normalize(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
 
     /** Set the input and output tensors.
      *
@@ -57,6 +60,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup        _memory_group;
     CLReductionOperation _reduce_func;
     CLL2NormalizeKernel  _normalize_kernel;
     CLTensor             _sumsq;

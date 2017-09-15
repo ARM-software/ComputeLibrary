@@ -47,8 +47,8 @@ void CLConvolution3x3::configure(ICLTensor *input, ICLTensor *output, const int1
 }
 
 template <unsigned int matrix_size>
-CLConvolutionSquare<matrix_size>::CLConvolutionSquare()
-    : _tmp(), _is_separable(false), _kernel_hor(), _kernel_vert(), _kernel(), _border_handler()
+CLConvolutionSquare<matrix_size>::CLConvolutionSquare(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _tmp(), _is_separable(false), _kernel_hor(), _kernel_vert(), _kernel(), _border_handler()
 {
 }
 
@@ -65,6 +65,9 @@ void CLConvolutionSquare<matrix_size>::configure(ICLTensor *input, ICLTensor *ou
     {
         std::pair<DataType, DataType> type_pair = data_type_for_convolution(conv_col, conv_row, matrix_size);
         _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, type_pair.first));
+
+        // Manage intermediate buffers
+        _memory_group.manage(&_tmp);
 
         if(scale == 0)
         {
@@ -92,8 +95,12 @@ void                   CLConvolutionSquare<matrix_size>::run()
 
     if(_is_separable)
     {
+        _memory_group.acquire();
+
         CLScheduler::get().enqueue(_kernel_hor, false);
         CLScheduler::get().enqueue(_kernel_vert);
+
+        _memory_group.release();
     }
     else
     {

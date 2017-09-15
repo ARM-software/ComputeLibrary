@@ -33,8 +33,9 @@
 
 using namespace arm_compute;
 
-CLLocallyConnectedLayer::CLLocallyConnectedLayer()
-    : _input_im2col_kernel(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(), _is_first_run(false)
+CLLocallyConnectedLayer::CLLocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(),
+      _is_first_run(false)
 {
 }
 
@@ -99,6 +100,10 @@ void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor 
     shape_gemm.set(1, mat_input_rows);
     _gemm_output.allocator()->init(TensorInfo(shape_gemm, 1, input->info()->data_type()));
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_input_im2col_reshaped);
+    _memory_group.manage(&_gemm_output);
+
     // Configure kernels
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(conv_w, conv_h), conv_info, _has_bias);
     _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
@@ -120,6 +125,8 @@ void CLLocallyConnectedLayer::run()
         CLScheduler::get().enqueue(_weights_reshape_kernel);
     }
 
+    _memory_group.acquire();
+
     // Run input reshaping
     CLScheduler::get().enqueue(_input_im2col_kernel);
 
@@ -128,4 +135,6 @@ void CLLocallyConnectedLayer::run()
 
     // Reshape output matrix
     CLScheduler::get().enqueue(_output_col2im_kernel, false);
+
+    _memory_group.release();
 }

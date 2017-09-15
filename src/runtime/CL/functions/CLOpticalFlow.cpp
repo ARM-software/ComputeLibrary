@@ -37,8 +37,9 @@
 
 using namespace arm_compute;
 
-CLOpticalFlow::CLOpticalFlow() // NOLINT
-    : _tracker_init_kernel(),
+CLOpticalFlow::CLOpticalFlow(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _tracker_init_kernel(),
       _tracker_stage0_kernel(),
       _tracker_stage1_kernel(),
       _tracker_finalize_kernel(),
@@ -116,6 +117,10 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
         _scharr_gx[i].allocator()->init(tensor_info);
         _scharr_gy[i].allocator()->init(tensor_info);
 
+        // Manage intermediate buffers
+        _memory_group.manage(_scharr_gx.get() + i);
+        _memory_group.manage(_scharr_gy.get() + i);
+
         // Init Scharr kernel
         _func_scharr[i].configure(old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);
 
@@ -144,6 +149,8 @@ void CLOpticalFlow::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_num_levels == 0, "Unconfigured function");
 
+    _memory_group.acquire();
+
     for(unsigned int level = _num_levels; level > 0; --level)
     {
         // Run Scharr kernel
@@ -160,4 +167,6 @@ void CLOpticalFlow::run()
     }
 
     CLScheduler::get().enqueue(_tracker_finalize_kernel, true);
+
+    _memory_group.release();
 }

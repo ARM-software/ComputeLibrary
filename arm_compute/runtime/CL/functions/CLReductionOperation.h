@@ -27,8 +27,10 @@
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 #include <cstdint>
 #include <memory>
@@ -44,7 +46,7 @@ class CLReductionOperation : public IFunction
 {
 public:
     /* Constructor */
-    CLReductionOperation();
+    CLReductionOperation(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
 
     /** Set the input and output tensors.
      *
@@ -59,6 +61,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup                                 _memory_group;
     std::vector<CLTensor *>                       _sums_vector{ nullptr };
     std::unique_ptr<CLReductionOperationKernel[]> _reduction_kernels_vector{ nullptr };
     std::unique_ptr<CLFillBorderKernel[]>         _border_handlers_vector{ nullptr };
