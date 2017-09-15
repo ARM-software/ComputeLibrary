@@ -128,33 +128,6 @@ private:
     RoundingPolicy       _rounding_policy;
 };
 
-// Batch Normalization Layer visitor
-struct batch_normalization_layer_visitor : public boost::static_visitor<>
-{
-public:
-    explicit batch_normalization_layer_visitor(const TensorVariant &in, const TensorVariant &mean, const TensorVariant &var, const TensorVariant &beta, const TensorVariant &gamma, float epsilon,
-                                               int fixed_point_position = 0)
-        : _in(in), _mean(mean), _var(var), _beta(beta), _gamma(gamma), _epsilon(epsilon), _fixed_point_position(fixed_point_position)
-    {
-    }
-
-    template <typename T>
-    void operator()(Tensor<T> &out) const
-    {
-        const Tensor<T> &in    = boost::get<Tensor<T>>(_in);
-        const Tensor<T> &mean  = boost::get<Tensor<T>>(_mean);
-        const Tensor<T> &var   = boost::get<Tensor<T>>(_var);
-        const Tensor<T> &beta  = boost::get<Tensor<T>>(_beta);
-        const Tensor<T> &gamma = boost::get<Tensor<T>>(_gamma);
-        tensor_operations::batch_normalization_layer(in, out, mean, var, beta, gamma, _epsilon, _fixed_point_position);
-    }
-
-private:
-    const TensorVariant &_in, &_mean, &_var, &_beta, &_gamma;
-    float                _epsilon;
-    int                  _fixed_point_position;
-};
-
 // ROI Pooling layer
 struct roi_pooling_layer_visitor : public boost::static_visitor<>
 {

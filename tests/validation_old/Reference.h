@@ -204,17 +204,6 @@ public:
     static RawTensor compute_reference_warp_perspective(const TensorShape &shape, RawTensor &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode,
                                                         uint8_t constant_border_value);
 
-    /** Compute reference batch normalization layer.
-     *
-     * @param[in] shape0               Shape of the input and output tensors.
-     * @param[in] shape1               Shape of the vector tensors.
-     * @param[in] dt                   Data type of all input and output tensors.
-     * @param[in] epsilon              Small value to avoid division with zero.
-     * @param[in] fixed_point_position Fixed point position.
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position = 0);
     /** Compute reference roi pooling layer.
      *
      * @param[in] shape     Shape of the input tensor.

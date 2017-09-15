@@ -198,20 +198,6 @@ public:
      * @param[in]  constant_border_value Constant value to use for borders if border_mode is set to CONSTANT.
      */
     static void warp_perspective(const RawTensor &src, RawTensor &dst, RawTensor &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value);
-
-    /** Batch Normalization of @p src based on the information from @p norm_info.
-     *
-     * @param[in]  src                  Input tensor.
-     * @param[out] dst                  Result tensor.
-     * @param[out] mean                 Mean vector tensor.
-     * @param[out] var                  Var vector tensor.
-     * @param[out] beta                 Beta vector tensor.
-     * @param[out] gamma                Gamma vector tensor.
-     * @param[in]  epsilon              Small value to avoid division with zero.
-     * @param[in]  fixed_point_position Fixed point position.
-     */
-    static void batch_normalization_layer(const RawTensor &src, RawTensor &dst, const RawTensor &mean, const RawTensor &var, const RawTensor &beta, const RawTensor &gamma, float epsilon,
-                                          int fixed_point_position = 0);
     /** ROI Pooling layer of @p src based on the information from @p pool_info and @p rois.
      *
      * @param[in]  src       Input tensor.

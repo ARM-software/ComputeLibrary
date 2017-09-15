@@ -284,68 +284,6 @@ RawTensor Reference::compute_reference_warp_perspective(const TensorShape &shape
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_batch_normalization_layer(const TensorShape &shape0, const TensorShape &shape1, DataType dt, float epsilon, int fixed_point_position)
-{
-    // Create reference
-    RawTensor ref_src(shape0, dt, 1, fixed_point_position);
-    RawTensor ref_dst(shape0, dt, 1, fixed_point_position);
-    RawTensor ref_mean(shape1, dt, 1, fixed_point_position);
-    RawTensor ref_var(shape1, dt, 1, fixed_point_position);
-    RawTensor ref_beta(shape1, dt, 1, fixed_point_position);
-    RawTensor ref_gamma(shape1, dt, 1, fixed_point_position);
-
-    // Fill tensors
-    switch(dt)
-    {
-        case DataType::QS8:
-        {
-            const std::pair<int8_t, int8_t> bounds = get_batchnormalization_layer_test_bounds<int8_t>(fixed_point_position);
-            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
-            std::uniform_int_distribution<> distribution_var(0, bounds.second);
-            fill_tensors(distribution, { 0, 1, 3, 4 }, &ref_src, &ref_mean, &ref_beta, &ref_gamma);
-            fill_tensors(distribution_var, { 0 }, &ref_var);
-            break;
-        }
-        case DataType::QS16:
-        {
-            const std::pair<int16_t, int16_t> bounds = get_batchnormalization_layer_test_bounds<int16_t>(fixed_point_position);
-            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
-            std::uniform_int_distribution<> distribution_var(0, bounds.second);
-            fill_tensors(distribution, { 0, 1, 3, 4 }, &ref_src, &ref_mean, &ref_beta, &ref_gamma);
-            fill_tensors(distribution_var, { 0 }, &ref_var);
-            break;
-        }
-        case DataType::F16:
-        {
-            const std::pair<half_float::half, half_float::half> bounds = get_batchnormalization_layer_test_bounds<half_float::half>();
-            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
-            std::uniform_real_distribution<> distribution_var(0, bounds.second);
-            fill_tensors(distribution, { 0, 1, 3, 4 }, &ref_src, &ref_mean, &ref_beta, &ref_gamma);
-            fill_tensors(distribution_var, { 0 }, &ref_var);
-            break;
-        }
-        case DataType::F32:
-        {
-            const std::pair<float, float> bounds = get_batchnormalization_layer_test_bounds<float>();
-            std::uniform_real_distribution<> distribution(bounds.first, bounds.second);
-            std::uniform_real_distribution<> distribution_var(0, bounds.second);
-            fill_tensors(distribution, { 0, 1, 3, 4 }, &ref_src, &ref_mean, &ref_beta, &ref_gamma);
-            fill_tensors(distribution_var, { 0 }, &ref_var);
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Not supported");
-            break;
-        }
-    }
-
-    // Compute reference
-    ReferenceCPP::batch_normalization_layer(ref_src, ref_dst, ref_mean, ref_var, ref_beta, ref_gamma, epsilon, fixed_point_position);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
 {
     TensorShape shape_dst;

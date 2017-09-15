@@ -212,19 +212,6 @@ void ReferenceCPP::warp_perspective(const RawTensor &src, RawTensor &dst, RawTen
     tensor_operations::warp_perspective(s, d, vmask, matrix, policy, border_mode, constant_border_value);
 }
 
-// Batch Normalization Layer
-void ReferenceCPP::batch_normalization_layer(const RawTensor &src, RawTensor &dst, const RawTensor &mean, const RawTensor &var, const RawTensor &beta, const RawTensor &gamma, float epsilon,
-                                             int fixed_point_position)
-{
-    const TensorVariant s = TensorFactory::get_tensor(src);
-    TensorVariant       d = TensorFactory::get_tensor(dst);
-    const TensorVariant m = TensorFactory::get_tensor(mean);
-    const TensorVariant v = TensorFactory::get_tensor(var);
-    const TensorVariant b = TensorFactory::get_tensor(beta);
-    const TensorVariant g = TensorFactory::get_tensor(gamma);
-    boost::apply_visitor(tensor_visitors::batch_normalization_layer_visitor(s, m, v, b, g, epsilon, fixed_point_position), d);
-}
-
 // ROI Pooling Layer
 void ReferenceCPP::roi_pooling_layer(const RawTensor &src, RawTensor &dst, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
 {

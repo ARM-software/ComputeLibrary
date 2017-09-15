@@ -202,6 +202,31 @@ void fill_lookuptable(T &&table)
         table[i] = distribution(generator);
     }
 }
+
+/** Helper function to get the testing range for batch normalization layer.
+ *
+ * @param[in] fixed_point_position (Optional) Number of bits for the fractional part. Defaults to 1.
+ *
+ * @return A pair containing the lower upper testing bounds.
+ */
+template <typename T>
+std::pair<T, T> get_batchnormalization_layer_test_bounds(int fixed_point_position = 1)
+{
+    bool is_float = std::is_floating_point<T>::value;
+    std::pair<T, T> bounds;
+
+    // Set initial values
+    if(is_float)
+    {
+        bounds = std::make_pair(-1.f, 1.f);
+    }
+    else
+    {
+        bounds = std::make_pair(1, 1 << (fixed_point_position));
+    }
+
+    return bounds;
+}
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
