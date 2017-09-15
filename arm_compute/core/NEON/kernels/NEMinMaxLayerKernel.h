@@ -26,9 +26,9 @@
 #define __ARM_COMPUTE_NEMINMAXLAYERKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "support/Mutex.h"
 
 #include <cstdint>
-#include <mutex>
 
 namespace arm_compute
 {
@@ -71,7 +71,7 @@ private:
     void update_min_max(float *out_ptr, float min, float max);
     const ITensor *_input;
     ITensor       *_output;
-    std::mutex     _mtx;
+    Mutex          _mtx;
 };
 }
 #endif /* __ARM_COMPUTE_NEMINMAXLAYERKERNEL_H__ */

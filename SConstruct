@@ -124,9 +124,10 @@ elif env['arch'] == 'arm64-v8a':
 elif env['arch'] == 'arm64-v8.2-a':
     env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16+simd'])
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
-
-    if env['os'] in ['linux', 'bare_metal']:
+    if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
+    elif env['os'] == 'bare_metal':
+        prefix = "aarch64-elf-"
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
 elif env['arch'] == 'x86_32':
@@ -218,4 +219,5 @@ if env['opencl']:
 if env['examples']:
     SConscript('./examples/SConscript', variant_dir='#build/%s/examples' % env['build_dir'], duplicate=0)
 
-SConscript('./tests/SConscript', variant_dir='#build/%s/tests' % env['build_dir'], duplicate=0)
+if env['os'] != 'bare_metal':
+    SConscript('./tests/SConscript', variant_dir='#build/%s/tests' % env['build_dir'], duplicate=0)
