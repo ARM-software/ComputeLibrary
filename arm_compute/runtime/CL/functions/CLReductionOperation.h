@@ -62,7 +62,7 @@ public:
 
 private:
     CLMemoryGroup                                 _memory_group;
-    std::vector<CLTensor *>                       _sums_vector{ nullptr };
+    std::unique_ptr<CLTensor[]>                   _sums_vector{ nullptr };
     std::unique_ptr<CLReductionOperationKernel[]> _reduction_kernels_vector{ nullptr };
     std::unique_ptr<CLFillBorderKernel[]>         _border_handlers_vector{ nullptr };
     unsigned int                                  _num_of_stages;

@@ -49,6 +49,9 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
     // depending on the size of the input. Last stage should have only 1 WG.
     _num_of_stages = num_of_wg / 128 + 2;
 
+    // Create temporary tensors
+    _sums_vector = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_of_stages - 1);
+
     // Configure reduction operation kernels
     _reduction_kernels_vector = arm_compute::support::cpp14::make_unique<CLReductionOperationKernel[]>(_num_of_stages);
     _border_handlers_vector   = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(_num_of_stages);
@@ -57,22 +60,28 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
     for(unsigned int i = 0; i < _num_of_stages - 1; i++)
     {
         shape.set(0, ceil(shape.x() / 128.f));
-        auto *tensor = new CLTensor;
-        tensor->allocator()->init(TensorInfo(shape, input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
-        _memory_group.manage(tensor);
-        _sums_vector.push_back(tensor);
+        _sums_vector[i].allocator()->init(TensorInfo(shape, input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
     }
 
     // Apply ReductionOperation only on first kernel
-    _reduction_kernels_vector[0].configure(input, _sums_vector.at(0), axis, op);
+    _memory_group.manage(_sums_vector.get());
+    _reduction_kernels_vector[0].configure(input, _sums_vector.get(), axis, op);
     _border_handlers_vector[0].configure(input, _reduction_kernels_vector[0].border_size(), BorderMode::CONSTANT, PixelValue(0));
-    for(unsigned int i = 1; i < _num_of_stages; i++)
+
+    // Apply ReductionOperation on intermediate stages
+    for(unsigned int i = 1; i < _num_of_stages - 1; ++i)
     {
-        // Last sum vector is the output vector
-        _reduction_kernels_vector[i].configure(_sums_vector.at(i - 1), i == _num_of_stages - 1 ? output : _sums_vector.at(i), axis, ReductionOperation::SUM);
-        _border_handlers_vector[i].configure(_sums_vector.at(i - 1), _reduction_kernels_vector[i].border_size(), BorderMode::CONSTANT, PixelValue(0));
-        _sums_vector.at(i - 1)->allocator()->allocate();
+        _memory_group.manage(_sums_vector.get() + i);
+        _reduction_kernels_vector[i].configure(_sums_vector.get() + i - 1, _sums_vector.get() + i, axis, ReductionOperation::SUM);
+        _border_handlers_vector[i].configure(_sums_vector.get() + i - 1, _reduction_kernels_vector[i].border_size(), BorderMode::CONSTANT, PixelValue(0));
+        _sums_vector[i - 1].allocator()->allocate();
     }
+
+    // Apply ReductionOperation on the last stage
+    const unsigned int last_stage = _num_of_stages - 1;
+    _reduction_kernels_vector[last_stage].configure(_sums_vector.get() + last_stage - 1, output, axis, ReductionOperation::SUM);
+    _border_handlers_vector[last_stage].configure(_sums_vector.get() + last_stage - 1, _reduction_kernels_vector[last_stage].border_size(), BorderMode::CONSTANT, PixelValue(0));
+    _sums_vector[last_stage - 1].allocator()->allocate();
 }
 
 void CLReductionOperation::run()
