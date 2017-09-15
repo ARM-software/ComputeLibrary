@@ -27,40 +27,36 @@
 #include "arm_compute/core/Types.h"
 
 #include <map>
+#include <regex>
 #include <vector>
 
 namespace
 {
-arm_compute::GPUTarget get_bifrost_target(const std::string &name)
+arm_compute::GPUTarget get_bifrost_target(const std::string &version)
 {
-    arm_compute::GPUTarget target = arm_compute::GPUTarget::BIFROST;
-
-    if(name == "G7")
+    if(version == "70")
     {
-        target = arm_compute::GPUTarget::G70;
+        return arm_compute::GPUTarget::G70;
     }
-
-    return target;
+    else
+    {
+        return arm_compute::GPUTarget::BIFROST;
+    }
 }
 
-arm_compute::GPUTarget get_midgard_target(const std::string &name)
+arm_compute::GPUTarget get_midgard_target(const std::string &version)
 {
-    arm_compute::GPUTarget target = arm_compute::GPUTarget::MIDGARD;
-
-    if(name == "T6")
+    switch(version[0])
     {
-        target = arm_compute::GPUTarget::T600;
+        case '6':
+            return arm_compute::GPUTarget::T600;
+        case '7':
+            return arm_compute::GPUTarget::T700;
+        case '8':
+            return arm_compute::GPUTarget::T800;
+        default:
+            return arm_compute::GPUTarget::MIDGARD;
     }
-    else if(name == "T7")
-    {
-        target = arm_compute::GPUTarget::T700;
-    }
-    else if(name == "T8")
-    {
-        target = arm_compute::GPUTarget::T800;
-    }
-
-    return target;
 }
 } // namespace
 
@@ -160,49 +156,43 @@ const std::string &string_from_target(GPUTarget target)
 
 GPUTarget get_target_from_device(cl::Device &device)
 {
-    const std::string name_mali("Mali-");
-    GPUTarget         target{ GPUTarget::MIDGARD };
-
-    size_t            name_size = 0;
-    std::vector<char> name;
+    size_t name_size = 0;
 
     // Query device name size
     cl_int err = clGetDeviceInfo(device.get(), CL_DEVICE_NAME, 0, nullptr, &name_size);
     ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (name_size == 0), "clGetDeviceInfo failed to return valid information");
-    // Resize vector
-    name.resize(name_size);
+
+    std::vector<char> name_buffer(name_size);
+
     // Query device name
-    err = clGetDeviceInfo(device.get(), CL_DEVICE_NAME, name_size, name.data(), nullptr);
+    err = clGetDeviceInfo(device.get(), CL_DEVICE_NAME, name_size, name_buffer.data(), nullptr);
     ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetDeviceInfo failed to return valid information");
     ARM_COMPUTE_UNUSED(err);
 
-    std::string name_str(name.begin(), name.end());
-    auto        pos = name_str.find(name_mali);
+    std::regex  mali_regex(R"(Mali-([TG])(\d+))");
+    std::string device_name(name_buffer.begin(), name_buffer.end());
+    std::smatch name_parts;
+    const bool  found_mali = std::regex_search(device_name, name_parts, mali_regex);
 
-    if(pos != std::string::npos)
+    if(!found_mali)
     {
-        ARM_COMPUTE_ERROR_ON_MSG((pos + name_mali.size() + 2) > name_str.size(), "Device name is shorter than expected.");
-        std::string sub_name = name_str.substr(pos + name_mali.size(), 2);
+        ARM_COMPUTE_INFO("Can't find valid Mali GPU. Target is set to MIDGARD.");
+        return GPUTarget::MIDGARD;
+    }
 
-        if(sub_name[0] == 'G')
-        {
-            target = get_bifrost_target(sub_name);
-        }
-        else if(sub_name[0] == 'T')
-        {
-            target = get_midgard_target(sub_name);
-        }
-        else
-        {
+    const char         target  = name_parts.str(1)[0];
+    const std::string &version = name_parts.str(2);
+
+    switch(target)
+    {
+        case 'T':
+            return get_midgard_target(version);
+        case 'G':
+            return get_bifrost_target(version);
+        default:
             ARM_COMPUTE_INFO("Mali GPU unknown. Target is set to the default one.");
-        }
+            return GPUTarget::MIDGARD;
     }
-    else
-    {
-        ARM_COMPUTE_INFO("Can't find valid Mali GPU. Target is set to the default one.");
-    }
-
-    return target;
 }
 
 GPUTarget get_arch_from_target(GPUTarget target)
