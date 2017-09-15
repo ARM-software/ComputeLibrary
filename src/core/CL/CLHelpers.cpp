@@ -33,7 +33,7 @@ namespace
 {
 arm_compute::GPUTarget get_bifrost_target(const std::string &name)
 {
-    arm_compute::GPUTarget target = arm_compute::GPUTarget::MIDGARD;
+    arm_compute::GPUTarget target = arm_compute::GPUTarget::BIFROST;
 
     if(name == "G7")
     {
