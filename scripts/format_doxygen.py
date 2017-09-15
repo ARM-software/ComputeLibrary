@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# FIXME: Remove before the release
 
 import os.path
 import re

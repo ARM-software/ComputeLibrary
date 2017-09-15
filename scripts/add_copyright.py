@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#FIXME: Remove this file before the release
 
 import glob
 import os.path

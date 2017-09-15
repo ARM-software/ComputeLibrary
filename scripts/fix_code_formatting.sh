@@ -1,4 +1,5 @@
 #!/bin/bash
+#FIXME: Remove this file before the release
 
 ASTYLE_PARAMETERS=" --style=ansi \
 	--indent=spaces \

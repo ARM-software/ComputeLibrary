@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#FIXME: Remove this file before the release
+
 import os
 import re
 import sys

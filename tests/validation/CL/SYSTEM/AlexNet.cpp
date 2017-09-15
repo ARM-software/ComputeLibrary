@@ -21,8 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef INTERNAL_ONLY //FIXME Delete this file before the release
-
 #include "arm_compute/runtime/CL/CLSubTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
@@ -112,4 +110,3 @@ TEST_SUITE_END()
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* INTERNAL_ONLY */

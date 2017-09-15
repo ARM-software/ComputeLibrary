@@ -378,7 +378,6 @@ public:
         }
     }
 
-#ifdef INTERNAL_ONLY
     /** Fills the trainable parameters from binary files
      *
      * @param weights Files names containing the weights data
@@ -405,7 +404,6 @@ public:
     {
         library->fill_layer_data(Accessor(input), name);
     }
-#endif /* INTERNAL_ONLY */
 
     /** Get the classification results.
      *
