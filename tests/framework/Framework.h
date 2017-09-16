@@ -316,6 +316,7 @@ private:
     std::set<InstrumentType> _instruments{ InstrumentType::NONE };
     TestFilter               _test_filter{};
     LogLevel                 _log_level{ LogLevel::ALL };
+    const TestInfo          *_current_test_info{ nullptr };
     TestResult              *_current_test_result{ nullptr };
     std::vector<std::string> _test_info{};
 };

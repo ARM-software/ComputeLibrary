@@ -165,16 +165,17 @@ void Framework::log_test_end(const TestInfo &info)
 
 void Framework::log_failed_expectation(const TestError &error)
 {
+    ARM_COMPUTE_ERROR_ON(_current_test_info == nullptr);
+    ARM_COMPUTE_ERROR_ON(_current_test_result == nullptr);
+
+    const bool is_expected_failure = _current_test_info->status == TestCaseFactory::Status::EXPECTED_FAILURE;
+
     if(_log_level >= error.level() && _printer != nullptr)
     {
-        constexpr bool expected_error = true;
-        _printer->print_error(error, expected_error);
+        _printer->print_error(error, is_expected_failure);
     }
 
-    if(_current_test_result != nullptr)
-    {
-        _current_test_result->status = TestResult::Status::FAILED;
-    }
+    _current_test_result->status = TestResult::Status::FAILED;
 }
 
 void Framework::log_info(const std::string &info)
@@ -229,6 +230,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     Profiler   profiler = get_profiler();
     TestResult result(TestResult::Status::NOT_RUN);
 
+    _current_test_info   = &info;
     _current_test_result = &result;
 
     if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
@@ -236,7 +238,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         _printer->print_errors_header();
     }
 
-    const bool is_expected_failure = test_factory.status() == TestCaseFactory::Status::EXPECTED_FAILURE;
+    const bool is_expected_failure = info.status == TestCaseFactory::Status::EXPECTED_FAILURE;
 
     try
     {
@@ -363,6 +365,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         _printer->print_errors_footer();
     }
 
+    _current_test_info   = nullptr;
     _current_test_result = nullptr;
 
     if(result.status == TestResult::Status::FAILED)
