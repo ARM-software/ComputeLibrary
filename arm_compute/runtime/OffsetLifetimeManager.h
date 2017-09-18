@@ -21,35 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__
-#define __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__
+#ifndef __ARM_COMPUTE_OFFSETLIFETIMEMANAGER_H__
+#define __ARM_COMPUTE_OFFSETLIFETIMEMANAGER_H__
 
 #include "arm_compute/runtime/ISimpleLifetimeManager.h"
 
-#include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
-#include <memory>
+#include <map>
 #include <vector>
 
 namespace arm_compute
 {
+class IMemoryPool;
+
 /** Concrete class that tracks the lifetime of registered tensors and
- *  calculates the systems memory requirements in terms of blobs */
-class BlobLifetimeManager : public ISimpleLifetimeManager
+ *  calculates the systems memory requirements in terms of a single blob and a list of offsets */
+class OffsetLifetimeManager : public ISimpleLifetimeManager
 {
 public:
     /** Constructor */
-    BlobLifetimeManager();
+    OffsetLifetimeManager();
     /** Prevent instances of this class to be copy constructed */
-    BlobLifetimeManager(const BlobLifetimeManager &) = delete;
+    OffsetLifetimeManager(const OffsetLifetimeManager &) = delete;
     /** Prevent instances of this class to be copied */
-    BlobLifetimeManager &operator=(const BlobLifetimeManager &) = delete;
+    OffsetLifetimeManager &operator=(const OffsetLifetimeManager &) = delete;
     /** Allow instances of this class to be move constructed */
-    BlobLifetimeManager(BlobLifetimeManager &&) = default;
+    OffsetLifetimeManager(OffsetLifetimeManager &&) = default;
     /** Allow instances of this class to be moved */
-    BlobLifetimeManager &operator=(BlobLifetimeManager &&) = default;
+    OffsetLifetimeManager &operator=(OffsetLifetimeManager &&) = default;
 
     // Inherited methods overridden:
     std::unique_ptr<IMemoryPool> create_pool(IAllocator *allocator) override;
@@ -60,7 +61,7 @@ private:
     void update_blobs_and_mappings() override;
 
 private:
-    std::vector<size_t> _blobs; /**< Memory blobs' sizes */
+    size_t _blob; /**< Memory blob size */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__ */
+#endif /* __ARM_COMPUTE_OFFSETLIFETIMEMANAGER_H__ */

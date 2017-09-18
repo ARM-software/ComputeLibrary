@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/BlobLifetimeManager.h"
+#include "arm_compute/runtime/OffsetLifetimeManager.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/runtime/BlobMemoryPool.h"
 #include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
+#include "arm_compute/runtime/OffsetMemoryPool.h"
 #include "support/ToolchainSupport.h"
 
 #include <algorithm>
@@ -36,52 +36,41 @@
 
 using namespace arm_compute;
 
-BlobLifetimeManager::BlobLifetimeManager()
-    : _blobs()
+OffsetLifetimeManager::OffsetLifetimeManager()
+    : _blob(0)
 {
 }
 
-std::unique_ptr<IMemoryPool> BlobLifetimeManager::create_pool(IAllocator *allocator)
+std::unique_ptr<IMemoryPool> OffsetLifetimeManager::create_pool(IAllocator *allocator)
 {
     ARM_COMPUTE_ERROR_ON(allocator == nullptr);
-    return support::cpp14::make_unique<BlobMemoryPool>(allocator, _blobs);
+    return support::cpp14::make_unique<OffsetMemoryPool>(allocator, _blob);
 }
 
-MappingType BlobLifetimeManager::mapping_type() const
+MappingType OffsetLifetimeManager::mapping_type() const
 {
-    return MappingType::BLOBS;
+    return MappingType::OFFSETS;
 }
 
-void BlobLifetimeManager::update_blobs_and_mappings()
+void OffsetLifetimeManager::update_blobs_and_mappings()
 {
     ARM_COMPUTE_ERROR_ON(!are_all_finalized());
     ARM_COMPUTE_ERROR_ON(_active_group == nullptr);
 
-    // Sort active group requirements in descending order.
-    std::sort(std::begin(_active_elements), std::end(_active_elements), [](const Element & a, const Element & b)
+    // Update blob size
+    size_t max_group_size = std::accumulate(std::begin(_active_elements), std::end(_active_elements), static_cast<size_t>(0), [](size_t s, const Element & e)
     {
-        return a.size > b.size;
+        return s + e.size;
     });
-    std::vector<size_t> group_sizes;
-    std::transform(std::begin(_active_elements), std::end(_active_elements), std::back_inserter(group_sizes), [](const Element & e)
-    {
-        return e.size;
-    });
-
-    // Update blob sizes
-    size_t max_size = std::max(_blobs.size(), group_sizes.size());
-    _blobs.resize(max_size, 0);
-    group_sizes.resize(max_size, 0);
-    std::transform(std::begin(_blobs), std::end(_blobs), std::begin(group_sizes), std::begin(_blobs), [](size_t lhs, size_t rhs)
-    {
-        return std::max(lhs, rhs);
-    });
+    _blob = std::max(_blob, max_group_size);
 
     // Calculate group mappings
     auto &group_mappings = _active_group->mappings();
-    int   blob_idx       = 0;
+    size_t offset         = 0;
     for(auto &e : _active_elements)
     {
-        group_mappings[e.handle] = blob_idx++;
+        group_mappings[e.handle] = offset;
+        offset += e.size;
+        ARM_COMPUTE_ERROR_ON(offset > _blob);
     }
 }

@@ -21,43 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_BLOBMEMORYPOOL_H__
-#define __ARM_COMPUTE_BLOBMEMORYPOOL_H__
+#ifndef __ARM_COMPUTE_OFFSETMEMORYPOOL_H__
+#define __ARM_COMPUTE_OFFSETMEMORYPOOL_H__
 
 #include "arm_compute/runtime/IMemoryPool.h"
 
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
-#include <memory>
-#include <vector>
 
 namespace arm_compute
 {
 class IAllocator;
 
-/** Blob memory pool */
-class BlobMemoryPool : public IMemoryPool
+/** Offset based memory pool */
+class OffsetMemoryPool : public IMemoryPool
 {
 public:
     /** Default Constructor
      *
      * @note allocator should outlive the memory pool
      *
-     * @param[in] allocator  Backing memory allocator
-     * @param[in] blob_sizes Sizes of the blobs to be allocated
+     * @param[in] allocator Backing memory allocator
+     * @param[in] blob_size Size of the memory be allocated
      */
-    BlobMemoryPool(IAllocator *allocator, std::vector<size_t> blob_sizes);
+    OffsetMemoryPool(IAllocator *allocator, size_t blob_size);
     /** Default Destructor */
-    ~BlobMemoryPool();
+    ~OffsetMemoryPool();
     /** Prevent instances of this class to be copy constructed */
-    BlobMemoryPool(const BlobMemoryPool &) = delete;
+    OffsetMemoryPool(const OffsetMemoryPool &) = delete;
     /** Prevent instances of this class to be copy assigned */
-    BlobMemoryPool &operator=(const BlobMemoryPool &) = delete;
+    OffsetMemoryPool &operator=(const OffsetMemoryPool &) = delete;
     /** Allow instances of this class to be move constructed */
-    BlobMemoryPool(BlobMemoryPool &&) = default;
+    OffsetMemoryPool(OffsetMemoryPool &&) = default;
     /** Allow instances of this class to be move assigned */
-    BlobMemoryPool &operator=(BlobMemoryPool &&) = default;
+    OffsetMemoryPool &operator=(OffsetMemoryPool &&) = default;
 
     // Inherited methods overridden:
     void acquire(MemoryMappings &handles) override;
@@ -66,18 +64,9 @@ public:
     std::unique_ptr<IMemoryPool> duplicate() override;
 
 private:
-    /** Allocates internal blobs
-     *
-     * @param sizes Size of each blob
-     */
-    void allocate_blobs(const std::vector<size_t> &sizes);
-    /** Frees blobs **/
-    void free_blobs();
-
-private:
-    IAllocator         *_allocator;  /**< Allocator to use for internal allocation */
-    std::vector<void *> _blobs;      /**< Vector holding all the memory blobs */
-    std::vector<size_t> _blob_sizes; /**< Sizes of each blob */
+    IAllocator *_allocator; /**< Allocator to use for internal allocation */
+    void       *_blob;      /**< Memory blob */
+    size_t      _blob_size; /**< Sizes of the allocated memory blob */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_BLOBMEMORYPOOL_H__ */
+#endif /* __ARM_COMPUTE_OFFSETMEMORYPOOL_H__ */
