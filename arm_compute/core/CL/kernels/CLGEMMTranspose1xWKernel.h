@@ -78,5 +78,5 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMTRANSPOSE1XWKERNEL_H__ */

@@ -58,6 +58,5 @@ private:
     ICLTensor       *_accum;
     const ICLTensor *_biases;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGEMMMATRIXACCUMULATEBIASESKERNEL_H__ */

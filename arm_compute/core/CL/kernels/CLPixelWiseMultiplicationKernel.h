@@ -68,6 +68,5 @@ private:
     const ICLTensor *_input2;
     ICLTensor       *_output;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLPIXELWISEMULTIPLICATIONKERNEL_H__ */

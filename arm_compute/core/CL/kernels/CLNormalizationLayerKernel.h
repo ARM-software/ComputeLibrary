@@ -65,5 +65,5 @@ private:
     BorderSize       _border_size;
     bool             _is_in_map;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLNORMALIZATIONLAYERKERNEL_H__ */

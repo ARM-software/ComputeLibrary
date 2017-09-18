@@ -105,5 +105,5 @@ private:
     const ICLTensor *_sum;
     ICLTensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__ */

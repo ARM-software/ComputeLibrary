@@ -61,5 +61,5 @@ private:
     const ICLTensor *_input;  /**< Source tensor */
     ICLTensor       *_output; /**< Destination tensor */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLRESHAPELAYERKERNEL_H__ */

@@ -66,5 +66,5 @@ private:
     ICLTensor       *_output;
     const ICLTensor *_min_max;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLQUANTIZATIONLAYERKERNEL_H__ */

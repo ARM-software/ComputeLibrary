@@ -60,5 +60,5 @@ private:
     const ICLTensor *_input;
     ICLTensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLFLOORKERNEL_H__ */

@@ -70,5 +70,5 @@ private:
     const IImage      *_input;                   /**< Source image - Harris score */
     InternalKeypoint *_output;                   /**< Array of NEInternalKeypoint */
 };
-} //namespace arm_compute
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPPCORNERCANDIDATESKERNEL_H__ */

@@ -72,5 +72,5 @@ private:
     ICLTensor          *_output;
     ROIPoolingLayerInfo _pool_info;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLROIPOOLINGLAYERKERNEL_H__ */

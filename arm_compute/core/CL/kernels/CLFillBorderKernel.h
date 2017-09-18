@@ -73,5 +73,5 @@ public:
 private:
     ICLTensor *_tensor;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLFILLBORDERKERNEL_H__ */

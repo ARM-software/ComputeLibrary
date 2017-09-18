@@ -59,6 +59,5 @@ public:
      */
     void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H__ */

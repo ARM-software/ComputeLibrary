@@ -68,5 +68,5 @@ private:
     ReductionOperation _op;
     BorderSize         _border_size;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLREDUCTIONOPERATIONKERNEL_H__ */

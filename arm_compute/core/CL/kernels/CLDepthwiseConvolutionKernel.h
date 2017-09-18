@@ -68,5 +68,5 @@ private:
     unsigned int     _conv_pad_x;
     unsigned int     _conv_pad_y;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTIONKERNEL_H__ */

@@ -62,5 +62,5 @@ private:
     const ICLTensor *_biases;
     ICLTensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLWEIGHTSRESHAPEKERNEL_H__ */

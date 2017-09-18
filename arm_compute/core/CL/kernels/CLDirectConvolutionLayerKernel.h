@@ -84,5 +84,5 @@ private:
     int              _conv_stride_x;
     int              _conv_stride_y;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDIRECTCONVOLUTIONLAYERKERNEL_H__ */

@@ -81,6 +81,5 @@ private:
     ICLTensor       *_output;
     std::pair<unsigned int, unsigned int> _convolved_dims;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLCOL2IMKERNEL_H__ */

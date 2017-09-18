@@ -76,5 +76,5 @@ private:
     const ICLTensor *_input;
     ICLTensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMINTERLEAVE4X4KERNEL_H__ */

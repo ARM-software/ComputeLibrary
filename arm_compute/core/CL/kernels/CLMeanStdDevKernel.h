@@ -73,5 +73,5 @@ private:
     cl::Buffer     *_global_sum_squared;
     BorderSize      _border_size;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLMEANSTDDEVKERNEL_H__ */

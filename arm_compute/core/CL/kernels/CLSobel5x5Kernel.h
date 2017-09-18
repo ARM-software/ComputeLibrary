@@ -112,5 +112,5 @@ private:
     bool             _run_sobel_x; /**< Do we need to run sobel X? */
     bool             _run_sobel_y; /**< Do we need to run sobel Y? */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLSOBEL5X5KERNEL_H__ */

@@ -68,5 +68,5 @@ private:
     unsigned int     _axis;
     float            _epsilon;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLL2NORMALIZEKERNEL_H__ */

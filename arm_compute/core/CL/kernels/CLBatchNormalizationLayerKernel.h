@@ -76,5 +76,5 @@ private:
     const ICLTensor *_gamma;
     float            _epsilon;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLBATCHNORMALIZATIONLAYERKERNEL_H__ */

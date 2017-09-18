@@ -87,5 +87,5 @@ public:
      */
     void configure(const ICLTensor *input, uint32_t shift, ICLTensor *accum);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLACCUMULATEKERNEL_H__ */

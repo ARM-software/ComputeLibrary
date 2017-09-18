@@ -73,5 +73,5 @@ private:
     int              _left_right;
     unsigned int     _depth_offset;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLDEPTHCONCATENATEKERNEL_H__ */

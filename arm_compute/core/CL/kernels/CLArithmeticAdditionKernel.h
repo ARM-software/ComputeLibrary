@@ -68,5 +68,5 @@ private:
     const ICLTensor *_input2; /**< Source tensor 2 */
     ICLTensor       *_output; /**< Destination tensor */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLARITHMETICADDITIONKERNEL_H__ */

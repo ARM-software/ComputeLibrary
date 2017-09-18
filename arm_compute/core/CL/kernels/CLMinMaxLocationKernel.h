@@ -100,5 +100,5 @@ private:
     const ICLImage *_input;         /**< Input image. */
     cl::Buffer     *_min_max_count; /**< Minimum/maximum value occurrences. */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLMINMAXLOCATIONKERNEL_H__ */

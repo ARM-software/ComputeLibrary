@@ -105,6 +105,5 @@ private:
     unsigned int   _num_elems_processed_per_iteration;
     Im2ColFunction _run_func;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLIM2COLKERNEL_H__ */
