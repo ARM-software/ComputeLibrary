@@ -21,42 +21,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "CL/CLAccessor.h"
-#include "Utils.h"
-#include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/validation_old/Datasets.h"
-#include "tests/validation_old/Validation.h"
-#include "utils/TypePrinter.h"
-
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/CLTensorAllocator.h"
+#include "tests/CL/CLAccessor.h"
+#include "tests/Globals.h"
+#include "tests/datasets/BorderModeDataset.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
 
-#include "tests/validation_old/boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::validation;
-
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(CL)
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(FillBorder, BorderModes() * boost::unit_test::data::make({ PaddingSize{ 0 }, PaddingSize{ 1, 0, 1, 2 }, PaddingSize{ 10 } }), border_mode, padding)
+namespace arm_compute
 {
-    constexpr uint8_t border_value = 42U;
-    constexpr uint8_t tensor_value = 89U;
-    BorderSize        border_size{ 5 };
+namespace test
+{
+namespace validation
+{
+TEST_SUITE(CL)
+TEST_SUITE(FillBorder)
+
+// *INDENT-OFF*
+// clang-format off
+const auto PaddingSizesDataset = concat(concat(
+                                 framework::dataset::make("PaddingSize", PaddingSize{ 0 }),
+                                 framework::dataset::make("PaddingSize", PaddingSize{ 1, 0, 1, 2 })),
+                                 framework::dataset::make("PaddingSize", PaddingSize{ 10 }));
+
+const auto BorderSizesDataset  = framework::dataset::make("BorderSize", 0, 6);
+
+DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(combine(combine(combine(
+               datasets::SmallShapes(),
+               datasets::BorderModes()),
+               BorderSizesDataset),
+               PaddingSizesDataset),
+               framework::dataset::make("DataType", DataType::U8)),
+               shape, border_mode, size, padding, data_type)
+// clang-format on
+// *INDENT-ON*
+{
+    BorderSize border_size{ static_cast<unsigned int>(size) };
+
+    std::mt19937                           generator(library->seed());
+    std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
+    const uint8_t                          border_value = distribution_u8(generator);
+    const uint8_t                          tensor_value = distribution_u8(generator);
 
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(TensorShape{ 10U, 10U, 2U }, DataType::U8);
+    CLTensor src = create_tensor<CLTensor>(shape, data_type);
 
     src.info()->extend_padding(padding);
 
@@ -85,5 +96,8 @@ BOOST_DATA_TEST_CASE(FillBorder, BorderModes() * boost::unit_test::data::make({ 
     validate(CLAccessor(src), &tensor_value);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-#endif /* DOXYGEN_SKIP_THIS */
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

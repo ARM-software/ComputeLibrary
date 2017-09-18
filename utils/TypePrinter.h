@@ -578,6 +578,13 @@ inline std::string to_string(const BorderMode &mode)
     return str.str();
 }
 
+inline std::string to_string(const BorderSize &border)
+{
+    std::stringstream str;
+    str << border;
+    return str.str();
+}
+
 inline std::string to_string(const InterpolationPolicy &policy)
 {
     std::stringstream str;
