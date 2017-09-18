@@ -56,55 +56,6 @@ public:
         tensor_operations::absolute_difference(in1, in2, out);
     }
 };
-// Pixel-wise Multiplication visitor
-struct pixel_wise_multiplication_visitor : public boost::static_visitor<>
-{
-public:
-    explicit pixel_wise_multiplication_visitor(float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
-        : _scale(scale), _convert_policy(convert_policy), _rounding_policy(rounding_policy)
-    {
-    }
-
-    template <typename T1, typename T2, typename T3>
-    void operator()(const Tensor<T1> &in1, const Tensor<T2> &in2, Tensor<T3> &out) const
-    {
-        tensor_operations::pixel_wise_multiplication(in1, in2, out, _scale, _convert_policy, _rounding_policy);
-    }
-
-private:
-    float          _scale;
-    ConvertPolicy  _convert_policy;
-    RoundingPolicy _rounding_policy;
-};
-// Fixed Point Pixel-wise Multiplication visitor
-struct fixed_point_pixel_wise_multiplication_visitor : public boost::static_visitor<>
-{
-public:
-    explicit fixed_point_pixel_wise_multiplication_visitor(const TensorVariant &in1, const TensorVariant &in2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
-        : _in1(in1), _in2(in2), _scale(scale), _convert_policy(convert_policy), _rounding_policy(rounding_policy)
-    {
-    }
-
-    template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-    void operator()(Tensor<T> &out) const
-    {
-        const Tensor<T> &in1 = boost::get<Tensor<T>>(_in1);
-        const Tensor<T> &in2 = boost::get<Tensor<T>>(_in2);
-        tensor_operations::fixed_point_pixel_wise_multiplication(in1, in2, out, _scale, _convert_policy, _rounding_policy);
-    }
-    template < typename T, typename std::enable_if < !std::is_integral<T>::value, int >::type = 0 >
-    void operator()(Tensor<T> &out) const
-    {
-        ARM_COMPUTE_ERROR("NOT SUPPORTED!");
-    }
-
-private:
-    const TensorVariant &_in1;
-    const TensorVariant &_in2;
-    float                _scale;
-    ConvertPolicy        _convert_policy;
-    RoundingPolicy       _rounding_policy;
-};
 
 // ROI Pooling layer
 struct roi_pooling_layer_visitor : public boost::static_visitor<>

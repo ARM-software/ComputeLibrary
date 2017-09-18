@@ -89,35 +89,6 @@ public:
      * @return Computed raw tensor.
      */
     static RawTensor compute_reference_accumulate_weighted(const TensorShape &shape, float alpha);
-    /** Compute reference pixel-wise multiplication
-     *
-     * @param[in] shape           Shape of the input and output tensors.
-     * @param[in] dt_in0          Data type of first input tensor.
-     * @param[in] dt_in1          Data type of second input tensor.
-     * @param[in] dt_out          Data type of the output tensor.
-     * @param[in] scale           Non-negative scale.
-     * @param[in] convert_policy  Overflow policy of the operation.
-     * @param[in] rounding_policy Rounding policy of the operation.
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_pixel_wise_multiplication(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, float scale, ConvertPolicy convert_policy,
-                                                                 RoundingPolicy rounding_policy);
-    /** Compute reference pixel-wise multiplication.
-     *
-     * @param[in] shape                Shape of the input and output tensors.
-     * @param[in] dt_in0               Data type of first input tensor.
-     * @param[in] dt_in1               Data type of second input tensor.
-     * @param[in] dt_out               Data type of the output tensor.
-     * @param[in] scale                Scale to apply after multiplication. Must be positive.
-     * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number.
-     * @param[in] convert_policy       Overflow policy of the operation.
-     * @param[in] rounding_policy      Rounding policy of the operation.
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_fixed_point_pixel_wise_multiplication(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, float scale, int fixed_point_position,
-                                                                             ConvertPolicy convert_policy, RoundingPolicy rounding_policy);
     /** Compute reference roi pooling layer.
      *
      * @param[in] shape     Shape of the input tensor.

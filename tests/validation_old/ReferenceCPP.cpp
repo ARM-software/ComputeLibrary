@@ -130,24 +130,6 @@ void ReferenceCPP::non_linear_filter(const RawTensor &src, RawTensor &dst, NonLi
     tensor_operations::non_linear_filter(s, d, function, mask_size, pattern, mask, border_mode, constant_border_value);
 }
 
-// Pixel-wise multiplication
-void ReferenceCPP::pixel_wise_multiplication(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
-{
-    const TensorVariant s1 = TensorFactory::get_tensor(src1);
-    const TensorVariant s2 = TensorFactory::get_tensor(src2);
-    TensorVariant       d  = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(pixel_wise_multiplication_visitor(scale, convert_policy, rounding_policy), s1, s2, d);
-}
-
-// Fixed-point Pixel-wise multiplication
-void ReferenceCPP::fixed_point_pixel_wise_multiplication(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
-{
-    const TensorVariant s1 = TensorFactory::get_tensor(src1);
-    const TensorVariant s2 = TensorFactory::get_tensor(src2);
-    TensorVariant       d  = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(tensor_visitors::fixed_point_pixel_wise_multiplication_visitor(s1, s2, scale, convert_policy, rounding_policy), d);
-}
-
 // Threshold
 void ReferenceCPP::threshold(const RawTensor &src, RawTensor &dst, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {

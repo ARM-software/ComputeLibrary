@@ -311,6 +311,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PoolingLayerInfo &in
     return os;
 }
 
+inline std::string to_string(const RoundingPolicy &rounding_policy)
+{
+    std::stringstream str;
+    str << rounding_policy;
+    return str.str();
+}
+
 /** Formatted output of the DataType type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
 {

@@ -109,26 +109,6 @@ public:
     */
     static void non_linear_filter(const RawTensor &src, RawTensor &dst, NonLinearFilterFunction function, unsigned int mask_size,
                                   MatrixPattern pattern, const uint8_t *mask, BorderMode border_mode, uint8_t constant_border_value = 0);
-    /** Element-wise multiplication of @p src1, @p src2 and @p scale
-     *
-     * @param[in]  src1            First tensor.
-     * @param[in]  src2            Second tensor.
-     * @param[out] dst             Result tensor.
-     * @param[in]  scale           A non-negative float multiplied to each product.
-     * @param[in]  convert_policy  Overflow policy.
-     * @param[in]  rounding_policy Rounding policy.
-     */
-    static void pixel_wise_multiplication(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy);
-    /** Fixed-point Pixel-wise multiplication of @p src1 by @p src2
-     *
-     * @param[in]  src1            First tensor.
-     * @param[in]  src2            Second tensor.
-     * @param[out] dst             Result tensor.
-     * @param[in]  scale           A non-negative float multiplied to each product.
-     * @param[in]  convert_policy  Overflow policy.
-     * @param[in]  rounding_policy Rounding policy.
-     */
-    static void fixed_point_pixel_wise_multiplication(const RawTensor &src1, const RawTensor &src2, RawTensor &dst, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy);
     /** Threshold of@p src to @p dst
      *
      * @param[in]  src         Input tensor.

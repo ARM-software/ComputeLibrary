@@ -128,42 +128,6 @@ RawTensor Reference::compute_reference_accumulate_weighted(const TensorShape &sh
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_pixel_wise_multiplication(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, float scale, ConvertPolicy convert_policy,
-                                                                 RoundingPolicy rounding_policy)
-{
-    // Create reference
-    RawTensor ref_src1(shape, dt_in0);
-    RawTensor ref_src2(shape, dt_in1);
-    RawTensor ref_dst(shape, dt_out);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src1, 0);
-    library->fill_tensor_uniform(ref_src2, 1);
-
-    // Compute reference
-    ReferenceCPP::pixel_wise_multiplication(ref_src1, ref_src2, ref_dst, scale, convert_policy, rounding_policy);
-
-    return ref_dst;
-}
-
-RawTensor Reference::compute_reference_fixed_point_pixel_wise_multiplication(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, float scale, int fixed_point_position,
-                                                                             ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
-{
-    // Create reference
-    RawTensor ref_src1(shape, dt_in0, 1, fixed_point_position);
-    RawTensor ref_src2(shape, dt_in1, 1, fixed_point_position);
-    RawTensor ref_dst(shape, dt_out, 1, fixed_point_position);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src1, 0);
-    library->fill_tensor_uniform(ref_src2, 1);
-
-    // Compute reference
-    ReferenceCPP::fixed_point_pixel_wise_multiplication(ref_src1, ref_src2, ref_dst, scale, convert_policy, rounding_policy);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
 {
     TensorShape shape_dst;
