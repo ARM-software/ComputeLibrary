@@ -41,8 +41,9 @@
 
 using namespace arm_compute;
 
-NEHarrisCorners::NEHarrisCorners() // NOLINT
-    : _sobel(),
+NEHarrisCorners::NEHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _sobel(),
       _harris_score(),
       _non_max_suppr(),
       _candidates(),
@@ -81,6 +82,10 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
     _gx.allocator()->init(tensor_info_gxgy);
     _gy.allocator()->init(tensor_info_gxgy);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_gx);
+    _memory_group.manage(&_gy);
+
     TensorInfo tensor_info_score(shape, Format::F32);
     _score.allocator()->init(tensor_info_score);
     _nonmax.allocator()->init(tensor_info_score);
@@ -117,6 +122,9 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
 
     // Normalization factor
     const float norm_factor = 1.0f / (255.0f * pow(4.0f, gradient_size / 2) * block_size);
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_score);
 
     if(use_fp16)
     {
@@ -180,25 +188,34 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
     _border_gx.configure(&_gx, _harris_score->border_size(), border_mode, constant_border_value);
     _border_gy.configure(&_gy, _harris_score->border_size(), border_mode, constant_border_value);
 
+    // Allocate once all the configure methods have been called
+    _gx.allocator()->allocate();
+    _gy.allocator()->allocate();
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_nonmax);
+
     // Init non-maxima suppression function
     _non_max_suppr.configure(&_score, &_nonmax, border_mode);
+
+    // Allocate once all the configure methods have been called
+    _score.allocator()->allocate();
 
     // Init corner candidates kernel
     _candidates.configure(&_nonmax, _corners_list.get(), &_num_corner_candidates);
 
+    // Allocate once all the configure methods have been called
+    _nonmax.allocator()->allocate();
+
     // Init euclidean distance
     _sort_euclidean.configure(_corners_list.get(), corners, &_num_corner_candidates, min_dist);
-
-    // Allocate once all the configure methods have been called
-    _gx.allocator()->allocate();
-    _gy.allocator()->allocate();
-    _score.allocator()->allocate();
-    _nonmax.allocator()->allocate();
 }
 
 void NEHarrisCorners::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
+
+    _memory_group.acquire();
 
     // Init to 0 number of corner candidates
     _num_corner_candidates = 0;
@@ -221,4 +238,6 @@ void NEHarrisCorners::run()
 
     // Run sort & euclidean distance
     NEScheduler::get().schedule(&_sort_euclidean, Window::DimY);
+
+    _memory_group.release();
 }

@@ -35,8 +35,9 @@
 
 using namespace arm_compute;
 
-NEFastCorners::NEFastCorners()
-    : _fast_corners_kernel(),
+NEFastCorners::NEFastCorners(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)),
+      _fast_corners_kernel(),
       _border_handler(),
       _nonmax_kernel(),
       _fill_kernel(),
@@ -59,6 +60,7 @@ void NEFastCorners::configure(IImage *input, float threshold, bool nonmax_suppre
 
     TensorInfo tensor_info(input->info()->tensor_shape(), Format::U8);
     _output.allocator()->init(tensor_info);
+    _memory_group.manage(&_output);
 
     // If border is UNDEFINED _fast_corners_kernel will operate in xwindow (3,
     // width - 3) and ywindow (3, height -3) so the output image will leave the
@@ -75,6 +77,7 @@ void NEFastCorners::configure(IImage *input, float threshold, bool nonmax_suppre
     else
     {
         _suppressed.allocator()->init(tensor_info);
+        _memory_group.manage(&_suppressed);
         _nonmax_kernel.configure(&_output, &_suppressed, BorderMode::UNDEFINED == border_mode);
         _fill_kernel.configure(&_suppressed, 1 /* we keep all texels >0 */, corners);
 
@@ -90,6 +93,8 @@ void NEFastCorners::run()
 {
     NEScheduler::get().schedule(&_border_handler, Window::DimZ);
 
+    _memory_group.acquire();
+
     NEScheduler::get().schedule(&_fast_corners_kernel, Window::DimY);
 
     if(_non_max)
@@ -98,4 +103,6 @@ void NEFastCorners::run()
     }
 
     NEScheduler::get().schedule(&_fill_kernel, Window::DimY);
+
+    _memory_group.release();
 }
