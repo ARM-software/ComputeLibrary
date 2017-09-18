@@ -28,12 +28,9 @@
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/IMemoryManager.h"
-#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <cstdint>
-#include <memory>
 
 namespace arm_compute
 {
@@ -47,7 +44,7 @@ public:
      *
      * Initialize NEScale
      */
-    NEScale(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEScale();
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
      * @param[in, out] input                 Source tensor. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -62,7 +59,6 @@ public:
     void run() override;
 
 private:
-    MemoryGroup        _memory_group;   /**< Function memory group */
     Tensor             _offsets;        /**< Offset to access the element with NEAREST interpolation or the top-left element with BILINEAR interpolation in the input tensor */
     Tensor             _dx;             /**< Element's distance between the X real coordinate and the smallest X following integer */
     Tensor             _dy;             /**< Element's distance between the Y real coordinate and the smallest Y following integer */

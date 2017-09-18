@@ -86,9 +86,8 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
 }
 } // namespace
 
-NEScale::NEScale(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
-    : _memory_group(std::move(memory_manager)),
-      _offsets(),
+NEScale::NEScale() // NOLINT
+    : _offsets(),
       _dx(),
       _dy(),
       _scale_kernel(),
@@ -131,7 +130,6 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         {
             TensorInfo tensor_info_offsets(shape, Format::S32);
             _offsets.allocator()->init(tensor_info_offsets);
-            _memory_group.manage(&_offsets);
 
             _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_undefined);
 
@@ -150,11 +148,6 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _offsets.allocator()->init(tensor_info_offsets);
             _dx.allocator()->init(tensor_info_dxdy);
             _dy.allocator()->init(tensor_info_dxdy);
-
-            // Manage intermediate buffers
-            _memory_group.manage(&_offsets);
-            _memory_group.manage(&_dx);
-            _memory_group.manage(&_dy);
 
             _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_undefined);
 
@@ -181,10 +174,6 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
 
 void NEScale::run()
 {
-    _memory_group.acquire();
-
     NEScheduler::get().schedule(&_border_handler, Window::DimZ);
     NEScheduler::get().schedule(&_scale_kernel, Window::DimY);
-
-    _memory_group.release();
 }
