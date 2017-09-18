@@ -50,7 +50,7 @@ RelativeTolerance<float>            tolerance_f32(0.05f);
 
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
-constexpr AbsoluteTolerance<int16_t> tolerance_qs16(2);
+constexpr AbsoluteTolerance<int16_t> tolerance_qs16(3);
 
 /** Input data set. */
 const auto NormalizationDataset = combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
