@@ -42,8 +42,9 @@
 
 using namespace arm_compute;
 
-CLHarrisCorners::CLHarrisCorners() // NOLINT
-    : _sobel(nullptr),
+CLHarrisCorners::CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _sobel(nullptr),
       _harris_score(),
       _non_max_suppr(),
       _candidates(),
@@ -84,6 +85,10 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
 
     _corners_list = arm_compute::support::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_gx);
+    _memory_group.manage(&_gy);
+
     /* Set/init Sobel kernel accordingly with gradient_size */
     switch(gradient_size)
     {
@@ -116,6 +121,9 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     const float norm_factor               = 1.0f / (255.0f * pow(4.0f, gradient_size / 2) * block_size);
     const float pow4_normalization_factor = pow(norm_factor, 4);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_score);
+
     // Set/init Harris Score kernel accordingly with block_size
     _harris_score.configure(&_gx, &_gy, &_score, block_size, pow4_normalization_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
 
@@ -123,25 +131,34 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     _border_gx.configure(&_gx, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
     _border_gy.configure(&_gy, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
 
+    // Allocate intermediate buffers
+    _gx.allocator()->allocate();
+    _gy.allocator()->allocate();
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_nonmax);
+
     // Init non-maxima suppression function
     _non_max_suppr.configure(&_score, &_nonmax, border_mode);
+
+    // Allocate intermediate buffers
+    _score.allocator()->allocate();
 
     // Init corner candidates kernel
     _candidates.configure(&_nonmax, _corners_list.get(), &_num_corner_candidates);
 
+    // Allocate intermediate buffers
+    _nonmax.allocator()->allocate();
+
     // Init euclidean distance
     _sort_euclidean.configure(_corners_list.get(), _corners, &_num_corner_candidates, min_dist);
-
-    // Allocate intermediate buffers
-    _gx.allocator()->allocate();
-    _gy.allocator()->allocate();
-    _score.allocator()->allocate();
-    _nonmax.allocator()->allocate();
 }
 
 void CLHarrisCorners::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
+
+    _memory_group.acquire();
 
     // Init to 0 number of corner candidates
     _num_corner_candidates = 0;
@@ -167,4 +184,6 @@ void CLHarrisCorners::run()
     _corners->map(CLScheduler::get().queue(), true);
     Scheduler::get().schedule(&_sort_euclidean, Window::DimY);
     _corners->unmap(CLScheduler::get().queue());
+
+    _memory_group.release();
 }

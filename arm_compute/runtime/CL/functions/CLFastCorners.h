@@ -29,11 +29,14 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/CL/CLArray.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -51,7 +54,7 @@ class CLFastCorners : public IFunction
 {
 public:
     /** Constructor */
-    CLFastCorners();
+    CLFastCorners(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLFastCorners(const CLFastCorners &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -72,6 +75,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup             _memory_group;
     CLFastCornersKernel       _fast_corners_kernel;
     CLNonMaximaSuppression3x3 _suppr_func;
     CLCopyToArrayKernel       _copy_array_kernel;

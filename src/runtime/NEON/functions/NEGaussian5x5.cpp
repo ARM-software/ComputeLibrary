@@ -57,9 +57,10 @@ void NEGaussian5x5::configure(ITensor *input, ITensor *output, BorderMode border
 
 void NEGaussian5x5::run()
 {
+    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
+
     _memory_group.acquire();
 
-    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
     NEScheduler::get().schedule(&_kernel_hor, Window::DimY);
     NEScheduler::get().schedule(&_kernel_vert, Window::DimY);
 

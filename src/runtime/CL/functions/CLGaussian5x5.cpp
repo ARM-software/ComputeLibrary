@@ -35,8 +35,8 @@
 
 using namespace arm_compute;
 
-CLGaussian5x5::CLGaussian5x5()
-    : _kernel_hor(), _kernel_vert(), _border_handler(), _tmp()
+CLGaussian5x5::CLGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _kernel_hor(), _kernel_vert(), _border_handler(), _tmp()
 {
 }
 
@@ -46,6 +46,10 @@ void CLGaussian5x5::configure(ICLTensor *input, ICLTensor *output, BorderMode bo
 
     _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, DataType::U16));
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_tmp);
+
+    // Configure kernels
     _kernel_hor.configure(input, &_tmp, border_mode == BorderMode::UNDEFINED);
     _kernel_vert.configure(&_tmp, output, border_mode == BorderMode::UNDEFINED);
     _border_handler.configure(input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
@@ -57,6 +61,11 @@ void CLGaussian5x5::configure(ICLTensor *input, ICLTensor *output, BorderMode bo
 void CLGaussian5x5::run()
 {
     CLScheduler::get().enqueue(_border_handler, false);
+
+    _memory_group.acquire();
+
     CLScheduler::get().enqueue(_kernel_hor, false);
     CLScheduler::get().enqueue(_kernel_vert);
+
+    _memory_group.release();
 }
