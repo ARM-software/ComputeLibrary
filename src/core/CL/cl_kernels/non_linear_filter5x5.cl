@@ -392,29 +392,29 @@ __kernel void non_linear_filter_cross5x5(
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
     // Load values
-    uchar16 top2    = vload16(0, offset(&src, 0, -2));
-    uchar16 top     = vload16(0, offset(&src, 0, -1));
+    uchar8  top2    = vload8(0, offset(&src, 0, -2));
+    uchar8  top     = vload8(0, offset(&src, 0, -1));
     uchar16 middle  = vload16(0, offset(&src, -2, 0));
-    uchar16 bottom  = vload16(0, offset(&src, 0, 1));
-    uchar16 bottom2 = vload16(0, offset(&src, 0, 2));
+    uchar8  bottom  = vload8(0, offset(&src, 0, 1));
+    uchar8  bottom2 = vload8(0, offset(&src, 0, 2));
 
     // Apply respective filter
 #ifdef MIN
     uchar8 tmp_middle = row_reduce_min_5(middle);
-    uchar8 out        = min(tmp_middle, min(min(top2.s01234567, top.s01234567), min(bottom.s01234567, bottom2.s01234567)));
+    uchar8 out        = min(tmp_middle, min(min(top2, top), min(bottom, bottom2)));
 #elif defined(MAX)
     uchar8  tmp_middle = row_reduce_max_5(middle);
-    uchar8  out        = max(tmp_middle, max(max(top2.s01234567, top.s01234567), max(bottom.s01234567, bottom2.s01234567)));
+    uchar8  out        = max(tmp_middle, max(max(top2, top.s01234567), max(bottom, bottom2)));
 #elif defined(MEDIAN)
-    uchar8 p0  = top2.s01234567;
-    uchar8 p1  = top.s01234567;
+    uchar8 p0  = top2;
+    uchar8 p1  = top;
     uchar8 p2  = middle.s01234567;
     uchar8 p3  = middle.s12345678;
     uchar8 p4  = middle.s23456789;
     uchar8 p5  = middle.s3456789A;
     uchar8 p6  = middle.s456789AB;
-    uchar8 p7  = bottom.s01234567;
-    uchar8 p8  = bottom2.s01234567;
+    uchar8 p7  = bottom;
+    uchar8 p8  = bottom2;
     uchar8 out = sort9(p0, p1, p2, p3, p4, p5, p6, p7, p8);
 #else /* MIN or MAX or MEDIAN */
 #error "Unsupported filter function"
@@ -449,11 +449,15 @@ __kernel void non_linear_filter_disk5x5(
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
     // Load values
-    uchar16 top2    = vload16(0, offset(&src, -1, -2));
+    uchar16 top2    = vload16(0, offset(&src, -2, -2));
     uchar16 top     = vload16(0, offset(&src, -2, -1));
     uchar16 middle  = vload16(0, offset(&src, -2, 0));
     uchar16 bottom  = vload16(0, offset(&src, -2, 1));
-    uchar16 bottom2 = vload16(0, offset(&src, -1, 2));
+    uchar16 bottom2 = vload16(0, offset(&src, -2, 2));
+
+    // Shift top2 and bottom2 values
+    top2    = top2.s123456789ABCDEFF;
+    bottom2 = bottom2.s123456789ABCDEFF;
 
     // Apply respective filter
 #ifdef MIN
