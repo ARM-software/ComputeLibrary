@@ -52,7 +52,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFloorFixture<float>, framework::DatasetMode::
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFloorFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEFloorFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
