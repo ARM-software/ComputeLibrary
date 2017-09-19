@@ -118,46 +118,6 @@ void apply_2d_spatial_filter(Coordinates coord, const Tensor<T1> &in, Tensor<T3>
 }
 } // namespace
 
-template <typename T>
-T bilinear_policy(const Tensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, uint8_t constant_border_value)
-{
-    int idx = std::floor(xn);
-    int idy = std::floor(yn);
-
-    const float dx   = xn - idx;
-    const float dy   = yn - idy;
-    const float dx_1 = 1.0f - dx;
-    const float dy_1 = 1.0f - dy;
-
-    id.set(0, idx);
-    id.set(1, idy);
-    const T tl = tensor_elem_at(in, id, border_mode, constant_border_value);
-    id.set(0, idx + 1);
-    id.set(1, idy);
-    const T tr = tensor_elem_at(in, id, border_mode, constant_border_value);
-    id.set(0, idx);
-    id.set(1, idy + 1);
-    const T bl = tensor_elem_at(in, id, border_mode, constant_border_value);
-    id.set(0, idx + 1);
-    id.set(1, idy + 1);
-    const T br = tensor_elem_at(in, id, border_mode, constant_border_value);
-
-    return tl * (dx_1 * dy_1) + tr * (dx * dy_1) + bl * (dx_1 * dy) + br * (dx * dy);
-}
-
-bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode border_mode)
-{
-    if(border_mode != BorderMode::UNDEFINED)
-    {
-        return true;
-    }
-    if((0 <= yn + 1) && (yn + 1 < height) && (0 <= xn + 1) && (xn + 1 < width))
-    {
-        return true;
-    }
-    return false;
-}
-
 // Sobel 3x3
 template <typename T1, typename T2>
 void sobel_3x3(Tensor<T1> &in, Tensor<T2> &out_x, Tensor<T2> &out_y, BorderMode border_mode, uint8_t constant_border_value)
@@ -674,92 +634,6 @@ void threshold(const Tensor<T> &in, Tensor<T> &out, uint8_t threshold, uint8_t f
         default:
             ARM_COMPUTE_ERROR("Thresholding type not recognised");
             break;
-    }
-}
-
-// Warp Perspective
-template <typename T>
-void warp_perspective(const Tensor<T> &in, Tensor<T> &out, Tensor<T> &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
-{
-    // x0 = M00 * x + M01 * y + M02
-    // y0 = M10 * x + M11 * y + M12
-    // z0 = M20 * x + M21 * y + M22
-    // xn = x0 / z0
-    // yn = y0 / z0
-    const float M00 = matrix[0];
-    const float M10 = matrix[1];
-    const float M20 = matrix[2];
-    const float M01 = matrix[0 + 1 * 3];
-    const float M11 = matrix[1 + 1 * 3];
-    const float M21 = matrix[2 + 1 * 3];
-    const float M02 = matrix[0 + 2 * 3];
-    const float M12 = matrix[1 + 2 * 3];
-    const float M22 = matrix[2 + 2 * 3];
-
-    const int width  = in.shape().x();
-    const int height = in.shape().y();
-
-    for(int element_idx = 0; element_idx < in.num_elements(); ++element_idx)
-    {
-        valid_mask[element_idx] = 1;
-        Coordinates id          = index2coord(in.shape(), element_idx);
-        int         idx         = id.x();
-        int         idy         = id.y();
-        const float z0          = M20 * idx + M21 * idy + M22;
-
-        float x0 = (M00 * idx + M01 * idy + M02);
-        float y0 = (M10 * idx + M11 * idy + M12);
-
-        float xn = x0 / z0;
-        float yn = y0 / z0;
-        id.set(0, static_cast<int>(std::floor(xn)));
-        id.set(1, static_cast<int>(std::floor(yn)));
-        if((0 <= yn) && (yn < height) && (0 <= xn) && (xn < width))
-        {
-            switch(policy)
-            {
-                case InterpolationPolicy::NEAREST_NEIGHBOR:
-                    out[element_idx] = tensor_elem_at(in, id, border_mode, constant_border_value);
-                    break;
-                case InterpolationPolicy::BILINEAR:
-                    (valid_bilinear_policy(xn, yn, width, height, border_mode)) ? out[element_idx] = bilinear_policy(in, id, xn, yn, border_mode, constant_border_value) : valid_mask[element_idx] = 0;
-                    break;
-                case InterpolationPolicy::AREA:
-                default:
-                    ARM_COMPUTE_ERROR("Interpolation not supported");
-            }
-        }
-        else
-        {
-            if(border_mode == BorderMode::UNDEFINED)
-            {
-                valid_mask[element_idx] = 0;
-            }
-            else
-            {
-                switch(policy)
-                {
-                    case InterpolationPolicy::NEAREST_NEIGHBOR:
-                        if(border_mode == BorderMode::CONSTANT)
-                        {
-                            out[element_idx] = constant_border_value;
-                        }
-                        else if(border_mode == BorderMode::REPLICATE)
-                        {
-                            id.set(0, std::max(0, std::min(static_cast<int>(xn), width - 1)));
-                            id.set(1, std::max(0, std::min(static_cast<int>(yn), height - 1)));
-                            out[element_idx] = in[coord2index(in.shape(), id)];
-                        }
-                        break;
-                    case InterpolationPolicy::BILINEAR:
-                        out[element_idx] = bilinear_policy(in, id, xn, yn, border_mode, constant_border_value);
-                        break;
-                    case InterpolationPolicy::AREA:
-                    default:
-                        ARM_COMPUTE_ERROR("Interpolation not supported");
-                }
-            }
-        }
     }
 }
 

@@ -140,17 +140,6 @@ public:
      * @param[in]  upper       Upper threshold. Only used when the thresholding type is RANGE.
      */
     static void threshold(const RawTensor &src, RawTensor &dst, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper);
-    /** Warp perspective of@p src to @p dst
-     *
-     * @param[in]  src                   First tensor.
-     * @param[out] dst                   Result tensor.
-     * @param[out] valid_mask            Valid mask tensor.
-     * @param[in]  matrix                The perspective matrix. Must be 3x3 of type float.
-     * @param[in]  policy                The interpolation type.
-     * @param[in]  border_mode           Strategy to use for borders.
-     * @param[in]  constant_border_value Constant value to use for borders if border_mode is set to CONSTANT.
-     */
-    static void warp_perspective(const RawTensor &src, RawTensor &dst, RawTensor &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value);
     /** ROI Pooling layer of @p src based on the information from @p pool_info and @p rois.
      *
      * @param[in]  src       Input tensor.

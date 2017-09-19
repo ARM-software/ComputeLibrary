@@ -104,8 +104,6 @@ RawTensor transpose(const RawTensor &src, int chunk_width = 1);
 /** Fill matrix random.
  *
  * @param[in,out] matrix Matrix
- * @param[in]     cols   Columns (width) of matrix
- * @param[in]     rows   Rows (height) of matrix
  */
 template <std::size_t SIZE>
 inline void fill_warp_matrix(std::array<float, SIZE> &matrix, int cols, int rows)
@@ -126,6 +124,7 @@ inline void fill_warp_matrix(std::array<float, SIZE> &matrix, int cols, int rows
     }
 }
 
+bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode border_mode);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -118,19 +118,6 @@ public:
      */
     static RawTensor compute_reference_fixed_point_pixel_wise_multiplication(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, float scale, int fixed_point_position,
                                                                              ConvertPolicy convert_policy, RoundingPolicy rounding_policy);
-    /** Compute reference Warp Perspective.
-     *
-     * @param[in]  shape                 Shape of the input and output tensors.
-     * @param[out] valid_mask            Valid mask tensor.
-     * @param[in]  matrix                The perspective matrix. Must be 3x3 of type float.
-     * @param[in]  policy                The interpolation type.
-     * @param[in]  border_mode           Strategy to use for borders.
-     * @param[in]  constant_border_value Constant value to use for borders if border_mode is set to CONSTANT.
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_warp_perspective(const TensorShape &shape, RawTensor &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode,
-                                                        uint8_t constant_border_value);
     /** Compute reference roi pooling layer.
      *
      * @param[in] shape     Shape of the input tensor.

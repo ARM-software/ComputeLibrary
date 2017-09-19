@@ -164,22 +164,6 @@ RawTensor Reference::compute_reference_fixed_point_pixel_wise_multiplication(con
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_warp_perspective(const TensorShape &shape, RawTensor &valid_mask, const float *matrix, InterpolationPolicy policy, BorderMode border_mode,
-                                                        uint8_t constant_border_value)
-{
-    // Create reference
-    RawTensor ref_src(shape, DataType::U8);
-    RawTensor ref_dst(shape, DataType::U8);
-
-    // Fill reference
-    library->fill_tensor_uniform(ref_src, 0);
-
-    // Compute reference
-    ReferenceCPP::warp_perspective(ref_src, ref_dst, valid_mask, matrix, policy, border_mode, constant_border_value);
-
-    return ref_dst;
-}
-
 RawTensor Reference::compute_reference_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info)
 {
     TensorShape shape_dst;
