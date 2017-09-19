@@ -26,19 +26,27 @@
 
 #include "arm_compute/runtime/IMemoryPool.h"
 
-#include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
+#include <memory>
 #include <vector>
 
 namespace arm_compute
 {
+class IAllocator;
+
 /** Blob memory pool */
 class BlobMemoryPool : public IMemoryPool
 {
 public:
-    /** Default Constructor */
+    /** Default Constructor
+     *
+     * @note allocator should outlive the memory pool
+     *
+     * @param[in] allocator  Backing memory allocator
+     * @param[in] blob_sizes Sizes of the blobs to be allocated
+     */
     BlobMemoryPool(IAllocator *allocator, std::vector<size_t> blob_sizes);
     /** Default Destructor */
     ~BlobMemoryPool();

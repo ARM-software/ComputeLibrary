@@ -118,14 +118,13 @@ void BlobLifetimeManager::update_blobs_and_mappings()
     ARM_COMPUTE_ERROR_ON(!are_all_finalized());
     ARM_COMPUTE_ERROR_ON(_active_group == nullptr);
 
-    // Sort finalized group requirements in descending order
-    auto group = _finalized_groups[_active_group];
-    std::sort(std::begin(group), std::end(group), [](const Element & a, const Element & b)
+    // Sort active group requirements in descending order
+    std::sort(std::begin(_active_elements), std::end(_active_elements), [](const Element & a, const Element & b)
     {
         return a.size > b.size;
     });
     std::vector<size_t> group_sizes;
-    std::transform(std::begin(group), std::end(group), std::back_inserter(group_sizes), [](const Element & e)
+    std::transform(std::begin(_active_elements), std::end(_active_elements), std::back_inserter(group_sizes), [](const Element & e)
     {
         return e.size;
     });
@@ -142,7 +141,7 @@ void BlobLifetimeManager::update_blobs_and_mappings()
     // Calculate group mappings
     auto &group_mappings = _active_group->mappings();
     int   blob_idx       = 0;
-    for(auto &e : group)
+    for(auto &e : _active_elements)
     {
         group_mappings[e.handle] = blob_idx++;
     }

@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/BlobMemoryPool.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
 #include "support/ToolchainSupport.h"
@@ -47,8 +48,6 @@ BlobMemoryPool::~BlobMemoryPool()
 
 void BlobMemoryPool::acquire(MemoryMappings &handles)
 {
-    ARM_COMPUTE_ERROR_ON(handles.size() > _blobs.size());
-
     // Set memory to handlers
     for(auto &handle : handles)
     {
