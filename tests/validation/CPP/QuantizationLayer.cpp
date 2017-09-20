@@ -23,6 +23,8 @@
  */
 #include "QuantizationLayer.h"
 
+#include <cmath>
+
 namespace arm_compute
 {
 namespace test
@@ -46,21 +48,15 @@ SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src)
     for(int k = 0; k < num_batches; ++k)
     {
         // Compute min and max of the 3D tensor
-        float min = src[0];
-        float max = src[0];
+        float min = src[k * stride_w];
+        float max = src[k * stride_w];
 
         // Look for min and max values
         for(int i = 1; i < stride_w; ++i)
         {
             float val = src[i + k * stride_w];
-            if(val < min)
-            {
-                min = val;
-            }
-            if(val > max)
-            {
-                max = val;
-            }
+            min       = std::min(min, val);
+            max       = std::max(max, val);
         }
 
         // Saturate the result in case min = max
