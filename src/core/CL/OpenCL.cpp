@@ -621,6 +621,7 @@ cl_int clGetDeviceInfo(cl_device_id   device,
 
 cl_int clRetainEvent(cl_event event)
 {
+    arm_compute::CLSymbols::get().load_default();
     auto func = arm_compute::CLSymbols::get().clRetainEvent;
     if(func != nullptr)
     {
