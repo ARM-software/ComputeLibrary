@@ -24,10 +24,10 @@
 #ifndef __ARM_COMPUTE_HALF_H__
 #define __ARM_COMPUTE_HALF_H__
 
-#ifdef __ANDROID__
+#if(__ANDROID__ || BARE_METAL)
 // Android toolchain is broken and doesn't support all CPP11 math functions.
 #define HALF_ENABLE_CPP11_CMATH 0
-#endif /* __ANDROID__ */
+#endif /* __ANDROID__ || BARE_METAL */
 
 // Set style to round to nearest
 #define HALF_ROUND_STYLE 1
