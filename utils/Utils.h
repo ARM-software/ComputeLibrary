@@ -79,6 +79,49 @@ void draw_detection_rectangle(arm_compute::ITensor *tensor, const arm_compute::D
  */
 std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs);
 
+/** Maps a tensor if needed
+ *
+ * @param[in] tensor   Tensor to be mapped
+ * @param[in] blocking Specified if map is blocking or not
+ */
+template <typename T>
+void map(T &tensor, bool blocking)
+{
+    ARM_COMPUTE_UNUSED(tensor);
+    ARM_COMPUTE_UNUSED(blocking);
+}
+
+/** Unmaps a tensor if needed
+ *
+ * @param tensor  Tensor to be unmapped
+ */
+template <typename T>
+void unmap(T &tensor)
+{
+    ARM_COMPUTE_UNUSED(tensor);
+}
+
+#ifdef ARM_COMPUTE_CL
+/** Maps a tensor if needed
+ *
+ * @param[in] tensor   Tensor to be mapped
+ * @param[in] blocking Specified if map is blocking or not
+ */
+void map(CLTensor &tensor, bool blocking)
+{
+    tensor.map(blocking);
+}
+
+/** Unmaps a tensor if needed
+ *
+ * @param tensor  Tensor to be unmapped
+ */
+void unmap(CLTensor &tensor)
+{
+    tensor.unmap();
+}
+#endif /* ARM_COMPUTE_CL */
+
 /** Class to load the content of a PPM file into an Image
  */
 class PPMLoader
@@ -147,13 +190,9 @@ public:
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&image, arm_compute::Format::U8, arm_compute::Format::RGB888);
         try
         {
-#ifdef ARM_COMPUTE_CL
             // Map buffer if creating a CLTensor
-            if(std::is_same<typename std::decay<T>::type, arm_compute::CLImage>::value)
-            {
-                image.map();
-            }
-#endif /* ARM_COMPUTE_CL */
+            map(image, true);
+
             // Check if the file is large enough to fill the image
             const size_t current_position = _fs.tellg();
             _fs.seekg(0, std::ios_base::end);
@@ -214,13 +253,8 @@ public:
                     ARM_COMPUTE_ERROR("Unsupported format");
             }
 
-#ifdef ARM_COMPUTE_CL
             // Unmap buffer if creating a CLTensor
-            if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
-            {
-                image.unmap();
-            }
-#endif /* ARM_COMPUTE_CL */
+            unmap(image);
         }
         catch(const std::ifstream::failure &e)
         {
@@ -261,13 +295,8 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         fs << "P6\n"
            << width << " " << height << " 255\n";
 
-#ifdef ARM_COMPUTE_CL
         // Map buffer if creating a CLTensor
-        if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
-        {
-            tensor.map();
-        }
-#endif /* ARM_COMPUTE_CL */
+        map(tensor, true);
 
         switch(tensor.info()->format())
         {
@@ -308,13 +337,9 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
             default:
                 ARM_COMPUTE_ERROR("Unsupported format");
         }
-#ifdef ARM_COMPUTE_CL
+
         // Unmap buffer if creating a CLTensor
-        if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
-        {
-            tensor.unmap();
-        }
-#endif /* ARM_COMPUTE_CL */
+        unmap(tensor);
     }
     catch(const std::ofstream::failure &e)
     {
@@ -345,13 +370,9 @@ void load_trained_data(T &tensor, const std::string &filename)
             throw std::runtime_error("Could not load binary data: " + filename);
         }
 
-#ifdef ARM_COMPUTE_CL
         // Map buffer if creating a CLTensor
-        if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
-        {
-            tensor.map();
-        }
-#endif /* ARM_COMPUTE_CL */
+        map(tensor, true);
+
         Window window;
 
         window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, 1, 1));
@@ -371,10 +392,7 @@ void load_trained_data(T &tensor, const std::string &filename)
 
 #ifdef ARM_COMPUTE_CL
         // Unmap buffer if creating a CLTensor
-        if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
-        {
-            tensor.unmap();
-        }
+        unmap(tensor);
 #endif /* ARM_COMPUTE_CL */
     }
     catch(const std::ofstream::failure &e)
