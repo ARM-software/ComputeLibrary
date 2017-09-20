@@ -50,10 +50,10 @@ struct IMeasurement
     {
     }
 
-    const std::string unit;
+    std::string unit;
 };
 
-/** Meaurement of a specific type. */
+/** Measurement of a specific type. */
 template <typename T>
 struct TypedMeasurement : public IMeasurement
 {
