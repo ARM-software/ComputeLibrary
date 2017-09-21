@@ -249,6 +249,94 @@ inline qint32x4x2_t internal_vmlal(const qint32x4x2_t &x, const qint16x8_t &y, c
     return r;
 }
 
+constexpr int SmallTensorSizeOptim = 8;
+inline bool run_optim_small_tensor(const ITensor *t)
+{
+    return t->info()->dimension(Window::DimX) <= SmallTensorSizeOptim && t->info()->dimension(Window::DimY) <= SmallTensorSizeOptim;
+}
+
+// Optimized convolver for 1x1 kernels used only where input width and height are both <= 8
+// For big Z as in Input=7x7x832, this implementation is faster than the general code becuase it doesn't need to
+// store intermidiate results in memory. Temporary results are stored in NEON registers directly and then written to the output buffer.
+template <unsigned int stridex>
+class convolver_w1x1_i8x8_f32
+{
+public:
+    static void convolve(const Window &window, const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+    {
+        ARM_COMPUTE_ERROR_ON(input->info()->dimension(Window::DimX) > SmallTensorSizeOptim);
+        ARM_COMPUTE_ERROR_ON(input->info()->dimension(Window::DimY) > SmallTensorSizeOptim);
+
+        const int          input_stride_y  = input->info()->strides_in_bytes().y();
+        const int          input_stride_z  = input->info()->strides_in_bytes().z();
+        const int          output_stride_y = output->info()->strides_in_bytes().y();
+        const int          output_stride_z = output->info()->strides_in_bytes().z();
+        const int          kernel_stride_z = weights->info()->strides_in_bytes().z();
+        const int          kernel_stride_w = weights->info()->strides_in_bytes()[3];
+        const int          output_h        = output->info()->dimension(1);
+        const int          range_z         = window.z().end() - window.z().start();
+        const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
+        const unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
+
+        // setup output window for the iterator
+        Window window_out = window;
+        window_out.set(Window::DimX, Window::Dimension(0, output->info()->dimension(Window::DimX), output->info()->dimension(Window::DimX)));
+        window_out.set(Window::DimY, Window::Dimension(0, output->info()->dimension(Window::DimY), output->info()->dimension(Window::DimY)));
+        window_out.set(Window::DimZ, Window::Dimension(window.z().start(), window.z().end(), range_z));
+
+        // setup input window for the iterator
+        Window window_in = window;
+        // we just want execute_window_loop to iterate over the higher dimensions (>3), so we set the first 3 dimensions to 0
+        window_in.set(Window::DimX, Window::Dimension(0, 0, 0));
+        window_in.set(Window::DimY, Window::Dimension(0, 0, 0));
+        window_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
+
+        Window   window_k = calculate_max_window(*weights->info(), Steps(1u));
+        Iterator out(output, window_out);
+        Iterator in(input, window_in);
+        Iterator k(weights, window_k);
+
+        const uint8_t *k_ptr = k.ptr();
+
+        execute_window_loop(window_out, [&](const Coordinates & id)
+        {
+            const uint8_t *input_ptr                    = in.ptr();
+            uint8_t       *out_ptr                      = out.ptr();
+            int            ih                           = 0;
+            int            oh                           = 0;
+            float32x4_t    accum0[SmallTensorSizeOptim] = { vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0) };
+            float32x4_t    accum1[SmallTensorSizeOptim] = { vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0) };
+            for(int oz = 0; oz < range_z; ++oz)
+            {
+                accum0[0] = accum0[1] = accum0[2] = accum0[3] = accum0[4] = accum0[5] = accum0[6] = accum0[7] = vdupq_n_f32(0.f);
+                accum1[0] = accum1[1] = accum1[2] = accum1[3] = accum1[4] = accum1[5] = accum1[6] = accum1[7] = vdupq_n_f32(0.f);
+                auto p_out_base                                                                               = out_ptr + oz * output_stride_z;
+                for(int p = 0; p < kernel_depth; ++p)
+                {
+                    const auto k_val = reinterpret_cast<const float *>(k_ptr + p * kernel_stride_z + (id.z() + oz) * kernel_stride_w);
+                    const auto vk0   = internal_vdupq_n(*k_val);
+                    for(ih = 0, oh = 0; oh < output_h; ++oh, ih += conv_stride_y)
+                    {
+                        const int offset_xy = ih * input_stride_y;
+                        auto      in_val    = reinterpret_cast<const float *>(input_ptr + p * input_stride_z + offset_xy);
+                        auto      v_in0     = internal_vld1q<stridex>(in_val);
+                        auto      v_in1     = internal_vld1q<stridex>(in_val + 4);
+                        accum0[oh]          = vmlaq_f32(accum0[oh], vk0, v_in0);
+                        accum1[oh]          = vmlaq_f32(accum1[oh], vk0, v_in1);
+                    }
+                }
+                for(oh = 0; oh < output_h; ++oh)
+                {
+                    auto p_out = reinterpret_cast<float *>(p_out_base + oh * output_stride_y);
+                    vst1q_f32(p_out, accum0[oh]);
+                    vst1q_f32(p_out + 4, accum1[oh]);
+                }
+            }
+        },
+        in, out);
+    }
+};
+
 template <typename T1, typename T2, unsigned int stridex>
 class convolver_1x1
 {
@@ -316,6 +404,7 @@ public:
                         }
                     }
                 }
+
                 // Step 2
                 for(int p = 1; p < kernel_depth; ++p)
                 {
@@ -1189,6 +1278,47 @@ inline void convolve_1x1(const Window &window, unsigned int num_elems_read_per_i
     }
 }
 
+template <>
+inline void convolve_1x1<float, float>(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
+                                       const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+{
+    const unsigned int conv_stride_x = std::get<0>(conv_info.stride());
+    if(run_optim_small_tensor(input))
+    {
+        switch(conv_stride_x)
+        {
+            case 1:
+                convolver_w1x1_i8x8_f32<1>::convolve(window, input, weights, output, conv_info);
+                break;
+            case 2:
+                convolver_w1x1_i8x8_f32<2>::convolve(window, input, weights, output, conv_info);
+                break;
+            case 3:
+                convolver_w1x1_i8x8_f32<3>::convolve(window, input, weights, output, conv_info);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Not implemented");
+        }
+    }
+    else
+    {
+        switch(conv_stride_x)
+        {
+            case 1:
+                convolver_1x1<float, float, 1>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+                break;
+            case 2:
+                convolver_1x1<float, float, 2>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+                break;
+            case 3:
+                convolver_1x1<float, float, 3>::convolve(window, num_elems_read_per_iteration, num_elems_written_per_iteration, input, weights, output, conv_info);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Not implemented");
+        }
+    }
+}
+
 template <typename T1, typename T2>
 inline void convolve_3x3(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
                          const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
@@ -1311,7 +1441,14 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
                     _num_elems_written_per_iteration = 8;
                     break;
                 case DataType::F32:
-                    _num_elems_written_per_iteration = 4;
+                    if(run_optim_small_tensor(input))
+                    {
+                        _num_elems_written_per_iteration = 8;
+                    }
+                    else
+                    {
+                        _num_elems_written_per_iteration = 4;
+                    }
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Data type not supported.");
@@ -1361,8 +1498,7 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
     const int          upper_bound_h = ((output->info()->dimension(1) - 1) * conv_stride_y - conv_pad_y + _kernel_size) - input_height;
     _border_size.right               = std::max(upper_bound_w, static_cast<int>(_kernel_size));
     _border_size.bottom              = std::max(upper_bound_h, static_cast<int>(_kernel_size));
-
-    Window                 win = calculate_max_window(*output->info(), Steps(_num_elems_written_per_iteration));
+    Window                 win       = calculate_max_window(*output->info(), Steps(_num_elems_written_per_iteration));
     AccessWindowStatic     input_access(input->info(), -conv_pad_x, -conv_pad_y, input_width + _border_size.right, input_height + _border_size.bottom);
     AccessWindowStatic     weights_access(weights->info(), 0, 0, _num_weight_elems_read_per_row, _kernel_size);
     AccessWindowHorizontal output_access(output->info(), 0, _num_elems_written_per_iteration);
