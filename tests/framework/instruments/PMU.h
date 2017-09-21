@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <linux/perf_event.h>
 #include <stdexcept>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 namespace arm_compute

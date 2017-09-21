@@ -202,12 +202,12 @@ void MaliCounter::init()
         }
     }
 
-    if(ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_GET_BUFFER_SIZE, &_buffer_size) != 0) // NOLINT
+    if(ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_BUFFER_SIZE), &_buffer_size) != 0) // NOLINT
     {
         throw std::runtime_error("Failed to get buffer size.");
     }
 
-    if(ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_GET_HWVER, &_hw_ver) != 0) // NOLINT
+    if(ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_HWVER), &_hw_ver) != 0) // NOLINT
     {
         throw std::runtime_error("Could not determine HW version.");
     }
@@ -300,7 +300,7 @@ void MaliCounter::wait_next_event()
     {
         mali_userspace::kbase_hwcnt_reader_metadata meta; // NOLINT
 
-        if(ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_GET_BUFFER, &meta) != 0) // NOLINT
+        if(ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_BUFFER), &meta) != 0) // NOLINT
         {
             throw std::runtime_error("Failed READER_GET_BUFFER.");
         }
