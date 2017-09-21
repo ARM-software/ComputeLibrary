@@ -46,15 +46,13 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
         _accumulator.allocator()->free();
     }
 
-    // Manage intermediate buffers
-    _memory_group.manage(&_accumulator);
-
     // Allocate the intermediate accumulator tensor in case of fixed point input
     switch(output->info()->data_type())
     {
         case DataType::QS8:
         {
             _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::QS16, output->info()->fixed_point_position()));
+            _memory_group.manage(&_accumulator);
             _conv_kernel.configure(input, weights, &_accumulator, conv_info);
             _accumulate_bias_kernel.configure(&_accumulator, bias, output);
             _accumulator.allocator()->allocate();
@@ -63,6 +61,7 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
         case DataType::QS16:
         {
             _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::QS32, output->info()->fixed_point_position()));
+            _memory_group.manage(&_accumulator);
             _conv_kernel.configure(input, weights, &_accumulator, conv_info);
             _accumulate_bias_kernel.configure(&_accumulator, bias, output);
             _accumulator.allocator()->allocate();
