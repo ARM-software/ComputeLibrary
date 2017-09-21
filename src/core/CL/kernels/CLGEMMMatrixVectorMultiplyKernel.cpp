@@ -75,7 +75,7 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
 
     Window win = calculate_max_window(*input0->info(), Steps(num_elems_read_per_iteration));
 
-    AccessWindowRectangle  input0_access(input0->info(), 0, 0, border_size().right, border_size().bottom);
+    AccessWindowRectangle  input0_access(input0->info(), 0, 0, num_elems_read_per_iteration, _num_rows_read_per_iteration);
     AccessWindowHorizontal input1_access(input1->info(), 0, num_elems_read_per_iteration);
     AccessWindowStatic     output_access(_output->info(), 0, 0, _output->info()->dimension(0) + border_x, _output->info()->dimension(1) + border_y);
 
