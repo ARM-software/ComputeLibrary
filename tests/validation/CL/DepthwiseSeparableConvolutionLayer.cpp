@@ -53,9 +53,8 @@ TEST_SUITE(DepthwiseSeparableConvolutionLayer)
 
 template <typename T>
 using CLDepthwiseSeparableConvolutionLayerFixture = DepthwiseSeparableConvolutionValidationFixture<CLTensor, CLAccessor, CLDepthwiseSeparableConvolutionLayer, T>;
-//
-// FIXME: COMPMID-523 fix the bug in depthwise convolution
-DISABLED_FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseSeparableConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, datasets::MobileNetDepthwiseSeparableConvolutionLayerDataset())
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseSeparableConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, datasets::MobileNetDepthwiseSeparableConvolutionLayerDataset())
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);

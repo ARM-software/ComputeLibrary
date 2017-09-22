@@ -51,16 +51,30 @@ TEST_SUITE(DepthwiseConvolutionLayer)
 template <typename T>
 using CLDepthwiseConvolutionFixture = DepthwiseConvolutionValidationFixture<CLTensor, CLAccessor, CLDepthwiseConvolution, T>;
 
-// FIXME: COMPMID-523 fix the bug in depthwise convolution
+TEST_SUITE(Generic)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::PRECOMMIT, datasets::SmallDepthwiseConvolutionDataset())
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::NIGHTLY, datasets::LargeDepthwiseConvolutionDataset())
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+TEST_SUITE_END()
+
+template <typename T>
+using CLDepthwiseConvolutionFixture3x3 = DepthwiseConvolutionValidationFixture<CLTensor, CLAccessor, CLDepthwiseConvolution3x3, T>;
+
+TEST_SUITE(W3x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionFixture3x3<float>, framework::DatasetMode::PRECOMMIT, datasets::SmallDepthwiseConvolutionDataset3x3())
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionFixture3x3<float>, framework::DatasetMode::NIGHTLY, datasets::LargeDepthwiseConvolutionDataset3x3())
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END()
 
 TEST_SUITE_END()
 TEST_SUITE_END()

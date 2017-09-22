@@ -53,34 +53,38 @@ void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, ICLTenso
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
 
+    std::pair<unsigned int, unsigned int> expected_output = scaled_dimensions(input->info()->tensor_shape().x(), input->info()->tensor_shape().y(),
+                                                                              weights->info()->tensor_shape().x(), weights->info()->tensor_shape().y(),
+                                                                              conv_info);
+
+    ARM_COMPUTE_UNUSED(expected_output);
+    ARM_COMPUTE_ERROR_ON(expected_output.first != output->info()->tensor_shape().x());
+    ARM_COMPUTE_ERROR_ON(expected_output.second != output->info()->tensor_shape().y());
+
     _input         = input;
     _output        = output;
     _weights       = weights;
     _conv_stride_x = conv_info.stride().first;
     _conv_stride_y = conv_info.stride().second;
-    _border_size   = BorderSize(weights->info()->dimension(1) / 2, weights->info()->dimension(0) / 2);
-    _conv_pad_x    = std::min(border_size().right, conv_info.pad().first);
-    _conv_pad_y    = std::min(border_size().bottom, conv_info.pad().second);
+    _conv_pad_x    = conv_info.pad().first;
+    _conv_pad_y    = conv_info.pad().second;
+    _border_size   = BorderSize(_conv_pad_y, _conv_pad_x);
 
     // Set build options
-    std::set<std::string> options;
-
-    options.emplace("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
+    ARM_COMPUTE_ERROR_ON(_conv_stride_x < 1 || _conv_stride_x > 3);
+    std::set<std::string> options{ "-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x) };
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_convolution_3x3", options));
 
     // Configure kernel window
     const unsigned int num_elems_processed_per_iteration = 2;
     const unsigned int num_elems_written_per_iteration   = 2;
-    const unsigned int num_elems_read_per_iteration      = (_conv_stride_x == 1) ? 4 : (_conv_stride_x == 2) ? 5 : 6;
+    const unsigned int num_elems_read_per_iteration      = 3 + _conv_stride_x;
     const unsigned int num_rows_read_per_iteration       = 3;
 
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
 
-    const int access_right  = border_size().left + ceil_to_multiple(border_size().left + input->info()->dimension(0), num_elems_read_per_iteration);
-    const int access_bottom = border_size().bottom + ceil_to_multiple(border_size().bottom + input->info()->dimension(1), num_rows_read_per_iteration);
-
-    AccessWindowStatic     input_access(input->info(), -border_size().left, -border_size().bottom, access_right, access_bottom);
+    AccessWindowRectangle  input_access(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration, _conv_stride_x, _conv_stride_y);
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
     AccessWindowStatic     weights_access(weights->info(), 0, 0, weights->info()->dimension(0), weights->info()->dimension(1));
 

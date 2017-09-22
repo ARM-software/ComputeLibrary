@@ -78,7 +78,7 @@ protected:
         TensorType dst     = create_tensor<TensorType>(output_shape, DataType::F32);
 
         // Create Depthwise Convolution configure function
-        CLDepthwiseConvolution depthwise_convolution;
+        FunctionType depthwise_convolution;
         depthwise_convolution.configure(&src, &dst, &weights, pad_stride_info);
 
         // Allocate tensors
