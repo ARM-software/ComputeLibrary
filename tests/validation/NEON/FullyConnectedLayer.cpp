@@ -43,9 +43,9 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-constexpr AbsoluteTolerance<float> tolerance_f32(0.001f);
+constexpr RelativeTolerance<float> tolerance_f32(0.01f);
 #ifdef ARM_COMPUTE_ENABLE_FP16
-constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);
+constexpr RelativeTolerance<float> tolerance_f16(0.01f);
 #endif /* ARM_COMPUTE_ENABLE_FP16*/
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<float> tolerance_fixed_point(1.f);

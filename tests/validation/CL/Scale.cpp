@@ -59,6 +59,8 @@ constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
 constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
 RelativeTolerance<float>             tolerance_f32(0.05);
 RelativeTolerance<half>              tolerance_f16(half(0.1));
+
+constexpr float tolerance_num_f32(0.01f);
 } // namespace
 
 TEST_SUITE(CL)
@@ -119,7 +121,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<float>, framework::DatasetMode::
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_f32);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)),
                                                                                                          framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
@@ -130,7 +132,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<float>, framework::DatasetMode::
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_f32);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
 }
 TEST_SUITE_END()
 TEST_SUITE(FP16)

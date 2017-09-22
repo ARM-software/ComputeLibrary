@@ -58,6 +58,9 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
 constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
 RelativeTolerance<float>             tolerance_f32(0.01);
+
+constexpr float tolerance_num_s16 = 0.01f;
+constexpr float tolerance_num_f32 = 0.01f;
 } // namespace
 
 TEST_SUITE(NEON)
@@ -123,7 +126,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::
     ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_f32);
+    validate(Accessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)),
@@ -135,7 +138,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<float>, framework::DatasetMode::
     ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_f32);
+    validate(Accessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
@@ -178,7 +181,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode
     ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_s16);
+    validate(Accessor(_target), _reference, valid_region, tolerance_s16, tolerance_num_s16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::S16)),
@@ -190,7 +193,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<int16_t>, framework::DatasetMode
     ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_s16);
+    validate(Accessor(_target), _reference, valid_region, tolerance_s16, tolerance_num_s16);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
