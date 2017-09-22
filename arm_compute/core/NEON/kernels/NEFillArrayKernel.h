@@ -69,5 +69,5 @@ private:
     IKeyPointArray *_output;
     uint8_t         _threshold;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEFILLARRAYKERNEL_H__*/

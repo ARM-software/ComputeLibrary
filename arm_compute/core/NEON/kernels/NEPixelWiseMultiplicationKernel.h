@@ -102,5 +102,5 @@ private:
     float          _scale;
     int            _scale_exponent;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEPIXELWISEMULTIPLICATIONKERNEL_H__ */

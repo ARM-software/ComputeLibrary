@@ -103,5 +103,5 @@ private:
     ActivationFunctionExecutorPtr _func;
     ActivationLayerInfo           _act_info;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEACTIVATIONLAYERKERNEL_H__ */

@@ -78,5 +78,5 @@ private:
     unsigned int   _num_elems_read_per_iteration;
     unsigned int   _num_elems_written_per_iteration;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYERKERNEL_H__ */

@@ -77,5 +77,5 @@ private:
     uint8_t        _true_value;
     uint8_t        _upper;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NETHRESHOLDKERNEL_H__ */

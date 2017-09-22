@@ -43,5 +43,5 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEFLOORKERNEL_H__ */

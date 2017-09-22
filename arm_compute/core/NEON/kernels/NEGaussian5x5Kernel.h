@@ -69,5 +69,5 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGAUSSIAN5x5KERNEL_H__ */

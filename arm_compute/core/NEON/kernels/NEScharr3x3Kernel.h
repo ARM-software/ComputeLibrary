@@ -78,5 +78,5 @@ private:
     ITensor       *_output_x;     /**< Output tensor for scharr X */
     ITensor       *_output_y;     /**< Output tensor for scharr Y */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESCHARR3x3KERNEL_H__ */

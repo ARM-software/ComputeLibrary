@@ -58,5 +58,5 @@ public:
 #else  /* ARM_COMPUTE_ENABLE_FP16 */
 using NEBox3x3FP16Kernel = NEBox3x3Kernel;
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEBOX3x3KERNEL_H__ */

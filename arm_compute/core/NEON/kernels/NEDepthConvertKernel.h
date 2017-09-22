@@ -81,5 +81,5 @@ private:
     int           _fixed_point_position_input;
     int           _fixed_point_position_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEDEPTHCONVERTKERNEL_H__ */

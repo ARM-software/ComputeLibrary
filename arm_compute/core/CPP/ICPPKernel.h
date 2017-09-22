@@ -51,5 +51,5 @@ public:
      */
     virtual void run(const Window &window, const ThreadInfo &info) = 0;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_ICPPKERNEL_H__ */

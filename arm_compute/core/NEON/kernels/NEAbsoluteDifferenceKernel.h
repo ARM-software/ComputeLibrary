@@ -78,5 +78,5 @@ private:
     const ITensor   *_input2;
     ITensor         *_output;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEABSOLUTEDIFFERENCEKERNEL_H__ */

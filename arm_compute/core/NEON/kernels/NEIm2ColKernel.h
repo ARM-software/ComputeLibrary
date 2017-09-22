@@ -112,5 +112,5 @@ private:
     unsigned int  _kernel_height;
     bool          _has_bias;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEIM2COLKERNEL_H__ */

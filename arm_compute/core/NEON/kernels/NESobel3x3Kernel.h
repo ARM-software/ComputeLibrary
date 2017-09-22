@@ -78,5 +78,5 @@ private:
     ITensor       *_output_x;    /**< Output tensor for sobel X */
     ITensor       *_output_y;    /**< Output tensor for sobel Y */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESOBEL3x3KERNEL_H__ */

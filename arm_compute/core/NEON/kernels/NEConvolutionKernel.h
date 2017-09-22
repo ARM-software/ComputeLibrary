@@ -247,5 +247,5 @@ protected:
         4
     }; /**< Number of supported permutations */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECONVOLUTIONKERNEL_H__ */

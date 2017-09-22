@@ -121,5 +121,5 @@ private:
     unsigned int _num_elems_processed_per_iteration;
     bool         _is_parallelizable;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NECHANNELCOMBINEKERNEL_H__ */

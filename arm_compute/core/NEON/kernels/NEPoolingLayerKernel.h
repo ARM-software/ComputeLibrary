@@ -138,5 +138,5 @@ private:
     int              _num_elems_processed_per_iteration;
     BorderSize       _border_size;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEPOOLINGLAYERKERNEL_H__ */

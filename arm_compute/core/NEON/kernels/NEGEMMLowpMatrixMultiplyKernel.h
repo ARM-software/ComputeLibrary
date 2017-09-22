@@ -84,5 +84,5 @@ private:
     int32_t        _output_mult_int;
     int32_t        _shift;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYKERNEL_H__*/

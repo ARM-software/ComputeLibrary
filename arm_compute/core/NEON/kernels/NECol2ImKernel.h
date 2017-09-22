@@ -95,6 +95,5 @@ private:
     ITensor          *_output;
     std::pair<unsigned int, unsigned int> _convolved_dims;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECOL2IMKERNEL_H__ */

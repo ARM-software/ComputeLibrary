@@ -102,5 +102,5 @@ private:
     NormalizationLayerInfo _norm_info;
     BorderSize             _border_size;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NENORMALIZATIONLAYERKERNEL_H__ */

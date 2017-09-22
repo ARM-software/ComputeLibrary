@@ -72,5 +72,5 @@ private:
     ITensor            *_output;
     ROIPoolingLayerInfo _pool_info;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEROIPOOLINGLAYERKERNEL_H__ */

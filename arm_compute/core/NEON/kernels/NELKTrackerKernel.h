@@ -140,5 +140,5 @@ private:
     unsigned int                _num_levels;
     ValidRegion                 _valid_region;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NELKTRACKERKERNEL_H__ */

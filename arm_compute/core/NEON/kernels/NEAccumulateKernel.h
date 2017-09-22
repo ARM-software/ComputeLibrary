@@ -118,5 +118,5 @@ public:
 private:
     uint32_t _shift;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEACCUMULATEKERNEL_H__ */

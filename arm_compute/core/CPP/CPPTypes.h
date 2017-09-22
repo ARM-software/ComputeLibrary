@@ -54,5 +54,5 @@ struct ThreadInfo
     int       num_threads{ 1 };
     CPUTarget cpu{ CPUTarget::INTRINSICS };
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPP_TYPES_H__ */

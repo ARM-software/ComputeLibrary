@@ -137,5 +137,5 @@ private:
     size_t         _num_bins;
     float          _l2_hyst_threshold;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEHOGDESCRIPTORKERNEL_H__ */

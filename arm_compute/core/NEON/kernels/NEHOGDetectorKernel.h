@@ -81,6 +81,5 @@ private:
     size_t                 _max_num_detection_windows;
     arm_compute::Mutex     _mutex;
 };
-}
-
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEHOGDETECTORKERNEL_H__ */

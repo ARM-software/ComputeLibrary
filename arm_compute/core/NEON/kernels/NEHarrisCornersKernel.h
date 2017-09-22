@@ -122,5 +122,5 @@ private:
 template <int32_t block_size>
 using NEHarrisScoreFP16Kernel = NEHarrisScoreKernel<block_size>;
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEHARRISCORNERSKERNEL_H__ */

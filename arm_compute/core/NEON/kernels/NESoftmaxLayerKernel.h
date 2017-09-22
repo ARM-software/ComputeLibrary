@@ -131,5 +131,5 @@ private:
     const ITensor        *_sum;
     ITensor              *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H__ */

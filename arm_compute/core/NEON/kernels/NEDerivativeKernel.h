@@ -90,5 +90,5 @@ private:
     ITensor       *_output_x; /**< Output tensor - Derivate along the X direction */
     ITensor       *_output_y; /**< Output tensor - Derivate along the Y direction */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDERIVATIVEKERNEL_H__ */

@@ -77,5 +77,5 @@ private:
     MatrixAdditionFunction *_func;
     float                   _beta;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEGEMMMATRIXADDITIONKERNEL_H__ */

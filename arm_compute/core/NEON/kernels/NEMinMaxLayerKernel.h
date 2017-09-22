@@ -73,5 +73,5 @@ private:
     ITensor       *_output;
     Mutex          _mtx;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEMINMAXLAYERKERNEL_H__ */

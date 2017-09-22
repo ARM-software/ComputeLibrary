@@ -116,5 +116,5 @@ private:
     void warp_constant(const Window &window) override;
     void warp_replicate(const Window &window) override;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEWARPKERNEL_H__ */

@@ -29,5 +29,5 @@
 namespace arm_compute
 {
 using INESimpleKernel = ICPPSimpleKernel;
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_INESIMPLEKERNEL_H__ */

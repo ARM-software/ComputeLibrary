@@ -74,5 +74,5 @@ private:
     const ITensor *_map_x;  /**< Input remap x coordinates */
     const ITensor *_map_y;  /**< Input remap y coordinates */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEREMAPKERNEL_H__ */

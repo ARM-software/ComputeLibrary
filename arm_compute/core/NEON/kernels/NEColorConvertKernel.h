@@ -84,5 +84,5 @@ private:
     void                 *_output;
     ColorConvertFunction *_func;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECOLORCONVERTKERNEL_H__ */

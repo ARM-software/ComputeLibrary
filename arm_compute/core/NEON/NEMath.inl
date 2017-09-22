@@ -302,4 +302,4 @@ inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
     return vexpq_f16(vmulq_f16(n, vlogq_f16(val)));
 }
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-}
+} // namespace arm_compute

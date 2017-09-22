@@ -143,5 +143,5 @@ private:
     unsigned int            _func_idx;
     BorderSize              _border_size;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NENONLINEARFILTERKERNEL_H__ */

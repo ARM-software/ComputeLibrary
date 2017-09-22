@@ -75,6 +75,5 @@ private:
 private:
     static const uint32_t _histogram_size = 256; /**< Default histogram size of 256. */
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECUMULATIVEDISTRIBUTIONKERNEL_H__ */

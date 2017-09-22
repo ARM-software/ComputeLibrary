@@ -1995,4 +1995,4 @@ inline float32x4x2_t vmax2q_f32(float32x4x2_t a, float32x4x2_t b)
     };
     return res;
 }
-}
+} // namespace arm_compute

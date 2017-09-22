@@ -62,5 +62,5 @@ private:
     const ITensor *_input;  /**< Source tensor */
     ITensor       *_output; /**< Destination tensor */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEBITWISENOTKERNEL_H__ */

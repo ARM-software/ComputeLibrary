@@ -68,5 +68,5 @@ private:
     uint8_t       _threshold;           /**< threshold on difference between intensity */
     bool          _non_max_suppression; /** true if non-maxima suppression is applied in the next stage */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEFASTCORNERSKERNEL_H__ */

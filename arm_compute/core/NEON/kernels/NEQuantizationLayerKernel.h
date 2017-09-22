@@ -67,5 +67,5 @@ private:
     ITensor       *_output;
     const ITensor *_min_max;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H__ */

@@ -72,5 +72,5 @@ private:
     TableLookupFunction _func;
     const ILut         *_lut;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NETABLELOOKUPKERNEL_H__ */

@@ -59,5 +59,5 @@ private:
     ITensor       *_accum;
     const ITensor *_biases;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMMATRIXACCUMULATEBIASESKERNEL_H__ */

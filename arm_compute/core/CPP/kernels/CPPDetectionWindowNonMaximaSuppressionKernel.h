@@ -67,6 +67,5 @@ private:
     IDetectionWindowArray *_input_output;
     float                  _min_distance;
 };
-}
-
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPPDETECTIONWINDOWNONMAXIMASUPPRESSIONKERNEL_H__ */

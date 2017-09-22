@@ -75,5 +75,5 @@ private:
 
     GEMMInterleaveFunction *_func; /**< GEMM interleave function to use for the particular tensor types passed to configure() */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMINTERLEAVE4x4KERNEL_H__*/

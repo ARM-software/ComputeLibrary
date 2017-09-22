@@ -105,5 +105,5 @@ private:
     ChannelExtractFunction _func;
     unsigned int           _lut_index;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NECHANNELEXTRACTKERNEL_H__ */

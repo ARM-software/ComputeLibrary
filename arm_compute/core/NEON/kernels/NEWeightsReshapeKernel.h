@@ -89,6 +89,5 @@ private:
     const ITensor        *_bias;
     ITensor              *_output;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H__ */

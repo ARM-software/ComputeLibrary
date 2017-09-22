@@ -71,5 +71,5 @@ private:
     ITensor       *_output;
     float          _alpha;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMMATRIXMULTIPLYKERNEL_H__*/

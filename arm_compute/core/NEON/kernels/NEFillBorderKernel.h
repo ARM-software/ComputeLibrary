@@ -75,5 +75,5 @@ private:
     BorderMode _mode;
     PixelValue _constant_border_value;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEFILLBORDERKERNEL_H__ */

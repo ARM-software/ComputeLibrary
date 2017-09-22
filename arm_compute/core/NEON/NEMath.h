@@ -180,6 +180,6 @@ float16x8_t vexpq_f16(float16x8_t x);
  */
 float16x8_t vpowq_f16(float16x8_t val, float16x8_t n);
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-}
+} // namespace arm_compute
 #include "arm_compute/core/NEON/NEMath.inl"
 #endif /* __ARM_COMPUTE_NEMATH_H__ */

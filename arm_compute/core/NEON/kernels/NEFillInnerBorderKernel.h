@@ -71,5 +71,5 @@ private:
     BorderSize _border_size;
     PixelValue _constant_border_value;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEFILLINNERBORDERKERNEL_H__ */

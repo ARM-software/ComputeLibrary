@@ -160,5 +160,5 @@ private:
 template <MagnitudeType mag_type, PhaseType phase_type>
 using NEMagnitudePhaseFP16Kernel = NEMagnitudePhaseKernel<mag_type, phase_type>;
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEMAGNITUDEPHASEKERNEL_H__ */

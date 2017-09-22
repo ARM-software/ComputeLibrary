@@ -85,5 +85,5 @@ private:
     const ITensor *_input;
     ITensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESCALEKERNEL_H__ */

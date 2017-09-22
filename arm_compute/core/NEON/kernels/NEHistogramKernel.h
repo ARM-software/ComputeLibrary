@@ -127,5 +127,5 @@ private:
     arm_compute::Mutex            _hist_mtx;
     static constexpr unsigned int _max_range_size{ 256 }; ///< 256 possible pixel values as we handle only U8 images
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEHISTOGRAMKERNEL_H__ */

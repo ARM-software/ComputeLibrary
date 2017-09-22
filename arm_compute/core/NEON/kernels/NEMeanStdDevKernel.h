@@ -75,5 +75,5 @@ private:
     arm_compute::Mutex _mtx;
     BorderSize         _border_size;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEMEANSTDDEVKERNEL_H__ */

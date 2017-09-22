@@ -65,6 +65,5 @@ private:
     InternalKeypoint *_in_out;                /**< Source array of InternalKeypoint */
     IKeyPointArray   *_output;                /**< Destination array of IKeyPointArray */
 };
-
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPPSORTEUCLIDEANDISTANCEKERNEL_H__ */

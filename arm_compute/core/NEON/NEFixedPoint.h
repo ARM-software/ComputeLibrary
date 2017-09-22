@@ -1220,6 +1220,6 @@ qint16x8_t vqpowq_qs16(qint16x8_t a, qint16x8_t b, int fixed_point_position);
  * @return The lane-by-lane maximum -> float32x4x2
  */
 float32x4x2_t vmax2q_f32(float32x4x2_t a, float32x4x2_t b);
-}
+} // namespace arm_compute
 #include "arm_compute/core/NEON/NEFixedPoint.inl"
 #endif /* __ARM_COMPUTE_NEFIXEDPOINT_H__ */

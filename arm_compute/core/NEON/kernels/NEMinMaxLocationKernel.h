@@ -159,5 +159,5 @@ private:
     ICoordinates2DArray *_min_loc;   /**< Locations of minimum values. */
     ICoordinates2DArray *_max_loc;   /**< Locations of maximum values. */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEMINMAXLOCATIONKERNEL_H__ */

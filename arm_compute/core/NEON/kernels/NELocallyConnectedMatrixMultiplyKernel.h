@@ -60,5 +60,5 @@ private:
     const ITensor *_input1;
     ITensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NELOCALLYCONNECTEDMATRIXMULTIPLYKERNEL_H__ */

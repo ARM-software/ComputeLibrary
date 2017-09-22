@@ -77,5 +77,5 @@ private:
     const ITensor     *_beta;
     float              _epsilon;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEBATCHNORMALIZATIONLAYERKERNEL_H__ */

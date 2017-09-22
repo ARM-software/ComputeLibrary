@@ -46,5 +46,5 @@ public:
     BorderSize border_size() const override;
     bool       is_parallelisable() const override;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEINTEGRALIMAGEKERNEL_H__ */
