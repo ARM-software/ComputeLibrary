@@ -44,6 +44,12 @@ public:
         add_config(TensorShape(1024U, 1U), TensorShape(1000U, 1024U), TensorShape(1000U, 1U), TensorShape(1000U, 1U), 1.0f, 0.0f);
         add_config(TensorShape(256U, 784U), TensorShape(64U, 256U), TensorShape(64U, 784U), TensorShape(64U, 784U), 1.0f, 0.0f);
         add_config(TensorShape(1152U, 2704U), TensorShape(256U, 1152U), TensorShape(256U, 2704U), TensorShape(256U, 2704U), 1.0f, 0.0f);
+        add_config(TensorShape{ 128U, 256U }, TensorShape{ 128U, 128U }, TensorShape{ 128U, 256U }, TensorShape{ 128U, 256U }, 1.1f, 0.0f);
+        add_config(TensorShape{ 512U, 128U }, TensorShape{ 512U, 512U }, TensorShape{ 512U, 128U }, TensorShape{ 512U, 128U }, 0.5f, 0.0f);
+        add_config(TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, 0.5f, 0.0f);
+        add_config(TensorShape{ 128U, 256U }, TensorShape{ 128U, 128U }, TensorShape{ 128U, 256U }, TensorShape{ 128U, 256U }, 1.1f, 1.5f);
+        add_config(TensorShape{ 512U, 128U }, TensorShape{ 512U, 512U }, TensorShape{ 512U, 128U }, TensorShape{ 512U, 128U }, 1.2f, 1.1f);
+        add_config(TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, TensorShape{ 256U, 256U }, 0.5f, 1.3f);
     }
 };
 } // namespace datasets

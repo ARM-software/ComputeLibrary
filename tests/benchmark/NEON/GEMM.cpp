@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/benchmark/fixtures/GEMMFixture.h"
+#include "tests/datasets/GoogleNetGEMMDataset.h"
 #include "tests/datasets/MatrixMultiplyGEMMDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h"
 #include "tests/framework/Macros.h"
@@ -56,6 +57,7 @@ TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMM, NEGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(), data_types));
 REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, NEGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(), data_types));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMM, NEGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(datasets::GoogleNetGEMMDataset(), data_types));
 
 TEST_SUITE_END()
 } // namespace test
