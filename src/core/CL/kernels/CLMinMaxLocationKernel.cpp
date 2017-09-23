@@ -32,8 +32,8 @@
 
 #include <climits>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 inline int32_t FloatFlip(float val)
 {
     static_assert(sizeof(float) == sizeof(int32_t), "Float must be same size as int32_t");
@@ -88,9 +88,13 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     }
 
     // Set kernel build options
-    std::set<std::string> build_opts;
-    build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.emplace((0 != (num_elems_processed_per_iteration % max_cl_vector_width)) ? "-DNON_MULTIPLE_OF_16" : "");
+    std::set<std::string> build_opts{ "-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()) };
+
+    if(num_elems_processed_per_iteration % max_cl_vector_width != 0)
+    {
+        build_opts.emplace("-DNON_MULTIPLE_OF_16");
+    }
+
     if(input->info()->data_type() == DataType::F32)
     {
         build_opts.emplace("-DDATA_TYPE_MAX=" + support::cpp11::to_string(std::numeric_limits<float>::max()));
@@ -109,11 +113,11 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     // Set fixed arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg(idx++, *_min_max);
-    _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
+    _kernel.setArg<cl_int>(idx++, static_cast<cl_int>(input->info()->dimension(0)));
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
+    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, ceil_to_multiple(num_elems_processed_per_iteration, 16)));
     ICLKernel::configure(win);
 }
 
@@ -226,3 +230,4 @@ void CLMinMaxLocationKernel::run(const Window &window, cl::CommandQueue &queue)
     }
     while(window.slide_window_slice_2D(slice));
 }
+} // namespace arm_compute

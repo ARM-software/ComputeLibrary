@@ -47,8 +47,8 @@ void validate_configuration(const CLTensor &src, TensorShape shape)
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create output storage
-    int32_t              min{};
-    int32_t              max{};
+    int32_t              min = 0;
+    int32_t              max = 0;
     CLCoordinates2DArray min_loc(shape.total_size());
     CLCoordinates2DArray max_loc(shape.total_size());
 
@@ -57,7 +57,7 @@ void validate_configuration(const CLTensor &src, TensorShape shape)
     min_max_loc.configure(&src, &min, &max, &min_loc, &max_loc);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), src.info()->dimension(0)).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
     validate(src.info()->padding(), padding);
 }
 

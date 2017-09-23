@@ -25,8 +25,8 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLMinMaxLocation::CLMinMaxLocation()
     : _min_max_kernel(),
       _min_max_loc_kernel(),
@@ -96,3 +96,4 @@ void CLMinMaxLocation::run()
         _max_loc->resize(max_corner_size);
     }
 }
+} // namespace arm_compute

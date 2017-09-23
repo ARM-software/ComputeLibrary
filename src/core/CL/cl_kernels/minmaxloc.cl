@@ -45,7 +45,7 @@ inline int FloatFlip(float val)
 
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_min = (VEC_DATA_TYPE(DATA_TYPE, 16))(DATA_TYPE_MIN);
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_max = (VEC_DATA_TYPE(DATA_TYPE, 16))(DATA_TYPE_MAX);
-__constant uint16 idx16 = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+__constant int16 idx16 = (int16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 
 /** This function identifies the min and maximum value of an input image.
  *
@@ -65,7 +65,7 @@ __constant uint16 idx16 = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
 __kernel void minmax(
     IMAGE_DECLARATION(src),
     __global int *min_max,
-    uint          width)
+    int           width)
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 
@@ -76,11 +76,11 @@ __kernel void minmax(
     local_max = type_min;
 
     // Calculate min/max of row
-    uint width4 = width >> 4;
-    for(uint i = 0; i < width4; i++)
+    int i = 0;
+    for(; i + 16 <= width; i += 16)
     {
         VEC_DATA_TYPE(DATA_TYPE, 16)
-        data      = vload16(0, (__global DATA_TYPE *)offset(&src, i << 4, 0));
+        data      = vload16(0, (__global DATA_TYPE *)offset(&src, i, 0));
         local_min = min(data, local_min);
         local_max = max(data, local_max);
     }
@@ -88,15 +88,15 @@ __kernel void minmax(
 #ifdef NON_MULTIPLE_OF_16
     // Handle non multiple of 16
     VEC_DATA_TYPE(DATA_TYPE, 16)
-    data = vload16(0, (__global DATA_TYPE *)offset(&src, width4 << 4, 0));
+    data = vload16(0, (__global DATA_TYPE *)offset(&src, i, 0));
 #ifdef IS_DATA_TYPE_FLOAT
-    int16 widx = convert_int16(((uint16)(width4 << 4) + idx16) < width);
+    int16 valid_indices = (i + idx16) < width;
 #else  /* IS_DATA_TYPE_FLOAT */
     VEC_DATA_TYPE(DATA_TYPE, 16)
-    widx = CONVERT(((uint16)(width4 << 4) + idx16) < width, VEC_DATA_TYPE(DATA_TYPE, 16));
+    valid_indices = CONVERT((i + idx16) < width, VEC_DATA_TYPE(DATA_TYPE, 16));
 #endif /* IS_DATA_TYPE_FLOAT */
-    local_max = max(local_max, select(type_min, data, widx));
-    local_min = min(local_min, select(type_max, data, widx));
+    local_max = max(local_max, select(type_min, data, valid_indices));
+    local_min = min(local_min, select(type_max, data, valid_indices));
 #endif /* NON_MULTIPLE_OF_16 */
 
     // Perform min/max reduction
