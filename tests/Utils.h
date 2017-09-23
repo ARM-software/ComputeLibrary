@@ -351,50 +351,10 @@ inline int coord2index(const TensorShape &shape, const Coordinates &coord)
     return index;
 }
 
-/** Check if Coordinates dimensionality can match the respective shape one.
- *
- * @param coords Coordinates
- * @param shape  Shape to match dimensionality
- *
- * @return True if Coordinates can match the dimensionality of the shape else false.
- */
-inline bool match_shape(Coordinates &coords, const TensorShape &shape)
-{
-    auto check_nz = [](int i)
-    {
-        return i != 0;
-    };
-
-    const int coords_dims = coords.num_dimensions();
-    const int shape_dims  = shape.num_dimensions();
-
-    // Increase coordinates scenario
-    if(coords_dims < shape_dims)
-    {
-        coords.set_num_dimensions(shape_dims);
-        return true;
-    }
-    // Decrease coordinates scenario
-    if(coords_dims > shape_dims && !std::any_of(coords.begin() + shape_dims, coords.end(), check_nz))
-    {
-        coords.set_num_dimensions(shape_dims);
-        return true;
-    }
-
-    return (coords_dims == shape_dims);
-}
-
 /** Check if a coordinate is within a valid region */
 inline bool is_in_valid_region(const ValidRegion &valid_region, Coordinates coord)
 {
-    const bool match = match_shape(coord, valid_region.shape);
-
-    if(!match)
-    {
-        return false;
-    }
-
-    for(int d = 0; static_cast<size_t>(d) < coord.num_dimensions(); ++d)
+    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
     {
         if(coord[d] < valid_region.start(d) || coord[d] >= valid_region.end(d))
         {
