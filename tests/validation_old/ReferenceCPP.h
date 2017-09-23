@@ -44,26 +44,6 @@ namespace validation
 class ReferenceCPP final : public Reference
 {
 public:
-    /** Function to compute reference sobel 3x3.
-     *
-     * @param[in] src                   Input tensor.
-     * @param[in] dst_x                 Result tensor along x axis
-     * @param[in] dst_y                 Result tensor along y axis
-     * @param[in] border_mode           Border mode to use for input tensor
-     * @param[in] constant_border_value Constant value to use if @p border_mode is constant
-     *
-     */
-    static void sobel_3x3(RawTensor &src, RawTensor &dst_x, RawTensor &dst_y, BorderMode border_mode, uint8_t constant_border_value);
-    /** Function to compute reference sobel 5x5.
-     *
-     * @param[in] src                   Input tensor.
-     * @param[in] dst_x                 Result tensor along x axis
-     * @param[in] dst_y                 Result tensor along y axis
-     * @param[in] border_mode           Border mode to use for input tensor
-     * @param[in] constant_border_value Constant value to use if @p border_mode is constant
-     *
-     */
-    static void sobel_5x5(RawTensor &src, RawTensor &dst_x, RawTensor &dst_y, BorderMode border_mode, uint8_t constant_border_value);
     /** Function to compute reference Harris corners.
      *
      * @param[in]  src                   Input tensor

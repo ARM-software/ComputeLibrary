@@ -142,7 +142,7 @@ struct BorderSize
     }
 
     /** Border with equal size around the 2D plane */
-    constexpr BorderSize(unsigned int size)
+    explicit constexpr BorderSize(unsigned int size)
         : top{ size }, right{ size }, bottom{ size }, left{ size }
     {
     }

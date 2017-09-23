@@ -211,7 +211,7 @@ void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned 
  *
  * - All values should match
  */
-template <typename T, typename U>
+template <typename T, typename U = AbsoluteTolerance<T>>
 void validate(T target, T reference, U tolerance = AbsoluteTolerance<T>());
 
 template <typename T>

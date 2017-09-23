@@ -389,6 +389,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Format &format)
     return os;
 }
 
+inline std::string to_string(const Format &format)
+{
+    std::stringstream str;
+    str << format;
+    return str.str();
+}
+
 /** Formatted output of the Channel type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const Channel &channel)
 {
