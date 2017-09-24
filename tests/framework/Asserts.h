@@ -135,6 +135,25 @@ ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_comput
         arm_compute::test::framework::Framework::get().clear_test_info();                                                                     \
     } while(false)
 
+#define ARM_COMPUTE_ASSERT_FAIL(MSG)                                                                              \
+    do                                                                                                            \
+    {                                                                                                             \
+        std::stringstream msg;                                                                                    \
+        msg << "Assertion '" << MSG << "' failed.\n";                                                             \
+        arm_compute::test::framework::Framework::get().print_test_info(msg);                                      \
+        throw arm_compute::test::framework::TestError(msg.str(), arm_compute::test::framework::LogLevel::ERRORS); \
+        arm_compute::test::framework::Framework::get().clear_test_info();                                         \
+    } while(false)
+
+#define ARM_COMPUTE_EXPECT_FAIL(MSG, LEVEL)                                                                                               \
+    do                                                                                                                                    \
+    {                                                                                                                                     \
+        std::stringstream msg;                                                                                                            \
+        msg << "Expectation '" << MSG << "' failed.\n";                                                                                   \
+        arm_compute::test::framework::Framework::get().print_test_info(msg);                                                              \
+        arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), LEVEL)); \
+        arm_compute::test::framework::Framework::get().clear_test_info();                                                                 \
+    } while(false)
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

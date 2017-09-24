@@ -29,6 +29,48 @@ namespace test
 {
 namespace validation
 {
+void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPattern pattern)
+{
+    unsigned int                v = 0;
+    std::mt19937                gen(library->seed());
+    std::bernoulli_distribution dist(0.5);
+
+    for(int r = 0; r < rows; ++r)
+    {
+        for(int c = 0; c < cols; ++c, ++v)
+        {
+            uint8_t val = 0;
+
+            switch(pattern)
+            {
+                case MatrixPattern::BOX:
+                    val = 255;
+                    break;
+                case MatrixPattern::CROSS:
+                    val = ((r == (rows / 2)) || (c == (cols / 2))) ? 255 : 0;
+                    break;
+                case MatrixPattern::DISK:
+                    val = (((r - rows / 2.0f + 0.5f) * (r - rows / 2.0f + 0.5f)) / ((rows / 2.0f) * (rows / 2.0f)) + ((c - cols / 2.0f + 0.5f) * (c - cols / 2.0f + 0.5f)) / ((cols / 2.0f) *
+                            (cols / 2.0f))) <= 1.0f ? 255 : 0;
+                    break;
+                case MatrixPattern::OTHER:
+                    val = (dist(gen) ? 0 : 255);
+                    break;
+                default:
+                    return;
+            }
+
+            mask[v] = val;
+        }
+    }
+
+    if(pattern == MatrixPattern::OTHER)
+    {
+        std::uniform_int_distribution<uint8_t> distribution_u8(0, ((cols * rows) - 1));
+        mask[distribution_u8(gen)] = 255;
+    }
+}
+
 TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &input_shapes)
 {
     ARM_COMPUTE_ERROR_ON(input_shapes.empty());
@@ -51,6 +93,24 @@ TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &in
     out_shape.set(2, depth);
 
     return out_shape;
+}
+
+HarrisCornersParameters harris_corners_parameters()
+{
+    HarrisCornersParameters params;
+
+    std::mt19937                           gen(library->seed());
+    std::uniform_real_distribution<float>  threshold_dist(0.f, 0.01f);
+    std::uniform_real_distribution<float>  sensitivity(0.04f, 0.15f);
+    std::uniform_real_distribution<float>  euclidean_distance(0.f, 30.f);
+    std::uniform_int_distribution<uint8_t> int_dist(0, 255);
+
+    params.threshold             = threshold_dist(gen);
+    params.sensitivity           = sensitivity(gen);
+    params.min_dist              = euclidean_distance(gen);
+    params.constant_border_value = int_dist(gen);
+
+    return params;
 }
 } // namespace validation
 } // namespace test

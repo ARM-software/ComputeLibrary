@@ -114,7 +114,7 @@ inline void Window::validate() const
     for(size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_ERROR_ON(_dims[i].step() == 0);
-        ARM_COMPUTE_ERROR_ON(_dims[i].end() <= _dims[i].start());
+        ARM_COMPUTE_ERROR_ON(_dims[i].end() < _dims[i].start());
         ARM_COMPUTE_ERROR_ON((_dims[i].end() - _dims[i].start()) % _dims[i].step());
     }
 }

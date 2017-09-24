@@ -31,36 +31,6 @@ namespace test
 {
 namespace validation
 {
-// Return a tensor element at a specified coordinate with different border modes
-template <typename T>
-T tensor_elem_at(const SimpleTensor<T> &in, Coordinates coord, BorderMode border_mode, T constant_border_value)
-{
-    const int  x      = coord.x();
-    const int  y      = coord.y();
-    const auto width  = static_cast<int>(in.shape().x());
-    const auto height = static_cast<int>(in.shape().y());
-
-    // If coordinates beyond range of tensor's width or height
-    if(x < 0 || y < 0 || x >= width || y >= height)
-    {
-        if(border_mode == BorderMode::REPLICATE)
-        {
-            coord.set(0, std::max(0, std::min(x, width - 1)));
-            coord.set(1, std::max(0, std::min(y, height - 1)));
-        }
-        else
-        {
-            return static_cast<T>(constant_border_value);
-        }
-    }
-    return in[coord2index(in.shape(), coord)];
-}
-
-template uint8_t tensor_elem_at(const SimpleTensor<uint8_t> &in, Coordinates coord, BorderMode border_mode, uint8_t constant_border_value);
-template int16_t tensor_elem_at(const SimpleTensor<int16_t> &in, Coordinates coord, BorderMode border_mode, int16_t constant_border_value);
-template half tensor_elem_at(const SimpleTensor<half> &in, Coordinates coord, BorderMode border_mode, half constant_border_value);
-template float tensor_elem_at(const SimpleTensor<float> &in, Coordinates coord, BorderMode border_mode, float constant_border_value);
-
 // Return the bilinear value at a specified coordinate with different border modes
 template <typename T>
 T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, T constant_border_value)

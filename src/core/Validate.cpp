@@ -184,7 +184,7 @@ void arm_compute::error_on_unconfigured_kernel(const char *function, const char 
     ARM_COMPUTE_UNUSED(kernel);
 
     ARM_COMPUTE_ERROR_ON_LOC(kernel == nullptr, function, file, line);
-    ARM_COMPUTE_ERROR_ON_LOC_MSG((kernel->window().x().start() == kernel->window().x().end()) && (kernel->window().x().end() == 0),
+    ARM_COMPUTE_ERROR_ON_LOC_MSG((kernel->window().x().start() == kernel->window().x().end()) && (kernel->window().x().end() == 0) && (kernel->window().x().step() == 0),
                                  function, file, line,
                                  "This kernel hasn't been configured.");
 }

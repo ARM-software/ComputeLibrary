@@ -622,5 +622,18 @@ inline std::string to_string(const PoolingLayerInfo &info)
     return str.str();
 }
 
+/** Formatted output of the KeyPoint type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const KeyPoint &point)
+{
+    os << "{x=" << point.x << ","
+       << "y=" << point.y << ","
+       << "strength=" << point.strength << ","
+       << "scale=" << point.scale << ","
+       << "orientation=" << point.orientation << ","
+       << "tracking_status=" << point.tracking_status << ","
+       << "error=" << point.error << "}";
+
+    return os;
+}
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

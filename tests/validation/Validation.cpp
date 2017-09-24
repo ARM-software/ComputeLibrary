@@ -297,11 +297,24 @@ void validate(std::vector<unsigned int> classified_labels, std::vector<unsigned 
 {
     ARM_COMPUTE_EXPECT_EQUAL(classified_labels.size(), expected_labels.size(), framework::LogLevel::ERRORS);
 
-    const int min_num = std::min(classified_labels.size(), expected_labels.size());
+    int64_t   num_mismatches = 0;
+    const int num_elements   = std::min(classified_labels.size(), expected_labels.size());
 
-    for(int i = 0; i < min_num; ++i)
+    for(int i = 0; i < num_elements; ++i)
     {
-        ARM_COMPUTE_EXPECT_EQUAL(classified_labels[i], expected_labels[i], framework::LogLevel::ERRORS);
+        if(classified_labels[i] != expected_labels[i])
+        {
+            ++num_mismatches;
+            ARM_COMPUTE_EXPECT_EQUAL(classified_labels[i], expected_labels[i], framework::LogLevel::DEBUG);
+        }
+    }
+
+    if(num_elements > 0)
+    {
+        const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements * 100.f;
+
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0, framework::LogLevel::ERRORS);
     }
 }
 } // namespace validation

@@ -43,7 +43,9 @@ public:
 
     ICLArray(const ICLArray &) = delete;
     ICLArray &operator=(const ICLArray &) = delete;
-    virtual ~ICLArray()                   = default;
+    ICLArray(ICLArray &&)                 = default;
+    ICLArray &operator=(ICLArray &&) = default;
+    virtual ~ICLArray()              = default;
     /** Interface to be implemented by the child class to return a reference to the OpenCL buffer containing the array's data.
      *
      * @return A reference to an OpenCL buffer containing the array's data.

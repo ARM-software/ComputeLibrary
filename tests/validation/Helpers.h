@@ -26,7 +26,9 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+#include "support/Half.h"
 #include "tests/Globals.h"
+#include "tests/SimpleTensor.h"
 
 #include <random>
 #include <type_traits>
@@ -136,47 +138,7 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
  * @param[in]     rows    Rows (height) of mask
  * @param[in]     pattern Pattern to fill the mask according to
  */
-inline void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPattern pattern)
-{
-    unsigned int                v = 0;
-    std::mt19937                gen(library->seed());
-    std::bernoulli_distribution dist(0.5);
-
-    for(int r = 0; r < rows; ++r)
-    {
-        for(int c = 0; c < cols; ++c, ++v)
-        {
-            uint8_t val = 0;
-
-            switch(pattern)
-            {
-                case MatrixPattern::BOX:
-                    val = 255;
-                    break;
-                case MatrixPattern::CROSS:
-                    val = ((r == (rows / 2)) || (c == (cols / 2))) ? 255 : 0;
-                    break;
-                case MatrixPattern::DISK:
-                    val = (((r - rows / 2.0f + 0.5f) * (r - rows / 2.0f + 0.5f)) / ((rows / 2.0f) * (rows / 2.0f)) + ((c - cols / 2.0f + 0.5f) * (c - cols / 2.0f + 0.5f)) / ((cols / 2.0f) *
-                            (cols / 2.0f))) <= 1.0f ? 255 : 0;
-                    break;
-                case MatrixPattern::OTHER:
-                    val = (dist(gen) ? 0 : 255);
-                    break;
-                default:
-                    return;
-            }
-
-            mask[v] = val;
-        }
-    }
-
-    if(pattern == MatrixPattern::OTHER)
-    {
-        std::uniform_int_distribution<uint8_t> distribution_u8(0, ((cols * rows) - 1));
-        mask[distribution_u8(gen)] = 255;
-    }
-}
+void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPattern pattern);
 
 /** Calculate output tensor shape give a vector of input tensor to concatenate
  *
@@ -185,6 +147,18 @@ inline void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPatt
  * @return The shape of output concatenated tensor.
  */
 TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &input_shapes);
+
+/** Parameters of Harris Corners algorithm. */
+struct HarrisCornersParameters
+{
+    float   threshold{ 0.f };
+    float   sensitivity{ 0.f };
+    float   min_dist{ 0.f };
+    uint8_t constant_border_value{ 0 };
+};
+
+/** Generate parameters for Harris Corners algorithm. */
+HarrisCornersParameters harris_corners_parameters();
 
 /** Helper function to fill the Lut random by a ILutAccessor.
  *

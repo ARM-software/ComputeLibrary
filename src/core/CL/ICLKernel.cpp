@@ -43,7 +43,10 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
         return;
     }
 
-    ARM_COMPUTE_ERROR_ON((0 == (window.x().end() - window.x().start())) || (0 == (window.y().end() - window.y().start())));
+    if((window.x().end() - window.x().start()) == 0 || (window.y().end() - window.y().start()) == 0)
+    {
+        return;
+    }
 
     cl::NDRange gws((window.x().end() - window.x().start()) / window.x().step(),
                     (window.y().end() - window.y().start()) / window.y().step(),
