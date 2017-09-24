@@ -184,6 +184,11 @@ void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
     const unsigned int num_iterations = max_window.num_iterations(split_dimension);
     info.num_threads                  = std::min(num_iterations, _num_threads);
 
+    if(num_iterations == 0)
+    {
+        return;
+    }
+
     if(!kernel->is_parallelisable() || info.num_threads == 1)
     {
         kernel->run(max_window, info);
