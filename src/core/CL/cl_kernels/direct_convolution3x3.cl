@@ -34,6 +34,8 @@ MULQ_SAT_IMPL(qs32x8, qs32x8)
 
 #else /* FIXED_POINT_POSITION */
 
+#undef CONVERT_SAT
+
 #define ADD_OP(a, b) ((a) + (b))
 #define MUL_OP(a, b) ((a) * (b))
 #define CONVERT_SAT(a, b) ((a))

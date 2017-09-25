@@ -100,6 +100,9 @@
 #error DATA_TYPE_IN_BYTES not set for the transpose OpenCL kernel
 #endif /* not DATA_TYPE_IN_BYTES */
 
+#undef VLOAD
+#undef VSTORE
+
 #if DATA_TYPE_IN_BYTES == 4
 #define DATA_TYPE uint
 #define TRANSPOSE() TRANSPOSE_4x4(u0, u1, u2, u3)
