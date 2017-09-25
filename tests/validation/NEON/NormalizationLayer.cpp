@@ -50,7 +50,7 @@ constexpr AbsoluteTolerance<float> tolerance_f16(0.001f);
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
-constexpr AbsoluteTolerance<int16_t> tolerance_qs16(3);
+constexpr AbsoluteTolerance<int16_t> tolerance_qs16(4);
 
 /** Input data set. */
 const auto NormalizationDataset = combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()), framework::dataset::make("NormalizationSize", 3, 9, 2)),
