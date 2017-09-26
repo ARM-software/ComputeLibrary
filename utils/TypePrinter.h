@@ -264,6 +264,13 @@ inline std::string to_string(const arm_compute::NormalizationLayerInfo &info)
     return str.str();
 }
 
+/** Formatted output of @ref NormalizationLayerInfo. */
+inline ::std::ostream &operator<<(::std::ostream &os, const NormalizationLayerInfo &info)
+{
+    os << info.type();
+    return os;
+}
+
 /** Formatted output of the PoolingType type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_type)
 {

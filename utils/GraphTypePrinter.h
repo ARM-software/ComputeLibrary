@@ -21,45 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_TYPES_H__
-#define __ARM_COMPUTE_GRAPH_TYPES_H__
+#ifndef __ARM_COMPUTE_TEST_GRAPH_TYPE_PRINTER_H__
+#define __ARM_COMPUTE_TEST_GRAPH_TYPE_PRINTER_H__
 
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/SubTensorInfo.h"
-#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/graph/Types.h"
+
+#include <ostream>
+#include <sstream>
+#include <string>
 
 namespace arm_compute
 {
 namespace graph
 {
-using arm_compute::ITensor;
-using arm_compute::TensorInfo;
-using arm_compute::SubTensorInfo;
-using arm_compute::DataType;
-using arm_compute::Coordinates;
-using arm_compute::TensorShape;
-using arm_compute::PadStrideInfo;
-using arm_compute::WeightsInfo;
-using arm_compute::ActivationLayerInfo;
-using arm_compute::NormType;
-using arm_compute::NormalizationLayerInfo;
-using arm_compute::PoolingLayerInfo;
-using arm_compute::PoolingType;
-
-/**< Execution hint to the graph executor */
-enum class Hint
+/** Formatted output of the @ref ConvolutionMethodHint type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethodHint &conv_method)
 {
-    DONT_CARE, /**< Run node in any device */
-    OPENCL,    /**< Run node on an OpenCL capable device (GPU) */
-    NEON       /**< Run node on a NEON capable device */
-};
+    switch(conv_method)
+    {
+        case ConvolutionMethodHint::DIRECT:
+            os << "DIRECT";
+            break;
+        case ConvolutionMethodHint::GEMM:
+            os << "GEMM";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
 
-/**< Convolution method hint to the graph executor */
-enum class ConvolutionMethodHint
+    return os;
+}
+
+inline std::string to_string(const ConvolutionMethodHint &conv_method)
 {
-    GEMM,  /**< Convolution using GEMM */
-    DIRECT /**< Direct convolution */
-};
+    std::stringstream str;
+    str << conv_method;
+    return str.str();
+}
 } // namespace graph
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_GRAPH_TYPES_H__*/
+#endif /* __ARM_COMPUTE_TEST_GRAPH_TYPE_PRINTER_H__ */

@@ -85,6 +85,8 @@ def filter_clang_tidy_lines( lines ):
                ("NESoftmaxLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                ("GraphUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint32'" in line) or
                ("GraphUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
+               ("ConvolutionLayer.cpp" in line and "move assignment operators should be marked noexcept" in line) or
+               ("ConvolutionLayer.cpp" in line and "move constructors should be marked noexcept" in line) or
                ("parameter 'memory_manager' is unused" in line) or
                ("parameter 'memory_manager' is copied for each invocation but only used as a const reference" in line) or
                "3rdparty" in line):

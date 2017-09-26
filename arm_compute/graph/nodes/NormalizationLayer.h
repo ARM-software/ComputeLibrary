@@ -21,45 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_TYPES_H__
-#define __ARM_COMPUTE_GRAPH_TYPES_H__
+#ifndef __ARM_COMPUTE_GRAPH_NORMALIZATION_LAYER_H__
+#define __ARM_COMPUTE_GRAPH_NORMALIZATION_LAYER_H__
 
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/SubTensorInfo.h"
-#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/graph/INode.h"
+#include "arm_compute/graph/Types.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-using arm_compute::ITensor;
-using arm_compute::TensorInfo;
-using arm_compute::SubTensorInfo;
-using arm_compute::DataType;
-using arm_compute::Coordinates;
-using arm_compute::TensorShape;
-using arm_compute::PadStrideInfo;
-using arm_compute::WeightsInfo;
-using arm_compute::ActivationLayerInfo;
-using arm_compute::NormType;
-using arm_compute::NormalizationLayerInfo;
-using arm_compute::PoolingLayerInfo;
-using arm_compute::PoolingType;
-
-/**< Execution hint to the graph executor */
-enum class Hint
+/** Normalization layer node */
+class NormalizationLayer final : public INode
 {
-    DONT_CARE, /**< Run node in any device */
-    OPENCL,    /**< Run node on an OpenCL capable device (GPU) */
-    NEON       /**< Run node on a NEON capable device */
-};
+public:
+    /** Default Constructor
+     *
+     * @param[in] norm_info Normalization layer information
+     */
+    explicit NormalizationLayer(const NormalizationLayerInfo norm_info);
 
-/**< Convolution method hint to the graph executor */
-enum class ConvolutionMethodHint
-{
-    GEMM,  /**< Convolution using GEMM */
-    DIRECT /**< Direct convolution */
+    // Inherited methods overriden:
+    std::unique_ptr<arm_compute::IFunction> instantiate_node(Hint hint, ITensor *input, ITensor *output) override;
+    void print_info() override;
+
+private:
+    const NormalizationLayerInfo _norm_info; /**< Normalization layer information */
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_GRAPH_TYPES_H__*/
+#endif /* __ARM_COMPUTE_GRAPH_NORMALIZATION_LAYER_H__ */

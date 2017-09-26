@@ -27,6 +27,7 @@
 #include "arm_compute/graph/nodes/ActivationLayer.h"
 #include "arm_compute/graph/nodes/ConvolutionLayer.h"
 #include "arm_compute/graph/nodes/FullyConnectedLayer.h"
+#include "arm_compute/graph/nodes/NormalizationLayer.h"
 #include "arm_compute/graph/nodes/PoolingLayer.h"
 #include "arm_compute/graph/nodes/SoftmaxLayer.h"
 

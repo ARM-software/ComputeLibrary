@@ -33,6 +33,16 @@ using namespace arm_compute::graph;
 
 namespace
 {
+TensorShape calculate_fullyconnected_layer_output_shape(const TensorShape &input_shape, unsigned int output_neurons)
+{
+    // Note: Only 1D batch space is supported at the moment
+    unsigned int batches = input_shape[1];
+    if(input_shape.num_dimensions() > 2)
+    {
+        batches = input_shape[3];
+    }
+    return TensorShape(output_neurons, batches);
+}
 template <typename FullyConnectedType, typename TensorType, Hint hint>
 std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output)
 {
@@ -95,8 +105,10 @@ std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(Hi
         _biases.set_info(TensorInfo(TensorShape(_num_neurons), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
     }
 
-    arm_compute::auto_init_if_empty(*output->info(), TensorShape(_num_neurons, input->info()->dimension(1)), input->info()->num_channels(), input->info()->data_type(),
-                                    input->info()->fixed_point_position());
+    // Auto configure output
+    arm_compute::auto_init_if_empty(*output->info(),
+                                    calculate_fullyconnected_layer_output_shape(input->info()->tensor_shape(), _num_neurons),
+                                    input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
 
     std::unique_ptr<arm_compute::IFunction> func;
     _hint   = hint;
@@ -125,6 +137,10 @@ void FullyConnectedLayer::print_info()
     {
         std::cout << "Instantiating NEFullyConnectedLayer";
     }
-    std::cout << " Type: " << _input->info()->data_type() << " Input Shape: " << _input->info()->tensor_shape() << " Weights shape: " << _weights.info().tensor_shape() << " Biases Shape: " <<
-              _biases.info().tensor_shape() << " Output Shape: " << _output->info()->tensor_shape() << std::endl;
+    std::cout << " Type: " << _input->info()->data_type()
+              << " Input Shape: " << _input->info()->tensor_shape()
+              << " Weights shape: " << _weights.info().tensor_shape()
+              << " Biases Shape: " << _biases.info().tensor_shape()
+              << " Output Shape: " << _output->info()->tensor_shape()
+              << std::endl;
 }
