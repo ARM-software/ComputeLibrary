@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Strides.h"
 #include "arm_compute/core/Types.h"
 
 #include "tests/Types.h"
@@ -551,6 +552,13 @@ inline std::string to_string(const Dimensions<T> &dimensions)
 {
     std::stringstream str;
     str << dimensions;
+    return str.str();
+}
+
+inline std::string to_string(const Strides &stride)
+{
+    std::stringstream str;
+    str << stride;
     return str.str();
 }
 
