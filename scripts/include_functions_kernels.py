@@ -45,12 +45,15 @@ def create_include_list(folder):
     return updated_files
 
 
-def include_components(path, header_prefix, folder):
+def include_components(path, header_prefix, folder, subfolders=None):
     for t in targets:
         target_path = path +  t.name + "/"
         components_file = target_path + t.prefix + header_prefix
         if os.path.exists(components_file):
             include_list = create_include_list(target_path + folder)
+            for s in subfolders or []:
+                include_list += create_include_list( target_path + folder + "/" + s)
+            include_list.sort()
             lines = read_file(components_file)
             lines, first_pos = remove_existing_includes(lines)
             lines = add_updated_includes(lines, first_pos, include_list)
@@ -59,7 +62,7 @@ def include_components(path, header_prefix, folder):
 
 if __name__ == "__main__":
     # Include kernels
-    include_components(core_path, "Kernels.h", "kernels")
+    include_components(core_path, "Kernels.h", "kernels", ["arm32", "arm64"])
 
     # Include functions
     include_components(runtime_path, "Functions.h", "functions")

@@ -56,6 +56,7 @@
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillInnerBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFloorKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAccumulateBiasesKernel.h"
@@ -100,5 +101,7 @@
 #include "arm_compute/core/NEON/kernels/NETransposeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWarpKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
+#include "arm_compute/core/NEON/kernels/arm32/NEGEMMAArch32Kernel.h"
+#include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
 
 #endif /* __ARM_COMPUTE_NEKERNELS_H__ */

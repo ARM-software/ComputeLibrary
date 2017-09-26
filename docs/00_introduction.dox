@@ -36,33 +36,50 @@ You should have the following file organisation:
 	├── arm_compute --> All the arm_compute headers
 	│   ├── core
 	│   │   ├── CL
+	│   │   │   ├── CLKernelLibrary.h --> Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
 	│   │   │   ├── CLKernels.h --> Includes all the OpenCL kernels at once
 	│   │   │   ├── CL specialisation of all the generic objects interfaces (ICLTensor, ICLImage, etc.)
 	│   │   │   ├── kernels --> Folder containing all the OpenCL kernels
 	│   │   │   │   └── CL*Kernel.h
 	│   │   │   └── OpenCL.h --> Wrapper to configure the Khronos OpenCL C++ header
 	│   │   ├── CPP
+	│   │   │   ├── CPPKernels.h --> Includes all the CPP kernels at once
 	│   │   │   └── kernels --> Folder containing all the CPP kernels
-	│   │   │   │   └── CPP*Kernel.h
+	│   │   │       └── CPP*Kernel.h
 	│   │   ├── NEON
 	│   │   │   ├── kernels --> Folder containing all the NEON kernels
+	│   │   │   │   ├── arm64 --> Folder containing the interfaces for the assembly arm64 NEON kernels
+	│   │   │   │   ├── arm32 --> Folder containing the interfaces for the assembly arm32 NEON kernels
+	│   │   │   │   ├── assembly --> Folder containing the NEON assembly routines.
 	│   │   │   │   └── NE*Kernel.h
 	│   │   │   └── NEKernels.h --> Includes all the NEON kernels at once
 	│   │   ├── All common basic types (Types.h, Window, Coordinates, Iterator, etc.)
 	│   │   ├── All generic objects interfaces (ITensor, IImage, etc.)
 	│   │   └── Objects metadata classes (ImageInfo, TensorInfo, MultiImageInfo)
+	│   ├── graph
+	│   │   ├── CL --> OpenCL specific operations
+	│   │   │   └── CLMap.h / CLUnmap.h
+	│   │   ├── nodes
+	│   │   │   └── The various nodes supported by the graph API
+	│   │   ├── Nodes.h --> Includes all the Graph nodes at once.
+	│   │   └── Graph objects ( INode, ITensorAccessor, Graph, etc.)
 	│   └── runtime
 	│       ├── CL
 	│       │   ├── CL objects & allocators (CLArray, CLImage, CLTensor, etc.)
 	│       │   ├── functions --> Folder containing all the OpenCL functions
 	│       │   │   └── CL*.h
+	│       │   ├── CLScheduler.h --> Interface to enqueue OpenCL kernels and get/set the OpenCL CommandQueue and ICLTuner.
 	│       │   └── CLFunctions.h --> Includes all the OpenCL functions at once
 	│       ├── CPP
-	│       │   └── Scheduler.h --> Basic pool of threads to execute CPP/NEON code on several cores in parallel
+	│       │   ├── CPPKernels.h --> Includes all the CPP functions at once.
+	│       │   └── CPPScheduler.h --> Basic pool of threads to execute CPP/NEON code on several cores in parallel
 	│       ├── NEON
 	│       │   ├── functions --> Folder containing all the NEON functions
 	│       │   │   └── NE*.h
 	│       │   └── NEFunctions.h --> Includes all the NEON functions at once
+	│       ├── OMP
+	│       │   └── OMPScheduler.h --> OpenMP scheduler (Alternative to the CPPScheduler)
+	│       ├── Memory manager files (LifetimeManager, PoolManager, etc.)
 	│       └── Basic implementations of the generic object interfaces (Array, Image, Tensor, etc.)
 	├── documentation
 	│   ├── index.xhtml
@@ -74,32 +91,47 @@ You should have the following file organisation:
 	│   ├── neon_convolution.cpp
 	│   └── neon_scale.cpp
 	├── include
-	│   └── CL
-	│       └── Khronos OpenCL C headers and C++ wrapper
+	│   ├── CL
+	│   │   └── Khronos OpenCL C headers and C++ wrapper
+	│   ├── half --> FP16 library available from http://half.sourceforge.net
+	│   └── libnpy --> Library to load / write npy buffers, available from https://github.com/llohse/libnpy
 	├── opencl-1.2-stubs
 	│   └── opencl_stubs.c
+	├── scripts
+	│   ├── caffe_data_extractor.py --> Basic script to export weights from Caffe to npy files
+	│   └── tensorflow_data_extractor.py --> Basic script to export weights from Tensor Flow to npy files
 	├── src
 	│   ├── core
 	│   │   └── ... (Same structure as headers)
 	│   │       └── CL
 	│   │           └── cl_kernels --> All the OpenCL kernels
+	│   ├── graph
+	│   │   └── ... (Same structure as headers)
 	│   └── runtime
 	│       └── ... (Same structure as headers)
+	├── support
+	│   └── Various headers to work around toolchains / platform issues.
 	├── tests
 	│   ├── All test related files shared between validation and benchmark
-	│   ├── CL --> OpenCL specific files (shared)
-	│   ├── NEON --> NEON specific files (shared)
+	│   ├── CL --> OpenCL accessors
+	│   ├── NEON --> NEON accessors
 	│   ├── benchmark --> Sources for benchmarking
 	│   │   ├── Benchmark specific files
-	│   │   ├── main.cpp --> Entry point for benchmark test framework
 	│   │   ├── CL --> OpenCL benchmarking tests
 	│   │   └── NEON --> NEON benchmarking tests
+	│   ├── datasets
+	│   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
+	│   ├── framework
+	│   │   └── Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
+	│   ├── networks
+	│   │   └── Examples of how to instantiate networks.
 	│   ├── validation --> Sources for validation
 	│   │   ├── Validation specific files
-	│   │   ├── main.cpp --> Entry point for validation test framework
 	│   │   ├── CL --> OpenCL validation tests
-	│   │   ├── NEON --> NEON validation tests
-	│   │   └── UNIT --> Library validation tests
+	│   │   ├── CPP --> C++ reference implementations
+	│   │   ├── fixtures
+	│   │   │   └── Fixtures to initialise and run the runtime Functions.
+	│   │   └── NEON --> NEON validation tests
 	│   └── dataset --> Datasets defining common sets of input parameters
 	└── utils --> Boiler plate code used by examples
 	    └── Utils.h
@@ -118,6 +150,35 @@ If there is more than one release in a month then an extra sequential number is 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
 
 @subsection S2_2_changelog Changelog
+
+v17.09 Public major release
+ - Experimental Graph support: initial implementation of a simple stream API to easily chain machine learning layers.
+ - Memory Manager (@ref arm_compute::BlobLifetimeManager, @ref arm_compute::BlobMemoryPool, @ref arm_compute::ILifetimeManager, @ref arm_compute::IMemoryGroup, @ref arm_compute::IMemoryManager, @ref arm_compute::IMemoryPool, @ref arm_compute::IPoolManager, @ref arm_compute::MemoryManagerOnDemand, @ref arm_compute::PoolManager)
+ - New validation and benchmark frameworks (Boost and Google frameworks replaced by homemade framework).
+ - Most machine learning functions support both fixed point 8 and 16 bit (QS8, QS16) for both NEON and OpenCL.
+ - New NEON kernels / functions:
+    - @ref arm_compute::NEGEMMAssemblyBaseKernel @ref arm_compute::NEGEMMAArch64Kernel
+    - @ref arm_compute::NEDequantizationLayerKernel / @ref arm_compute::NEDequantizationLayer
+    - @ref arm_compute::NEFloorKernel / @ref arm_compute::NEFloor
+    - @ref arm_compute::NEL2NormalizeKernel / @ref arm_compute::NEL2Normalize
+    - @ref arm_compute::NEQuantizationLayerKernel @ref arm_compute::NEMinMaxLayerKernel / @ref arm_compute::NEQuantizationLayer
+    - @ref arm_compute::NEROIPoolingLayerKernel / @ref arm_compute::NEROIPoolingLayer
+    - @ref arm_compute::NEReductionOperationKernel / @ref arm_compute::NEReductionOperation
+    - @ref arm_compute::NEReshapeLayerKernel / @ref arm_compute::NEReshapeLayer
+
+ - New OpenCL kernels / functions:
+    - @ref arm_compute::CLDepthwiseConvolution3x3Kernel @ref arm_compute::CLDepthwiseIm2ColKernel @ref arm_compute::CLDepthwiseVectorToTensorKernel @ref arm_compute::CLDepthwiseWeightsReshapeKernel / @ref arm_compute::CLDepthwiseConvolution3x3 @ref arm_compute::CLDepthwiseConvolution @ref arm_compute::CLDepthwiseSeparableConvolutionLayer
+    - @ref arm_compute::CLDequantizationLayerKernel / @ref arm_compute::CLDequantizationLayer
+    - @ref arm_compute::CLDirectConvolutionLayerKernel / @ref arm_compute::CLDirectConvolutionLayer
+    - @ref arm_compute::CLFlattenLayer
+    - @ref arm_compute::CLFloorKernel / @ref arm_compute::CLFloor
+    - @ref arm_compute::CLGEMMTranspose1xW
+    - @ref arm_compute::CLGEMMMatrixVectorMultiplyKernel
+    - @ref arm_compute::CLL2NormalizeKernel / @ref arm_compute::CLL2Normalize
+    - @ref arm_compute::CLQuantizationLayerKernel @ref arm_compute::CLMinMaxLayerKernel / @ref arm_compute::CLQuantizationLayer
+    - @ref arm_compute::CLROIPoolingLayerKernel / @ref arm_compute::CLROIPoolingLayer
+    - @ref arm_compute::CLReductionOperationKernel / @ref arm_compute::CLReductionOperation
+    - @ref arm_compute::CLReshapeLayerKernel / @ref arm_compute::CLReshapeLayer
 
 v17.06 Public major release
  - Various bug fixes
@@ -171,7 +232,6 @@ v17.04 Public bug fixes release
  -  @ref arm_compute::NELogits1DNormKernel
  -  @ref arm_compute::NENonMaximaSuppression3x3FP16Kernel
  -  @ref arm_compute::NENonMaximaSuppression3x3Kernel
-
 
 v17.03.1 First Major public release of the sources
  - Renamed the library to arm_compute
@@ -303,6 +363,10 @@ To see the build options available simply run ```scons -h```:
 		default: False
 		actual: False
 
+	mali: Enable Mali hardware counters (yes|no)
+		default: False
+		actual: False
+
 	validation_tests: Build validation test programs (yes|no)
 		default: False
 		actual: False
@@ -354,6 +418,8 @@ Example:
 @b benchmark_tests: Enable the build of the benchmark tests
 
 @b pmu: Enable the PMU cycle counter to measure execution time in benchmark tests. (Your device needs to support it)
+
+@b mali: Enable the collection of Mali hardware counters to measure execution time in benchmark tests. (Your device needs to have a Mali driver that supports it)
 
 @b openmp Build in the OpenMP scheduler for NEON.
 

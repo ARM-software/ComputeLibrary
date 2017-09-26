@@ -13,7 +13,7 @@ extract the parameter values from a trained model.
 
 @note complex networks might require altering the script to properly work.
 
-@subsection how_to How to use the script
+@subsection caffe_how_to How to use the script
 
 Install caffe following <a href="http://caffe.berkeleyvision.org/installation.html">caffe's document</a>.
 Make sure the pycaffe has been added into the PYTHONPATH.
@@ -30,7 +30,7 @@ For example, to extract the data from pre-trained caffe Alex model to binary fil
 
 The script has been tested under Python2.7.
 
-@subsection result  What is the expected output from the script
+@subsection caffe_result  What is the expected output from the script
 
 If the script runs successfully, it prints the names and shapes of each layer onto the standard
 output and generates *.npy files containing the weights and biases of each layer.
@@ -60,7 +60,7 @@ when dealing with binary files with version < 0.11, pass the whole file name {mo
 specified otherwise by the user. Thus should a user alter this default behavior and/or want to extract parameters from other
 collections, tf.GraphKeys.TRAINABLE_VARIABLES should be replaced accordingly.
 
-@subsection how_to How to use the script
+@subsection tensorflow_how_to How to use the script
 
 Install tensorflow and numpy.
 
@@ -82,7 +82,7 @@ Or for binary checkpoint files before Tensorflow 0.11:
 
 The script has been tested with Tensorflow 1.2, 1.3 on Python 2.7.6 and Python 3.4.3.
 
-@subsection result What is the expected output from the script
+@subsection tensorflow_result What is the expected output from the script
 
 If the script runs successfully, it prints the names and shapes of each parameter onto the standard output and generates
  *.npy files containing the weights and biases of each layer.
