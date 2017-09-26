@@ -120,7 +120,6 @@ void main_graph_lenet(int argc, const char **argv)
               500U,
               get_accessor(data_path, "/cnn_data/lenet_model/ip1_w.npy"),
               get_accessor(data_path, "/cnn_data/lenet_model/ip1_b.npy"))
-          << TensorInfo(TensorShape(500U, batches), 1, DataType::F32)
           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
           << FullyConnectedLayer(
               10U,

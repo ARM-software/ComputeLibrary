@@ -87,7 +87,11 @@ You should have the following file organisation:
 	├── documentation.xhtml -> documentation/index.xhtml
 	├── examples
 	│   ├── cl_convolution.cpp
+	│   ├── cl_events.cpp
+	│   ├── graph_lenet.cpp
 	│   ├── neoncl_scale_median_gaussian.cpp
+	│   ├── neon_cnn.cpp
+	│   ├── neon_copy_objects.cpp
 	│   ├── neon_convolution.cpp
 	│   └── neon_scale.cpp
 	├── include
