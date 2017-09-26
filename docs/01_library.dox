@@ -1,6 +1,6 @@
 namespace arm_compute
 {
-/** 
+/**
 @page architecture Library architecture
 
 @tableofcontents
@@ -246,5 +246,125 @@ It will iterate through every element of the execution window and for each eleme
 Here are a couple of examples of how to use the iterators to fill / read tensors:
 
 @snippet examples/neon_copy_objects.cpp Copy objects example
+
+@section S4_7_memory_manager MemoryManager
+
+@ref IMemoryManager is a memory managing interface that can be used to reduce the memory requirements of a given pipeline by recycling temporary buffers.
+
+@subsection S4_7_1_memory_manager_components MemoryGroup, MemoryPool and MemoryManager Components
+
+@subsubsection S4_7_1_1_memory_group MemoryGroup
+
+@ref IMemoryGroup defines the memory managing granularity.
+
+MemoryGroup binds a number of objects to a bucket of memory requirements that need to be fulfilled in order for an operation or list of operations to be executed.
+
+Requesting backing memory for a specific group can be done using @ref IMemoryGroup::acquire and releasing the memory back using @ref IMemoryGroup::release.
+
+@note Two types of memory groups are currently implemented:
+- @ref MemoryGroup that manages @ref Tensor objects
+- @ref CLMemoryGroup that manages @ref CLTensor objects.
+
+@subsubsection S4_7_1_2_memory_pool MemoryPool
+
+@ref IMemoryPool defines a pool of memory that can be used to provide backing memory to a memory group.
+
+@note @ref BlobMemoryPool is currently implemented which models the memory requirements as a vector of distinct memory blobs.
+
+@subsubsection S4_7_1_2_memory_manager_components MemoryManager Components
+
+@ref IMemoryManager consists of two components:
+- @ref ILifetimeManager that keeps track of the lifetime of the registered objects of the memory groups and given an @ref IAllocator creates an appropriate memory pool that fulfils the memory requirements of all the registered memory groups.
+- @ref IPoolManager that safely manages the registered memory pools.
+
+@note @ref IMemoryManager::finalize should be called once the configuration of all the memory groups, kernels and functions is done, so that the memory manager can allocate the appropriate backing memory.
+
+@note @ref BlobLifetimeManager is currently implemented which models the memory requirements as a vector of distinct memory blobs.
+
+@subsection S4_7_2_working_with_memory_manager Working with the Memory Manager
+Using a memory manager to reduce the memory requirements of a pipeline can be summed in the following steps:
+
+Initially a memory manager must be set-up:
+@code{.cpp}
+Allocator  allocator{};                                                               // Create an allocator to use for the backing memory allocation
+auto lifetime_mgr  = std::make_shared<BlobLifetimeManager>();                         // Create Lifetime Manager
+auto pool_mgr      = std::make_shared<PoolManager>();                                 // Create Pool Manager
+auto mm            = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr); // Create Memory Manager
+@endcode
+
+Once done, memory groups can be registered to use the memory manager:
+@code{.cpp}
+MemoryGroup memory_group(mm); // Create a memory group and set the memory manager to use
+@endcode
+
+@note If a memory manager is not specified then all allocation will be immediate instead of deferred through the memory manager.
+
+Next step is to set objects to be managed by the memory group. It is important though to note that the lifetime of an object is tracked from the @ref MemoryGroup::manage() and the @ref TensorAllocator::allocate calls.
+@ref MemoryGroup::manage flags that the object will be needed starting now and when @ref TensorAllocator::allocate is called it signals the end of the object lifetime.
+@code{.cpp}
+Tensor tmp1, tmp2, tmp3;            // Create example tensors
+memory_group.manage(&tmp1);         // Start managing object tmp1 and start its lifetime
+memory_group.manage(&tmp2);         // Start managing object tmp2 and start its lifetime
+
+operation1.configure(&tmp1, &tmp2); // Configure a function/kernel using tmp1 and tmp2
+
+tmp1.allocator()->allocate();       // Flag that the lifetime of object tmp1 has ended
+
+memory_group.manage(&tmp3);         // Start managing object tmp3 and start its lifetime
+
+operation2.configure(&tmp2, &tmp3); // Configure a function/kernel using tmp2 and tmp3
+
+tmp2.allocator()->allocate();       // Flag that the lifetime of object tmp2 has ended
+tmp3.allocator()->allocate();       // Flag that the lifetime of object tmp3 has ended
+@endcode
+
+@warning The configuration step should be done sequentially by a single thread so that all the lifetimes are captured correclty.
+
+When configuration of all the operations is finished then the memory manager have to be finalized:
+@code{.cpp}
+mm->set_allocator(&allocator); // Set allocator to use
+mm->set_set_num_pools(2);      // Set number of pools to create in case parallel operations can be run
+mm->finalize();                // Finalize memory manager (Object lifetime check, Memory pool creation etc)
+@endcode
+
+Finally, during execution of the pipeline the memory of the appropriate memory group should be requested before running:
+@code{.cpp}
+memory_group.acquire(); // Request memory for the group
+
+operation1.run();       // Run operation1
+operation2.run();       // Run operation2
+
+memory_group.release(); // Release memory so that it can be reused
+@endcode
+@note Execution of a pipeline can be done in a multi-threading environment as memory acquisition/release are thread safe.
+
+@subsection S4_7_3_memory_manager_function_support Function support
+
+Most of the library's function have been ported to use @ref IMemoryManager for their internal temporary buffers.
+
+If that is the case, a memory manager can be passed to them during construction to reuse memory among these functions.
+@code{.cpp}
+// Setup Memory Manager
+CLBufferAllocator  allocator{};                                                       // Create an allocator to use for the backing memory allocation
+auto lifetime_mgr  = std::make_shared<BlobLifetimeManager>();                         // Create Lifetime Manager
+auto pool_mgr      = std::make_shared<PoolManager>();                                 // Create Pool Manager
+auto mm            = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr); // Create Memory Manager
+
+// Create two convolution layers and use the memory manager to manager their internal temporary buffers
+CLConvolutionLayer conv1(mm), conv2(mm);
+
+// Configure layers
+conv1.configure(...);
+conv2.configure(...);
+
+// Finalize memory manager
+mm->set_allocator(&allocator); // Set allocator to use
+mm->set_set_num_pools(1);      // Set number of pools to create in case parallel operations can be run
+mm->finalize();                // Finalize memory manager (Object lifetime check, Memory pool creation etc)
+
+// Run layers (Memory will be recycled for internal buffers for conv1 and conv2
+conv1.run();
+conv2.run();
+@endcode
 */
 } // namespace arm_compute
