@@ -68,8 +68,8 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
 
     _num_rows_read_per_iteration = 4;
 
-    const unsigned int border_x = num_elems_read_per_iteration - input0->info()->dimension(0) % num_elems_read_per_iteration;
-    const unsigned int border_y = _num_rows_read_per_iteration - input0->info()->dimension(1) % _num_rows_read_per_iteration;
+    const unsigned int border_x = ceil_to_multiple(input0->info()->dimension(0), num_elems_read_per_iteration) - input0->info()->dimension(0);
+    const unsigned int border_y = ceil_to_multiple(input0->info()->dimension(1), _num_rows_read_per_iteration) - input0->info()->dimension(1);
 
     _border_size = BorderSize(border_y, border_x);
 
@@ -96,7 +96,7 @@ void CLGEMMMatrixVectorMultiplyKernel::run(const Window &window, cl::CommandQueu
     Window slice_out = window.first_slice_window_3D();
 
     // Setup input0 slice
-    slice_in.set(Window::DimX, Window::Dimension(0, _input0->info()->dimension(0) + border_size().right, _input0->info()->dimension(0) + border_size().right));
+    slice_in.set(Window::DimX, Window::Dimension(0, _input0->info()->dimension(0), _input0->info()->dimension(0)));
     slice_in.set(Window::DimY, Window::Dimension(0, _input0->info()->dimension(1) + border_size().bottom, _num_rows_read_per_iteration));
     slice_in.set(Window::DimZ, Window::Dimension(0, _input0->info()->dimension(2), 1));
 
