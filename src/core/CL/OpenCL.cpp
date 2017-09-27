@@ -100,6 +100,7 @@ bool CLSymbols::load(const std::string &library)
     clGetDeviceInfo           = reinterpret_cast<clGetDeviceInfo_func>(dlsym(handle, "clGetDeviceInfo"));
     clGetDeviceIDs            = reinterpret_cast<clGetDeviceIDs_func>(dlsym(handle, "clGetDeviceIDs"));
     clRetainEvent             = reinterpret_cast<clRetainEvent_func>(dlsym(handle, "clRetainEvent"));
+    clGetPlatformIDs          = reinterpret_cast<clGetPlatformIDs_func>(dlsym(handle, "clGetPlatformIDs"));
 
     dlclose(handle);
 
@@ -626,6 +627,20 @@ cl_int clRetainEvent(cl_event event)
     if(func != nullptr)
     {
         return func(event);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clGetPlatformIDs(cl_uint num_entries, cl_platform_id *platforms, cl_uint *num_platforms)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clGetPlatformIDs;
+    if(func != nullptr)
+    {
+        return func(num_entries, platforms, num_platforms);
     }
     else
     {
