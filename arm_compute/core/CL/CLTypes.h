@@ -24,8 +24,13 @@
 #ifndef __ARM_COMPUTE_CL_TYPES_H__
 #define __ARM_COMPUTE_CL_TYPES_H__
 
+#include <string>
+
 namespace arm_compute
 {
+/** Default string for the CLKernel configuration id */
+static const std::string default_config_id = "no_config_id";
+
 /** Available GPU Targets */
 enum class GPUTarget
 {

@@ -42,8 +42,8 @@ void CLTuner::tune_kernel(ICLKernel &kernel)
     // Get the configuration ID from the kernel
     const std::string &config_id = kernel.config_id();
 
-    // Check if we need to find the Optimal LWS. If config_id is empty, the kernel does not require to be tuned
-    if(config_id != "")
+    // Check if we need to find the Optimal LWS. If config_id is equal to default_config_id, the kernel does not require to be tuned
+    if(config_id != arm_compute::default_config_id)
     {
         auto p = _lws_table.find(config_id);
 

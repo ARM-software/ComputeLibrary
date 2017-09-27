@@ -63,7 +63,7 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
 }
 
 ICLKernel::ICLKernel()
-    : _kernel(nullptr), _lws_hint(CLKernelLibrary::get().default_ndrange()), _target(GPUTarget::MIDGARD), _config_id("")
+    : _kernel(nullptr), _lws_hint(CLKernelLibrary::get().default_ndrange()), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id)
 {
 }
 
