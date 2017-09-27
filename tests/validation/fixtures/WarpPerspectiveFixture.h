@@ -62,7 +62,7 @@ public:
 
         // Create the matrix
         std::array<float, 9> matrix = { { 0 } };
-        fill_warp_matrix<9>(matrix, 3, 3);
+        fill_warp_matrix<9>(matrix);
 
         _target    = compute_target(input_shape, vmask_shape, matrix.data(), policy, border_mode, constant_border_value, data_type);
         _reference = compute_reference(input_shape, vmask_shape, matrix.data(), policy, border_mode, constant_border_value, data_type);

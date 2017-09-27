@@ -65,7 +65,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 
     // Create the matrix
     std::array<float, 6> matrix{ {} };
-    fill_warp_matrix<6>(matrix, 3, 2);
+    fill_warp_matrix<6>(matrix);
 
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);

@@ -56,7 +56,7 @@ public:
 
         // Create the matrix
         std::array<float, 6> matrix{ {} };
-        fill_warp_matrix<6>(matrix, 3, 2);
+        fill_warp_matrix<6>(matrix);
 
         _target    = compute_target(shape, data_type, matrix.data(), policy, border_mode, constant_border_value);
         _reference = compute_reference(shape, data_type, matrix.data(), policy, border_mode, constant_border_value);

@@ -106,21 +106,18 @@ RawTensor transpose(const RawTensor &src, int chunk_width = 1);
  * @param[in,out] matrix Matrix
  */
 template <std::size_t SIZE>
-inline void fill_warp_matrix(std::array<float, SIZE> &matrix, int cols, int rows)
+inline void fill_warp_matrix(std::array<float, SIZE> &matrix)
 {
     std::mt19937                          gen(library.get()->seed());
     std::uniform_real_distribution<float> dist(-1, 1);
-
-    for(int v = 0, r = 0; r < rows; ++r)
+    for(auto &x : matrix)
     {
-        for(int c = 0; c < cols; ++c, ++v)
-        {
-            matrix[v] = dist(gen);
-        }
+        x = dist(gen);
     }
     if(SIZE == 9)
     {
-        matrix[(cols * rows) - 1] = 1;
+        // This is only used in Warp Perspective, we set M[3][3] = 1 so that Z0 is not 0 and we avoid division by 0.
+        matrix[8] = 1.f;
     }
 }
 
