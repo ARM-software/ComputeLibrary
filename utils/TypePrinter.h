@@ -28,6 +28,8 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
 
+#include "tests/Types.h"
+
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -145,6 +147,35 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo 
 {
     os << pool_info.pooled_width() << "x" << pool_info.pooled_height() << "~" << pool_info.spatial_scale();
     return os;
+}
+
+inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
+{
+    switch(op)
+    {
+        case FixedPointOp::EXP:
+            os << "EXP";
+            break;
+        case FixedPointOp::LOG:
+            os << "LOG";
+            break;
+        case FixedPointOp::INV_SQRT:
+            os << "INV_SQRT";
+            break;
+        case FixedPointOp::RECIPROCAL:
+            os << "RECIPROCAL";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+inline std::string to_string(const FixedPointOp &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
 }
 
 /** Formatted output of the activation function type. */

@@ -186,45 +186,6 @@ RawTensor Reference::compute_reference_roi_pooling_layer(const TensorShape &shap
     return ref_dst;
 }
 
-RawTensor Reference::compute_reference_fixed_point_operation(const TensorShape &shape, DataType dt_in, DataType dt_out, FixedPointOp op, int fixed_point_position)
-{
-    // Create reference
-    RawTensor ref_src(shape, dt_in, 1, fixed_point_position);
-    RawTensor ref_dst(shape, dt_out, 1, fixed_point_position);
-
-    // Fill reference
-    int min = 0;
-    int max = 0;
-    switch(op)
-    {
-        case(FixedPointOp::INV_SQRT):
-            min = 1;
-            max = (dt_in == DataType::QS8) ? 0x7F : 0x7FFF;
-            break;
-        case(FixedPointOp::LOG):
-            min = (1 << (fixed_point_position - 1));
-            max = (dt_in == DataType::QS8) ? 0x3F : 0x3FFF;
-            break;
-        case(FixedPointOp::EXP):
-            min = -(1 << (fixed_point_position - 1));
-            max = (1 << (fixed_point_position - 1));
-            break;
-        case(FixedPointOp::RECIPROCAL):
-            min = 15;
-            max = (dt_in == DataType::QS8) ? 0x7F : 0x7FFF;
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Fixed point operation not supported");
-    }
-    std::uniform_int_distribution<> distribution(min, max);
-    library->fill(ref_src, distribution, 0);
-
-    // Compute reference
-    ReferenceCPP::fixed_point_operation(ref_src, ref_dst, op);
-
-    return ref_dst;
-}
-
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -165,14 +165,6 @@ void ReferenceCPP::roi_pooling_layer(const RawTensor &src, RawTensor &dst, const
     boost::apply_visitor(tensor_visitors::roi_pooling_layer_visitor(s, rois, pool_info), d);
 }
 
-// Fixed point operation
-void ReferenceCPP::fixed_point_operation(const RawTensor &src, RawTensor &dst, FixedPointOp op)
-{
-    const TensorVariant s = TensorFactory::get_tensor(src);
-    TensorVariant       d = TensorFactory::get_tensor(dst);
-    boost::apply_visitor(tensor_visitors::fixed_point_operation_visitor(s, op), d);
-}
-
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

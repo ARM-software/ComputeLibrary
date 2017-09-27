@@ -126,17 +126,6 @@ public:
      * @param[in] pool_info ROI Pooling Layer information.
      */
     static RawTensor compute_reference_roi_pooling_layer(const TensorShape &shape, DataType dt, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info);
-    /** Compute reference fixed point operation.
-     *
-     * @param[in] shape                Shape of the input and output tensors.
-     * @param[in] dt_in                Data type of the input tensor.
-     * @param[in] dt_out               Data type of the output tensor.
-     * @param[in] op                   Fixed point operation to perform.
-     * @param[in] fixed_point_position Number of bits for the fractional part of the fixed point numbers
-     *
-     * @return Computed raw tensor.
-     */
-    static RawTensor compute_reference_fixed_point_operation(const TensorShape &shape, DataType dt_in, DataType dt_out, FixedPointOp op, int fixed_point_position);
 
 protected:
     Reference()  = default;

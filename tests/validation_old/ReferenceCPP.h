@@ -148,13 +148,6 @@ public:
      * @param[in]  pool_info ROI Pooling Layer information.
      */
     static void roi_pooling_layer(const RawTensor &src, RawTensor &dst, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info);
-    /** Fixed point operations of @p src
-     *
-     * @param[in]  src Input tensor.
-     * @param[out] dst Result tensor.
-     * @param[in]  op  Fixed point operation to perform.
-     */
-    static void fixed_point_operation(const RawTensor &src, RawTensor &dst, FixedPointOp op);
 
 private:
     ReferenceCPP()  = delete;
