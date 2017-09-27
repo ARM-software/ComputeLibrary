@@ -187,6 +187,12 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
     },
     ina, inb, out);
 #else  /* ARM_COMPUTE_ENABLE_FP16 */
+    ARM_COMPUTE_UNUSED(input0);
+    ARM_COMPUTE_UNUSED(input1);
+    ARM_COMPUTE_UNUSED(output);
+    ARM_COMPUTE_UNUSED(window);
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_ERROR("Not implemented");
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 }
@@ -1046,6 +1052,11 @@ void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
     },
     ina, inb, out);
 #else  /* ARM_COMPUTE_ENABLE_FP16 */
+    ARM_COMPUTE_UNUSED(input0);
+    ARM_COMPUTE_UNUSED(input1);
+    ARM_COMPUTE_UNUSED(output);
+    ARM_COMPUTE_UNUSED(window);
+    ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_ERROR("Not implemented");
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 }

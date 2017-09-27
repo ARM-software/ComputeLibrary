@@ -14,8 +14,8 @@ def get_list_flags( filename, arch):
     if "tests/validation_old" in filename:
         flags.append("-DBOOST")
     flags.append("-DARM_COMPUTE_CPP_SCHEDULER=1")
+    flags.append("-DARM_COMPUTE_CL")
     if arch == "aarch64":
-        flags.append("-DARM_COMPUTE_CL")
         flags.append("-DARM_COMPUTE_ENABLE_FP16")
     return flags
 
@@ -70,6 +70,7 @@ def filter_clang_tidy_lines( lines ):
                ("Error.cpp" in line and "do not define a C-style variadic function" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move constructors should be marked noexcept" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move assignment operators should be marked noexcept" in line) or
+               ("CLMinMaxLocationKernel.cpp" in line and "Forming reference to null pointer" in line) or
                ("PMUCounter.cpp" in line and "consider replacing 'long long' with 'int64'" in line) or
                ("Validation.cpp" in line and "parameter 'classified_labels' is unused" in line) or
                ("Validation.cpp" in line and "parameter 'expected_labels' is unused" in line) or
@@ -82,6 +83,7 @@ def filter_clang_tidy_lines( lines ):
                ("NEGEMMMatrixMultiplyKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                ("NEPoolingLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                ("NESoftmaxLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
+               ("GraphUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint32'" in line) or
                ("GraphUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
                ("parameter 'memory_manager' is unused" in line) or
                ("parameter 'memory_manager' is copied for each invocation but only used as a const reference" in line) or
@@ -110,6 +112,12 @@ def filter_clang_tidy_lines( lines ):
 
             out.append(line)
             print_context=True
+        elif (("CLMinMaxLocationKernel.cpp" in line and "'?' condition is false" in line) or
+              ("CLMinMaxLocationKernel.cpp" in line and "Assuming the condition is false" in line) or
+              ("CLMinMaxLocationKernel.cpp" in line and "Assuming pointer value is null" in line) or
+              ("CLMinMaxLocationKernel.cpp" in line and "Forming reference to null pointer" in line)):
+               print_context=False
+               continue
         elif print_context:
             out.append(line)
 

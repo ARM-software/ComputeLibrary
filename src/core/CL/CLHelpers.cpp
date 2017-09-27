@@ -161,6 +161,7 @@ GPUTarget get_target_from_device(cl::Device &device)
     // Query device name size
     cl_int err = clGetDeviceInfo(device.get(), CL_DEVICE_NAME, 0, nullptr, &name_size);
     ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (name_size == 0), "clGetDeviceInfo failed to return valid information");
+    ARM_COMPUTE_UNUSED(err);
 
     std::vector<char> name_buffer(name_size);
 
@@ -206,6 +207,7 @@ bool non_uniform_workgroup_support(const cl::Device &device)
     size_t            extension_size = 0;
     cl_int            err            = clGetDeviceInfo(device.get(), CL_DEVICE_EXTENSIONS, 0, nullptr, &extension_size);
     ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (extension_size == 0), "clGetDeviceInfo failed to return valid information");
+    ARM_COMPUTE_UNUSED(err);
     // Resize vector
     extension.resize(extension_size);
     // Query extension
@@ -224,6 +226,8 @@ CLVersion get_cl_version(const cl::Device &device)
     size_t            version_size = 0;
     cl_int            err          = clGetDeviceInfo(device.get(), CL_DEVICE_VERSION, 0, nullptr, &version_size);
     ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (version_size == 0), "clGetDeviceInfo failed to return valid information");
+    ARM_COMPUTE_UNUSED(err);
+
     // Resize vector
     version.resize(version_size);
     // Query version

@@ -70,6 +70,7 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     _border_size   = BorderSize(0, border_width);
 
     unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
+    ARM_COMPUTE_UNUSED(num_elems_processed_per_iteration);
 
     switch(_input->info()->data_type())
     {
