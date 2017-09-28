@@ -48,6 +48,8 @@ public:
     ~NEPoolingLayerKernel() = default;
     /** Set the input and output tensors.
      *
+     * @note QS8, QS16 and F16 are supported for pool sizes 2 and 3 only
+     *
      * @param[in]  input     Source tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
@@ -123,6 +125,13 @@ private:
      */
     template <PoolingType pooling_type>
     void pooling7_f32(const Window &window_input, const Window &window);
+    /** Function to perform NxN pooling.
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type>
+    void poolingN_f32(const Window &window_input, const Window &window);
     /** Common signature for all the specialised Pooling functions
      *
      * @param[in] window_input Input region on which to execute the kernel.

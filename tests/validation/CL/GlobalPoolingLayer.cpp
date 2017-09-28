@@ -47,8 +47,8 @@ namespace
 const auto GlobalPoolingLayerDataset = combine(datasets::GlobalPoolingShapes(), datasets::PoolingTypes());
 
 /** Input data set for quantized data types */
-constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for float types */
-constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);  /**< Tolerance value for comparing reference's output against implementation's output for float types */
+constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 types */
+constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);  /**< Tolerance value for comparing reference's output against implementation's output for FP16 types */
 } // namespace
 
 TEST_SUITE(CL)

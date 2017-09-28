@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.5
+#!/usr/bin/env python
 #FIXME: Remove this file before the release
 
 import glob

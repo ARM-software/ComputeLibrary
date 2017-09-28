@@ -23,19 +23,36 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
+#include "arm_compute/core/ITensor.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
+NEPoolingLayer::NEPoolingLayer()
+    : _pooling_layer_kernel(), _border_handler(), _is_global_pooling_layer(false)
+{
+}
+
 void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
 {
+    // Check if we have Global Pooling Layer
+    _is_global_pooling_layer = (input->info()->dimension(0) == pool_info.pool_size()) && (input->info()->dimension(1) == pool_info.pool_size());
+
     // Configure pooling kernel
-    auto k = arm_compute::support::cpp14::make_unique<NEPoolingLayerKernel>();
-    k->configure(input, output, pool_info);
-    _kernel = std::move(k);
+    _pooling_layer_kernel.configure(input, output, pool_info);
 
     // Configure border depending on operation required
     BorderMode border_mode = (pool_info.pool_type() == PoolingType::MAX) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
-    _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(static_cast<float>(0.f)));
+    _border_handler.configure(input, _pooling_layer_kernel.border_size(), border_mode, PixelValue(static_cast<float>(0.f)));
+}
+
+void NEPoolingLayer::run()
+{
+    // Fill border
+    NEScheduler::get().schedule(&_border_handler, Window::DimY);
+
+    // Run pooling layer
+    NEScheduler::get().schedule(&_pooling_layer_kernel, _is_global_pooling_layer ? Window::DimZ : Window::DimY);
 }
