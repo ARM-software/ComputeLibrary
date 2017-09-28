@@ -569,7 +569,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 };
 
 CLKernelLibrary::CLKernelLibrary()
-    : _context(), _device(), _kernel_path("."), _programs_map(), _built_programs_map(), _max_workgroup_size(0)
+    : _context(), _device(), _kernel_path("."), _programs_map(), _built_programs_map()
 {
 }
 
@@ -709,19 +709,18 @@ std::string CLKernelLibrary::get_program_source(const std::string &program_name)
     return program_source_it->second;
 }
 
-size_t CLKernelLibrary::max_local_workgroup_size()
+size_t CLKernelLibrary::max_local_workgroup_size(const cl::Kernel &kernel) const
 {
-    if(_max_workgroup_size == 0)
-    {
-        size_t err = clGetDeviceInfo(_device.get(), CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t), &_max_workgroup_size, nullptr);
-        ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetDeviceInfo failed to return valid information");
-        ARM_COMPUTE_UNUSED(err);
-    }
+    size_t result;
 
-    return _max_workgroup_size;
+    size_t err = kernel.getWorkGroupInfo(_device, CL_KERNEL_WORK_GROUP_SIZE, &result);
+    ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetKernelWorkGroupInfo failed to return the maximum workgroup size for the kernel");
+    ARM_COMPUTE_UNUSED(err);
+
+    return result;
 }
 
-cl::NDRange CLKernelLibrary::default_ndrange()
+cl::NDRange CLKernelLibrary::default_ndrange() const
 {
-    return cl::NDRange(std::min<size_t>(_max_workgroup_size, 128u), 1);
+    return cl::NDRange(128u, 1);
 }

@@ -52,18 +52,28 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
                     (window.y().end() - window.y().start()) / window.y().step(),
                     (window.z().end() - window.z().start()) / window.z().step());
 
+    cl::NDRange valid_lws;
+    if(lws_hint[0] * lws_hint[1] * lws_hint[2] > kernel.get_max_workgroup_size())
+    {
+        valid_lws = cl::NullRange;
+    }
+    else
+    {
+        valid_lws = lws_hint;
+    }
+
     cl::NDRange lws = cl::NullRange;
 
-    if((lws_hint[0] <= gws[0]) && (lws_hint[1] <= gws[1]) && (lws_hint[2] <= gws[2]))
+    if((valid_lws[0] <= gws[0]) && (valid_lws[1] <= gws[1]) && (valid_lws[2] <= gws[2]))
     {
-        lws = lws_hint;
+        lws = valid_lws;
     }
 
     queue.enqueueNDRangeKernel(kernel.kernel(), cl::NullRange, gws, lws);
 }
 
 ICLKernel::ICLKernel()
-    : _kernel(nullptr), _lws_hint(CLKernelLibrary::get().default_ndrange()), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id)
+    : _kernel(nullptr), _lws_hint(CLKernelLibrary::get().default_ndrange()), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0)
 {
 }
 
@@ -162,4 +172,13 @@ void ICLKernel::set_target(GPUTarget target)
 GPUTarget ICLKernel::get_target() const
 {
     return _target;
+}
+
+size_t ICLKernel::get_max_workgroup_size()
+{
+    if(_max_workgroup_size == 0)
+    {
+        _max_workgroup_size = CLKernelLibrary::get().max_local_workgroup_size(_kernel);
+    }
+    return _max_workgroup_size;
 }
