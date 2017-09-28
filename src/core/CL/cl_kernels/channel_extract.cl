@@ -51,16 +51,16 @@ __kernel void channel_extract_RGB888(
     uchar16 data  = vload16(0, src.ptr);
     uchar8  data2 = vload8(0, src.ptr + 16);
 
-#if defined CHANNEL_R
+#ifdef CHANNEL_R
     vstore4(data.s0369, 0, dst.ptr);
     vstore4((uchar4)(data.sCF, data2.s25), 0, dst.ptr + 4);
-#elif defined CHANNEL_G
+#elif defined(CHANNEL_G)
     vstore4(data.s147A, 0, dst.ptr);
     vstore4((uchar4)(data.sD, data2.s036), 0, dst.ptr + 4);
-#elif defined CHANNEL_B
+#elif defined(CHANNEL_B)
     vstore4(data.s258B, 0, dst.ptr);
     vstore4((uchar4)(data.sE, data2.s147), 0, dst.ptr + 4);
-#endif
+#endif /* CHANNEL_R or CHANNEL_G or CHANNEL_B */
 }
 
 /** This function extracts a given channel from an RGBA image.
@@ -91,15 +91,15 @@ __kernel void channel_extract_RGBA8888(
     uchar16 data  = vload16(0, src.ptr);
     uchar16 data2 = vload16(0, src.ptr + 16);
 
-#if defined CHANNEL_R
+#ifdef CHANNEL_R
     vstore8((uchar8)(data.s048C, data2.s048C), 0, dst.ptr);
-#elif defined CHANNEL_G
+#elif defined(CHANNEL_G)
     vstore8((uchar8)(data.s159D, data2.s159D), 0, dst.ptr);
-#elif defined CHANNEL_B
+#elif defined(CHANNEL_B)
     vstore8((uchar8)(data.s26AE, data2.s26AE), 0, dst.ptr);
-#elif defined CHANNEL_A
+#elif defined(CHANNEL_A)
     vstore8((uchar8)(data.s37BF, data2.s37BF), 0, dst.ptr);
-#endif
+#endif /* CHANNEL_R or CHANNEL_G or CHANNEL_B or CHANNEL_A */
 }
 
 /** This function extracts a given channel from an YUYV image.
@@ -129,13 +129,13 @@ __kernel void channel_extract_YUYV422(
 
     uchar16 data = vload16(0, src.ptr);
 
-#if defined CHANNEL_Y
+#ifdef CHANNEL_Y
     vstore8(data.s02468ACE, 0, dst.ptr);
-#elif defined CHANNEL_U
+#elif defined(CHANNEL_U)
     vstore4(data.s159D, 0, dst.ptr);
-#elif defined CHANNEL_V
+#elif defined(CHANNEL_V)
     vstore4(data.s37BF, 0, dst.ptr);
-#endif
+#endif /* CHANNEL_Y or CHANNEL_U or CHANNEL_V */
 }
 
 /** This function extracts a given channel from an UYUV image.
@@ -165,13 +165,13 @@ __kernel void channel_extract_UYVY422(
 
     uchar16 data = vload16(0, src.ptr);
 
-#if defined CHANNEL_Y
+#ifdef CHANNEL_Y
     vstore8(data.s13579BDF, 0, dst.ptr);
-#elif defined CHANNEL_U
+#elif defined(CHANNEL_U)
     vstore4(data.s048C, 0, dst.ptr);
-#elif defined CHANNEL_V
+#elif defined(CHANNEL_V)
     vstore4(data.s26AE, 0, dst.ptr);
-#endif
+#endif /* CHANNEL_Y or CHANNEL_U or CHANNEL_V */
 }
 
 /** This function extracts a given channel from an NV12 image.
@@ -202,11 +202,11 @@ __kernel void channel_extract_NV12(
 
     uchar16 data = vload16(0, src.ptr);
 
-#if defined CHANNEL_U
+#ifdef CHANNEL_U
     vstore8(data.s02468ACE, 0, dst.ptr);
-#elif defined CHANNEL_V
+#elif defined(CHANNEL_V)
     vstore8(data.s13579BDF, 0, dst.ptr);
-#endif
+#endif /* CHANNEL_U or CHANNEL_V */
 }
 
 /** This function extracts a given channel from an NV21 image.
@@ -237,11 +237,11 @@ __kernel void channel_extract_NV21(
 
     uchar16 data = vload16(0, src.ptr);
 
-#if defined CHANNEL_U
+#ifdef CHANNEL_U
     vstore8(data.s13579BDF, 0, dst.ptr);
-#elif defined CHANNEL_V
+#elif defined(CHANNEL_V)
     vstore8(data.s02468ACE, 0, dst.ptr);
-#endif
+#endif /* CHANNEL_U or CHANNEL_V */
 }
 
 /** This function extracts a given plane from an multi-planar image.

@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_absolute_difference_kernel =
     [ "configure", "classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml#a837b139cf977a6c4530e3d574fcceef2", null ],
     [ "operator=", "classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml#a5d6e77370a140f10010d3cb9e2a11857", null ],
     [ "operator=", "classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml#aa288278807596db819a0bb3336f6b87c", null ],
-    [ "run", "classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

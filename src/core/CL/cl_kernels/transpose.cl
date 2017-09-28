@@ -98,7 +98,10 @@
 
 #ifndef DATA_TYPE_IN_BYTES
 #error DATA_TYPE_IN_BYTES not set for the transpose OpenCL kernel
-#endif
+#endif /* not DATA_TYPE_IN_BYTES */
+
+#undef VLOAD
+#undef VSTORE
 
 #if DATA_TYPE_IN_BYTES == 4
 #define DATA_TYPE uint
@@ -118,9 +121,9 @@
 #define VLOAD(x, y) vload16(x, y)
 #define VSTORE(x, y, z) vstore16(x, y, z)
 #define BLOCK_SIZE 16
-#else
+#else /* switch DATA_TYPE_IN_BYTES */
 #error DATA_TYPE_IN_BYTES not supported for transpose
-#endif
+#endif /* switch DATA_TYPE_IN_BYTES */
 
 /** This OpenCL kernel computes the matrix transposition of input matrix
  *

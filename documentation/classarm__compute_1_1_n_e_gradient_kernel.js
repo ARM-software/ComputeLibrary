@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_gradient_kernel =
     [ "configure", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#a49306e1c9421979fc704f3c96096ce8e", null ],
     [ "operator=", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#ac9fb1a343e29082ecd7ffaa0216dcd35", null ],
     [ "operator=", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#a77d401f1799eff9f50baca598c912801", null ],
-    [ "run", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

@@ -33,8 +33,8 @@
 
 using namespace arm_compute;
 
-CLSobel7x7::CLSobel7x7()
-    : _sobel_hor(), _sobel_vert(), _border_handler(), _tmp_x(), _tmp_y()
+CLSobel7x7::CLSobel7x7(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _sobel_hor(), _sobel_vert(), _border_handler(), _tmp_x(), _tmp_y()
 {
 }
 
@@ -51,6 +51,8 @@ void CLSobel7x7::configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *out
     {
         _tmp_x.allocator()->init(tensor_info);
         _tmp_y.allocator()->init(tensor_info);
+        _memory_group.manage(&_tmp_x);
+        _memory_group.manage(&_tmp_y);
         _sobel_hor.configure(input, &_tmp_x, &_tmp_y, border_mode == BorderMode::UNDEFINED);
         _sobel_vert.configure(&_tmp_x, &_tmp_y, output_x, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
@@ -59,6 +61,7 @@ void CLSobel7x7::configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *out
     else if(run_sobel_x)
     {
         _tmp_x.allocator()->init(tensor_info);
+        _memory_group.manage(&_tmp_x);
         _sobel_hor.configure(input, &_tmp_x, nullptr, border_mode == BorderMode::UNDEFINED);
         _sobel_vert.configure(&_tmp_x, nullptr, output_x, nullptr, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
@@ -66,6 +69,7 @@ void CLSobel7x7::configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *out
     else if(run_sobel_y)
     {
         _tmp_y.allocator()->init(tensor_info);
+        _memory_group.manage(&_tmp_y);
         _sobel_hor.configure(input, nullptr, &_tmp_y, border_mode == BorderMode::UNDEFINED);
         _sobel_vert.configure(nullptr, &_tmp_y, nullptr, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_y.allocator()->allocate();
@@ -76,6 +80,11 @@ void CLSobel7x7::configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *out
 void CLSobel7x7::run()
 {
     CLScheduler::get().enqueue(_border_handler, false);
+
+    _memory_group.acquire();
+
     CLScheduler::get().enqueue(_sobel_hor, false);
     CLScheduler::get().enqueue(_sobel_vert);
+
+    _memory_group.release();
 }

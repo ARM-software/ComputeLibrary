@@ -21,125 +21,66 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEIntegralImage.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/IntegralImageFixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
-namespace
+namespace arm_compute
 {
-/** Compute Neon integral image function.
- *
- * @param[in] shape Shape of the input and output tensors.
- *
- * @return Computed output tensor.
- */
-Tensor compute_integral_image(const TensorShape &shape)
+namespace test
+{
+namespace validation
+{
+TEST_SUITE(NEON)
+TEST_SUITE(IntegralImage)
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U32);
+    Tensor src = create_tensor<Tensor>(shape, data_type);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U32);
 
-    // Create integral image configure function
-    NEIntegralImage integral_image;
-    integral_image.configure(&src, &dst);
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-    // Allocate tensors
-    src.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
-
-    // Compute function
-    integral_image.run();
-
-    return dst;
-}
-} // namespace
-
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(IntegralImage)
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
-{
-    // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U32);
-
-    BOOST_TEST(src.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
-
-    // Create integral image configure function
+    // Create and configure function
     NEIntegralImage integral_image;
     integral_image.configure(&src, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize src_padding(0, required_padding(shape.x(), 16), 0, 0);
-    const PaddingSize dst_padding(1, required_padding(shape.x(), 16), 0, 1);
+    const PaddingSize src_padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize dst_padding(1, src_padding.right, 0, 1);
 
     validate(src.info()->padding(), src_padding);
     validate(dst.info()->padding(), dst_padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
+template <typename T>
+using NEIntegralImageFixture = IntegralImageValidationFixture<Tensor, Accessor, NEIntegralImage, T>;
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEIntegralImageFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                             DataType::U8)))
 {
-    // Compute function
-    Tensor dst = compute_integral_image(shape);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_integral_image(shape);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEIntegralImageFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                           DataType::U8)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes(), shape)
-{
-    // Compute function
-    Tensor dst = compute_integral_image(shape);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_integral_image(shape);
-
-    // Validate output
-    validate(NEAccessor(dst), ref_dst);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

@@ -64,8 +64,9 @@ void NEGaussian3x3Kernel::configure(const ITensor *input, ITensor *output, bool 
     INEKernel::configure(win);
 }
 
-void NEGaussian3x3Kernel::run(const Window &window)
+void NEGaussian3x3Kernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 

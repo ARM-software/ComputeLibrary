@@ -21,183 +21,147 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "dataset/GEMMDataset.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/LargeGEMMDataset.h"
+#include "tests/datasets/SmallGEMMDataset.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/GEMMFixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
+namespace arm_compute
+{
+namespace test
+{
+namespace validation
+{
 namespace
 {
-const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-const float tolerance_qs8 = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
+constexpr AbsoluteTolerance<float> tolerance_f(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
+constexpr AbsoluteTolerance<float> tolerance_q(1.0f);   /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 
-Tensor compute_gemm(const TensorShape &src_shape1, const TensorShape &src_shape2, const TensorShape &src_shape3,
-                    const TensorShape &out_shape, float alpha, float beta, DataType dt, int fixed_point_position = 0)
+/** CNN data types */
+const auto CNNDataTypes = framework::dataset::make("DataType",
 {
-    // Create tensors
-    Tensor src1 = create_tensor(src_shape1, dt, 1, fixed_point_position);
-    Tensor src2 = create_tensor(src_shape2, dt, 1, fixed_point_position);
-    Tensor src3 = create_tensor(src_shape3, dt, 1, fixed_point_position);
-    Tensor dst  = create_tensor(out_shape, dt, 1, fixed_point_position);
-
-    // Create and configure function
-    NEGEMM gemm;
-    gemm.configure(&src1, &src2, &src3, &dst, alpha, beta);
-
-    // Allocate tensors
-    src1.allocator()->allocate();
-    src2.allocator()->allocate();
-    src3.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src1.info()->is_resizable());
-    BOOST_TEST(!src2.info()->is_resizable());
-    BOOST_TEST(!src3.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    if(dt == DataType::F32)
-    {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-        library->fill(NEAccessor(src1), distribution, 0);
-        library->fill(NEAccessor(src2), distribution, 1);
-        library->fill(NEAccessor(src3), distribution, 2);
-    }
-    else
-    {
-        library->fill_tensor_uniform(NEAccessor(src1), 0);
-        library->fill_tensor_uniform(NEAccessor(src2), 1);
-        library->fill_tensor_uniform(NEAccessor(src3), 2);
-    }
-
-    // Compute function
-    gemm.run();
-
-    return dst;
-}
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    DataType::F16,
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+    DataType::F32,
+    DataType::QS8,
+    DataType::QS16,
+});
 } // namespace
 
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(GEMM)
+TEST_SUITE(NEON)
+TEST_SUITE(GEMM)
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration,
-                     SmallGEMMDataset() * boost::unit_test::data::make({ DataType::F32, DataType::QS8 }),
-                     gemm_set, dt)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes),
+               shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type)
 {
     // Set fixed point position data type allowed
-    int fixed_point_position = (dt == DataType::F32) ? 0 : 3;
+    const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
 
     // Create tensors
-    Tensor src1 = create_tensor(gemm_set.shape_a, dt, 1, fixed_point_position);
-    Tensor src2 = create_tensor(gemm_set.shape_b, dt, 1, fixed_point_position);
-    Tensor src3 = create_tensor(gemm_set.shape_c, dt, 1, fixed_point_position);
-    Tensor dst  = create_tensor(gemm_set.shape_d, dt, 1, fixed_point_position);
+    Tensor a   = create_tensor<Tensor>(shape_a, data_type, 1, fixed_point_position);
+    Tensor b   = create_tensor<Tensor>(shape_b, data_type, 1, fixed_point_position);
+    Tensor c   = create_tensor<Tensor>(shape_c, data_type, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(output_shape, data_type, 1, fixed_point_position);
 
-    BOOST_TEST(src1.info()->is_resizable());
-    BOOST_TEST(src2.info()->is_resizable());
-    BOOST_TEST(src3.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
+    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEGEMM gemm;
-    gemm.configure(&src1, &src2, &src3, &dst, gemm_set.alpha, gemm_set.beta);
-
-    // Validate valid region
-    const ValidRegion src1_valid_region = shape_to_valid_region(gemm_set.shape_a);
-    const ValidRegion src2_valid_region = shape_to_valid_region(gemm_set.shape_b);
-    const ValidRegion src3_valid_region = shape_to_valid_region(gemm_set.shape_c);
-    const ValidRegion dst_valid_region  = shape_to_valid_region(gemm_set.shape_d);
-
-    validate(src1.info()->valid_region(), src1_valid_region);
-    validate(src2.info()->valid_region(), src2_valid_region);
-    validate(src3.info()->valid_region(), src3_valid_region);
-    validate(dst.info()->valid_region(), dst_valid_region);
+    gemm.configure(&a, &b, &c, &dst, alpha, beta);
 }
 
-BOOST_AUTO_TEST_SUITE(Float)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(SmallGEMM, SmallGEMMDataset() * boost::unit_test::data::make(DataType::F32),
-                     gemm_set, dt)
+template <typename T>
+using NEGEMMFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T>;
+
+TEST_SUITE(Float)
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(), framework::dataset::make("DataType", DataType::F16)))
 {
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt);
-
-    // Compute function
-    Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(_target), _reference, tolerance_f);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(LargeGEMM, LargeGEMMDataset() * boost::unit_test::data::make(DataType::F32),
-                     gemm_set, dt)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(), framework::dataset::make("DataType",
+                                                                                               DataType::F16)))
 {
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt);
-
-    // Compute function
-    Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(_target), _reference, tolerance_f);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-BOOST_AUTO_TEST_SUITE(Quantized)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(SmallGEMM, SmallGEMMDataset() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(1, 7),
-                     gemm_set, dt, fixed_point_position)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(), framework::dataset::make("DataType", DataType::F32)))
 {
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt, fixed_point_position);
-
-    // Compute function
-    Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
+    validate(Accessor(_target), _reference, tolerance_f);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(LargeGEMM, LargeGEMMDataset() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(1, 7),
-                     gemm_set, dt, fixed_point_position)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(), framework::dataset::make("DataType", DataType::F32)))
 {
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt, fixed_point_position);
-
-    // Compute function
-    Tensor dst = compute_gemm(gemm_set.shape_a, gemm_set.shape_b, gemm_set.shape_c, gemm_set.shape_d, gemm_set.alpha, gemm_set.beta, dt, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
+    validate(Accessor(_target), _reference, tolerance_f);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+template <typename T>
+using NEGEMMFixedPointFixture = GEMMValidationFixedPointFixture<Tensor, Accessor, NEGEMM, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QS8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
+                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                             DataType::QS8)),
+                                                                                                             framework::dataset::make("FractionalBits", 1, 7)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_q);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::QS8)),
+                                                                                                           framework::dataset::make("FractionalBits", 1, 7)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_q);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QS16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
+                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                              DataType::QS16)),
+                                                                                                              framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_q);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::QS16)),
+                                                                                                            framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_q);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

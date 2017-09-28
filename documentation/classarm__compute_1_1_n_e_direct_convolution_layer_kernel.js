@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_direct_convolution_layer_kernel =
     [ "configure", "classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml#a537ba0d35bcc8d5488da55d1a27c89a3", null ],
     [ "operator=", "classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml#ac299dc8386e25ebcf104989623cf6000", null ],
     [ "operator=", "classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml#aec3ec4dc8b3bda8ba2638fbb9d520322", null ],
-    [ "run", "classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

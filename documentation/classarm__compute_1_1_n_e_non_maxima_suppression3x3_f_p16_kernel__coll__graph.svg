@@ -12,15 +12,15 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="0,-0.5 0,-30.5 153,-30.5 153,-0.5 0,-0.5"/>
-<text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">NENonMaximaSuppression3x3</text>
-<text text-anchor="middle" x="76.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">FP16Kernel</text>
+<text text-anchor="start" x="8" y="-18.5" font-family="Helvetica" font-size="10.00">NENonMaximaSuppression3x3</text>
+<text text-anchor="middle" x="76.5" y="-7.5" font-family="Helvetica" font-size="10.00">FP16Kernel</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml" target="_top" xlink:title="Interface to perform Non&#45;Maxima suppression over a 3x3 window using NEON. ">
 <polygon fill="white" stroke="black" points="0,-67.5 0,-97.5 153,-97.5 153,-67.5 0,-67.5"/>
-<text text-anchor="start" x="8" y="-85.5" font-family="Helvetica,sans-Serif" font-size="10.00">NENonMaximaSuppression3x3</text>
-<text text-anchor="middle" x="76.5" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">Kernel</text>
+<text text-anchor="start" x="8" y="-85.5" font-family="Helvetica" font-size="10.00">NENonMaximaSuppression3x3</text>
+<text text-anchor="middle" x="76.5" y="-74.5" font-family="Helvetica" font-size="10.00">Kernel</text>
 </a>
 </g>
 </g>
@@ -33,7 +33,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_c_p_p_kernel.xhtml" target="_top" xlink:title="Common interface for all kernels implemented in C++. ">
 <polygon fill="white" stroke="black" points="45.5,-134.5 45.5,-153.5 107.5,-153.5 107.5,-134.5 45.5,-134.5"/>
-<text text-anchor="middle" x="76.5" y="-141.5" font-family="Helvetica,sans-Serif" font-size="10.00">INEKernel</text>
+<text text-anchor="middle" x="76.5" y="-141.5" font-family="Helvetica" font-size="10.00">INEKernel</text>
 </a>
 </g>
 </g>
@@ -46,7 +46,7 @@
 <g id="node4" class="node"><title>Node4</title>
 <g id="a_node4"><a xlink:href="classarm__compute_1_1_i_kernel.xhtml" target="_top" xlink:title="Common information for all the kernels. ">
 <polygon fill="white" stroke="black" points="53,-190.5 53,-209.5 100,-209.5 100,-190.5 53,-190.5"/>
-<text text-anchor="middle" x="76.5" y="-197.5" font-family="Helvetica,sans-Serif" font-size="10.00">IKernel</text>
+<text text-anchor="middle" x="76.5" y="-197.5" font-family="Helvetica" font-size="10.00">IKernel</text>
 </a>
 </g>
 </g>

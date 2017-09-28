@@ -67,8 +67,9 @@ void NEDilateKernel::configure(const ITensor *input, ITensor *output, bool borde
     INEKernel::configure(win);
 }
 
-void NEDilateKernel::run(const Window &window)
+void NEDilateKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 

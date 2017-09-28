@@ -64,7 +64,7 @@ public:
     void configure(const IImage *input, const IDistribution1D *distribution, IDistribution1D *cumulative_sum, ILut *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
 private:
@@ -75,6 +75,5 @@ private:
 private:
     static const uint32_t _histogram_size = 256; /**< Default histogram size of 256. */
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECUMULATIVEDISTRIBUTIONKERNEL_H__ */

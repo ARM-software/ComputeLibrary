@@ -27,10 +27,13 @@
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLSobel7x7Kernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -47,7 +50,7 @@ class CLSobel7x7 : public IFunction
 {
 public:
     /** Default Constructor. */
-    CLSobel7x7();
+    CLSobel7x7(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source, destinations and border mode.
      *
      * @note At least one of output_x or output_y must be not NULL.
@@ -64,6 +67,7 @@ public:
     void run() override;
 
 protected:
+    CLMemoryGroup        _memory_group;   /**< Function's memory group */
     CLSobel7x7HorKernel  _sobel_hor;      /**< Sobel Horizontal 7x7 kernel */
     CLSobel7x7VertKernel _sobel_vert;     /**< Sobel Vertical 7x7 kernel */
     CLFillBorderKernel   _border_handler; /**< Kernel to handle image borders */

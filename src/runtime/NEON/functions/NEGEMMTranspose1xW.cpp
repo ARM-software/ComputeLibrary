@@ -24,17 +24,17 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMTranspose1xW.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 void NEGEMMTranspose1xW::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEGEMMTranspose1xWKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEGEMMTranspose1xWKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

@@ -1,7 +1,6 @@
 var classarm__compute_1_1_dimensions =
 [
     [ "Dimensions", "classarm__compute_1_1_dimensions.xhtml#aa521fcebc508ef8447da413cc64d020a", null ],
-    [ "Dimensions", "classarm__compute_1_1_dimensions.xhtml#a0d3c59537291735849c740364496a41c", null ],
     [ "Dimensions", "classarm__compute_1_1_dimensions.xhtml#aa2c609345b3b6fa8da2486f75fff8ed8", null ],
     [ "begin", "classarm__compute_1_1_dimensions.xhtml#ab2878b67ca384a699c1270900b31290b", null ],
     [ "begin", "classarm__compute_1_1_dimensions.xhtml#aeade0eaf149acac842e98d99d37e39c7", null ],
@@ -18,5 +17,6 @@ var classarm__compute_1_1_dimensions =
     [ "set_num_dimensions", "classarm__compute_1_1_dimensions.xhtml#a810a78f0b7cc0270f38d4136e023ea3b", null ],
     [ "x", "classarm__compute_1_1_dimensions.xhtml#afb5cd37bb08f1029691590372e6330f0", null ],
     [ "y", "classarm__compute_1_1_dimensions.xhtml#a691c9cb93365c2e33f3429de43244098", null ],
-    [ "z", "classarm__compute_1_1_dimensions.xhtml#a336121cb63ed79fa0a072eed03d694ac", null ]
+    [ "z", "classarm__compute_1_1_dimensions.xhtml#a336121cb63ed79fa0a072eed03d694ac", null ],
+    [ "_num_dimensions", "classarm__compute_1_1_dimensions.xhtml#aa89963f237bc019a8ea2642f95d07a56", null ]
 ];

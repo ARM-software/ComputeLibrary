@@ -193,8 +193,9 @@ void NESobel7x7HorKernel::configure(const ITensor *input, ITensor *output_x, ITe
     INEKernel::configure(win);
 }
 
-void NESobel7x7HorKernel::run(const Window &window)
+void NESobel7x7HorKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
@@ -351,8 +352,9 @@ void NESobel7x7VertKernel::configure(const ITensor *input_x, const ITensor *inpu
     INEKernel::configure(win);
 }
 
-void NESobel7x7VertKernel::run(const Window &window)
+void NESobel7x7VertKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

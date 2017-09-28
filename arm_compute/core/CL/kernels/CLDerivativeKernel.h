@@ -68,5 +68,5 @@ private:
     bool             _run_derivative_x; /**< Do we need to run Derivative X ? */
     bool             _run_derivative_y; /**< Do we need to run Derivative Y ? */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDERIVATIVEKERNEL_H__ */

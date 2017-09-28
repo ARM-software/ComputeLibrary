@@ -75,7 +75,7 @@ void main_neon_copy_objects(int argc, const char **argv)
     // Fill the input tensor:
     // Simplest way: create an iterator to iterate through each element of the input tensor:
     Window input_window;
-    input_window.use_tensor_dimensions(input.info());
+    input_window.use_tensor_dimensions(input.info()->tensor_shape());
     std::cout << " Dimensions of the input's iterator:\n";
     std::cout << " X = [start=" << input_window.x().start() << ", end=" << input_window.x().end() << ", step=" << input_window.x().step() << "]\n";
     std::cout << " Y = [start=" << input_window.y().start() << ", end=" << input_window.y().end() << ", step=" << input_window.y().step() << "]\n";
@@ -109,7 +109,7 @@ void main_neon_copy_objects(int argc, const char **argv)
 
     // More efficient way: create an iterator to iterate through each row (instead of each element) of the output tensor:
     Window output_window;
-    output_window.use_tensor_dimensions(output.info(), /* first_dimension =*/Window::DimY); // Iterate through the rows (not each element)
+    output_window.use_tensor_dimensions(output.info()->tensor_shape(), /* first_dimension =*/Window::DimY); // Iterate through the rows (not each element)
     std::cout << " Dimensions of the output's iterator:\n";
     std::cout << " X = [start=" << output_window.x().start() << ", end=" << output_window.x().end() << ", step=" << output_window.x().step() << "]\n";
     std::cout << " Y = [start=" << output_window.y().start() << ", end=" << output_window.y().end() << ", step=" << output_window.y().step() << "]\n";

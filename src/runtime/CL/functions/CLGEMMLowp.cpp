@@ -33,8 +33,8 @@
 
 using namespace arm_compute;
 
-CLGEMMLowp::CLGEMMLowp()
-    : _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _tmp_a(), _tmp_b()
+CLGEMMLowp::CLGEMMLowp(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _tmp_a(), _tmp_b()
 {
 }
 
@@ -62,6 +62,10 @@ void CLGEMMLowp::configure(const ICLTensor *a, const ICLTensor *b, ICLTensor *ou
     TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type());
     _tmp_b.allocator()->init(info_b);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_tmp_a);
+    _memory_group.manage(&_tmp_b);
+
     // Configure kernels
     _interleave_kernel.configure(a, &_tmp_a);
     _transpose_kernel.configure(b, &_tmp_b);
@@ -74,6 +78,8 @@ void CLGEMMLowp::configure(const ICLTensor *a, const ICLTensor *b, ICLTensor *ou
 
 void CLGEMMLowp::run()
 {
+    _memory_group.acquire();
+
     /* Run interleave kernel */
     CLScheduler::get().enqueue(_interleave_kernel, false);
 
@@ -82,4 +88,6 @@ void CLGEMMLowp::run()
 
     /* Run matrix multiply kernel */
     CLScheduler::get().enqueue(_mm_kernel, false);
+
+    _memory_group.release();
 }

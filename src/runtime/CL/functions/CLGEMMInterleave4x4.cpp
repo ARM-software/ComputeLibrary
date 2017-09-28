@@ -24,13 +24,13 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMInterleave4x4.h"
 
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 void CLGEMMInterleave4x4::configure(const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLGEMMInterleave4x4Kernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLGEMMInterleave4x4Kernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

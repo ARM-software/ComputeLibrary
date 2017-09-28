@@ -9,5 +9,5 @@ var classarm__compute_1_1_n_e_channel_combine_kernel =
     [ "is_parallelisable", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283", null ],
     [ "operator=", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#af7fa6b6b40f275e2f6f0afdf42aa6130", null ],
     [ "operator=", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#a4dfea5b19ebe5e46148a63af9fdbc5db", null ],
-    [ "run", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

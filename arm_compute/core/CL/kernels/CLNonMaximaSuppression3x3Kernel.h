@@ -48,5 +48,5 @@ public:
     // Inherited methods overridden:
     BorderSize border_size() const override;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLNONMAXIMASUPPRESSION3x3KERNEL_H__ */

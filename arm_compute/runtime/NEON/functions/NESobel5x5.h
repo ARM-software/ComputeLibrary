@@ -28,9 +28,12 @@
 #include "arm_compute/core/NEON/kernels/NESobel5x5Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -47,7 +50,7 @@ class NESobel5x5 : public IFunction
 {
 public:
     /** Default constructor */
-    NESobel5x5();
+    NESobel5x5(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source, destinations and border mode.
      *
      * @note At least one of output_x or output_y must be not NULL.
@@ -65,6 +68,7 @@ public:
     void run() override;
 
 protected:
+    MemoryGroup          _memory_group;   /**< Function memory group */
     NESobel5x5HorKernel  _sobel_hor;      /**< Sobel Horizontal 5x5 kernel */
     NESobel5x5VertKernel _sobel_vert;     /**< Sobel Vertical 5x5 kernel */
     Tensor               _tmp_x;          /**< Temporary buffer for Sobel X */

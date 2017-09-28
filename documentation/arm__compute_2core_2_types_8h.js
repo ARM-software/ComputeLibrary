@@ -6,13 +6,16 @@ var arm__compute_2core_2_types_8h =
     [ "Rectangle", "structarm__compute_1_1_rectangle.xhtml", "structarm__compute_1_1_rectangle" ],
     [ "Coordinates2D", "structarm__compute_1_1_coordinates2_d.xhtml", "structarm__compute_1_1_coordinates2_d" ],
     [ "Coordinates3D", "structarm__compute_1_1_coordinates3_d.xhtml", "structarm__compute_1_1_coordinates3_d" ],
+    [ "ROI", "structarm__compute_1_1_r_o_i.xhtml", "structarm__compute_1_1_r_o_i" ],
     [ "DetectionWindow", "structarm__compute_1_1_detection_window.xhtml", "structarm__compute_1_1_detection_window" ],
     [ "PadStrideInfo", "classarm__compute_1_1_pad_stride_info.xhtml", "classarm__compute_1_1_pad_stride_info" ],
     [ "PoolingLayerInfo", "classarm__compute_1_1_pooling_layer_info.xhtml", "classarm__compute_1_1_pooling_layer_info" ],
+    [ "ROIPoolingLayerInfo", "classarm__compute_1_1_r_o_i_pooling_layer_info.xhtml", "classarm__compute_1_1_r_o_i_pooling_layer_info" ],
     [ "ActivationLayerInfo", "classarm__compute_1_1_activation_layer_info.xhtml", "classarm__compute_1_1_activation_layer_info" ],
     [ "NormalizationLayerInfo", "classarm__compute_1_1_normalization_layer_info.xhtml", "classarm__compute_1_1_normalization_layer_info" ],
     [ "WeightsInfo", "classarm__compute_1_1_weights_info.xhtml", "classarm__compute_1_1_weights_info" ],
     [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", "structarm__compute_1_1_i_o_format_info" ],
+    [ "half", "arm__compute_2core_2_types_8h.xhtml#a73e2825fd61d349c5ca2f5313e3c8ea1", null ],
     [ "InternalKeypoint", "arm__compute_2core_2_types_8h.xhtml#a2ab89a5d0959531aac270879cdd3ed78", null ],
     [ "PaddingSize", "arm__compute_2core_2_types_8h.xhtml#a4467b302fc9ec312c40580336ab783da", null ],
     [ "BilinearInterpolation", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202", [
@@ -52,6 +55,7 @@ var arm__compute_2core_2_types_8h =
       [ "QS16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a48d877702a2957f5a932c43a357866f9", null ],
       [ "U32", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6ac8bd5bedff8ef192d39a962afc0e19ee", null ],
       [ "S32", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aa1e28eee0339658d39a8b4d325b56e9c", null ],
+      [ "QS32", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6ad5695915456312560039ee411667cdbf", null ],
       [ "U64", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a31d65cccd6593e4101db93fb878abcaa", null ],
       [ "S64", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a115dca124dc6423c7a400b8a8a0270cc", null ],
       [ "F16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a56d8353718e6fdc78b8d69078a2cdb94", null ],
@@ -118,7 +122,12 @@ var arm__compute_2core_2_types_8h =
     ] ],
     [ "PoolingType", "arm__compute_2core_2_types_8h.xhtml#a9172da722f0a434e5cc07c0a3c115d93", [
       [ "MAX", "arm__compute_2core_2_types_8h.xhtml#a9172da722f0a434e5cc07c0a3c115d93a26a4b44a837bf97b972628509912b4a5", null ],
-      [ "AVG", "arm__compute_2core_2_types_8h.xhtml#a9172da722f0a434e5cc07c0a3c115d93afcefd647d6a866603c627b11347c707a", null ]
+      [ "AVG", "arm__compute_2core_2_types_8h.xhtml#a9172da722f0a434e5cc07c0a3c115d93afcefd647d6a866603c627b11347c707a", null ],
+      [ "L2", "arm__compute_2core_2_types_8h.xhtml#a9172da722f0a434e5cc07c0a3c115d93a7e6aa2d53f6ee2b1a34b017fa403cb76", null ]
+    ] ],
+    [ "ReductionOperation", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45b", [
+      [ "SUM_SQUARE", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba2ce6e134b828b72fad160fa17c8d1b64", null ],
+      [ "SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a", null ]
     ] ],
     [ "RoundingPolicy", "arm__compute_2core_2_types_8h.xhtml#add6426cbf2e057a195846d4ba09a50be", [
       [ "TO_ZERO", "arm__compute_2core_2_types_8h.xhtml#add6426cbf2e057a195846d4ba09a50bea5631ad8e27788edfca7e13535d862c06", null ],

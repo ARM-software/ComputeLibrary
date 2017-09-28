@@ -29,9 +29,13 @@
 #include "arm_compute/core/IMultiHOG.h"
 #include "arm_compute/core/NEON/kernels/NEHOGDescriptorKernel.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEHOGDetector.h"
 #include "arm_compute/runtime/NEON/functions/NEHOGGradient.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -53,7 +57,7 @@ class NEHOGMultiDetection : public IFunction
 {
 public:
     /** Default constructor */
-    NEHOGMultiDetection();
+    NEHOGMultiDetection(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEHOGMultiDetection(const NEHOGMultiDetection &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -85,6 +89,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                                                   _memory_group;
     NEHOGGradient                                                 _gradient_kernel;
     std::unique_ptr<NEHOGOrientationBinningKernel[]>              _orient_bin_kernel;
     std::unique_ptr<NEHOGBlockNormalizationKernel[]>              _block_norm_kernel;

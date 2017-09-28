@@ -1,18 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1absolute__difference__visitor.xhtml" title="absolute_difference\l_visitor" alt="" coords="165,5,300,47"/>
-<area shape="rect" id="node3" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1activation__layer__visitor.xhtml" title="activation_layer_visitor" alt="" coords="155,71,310,98"/>
-<area shape="rect" id="node4" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1arithmetic__addition__visitor.xhtml" title="arithmetic_addition\l_visitor" alt="" coords="167,123,298,164"/>
-<area shape="rect" id="node5" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1arithmetic__subtraction__visitor.xhtml" title="arithmetic_subtraction\l_visitor" alt="" coords="157,188,308,229"/>
-<area shape="rect" id="node6" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1batch__normalization__layer__visitor.xhtml" title="batch_normalization\l_layer_visitor" alt="" coords="163,253,302,295"/>
-<area shape="rect" id="node7" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1convolution__layer__visitor.xhtml" title="convolution_layer_visitor" alt="" coords="150,319,315,346"/>
-<area shape="rect" id="node8" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1depth__convert__visitor.xhtml" title="depth_convert_visitor" alt="" coords="159,370,306,397"/>
-<area shape="rect" id="node9" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fixed__point__operation__visitor.xhtml" title="fixed_point_operation\l_visitor" alt="" coords="160,421,305,463"/>
-<area shape="rect" id="node10" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fixed__point__pixel__wise__multiplication__visitor.xhtml" title="fixed_point_pixel_wise\l_multiplication_visitor" alt="" coords="156,487,309,528"/>
-<area shape="rect" id="node11" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fully__connected__layer__visitor.xhtml" title="fully_connected_layer\l_visitor" alt="" coords="159,552,307,593"/>
-<area shape="rect" id="node12" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1gemm__visitor.xhtml" title="gemm_visitor" alt="" coords="183,618,283,645"/>
-<area shape="rect" id="node13" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1normalization__layer__visitor.xhtml" title="normalization_layer\l_visitor" alt="" coords="165,669,300,711"/>
-<area shape="rect" id="node14" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1pixel__wise__multiplication__visitor.xhtml" title="pixel_wise_multiplication\l_visitor" alt="" coords="149,735,316,776"/>
-<area shape="rect" id="node15" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1pooling__layer__visitor.xhtml" title="pooling_layer_visitor" alt="" coords="163,801,303,827"/>
-<area shape="rect" id="node16" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1print__visitor.xhtml" title="print_visitor" alt="" coords="188,851,277,878"/>
-<area shape="rect" id="node17" href="$structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1softmax__layer__visitor.xhtml" title="softmax_layer_visitor" alt="" coords="159,902,306,929"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1networks_1_1_alex_net_network.xhtml" title="AlexNet model object. " alt="" coords="5,5,331,120"/>
 </map>

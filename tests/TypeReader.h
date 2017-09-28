@@ -64,4 +64,4 @@ inline ::std::istream &operator>>(::std::istream &is, BorderMode &mode)
     return is;
 }
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_TYPE_READER_H__ */

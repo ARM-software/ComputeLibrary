@@ -1,15 +1,8 @@
 var searchData=
 [
-  ['largefullyconnectedlayerdataset',['LargeFullyConnectedLayerDataset',['../classarm__compute_1_1test_1_1_large_fully_connected_layer_dataset.xhtml',1,'arm_compute::test']]],
-  ['largegemmdataset',['LargeGEMMDataset',['../classarm__compute_1_1test_1_1_large_g_e_m_m_dataset.xhtml',1,'arm_compute::test']]],
-  ['largeimages',['LargeImages',['../classarm__compute_1_1test_1_1_large_images.xhtml',1,'arm_compute::test']]],
-  ['largeshapes',['LargeShapes',['../classarm__compute_1_1test_1_1_large_shapes.xhtml',1,'arm_compute::test']]],
-  ['lenet5',['LeNet5',['../classarm__compute_1_1test_1_1model__objects_1_1_le_net5.xhtml',1,'arm_compute::test::model_objects']]],
-  ['lenet5activationlayerdataset',['LeNet5ActivationLayerDataset',['../classarm__compute_1_1test_1_1_le_net5_activation_layer_dataset.xhtml',1,'arm_compute::test']]],
-  ['lenet5convolutionlayerdataset',['LeNet5ConvolutionLayerDataset',['../classarm__compute_1_1test_1_1_le_net5_convolution_layer_dataset.xhtml',1,'arm_compute::test']]],
-  ['lenet5fixture',['LeNet5Fixture',['../classarm__compute_1_1test_1_1benchmark_1_1_le_net5_fixture.xhtml',1,'arm_compute::test::benchmark']]],
-  ['lenet5fullyconnectedlayerdataset',['LeNet5FullyConnectedLayerDataset',['../classarm__compute_1_1test_1_1_le_net5_fully_connected_layer_dataset.xhtml',1,'arm_compute::test']]],
-  ['lenet5poolinglayerdataset',['LeNet5PoolingLayerDataset',['../classarm__compute_1_1test_1_1_le_net5_pooling_layer_dataset.xhtml',1,'arm_compute::test']]],
-  ['lut',['Lut',['../classarm__compute_1_1_lut.xhtml',1,'arm_compute']]],
-  ['lutallocator',['LutAllocator',['../classarm__compute_1_1_lut_allocator.xhtml',1,'arm_compute']]]
+  ['kbase_5fhwcnt_5freader_5fmetadata',['kbase_hwcnt_reader_metadata',['../structmali__userspace_1_1kbase__hwcnt__reader__metadata.xhtml',1,'mali_userspace']]],
+  ['kbase_5fuk_5fgpuprops',['kbase_uk_gpuprops',['../structmali__userspace_1_1kbase__uk__gpuprops.xhtml',1,'mali_userspace']]],
+  ['kernel',['Kernel',['../classarm__compute_1_1_kernel.xhtml',1,'arm_compute']]],
+  ['keypoint',['Keypoint',['../struct_keypoint.xhtml',1,'']]],
+  ['keypoint',['KeyPoint',['../structarm__compute_1_1_key_point.xhtml',1,'arm_compute']]]
 ];

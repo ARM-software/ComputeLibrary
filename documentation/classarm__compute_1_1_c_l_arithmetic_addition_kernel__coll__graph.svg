@@ -12,13 +12,13 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="0,-0.5 0,-19.5 137,-19.5 137,-0.5 0,-0.5"/>
-<text text-anchor="middle" x="68.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">CLArithmeticAdditionKernel</text>
+<text text-anchor="middle" x="68.5" y="-7.5" font-family="Helvetica" font-size="10.00">CLArithmeticAdditionKernel</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_i_c_l_kernel.xhtml" target="_top" xlink:title="Common interface for all the OpenCL kernels. ">
 <polygon fill="white" stroke="black" points="38.5,-56.5 38.5,-75.5 98.5,-75.5 98.5,-56.5 38.5,-56.5"/>
-<text text-anchor="middle" x="68.5" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLKernel</text>
+<text text-anchor="middle" x="68.5" y="-63.5" font-family="Helvetica" font-size="10.00">ICLKernel</text>
 </a>
 </g>
 </g>
@@ -31,7 +31,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_kernel.xhtml" target="_top" xlink:title="Common information for all the kernels. ">
 <polygon fill="white" stroke="black" points="45,-112.5 45,-131.5 92,-131.5 92,-112.5 45,-112.5"/>
-<text text-anchor="middle" x="68.5" y="-119.5" font-family="Helvetica,sans-Serif" font-size="10.00">IKernel</text>
+<text text-anchor="middle" x="68.5" y="-119.5" font-family="Helvetica" font-size="10.00">IKernel</text>
 </a>
 </g>
 </g>

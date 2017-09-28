@@ -31,8 +31,8 @@
 
 using namespace arm_compute;
 
-CLHOGDescriptor::CLHOGDescriptor()
-    : _gradient(), _orient_bin(), _block_norm(), _mag(), _phase(), _hog_space()
+CLHOGDescriptor::CLHOGDescriptor(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _gradient(), _orient_bin(), _block_norm(), _mag(), _phase(), _hog_space()
 {
 }
 
@@ -71,8 +71,15 @@ void CLHOGDescriptor::configure(ICLTensor *input, ICLTensor *output, const IHOG 
     TensorInfo info_space(shape_hog_space, num_bins, DataType::F32);
     _hog_space.allocator()->init(info_space);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_mag);
+    _memory_group.manage(&_phase);
+
     // Initialise gradient kernel
     _gradient.configure(input, &_mag, &_phase, hog_info->phase_type(), border_mode, constant_border_value);
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_hog_space);
 
     // Initialise orientation binning kernel
     _orient_bin.configure(&_mag, &_phase, &_hog_space, hog->info());
@@ -88,6 +95,8 @@ void CLHOGDescriptor::configure(ICLTensor *input, ICLTensor *output, const IHOG 
 
 void CLHOGDescriptor::run()
 {
+    _memory_group.acquire();
+
     // Run gradient
     _gradient.run();
 
@@ -96,4 +105,6 @@ void CLHOGDescriptor::run()
 
     // Run block normalization
     CLScheduler::get().enqueue(_block_norm);
+
+    _memory_group.release();
 }

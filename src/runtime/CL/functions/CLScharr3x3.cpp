@@ -24,8 +24,8 @@
 #include "arm_compute/runtime/CL/functions/CLScharr3x3.h"
 
 #include "arm_compute/core/CL/kernels/CLScharr3x3Kernel.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -33,7 +33,7 @@ using namespace arm_compute;
 
 void CLScharr3x3::configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = arm_compute::cpp14::make_unique<CLScharr3x3Kernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLScharr3x3Kernel>();
     k->configure(input, output_x, output_y, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));

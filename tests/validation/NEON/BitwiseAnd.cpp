@@ -21,142 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEBitwiseAnd.h"
-#include "arm_compute/runtime/SubTensor.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/BitwiseAndFixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
-namespace
+namespace arm_compute
 {
-/** Compute Neon bitwise and function.
- *
- * @param[in] shape Shape of the input and output tensors.
- *
- * @return Computed output tensor.
- */
-Tensor compute_bitwise_and(const TensorShape &shape)
+namespace test
 {
-    // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+namespace validation
+{
+TEST_SUITE(NEON)
+TEST_SUITE(BitwiseAnd)
 
-    // Create and configure function
-    NEBitwiseAnd band;
-    band.configure(&src1, &src2, &dst);
-
-    // Allocate tensors
-    src1.allocator()->allocate();
-    src2.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src1.info()->is_resizable());
-    BOOST_TEST(!src2.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src1), 0);
-    library->fill_tensor_uniform(NEAccessor(src2), 1);
-
-    // Compute function
-    band.run();
-
-    return dst;
-}
-
-/** Compute Neon bitwise and function that splits the input and output in two subtensor.
- *
- * @param[in] shape Shape of the input and output tensors.
- *
- * @return Computed output tensor.
- */
-Tensor compute_bitwise_and_subtensor(const TensorShape &shape)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src1 = create_tensor<Tensor>(shape, data_type);
+    Tensor src2 = create_tensor<Tensor>(shape, data_type);
+    Tensor dst  = create_tensor<Tensor>(shape, data_type);
 
-    // Create SubTensors
-    int         coord_z   = shape.z() / 2;
-    TensorShape sub_shape = shape;
-    sub_shape.set(2, coord_z);
-
-    SubTensor src1_sub1(&src1, sub_shape, Coordinates());
-    SubTensor src1_sub2(&src1, sub_shape, Coordinates(0, 0, coord_z));
-    SubTensor src2_sub1(&src2, sub_shape, Coordinates());
-    SubTensor src2_sub2(&src2, sub_shape, Coordinates(0, 0, coord_z));
-    SubTensor dst_sub1(&dst, sub_shape, Coordinates());
-    SubTensor dst_sub2(&dst, sub_shape, Coordinates(0, 0, coord_z));
+    ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
-    NEBitwiseAnd band1, band2;
-    band1.configure(&src1_sub1, &src2_sub1, &dst_sub1);
-    band2.configure(&src1_sub2, &src2_sub2, &dst_sub2);
-
-    // Allocate tensors
-    src1.allocator()->allocate();
-    src2.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src1.info()->is_resizable());
-    BOOST_TEST(!src2.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    std::uniform_int_distribution<> distribution(0, 255);
-    library->fill(NEAccessor(src1), distribution, 0);
-    library->fill(NEAccessor(src2), distribution, 1);
-
-    // Compute function
-    band1.run();
-    band2.run();
-
-    return dst;
-}
-} // namespace
-
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(BitwiseAnd)
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
-{
-    // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
-
-    BOOST_TEST(src1.info()->is_resizable());
-    BOOST_TEST(src2.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
-
-    // Create and configure function
-    NEBitwiseAnd band;
-    band.configure(&src1, &src2, &dst);
+    NEBitwiseAnd bitwise_and;
+    bitwise_and.configure(&src1, &src2, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
@@ -165,54 +65,30 @@ BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, required_padding(shape.x(), 16), 0, 0);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
     validate(src1.info()->padding(), padding);
     validate(src2.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
+template <typename T>
+using NEBitwiseAndFixture = BitwiseAndValidationFixture<Tensor, Accessor, NEBitwiseAnd, T>;
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBitwiseAndFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                          DataType::U8)))
 {
-    // Compute function
-    Tensor dst = compute_bitwise_and(shape);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_bitwise_and(shape);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEBitwiseAndFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                        DataType::U8)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_AUTO_TEST_CASE(RunSubTensor)
-{
-    // Create shape
-    TensorShape shape(27U, 35U, 8U, 2U);
-
-    // Compute function
-    Tensor dst = compute_bitwise_and_subtensor(shape);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_bitwise_and(shape);
-
-    // Validate output
-    validate(NEAccessor(dst), ref_dst);
-}
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes(), shape)
-{
-    // Compute function
-    Tensor dst = compute_bitwise_and(shape);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_bitwise_and(shape);
-
-    // Validate output
-    validate(NEAccessor(dst), ref_dst);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

@@ -26,7 +26,6 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/NEMath.h"
@@ -43,6 +42,104 @@ using namespace arm_compute;
 
 namespace
 {
+void logits_1d_max_qs8(const ITensor *in, ITensor *out, const Window &window)
+{
+    Window in_slice = window.first_slice_window_1D();
+
+    Window window_max(window);
+    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
+    Window max_slice = window_max.first_slice_window_1D();
+
+    do
+    {
+        Iterator input(in, in_slice);
+        Iterator output(out, max_slice);
+
+        qint8x16_t vec_max = vdupq_n_s8(std::numeric_limits<qint8_t>::lowest());
+
+        execute_window_loop(in_slice, [&](const Coordinates & id)
+        {
+            const auto       in_ptr        = reinterpret_cast<const qint8_t *>(input.ptr());
+            const qint8x16_t current_value = vld1q_qs8(in_ptr);
+            vec_max                        = vmaxq_qs8(vec_max, current_value);
+        },
+        input);
+
+        qint8x8_t carry_max = vpmax_qs8(vget_high_s8(vec_max), vget_low_s8(vec_max));
+        carry_max           = vpmax_qs8(carry_max, carry_max);
+        carry_max           = vpmax_qs8(carry_max, carry_max);
+        carry_max           = vpmax_qs8(carry_max, carry_max);
+
+        *(reinterpret_cast<qint8_t *>(output.ptr())) = vget_lane_s8(carry_max, 0);
+    }
+    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
+}
+void logits_1d_max_qs16(const ITensor *in, ITensor *out, const Window &window)
+{
+    Window in_slice = window.first_slice_window_1D();
+
+    Window window_max(window);
+    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
+    Window max_slice = window_max.first_slice_window_1D();
+
+    do
+    {
+        Iterator input(in, in_slice);
+        Iterator output(out, max_slice);
+
+        qint16x8_t vec_max = vdupq_n_qs16(std::numeric_limits<qint16_t>::lowest());
+
+        execute_window_loop(in_slice, [&](const Coordinates & id)
+        {
+            const auto       in_ptr        = reinterpret_cast<const qint16_t *>(input.ptr());
+            const qint16x8_t current_value = vld1q_qs16(in_ptr);
+            vec_max                        = vmaxq_qs16(vec_max, current_value);
+        },
+        input);
+
+        qint16x4_t carry_max = vpmax_qs16(vget_high_qs16(vec_max), vget_low_qs16(vec_max));
+        carry_max            = vpmax_qs16(carry_max, carry_max);
+        carry_max            = vpmax_qs16(carry_max, carry_max);
+
+        *(reinterpret_cast<qint16_t *>(output.ptr())) = vget_lane_s16(carry_max, 0);
+    }
+    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
+}
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+void logits_1d_max_f16(const ITensor *in, ITensor *out, const Window &window)
+{
+    Window in_slice = window.first_slice_window_1D();
+
+    Window window_max(window);
+    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
+    Window max_slice = window_max.first_slice_window_1D();
+
+    do
+    {
+        Iterator input(in, in_slice);
+        Iterator output(out, max_slice);
+
+        float16x8_t vec_max = vdupq_n_f16(std::numeric_limits<float16_t>::lowest());
+
+        execute_window_loop(in_slice, [&](const Coordinates & id)
+        {
+            const auto        in_ptr        = reinterpret_cast<const float16_t *>(input.ptr());
+            const float16x8_t current_value = vld1q_f16(in_ptr);
+            vec_max                         = vmaxq_f16(vec_max, current_value);
+        },
+        input);
+
+        float16x4_t carry_max = vpmax_f16(vget_high_f16(vec_max), vget_low_f16(vec_max));
+        carry_max             = vpmax_f16(carry_max, carry_max);
+        carry_max             = vpmax_f16(carry_max, carry_max);
+
+        *(reinterpret_cast<float16_t *>(output.ptr())) = vget_lane_f16(carry_max, 0);
+    }
+    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
 void logits_1d_max_f32(const ITensor *in, ITensor *out, const Window &window)
 {
     Window in_slice = window.first_slice_window_1D();
@@ -73,39 +170,6 @@ void logits_1d_max_f32(const ITensor *in, ITensor *out, const Window &window)
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
-
-void logits_1d_max_qs8(const ITensor *in, ITensor *out, const Window &window)
-{
-    Window in_slice = window.first_slice_window_1D();
-
-    Window window_max(window);
-    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
-    Window max_slice = window_max.first_slice_window_1D();
-
-    do
-    {
-        Iterator input(in, in_slice);
-        Iterator output(out, max_slice);
-
-        qint8x16_t vec_max = vdupq_n_s8(-1);
-
-        execute_window_loop(in_slice, [&](const Coordinates & id)
-        {
-            const auto       in_ptr        = reinterpret_cast<const qint8_t *>(input.ptr());
-            const qint8x16_t current_value = vld1q_qs8(in_ptr);
-            vec_max                        = vmaxq_qs8(vec_max, current_value);
-        },
-        input);
-
-        qint8x8_t carry_max = vpmax_qs8(vget_high_s8(vec_max), vget_low_s8(vec_max));
-        carry_max           = vpmax_qs8(carry_max, carry_max);
-        carry_max           = vpmax_qs8(carry_max, carry_max);
-        carry_max           = vpmax_qs8(carry_max, carry_max);
-
-        *(reinterpret_cast<int8_t *>(output.ptr())) = vget_lane_s8(carry_max, 0);
-    }
-    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
-}
 } // namespace
 
 NELogits1DMaxKernel::NELogits1DMaxKernel()
@@ -120,30 +184,46 @@ BorderSize NELogits1DMaxKernel::border_size() const
 
 void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+
+    // Softmax across the x dimension
+    TensorShape output_shape{ input->info()->tensor_shape() };
+    output_shape.set(0, 1);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
     const int    input_width                       = input->info()->valid_region().shape.x();
-    unsigned int num_elems_processed_per_iteration = 0;
+    unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->info()->data_type());
 
     switch(input->info()->data_type())
     {
         case DataType::QS8:
-            _func                             = &logits_1d_max_qs8;
-            num_elems_processed_per_iteration = 16;
+            _func = &logits_1d_max_qs8;
+            break;
+        case DataType::QS16:
+            _func = &logits_1d_max_qs16;
             break;
         case DataType::F32:
-            num_elems_processed_per_iteration = 4;
-            _func                             = &logits_1d_max_f32;
+            _func = &logits_1d_max_f32;
             break;
+        case DataType::F16:
+#ifdef ARM_COMPUTE_ENABLE_FP16
+            _func = &logits_1d_max_f16;
+            break;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
     }
 
     _input       = input;
     _output      = output;
-    _border_size = BorderSize(0, input_width % num_elems_processed_per_iteration, 0, 0);
+    _border_size = BorderSize(0, num_elems_processed_per_iteration - (input_width % num_elems_processed_per_iteration), 0, 0);
 
     // Configure kernel window
     constexpr unsigned int num_elems_written_per_row = 1;
@@ -159,8 +239,9 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
     INEKernel::configure(win);
 }
 
-void NELogits1DMaxKernel::run(const Window &window)
+void NELogits1DMaxKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -170,67 +251,6 @@ void NELogits1DMaxKernel::run(const Window &window)
 
 namespace
 {
-void logits_1d_shift_exp_sum_f32(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
-{
-    Window window_max(window);
-    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
-
-    Window max_slice = window_max.first_slice_window_1D();
-    Window in_slice  = window.first_slice_window_1D();
-
-    constexpr int step        = 4;
-    const int     long_steps  = in->info()->valid_region().shape.x() / step;
-    const int     small_steps = in->info()->valid_region().shape.x() % step;
-
-    do
-    {
-        Iterator input(in, in_slice);
-        Iterator exp(out, in_slice);
-        Iterator _max(max, max_slice);
-        Iterator _sum(sum, max_slice);
-
-        // Get pointers
-        auto in_ptr  = reinterpret_cast<const float *>(input.ptr());
-        auto exp_ptr = reinterpret_cast<float *>(exp.ptr());
-
-        // Init sum to zero
-        float32x4_t vec_sum_value = vdupq_n_f32(0.0f);
-
-        // Get max value
-        const auto        max_ptr = reinterpret_cast<const float *>(_max.ptr());
-        const float32x4_t vec_max = vdupq_n_f32(*max_ptr);
-
-        // Run neon loop
-        for(int i = 0; i < long_steps; ++i)
-        {
-            float32x4_t vec_elements = vld1q_f32(in_ptr);
-            vec_elements             = vsubq_f32(vec_elements, vec_max);
-            vec_elements             = vexpq_f32(vec_elements);
-
-            vst1q_f32(exp_ptr, vec_elements);
-            vec_sum_value = vaddq_f32(vec_elements, vec_sum_value);
-
-            in_ptr += step;
-            exp_ptr += step;
-        }
-
-        // Reduce sum
-        float32x2_t carry_addition = vpadd_f32(vget_high_f32(vec_sum_value), vget_low_f32(vec_sum_value));
-        carry_addition             = vpadd_f32(carry_addition, carry_addition);
-        float sum                  = vget_lane_f32(carry_addition, 0);
-
-        // Run remaining elements
-        for(int i = 0; i < small_steps; ++i)
-        {
-            float element = std::exp(in_ptr[i] - *max_ptr);
-            exp_ptr[i]    = element;
-            sum += element;
-        }
-
-        *(reinterpret_cast<float *>(_sum.ptr())) = sum;
-    }
-    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
-}
 void logits_1d_shift_exp_sum_qs8(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
 {
     Window window_max(window);
@@ -293,6 +313,190 @@ void logits_1d_shift_exp_sum_qs8(const ITensor *in, const ITensor *max, ITensor 
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
+void logits_1d_shift_exp_sum_qs16(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
+{
+    Window window_max(window);
+    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
+
+    Window max_slice = window_max.first_slice_window_1D();
+    Window in_slice  = window.first_slice_window_1D();
+
+    constexpr int step                 = 4;
+    const int     long_steps           = in->info()->valid_region().shape.x() / step;
+    const int     small_steps          = in->info()->valid_region().shape.x() % step;
+    const int     fixed_point_position = in->info()->fixed_point_position();
+
+    do
+    {
+        Iterator input(in, in_slice);
+        Iterator exp(out, in_slice);
+        Iterator _max(max, max_slice);
+        Iterator _sum(sum, max_slice);
+
+        // Get pointers
+        auto in_ptr  = reinterpret_cast<const qint16_t *>(input.ptr());
+        auto exp_ptr = reinterpret_cast<qint16_t *>(exp.ptr());
+
+        // Init sum to zero
+        qint32x4_t vec_sum_value = vdupq_n_qs32(0);
+
+        // Get max value
+        const auto       max_ptr = reinterpret_cast<const qint16_t *>(_max.ptr());
+        const qint16x4_t vec_max = vdup_n_qs16(*max_ptr);
+
+        // Run neon loop
+        for(int i = 0; i < long_steps; ++i)
+        {
+            qint16x4_t vec_elements = vld1_qs16(in_ptr);
+            vec_elements            = vqsub_qs16(vec_elements, vec_max);
+            vec_elements            = vqexp_qs16(vec_elements, fixed_point_position);
+
+            vst1_qs16(exp_ptr, vec_elements);
+            vec_sum_value = vqaddq_qs32(vec_sum_value, vmovl_s16(vec_elements));
+
+            in_ptr += step;
+            exp_ptr += step;
+        }
+        // Reduce sum
+        qint32x2_t carry_addition = vqadd_qs32(vget_high_s32(vec_sum_value), vget_low_s32(vec_sum_value));
+        qint32_t   sum            = vget_lane_s32(carry_addition, 0) + vget_lane_s32(carry_addition, 1);
+
+        // Run remaining elements
+        for(int i = 0; i < small_steps; ++i)
+        {
+            qint16_t element = sqexp_qs16(sqsub_qs16(in_ptr[i], *max_ptr), fixed_point_position);
+            exp_ptr[i]       = element;
+            sum              = sqadd_qs32(sum, element);
+        }
+
+        *(reinterpret_cast<qint16_t *>(_sum.ptr())) = sqmovn_qs32(sum);
+    }
+    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
+}
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+void logits_1d_shift_exp_sum_f16(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
+{
+    Window window_max(window);
+    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
+
+    Window max_slice = window_max.first_slice_window_1D();
+    Window in_slice  = window.first_slice_window_1D();
+
+    constexpr int step        = 8;
+    const int     long_steps  = in->info()->valid_region().shape.x() / step;
+    const int     small_steps = in->info()->valid_region().shape.x() % step;
+
+    do
+    {
+        Iterator input(in, in_slice);
+        Iterator exp(out, in_slice);
+        Iterator _max(max, max_slice);
+        Iterator _sum(sum, max_slice);
+
+        // Get pointers
+        auto in_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
+        auto exp_ptr = reinterpret_cast<float16_t *>(exp.ptr());
+
+        // Init sum to zero
+        float16x8_t vec_sum_value = vdupq_n_f16(0);
+
+        // Get max value
+        const auto        max_ptr = reinterpret_cast<const float16_t *>(_max.ptr());
+        const float16x8_t vec_max = vdupq_n_f16(*max_ptr);
+
+        // Run neon loop
+        for(int i = 0; i < long_steps; ++i)
+        {
+            float16x8_t vec_elements = vld1q_f16(in_ptr);
+            vec_elements             = vsubq_f16(vec_elements, vec_max);
+            vec_elements             = vexpq_f16(vec_elements);
+
+            vst1q_f16(exp_ptr, vec_elements);
+            vec_sum_value = vaddq_f16(vec_sum_value, vec_elements);
+
+            in_ptr += step;
+            exp_ptr += step;
+        }
+        // Reduce sum
+        const float16x4_t sum_red        = vadd_f16(vget_low_f16(vec_sum_value), vget_high_f16(vec_sum_value));
+        const float16x4_t carry_addition = vpadd_f16(sum_red, sum_red);
+        float16_t         sum            = vget_lane_f16(carry_addition, 0) + vget_lane_f16(carry_addition, 1);
+
+        // Run remaining elements
+        for(int i = 0; i < small_steps; ++i)
+        {
+            const float16_t element = std::exp(static_cast<float>(in_ptr[i] - *max_ptr));
+            exp_ptr[i]              = element;
+            sum += element;
+        }
+        *(reinterpret_cast<float16_t *>(_sum.ptr())) = sum;
+    }
+    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
+void logits_1d_shift_exp_sum_f32(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
+{
+    Window window_max(window);
+    window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
+
+    Window max_slice = window_max.first_slice_window_1D();
+    Window in_slice  = window.first_slice_window_1D();
+
+    constexpr int step        = 4;
+    const int     long_steps  = in->info()->valid_region().shape.x() / step;
+    const int     small_steps = in->info()->valid_region().shape.x() % step;
+
+    do
+    {
+        Iterator input(in, in_slice);
+        Iterator exp(out, in_slice);
+        Iterator _max(max, max_slice);
+        Iterator _sum(sum, max_slice);
+
+        // Get pointers
+        auto in_ptr  = reinterpret_cast<const float *>(input.ptr());
+        auto exp_ptr = reinterpret_cast<float *>(exp.ptr());
+
+        // Init sum to zero
+        float32x4_t vec_sum_value = vdupq_n_f32(0.0f);
+
+        // Get max value
+        const auto        max_ptr = reinterpret_cast<const float *>(_max.ptr());
+        const float32x4_t vec_max = vdupq_n_f32(*max_ptr);
+
+        // Run neon loop
+        for(int i = 0; i < long_steps; ++i)
+        {
+            float32x4_t vec_elements = vld1q_f32(in_ptr);
+            vec_elements             = vsubq_f32(vec_elements, vec_max);
+            vec_elements             = vexpq_f32(vec_elements);
+
+            vst1q_f32(exp_ptr, vec_elements);
+            vec_sum_value = vaddq_f32(vec_elements, vec_sum_value);
+
+            in_ptr += step;
+            exp_ptr += step;
+        }
+
+        // Reduce sum
+        float32x2_t carry_addition = vpadd_f32(vget_high_f32(vec_sum_value), vget_low_f32(vec_sum_value));
+        carry_addition             = vpadd_f32(carry_addition, carry_addition);
+        float sum                  = vget_lane_f32(carry_addition, 0);
+
+        // Run remaining elements
+        for(int i = 0; i < small_steps; ++i)
+        {
+            float element = std::exp(in_ptr[i] - *max_ptr);
+            exp_ptr[i]    = element;
+            sum += element;
+        }
+
+        *(reinterpret_cast<float *>(_sum.ptr())) = sum;
+    }
+    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
+}
 } //namespace
 
 NELogits1DShiftExpSumKernel::NELogits1DShiftExpSumKernel()
@@ -302,11 +506,16 @@ NELogits1DShiftExpSumKernel::NELogits1DShiftExpSumKernel()
 
 void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor *max, ITensor *output, ITensor *sum)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(max, 1, DataType::F32, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, max, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, max, output);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(max, sum, output);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, max, sum);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output, max, sum);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(max, sum);
 
     unsigned int num_elems_processed_per_iteration = input->info()->valid_region().shape.x();
@@ -316,11 +525,20 @@ void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor 
         case DataType::QS8:
             _func = &logits_1d_shift_exp_sum_qs8;
             break;
+        case DataType::QS16:
+            _func = &logits_1d_shift_exp_sum_qs16;
+            break;
         case DataType::F32:
             _func = &logits_1d_shift_exp_sum_f32;
             break;
+        case DataType::F16:
+#ifdef ARM_COMPUTE_ENABLE_FP16
+            _func = &logits_1d_shift_exp_sum_f16;
+            break;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
+            break;
     }
 
     _input  = input;
@@ -343,8 +561,9 @@ void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor 
     INEKernel::configure(win);
 }
 
-void NELogits1DShiftExpSumKernel::run(const Window &window)
+void NELogits1DShiftExpSumKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -354,36 +573,6 @@ void NELogits1DShiftExpSumKernel::run(const Window &window)
 
 namespace
 {
-void logits_1d_norm_f32(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window)
-{
-    Window window_sum(window);
-    window_sum.set(Window::DimX, Window::Dimension(0, 0, 0));
-    Window sum_slice = window_sum.first_slice_window_1D();
-    Window in_slice  = window.first_slice_window_1D();
-
-    do
-    {
-        Iterator input(in, in_slice);
-        Iterator _sum(sum, sum_slice);
-        Iterator output(out, in_slice);
-
-        const float       sum_value        = *reinterpret_cast<const float *>(_sum.ptr());
-        const float32x4_t vec_sum_inversed = vdupq_n_f32(1.0f / sum_value);
-
-        execute_window_loop(in_slice, [&](const Coordinates & id)
-        {
-            const auto in_ptr  = reinterpret_cast<const float *>(input.ptr());
-            const auto out_ptr = reinterpret_cast<float *>(output.ptr());
-
-            const float32x4_t vec_in           = vld1q_f32(in_ptr);
-            const float32x4_t normalized_value = vmulq_f32(vec_in, vec_sum_inversed);
-
-            vst1q_f32(out_ptr, normalized_value);
-        },
-        input, output);
-    }
-    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
-}
 void logits_1d_norm_qs8(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window)
 {
     Window window_sum(window);
@@ -416,6 +605,101 @@ void logits_1d_norm_qs8(const ITensor *in, const ITensor *sum, ITensor *out, con
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
 }
+void logits_1d_norm_qs16(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window)
+{
+    Window window_sum(window);
+    window_sum.set(Window::DimX, Window::Dimension(0, 0, 0));
+    Window sum_slice = window_sum.first_slice_window_1D();
+    Window in_slice  = window.first_slice_window_1D();
+
+    const int fixed_point_position = in->info()->fixed_point_position();
+
+    do
+    {
+        Iterator input(in, in_slice);
+        Iterator _sum(sum, sum_slice);
+        Iterator output(out, in_slice);
+
+        const int16_t    sum_value        = *reinterpret_cast<const qint16_t *>(_sum.ptr());
+        const qint16x8_t vec_sum_inversed = vqrecipq_qs16(vdupq_n_qs16(sum_value), fixed_point_position);
+
+        execute_window_loop(in_slice, [&](const Coordinates & id)
+        {
+            const auto in_ptr  = reinterpret_cast<const qint16_t *>(input.ptr());
+            const auto out_ptr = reinterpret_cast<qint16_t *>(output.ptr());
+
+            const qint16x8_t vec_in           = vld1q_qs16(in_ptr);
+            const qint16x8_t normalized_value = vqmulq_qs16(vec_in, vec_sum_inversed, fixed_point_position);
+
+            vst1q_qs16(out_ptr, normalized_value);
+        },
+        input, output);
+    }
+    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
+}
+#ifdef ARM_COMPUTE_ENABLE_FP16
+void logits_1d_norm_f16(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window)
+{
+    Window window_sum(window);
+    window_sum.set(Window::DimX, Window::Dimension(0, 0, 0));
+    Window sum_slice = window_sum.first_slice_window_1D();
+    Window in_slice  = window.first_slice_window_1D();
+
+    do
+    {
+        Iterator input(in, in_slice);
+        Iterator _sum(sum, sum_slice);
+        Iterator output(out, in_slice);
+
+        const float16_t   sum_value        = *reinterpret_cast<const qint16_t *>(_sum.ptr());
+        const float16x8_t vec_sum_inversed = vdupq_n_f16(1.0f / sum_value);
+
+        execute_window_loop(in_slice, [&](const Coordinates & id)
+        {
+            const auto in_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
+            const auto out_ptr = reinterpret_cast<float16_t *>(output.ptr());
+
+            const float16x8_t vec_in           = vld1q_f16(in_ptr);
+            const float16x8_t normalized_value = vmulq_f16(vec_in, vec_sum_inversed);
+
+            vst1q_f16(out_ptr, normalized_value);
+        },
+        input, output);
+    }
+    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
+void logits_1d_norm_f32(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window)
+{
+    Window window_sum(window);
+    window_sum.set(Window::DimX, Window::Dimension(0, 0, 0));
+    Window sum_slice = window_sum.first_slice_window_1D();
+    Window in_slice  = window.first_slice_window_1D();
+
+    do
+    {
+        Iterator input(in, in_slice);
+        Iterator _sum(sum, sum_slice);
+        Iterator output(out, in_slice);
+
+        const float       sum_value        = *reinterpret_cast<const float *>(_sum.ptr());
+        const float32x4_t vec_sum_inversed = vdupq_n_f32(1.0f / sum_value);
+
+        execute_window_loop(in_slice, [&](const Coordinates & id)
+        {
+            const auto in_ptr  = reinterpret_cast<const float *>(input.ptr());
+            const auto out_ptr = reinterpret_cast<float *>(output.ptr());
+
+            const float32x4_t vec_in           = vld1q_f32(in_ptr);
+            const float32x4_t normalized_value = vmulq_f32(vec_in, vec_sum_inversed);
+
+            vst1q_f32(out_ptr, normalized_value);
+        },
+        input, output);
+    }
+    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
+}
 } // namespace
 
 NELogits1DNormKernel::NELogits1DNormKernel()
@@ -425,9 +709,14 @@ NELogits1DNormKernel::NELogits1DNormKernel()
 
 void NELogits1DNormKernel::configure(const ITensor *input, const ITensor *sum, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, sum);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, sum);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(sum, output);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, sum, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
     _input  = input;
@@ -435,20 +724,27 @@ void NELogits1DNormKernel::configure(const ITensor *input, const ITensor *sum, I
     _output = output;
 
     // Configure kernel window
-    unsigned int num_elems_processed_per_iteration = 0;
+    unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->info()->data_type());
 
     switch(input->info()->data_type())
     {
         case DataType::QS8:
-            _func                             = &logits_1d_norm_qs8;
-            num_elems_processed_per_iteration = 16;
+            _func = &logits_1d_norm_qs8;
+            break;
+        case DataType::QS16:
+            _func = &logits_1d_norm_qs16;
             break;
         case DataType::F32:
-            num_elems_processed_per_iteration = 4;
-            _func                             = &logits_1d_norm_f32;
+            _func = &logits_1d_norm_f32;
             break;
+        case DataType::F16:
+#ifdef ARM_COMPUTE_ENABLE_FP16
+            _func = &logits_1d_norm_f16;
+            break;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
+            break;
     }
 
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
@@ -464,8 +760,9 @@ void NELogits1DNormKernel::configure(const ITensor *input, const ITensor *sum, I
     INEKernel::configure(win);
 }
 
-void NELogits1DNormKernel::run(const Window &window)
+void NELogits1DNormKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

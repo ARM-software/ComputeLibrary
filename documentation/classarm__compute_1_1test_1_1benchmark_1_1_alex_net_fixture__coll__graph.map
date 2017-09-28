@@ -1,5 +1,0 @@
-<map id="AlexNetFixture&lt; ITensorType, TensorType, SubTensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction, dt &gt;" name="AlexNetFixture&lt; ITensorType, TensorType, SubTensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction, dt &gt;">
-<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1benchmark_1_1_profiler.xhtml" title="Profiler" alt="" coords="777,56,840,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1model__objects_1_1_alex_net.xhtml" title="AlexNet\&lt; ITensorType,\l TensorType, SubTensorType,\l Accessor, ActivationLayerFunction,\l ConvolutionLayerFunction, FullyConnected\lLayerFunction, NormalizationLayerFunction,\l PoolingLayerFunction, SoftmaxLayerFunction, dt \&gt;" alt="" coords="648,107,969,207"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1model__objects_1_1_alex_net.xhtml" title="AlexNet model object. " alt="" coords="5,100,300,215"/>
-</map>

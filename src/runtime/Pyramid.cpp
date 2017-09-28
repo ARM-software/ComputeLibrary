@@ -24,10 +24,10 @@
 #include "arm_compute/runtime/Pyramid.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PyramidInfo.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 
@@ -46,7 +46,7 @@ void Pyramid::init_auto_padding(const PyramidInfo &info)
 void Pyramid::internal_init(const PyramidInfo &info, bool auto_padding)
 {
     _info    = info;
-    _pyramid = arm_compute::cpp14::make_unique<Tensor[]>(_info.num_levels());
+    _pyramid = arm_compute::support::cpp14::make_unique<Tensor[]>(_info.num_levels());
 
     size_t      w            = _info.width();
     size_t      h            = _info.height();

@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_histogram_kernel =
     [ "configure", "classarm__compute_1_1_n_e_histogram_kernel.xhtml#aaae5b09830704e2ed3cf7d09fe01bfc9", null ],
     [ "operator=", "classarm__compute_1_1_n_e_histogram_kernel.xhtml#a141d3236a2c874c5ea0ac78776b4433b", null ],
     [ "operator=", "classarm__compute_1_1_n_e_histogram_kernel.xhtml#a4d612efbb9c534d6d89d397e65d816dd", null ],
-    [ "run", "classarm__compute_1_1_n_e_histogram_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_histogram_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

@@ -29,13 +29,14 @@
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"
-#include "arm_compute/core/CL/kernels/CLNonMaximaSuppression3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEHarrisCornersKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 #include <cstdint>
-
 #include <memory>
 
 namespace arm_compute
@@ -60,7 +61,7 @@ class CLHarrisCorners : public IFunction
 {
 public:
     /** Constructor */
-    CLHarrisCorners();
+    CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLHarrisCorners(const CLHarrisCorners &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -85,9 +86,10 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup                       _memory_group;          /**< Function's memory group */
     std::unique_ptr<IFunction>          _sobel;                 /**< Sobel function */
     CLHarrisScoreKernel                 _harris_score;          /**< Harris score kernel */
-    CLNonMaximaSuppression3x3Kernel     _non_max_suppr;         /**< Non-maxima suppression function */
+    CLNonMaximaSuppression3x3           _non_max_suppr;         /**< Non-maxima suppression function */
     CPPCornerCandidatesKernel           _candidates;            /**< Sort kernel */
     CPPSortEuclideanDistanceKernel      _sort_euclidean;        /**< Euclidean distance kernel */
     CLFillBorderKernel                  _border_gx;             /**< Border handler before running harris score */

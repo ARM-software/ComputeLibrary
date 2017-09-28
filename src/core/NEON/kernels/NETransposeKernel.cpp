@@ -179,8 +179,9 @@ NETransposeKernel::NETransposeKernel()
 
 void NETransposeKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON(output == nullptr);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::U16, DataType::S16, DataType::QS16, DataType::U32, DataType::S32, DataType::F16,
+                                                  DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     TensorShape  output_shape{ input->info()->tensor_shape() };
     const size_t w_out = input->info()->dimension(1);
@@ -191,8 +192,9 @@ void NETransposeKernel::configure(const ITensor *input, ITensor *output)
     // Output tensor auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     _input  = input;
     _output = output;
@@ -231,8 +233,9 @@ void NETransposeKernel::configure(const ITensor *input, ITensor *output)
     INEKernel::configure(win);
 }
 
-void NETransposeKernel::run(const Window &window)
+void NETransposeKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

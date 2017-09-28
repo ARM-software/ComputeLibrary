@@ -52,28 +52,28 @@ __kernel void scharr3x3(
 #ifdef GRAD_X
     ,
     IMAGE_DECLARATION(dst_gx)
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     ,
     IMAGE_DECLARATION(dst_gy)
-#endif
+#endif /* GRAD_Y */
 )
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 #ifdef GRAD_X
     Image dst_gx = CONVERT_TO_IMAGE_STRUCT(dst_gx);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     Image dst_gy = CONVERT_TO_IMAGE_STRUCT(dst_gy);
-#endif
+#endif /* GRAD_Y */
 
     // Output pixels
 #ifdef GRAD_X
     short8 gx = (short8)0;
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     short8 gy = (short8)0;
-#endif
+#endif /* GRAD_Y */
 
     // Row0
     uchar16 temp   = vload16(0, offset(&src, -1, -1));
@@ -83,12 +83,12 @@ __kernel void scharr3x3(
 #ifdef GRAD_X
     gx += left * (short8)(-3);
     gx += right * (short8)(+3);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     gy += left * (short8)(-3);
     gy += middle * (short8)(-10);
     gy += right * (short8)(-3);
-#endif
+#endif /* GRAD_Y */
 
     // Row1
     temp  = vload16(0, offset(&src, -1, 0));
@@ -97,7 +97,7 @@ __kernel void scharr3x3(
 #ifdef GRAD_X
     gx += left * (short8)(-10);
     gx += right * (short8)(+10);
-#endif
+#endif /* GRAD_X */
 
     // Row2
     temp   = vload16(0, offset(&src, -1, 1));
@@ -107,18 +107,18 @@ __kernel void scharr3x3(
 #ifdef GRAD_X
     gx += left * (short8)(-3);
     gx += right * (short8)(+3);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     gy += left * (short8)(+3);
     gy += middle * (short8)(+10);
     gy += right * (short8)(+3);
-#endif
+#endif /* GRAD_Y */
 
     // Store results
 #ifdef GRAD_X
     vstore8(gx, 0, ((__global short *)dst_gx.ptr));
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     vstore8(gy, 0, ((__global short *)dst_gy.ptr));
-#endif
+#endif /* GRAD_Y */
 }

@@ -48,15 +48,15 @@ public:
     NEMinMaxLocation();
     /** Initialise the kernel's inputs and outputs.
      *
-     * @param[in]  input     Input image. Data types supported: U8/S16.
-     * @param[out] min       Minimum value of image.
-     * @param[out] max       Maximum value of image.
+     * @param[in]  input     Input image. Data types supported: U8/S16/F32.
+     * @param[out] min       Minimum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
+     * @param[out] max       Maximum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
      * @param[out] min_loc   (Optional) Array of minimum value locations.
      * @param[out] max_loc   (Optional) Array of maximum value locations.
      * @param[out] min_count (Optional) Number of minimum value encounters.
      * @param[out] max_count (Optional) Number of maximum value encounters.
      */
-    void configure(const IImage *input, int32_t *min, int32_t *max,
+    void configure(const IImage *input, void *min, void *max,
                    ICoordinates2DArray *min_loc = nullptr, ICoordinates2DArray *max_loc = nullptr,
                    uint32_t *min_count = nullptr, uint32_t *max_count = nullptr);
 

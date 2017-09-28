@@ -12,13 +12,13 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="6.5,-0.5 6.5,-19.5 96.5,-19.5 96.5,-0.5 6.5,-0.5"/>
-<text text-anchor="middle" x="51.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">CLBox3x3Kernel</text>
+<text text-anchor="middle" x="51.5" y="-7.5" font-family="Helvetica" font-size="10.00">CLBox3x3Kernel</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" target="_top" xlink:title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. ">
 <polygon fill="white" stroke="black" points="0,-56.5 0,-75.5 103,-75.5 103,-56.5 0,-56.5"/>
-<text text-anchor="middle" x="51.5" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLSimple2DKernel</text>
+<text text-anchor="middle" x="51.5" y="-63.5" font-family="Helvetica" font-size="10.00">ICLSimple2DKernel</text>
 </a>
 </g>
 </g>
@@ -31,7 +31,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_c_l_simple_kernel.xhtml" target="_top" xlink:title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. ">
 <polygon fill="white" stroke="black" points="6.5,-112.5 6.5,-131.5 96.5,-131.5 96.5,-112.5 6.5,-112.5"/>
-<text text-anchor="middle" x="51.5" y="-119.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLSimpleKernel</text>
+<text text-anchor="middle" x="51.5" y="-119.5" font-family="Helvetica" font-size="10.00">ICLSimpleKernel</text>
 </a>
 </g>
 </g>
@@ -44,7 +44,7 @@
 <g id="node4" class="node"><title>Node4</title>
 <g id="a_node4"><a xlink:href="classarm__compute_1_1_i_c_l_kernel.xhtml" target="_top" xlink:title="Common interface for all the OpenCL kernels. ">
 <polygon fill="white" stroke="black" points="21.5,-168.5 21.5,-187.5 81.5,-187.5 81.5,-168.5 21.5,-168.5"/>
-<text text-anchor="middle" x="51.5" y="-175.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLKernel</text>
+<text text-anchor="middle" x="51.5" y="-175.5" font-family="Helvetica" font-size="10.00">ICLKernel</text>
 </a>
 </g>
 </g>
@@ -57,7 +57,7 @@
 <g id="node5" class="node"><title>Node5</title>
 <g id="a_node5"><a xlink:href="classarm__compute_1_1_i_kernel.xhtml" target="_top" xlink:title="Common information for all the kernels. ">
 <polygon fill="white" stroke="black" points="28,-224.5 28,-243.5 75,-243.5 75,-224.5 28,-224.5"/>
-<text text-anchor="middle" x="51.5" y="-231.5" font-family="Helvetica,sans-Serif" font-size="10.00">IKernel</text>
+<text text-anchor="middle" x="51.5" y="-231.5" font-family="Helvetica" font-size="10.00">IKernel</text>
 </a>
 </g>
 </g>

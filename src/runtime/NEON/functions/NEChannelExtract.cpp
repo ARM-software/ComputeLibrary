@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEChannelExtract.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEChannelExtractKernel.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,14 +32,14 @@ using namespace arm_compute;
 
 void NEChannelExtract::configure(const ITensor *input, Channel channel, ITensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEChannelExtractKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEChannelExtractKernel>();
     k->configure(input, channel, output);
     _kernel = std::move(k);
 }
 
 void NEChannelExtract::configure(const IMultiImage *input, Channel channel, IImage *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEChannelExtractKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEChannelExtractKernel>();
     k->configure(input, channel, output);
     _kernel = std::move(k);
 }

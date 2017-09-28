@@ -26,12 +26,14 @@
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/Steps.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -45,46 +47,6 @@ namespace arm_compute
 class IKernel;
 class ITensor;
 class ITensorInfo;
-
-namespace cpp14
-{
-template <class T>
-struct _Unique_if
-{
-    typedef std::unique_ptr<T> _Single_object;
-};
-
-template <class T>
-struct _Unique_if<T[]>
-{
-    typedef std::unique_ptr<T[]> _Unknown_bound;
-};
-
-template <class T, size_t N>
-struct _Unique_if<T[N]>
-{
-    typedef void _Known_bound;
-};
-
-template <class T, class... Args>
-typename _Unique_if<T>::_Single_object
-make_unique(Args &&... args)
-{
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
-template <class T>
-typename _Unique_if<T>::_Unknown_bound
-make_unique(size_t n)
-{
-    typedef typename std::remove_extent<T>::type U;
-    return std::unique_ptr<T>(new U[n]());
-}
-
-template <class T, class... Args>
-typename _Unique_if<T>::_Known_bound
-make_unique(Args &&...) = delete;
-}
 
 template <typename T>
 struct enable_bitwise_ops
@@ -122,9 +84,9 @@ struct is_contained<T, std::tuple<U, Ts...>> : is_contained<T, std::tuple<Ts...>
 }
 
 /** Computes bilinear interpolation using the pointer to the top-left pixel and the pixel's distance between
- * the real coordinates and the smallest following integer coordinates.
+ * the real coordinates and the smallest following integer coordinates. Input must be in single channel format.
  *
- * @param[in] pixel_ptr Pointer to the top-left pixel value. Format: Single channel U8
+ * @param[in] pixel_ptr Pointer to the top-left pixel value of a single channel input.
  * @param[in] stride    Stride to access the bottom-left and bottom-right pixel values
  * @param[in] dx        Pixel's distance between the X real coordinate and the smallest X following integer
  * @param[in] dy        Pixel's distance between the Y real coordinate and the smallest Y following integer
@@ -133,26 +95,57 @@ struct is_contained<T, std::tuple<U, Ts...>> : is_contained<T, std::tuple<Ts...>
  *
  * @return The bilinear interpolated pixel value
  */
-inline uint8_t delta_bilinear_c1u8(const uint8_t *pixel_ptr, size_t stride, float dx, float dy);
+template <typename T>
+inline T delta_bilinear_c1(const T *pixel_ptr, size_t stride, float dx, float dy)
+{
+    ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
 
-/** Return the pixel at (x,y) using bilinear interpolation. The image must be single channel U8
+    const float dx1 = 1.0f - dx;
+    const float dy1 = 1.0f - dy;
+
+    const T a00 = *pixel_ptr;
+    const T a01 = *(pixel_ptr + 1);
+    const T a10 = *(pixel_ptr + stride);
+    const T a11 = *(pixel_ptr + stride + 1);
+
+    const float w1 = dx1 * dy1;
+    const float w2 = dx * dy1;
+    const float w3 = dx1 * dy;
+    const float w4 = dx * dy;
+
+    return static_cast<T>(a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4);
+}
+
+/** Return the pixel at (x,y) using bilinear interpolation.
  *
  * @warning Only works if the iterator was created with an IImage
  *
- * @param[in] first_pixel_ptr Pointer to the first pixel of a single channel U8 image.
+ * @param[in] first_pixel_ptr Pointer to the first pixel of a single channel input.
  * @param[in] stride          Stride in bytes of the image;
  * @param[in] x               X position of the wanted pixel
  * @param[in] y               Y position of the wanted pixel
  *
  * @return The pixel at (x, y) using bilinear interpolation.
  */
-inline uint8_t pixel_bilinear_c1u8(const uint8_t *first_pixel_ptr, size_t stride, float x, float y);
+template <typename T>
+inline T pixel_bilinear_c1(const T *first_pixel_ptr, size_t stride, float x, float y)
+{
+    ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
 
-/** Return the pixel at (x,y) using bilinear interpolation by clamping when out of borders. The image must be single channel U8
+    const int32_t xi = std::floor(x);
+    const int32_t yi = std::floor(y);
+
+    const float dx = x - xi;
+    const float dy = y - yi;
+
+    return delta_bilinear_c1(first_pixel_ptr + xi + yi * stride, stride, dx, dy);
+}
+
+/** Return the pixel at (x,y) using bilinear interpolation by clamping when out of borders. The image must be single channel input
  *
  * @warning Only works if the iterator was created with an IImage
  *
- * @param[in] first_pixel_ptr Pointer to the first pixel of a single channel U8 image.
+ * @param[in] first_pixel_ptr Pointer to the first pixel of a single channel image.
  * @param[in] stride          Stride in bytes of the image
  * @param[in] width           Width of the image
  * @param[in] height          Height of the image
@@ -161,7 +154,22 @@ inline uint8_t pixel_bilinear_c1u8(const uint8_t *first_pixel_ptr, size_t stride
  *
  * @return The pixel at (x, y) using bilinear interpolation.
  */
-inline uint8_t pixel_bilinear_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float x, float y);
+template <typename T>
+inline uint8_t pixel_bilinear_c1_clamp(const T *first_pixel_ptr, size_t stride, size_t width, size_t height, float x, float y)
+{
+    ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
+
+    x = std::max(-1.f, std::min(x, static_cast<float>(width)));
+    y = std::max(-1.f, std::min(y, static_cast<float>(height)));
+
+    const float xi = std::floor(x);
+    const float yi = std::floor(y);
+
+    const float dx = x - xi;
+    const float dy = y - yi;
+
+    return delta_bilinear_c1(first_pixel_ptr + static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride, stride, dx, dy);
+}
 
 /** Return the pixel at (x,y) using area interpolation by clamping when out of borders. The image must be single channel U8
  *
@@ -501,6 +509,33 @@ bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
  * @return True if the fixed point position has been changed.
  */
 bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position);
+/** Helper function to calculate the Valid Region for Scale.
+ *
+ * @param[in] src_info         Input tensor info used to check.
+ * @param[in] dst_shape        Shape of the output.
+ * @param[in] policy           Interpolation policy.
+ * @param[in] border_size      Size of the border.
+ * @param[in] border_undefined True if the border is undefined.
+ *
+ * @return The corrispondent valid region
+ */
+ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined);
+/** Convert a linear index into n-dimensional coordinates.
+ *
+ * @param[in] shape Shape of the n-dimensional tensor.
+ * @param[in] index Linear index specifying the i-th element.
+ *
+ * @return n-dimensional coordinates.
+ */
+inline Coordinates index2coords(const TensorShape &shape, int index);
+/** Convert n-dimensional coordinates into a linear index.
+ *
+ * @param[in] shape Shape of the n-dimensional tensor.
+ * @param[in] coord N-dimensional coordinates.
+ *
+ * @return linead index
+ */
+inline int coords2index(const TensorShape &shape, const Coordinates &coord);
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

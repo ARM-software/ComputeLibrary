@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
 
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -33,7 +33,7 @@ using namespace arm_compute;
 void CLPixelWiseMultiplication::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
                                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
-    auto k = arm_compute::cpp14::make_unique<CLPixelWiseMultiplicationKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLPixelWiseMultiplicationKernel>();
     k->configure(input1, input2, output, scale, overflow_policy, rounding_policy);
     _kernel = std::move(k);
 }

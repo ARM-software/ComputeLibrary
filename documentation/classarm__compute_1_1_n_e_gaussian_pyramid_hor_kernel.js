@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel =
     [ "configure", "classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml#a165cde4f51d6dc5cb425237cdf7535a4", null ],
     [ "operator=", "classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml#a57b8231a27fbf3bd1867c384f20f0ee7", null ],
     [ "operator=", "classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml#a524b075e28c8335b5fcd97e2d0654429", null ],
-    [ "run", "classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

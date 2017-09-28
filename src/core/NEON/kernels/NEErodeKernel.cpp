@@ -67,8 +67,9 @@ void NEErodeKernel::configure(const ITensor *input, ITensor *output, bool border
     INEKernel::configure(win);
 }
 
-void NEErodeKernel::run(const Window &window)
+void NEErodeKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 

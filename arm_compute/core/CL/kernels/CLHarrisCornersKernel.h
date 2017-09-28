@@ -81,5 +81,5 @@ protected:
     float           _norm_factor;     /**< Normalization factor */
     BorderSize      _border_size;     /**< Border size */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLHARRISCORNERSKERNEL_H__ */

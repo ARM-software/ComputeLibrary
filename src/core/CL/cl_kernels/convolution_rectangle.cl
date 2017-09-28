@@ -31,15 +31,15 @@
 
 #ifndef DATA_TYPE
 #define DATA_TYPE short
-#endif
+#endif /* DATA_TYPE */
 
 #ifndef COMPUTE_TYPE
 #define COMPUTE_TYPE int
-#endif
+#endif /* COMPUTE_TYPE */
 
 #ifndef DATA_TYPE_OUT
 #define DATA_TYPE_OUT uchar
-#endif
+#endif /* DATA_TYPE_OUT */
 
 #ifndef DYNAMIC_MATRIX_CONVOLUTION
 
@@ -89,24 +89,24 @@ __kernel void convolution_rectangle(
 #if MATRIX_WIDTH == 3
         pixels += convolution1x3(offset(&src, -1, -(MATRIX_HEIGHT / 2) + i), matrix_coeff[0 + i * 3], matrix_coeff[1 + i * 3],
                                  matrix_coeff[2 + i * 3]);
-#endif
+#endif /* MATRIX_WIDTH */
 
 #if MATRIX_WIDTH == 5
         pixels += convolution1x5(offset(&src, -2, -(MATRIX_HEIGHT / 2) + i), matrix_coeff[0 + i * 5], matrix_coeff[1 + i * 5],
                                  matrix_coeff[2 + i * 5], matrix_coeff[3 + i * 5], matrix_coeff[4 + i * 5]);
-#endif
+#endif /* MATRIX_WIDTH */
 
 #if MATRIX_WIDTH == 7
         pixels += convolution1x7(offset(&src, -3, -(MATRIX_HEIGHT / 2) + i), matrix_coeff[0 + i * 7], matrix_coeff[1 + i * 7],
                                  matrix_coeff[2 + i * 7], matrix_coeff[3 + i * 7], matrix_coeff[4 + i * 7],
                                  matrix_coeff[5 + i * 7], matrix_coeff[6 + i * 7]);
-#endif
+#endif /* MATRIX_WIDTH */
 
 #if MATRIX_WIDTH == 9
         pixels += convolution1x9(offset(&src, -4, -(MATRIX_HEIGHT / 2) + i), matrix_coeff[0 + i * 9], matrix_coeff[1 + i * 9],
                                  matrix_coeff[2 + i * 9], matrix_coeff[3 + i * 9], matrix_coeff[4 + i * 9],
                                  matrix_coeff[5 + i * 9], matrix_coeff[6 + i * 9], matrix_coeff[7 + i * 9], matrix_coeff[8 + i * 9]);
-#endif
+#endif /* MATRIX_WIDTH */
     }
 
     pixels /= (VEC_DATA_TYPE(DATA_TYPE, 8))SCALE;
@@ -115,4 +115,4 @@ __kernel void convolution_rectangle(
     vstore8(CONVERT_SAT(pixels, VEC_DATA_TYPE(DATA_TYPE_OUT, 8)), 0, ((__global DATA_TYPE_OUT *)dst.ptr));
 }
 
-#endif // DYNAMIC_MATRIX_CONVOLUTION
+#endif /* not DYNAMIC_MATRIX_CONVOLUTION */

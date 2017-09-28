@@ -44,6 +44,7 @@ vars.AddVariables(
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
+    BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Neon support", False),
     BoolVariable("embed_kernels", "Embed OpenCL kernels in library binary", False),
@@ -102,8 +103,11 @@ prefix = ""
 if env['arch'] == 'armv7a':
     env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
 
-    if env['os'] in ['linux', 'bare_metal']:
+    if env['os'] == 'linux':
         prefix = "arm-linux-gnueabihf-"
+        env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
+    elif env['os'] == 'bare_metal':
+        prefix = "arm-none-eabi-"
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
     elif env['os'] == 'android':
         prefix = "arm-linux-androideabi-"
@@ -111,16 +115,19 @@ if env['arch'] == 'armv7a':
 elif env['arch'] == 'arm64-v8a':
     env.Append(CXXFLAGS = ['-march=armv8-a'])
 
-    if env['os'] in ['linux', 'bare_metal']:
+    if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
+    elif env['os'] == 'bare_metal':
+        prefix = "aarch64-none-elf-"
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
 elif env['arch'] == 'arm64-v8.2-a':
     env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16+simd'])
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
-
-    if env['os'] in ['linux', 'bare_metal']:
+    if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
+    elif env['os'] == 'bare_metal':
+        prefix = "aarch64-elf-"
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
 elif env['arch'] == 'x86_32':
@@ -161,6 +168,10 @@ if not GetOption("help"):
         if compiler_ver == '4.8.3':
             env.Append(CXXFLAGS = ['-Wno-array-bounds'])
 
+if env['standalone']:
+    env.Append(CXXFLAGS = ['-fPIC'])
+    env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
+
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])
 
@@ -169,8 +180,10 @@ if env['os'] == 'android':
     env.Append(LINKFLAGS = ['-pie', '-static-libstdc++'])
 elif env['os'] == 'bare_metal':
     env.Append(LINKFLAGS = ['-static'])
+    env.Append(LINKFLAGS = ['-specs=rdimon.specs'])
     env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(CPPDEFINES = ['NO_MULTI_THREADING'])
+    env.Append(CPPDEFINES = ['BARE_METAL'])
 
 if env['opencl']:
     if env['os'] == 'bare_metal':
@@ -189,6 +202,7 @@ else:
 
 if env['asserts']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ASSERTS_ENABLED'])
+    env.Append(CXXFLAGS = ['-fstack-protector-strong'])
 
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
@@ -205,4 +219,5 @@ if env['opencl']:
 if env['examples']:
     SConscript('./examples/SConscript', variant_dir='#build/%s/examples' % env['build_dir'], duplicate=0)
 
-SConscript('./tests/SConscript', variant_dir='#build/%s/tests' % env['build_dir'], duplicate=0)
+if env['os'] != 'bare_metal':
+    SConscript('./tests/SConscript', variant_dir='#build/%s/tests' % env['build_dir'], duplicate=0)

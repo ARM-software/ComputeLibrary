@@ -92,8 +92,9 @@ void NEHOGDetectorKernel::configure(const ITensor *input, const IHOG *hog, IDete
     INEKernel::configure(win);
 }
 
-void NEHOGDetectorKernel::run(const Window &window)
+void NEHOGDetectorKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_hog_descriptor == nullptr);
@@ -176,7 +177,7 @@ void NEHOGDetectorKernel::run(const Window &window)
                 win.idx_class = _idx_class;
                 win.score     = score;
 
-                std::unique_lock<std::mutex> lock(_mutex);
+                std::unique_lock<arm_compute::Mutex> lock(_mutex);
                 _detection_windows->push_back(win);
                 lock.unlock();
             }

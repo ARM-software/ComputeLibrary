@@ -52,7 +52,7 @@ public:
      *
      * @note The input and output tensors must have the same dimensions
      *
-     * @param[in]      input  Input tensor (Matrix C). Data types supported: F16/F32
+     * @param[in]      input  Input tensor (Matrix C). Data types supported: QS8/QS16/F16/F32
      * @param[in, out] output Output tensor. If this kernel is used to finalize the GEMM result (alpha * AB + beta * C), output must contain the result obtained by @ref CLGEMMMatrixMultiplyKernel. Data type supported: same as @p input
      * @param[in]      beta   Weight of matrix C
      */
@@ -65,6 +65,5 @@ private:
     const ICLTensor *_input;
     ICLTensor       *_output;
 };
-}
-
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMMATRIXADDITIONKERNEL_H__ */

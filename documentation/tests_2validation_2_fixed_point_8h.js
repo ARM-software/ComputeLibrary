@@ -13,6 +13,7 @@ var tests_2validation_2_fixed_point_8h =
     [ "fixed_point", "classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml", "classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point" ],
     [ "constant_expr", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr.xhtml", null ],
     [ "functions", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1functions.xhtml", null ],
+    [ "promote_t", "tests_2validation_2_fixed_point_8h.xhtml#ac20ca549fa27b2eed44367745055a233", null ],
     [ "OverflowPolicy", "tests_2validation_2_fixed_point_8h.xhtml#a0ada8f647402027261407be09bdf25ff", [
       [ "WRAP", "tests_2validation_2_fixed_point_8h.xhtml#a0ada8f647402027261407be09bdf25ffae1c8555fcf0ea2bb648a6fd527d658c0", null ],
       [ "SATURATE", "tests_2validation_2_fixed_point_8h.xhtml#a0ada8f647402027261407be09bdf25ffa4729d95f983955f0d93a30179deb2b86", null ]

@@ -31,7 +31,6 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include <cstddef>
 
@@ -44,7 +43,10 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
         return;
     }
 
-    ARM_COMPUTE_ERROR_ON((0 == (window.x().end() - window.x().start())) || (0 == (window.y().end() - window.y().start())));
+    if((window.x().end() - window.x().start()) == 0 || (window.y().end() - window.y().start()) == 0)
+    {
+        return;
+    }
 
     cl::NDRange gws((window.x().end() - window.x().start()) / window.x().step(),
                     (window.y().end() - window.y().start()) / window.y().step(),
@@ -61,19 +63,13 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
 }
 
 ICLKernel::ICLKernel()
-    : _kernel(nullptr), _lws_hint(cl::Range_128_1), _target(CLScheduler::get().target())
+    : _kernel(nullptr), _lws_hint(CLKernelLibrary::get().default_ndrange()), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id)
 {
 }
 
 cl::Kernel &ICLKernel::kernel()
 {
     return _kernel;
-}
-
-template <unsigned int dimension_size>
-unsigned int           ICLKernel::num_arguments_per_tensor() const
-{
-    return 2 + 2 * dimension_size;
 }
 
 template <unsigned int dimension_size>
@@ -123,6 +119,16 @@ void ICLKernel::add_3D_tensor_argument(unsigned int &idx, const ICLTensor *tenso
     add_tensor_argument<3>(idx, tensor, window);
 }
 
+void ICLKernel::add_4D_tensor_argument(unsigned int &idx, const ICLTensor *tensor, const Window &window)
+{
+    add_tensor_argument<4>(idx, tensor, window);
+}
+
+unsigned int ICLKernel::num_arguments_per_1D_array() const
+{
+    return num_arguments_per_array<1>();
+}
+
 unsigned int ICLKernel::num_arguments_per_1D_tensor() const
 {
     return num_arguments_per_tensor<1>();
@@ -136,6 +142,11 @@ unsigned int ICLKernel::num_arguments_per_2D_tensor() const
 unsigned int ICLKernel::num_arguments_per_3D_tensor() const
 {
     return num_arguments_per_tensor<3>();
+}
+
+unsigned int ICLKernel::num_arguments_per_4D_tensor() const
+{
+    return num_arguments_per_tensor<4>();
 }
 
 void ICLKernel::set_target(cl::Device &device)

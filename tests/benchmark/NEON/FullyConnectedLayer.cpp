@@ -21,112 +21,90 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "benchmark/Datasets.h"
-#include "benchmark/Profiler.h"
-#include "benchmark/WallClockTimer.h"
-
-#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/benchmark/fixtures/FullyConnectedLayerFixture.h"
+#include "tests/datasets/system_tests/alexnet/AlexNetFullyConnectedLayerDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1FullyConnectedLayerDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4FullyConnectedLayerDataset.h"
+#include "tests/datasets/system_tests/lenet5/LeNet5FullyConnectedLayerDataset.h"
+#include "tests/datasets/system_tests/vgg/vgg16/VGG16FullyConnectedLayerDataset.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
-#include "benchmark/benchmark_api.h"
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::benchmark;
-using namespace arm_compute::test::neon;
-
-#include "benchmark/common/FullyConnectedLayer.h"
-
+namespace arm_compute
+{
+namespace test
+{
 namespace
 {
-using FullyConnectedLayerAlexNetF32 = FullyConnectedLayer<AlexNetFullyConnectedLayerDataset, Tensor, NEAccessor, NEFullyConnectedLayer>;
-using FullyConnectedLayerAlexNetQS8 = FullyConnectedLayer<AlexNetFullyConnectedLayerDataset, Tensor, NEAccessor, NEFullyConnectedLayer, DataType::QS8>;
-using FullyConnectedLayerLeNet5     = FullyConnectedLayer<LeNet5FullyConnectedLayerDataset, Tensor, NEAccessor, NEFullyConnectedLayer>;
-using FullyConnectedLayerGoogLeNet  = FullyConnectedLayer<GoogLeNetFullyConnectedLayerDataset, Tensor, NEAccessor, NEFullyConnectedLayer>;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8, DataType::QS16 });
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
+const auto data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8, DataType::QS16 });
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 
-// F32
-BENCHMARK_DEFINE_F(FullyConnectedLayerAlexNetF32, neon_alexnet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        fc_layer->run();
-        profiler.stop();
-    }
-}
+using NEFullyConnectedLayerFixture = FullyConnectedLayerFixture<Tensor, NEFullyConnectedLayer, Accessor>;
 
-BENCHMARK_REGISTER_F(FullyConnectedLayerAlexNetF32, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetFullyConnectedLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(FullyConnectedLayerAlexNetF32, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetFullyConnectedLayerDataset, 1, 1, 4, 8>);
-BENCHMARK_REGISTER_F(FullyConnectedLayerAlexNetF32, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetFullyConnectedLayerDataset, 2, 1, 4, 8>);
+TEST_SUITE(NEON)
 
-// QS8
-BENCHMARK_DEFINE_F(FullyConnectedLayerAlexNetQS8, neon_alexnet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        fc_layer->run();
-        profiler.stop();
-    }
-}
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_REGISTER_F(FullyConnectedLayerAlexNetQS8, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetFullyConnectedLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(FullyConnectedLayerAlexNetQS8, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetFullyConnectedLayerDataset, 1, 1, 4, 8>);
-BENCHMARK_REGISTER_F(FullyConnectedLayerAlexNetQS8, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetFullyConnectedLayerDataset, 2, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_DEFINE_F(FullyConnectedLayerLeNet5, neon_lenet5)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        fc_layer->run();
-        profiler.stop();
-    }
-}
-BENCHMARK_REGISTER_F(FullyConnectedLayerLeNet5, neon_lenet5)
-->Threads(1)
-->Apply(DataSetArgBatched<LeNet5FullyConnectedLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(FullyConnectedLayerLeNet5, neon_lenet5)
-->Threads(1)
-->Apply(DataSetArgBatched<LeNet5FullyConnectedLayerDataset, 1, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_DEFINE_F(FullyConnectedLayerGoogLeNet, neon_googlenet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        fc_layer->run();
-        profiler.stop();
-    }
-}
-BENCHMARK_REGISTER_F(FullyConnectedLayerGoogLeNet, neon_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetFullyConnectedLayerDataset, 0, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace test
+} // namespace arm_compute

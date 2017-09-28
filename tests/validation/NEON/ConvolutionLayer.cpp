@@ -21,108 +21,75 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TypePrinter.h"
-#include "dataset/ConvolutionLayerDataset.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Error.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/LargeConvolutionLayerDataset.h"
+#include "tests/datasets/SmallConvolutionLayerDataset.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/ConvolutionLayerFixture.h"
 
-#include <random>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
+namespace arm_compute
+{
+namespace test
+{
+namespace validation
+{
 namespace
 {
-const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-const float tolerance_qs8 = 3.0f;   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
+const AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+#endif                                               /* ARM_COMPUTE_ENABLE_FP16 */
+const AbsoluteTolerance<float> tolerance_q(1.0f);    /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 
-Tensor compute_convolution_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
-                                 const PadStrideInfo &conv_info, int fixed_point_position)
+/** CNN data types */
+const auto CNNDataTypes = framework::dataset::make("DataType",
 {
-    // Create tensors
-    Tensor src     = create_tensor(input_shape, dt, 1, fixed_point_position);
-    Tensor weights = create_tensor(weights_shape, dt, 1, fixed_point_position);
-    Tensor bias    = create_tensor(bias_shape, dt, 1, fixed_point_position);
-    Tensor dst     = create_tensor(output_shape, dt, 1, fixed_point_position);
-
-    // Create and configure function
-    NEConvolutionLayer conv;
-    conv.configure(&src, &weights, &bias, &dst, conv_info);
-
-    // Allocate tensors
-    src.allocator()->allocate();
-    weights.allocator()->allocate();
-    bias.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src.info()->is_resizable());
-    BOOST_TEST(!weights.info()->is_resizable());
-    BOOST_TEST(!bias.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    if(dt == DataType::F32)
-    {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-        library->fill(NEAccessor(src), distribution, 0);
-        library->fill(NEAccessor(weights), distribution, 1);
-        library->fill(NEAccessor(bias), distribution, 2);
-    }
-    else
-    {
-        library->fill_tensor_uniform(NEAccessor(src), 0);
-        library->fill_tensor_uniform(NEAccessor(weights), 1);
-        library->fill_tensor_uniform(NEAccessor(bias), 2);
-    }
-
-    // Compute NEConvolutionLayer function
-    conv.run();
-
-    return dst;
-}
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    DataType::F16,
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+    DataType::F32,
+    DataType::QS8,
+    DataType::QS16,
+});
 } // namespace
 
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(ConvolutionLayer)
-BOOST_AUTO_TEST_SUITE(GEMM)
+TEST_SUITE(NEON)
+TEST_SUITE(ConvolutionLayer)
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration,
-                     AlexNetConvolutionLayerDataset() * boost::unit_test::data::make({ DataType::F32, DataType::QS8 }),
-                     conv_set, dt)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()), CNNDataTypes),
+               input_shape, weights_shape, bias_shape, output_shape, info, data_type)
 {
     // Set fixed point position data type allowed
-    int fixed_point_position = (dt == DataType::F32) ? 0 : 3;
+    int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
 
     // Create tensors
-    Tensor src     = create_tensor(conv_set.src_shape, dt, 1, fixed_point_position);
-    Tensor weights = create_tensor(conv_set.weights_shape, dt, 1, fixed_point_position);
-    Tensor bias    = create_tensor(conv_set.bias_shape, dt, 1, fixed_point_position);
-    Tensor dst     = create_tensor(conv_set.dst_shape, dt, 1, fixed_point_position);
+    Tensor src     = create_tensor<Tensor>(input_shape, data_type, 1, fixed_point_position);
+    Tensor weights = create_tensor<Tensor>(weights_shape, data_type, 1, fixed_point_position);
+    Tensor bias    = create_tensor<Tensor>(bias_shape, data_type, 1, fixed_point_position);
+    Tensor dst     = create_tensor<Tensor>(output_shape, data_type, 1, fixed_point_position);
 
-    BOOST_TEST(src.info()->is_resizable());
-    BOOST_TEST(weights.info()->is_resizable());
-    BOOST_TEST(bias.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEConvolutionLayer conv;
-    conv.configure(&src, &weights, &bias, &dst, conv_set.info);
+    conv.configure(&src, &weights, &bias, &dst, info);
 
     // Validate valid region
-    const ValidRegion src_valid_region     = shape_to_valid_region(conv_set.src_shape);
-    const ValidRegion weights_valid_region = shape_to_valid_region(conv_set.weights_shape);
-    const ValidRegion bias_valid_region    = shape_to_valid_region(conv_set.bias_shape);
-    const ValidRegion dst_valid_region     = shape_to_valid_region(conv_set.dst_shape);
+    const ValidRegion src_valid_region     = shape_to_valid_region(input_shape);
+    const ValidRegion weights_valid_region = shape_to_valid_region(weights_shape);
+    const ValidRegion bias_valid_region    = shape_to_valid_region(bias_shape);
+    const ValidRegion dst_valid_region     = shape_to_valid_region(output_shape);
 
     validate(src.info()->valid_region(), src_valid_region);
     validate(weights.info()->valid_region(), weights_valid_region);
@@ -130,71 +97,94 @@ BOOST_DATA_TEST_CASE(Configuration,
     validate(dst.info()->valid_region(), dst_valid_region);
 }
 
-BOOST_AUTO_TEST_SUITE(Float)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
-                     SmallConvolutionLayerDataset() * boost::unit_test::data::make(DataType::F32),
-                     conv_set, dt)
+template <typename T>
+using NEConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T>;
+
+TEST_SUITE(Float)
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                     framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                             framework::dataset::make("DataType", DataType::F16)))
 {
-    // Compute function
-    Tensor dst = compute_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(LargeConvolutionLayer,
-                     AlexNetConvolutionLayerDataset() * boost::unit_test::data::make(DataType::F32),
-                     conv_set, dt)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                   framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                           framework::dataset::make("DataType", DataType::F16)))
 {
-    // Compute function
-    Tensor dst = compute_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-BOOST_AUTO_TEST_SUITE(Quantized)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(SmallConvolutionLayer,
-                     SmallConvolutionLayerDataset() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(4, 7),
-                     conv_set, dt, fixed_point_position)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                      framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                              framework::dataset::make("DataType", DataType::F32)))
 {
-    // Compute function
-    Tensor dst = compute_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
+    validate(Accessor(_target), _reference, tolerance_f32);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(LargeConvolutionLayer,
-                     AlexNetConvolutionLayerDataset() * boost::unit_test::data::make(DataType::QS8) * boost::unit_test::data::xrange(4, 7),
-                     conv_set, dt, fixed_point_position)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                    framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                            framework::dataset::make("DataType", DataType::F32)))
 {
-    // Compute function
-    Tensor dst = compute_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_convolution_layer(conv_set.src_shape, conv_set.weights_shape, conv_set.bias_shape, conv_set.dst_shape, dt, conv_set.info, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
+    validate(Accessor(_target), _reference, tolerance_f32);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+template <typename T>
+using NEConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixture<Tensor, Accessor, NEConvolutionLayer, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QS8)
+// We test for fixed point precision [4,6]
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("DataType", DataType::QS8)),
+                       framework::dataset::make("FractionalBits", 4, 7)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_q);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                       framework::dataset::make("DataType", DataType::QS8)),
+                                                                                                                       framework::dataset::make("FractionalBits", 4, 7)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_q);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QS16)
+// Testing for fixed point position [1,14)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("DataType", DataType::QS16)),
+                       framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_q);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                        framework::dataset::make("DataType", DataType::QS16)),
+                                                                                                                        framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_q);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

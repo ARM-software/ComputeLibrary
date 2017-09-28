@@ -42,7 +42,7 @@ class NEPoolingLayer : public INESimpleFunction
 public:
     /** Set the input and output tensors.
      *
-     * @param[in, out] input     Source tensor. (Written to only when padding != 0) Data types supported: QS8/F32.
+     * @param[in, out] input     Source tensor. (Written to only when padding != 0) Data types supported: QS8/QS16/F16/F32.
      * @param[out]     output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]      pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */

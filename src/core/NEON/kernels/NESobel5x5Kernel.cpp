@@ -90,8 +90,9 @@ void NESobel5x5HorKernel::configure(const ITensor *input, ITensor *output_x, ITe
     INEKernel::configure(win);
 }
 
-void NESobel5x5HorKernel::run(const Window &window)
+void NESobel5x5HorKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
@@ -261,8 +262,9 @@ void NESobel5x5VertKernel::configure(ITensor *input_x, ITensor *input_y, ITensor
     INEKernel::configure(win);
 }
 
-void NESobel5x5VertKernel::run(const Window &window)
+void NESobel5x5VertKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

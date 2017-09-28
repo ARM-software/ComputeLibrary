@@ -24,54 +24,30 @@
 #ifndef __ARM_COMPUTE_TEST_NEON_HELPER_H__
 #define __ARM_COMPUTE_TEST_NEON_HELPER_H__
 
-#include "Globals.h"
-#include "TensorLibrary.h"
+#include "arm_compute/runtime/Array.h"
+#include "tests/Globals.h"
 
-#include "arm_compute/runtime/Tensor.h"
+#include <algorithm>
+#include <array>
+#include <vector>
 
 namespace arm_compute
 {
 namespace test
 {
-namespace neon
+template <typename D, typename T, typename... Ts>
+void fill_tensors(D &&dist, std::initializer_list<int> seeds, T &&tensor, Ts &&... other_tensors)
 {
-/** Helper to create an empty tensor.
- *
- * @param[in] shape                Desired shape.
- * @param[in] data_type            Desired data type.
- * @param[in] num_channels         (Optional) It indicates the number of channels for each tensor element
- * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
- *
- * @return Empty @ref Tensor with the specified shape and data type.
- */
-inline Tensor create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1, int fixed_point_position = 0)
-{
-    Tensor tensor;
-    tensor.allocator()->init(TensorInfo(shape, num_channels, data_type, fixed_point_position));
-
-    return tensor;
+    const std::array < T, 1 + sizeof...(Ts) > tensors{ { std::forward<T>(tensor), std::forward<Ts>(other_tensors)... } };
+    std::vector<int> vs(seeds);
+    ARM_COMPUTE_ERROR_ON(vs.size() != tensors.size());
+    int k = 0;
+    for(auto tp : tensors)
+    {
+        library->fill(Accessor(*tp), std::forward<D>(dist), vs[k++]);
+    }
 }
 
-/** Helper to create an empty tensor.
- *
- * @param[in] name                 File name from which to get the dimensions.
- * @param[in] data_type            Desired data type.
- * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers
- *
- * @return Empty @ref Tensor with the specified shape and data type.
- */
-inline Tensor create_tensor(const std::string &name, DataType data_type, int fixed_point_position = 0)
-{
-    constexpr unsigned int num_channels = 1;
-
-    const RawTensor &raw = library->get(name);
-
-    Tensor tensor;
-    tensor.allocator()->init(TensorInfo(raw.shape(), num_channels, data_type, fixed_point_position));
-
-    return tensor;
-}
-} // namespace neon
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_NEON_HELPER_H__ */

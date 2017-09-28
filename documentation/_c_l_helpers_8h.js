@@ -5,6 +5,10 @@ var _c_l_helpers_8h =
     [ "create_kernel", "_c_l_helpers_8h.xhtml#abc72c95941485d8a068fa38372308574", null ],
     [ "get_arch_from_target", "_c_l_helpers_8h.xhtml#a4a351d5c39dec88af98a671da1c43fd6", null ],
     [ "get_cl_type_from_data_type", "_c_l_helpers_8h.xhtml#ab04905b0c6c0e4091160561eae870101", null ],
+    [ "get_cl_version", "_c_l_helpers_8h.xhtml#a54c9b94a266f8065b64f001c47815b68", null ],
+    [ "get_data_size_from_data_type", "_c_l_helpers_8h.xhtml#ae5f4dd9f672832f7dce02fc14487f544", null ],
     [ "get_target_from_device", "_c_l_helpers_8h.xhtml#a9d0143bdde8255313aae6ac020dd629c", null ],
+    [ "get_underlying_cl_type_from_data_type", "_c_l_helpers_8h.xhtml#afc95473636a442507fda7ad48f3414c0", null ],
+    [ "non_uniform_workgroup_support", "_c_l_helpers_8h.xhtml#aa2499c7ccf5b1636360a9ac6cc52a67b", null ],
     [ "string_from_target", "_c_l_helpers_8h.xhtml#afab814721e78cbfc34e7e7fe2874fa56", null ]
 ];

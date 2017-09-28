@@ -1,5 +1,7 @@
 var benchmark_2_c_l_2_g_e_m_m_8cpp =
 [
-    [ "Threads", "benchmark_2_c_l_2_g_e_m_m_8cpp.xhtml#a5da2b0ae14b3f0d7897f4b9757cef07e", null ],
-    [ "state", "benchmark_2_c_l_2_g_e_m_m_8cpp.xhtml#af5df1344678ebbcc23857a8a93ccdf60", null ]
+    [ "CLGEMMFixture", "benchmark_2_c_l_2_g_e_m_m_8cpp.xhtml#abf07c2bf7d8e9c76e146f9b21bee88fd", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_g_e_m_m_8cpp.xhtml#a2b1950a60a98dec32a7ca7531fded8ad", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_g_e_m_m_8cpp.xhtml#aef76c7b3cf7d1e3c6fc7ff96804a5753", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_g_e_m_m_8cpp.xhtml#af935c08091163839aead6ac3023c2147", null ]
 ];

@@ -68,7 +68,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -111,7 +111,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const int16_t *conv_row, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -152,7 +152,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const int16_t *conv_col, uint32_t scale, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -223,7 +223,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const int16_t *conv, uint32_t width, uint32_t height, uint32_t scale, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -247,5 +247,5 @@ protected:
         4
     }; /**< Number of supported permutations */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECONVOLUTIONKERNEL_H__ */

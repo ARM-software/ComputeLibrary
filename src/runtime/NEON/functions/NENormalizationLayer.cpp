@@ -32,8 +32,8 @@
 
 using namespace arm_compute;
 
-NENormalizationLayer::NENormalizationLayer()
-    : _norm_kernel(), _multiply_kernel(), _border_handler(), _input_squared()
+NENormalizationLayer::NENormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _norm_kernel(), _multiply_kernel(), _border_handler(), _input_squared()
 {
 }
 
@@ -43,6 +43,9 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, Norm
 
     TensorInfo tensor_info(input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
     _input_squared.allocator()->init(tensor_info);
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_input_squared);
 
     // Configure kernels
     _norm_kernel.configure(input, &_input_squared, output, norm_info);
@@ -55,7 +58,11 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, Norm
 
 void NENormalizationLayer::run()
 {
+    _memory_group.acquire();
+
     NEScheduler::get().schedule(&_multiply_kernel, Window::DimY);
     NEScheduler::get().schedule(&_border_handler, Window::DimY);
     NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
+
+    _memory_group.release();
 }

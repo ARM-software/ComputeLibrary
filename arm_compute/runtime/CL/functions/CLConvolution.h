@@ -27,11 +27,14 @@
 #include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -70,7 +73,7 @@ class CLConvolutionSquare : public IFunction
 {
 public:
     /** Default constructor */
-    CLConvolutionSquare();
+    CLConvolutionSquare(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -86,6 +89,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup                                 _memory_group;   /**< Function's memory group */
     CLTensor                                      _tmp;            /**< temporary buffer for output of horizontal pass */
     bool                                          _is_separable;   /**< true if the convolution can be separated */
     CLSeparableConvolutionHorKernel<matrix_size>  _kernel_hor;     /**< kernel for horizontal pass of separated convolution */

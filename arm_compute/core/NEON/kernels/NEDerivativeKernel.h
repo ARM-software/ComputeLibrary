@@ -58,7 +58,7 @@ public:
     void configure(const ITensor *input, ITensor *output_x, ITensor *output_y, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -90,5 +90,5 @@ private:
     ITensor       *_output_x; /**< Output tensor - Derivate along the X direction */
     ITensor       *_output_y; /**< Output tensor - Derivate along the Y direction */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDERIVATIVEKERNEL_H__ */

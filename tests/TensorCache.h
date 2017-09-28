@@ -115,4 +115,4 @@ inline RawTensor &TensorCache::add(std::tuple<const std::string &, Format, Chann
 }
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_TENSOR_CACHE_H__ */

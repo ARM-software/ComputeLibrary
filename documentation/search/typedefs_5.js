@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['example',['example',['../namespacearm__compute_1_1utils.xhtml#a27e6364d61a5b27447d27337aa182cad',1,'arm_compute::utils']]]
+  ['floatarray',['FloatArray',['../namespacearm__compute.xhtml#a6e06029aa1b68c0cdeb80656cc9353fe',1,'arm_compute']]]
 ];

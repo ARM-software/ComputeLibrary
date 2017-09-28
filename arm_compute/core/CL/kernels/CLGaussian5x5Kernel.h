@@ -63,5 +63,5 @@ private:
     //Make the configure method of the parent class private
     using CLSeparableConvolution5x5VertKernel::configure;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGAUSSIAN5X5KERNEL_H__ */

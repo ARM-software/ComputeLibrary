@@ -28,8 +28,9 @@
 
 using namespace arm_compute;
 
-ICLSimpleFunction::ICLSimpleFunction()
-    : _kernel(), _border_handler()
+ICLSimpleFunction::ICLSimpleFunction() // NOLINT
+    : _kernel(),
+      _border_handler()
 {
 }
 

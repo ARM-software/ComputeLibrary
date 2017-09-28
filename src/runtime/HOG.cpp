@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/HOG.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -37,7 +37,7 @@ void HOG::init(const HOGInfo &input)
 {
     ARM_COMPUTE_ERROR_ON(nullptr != _descriptor);
     _info       = input;
-    _descriptor = arm_compute::cpp14::make_unique<float[]>(_info.descriptor_size());
+    _descriptor = arm_compute::support::cpp14::make_unique<float[]>(_info.descriptor_size());
 }
 
 float *HOG::descriptor() const

@@ -1,4 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_array.xhtml" title="IArray\&lt; NELKInternalKeypoint \&gt;" alt="" coords="5,5,216,32"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_array.xhtml" title="Array\&lt; NELKInternalKeypoint \&gt;" alt="" coords="264,5,471,32"/>
+<area shape="rect" id="node1" href="$class_gemm_common.xhtml" title="GemmCommon\&lt; To, Tr \&gt;" alt="" coords="5,13,179,39"/>
+<area shape="rect" id="node2" href="$class_gemm_interleaved.xhtml" title="GemmInterleaved\&lt; strategy,\l To, Tr \&gt;" alt="" coords="227,5,415,47"/>
 </map>

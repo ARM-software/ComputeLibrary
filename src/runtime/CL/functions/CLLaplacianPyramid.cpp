@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLLaplacianPyramid.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
@@ -33,11 +32,18 @@
 #include "arm_compute/runtime/CL/functions/CLDepthConvert.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
 #include "arm_compute/runtime/CL/functions/CLGaussianPyramid.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
-CLLaplacianPyramid::CLLaplacianPyramid()
-    : _num_levels(0), _gaussian_pyr_function(), _convf(), _subf(), _depth_function(), _gauss_pyr(), _conv_pyr()
+CLLaplacianPyramid::CLLaplacianPyramid() // NOLINT
+    : _num_levels(0),
+      _gaussian_pyr_function(),
+      _convf(),
+      _subf(),
+      _depth_function(),
+      _gauss_pyr(),
+      _conv_pyr()
 {
 }
 
@@ -64,8 +70,8 @@ void CLLaplacianPyramid::configure(ICLTensor *input, CLPyramid *pyramid, ICLTens
     // Create Gaussian Pyramid function
     _gaussian_pyr_function.configure(input, &_gauss_pyr, border_mode, constant_border_value);
 
-    _convf = arm_compute::cpp14::make_unique<CLGaussian5x5[]>(_num_levels);
-    _subf  = arm_compute::cpp14::make_unique<CLArithmeticSubtraction[]>(_num_levels);
+    _convf = arm_compute::support::cpp14::make_unique<CLGaussian5x5[]>(_num_levels);
+    _subf  = arm_compute::support::cpp14::make_unique<CLArithmeticSubtraction[]>(_num_levels);
 
     for(unsigned int i = 0; i < _num_levels; ++i)
     {

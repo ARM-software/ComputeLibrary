@@ -59,5 +59,5 @@ public:
 private:
     BorderSize _border_size; /**< Border size */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLNONLINEARFILTERKERNEL_H__ */

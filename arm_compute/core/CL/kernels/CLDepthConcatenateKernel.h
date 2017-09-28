@@ -52,9 +52,9 @@ public:
     ~CLDepthConcatenateKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: F32.
+     * @param[in]     input        Input tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[in]     depth_offset The offset on the Z axis.
-     * @param[in,out] output       Output tensor. Data types supported: F32.
+     * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
      *
      * @note: The output tensor's low two dimensions can't be smaller than the input one's.
      * @note: The gaps between the two lowest dimensions of input and output need to be divisible by 2.
@@ -71,6 +71,7 @@ private:
     ICLTensor       *_output;
     int              _top_bottom;
     int              _left_right;
+    unsigned int     _depth_offset;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLDEPTHCONCATENATEKERNEL_H__ */

@@ -25,9 +25,9 @@
 
 #ifdef SATURATE
 #define CONVERT_OP_FLOAT_STR(x, type, round) (convert_##type##_sat##round(x))
-#else
+#else /* SATURATE */
 #define CONVERT_OP_FLOAT_STR(x, type, round) (convert_##type##round(x))
-#endif
+#endif /* SATURATE */
 #define CONVERT_OP_FLOAT(x, type, round) CONVERT_OP_FLOAT_STR(x, type, round)
 
 /** Performs a pixelwise multiplication with float scale of either integer or float inputs.
@@ -43,31 +43,37 @@
  * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in1_stride_y                      Stride of the source image in Y dimension (in bytes)
  * @param[in]  in1_step_y                        in1_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in1_stride_z                      Stride of the source image in Y dimension (in bytes)
+ * @param[in]  in1_step_z                        in1_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  in1_offset_first_element_in_bytes The offset of the first element in the source image
  * @param[in]  in2_ptr                           Pointer to the source image. Supported data types: U8, S16, F16, F32
  * @param[in]  in2_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  in2_step_x                        in2_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in2_stride_y                      Stride of the source image in Y dimension (in bytes)
  * @param[in]  in2_step_y                        in2_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in2_stride_z                      Stride of the source image in Y dimension (in bytes)
+ * @param[in]  in2_step_z                        in2_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  in2_offset_first_element_in_bytes The offset of the first element in the source image
  * @param[out] out_ptr                           Pointer to the destination image. Supported data types: U8, S16, F16, F32
  * @param[in]  out_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination image in Y dimension (in bytes)
  * @param[in]  out_step_y                        out_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  out_stride_z                      Stride of the destination image in Y dimension (in bytes)
+ * @param[in]  out_step_z                        out_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
  * @param[in]  scale                             Float scaling factor. Supported data types: F32
  */
 __kernel void pixelwise_mul_float(
-    IMAGE_DECLARATION(in1),
-    IMAGE_DECLARATION(in2),
-    IMAGE_DECLARATION(out),
+    TENSOR3D_DECLARATION(in1),
+    TENSOR3D_DECLARATION(in2),
+    TENSOR3D_DECLARATION(out),
     const float scale)
 {
     // Get pixels pointer
-    Image in1 = CONVERT_TO_IMAGE_STRUCT(in1);
-    Image in2 = CONVERT_TO_IMAGE_STRUCT(in2);
-    Image out = CONVERT_TO_IMAGE_STRUCT(out);
+    Tensor3D in1 = CONVERT_TO_TENSOR3D_STRUCT(in1);
+    Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load data
     VEC_DATA_TYPE(DATA_TYPE_RES, 16)
@@ -76,13 +82,13 @@ __kernel void pixelwise_mul_float(
     in2_data = CONVERT(vload16(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(DATA_TYPE_RES, 16));
 
     // Perform multiplication
-#if defined DATA_TYPE_FLOAT
+#ifdef DATA_TYPE_FLOAT
     VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
-    res = CONVERT(in1_data * in2_data * scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
-#else
+    res = CONVERT(in1_data * in2_data * (DATA_TYPE_RES)scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
+#else  /* DATA_TYPE_FLOAT */
     VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
     res = CONVERT_OP_FLOAT(CONVERT_OP_FLOAT((convert_float16(in1_data * in2_data) * scale), VEC_DATA_TYPE(DATA_TYPE_RES, 16), ROUND), VEC_DATA_TYPE(DATA_TYPE_OUT, 16), ROUND);
-#endif
+#endif /* DATA_TYPE_FLOAT */
 
     // Store result
     vstore16(res, 0, (__global DATA_TYPE_OUT *)out.ptr);

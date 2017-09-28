@@ -39,13 +39,13 @@ public:
     NELogits1DMaxKernel();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8, F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -74,7 +74,7 @@ public:
     ~NELogits1DShiftExpSumKernel() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8, F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[in]  max    Max values tensor. Data types supported: same as @p input.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      * @param[out] sum    Sum of 1D logits tensor. Data types supported: same as @p input.
@@ -82,7 +82,7 @@ public:
     void configure(const ITensor *input, const ITensor *max, ITensor *output, ITensor *sum);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using Logits1DShiftExpSumFunction = void(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window);
@@ -113,14 +113,14 @@ public:
     ~NELogits1DNormKernel() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8, F32.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[in]  sum    Sum tensor. The number of dimensions should be dim(input)-1. Data types supported: same as @p input.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      */
     void configure(const ITensor *input, const ITensor *sum, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using Logits1DNormFunction = void(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window);
@@ -131,5 +131,5 @@ private:
     const ITensor        *_sum;
     ITensor              *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H__ */

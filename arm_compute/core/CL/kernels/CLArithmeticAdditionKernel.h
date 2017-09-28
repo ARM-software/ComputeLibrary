@@ -53,9 +53,9 @@ public:
     ~CLArithmeticAdditionKernel() = default;
     /** Initialise the kernel's inputs, output and convertion policy.
      *
-     * @param[in]  input1 First tensor input. Data types supported: U8, S16, F16, F32.
-     * @param[in]  input2 Second tensor input. Data types supported: U8, S16, F16, F32.
-     * @param[out] output Output tensor. Data types supported: U8 (Only if both inputs are U8), S16, F16, F32.
+     * @param[in]  input1 First tensor input. Data types supported: U8/QS8/QS16/S16/F16/F32.
+     * @param[in]  input2 Second tensor input. Data types supported: U8/QS8 (only if @p input1 is QS8), QS16 (only if @p input1 is QS16), S16/F16/F32.
+     * @param[out] output Output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16/F32.
      * @param[in]  policy Policy to use to handle overflow.
      */
     void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ConvertPolicy policy);
@@ -68,5 +68,5 @@ private:
     const ICLTensor *_input2; /**< Source tensor 2 */
     ICLTensor       *_output; /**< Destination tensor */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLARITHMETICADDITIONKERNEL_H__ */

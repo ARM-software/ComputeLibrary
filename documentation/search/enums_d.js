@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['termination',['Termination',['../namespacearm__compute.xhtml#a08c1503414e23f5dd10ff83492685453',1,'arm_compute']]],
-  ['thresholdtype',['ThresholdType',['../namespacearm__compute.xhtml#a3e6b23e675649b83240691abbc42a649',1,'arm_compute']]],
-  ['type',['Type',['../classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7',1,'arm_compute::Scheduler']]]
+  ['reductionoperation',['ReductionOperation',['../namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45b',1,'arm_compute']]],
+  ['roundingpolicy',['RoundingPolicy',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50be',1,'arm_compute::RoundingPolicy()'],['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml#add6426cbf2e057a195846d4ba09a50be',1,'arm_compute::test::fixed_point_arithmetic::RoundingPolicy()']]]
 ];

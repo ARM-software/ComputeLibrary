@@ -1,4 +1,4 @@
 var classarm__compute_1_1_n_e_activation_layer =
 [
-    [ "configure", "classarm__compute_1_1_n_e_activation_layer.xhtml#acc4810b936660981e14b1334c26ad8da", null ]
+    [ "configure", "classarm__compute_1_1_n_e_activation_layer.xhtml#adfb5ef37594fc9371c4a2b95e3d5e31b", null ]
 ];

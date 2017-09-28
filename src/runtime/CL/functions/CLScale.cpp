@@ -26,19 +26,14 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLScaleKernel.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
-void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
+void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value)
 {
-    ARM_COMPUTE_ERROR_ON(output == input);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-
-    auto k = arm_compute::cpp14::make_unique<CLScaleKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLScaleKernel>();
     k->configure(input, output, policy, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
     _border_handler.configure(input, _kernel->border_size(), border_mode, constant_border_value);

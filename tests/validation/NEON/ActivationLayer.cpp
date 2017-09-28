@@ -21,44 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "validation/Datasets.h"
-#include "validation/Helpers.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/ActivationFunctionsDataset.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/ActivationLayerFixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-#include <tuple>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
+namespace arm_compute
+{
+namespace test
+{
+namespace validation
+{
 namespace
 {
-/** Define tolerance of the activation layer
+/** Define tolerance of the activation layer.
  *
- * @param[in] activation           The activation function used.
- * @param[in] fixed_point_position Number of bits for the fractional part..
+ * @param[in] data_type  The data type used.
+ * @param[in] activation The activation function used.
  *
  * @return Tolerance depending on the activation function.
  */
-float activation_layer_tolerance(ActivationLayerInfo::ActivationFunction activation, int fixed_point_position = 0)
+AbsoluteTolerance<float> tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
 {
     switch(activation)
     {
@@ -66,152 +58,172 @@ float activation_layer_tolerance(ActivationLayerInfo::ActivationFunction activat
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
-            return (fixed_point_position != 0) ? 5.f : 0.00001f;
+            switch(data_type)
+            {
+                case DataType::QS8:
+                    return AbsoluteTolerance<float>(5.f);
+                case DataType::QS16:
+                    return AbsoluteTolerance<float>(11.f);
+                case DataType::F16:
+                    return AbsoluteTolerance<float>(0.01f);
+                default:
+                    return AbsoluteTolerance<float>(0.00001f);
+            }
             break;
         default:
-            return 0.f;
+            return AbsoluteTolerance<float>(0.f);
     }
 }
 
-/** Compute Neon activation layer function.
- *
- * @param[in] shape                Shape of the input and output tensors.
- * @param[in] dt                   Shape Data type of tensors.
- * @param[in] act_info             Activation layer information.
- * @param[in] fixed_point_position Number of bits for the fractional part of fixed point numbers.
- *
- * @return Computed output tensor.
- */
-Tensor compute_activation_layer(const TensorShape &shape, DataType dt, ActivationLayerInfo act_info, int fixed_point_position = 0)
+/** CNN data types */
+const auto CNNDataTypes = framework::dataset::make("DataType",
 {
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    DataType::F16,
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+    DataType::F32,
+    DataType::QS8,
+    DataType::QS16,
+});
+
+/** Input data sets. */
+const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), datasets::ActivationFunctions()), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+} // namespace
+
+TEST_SUITE(NEON)
+TEST_SUITE(ActivationLayer)
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
+               shape, data_type, in_place)
+{
+    // Set fixed point position data type allowed
+    const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
+
     // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, data_type, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, data_type, 1, fixed_point_position);
+
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEActivationLayer act_layer;
-    act_layer.configure(&src, &dst, act_info);
 
-    // Allocate tensors
-    src.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    if(dt == DataType::F32)
+    if(in_place)
     {
-        float min_bound = 0;
-        float max_bound = 0;
-        std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<float>(act_info.activation());
-        std::uniform_real_distribution<> distribution(min_bound, max_bound);
-        library->fill(NEAccessor(src), distribution, 0);
+        act_layer.configure(&src, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
     }
     else
     {
-        int min_bound = 0;
-        int max_bound = 0;
-        std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<int8_t>(act_info.activation(), fixed_point_position);
-        std::uniform_int_distribution<> distribution(min_bound, max_bound);
-        library->fill(NEAccessor(src), distribution, 0);
+        act_layer.configure(&src, &dst, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
     }
-
-    // Compute function
-    act_layer.run();
-
-    return dst;
-}
-} // namespace
-
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(ActivationLayer)
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTypes(), shape, dt)
-{
-    // Set fixed point position data type allowed
-    int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
-
-    // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
-
-    BOOST_TEST(src.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
-
-    // Create and configure function
-    NEActivationLayer act_layer;
-    act_layer.configure(&src, &dst, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ABS));
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
     validate(src.info()->valid_region(), valid_region);
-    validate(dst.info()->valid_region(), valid_region);
+
+    if(!in_place)
+    {
+        validate(dst.info()->valid_region(), valid_region);
+    }
 
     // Validate padding
-    const PaddingSize padding(0, required_padding(shape.x(), 16), 0, 0);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
     validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
+
+    if(!in_place)
+    {
+        validate(dst.info()->padding(), padding);
+    }
 }
 
-BOOST_AUTO_TEST_SUITE(Float)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFloatDataTypes() * ActivationFunctions(), shape, dt, act_function)
+template <typename T>
+using NEActivationLayerFixture = ActivationValidationFixture<Tensor, Accessor, NEActivationLayer, T>;
+
+TEST_SUITE(Float)
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset),
+                                                                                                            framework::dataset::make("DataType",
+                                                                                                                    DataType::F16)))
 {
-    // Create activation layer info
-    ActivationLayerInfo act_info(act_function, 1.f, 1.f);
-
-    // Compute function
-    Tensor dst = compute_activation_layer(shape, dt, act_info);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, dt, act_info);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(act_function));
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * CNNFloatDataTypes() * ActivationFunctions(), shape, dt, act_function)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
+                                                                                                          framework::dataset::make("DataType",
+                                                                                                                  DataType::F16)))
 {
-    // Create activation layer info
-    ActivationLayerInfo act_info(act_function, 1.f, 1.f);
-
-    // Compute function
-    Tensor dst = compute_activation_layer(shape, dt, act_info);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, dt, act_info);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(act_function));
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-/** @note We test for fixed point precision [3,5] because [1,2] and [6,7] ranges
- *        cause overflowing issues in most of the transcendentals functions.
- */
-BOOST_AUTO_TEST_SUITE(Quantized)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * ActivationFunctions() * boost::unit_test::data::xrange(3, 6, 1),
-                     shape, act_function, fixed_point_position)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset), framework::dataset::make("DataType",
+                                                                                                             DataType::F32)))
 {
-    // Create activation layer info
-    ActivationLayerInfo act_info(act_function, 1.f, 1.f);
-
-    // Compute function
-    Tensor dst = compute_activation_layer(shape, DataType::QS8, act_info, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_activation_layer(shape, DataType::QS8, act_info, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, activation_layer_tolerance(act_function, fixed_point_position));
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
 }
-BOOST_AUTO_TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset), framework::dataset::make("DataType",
+                                                                                                           DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+template <typename T>
+using NEActivationLayerFixedPointFixture = ActivationValidationFixedPointFixture<Tensor, Accessor, NEActivationLayer, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QS8)
+// We test for fixed point precision [3,5] because [1,2] and [6,7] ranges cause
+// overflowing issues in most of the transcendentals functions.
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ActivationDataset),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::QS8)),
+                                                                                                                        framework::dataset::make("FractionalBits", 3, 6)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), ActivationDataset),
+                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                              DataType::QS8)),
+                                                                                                                      framework::dataset::make("FractionalBits", 3, 6)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QS16)
+// Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ActivationDataset),
+                       framework::dataset::make("DataType",
+                                                DataType::QS16)),
+                       framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), ActivationDataset),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::QS16)),
+                                                                                                                       framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

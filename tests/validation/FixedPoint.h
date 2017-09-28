@@ -24,7 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_VALIDATION_FIXEDPOINT_H__
 #define __ARM_COMPUTE_TEST_VALIDATION_FIXEDPOINT_H__
 
-#include "Utils.h"
+#include "support/ToolchainSupport.h"
+#include "tests/Utils.h"
 
 #include <cassert>
 #include <cstdint>
@@ -62,6 +63,8 @@ template <> struct promote<uint32_t> { using type = uint64_t; };
 template <> struct promote<int32_t> { using type = int64_t; };
 template <> struct promote<uint64_t> { using type = uint64_t; };
 template <> struct promote<int64_t> { using type = int64_t; };
+template <typename T>
+using promote_t = typename promote<T>::type;
 // clang-format on
 // *INDENT-ON*
 }
@@ -86,10 +89,6 @@ class fixed_point
 public:
     // Static Checks
     static_assert(std::is_integral<T>::value, "Type is not an integer");
-
-    // Friends
-    friend struct detail::functions;
-    friend struct detail::constant_expr<T>;
 
     /** Constructor (from different fixed point type)
      *
@@ -147,7 +146,7 @@ public:
      * @param[in] p   Fixed point precision
      */
     fixed_point(std::string str, uint8_t p)
-        : _value(detail::constant_expr<T>::to_fixed(arm_compute::test::cpp11::stof(str), p)), _fixed_point_position(p)
+        : _value(detail::constant_expr<T>::to_fixed(support::cpp11::stof(str), p)), _fixed_point_position(p)
     {
         assert(p > 0 && p < std::numeric_limits<T>::digits);
     }
@@ -243,15 +242,20 @@ public:
     {
         assert(p > 0 && p < std::numeric_limits<T>::digits);
 
+        using promoted_T = typename traits::promote<T>::type;
+        promoted_T val   = _value;
         if(p > _fixed_point_position)
         {
-            _value <<= (p - _fixed_point_position);
+            val <<= (p - _fixed_point_position);
         }
         else if(p < _fixed_point_position)
         {
-            _value >>= (_fixed_point_position - p);
+            uint8_t pbar = _fixed_point_position - p;
+            val += (pbar != 0) ? (1 << (pbar - 1)) : 0;
+            val >>= pbar;
         }
 
+        _value                = detail::constant_expr<T>::saturate_cast(val);
         _fixed_point_position = p;
     }
 
@@ -332,7 +336,7 @@ struct constant_expr
      */
     static constexpr T to_fixed(float val, uint8_t p)
     {
-        return static_cast<T>(val * fixed_one(p) + ((val >= 0) ? 0.5 : -0.5));
+        return static_cast<T>(saturate_cast<float>(val * fixed_one(p) + ((val >= 0) ? 0.5 : -0.5)));
     }
     /** Clamp value between two ranges
      *
@@ -381,7 +385,7 @@ struct functions
     template <typename T>
     static bool signbit(fixed_point<T> x)
     {
-        return ((x._value >> std::numeric_limits<T>::digits) != 0);
+        return ((x.raw() >> std::numeric_limits<T>::digits) != 0);
     }
     /** Checks if two fixed point numbers are equal
      *
@@ -393,10 +397,10 @@ struct functions
     template <typename T>
     static bool isequal(fixed_point<T> x, fixed_point<T> y)
     {
-        uint8_t p = std::min(x._fixed_point_position, y._fixed_point_position);
+        uint8_t p = std::min(x.precision(), y.precision());
         x.rescale(p);
         y.rescale(p);
-        return (x._value == y._value);
+        return (x.raw() == y.raw());
     }
     /** Checks if two fixed point number are not equal
      *
@@ -420,10 +424,10 @@ struct functions
     template <typename T>
     static bool isgreater(fixed_point<T> x, fixed_point<T> y)
     {
-        uint8_t p = std::min(x._fixed_point_position, y._fixed_point_position);
+        uint8_t p = std::min(x.precision(), y.precision());
         x.rescale(p);
         y.rescale(p);
-        return (x._value > y._value);
+        return (x.raw() > y.raw());
     }
     /** Checks if one fixed point is greater or equal than the other
      *
@@ -435,10 +439,10 @@ struct functions
     template <typename T>
     static bool isgreaterequal(fixed_point<T> x, fixed_point<T> y)
     {
-        uint8_t p = std::min(x._fixed_point_position, y._fixed_point_position);
+        uint8_t p = std::min(x.precision(), y.precision());
         x.rescale(p);
         y.rescale(p);
-        return (x._value >= y._value);
+        return (x.raw() >= y.raw());
     }
     /** Checks if one fixed point is less than the other
      *
@@ -450,10 +454,10 @@ struct functions
     template <typename T>
     static bool isless(fixed_point<T> x, fixed_point<T> y)
     {
-        uint8_t p = std::min(x._fixed_point_position, y._fixed_point_position);
+        uint8_t p = std::min(x.precision(), y.precision());
         x.rescale(p);
         y.rescale(p);
-        return (x._value < y._value);
+        return (x.raw() < y.raw());
     }
     /** Checks if one fixed point is less or equal than the other
      *
@@ -465,10 +469,10 @@ struct functions
     template <typename T>
     static bool islessequal(fixed_point<T> x, fixed_point<T> y)
     {
-        uint8_t p = std::min(x._fixed_point_position, y._fixed_point_position);
+        uint8_t p = std::min(x.precision(), y.precision());
         x.rescale(p);
         y.rescale(p);
-        return (x._value <= y._value);
+        return (x.raw() <= y.raw());
     }
     /** Checks if one fixed point is less or greater than the other
      *
@@ -493,7 +497,7 @@ struct functions
     template <typename T>
     static fixed_point<T> clamp(fixed_point<T> x, T min, T max)
     {
-        return fixed_point<T>(constant_expr<T>::clamp(x._value, min, max), x._fixed_point_position, true);
+        return fixed_point<T>(constant_expr<T>::clamp(x.raw(), min, max), x.precision(), true);
     }
     /** Negate number
      *
@@ -505,12 +509,12 @@ struct functions
     static fixed_point<T> negate(fixed_point<T> x)
     {
         using promoted_T = typename traits::promote<T>::type;
-        promoted_T val   = -x._value;
+        promoted_T val   = -x.raw();
         if(OP == OverflowPolicy::SATURATE)
         {
             val = constant_expr<T>::saturate_cast(val);
         }
-        return fixed_point<T>(static_cast<T>(val), x._fixed_point_position, true);
+        return fixed_point<T>(static_cast<T>(val), x.precision(), true);
     }
     /** Perform addition among two fixed point numbers
      *
@@ -522,19 +526,19 @@ struct functions
     template <OverflowPolicy OP = OverflowPolicy::SATURATE, typename T>
     static fixed_point<T> add(fixed_point<T> x, fixed_point<T> y)
     {
-        uint8_t p = std::min(x._fixed_point_position, y._fixed_point_position);
+        uint8_t p = std::min(x.precision(), y.precision());
         x.rescale(p);
         y.rescale(p);
         if(OP == OverflowPolicy::SATURATE)
         {
             using type = typename traits::promote<T>::type;
-            type val   = static_cast<type>(x._value) + static_cast<type>(y._value);
+            type val   = static_cast<type>(x.raw()) + static_cast<type>(y.raw());
             val        = constant_expr<T>::saturate_cast(val);
             return fixed_point<T>(static_cast<T>(val), p, true);
         }
         else
         {
-            return fixed_point<T>(x._value + y._value, p, true);
+            return fixed_point<T>(x.raw() + y.raw(), p, true);
         }
     }
     /** Perform subtraction among two fixed point numbers
@@ -547,19 +551,19 @@ struct functions
     template <OverflowPolicy OP = OverflowPolicy::SATURATE, typename T>
     static fixed_point<T> sub(fixed_point<T> x, fixed_point<T> y)
     {
-        uint8_t p = std::min(x._fixed_point_position, y._fixed_point_position);
+        uint8_t p = std::min(x.precision(), y.precision());
         x.rescale(p);
         y.rescale(p);
         if(OP == OverflowPolicy::SATURATE)
         {
             using type = typename traits::promote<T>::type;
-            type val   = static_cast<type>(x._value) - static_cast<type>(y._value);
+            type val   = static_cast<type>(x.raw()) - static_cast<type>(y.raw());
             val        = constant_expr<T>::saturate_cast(val);
             return fixed_point<T>(static_cast<T>(val), p, true);
         }
         else
         {
-            return fixed_point<T>(x._value - y._value, p, true);
+            return fixed_point<T>(x.raw() - y.raw(), p, true);
         }
     }
     /** Perform multiplication among two fixed point numbers
@@ -573,10 +577,10 @@ struct functions
     static fixed_point<T> mul(fixed_point<T> x, fixed_point<T> y)
     {
         using promoted_T        = typename traits::promote<T>::type;
-        uint8_t    p_min        = std::min(x._fixed_point_position, y._fixed_point_position);
-        uint8_t    p_max        = std::max(x._fixed_point_position, y._fixed_point_position);
+        uint8_t    p_min        = std::min(x.precision(), y.precision());
+        uint8_t    p_max        = std::max(x.precision(), y.precision());
         promoted_T round_factor = (1 << (p_max - 1));
-        promoted_T val          = ((static_cast<promoted_T>(x._value) * static_cast<promoted_T>(y._value)) + round_factor) >> p_max;
+        promoted_T val          = ((static_cast<promoted_T>(x.raw()) * static_cast<promoted_T>(y.raw())) + round_factor) >> p_max;
         if(OP == OverflowPolicy::SATURATE)
         {
             val = constant_expr<T>::saturate_cast(val);
@@ -594,11 +598,11 @@ struct functions
     static fixed_point<T> div(fixed_point<T> x, fixed_point<T> y)
     {
         using promoted_T = typename traits::promote<T>::type;
-        uint8_t    p     = std::min(x._fixed_point_position, y._fixed_point_position);
-        promoted_T denom = static_cast<promoted_T>(y._value);
+        uint8_t    p     = std::min(x.precision(), y.precision());
+        promoted_T denom = static_cast<promoted_T>(y.raw());
         if(denom != 0)
         {
-            promoted_T val = (static_cast<promoted_T>(x._value) << std::max(x._fixed_point_position, y._fixed_point_position)) / denom;
+            promoted_T val = (static_cast<promoted_T>(x.raw()) << std::max(x.precision(), y.precision())) / denom;
             if(OP == OverflowPolicy::SATURATE)
             {
                 val = constant_expr<T>::saturate_cast(val);
@@ -607,7 +611,7 @@ struct functions
         }
         else
         {
-            T val = (x._value < 0) ? std::numeric_limits<T>::min() : std::numeric_limits<T>::max();
+            T val = (x.raw() < 0) ? std::numeric_limits<T>::min() : std::numeric_limits<T>::max();
             return fixed_point<T>(val, p, true);
         }
     }
@@ -622,12 +626,12 @@ struct functions
     static fixed_point<T> shift_left(fixed_point<T> x, size_t shift)
     {
         using promoted_T = typename traits::promote<T>::type;
-        promoted_T val   = static_cast<promoted_T>(x._value) << shift;
+        promoted_T val   = static_cast<promoted_T>(x.raw()) << shift;
         if(OP == OverflowPolicy::SATURATE)
         {
             val = constant_expr<T>::saturate_cast(val);
         }
-        return fixed_point<T>(static_cast<T>(val), x._fixed_point_position, true);
+        return fixed_point<T>(static_cast<T>(val), x.precision(), true);
     }
     /** Shift right
      *
@@ -639,7 +643,7 @@ struct functions
     template <typename T>
     static fixed_point<T> shift_right(fixed_point<T> x, size_t shift)
     {
-        return fixed_point<T>(x._value >> shift, x._fixed_point_position, true);
+        return fixed_point<T>(x.raw() >> shift, x.precision(), true);
     }
     /** Calculate absolute value
      *
@@ -651,8 +655,8 @@ struct functions
     static fixed_point<T> abs(fixed_point<T> x)
     {
         using promoted_T = typename traits::promote<T>::type;
-        T val            = (x._value < 0) ? constant_expr<T>::saturate_cast(-static_cast<promoted_T>(x._value)) : x._value;
-        return fixed_point<T>(val, x._fixed_point_position, true);
+        T val            = (x.raw() < 0) ? constant_expr<T>::saturate_cast(-static_cast<promoted_T>(x.raw())) : x.raw();
+        return fixed_point<T>(val, x.precision(), true);
     }
     /** Calculate the logarithm of a fixed point number
      *
@@ -663,7 +667,7 @@ struct functions
     template <typename T>
     static fixed_point<T> log(fixed_point<T> x)
     {
-        uint8_t p         = x._fixed_point_position;
+        uint8_t p         = x.precision();
         auto    const_one = fixed_point<T>(static_cast<T>(1), p);
 
         // Logarithm of 1 is zero and logarithm of negative values is not defined in R, so return 0.
@@ -678,7 +682,7 @@ struct functions
         }
 
         // Remove even powers of 2
-        T shift_val = 31 - __builtin_clz(x._value >> p);
+        T shift_val = 31 - __builtin_clz(x.raw() >> p);
         x           = shift_right(x, shift_val);
         x           = sub(x, const_one);
 
@@ -710,7 +714,7 @@ struct functions
     template <typename T>
     static fixed_point<T> exp(fixed_point<T> x)
     {
-        uint8_t p = x._fixed_point_position;
+        uint8_t p = x.precision();
         // Constants
         auto const_one = fixed_point<T>(1, p);
         auto ln2       = fixed_point<T>(0.6931471, p);
@@ -720,7 +724,7 @@ struct functions
         auto C         = fixed_point<T>(0.1763723, p);
         auto D         = fixed_point<T>(0.0435108, p);
 
-        T scaled_int_part = detail::constant_expr<T>::to_int(mul(x, inv_ln2)._value, p);
+        T scaled_int_part = detail::constant_expr<T>::to_int(mul(x, inv_ln2).raw(), p);
 
         // Polynomial expansion
         auto frac_part = sub(x, mul(ln2, fixed_point<T>(scaled_int_part, p)));
@@ -747,22 +751,27 @@ struct functions
     template <typename T>
     static fixed_point<T> inv_sqrt(fixed_point<T> x)
     {
-        const uint8_t p     = x._fixed_point_position;
-        int8_t        shift = std::numeric_limits<T>::digits - (p + detail::clz(x._value));
+        const uint8_t p     = x.precision();
+        int8_t        shift = std::numeric_limits<T>::digits - (p + detail::clz(x.raw()));
 
         shift += std::numeric_limits<T>::is_signed ? 1 : 0;
 
-        const auto           three_half = fixed_point<T>(1.5f, p);
-        fixed_point<T>       a          = shift < 0 ? shift_left(x, -shift) : shift_right(x, shift);
-        const fixed_point<T> x_half     = shift_right(a, 1);
+        // Use volatile to restrict compiler optimizations on shift as compiler reports maybe-uninitialized error on Android
+        volatile int8_t *shift_ptr = &shift;
 
-        // We need three iterations to find the result
-        for(int i = 0; i < 3; ++i)
+        auto           const_three = fixed_point<T>(3, p);
+        auto           a           = (*shift_ptr < 0) ? shift_left(x, -(shift)) : shift_right(x, shift);
+        fixed_point<T> x2          = a;
+
+        // We need three iterations to find the result for QS8 and five for QS16
+        constexpr int num_iterations = std::is_same<T, int8_t>::value ? 3 : 5;
+        for(int i = 0; i < num_iterations; ++i)
         {
-            a = mul(a, sub(three_half, mul(x_half, mul(a, a))));
+            fixed_point<T> three_minus_dx = sub(const_three, mul(a, mul(x2, x2)));
+            x2                            = shift_right(mul(x2, three_minus_dx), 1);
         }
 
-        return (shift < 0) ? shift_left(a, -shift >> 1) : shift_right(a, shift >> 1);
+        return (shift < 0) ? shift_left(x2, (-shift) >> 1) : shift_right(x2, shift >> 1);
     }
     /** Calculate the hyperbolic tangent of a fixed point number
      *
@@ -773,7 +782,7 @@ struct functions
     template <typename T>
     static fixed_point<T> tanh(fixed_point<T> x)
     {
-        uint8_t p = x._fixed_point_position;
+        uint8_t p = x.precision();
         // Constants
         auto const_one = fixed_point<T>(1, p);
         auto const_two = fixed_point<T>(2, p);

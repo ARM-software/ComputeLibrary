@@ -21,91 +21,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "benchmark/Datasets.h"
-#include "benchmark/Profiler.h"
-#include "benchmark/WallClockTimer.h"
-
-#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/benchmark/fixtures/NormalizationLayerFixture.h"
+#include "tests/datasets/system_tests/alexnet/AlexNetNormalizationLayerDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1NormalizationLayerDataset.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
-#include "benchmark/benchmark_api.h"
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::benchmark;
-using namespace arm_compute::test::neon;
-
-#include "benchmark/common/NormalizationLayer.h"
-
+namespace arm_compute
+{
+namespace test
+{
 namespace
 {
-using NormalizationLayerAlexNetF32 = NormalizationLayer<AlexNetNormalizationLayerDataset, Tensor, NEAccessor, NENormalizationLayer>;
-using NormalizationLayerAlexNetQS8 = NormalizationLayer<AlexNetNormalizationLayerDataset, Tensor, NEAccessor, NENormalizationLayer, DataType::QS8>;
-using NormalizationLayerGoogLeNet  = NormalizationLayer<GoogLeNetNormalizationLayerDataset, Tensor, NEAccessor, NENormalizationLayer>;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F16, DataType::F32 });
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
+const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F32 });
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
+using NENormalizationLayerFixture = NormalizationLayerFixture<Tensor, NENormalizationLayer, Accessor>;
 
-// F32
-BENCHMARK_DEFINE_F(NormalizationLayerAlexNetF32, neon_alexnet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        norm_layer->run();
-        profiler.stop();
-    }
-}
+TEST_SUITE(NEON)
 
-BENCHMARK_REGISTER_F(NormalizationLayerAlexNetF32, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetNormalizationLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(NormalizationLayerAlexNetF32, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetNormalizationLayerDataset, 1, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-// QS8
-BENCHMARK_DEFINE_F(NormalizationLayerAlexNetQS8, neon_alexnet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        norm_layer->run();
-        profiler.stop();
-    }
-}
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1NormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1NormalizationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_REGISTER_F(NormalizationLayerAlexNetQS8, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetNormalizationLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(NormalizationLayerAlexNetQS8, neon_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetNormalizationLayerDataset, 1, 1, 4, 8>);
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
 
-BENCHMARK_DEFINE_F(NormalizationLayerGoogLeNet, neon_googlenet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        norm_layer->run();
-        profiler.stop();
-    }
-}
-
-BENCHMARK_REGISTER_F(NormalizationLayerGoogLeNet, neon_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetNormalizationLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(NormalizationLayerGoogLeNet, neon_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetNormalizationLayerDataset, 1, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1NormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1NormalizationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace test
+} // namespace arm_compute

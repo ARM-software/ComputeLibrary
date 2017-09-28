@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_normalization_layer_kernel =
     [ "configure", "classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#a7b1cd624e23b7144b6962c19f426a166", null ],
     [ "operator=", "classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#a7221fb56d3119c94875fbf76addc27fe", null ],
     [ "operator=", "classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#a37d9ddfcfeee1a4993746c2d3ab51290", null ],
-    [ "run", "classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

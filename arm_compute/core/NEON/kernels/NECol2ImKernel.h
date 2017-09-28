@@ -74,7 +74,7 @@ public:
     void configure(const ITensor *input, ITensor *output, std::pair<unsigned int, unsigned int> convolved_dims);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Template function to run the col2im
@@ -95,6 +95,5 @@ private:
     ITensor          *_output;
     std::pair<unsigned int, unsigned int> _convolved_dims;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECOL2IMKERNEL_H__ */

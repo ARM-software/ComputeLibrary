@@ -60,6 +60,22 @@ void arm_compute::error_on_invalid_subwindow(const char *function, const char *f
     }
 }
 
+void arm_compute::error_on_window_not_collapsable_at_dimension(const char *function, const char *file, const int line,
+                                                               const arm_compute::Window &full, const arm_compute::Window &window, const int dim)
+{
+    ARM_COMPUTE_UNUSED(function);
+    ARM_COMPUTE_UNUSED(file);
+    ARM_COMPUTE_UNUSED(line);
+    ARM_COMPUTE_UNUSED(dim);
+
+    full.validate();
+    window.validate();
+
+    ARM_COMPUTE_ERROR_ON_LOC(window[dim].start() != 0, function, file, line);
+    ARM_COMPUTE_ERROR_ON_LOC(window[dim].start() != full[dim].start(), function, file, line);
+    ARM_COMPUTE_ERROR_ON_LOC(full[dim].end() != window[dim].end(), function, file, line);
+}
+
 void arm_compute::error_on_coordinates_dimensions_gte(const char *function, const char *file, const int line,
                                                       const arm_compute::Coordinates &pos, unsigned int max_dim)
 {
@@ -168,7 +184,7 @@ void arm_compute::error_on_unconfigured_kernel(const char *function, const char 
     ARM_COMPUTE_UNUSED(kernel);
 
     ARM_COMPUTE_ERROR_ON_LOC(kernel == nullptr, function, file, line);
-    ARM_COMPUTE_ERROR_ON_LOC_MSG((kernel->window().x().start() == kernel->window().x().end()) && (kernel->window().x().end() == 0),
+    ARM_COMPUTE_ERROR_ON_LOC_MSG((kernel->window().x().start() == kernel->window().x().end()) && (kernel->window().x().end() == 0) && (kernel->window().x().step() == 0),
                                  function, file, line,
                                  "This kernel hasn't been configured.");
 }

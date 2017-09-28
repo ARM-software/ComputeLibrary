@@ -1,8 +1,13 @@
 var searchData=
 [
-  ['rgb',['rgb',['../classarm__compute_1_1_pixel_value.xhtml#afe42472c55e7e5df52b8aaca94d0fa7e',1,'arm_compute::PixelValue']]],
-  ['rgbx',['rgbx',['../classarm__compute_1_1_pixel_value.xhtml#ac24a28b797176d8a1e73d27f64c058d2',1,'arm_compute::PixelValue']]],
-  ['right',['right',['../structarm__compute_1_1_border_size.xhtml#a78b0fed184c642b78f32fd34b228a5f9',1,'arm_compute::BorderSize']]],
-  ['row_5fdelim',['row_delim',['../structarm__compute_1_1_i_o_format_info.xhtml#ab1a3e6cb2768124a6853f52bd0e10596',1,'arm_compute::IOFormatInfo']]],
-  ['runs',['runs',['../structarm__compute_1_1test_1_1performance_1_1_performance_user_configuration.xhtml#a6fb109495cec5dfe6ba3f2251ad0fd16',1,'arm_compute::test::performance::PerformanceUserConfiguration']]]
+  ['p_5fvalue',['p_value',['../_mali_counter_8cpp.xhtml#ad6d507311ebc7aa745155092583925de',1,'MaliCounter.cpp']]],
+  ['padding',['padding',['../structmali__userspace_1_1mali__base__gpu__core__props.xhtml#a277246eaa19b960546694403ca3c8c99',1,'mali_userspace::mali_base_gpu_core_props::padding()'],['../structmali__userspace_1_1mali__base__gpu__l2__cache__props.xhtml#a6569a8f1a6cbfebc7d700f2e584e2d2d',1,'mali_userspace::mali_base_gpu_l2_cache_props::padding()'],['../structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#a0178ddd0add1d04939da36959f7daefb',1,'mali_userspace::mali_base_gpu_thread_props::padding()'],['../structmali__userspace_1_1mali__base__gpu__coherent__group.xhtml#ae403faab4d6ea2d43dbb256bbf938997',1,'mali_userspace::mali_base_gpu_coherent_group::padding()'],['../structmali__userspace_1_1mali__base__gpu__coherent__group__info.xhtml#ab6fb7d5a3ecf4d82432f5b89881cfe21',1,'mali_userspace::mali_base_gpu_coherent_group_info::padding()'],['../hwc_8hpp.xhtml#ad487ce76e40f524a7f5e350763b91ae5',1,'padding():&#160;hwc.hpp']]],
+  ['parser',['parser',['../namespacecaffe__data__extractor.xhtml#a8842070e9da559035fb0c7cd5f8b3c6e',1,'caffe_data_extractor.parser()'],['../namespacetensorflow__data__extractor.xhtml#a8842070e9da559035fb0c7cd5f8b3c6e',1,'tensorflow_data_extractor.parser()']]],
+  ['precision',['precision',['../structarm__compute_1_1_i_o_format_info.xhtml#a1fba9343eade93326cb985cfcb6de487',1,'arm_compute::IOFormatInfo']]],
+  ['precision_5ftype',['precision_type',['../structarm__compute_1_1_i_o_format_info.xhtml#ad53ff460a7430f45c22b27aad707e41f',1,'arm_compute::IOFormatInfo']]],
+  ['print_5fregion',['print_region',['../structarm__compute_1_1_i_o_format_info.xhtml#a3e3b8af91d2afbfeed14560f2070fd50',1,'arm_compute::IOFormatInfo']]],
+  ['product_5fid',['product_id',['../structmali__userspace_1_1mali__base__gpu__core__props.xhtml#a66c81e4a1e61720320e2da1caa7e365a',1,'mali_userspace::mali_base_gpu_core_props::product_id()'],['../structmali__userspace_1_1gpu__props.xhtml#a66c81e4a1e61720320e2da1caa7e365a',1,'mali_userspace::gpu_props::product_id()'],['../structmali__userspace_1_1_counter_mapping.xhtml#a66c81e4a1e61720320e2da1caa7e365a',1,'mali_userspace::CounterMapping::product_id()']]],
+  ['product_5fmask',['product_mask',['../structmali__userspace_1_1_counter_mapping.xhtml#a5a57e3aee3e1c5b169ac422799b49e28',1,'mali_userspace::CounterMapping']]],
+  ['props',['props',['../structmali__userspace_1_1kbase__uk__gpuprops.xhtml#a5d30709c693740b969d18000c2a78a50',1,'mali_userspace::kbase_uk_gpuprops']]],
+  ['ptr',['ptr',['../struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32',1,'Vector::ptr()'],['../struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32',1,'Image::ptr()'],['../struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32',1,'Tensor3D::ptr()'],['../struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32',1,'Tensor4D::ptr()']]]
 ];

@@ -42,7 +42,7 @@ public:
      */
     void configure(const ITensor *input, ITensor *output, bool border_undefined);
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 };
 
@@ -53,10 +53,10 @@ class NEBox3x3FP16Kernel : public NEBox3x3Kernel
 {
 public:
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 };
-#else
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
 using NEBox3x3FP16Kernel = NEBox3x3Kernel;
-#endif
-}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEBOX3x3KERNEL_H__ */

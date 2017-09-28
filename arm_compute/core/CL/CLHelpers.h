@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <string>
 
@@ -52,6 +53,22 @@ static constexpr const unsigned int max_cl_vector_width = 16;
  */
 std::string get_cl_type_from_data_type(const DataType &dt);
 
+/** Get the size of a data type in number of bits.
+ *
+ * @param[in] dt @ref DataType.
+ *
+ * @return Number of bits in the data type specified.
+ */
+std::string get_data_size_from_data_type(const DataType &dt);
+
+/** Translates fixed point tensor data type to the underlying OpenCL type.
+ *
+ * @param[in] dt @ref DataType to be translated to OpenCL type.
+ *
+ * @return The string specifying the underlying OpenCL type to be used.
+ */
+std::string get_underlying_cl_type_from_data_type(const DataType &dt);
+
 /** Translates a given gpu device target to string.
  *
  * @param[in] target Given gpu target.
@@ -70,7 +87,7 @@ const std::string &string_from_target(GPUTarget target);
 template <typename Kernel, typename... T>
 std::unique_ptr<Kernel> create_configure_kernel(T &&... args)
 {
-    std::unique_ptr<Kernel> k = arm_compute::cpp14::make_unique<Kernel>();
+    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
     k->configure(std::forward<T>(args)...);
     return k;
 }
@@ -82,7 +99,7 @@ std::unique_ptr<Kernel> create_configure_kernel(T &&... args)
 template <typename Kernel>
 std::unique_ptr<Kernel> create_kernel()
 {
-    std::unique_ptr<Kernel> k = arm_compute::cpp14::make_unique<Kernel>();
+    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
     return k;
 }
 
@@ -101,5 +118,20 @@ GPUTarget get_target_from_device(cl::Device &device);
  * @return the GPU target which shows the arch
  */
 GPUTarget get_arch_from_target(GPUTarget target);
+
+/** Helper function to get the highest OpenCL version supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return the highest OpenCL version supported
+ */
+CLVersion get_cl_version(const cl::Device &device);
+/** Helper function to check whether the arm_non_uniform_work_group_size extension is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the extension is supported
+ */
+bool non_uniform_workgroup_support(const cl::Device &device);
 }
-#endif
+#endif /* __ARM_COMPUTE_CLHELPERS_H__ */

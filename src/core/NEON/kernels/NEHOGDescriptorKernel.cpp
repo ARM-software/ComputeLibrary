@@ -675,8 +675,9 @@ void NEHOGOrientationBinningKernel::configure(const ITensor *input_magnitude, co
     INEKernel::configure(win);
 }
 
-void NEHOGOrientationBinningKernel::run(const Window &window)
+void NEHOGOrientationBinningKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -768,8 +769,9 @@ void NEHOGBlockNormalizationKernel::configure(const ITensor *input, ITensor *out
     INEKernel::configure(win);
 }
 
-void NEHOGBlockNormalizationKernel::run(const Window &window)
+void NEHOGBlockNormalizationKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);

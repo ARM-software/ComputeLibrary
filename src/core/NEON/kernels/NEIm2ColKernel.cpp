@@ -27,6 +27,7 @@
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
@@ -47,7 +48,8 @@ inline void linearize_volume(const uint8_t *const in_ptr,
                              bool                 has_bias,
                              int                  top_left_x,
                              int                  top_left_y,
-                             int                  kernel_size,
+                             int                  kernel_width,
+                             int                  kernel_height,
                              int                  kernel_depth,
                              int                  input_w,
                              int                  input_h,
@@ -56,9 +58,9 @@ inline void linearize_volume(const uint8_t *const in_ptr,
                              int                  input_stride_z,
                              int                  fixed_point_position)
 {
-    const int kernel_size2 = kernel_size * kernel_size;
-    const int x_e          = top_left_x + kernel_size;
-    const int y_e          = top_left_y + kernel_size;
+    const int kernel_size2 = kernel_width * kernel_height;
+    const int x_e          = top_left_x + kernel_width;
+    const int y_e          = top_left_y + kernel_height;
 
     // Linearize volume
     int d = 0;
@@ -109,8 +111,8 @@ inline void linearize_volume(const uint8_t *const in_ptr,
             if((y < 0 || y >= input_h) && has_pads)
             {
                 // All the values will be zeros
-                memset(out_ptr, 0, kernel_size * sizeof(T));
-                out_ptr += kernel_size;
+                memset(out_ptr, 0, kernel_width * sizeof(T));
+                out_ptr += kernel_width;
             }
             else
             {
@@ -132,9 +134,13 @@ inline void linearize_volume(const uint8_t *const in_ptr,
     // Append 1 if the convolution layer has biases
     if(has_bias)
     {
-        if(std::is_same<T, arm_compute::qint8_t>::value)
+        if(std::is_same<T, qint8_t>::value)
         {
-            *out_ptr = scvt_qs8_f32(1.0f, fixed_point_position);
+            *out_ptr = sqcvt_qs8_f32(1.0f, fixed_point_position);
+        }
+        else if(std::is_same<T, qint16_t>::value)
+        {
+            *out_ptr = sqcvt_qs16_f32(1.0f, fixed_point_position);
         }
         else
         {
@@ -199,7 +205,8 @@ void NEIm2ColKernel::run_generic(const Window &window)
                                       _has_bias,
                                       top_left_x,
                                       top_left_y,
-                                      static_cast<int>(_kernel_size),
+                                      static_cast<int>(_kernel_width),
+                                      static_cast<int>(_kernel_height),
                                       kernel_depth,
                                       input_w,
                                       input_h,
@@ -224,7 +231,7 @@ void NEIm2ColKernel::run_reduced(const Window &window)
     in_window.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Window out_window;
-    out_window.use_tensor_dimensions(_output->info());
+    out_window.use_tensor_dimensions(_output->info()->tensor_shape());
     out_window.set(Window::DimX, Window::Dimension(out_window.x().start(), out_window.x().end(), in_width));
 
     Window in_slice  = in_window.first_slice_window_3D();
@@ -246,9 +253,13 @@ void NEIm2ColKernel::run_reduced(const Window &window)
         // Add bias
         if(_has_bias)
         {
-            if(std::is_same<T, arm_compute::qint8_t>::value)
+            if(std::is_same<T, qint8_t>::value)
             {
-                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = scvt_qs8_f32(1.0f, _input->info()->fixed_point_position());
+                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = sqcvt_qs8_f32(1.0f, _input->info()->fixed_point_position());
+            }
+            else if(std::is_same<T, qint16_t>::value)
+            {
+                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = sqcvt_qs16_f32(1.0f, _input->info()->fixed_point_position());
             }
             else
             {
@@ -260,24 +271,30 @@ void NEIm2ColKernel::run_reduced(const Window &window)
 }
 
 NEIm2ColKernel::NEIm2ColKernel()
-    : _func(), _input(nullptr), _output(nullptr), _convolved_dims(), _conv_info(), _kernel_size(0), _has_bias(false)
+    : _func(), _input(nullptr), _output(nullptr), _convolved_dims(), _conv_info(), _kernel_width(0), _kernel_height(0), _has_bias(false)
 {
 }
 
-void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<unsigned int, unsigned int> convolved_dims, const PadStrideInfo &conv_info, bool has_bias)
+void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QS8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::QS8, DataType::QS16);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
 
     _input          = input;
     _output         = output;
-    _convolved_dims = convolved_dims;
     _conv_info      = conv_info;
-    _kernel_size    = std::sqrt((output->info()->dimension(0) - (has_bias ? 1 : 0)) / input->info()->dimension(2));
-    _has_bias       = has_bias;
+    _kernel_width   = kernel_dims.width;
+    _kernel_height  = kernel_dims.height,
+    _convolved_dims = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
+                                        _kernel_width, _kernel_height,
+                                        _conv_info);
+    _has_bias = has_bias;
 
-    unsigned int pad_x, pad_y, stride_x, stride_y = 0;
+    unsigned int pad_x    = 0;
+    unsigned int pad_y    = 0;
+    unsigned int stride_x = 0;
+    unsigned int stride_y = 0;
     std::tie(pad_x, pad_y)       = conv_info.pad();
     std::tie(stride_x, stride_y) = conv_info.stride();
 
@@ -296,8 +313,16 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<
             case DataType::F32:
                 _func = &NEIm2ColKernel::run_reduced<float>;
                 break;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+            case DataType::F16:
+                _func = &NEIm2ColKernel::run_reduced<float16_t>;
+                break;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
             case DataType::QS8:
                 _func = &NEIm2ColKernel::run_reduced<qint8_t>;
+                break;
+            case DataType::QS16:
+                _func = &NEIm2ColKernel::run_reduced<qint16_t>;
                 break;
             default:
                 ARM_COMPUTE_ERROR("Data type not supported");
@@ -311,8 +336,16 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<
             case DataType::F32:
                 _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<float, false> : &NEIm2ColKernel::run_generic<float, true>;
                 break;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+            case DataType::F16:
+                _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<float16_t, false> : &NEIm2ColKernel::run_generic<float16_t, true>;
+                break;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
             case DataType::QS8:
                 _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<qint8_t, false> : &NEIm2ColKernel::run_generic<qint8_t, true>;
+                break;
+            case DataType::QS16:
+                _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<qint16_t, false> : &NEIm2ColKernel::run_generic<qint16_t, true>;
                 break;
             default:
                 ARM_COMPUTE_ERROR("Data type not supported");
@@ -329,8 +362,9 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, std::pair<
     IKernel::configure(window);
 }
 
-void NEIm2ColKernel::run(const Window &window)
+void NEIm2ColKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

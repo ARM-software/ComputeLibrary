@@ -48,7 +48,7 @@ public:
 
     /** Default constructor: create a window containing a single element. */
     constexpr Window()
-        : _dims(), _thread_id(0), _num_threads(1)
+        : _dims()
     {
     }
     /** Copy constructor
@@ -157,10 +157,10 @@ public:
 
     /** Use the tensor's dimensions to fill the window dimensions.
      *
-     * @param[in] info            Tensor information to copy the dimensions from.
+     * @param[in] shape           @ref TensorShape to copy the dimensions from.
      * @param[in] first_dimension Only copy dimensions which are greater or equal to this value.
      */
-    void use_tensor_dimensions(const ITensorInfo *info, size_t first_dimension = Window::DimX);
+    void use_tensor_dimensions(const TensorShape &shape, size_t first_dimension = Window::DimX);
 
     /** Shift the values of a given dimension by the given shift_value
      *
@@ -293,38 +293,17 @@ public:
     {
         return slide_window_slice<4>(slice);
     }
-    /** Sets the ID of the thread that the window is associated with.
+
+    /* Collapse the dimensions higher than @p first if possible.
      *
-     * @param id ID of the thread that the window is associated with.
-     */
-    void set_thread_id(unsigned int id)
-    {
-        _thread_id = id;
-    }
-    /** Sets the number of threads dispatched that the window is associated with.
+     * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
      *
-     * @param num_threads The number of threads dispatched that the window is associated with.
-     */
-    void set_num_threads(unsigned int num_threads)
-    {
-        _num_threads = num_threads;
-    }
-    /** Get the ID of the thread that the window is associated with.
+     * @param[in] full_window Full window @p window has been created from.
+     * @param[in] first       Dimensions into which the following are collapsed.
      *
-     * @return ID of the thread that the window is associated with.
+     * @return Collapsed window.
      */
-    constexpr unsigned int thread_id() const
-    {
-        return _thread_id;
-    }
-    /** Get the number of threads dispatched that the window is associated with.
-     *
-     * @return The number of threads dispatched that the window is associated with.
-     */
-    constexpr unsigned int num_threads() const
-    {
-        return _num_threads;
-    }
+    Window collapse_if_possible(const Window &full_window, size_t first) const;
 
 private:
     /** First slice of the window
@@ -347,8 +326,6 @@ private:
 
 private:
     std::array<Dimension, Coordinates::num_max_dimensions> _dims;
-    unsigned int _thread_id;
-    unsigned int _num_threads;
 };
 }
 #include "Window.inl"

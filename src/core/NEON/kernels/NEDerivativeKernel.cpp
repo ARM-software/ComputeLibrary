@@ -214,8 +214,9 @@ void NEDerivativeKernel::derivative_xy(const Window &window)
     in, out_x, out_y);
 }
 
-void NEDerivativeKernel::run(const Window &window)
+void NEDerivativeKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

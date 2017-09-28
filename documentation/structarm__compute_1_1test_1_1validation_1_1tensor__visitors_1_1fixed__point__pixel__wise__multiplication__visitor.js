@@ -1,6 +1,0 @@
-var structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fixed__point__pixel__wise__multiplication__visitor =
-[
-    [ "fixed_point_pixel_wise_multiplication_visitor", "structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fixed__point__pixel__wise__multiplication__visitor.xhtml#ae347a7e4d8d15797909d5ffaae062f37", null ],
-    [ "operator()", "structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fixed__point__pixel__wise__multiplication__visitor.xhtml#ad4daf49b5d7c078507f1458a52f5c664", null ],
-    [ "operator()", "structarm__compute_1_1test_1_1validation_1_1tensor__visitors_1_1fixed__point__pixel__wise__multiplication__visitor.xhtml#ad4daf49b5d7c078507f1458a52f5c664", null ]
-];

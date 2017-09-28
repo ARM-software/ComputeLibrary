@@ -24,11 +24,12 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 #include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/runtime/CL/CLTuner.h"
 
 using namespace arm_compute;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD)
+    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner()
 {
 }
 
@@ -40,6 +41,18 @@ CLScheduler &CLScheduler::get()
 
 void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
 {
+    ARM_COMPUTE_ERROR_ON_MSG(!_is_initialised,
+                             "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
+                             or CLScheduler::get()::init() and CLKernelLibrary::get()::init() function before running functions!");
+
+    // Tune the kernel if the CLTuner has been provided
+    if(_cl_tuner != nullptr)
+    {
+        // Tune the OpenCL kernel
+        _cl_tuner->tune_kernel(kernel);
+    }
+
+    // Run kernel
     kernel.run(kernel.window(), _queue);
 
     if(flush)

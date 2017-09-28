@@ -45,10 +45,10 @@ NEGEMMMatrixAccumulateBiasesKernel::NEGEMMMatrixAccumulateBiasesKernel()
 
 void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor *biases)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::QS8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
-    ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() != 1);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(biases, accum);
+    ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
 
     _biases = biases;
     _accum  = accum;
@@ -58,11 +58,9 @@ void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor
     // Configure kernel window
     Window win = calculate_max_window(*accum->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic biases_access(biases->info(), 0, 0, biases->info()->dimension(0), biases->info()->dimension(1));
-
     update_window_and_padding(win,
                               AccessWindowHorizontal(accum->info(), 0, num_elems_processed_per_iteration),
-                              biases_access);
+                              AccessWindowStatic(biases->info(), 0, 0, win.x().end(), biases->info()->tensor_shape().y()));
 
     AccessWindowHorizontal output_access(accum->info(), 0, num_elems_processed_per_iteration);
 
@@ -74,8 +72,9 @@ void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor
     INEKernel::configure(win);
 }
 
-void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window)
+void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
@@ -109,6 +108,27 @@ void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window)
             in0_out, in1);
             break;
         }
+#ifdef ARM_COMPUTE_ENABLE_FP16
+        case DataType::F16:
+        {
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const float16x8x2_t accum  = vld2q_f16(reinterpret_cast<const float16_t *>(in0_out.ptr()));
+                const float16x8x2_t biases = vld2q_f16(reinterpret_cast<const float16_t *>(in1.ptr()));
+                const float16x8x2_t res =
+                {
+                    {
+                        vaddq_f16(accum.val[0], biases.val[0]),
+                        vaddq_f16(accum.val[1], biases.val[1])
+                    }
+                };
+
+                vst2q_f16(reinterpret_cast<float16_t *>(in0_out.ptr()), res);
+            },
+            in0_out, in1);
+            break;
+        }
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         case DataType::QS8:
         {
             execute_window_loop(window, [&](const Coordinates & id)
@@ -117,6 +137,21 @@ void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window)
                 const qint8x16_t biases = vld1q_qs8(reinterpret_cast<const qint8_t *>(in1.ptr()));
 
                 vst1q_qs8(reinterpret_cast<qint8_t *>(in0_out.ptr()), vqaddq_qs8(accum, biases));
+            },
+            in0_out, in1);
+            break;
+        }
+        case DataType::QS16:
+        {
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                qint16x8x2_t       accum  = vld2q_s16(reinterpret_cast<const qint16_t *>(in0_out.ptr()));
+                const qint16x8x2_t biases = vld2q_s16(reinterpret_cast<const qint16_t *>(in1.ptr()));
+
+                accum.val[0] = vqaddq_qs16(accum.val[0], biases.val[0]);
+                accum.val[1] = vqaddq_qs16(accum.val[1], biases.val[1]);
+
+                vst2q_s16(reinterpret_cast<qint16_t *>(in0_out.ptr()), accum);
             },
             in0_out, in1);
             break;

@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel =
     [ "configure", "classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml#a165cde4f51d6dc5cb425237cdf7535a4", null ],
     [ "operator=", "classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml#a22225d9b8a8f6d1b8fe5186be5776362", null ],
     [ "operator=", "classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml#a06af55b2547ef858438a07ee2283cb7e", null ],
-    [ "run", "classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

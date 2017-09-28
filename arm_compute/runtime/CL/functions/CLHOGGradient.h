@@ -28,11 +28,14 @@
 
 #include "arm_compute/core/CL/kernels/CLMagnitudePhaseKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLDerivative.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -46,7 +49,7 @@ class CLHOGGradient : public IFunction
 {
 public:
     /** Default constructor */
-    CLHOGGradient();
+    CLHOGGradient(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source, destinations, phase type and border mode
      *
      * @param[in, out] input                 Input tensor. Data type supported: U8.
@@ -63,6 +66,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup          _memory_group;
     CLDerivative           _derivative;
     CLMagnitudePhaseKernel _mag_phase;
     CLTensor               _gx;

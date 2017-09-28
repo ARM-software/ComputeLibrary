@@ -62,7 +62,7 @@ public:
     virtual void configure(const ITensor *gx, const ITensor *gy, ITensor *magnitude, ITensor *phase, int32_t norm_type);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 protected:
     /** Common signature for all the specialised gradient functions
@@ -129,7 +129,7 @@ public:
     void configure(const ITensor *magnitude, const ITensor *phase, ITensor *output, int32_t upper_thr, int32_t lower_thr, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -178,7 +178,7 @@ public:
     void configure(ITensor *input, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
     bool       is_parallelisable() const override;
 
@@ -186,5 +186,5 @@ private:
     ITensor *_input;  /**< Source tensor */
     ITensor *_output; /**< Destination tensor */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NECANNYEDGEKERNEL_H */

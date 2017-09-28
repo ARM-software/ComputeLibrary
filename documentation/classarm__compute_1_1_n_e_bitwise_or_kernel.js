@@ -6,5 +6,5 @@ var classarm__compute_1_1_n_e_bitwise_or_kernel =
     [ "configure", "classarm__compute_1_1_n_e_bitwise_or_kernel.xhtml#a837b139cf977a6c4530e3d574fcceef2", null ],
     [ "operator=", "classarm__compute_1_1_n_e_bitwise_or_kernel.xhtml#a5d760acdcf6781fb383167594dc296eb", null ],
     [ "operator=", "classarm__compute_1_1_n_e_bitwise_or_kernel.xhtml#a6a7df384121b0a711cbd580a480906a6", null ],
-    [ "run", "classarm__compute_1_1_n_e_bitwise_or_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_bitwise_or_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

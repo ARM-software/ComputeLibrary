@@ -21,125 +21,90 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEBox3x3.h"
-#include "arm_compute/runtime/SubTensor.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/BorderModeDataset.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/Box3x3Fixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
+namespace arm_compute
+{
+namespace test
+{
+namespace validation
+{
 namespace
 {
-/** Compute Neon 3-by-3 box filter.
- *
- * @param[in] shape Shape of the input and output tensors.
- *
- * @return Computed output tensor.
- */
-Tensor compute_box3x3(const TensorShape &shape)
-{
-    // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U8);
-
-    // Create and configure function
-    NEBox3x3 band;
-    band.configure(&src, &dst, BorderMode::UNDEFINED);
-
-    // Allocate tensors
-    src.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
-
-    // Compute function
-    band.run();
-
-    return dst;
-}
+constexpr unsigned int filter_size = 3;              /* Size of the kernel/filter in number of elements. */
+constexpr BorderSize   border_size(filter_size / 2); /* Border size of the kernel/filter around its central element. */
 } // namespace
 
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(Box3x3)
+TEST_SUITE(NEON)
+TEST_SUITE(Box3x3)
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+                                                                   datasets::BorderModes()),
+               shape, data_type, border_mode)
 {
     // Create tensors
-    Tensor src = create_tensor(shape, DataType::U8);
-    Tensor dst = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor<Tensor>(shape, data_type);
+    Tensor dst = create_tensor<Tensor>(shape, data_type);
 
-    BOOST_TEST(src.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
-    NEBox3x3 band;
-    band.configure(&src, &dst, BorderMode::UNDEFINED);
+    NEBox3x3 box3x3;
+    box3x3.configure(&src, &dst, border_mode);
 
     // Validate valid region
-    const ValidRegion src_valid_region = shape_to_valid_region(shape);
-    const ValidRegion dst_valid_region = shape_to_valid_region_undefined_border(shape, BorderSize(1));
-    validate(src.info()->valid_region(), src_valid_region);
+    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), border_size);
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
-    const PaddingSize read_padding(0, required_padding_undefined_border_read(shape.x(), 16, 8), 0, 0);
-    const PaddingSize write_padding(0, required_padding_undefined_border_write(shape.x(), 8, 1), 0, 0);
-    validate(src.info()->padding(), read_padding);
-    validate(dst.info()->padding(), write_padding);
+    PaddingCalculator calculator(shape.x(), 8);
+    calculator.set_border_size(1);
+    calculator.set_border_mode(border_mode);
+
+    const PaddingSize dst_padding = calculator.required_padding();
+
+    calculator.set_accessed_elements(16);
+    calculator.set_access_offset(-1);
+
+    const PaddingSize src_padding = calculator.required_padding();
+
+    validate(src.info()->padding(), src_padding);
+    validate(dst.info()->padding(), dst_padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
+template <typename T>
+using NEBox3x3Fixture = Box3x3ValidationFixture<Tensor, Accessor, NEBox3x3, T>;
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBox3x3Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                              DataType::U8)),
+                                                                                                      datasets::BorderModes()))
 {
-    // Compute function
-    Tensor dst = compute_box3x3(shape);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_box3x3(shape);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, shape_to_valid_region_undefined_border(shape, BorderSize(1)));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size));
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes(), shape)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEBox3x3Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                            DataType::U8)),
+                                                                                                    datasets::BorderModes()))
 {
-    // Compute function
-    Tensor dst = compute_box3x3(shape);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_box3x3(shape);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, shape_to_valid_region_undefined_border(shape, BorderSize(1)));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

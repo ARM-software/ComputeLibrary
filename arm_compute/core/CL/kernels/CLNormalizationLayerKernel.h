@@ -48,14 +48,12 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input         Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                           and an optional 4th dimension for batch of inputs. Data types supported: F16, F32.
-     * @param[in]  squared_input Source with each element has been squared. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                           Data types should match the input type.
-     * @param[out] output        Destination tensor. Output will have the same number of dimensions as input. Data types should match the input type.
-     * @param[in]  norm_info     Normalization layer information like the normalization type, normalization size and other parameters.
+     * @param[in]  input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
+     *                       and an optional 4th dimension for batch of inputs. Data types supported: QS8/QS16/F16/F32.
+     * @param[out] output    Destination tensor. Output will have the same number of dimensions as input. Data types supported: same as @p input.
+     * @param[in]  norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */
-    void configure(const ICLTensor *input, const ICLTensor *squared_input, ICLTensor *output, NormalizationLayerInfo norm_info);
+    void configure(const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -63,9 +61,9 @@ public:
 
 private:
     const ICLTensor *_input;
-    const ICLTensor *_squared_input;
     ICLTensor       *_output;
     BorderSize       _border_size;
+    bool             _is_in_map;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLNORMALIZATIONLAYERKERNEL_H__ */

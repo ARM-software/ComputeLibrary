@@ -52,25 +52,8 @@ void matrix_addition_f32(const ITensor *input, ITensor *output, const Window &wi
         const auto in_ptr  = reinterpret_cast<const float *>(in.ptr());
         const auto out_ptr = reinterpret_cast<float *>(out.ptr());
 
-        float32x4x4_t alpha_ab =
-        {
-            {
-                vld1q_f32(out_ptr + 0),
-                vld1q_f32(out_ptr + 4),
-                vld1q_f32(out_ptr + 8),
-                vld1q_f32(out_ptr + 12)
-            }
-        };
-
-        const float32x4x4_t c =
-        {
-            {
-                vld1q_f32(in_ptr + 0),
-                vld1q_f32(in_ptr + 4),
-                vld1q_f32(in_ptr + 8),
-                vld1q_f32(in_ptr + 12)
-            }
-        };
+        float32x4x4_t       alpha_ab = vld4q_f32(out_ptr);
+        const float32x4x4_t c        = vld4q_f32(in_ptr);
 
         // Multiply matrix C by its weight and accumulate
         alpha_ab.val[0] = vmlaq_f32(alpha_ab.val[0], c.val[0], beta_f32);
@@ -78,10 +61,7 @@ void matrix_addition_f32(const ITensor *input, ITensor *output, const Window &wi
         alpha_ab.val[2] = vmlaq_f32(alpha_ab.val[2], c.val[2], beta_f32);
         alpha_ab.val[3] = vmlaq_f32(alpha_ab.val[3], c.val[3], beta_f32);
 
-        vst1q_f32(out_ptr + 0, alpha_ab.val[0]);
-        vst1q_f32(out_ptr + 4, alpha_ab.val[1]);
-        vst1q_f32(out_ptr + 8, alpha_ab.val[2]);
-        vst1q_f32(out_ptr + 12, alpha_ab.val[3]);
+        vst4q_f32(out_ptr, alpha_ab);
     },
     in, out);
 }
@@ -99,37 +79,22 @@ void matrix_addition_f16(const ITensor *input, ITensor *output, const Window &wi
         const auto in_ptr  = reinterpret_cast<const float16_t *>(in.ptr());
         const auto out_ptr = reinterpret_cast<float16_t *>(out.ptr());
 
-        float16x8x2_t alpha_ab =
-        {
-            {
-                vld1q_f16(out_ptr + 0),
-                vld1q_f16(out_ptr + 8)
-            }
-        };
-
-        float16x8x2_t c =
-        {
-            {
-                vld1q_f16(in_ptr + 0),
-                vld1q_f16(in_ptr + 8)
-            }
-        };
-
+        float16x8x2_t       alpha_ab = vld2q_f16(out_ptr);
+        const float16x8x2_t c        = vld2q_f16(in_ptr);
         // Multiply matrix C by its weight and accumulate
         alpha_ab.val[0] = vaddq_f16(alpha_ab.val[0], vmulq_f16(c.val[0], beta_f16));
         alpha_ab.val[1] = vaddq_f16(alpha_ab.val[1], vmulq_f16(c.val[1], beta_f16));
 
-        vst1q_f16(out_ptr + 0, alpha_ab.val[0]);
-        vst1q_f16(out_ptr + 8, alpha_ab.val[1]);
+        vst2q_f16(out_ptr + 0, alpha_ab);
     },
     in, out);
 }
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 void matrix_addition_qs8(const ITensor *input, ITensor *output, const Window &window, float beta)
 {
     const int        fixed_point_position = input->info()->fixed_point_position();
-    const qint8x16_t beta_qs8             = vdupq_n_qs8(scvt_qs8_f32(beta, fixed_point_position));
+    const qint8x16_t beta_qs8             = vdupq_n_qs8(sqcvt_qs8_f32(beta, fixed_point_position));
 
     Iterator in(input, window);
     Iterator out(output, window);
@@ -149,6 +114,31 @@ void matrix_addition_qs8(const ITensor *input, ITensor *output, const Window &wi
     },
     in, out);
 }
+
+void matrix_addition_qs16(const ITensor *input, ITensor *output, const Window &window, float beta)
+{
+    const int        fixed_point_position = input->info()->fixed_point_position();
+    const qint16x8_t beta_qs16            = vdupq_n_qs16(sqcvt_qs16_f32(beta, fixed_point_position));
+
+    Iterator in(input, window);
+    Iterator out(output, window);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const auto in_ptr  = reinterpret_cast<const qint16_t *>(in.ptr());
+        const auto out_ptr = reinterpret_cast<qint16_t *>(out.ptr());
+
+        qint16x8x2_t       alpha_ab = vld2q_s16(out_ptr);
+        const qint16x8x2_t c        = vld2q_s16(in_ptr);
+
+        // Multiply matrix C by its weight and accumulate
+        alpha_ab.val[0] = vqmlaq_qs16(alpha_ab.val[0], c.val[0], beta_qs16, fixed_point_position);
+        alpha_ab.val[1] = vqmlaq_qs16(alpha_ab.val[1], c.val[1], beta_qs16, fixed_point_position);
+
+        vst2q_s16(out_ptr, alpha_ab);
+    },
+    in, out);
+}
 } // namespace
 
 NEGEMMMatrixAdditionKernel::NEGEMMMatrixAdditionKernel()
@@ -158,8 +148,8 @@ NEGEMMMatrixAdditionKernel::NEGEMMMatrixAdditionKernel()
 
 void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != output->info()->dimension(0));
@@ -173,11 +163,14 @@ void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output
         case DataType::QS8:
             _func = &matrix_addition_qs8;
             break;
+        case DataType::QS16:
+            _func = &matrix_addition_qs16;
+            break;
         case DataType::F16:
 #ifdef ARM_COMPUTE_ENABLE_FP16
             _func = &matrix_addition_f16;
             break;
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
             break;
@@ -190,8 +183,9 @@ void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output
     _beta = beta;
 }
 
-void NEGEMMMatrixAdditionKernel::run(const Window &window)
+void NEGEMMMatrixAdditionKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 

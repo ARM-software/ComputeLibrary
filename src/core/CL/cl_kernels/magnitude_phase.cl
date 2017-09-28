@@ -81,17 +81,17 @@ inline uchar16 phase_signed(VEC_DATA_TYPE(DATA_TYPE, 16) a, VEC_DATA_TYPE(DATA_T
 #define MAGNITUDE_OP(x, y) magnitude_l1((x), (y))
 #elif(2 == MAGNITUDE)
 #define MAGNITUDE_OP(x, y) magnitude_l2(convert_int16(x), convert_int16(y))
-#else
+#else /* MAGNITUDE */
 #define MAGNITUDE_OP(x, y)
-#endif
+#endif /* MAGNITUDE */
 
 #if(1 == PHASE)
 #define PHASE_OP(x, y) phase_unsigned((x), (y))
 #elif(2 == PHASE)
 #define PHASE_OP(x, y) phase_signed((x), (y))
-#else
+#else /* PHASE */
 #define PHASE_OP(x, y)
-#endif
+#endif /* PHASE */
 
 /** Calculate the magnitude and phase of given the gradients of an image.
  *
@@ -133,11 +133,11 @@ __kernel void magnitude_phase(
 #ifdef MAGNITUDE
     ,
     IMAGE_DECLARATION(magnitude)
-#endif
+#endif /* MAGNITUDE */
 #ifdef PHASE
     ,
     IMAGE_DECLARATION(phase)
-#endif
+#endif /* PHASE */
 )
 {
     // Get pixels pointer
@@ -154,9 +154,9 @@ __kernel void magnitude_phase(
 #ifdef MAGNITUDE
     Image magnitude = CONVERT_TO_IMAGE_STRUCT(magnitude);
     vstore16(MAGNITUDE_OP(in_a, in_b), 0, (__global DATA_TYPE *)magnitude.ptr);
-#endif
+#endif /* MAGNITUDE */
 #ifdef PHASE
     Image phase = CONVERT_TO_IMAGE_STRUCT(phase);
     vstore16(PHASE_OP(in_a, in_b), 0, phase.ptr);
-#endif
+#endif /* PHASE */
 }

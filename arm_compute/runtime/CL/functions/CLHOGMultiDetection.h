@@ -28,10 +28,14 @@
 #include "arm_compute/core/CL/ICLMultiHOG.h"
 #include "arm_compute/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLHOGDetector.h"
 #include "arm_compute/runtime/CL/functions/CLHOGGradient.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -53,7 +57,7 @@ class CLHOGMultiDetection : public IFunction
 {
 public:
     /** Default constructor */
-    CLHOGMultiDetection();
+    CLHOGMultiDetection(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLHOGMultiDetection(const CLHOGMultiDetection &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -85,6 +89,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup                                                 _memory_group;
     CLHOGGradient                                                 _gradient_kernel;
     std::unique_ptr<CLHOGOrientationBinningKernel[]>              _orient_bin_kernel;
     std::unique_ptr<CLHOGBlockNormalizationKernel[]>              _block_norm_kernel;

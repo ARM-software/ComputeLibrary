@@ -96,5 +96,5 @@ public:
 private:
     int _t2_load_offset;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGAUSSIANPYRAMIDKERNEL_H__ */

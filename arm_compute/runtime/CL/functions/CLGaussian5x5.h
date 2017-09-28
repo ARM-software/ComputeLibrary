@@ -27,10 +27,13 @@
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLGaussian5x5Kernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -47,7 +50,7 @@ class CLGaussian5x5 : public IFunction
 {
 public:
     /** Default Constructor. */
-    CLGaussian5x5();
+    CLGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source, destinations and border mode.
      *
      * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -61,6 +64,7 @@ public:
     void run() override;
 
 protected:
+    CLMemoryGroup           _memory_group;   /**< Function's memory group */
     CLGaussian5x5HorKernel  _kernel_hor;     /**< Horizontal pass kernel */
     CLGaussian5x5VertKernel _kernel_vert;    /**< Vertical pass kernel */
     CLFillBorderKernel      _border_handler; /**< Kernel to handle image borders */

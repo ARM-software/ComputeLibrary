@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_remap_kernel =
     [ "configure", "classarm__compute_1_1_n_e_remap_kernel.xhtml#a24cf804e6bcb60737bf447693c87d616", null ],
     [ "operator=", "classarm__compute_1_1_n_e_remap_kernel.xhtml#aa9096c3897bd0dbda632613a243fa835", null ],
     [ "operator=", "classarm__compute_1_1_n_e_remap_kernel.xhtml#ac19511f65e6bad8424d4dd8933e0b673", null ],
-    [ "run", "classarm__compute_1_1_n_e_remap_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_remap_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

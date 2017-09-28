@@ -60,13 +60,12 @@ public:
     void configure(IDetectionWindowArray *input_output, float min_distance);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
 private:
     IDetectionWindowArray *_input_output;
     float                  _min_distance;
 };
-}
-
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPPDETECTIONWINDOWNONMAXIMASUPPRESSIONKERNEL_H__ */

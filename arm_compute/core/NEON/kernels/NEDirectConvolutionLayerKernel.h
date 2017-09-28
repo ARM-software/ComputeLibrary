@@ -46,20 +46,25 @@ public:
     NEDirectConvolutionLayerKernel &operator=(NEDirectConvolutionLayerKernel &&) = default;
     /** Default destructor */
     ~NEDirectConvolutionLayerKernel() = default;
-    /** Set the input, weights and output tensors.
-      *
-      * @param[in]  input     Input tensor. Data types supported: QS8/F32.
-      * @param[in]  weights   Set of kernels to convolve the input volume.
-      *                       The 3rd dimension must be the same as the input's volume 3rd dimension.
-      *                       Data type supported: Same as @p input.
-      * @param[out] output    Output tensor.
-      *                       The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
-      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
-      */
+    /** Set the input, weights, and output tensors.
+     *
+     * @note: DirectConvolution only works in the following configurations:
+     *        1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3
+     *        3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3
+     *
+     * @param[in]  input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
+     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/F16/F32.
+     * @param[in]  weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                       The 3rd dimension must be the same as the input's volume 3rd dimension.
+     *                       Data type supported:Same as @p input.
+     * @param[out] output    Output tensor.
+     *                       The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
+     * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     */
     void configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -69,8 +74,9 @@ private:
     PadStrideInfo  _conv_info;
     BorderSize     _border_size;
     unsigned int   _kernel_size;
+    unsigned int   _num_weight_elems_read_per_row;
     unsigned int   _num_elems_read_per_iteration;
     unsigned int   _num_elems_written_per_iteration;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYERKERNEL_H__ */

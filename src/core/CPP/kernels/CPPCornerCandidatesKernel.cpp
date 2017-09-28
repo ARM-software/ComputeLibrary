@@ -37,12 +37,12 @@ using namespace arm_compute;
 
 namespace
 {
-inline void check_corner(float x, float y, float strength, InternalKeypoint *output, int32_t *num_corner_candidates, std::mutex *corner_candidates_mutex)
+inline void check_corner(float x, float y, float strength, InternalKeypoint *output, int32_t *num_corner_candidates, arm_compute::Mutex *corner_candidates_mutex)
 {
     if(strength != 0.0f)
     {
         /* Set index and update num_corner_candidate */
-        std::unique_lock<std::mutex> lock(*corner_candidates_mutex);
+        std::unique_lock<arm_compute::Mutex> lock(*corner_candidates_mutex);
 
         const int32_t idx = *num_corner_candidates;
 
@@ -55,12 +55,9 @@ inline void check_corner(float x, float y, float strength, InternalKeypoint *out
     }
 }
 
-inline void corner_candidates(const float *__restrict input, InternalKeypoint *__restrict output, int32_t x, int32_t y, int32_t *num_corner_candidates, std::mutex *corner_candidates_mutex)
+inline void corner_candidates(const float *__restrict input, InternalKeypoint *__restrict output, int32_t x, int32_t y, int32_t *num_corner_candidates, arm_compute::Mutex *corner_candidates_mutex)
 {
-    check_corner(x + 0, y, *(input + 0), output, num_corner_candidates, corner_candidates_mutex);
-    check_corner(x + 1, y, *(input + 1), output, num_corner_candidates, corner_candidates_mutex);
-    check_corner(x + 2, y, *(input + 2), output, num_corner_candidates, corner_candidates_mutex);
-    check_corner(x + 3, y, *(input + 3), output, num_corner_candidates, corner_candidates_mutex);
+    check_corner(x, y, *input, output, num_corner_candidates, corner_candidates_mutex);
 }
 } // namespace
 
@@ -86,7 +83,7 @@ void CPPCornerCandidatesKernel::configure(const IImage *input, InternalKeypoint 
     _output                = output;
     _num_corner_candidates = num_corner_candidates;
 
-    const unsigned int num_elems_processed_per_iteration = 4;
+    const unsigned int num_elems_processed_per_iteration = 1;
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
@@ -96,8 +93,9 @@ void CPPCornerCandidatesKernel::configure(const IImage *input, InternalKeypoint 
     INEKernel::configure(win);
 }
 
-void CPPCornerCandidatesKernel::run(const Window &window)
+void CPPCornerCandidatesKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     Iterator input(_input, window);

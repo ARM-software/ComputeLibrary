@@ -52,18 +52,18 @@ public:
      *
      * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
      *
-     * @param[in]  input            Source tensor. Data types supported: U8/S16.
+     * @param[in]  input            Source tensor. Data types supported: U8/S16/F32.
      * @param[in]  dx               Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
      * @param[in]  dy               Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
      * @param[in]  offsets          Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
-     * @param[out] output           Destination tensor. Data types supported: U8/S16. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[out] output           Destination tensor. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]  policy           Interpolation type to use
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ITensor *input, const ITensor *dx, const ITensor *dy, const ITensor *offsets, ITensor *output, InterpolationPolicy policy, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -85,5 +85,5 @@ private:
     const ITensor *_input;
     ITensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESCALEKERNEL_H__ */

@@ -23,14 +23,14 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEHOGDetector.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEHOGDetectorKernel.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 void NEHOGDetector::configure(const ITensor *input, const IHOG *hog, IDetectionWindowArray *detection_windows, const Size2D &detection_window_stride, float threshold, size_t idx_class)
 {
-    auto k = arm_compute::cpp14::make_unique<NEHOGDetectorKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEHOGDetectorKernel>();
     k->configure(input, hog, detection_windows, detection_window_stride, threshold, idx_class);
     _kernel = std::move(k);
 }

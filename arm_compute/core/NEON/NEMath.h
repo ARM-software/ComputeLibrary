@@ -28,6 +28,22 @@
 
 namespace arm_compute
 {
+/** Calculate floor of a vector.
+ *
+ * @param[in] val Input vector value in F32 format.
+ *
+ * @return The calculated floor vector.
+ */
+float32x4_t vfloorq_f32(float32x4_t val);
+
+/** Calculate inverse square root.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated inverse square root.
+ */
+float32x2_t vinvsqrt_f32(float32x2_t x);
+
 /** Calculate inverse square root.
  *
  * @param[in] x Input value.
@@ -35,6 +51,14 @@ namespace arm_compute
  * @return The calculated inverse square root.
  */
 float32x4_t vinvsqrtq_f32(float32x4_t x);
+
+/** Calculate reciprocal.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated reciprocal.
+ */
+float32x2_t vinv_f32(float32x2_t x);
 
 /** Calculate reciprocal.
  *
@@ -91,6 +115,71 @@ float32x4_t vtanhq_f32(float32x4_t val);
  * @return The calculated power.
  */
 float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
-}
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+/** Calculate hyperbolic tangent.
+ *
+ * tanh(x) = (e^2x - 1)/(e^2x + 1)
+ *
+ * @note We clamp x to [-5,5] to avoid overflowing issues.
+ *
+ * @param[in] val Input vector value in F32 format.
+ *
+ * @return The calculated Hyperbolic Tangent.
+ */
+float16x8_t vtanhq_f16(float16x8_t val);
+
+/** Calculate reciprocal.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated reciprocal.
+ */
+float16x4_t vinv_f16(float16x4_t x);
+
+/** Calculate reciprocal.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated reciprocal.
+ */
+float16x8_t vinvq_f16(float16x8_t x);
+
+/** Calculate inverse square root.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated inverse square root.
+ */
+float16x4_t vinvsqrt_f16(float16x4_t x);
+
+/** Calculate inverse square root.
+ *
+ * @param[in] x Input value.
+ *
+ * @return The calculated inverse square root.
+ */
+float16x8_t vinvsqrtq_f16(float16x8_t x);
+
+/** Calculate exponential
+ *
+ * @param[in] x Input vector value in F16 format.
+ *
+ * @return The calculated exponent.
+ */
+float16x8_t vexpq_f16(float16x8_t x);
+
+/** Calculate n power of a number.
+ *
+ * pow(x,n) = e^(n*log(x))
+ *
+ * @param[in] val Input vector value in F16 format.
+ * @param[in] n   Powers to raise the input to.
+ *
+ * @return The calculated power.
+ */
+float16x8_t vpowq_f16(float16x8_t val, float16x8_t n);
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+} // namespace arm_compute
 #include "arm_compute/core/NEON/NEMath.inl"
 #endif /* __ARM_COMPUTE_NEMATH_H__ */

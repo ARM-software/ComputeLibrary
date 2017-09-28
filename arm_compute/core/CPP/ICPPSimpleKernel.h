@@ -62,5 +62,5 @@ protected:
     const ITensor *_input;
     ITensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_ICPPSIMPLEKERNEL_H__ */

@@ -21,18 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_CL_CLACCESSOR_H__
-#define __ARM_COMPUTE_TEST_CL_CLACCESSOR_H__
-
-#include "IAccessor.h"
+#ifndef __ARM_COMPUTE_TEST_CLACCESSOR_H__
+#define __ARM_COMPUTE_TEST_CLACCESSOR_H__
 
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "tests/IAccessor.h"
 
 namespace arm_compute
 {
 namespace test
-{
-namespace cl
 {
 /** Accessor implementation for @ref CLTensor objects. */
 class CLAccessor : public IAccessor
@@ -62,9 +59,12 @@ public:
     DataType    data_type() const override;
     int         num_channels() const override;
     int         num_elements() const override;
+    PaddingSize padding() const override;
     int         fixed_point_position() const override;
     const void *operator()(const Coordinates &coord) const override;
     void *operator()(const Coordinates &coord) override;
+    const void *data() const;
+    void       *data();
 
 private:
     CLTensor &_tensor;
@@ -116,9 +116,24 @@ inline int CLAccessor::num_elements() const
     return _tensor.info()->tensor_shape().total_size();
 }
 
+inline PaddingSize CLAccessor::padding() const
+{
+    return _tensor.info()->padding();
+}
+
 inline int CLAccessor::fixed_point_position() const
 {
     return _tensor.info()->fixed_point_position();
+}
+
+inline const void *CLAccessor::data() const
+{
+    return _tensor.buffer();
+}
+
+inline void *CLAccessor::data()
+{
+    return _tensor.buffer();
 }
 
 inline const void *CLAccessor::operator()(const Coordinates &coord) const
@@ -130,7 +145,6 @@ inline void *CLAccessor::operator()(const Coordinates &coord)
 {
     return _tensor.ptr_to_element(coord);
 }
-} // cl
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_CLACCESSOR_H__ */

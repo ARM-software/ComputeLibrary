@@ -28,7 +28,7 @@
 using namespace arm_compute;
 
 CLTensor::CLTensor()
-    : _allocator()
+    : _allocator(this)
 {
 }
 

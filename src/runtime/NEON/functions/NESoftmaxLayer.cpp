@@ -31,15 +31,14 @@
 
 using namespace arm_compute;
 
-NESoftmaxLayer::NESoftmaxLayer()
-    : _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _fill_border_kernel(), _max(), _sum(), _tmp()
+NESoftmaxLayer::NESoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _fill_border_kernel(), _max(), _sum(), _tmp()
 {
 }
 
 void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
 
     // Create intermediate tensors shapes
     TensorInfo tensor_info_tmp(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
@@ -51,11 +50,16 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
     _max.allocator()->init(tensor_info_max_sum);
     _sum.allocator()->init(tensor_info_max_sum);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_tmp);
+    _memory_group.manage(&_max);
+    _memory_group.manage(&_sum);
+
     // Configure Kernels
     _max_kernel.configure(input, &_max);
     _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum);
     _norm_kernel.configure(&_tmp, &_sum, output);
-    _fill_border_kernel.configure(input, _max_kernel.border_size(), BorderMode::CONSTANT, PixelValue(-FLT_MAX));
+    _fill_border_kernel.configure(input, _max_kernel.border_size(), BorderMode::REPLICATE);
 
     // Allocate intermediate tensors
     _tmp.allocator()->allocate();
@@ -65,8 +69,12 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
 
 void NESoftmaxLayer::run()
 {
+    _memory_group.acquire();
+
     NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
     NEScheduler::get().schedule(&_max_kernel, Window::DimY);
     NEScheduler::get().schedule(&_shift_exp_sum_kernel, Window::DimY);
     NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
+
+    _memory_group.release();
 }

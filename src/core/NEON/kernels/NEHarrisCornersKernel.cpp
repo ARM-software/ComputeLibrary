@@ -287,8 +287,9 @@ NEHarrisScoreFP16Kernel<block_size>::NEHarrisScoreFP16Kernel()
 }
 
 template <int32_t block_size>
-void NEHarrisScoreFP16Kernel<block_size>::run(const Window &window)
+void NEHarrisScoreFP16Kernel<block_size>::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -360,7 +361,7 @@ void NEHarrisScoreFP16Kernel<block_size>::configure(const IImage *input1, const 
     INEKernel::configure(win);
 }
 
-#endif
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 template class arm_compute::NEHarrisScoreKernel<3>;
 template class arm_compute::NEHarrisScoreKernel<5>;
@@ -1029,8 +1030,9 @@ NEHarrisScoreKernel<block_size>::NEHarrisScoreKernel()
 }
 
 template <int32_t block_size>
-void NEHarrisScoreKernel<block_size>::run(const Window &window)
+void NEHarrisScoreKernel<block_size>::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

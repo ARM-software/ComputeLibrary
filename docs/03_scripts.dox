@@ -1,0 +1,92 @@
+/**
+@page data_import Importing data from existing models
+
+@tableofcontents
+
+@section caffe_data_extractor Extract data from pre-trained caffe model
+
+One can find caffe <a href="https://github.com/BVLC/caffe/wiki/Model-Zoo">pre-trained models</a> on
+caffe's official github repository.
+
+The caffe_data_extractor.py provided in the @ref scripts folder is an example script that shows how to
+extract the parameter values from a trained model.
+
+@note complex networks might require altering the script to properly work.
+
+@subsection caffe_how_to How to use the script
+
+Install caffe following <a href="http://caffe.berkeleyvision.org/installation.html">caffe's document</a>.
+Make sure the pycaffe has been added into the PYTHONPATH.
+
+Download the pre-trained caffe model.
+
+Run the caffe_data_extractor.py script by
+
+        python caffe_data_extractor.py -m <caffe model> -n <caffe netlist>
+
+For example, to extract the data from pre-trained caffe Alex model to binary file:
+
+        python caffe_data_extractor.py -m /path/to/bvlc_alexnet.caffemodel -n /path/to/caffe/models/bvlc_alexnet/deploy.prototxt
+
+The script has been tested under Python2.7.
+
+@subsection caffe_result  What is the expected output from the script
+
+If the script runs successfully, it prints the names and shapes of each layer onto the standard
+output and generates *.npy files containing the weights and biases of each layer.
+
+The @ref arm_compute::utils::load_trained_data shows how one could load
+the weights and biases into tensor from the .npy file by the help of Accessor.
+
+@section tensorflow_data_extractor Extract data from pre-trained tensorflow model
+
+The script tensorflow_data_extractor.py extracts trainable parameters (e.g. values of weights and biases) from a
+trained tensorflow model. A tensorflow model consists of the following two files:
+
+{model_name}.data-{step}-{global_step}: A binary file containing values of each variable.
+
+{model_name}.meta:  A binary file containing a MetaGraph struct which defines the graph structure of the neural
+network.
+
+@note Since Tensorflow version 0.11 the binary checkpoint file which contains the values for each parameter has the format of:
+    {model_name}.data-{step}-of-{max_step}
+instead of:
+    {model_name}.ckpt
+When dealing with binary files with version >= 0.11, only pass {model_name} to -m option;
+when dealing with binary files with version < 0.11, pass the whole file name {model_name}.ckpt to -m option.
+
+@note This script relies on the parameters to be extracted being in the
+'trainable_variables' tensor collection. By default all variables are automatically added to this collection unless
+specified otherwise by the user. Thus should a user alter this default behavior and/or want to extract parameters from other
+collections, tf.GraphKeys.TRAINABLE_VARIABLES should be replaced accordingly.
+
+@subsection tensorflow_how_to How to use the script
+
+Install tensorflow and numpy.
+
+Download the pre-trained tensorflow model.
+
+Run tensorflow_data_extractor.py with
+
+        python tensorflow_data_extractor -m <path_to_binary_checkpoint_file> -n <path_to_metagraph_file>
+
+For example, to extract the data from pre-trained tensorflow Alex model to binary files:
+
+        python tensorflow_data_extractor -m /path/to/bvlc_alexnet -n /path/to/bvlc_alexnet.meta
+
+Or for binary checkpoint files before Tensorflow 0.11:
+
+        python tensorflow_data_extractor -m /path/to/bvlc_alexnet.ckpt -n /path/to/bvlc_alexnet.meta
+
+@note with versions >= Tensorflow 0.11 only model name is passed to the -m option
+
+The script has been tested with Tensorflow 1.2, 1.3 on Python 2.7.6 and Python 3.4.3.
+
+@subsection tensorflow_result What is the expected output from the script
+
+If the script runs successfully, it prints the names and shapes of each parameter onto the standard output and generates
+ *.npy files containing the weights and biases of each layer.
+
+The @ref arm_compute::utils::load_trained_data shows how one could load
+the weights and biases into tensor from the .npy file by the help of Accessor.
+*/

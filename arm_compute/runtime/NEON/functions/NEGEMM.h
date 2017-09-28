@@ -25,12 +25,17 @@
 #define __ARM_COMPUTE_NEGEMM_H__
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -46,13 +51,14 @@ class NEGEMM : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMM();
+    NEGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+
     /** Initialise the kernel's inputs, output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
      * @note GEMM: The tensors a, b, c, d must have the same data type. You should not mix data types when calling this function.
      *
-     * @param[in]  a     First input tensor  (Matrix A or Vector A). Data type supported: QS8/F16/F32
+     * @param[in]  a     First input tensor  (Matrix A or Vector A). Data type supported: QS8/QS16/F16/F32
      * @param[in]  b     Second input tensor (Matrix B). Data type supported: same as @p a
      * @param[in]  c     Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a
      * @param[out] d     Output tensor. Data type supported: same as @p a
@@ -65,14 +71,17 @@ public:
     void run() override;
 
 private:
-    NEGEMMInterleave4x4Kernel  _interleave_kernel;
-    NEGEMMTranspose1xWKernel   _transpose_kernel;
-    NEGEMMMatrixMultiplyKernel _mm_kernel;
-    NEGEMMMatrixAdditionKernel _ma_kernel;
-    Tensor                     _tmp_a;
-    Tensor                     _tmp_b;
-    bool                       _run_vector_matrix_multiplication;
-    bool                       _run_addition;
+    MemoryGroup                               _memory_group;
+    NEGEMMInterleave4x4Kernel                 _interleave_kernel;
+    NEGEMMTranspose1xWKernel                  _transpose_kernel;
+    NEGEMMMatrixMultiplyKernel                _mm_kernel;
+    std::unique_ptr<NEGEMMAssemblyBaseKernel> _mm_optimised_kernel;
+    NEGEMMMatrixAdditionKernel                _ma_kernel;
+    Tensor                                    _tmp_a;
+    Tensor                                    _tmp_b;
+    Tensor                                    _workspace;
+    bool                                      _run_vector_matrix_multiplication;
+    bool                                      _run_addition;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMM_H__ */

@@ -46,19 +46,19 @@ public:
     NELocallyConnectedMatrixMultiplyKernel &operator=(NELocallyConnectedMatrixMultiplyKernel &&) = default;
     /** Initialise the kernel's input and output
      *
-     * @param[in]  input0 First input tensor. Data types supported: F32
+     * @param[in]  input0 First input tensor. Data types supported: F16, F32
      * @param[in]  input1 Second input tensor containing the Matrix B. Data type supported: same as @p input0
      * @param[out] output Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      */
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     const ITensor *_input0;
     const ITensor *_input1;
     ITensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NELOCALLYCONNECTEDMATRIXMULTIPLYKERNEL_H__ */

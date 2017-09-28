@@ -29,14 +29,15 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/IFunction.h"
 
+#include "arm_compute/core/CL/kernels/CLDepthConcatenateKernel.h"
+#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
+
 #include <memory>
 #include <vector>
 
 namespace arm_compute
 {
 class ICLTensor;
-class CLDepthConcatenateKernel;
-class CLFillBorderKernel;
 
 /** Basic function to execute concatenate tensors along z axis. This function calls the following kernels:
  *
@@ -51,8 +52,8 @@ public:
     CLDepthConcatenate();
     /** Initialise the kernel's inputs vector and output.
      *
-     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported:  F32.
-     * @param[out]    output        Output tensor. Data types supported: F32.
+     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QS8/QS16/F16/F32.
+     * @param[out]    output        Output tensor. Data types supported: Same as @p input.
      */
     void configure(std::vector<ICLTensor *> inputs_vector, ICLTensor *output);
 

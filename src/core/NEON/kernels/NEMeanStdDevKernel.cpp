@@ -85,8 +85,13 @@ std::pair<uint64x1_t, uint64x1_t> accumulate(const Window &window, Iterator &ite
 } // namespace
 
 NEMeanStdDevKernel::NEMeanStdDevKernel()
-    : _input(nullptr), _mean(nullptr), _stddev(nullptr), _global_sum(nullptr), _global_sum_squared(nullptr), _mtx()
+    : _input(nullptr), _mean(nullptr), _stddev(nullptr), _global_sum(nullptr), _global_sum_squared(nullptr), _mtx(), _border_size(0)
 {
+}
+
+BorderSize NEMeanStdDevKernel::border_size() const
+{
+    return _border_size;
 }
 
 void NEMeanStdDevKernel::configure(const IImage *input, float *mean, uint64_t *global_sum, float *stddev, uint64_t *global_sum_squared)
@@ -105,6 +110,8 @@ void NEMeanStdDevKernel::configure(const IImage *input, float *mean, uint64_t *g
 
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
+    _border_size = BorderSize(ceil_to_multiple(input->info()->dimension(0), num_elems_processed_per_iteration) - input->info()->dimension(0));
+
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
 
@@ -113,8 +120,9 @@ void NEMeanStdDevKernel::configure(const IImage *input, float *mean, uint64_t *g
     INEKernel::configure(win);
 }
 
-void NEMeanStdDevKernel::run(const Window &window)
+void NEMeanStdDevKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     Iterator input(_input, window);
@@ -134,7 +142,7 @@ void NEMeanStdDevKernel::run(const Window &window)
     const float num_pixels = _input->info()->dimension(0) * _input->info()->dimension(1);
 
     // Merge sum and calculate mean and stddev
-    std::unique_lock<std::mutex> lock(_mtx);
+    std::unique_lock<arm_compute::Mutex> lock(_mtx);
 
     *_global_sum += vget_lane_u64(local_sum, 0);
 

@@ -24,9 +24,9 @@
 #ifndef __ARM_COMPUTE_ARRAY_H__
 #define __ARM_COMPUTE_ARRAY_H__
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
+#include "support/ToolchainSupport.h"
 
 #include <memory>
 
@@ -47,7 +47,7 @@ public:
      * @param[in] max_num_values Maximum number of values the array will be able to stored
      */
     Array(size_t max_num_values)
-        : IArray<T>(max_num_values), _values(arm_compute::cpp14::make_unique<T[]>(max_num_values))
+        : IArray<T>(max_num_values), _values(arm_compute::support::cpp14::make_unique<T[]>(max_num_values))
     {
     }
 

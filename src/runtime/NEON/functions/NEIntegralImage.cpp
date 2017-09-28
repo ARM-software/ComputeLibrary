@@ -23,9 +23,9 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEIntegralImage.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEIntegralImageKernel.h"
 #include "arm_compute/core/Types.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -33,7 +33,7 @@ using namespace arm_compute;
 
 void NEIntegralImage::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEIntegralImageKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEIntegralImageKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
     _border_handler.configure(output, _kernel->border_size(), BorderMode::CONSTANT, 0);

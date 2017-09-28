@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** OpenCL kernel which transposes the elements of a matrix in chunks of 1x4 if the input data type is F32 or in chunks of 1x8 if the input data type is F16.
+/** OpenCL kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor)
  *
  * Following an example of how the transposition1xW works when the input data type is F32
  *
@@ -62,9 +62,7 @@ class ICLTensor;
  * \end{array} \right)
  * @f]
  *
- * @note If the input data type is F32, the output matrix will have the following shape: [ height * 4, width / 4 ]
- * @note If the input data type is F16, the output matrix will have the following shape: [ height * 8, width / 8 ]
- * @note If the input data type is U8, the output matrix will have the following shape: [ height * 16, width / 16 ]
+ * @note The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor)
  *
  */
 class CLGEMMTranspose1xWKernel : public ICLSimple2DKernel
@@ -72,7 +70,7 @@ class CLGEMMTranspose1xWKernel : public ICLSimple2DKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/F16/F32
+     * @param[in]  input  Input tensor. Data types supported: U8/S8/QS8/U16/S16/QS16/F16/U32/S32/F32
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
@@ -80,5 +78,5 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMTRANSPOSE1XWKERNEL_H__ */

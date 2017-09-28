@@ -885,4 +885,4 @@ void colorconvert_rgb_to_yuv4(const void *__restrict input, void *__restrict out
     },
     in, out_y, out_u, out_v);
 }
-}
+} // namespace arm_compute

@@ -25,8 +25,8 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLMinMaxLocation::CLMinMaxLocation()
     : _min_max_kernel(),
       _min_max_loc_kernel(),
@@ -41,7 +41,7 @@ CLMinMaxLocation::CLMinMaxLocation()
 {
 }
 
-void CLMinMaxLocation::configure(const ICLImage *input, int32_t *min, int32_t *max, CLCoordinates2DArray *min_loc, CLCoordinates2DArray *max_loc, uint32_t *min_count, uint32_t *max_count)
+void CLMinMaxLocation::configure(const ICLImage *input, void *min, void *max, CLCoordinates2DArray *min_loc, CLCoordinates2DArray *max_loc, uint32_t *min_count, uint32_t *max_count)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == min);
     ARM_COMPUTE_ERROR_ON(nullptr == max);
@@ -67,8 +67,8 @@ void CLMinMaxLocation::run()
     CLScheduler::get().enqueue(_min_max_loc_kernel, false);
 
     // Update min and max
-    q.enqueueReadBuffer(_min_max_vals, CL_FALSE, 0 * sizeof(int32_t), sizeof(int32_t), _min);
-    q.enqueueReadBuffer(_min_max_vals, CL_FALSE, 1 * sizeof(int32_t), sizeof(int32_t), _max);
+    q.enqueueReadBuffer(_min_max_vals, CL_FALSE, 0 * sizeof(int32_t), sizeof(int32_t), static_cast<int32_t *>(_min));
+    q.enqueueReadBuffer(_min_max_vals, CL_FALSE, 1 * sizeof(int32_t), sizeof(int32_t), static_cast<int32_t *>(_max));
 
     // Update min and max count
     if(_min_count != nullptr)
@@ -96,3 +96,4 @@ void CLMinMaxLocation::run()
         _max_loc->resize(max_corner_size);
     }
 }
+} // namespace arm_compute

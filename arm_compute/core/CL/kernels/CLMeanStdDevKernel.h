@@ -63,12 +63,15 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
+    BorderSize border_size() const override;
+
 private:
     const ICLImage *_input;
     float          *_mean;
     float          *_stddev;
     cl::Buffer     *_global_sum;
     cl::Buffer     *_global_sum_squared;
+    BorderSize      _border_size;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLMEANSTDDEVKERNEL_H__ */

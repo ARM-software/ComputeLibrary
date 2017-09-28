@@ -64,7 +64,7 @@ public:
     CLGEMMInterleave4x4Kernel &operator=(CLGEMMInterleave4x4Kernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  Input tensor. Data types supported: U8/S8/QS8/U16/S16/QS16/F16/U32/S32/F32
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
@@ -76,5 +76,5 @@ private:
     const ICLTensor *_input;
     ICLTensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMINTERLEAVE4X4KERNEL_H__ */

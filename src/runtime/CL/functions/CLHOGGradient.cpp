@@ -29,8 +29,8 @@
 
 using namespace arm_compute;
 
-CLHOGGradient::CLHOGGradient()
-    : _derivative(), _mag_phase(), _gx(), _gy()
+CLHOGGradient::CLHOGGradient(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _derivative(), _mag_phase(), _gx(), _gy()
 {
 }
 
@@ -46,6 +46,10 @@ void CLHOGGradient::configure(ICLTensor *input, ICLTensor *output_magnitude, ICL
     TensorInfo info(shape_img, Format::S16);
     _gx.allocator()->init(info);
     _gy.allocator()->init(info);
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_gx);
+    _memory_group.manage(&_gy);
 
     // Initialise derivate kernel
     _derivative.configure(input, &_gx, &_gy, border_mode, constant_border_value);
@@ -67,9 +71,13 @@ void CLHOGGradient::configure(ICLTensor *input, ICLTensor *output_magnitude, ICL
 
 void CLHOGGradient::run()
 {
+    _memory_group.acquire();
+
     // Run derivative
     _derivative.run();
 
     // Run magnitude/phase kernel
     CLScheduler::get().enqueue(_mag_phase);
+
+    _memory_group.release();
 }

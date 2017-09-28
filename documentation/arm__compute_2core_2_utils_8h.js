@@ -9,6 +9,7 @@ var arm__compute_2core_2_utils_8h =
     [ "data_type_from_format", "arm__compute_2core_2_utils_8h.xhtml#a59846ef5ca75cd81cdb7e8a1ce08f9db", null ],
     [ "DIV_CEIL", "arm__compute_2core_2_utils_8h.xhtml#a12705a88669cb9fb90451ebe0db53c41", null ],
     [ "element_size_from_data_type", "arm__compute_2core_2_utils_8h.xhtml#a34b06c0cd94808a77b697e79880b84b0", null ],
+    [ "float_to_string_with_full_precision", "arm__compute_2core_2_utils_8h.xhtml#a9cd394c15b73f79ca1d98f5328064be2", null ],
     [ "floor_to_multiple", "arm__compute_2core_2_utils_8h.xhtml#a6959e681668a37a9242d2aae4e8b4375", null ],
     [ "is_data_type_fixed_point", "arm__compute_2core_2_utils_8h.xhtml#ab6bb62694ae8369d18a9c9687040975e", null ],
     [ "is_data_type_float", "arm__compute_2core_2_utils_8h.xhtml#af5982a092e9eb743fce2d6392bdd8897", null ],
@@ -22,7 +23,7 @@ var arm__compute_2core_2_utils_8h =
     [ "print_consecutive_elements", "arm__compute_2core_2_utils_8h.xhtml#a51a0d2ae440bc8cab3fbbe84bfea8b1d", null ],
     [ "print_consecutive_elements_impl", "arm__compute_2core_2_utils_8h.xhtml#aa3a28b8acd21301990e06377c64e1276", null ],
     [ "read_file", "arm__compute_2core_2_utils_8h.xhtml#aefa4a4d3136d77b85cccfce344f9f37f", null ],
-    [ "scaled_dimensions", "arm__compute_2core_2_utils_8h.xhtml#a6fd2c972d67298469a6aad75879fffab", null ],
+    [ "scaled_dimensions", "arm__compute_2core_2_utils_8h.xhtml#a3d3d8bf7b86db4d7d4ebfe5b332f41b3", null ],
     [ "separate_matrix", "arm__compute_2core_2_utils_8h.xhtml#a18ec57dffc5c26864be77318111dfb2a", null ],
     [ "string_from_activation_func", "arm__compute_2core_2_utils_8h.xhtml#ac955c978e18cc9bf6daea31f13076fba", null ],
     [ "string_from_border_mode", "arm__compute_2core_2_utils_8h.xhtml#abd15add5c6c7de5c8205ce236875aadd", null ],
@@ -33,5 +34,5 @@ var arm__compute_2core_2_utils_8h =
     [ "string_from_matrix_pattern", "arm__compute_2core_2_utils_8h.xhtml#a018795ab2489d17309e158ff5c060ab1", null ],
     [ "string_from_non_linear_filter_function", "arm__compute_2core_2_utils_8h.xhtml#a14831547f57ecf5f0deef888ad41ad30", null ],
     [ "string_from_norm_type", "arm__compute_2core_2_utils_8h.xhtml#afb5698af5404d5d11e3516c87b6e7041", null ],
-    [ "val_to_string", "arm__compute_2core_2_utils_8h.xhtml#ae350823b5c93227dc33f1105ece06d68", null ]
+    [ "string_from_pooling_type", "arm__compute_2core_2_utils_8h.xhtml#a84a03e85d2c40bf54ec8cdd5e3715c58", null ]
 ];

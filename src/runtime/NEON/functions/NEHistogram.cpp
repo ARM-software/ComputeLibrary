@@ -24,17 +24,17 @@
 #include "arm_compute/runtime/NEON/functions/NEHistogram.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IDistribution1D.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 NEHistogram::NEHistogram()
-    : _histogram_kernel(), _local_hist(), _window_lut(arm_compute::cpp14::make_unique<uint32_t[]>(window_lut_default_size)), _local_hist_size(0)
+    : _histogram_kernel(), _local_hist(), _window_lut(arm_compute::support::cpp14::make_unique<uint32_t[]>(window_lut_default_size)), _local_hist_size(0)
 {
 }
 
@@ -45,7 +45,7 @@ void NEHistogram::configure(const IImage *input, IDistribution1D *output)
 
     // Allocate space for threads local histograms
     _local_hist_size = output->num_bins() * NEScheduler::get().num_threads();
-    _local_hist      = arm_compute::cpp14::make_unique<uint32_t[]>(_local_hist_size);
+    _local_hist      = arm_compute::support::cpp14::make_unique<uint32_t[]>(_local_hist_size);
 
     // Configure kernel
     _histogram_kernel.configure(input, output, _local_hist.get(), _window_lut.get());

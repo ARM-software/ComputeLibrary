@@ -1,22 +1,6 @@
 var searchData=
 [
-  ['qint16_5ft',['qint16_t',['../namespacearm__compute.xhtml#a1521eea74b97de8f2df9304e44179400',1,'arm_compute']]],
-  ['qint16x4_5ft',['qint16x4_t',['../namespacearm__compute.xhtml#a82c56f0856f56d430393e6a00baee983',1,'arm_compute']]],
-  ['qint16x4x2_5ft',['qint16x4x2_t',['../namespacearm__compute.xhtml#a8d57e0f4f122442011213667168ef538',1,'arm_compute']]],
-  ['qint16x4x3_5ft',['qint16x4x3_t',['../namespacearm__compute.xhtml#a63f034ee885f20111e7f5d44e48e6d93',1,'arm_compute']]],
-  ['qint16x4x4_5ft',['qint16x4x4_t',['../namespacearm__compute.xhtml#a8525b18a2f34c3497bbfbd0e7c3a7875',1,'arm_compute']]],
-  ['qint16x8_5ft',['qint16x8_t',['../namespacearm__compute.xhtml#a4e15143176bfacdde8b06f4bb0b67427',1,'arm_compute']]],
-  ['qint16x8x2_5ft',['qint16x8x2_t',['../namespacearm__compute.xhtml#a3c4099e91913f28017e1f57b8e5cbf9f',1,'arm_compute']]],
-  ['qint16x8x3_5ft',['qint16x8x3_t',['../namespacearm__compute.xhtml#a65e109cf43ade8a2a3c57a1120b90b05',1,'arm_compute']]],
-  ['qint16x8x4_5ft',['qint16x8x4_t',['../namespacearm__compute.xhtml#a6bc1e8d62f1055278d8f05454faa422f',1,'arm_compute']]],
-  ['qint32_5ft',['qint32_t',['../namespacearm__compute.xhtml#aa06c95f9976f3729316d689b4419089f',1,'arm_compute']]],
-  ['qint8_5ft',['qint8_t',['../namespacearm__compute.xhtml#a4c3f681c30c9398c45bc3cd5dc4f038a',1,'arm_compute']]],
-  ['qint8x16_5ft',['qint8x16_t',['../namespacearm__compute.xhtml#a5b99ed49abd6b7bf13dafdd17bcef855',1,'arm_compute']]],
-  ['qint8x16x2_5ft',['qint8x16x2_t',['../namespacearm__compute.xhtml#a09108711e0c18d4e9811ea4597d573b1',1,'arm_compute']]],
-  ['qint8x16x3_5ft',['qint8x16x3_t',['../namespacearm__compute.xhtml#a7e175277ee7de6a5aeb5cd8916dbb346',1,'arm_compute']]],
-  ['qint8x16x4_5ft',['qint8x16x4_t',['../namespacearm__compute.xhtml#a3c4b33603ffff71e9f02c4be1a2f14d5',1,'arm_compute']]],
-  ['qint8x8_5ft',['qint8x8_t',['../namespacearm__compute.xhtml#a16a1bee14f1db073f75caa76dacf5078',1,'arm_compute']]],
-  ['qint8x8x2_5ft',['qint8x8x2_t',['../namespacearm__compute.xhtml#ace2375b626995858a398e1ffb3108f14',1,'arm_compute']]],
-  ['qint8x8x3_5ft',['qint8x8x3_t',['../namespacearm__compute.xhtml#a252c74fae9a9238ef7c23d306e670706',1,'arm_compute']]],
-  ['qint8x8x4_5ft',['qint8x8x4_t',['../namespacearm__compute.xhtml#a01ae65c0a0736d4293e657a66bde1538',1,'arm_compute']]]
+  ['paddingsize',['PaddingSize',['../namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da',1,'arm_compute']]],
+  ['promote_5ft',['promote_t',['../namespacearm__compute_1_1test_1_1traits.xhtml#ac20ca549fa27b2eed44367745055a233',1,'arm_compute::test::traits::promote_t()'],['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits.xhtml#ac20ca549fa27b2eed44367745055a233',1,'arm_compute::test::fixed_point_arithmetic::traits::promote_t()']]],
+  ['promoted_5ftype',['promoted_type',['../structarm__compute_1_1test_1_1common__promoted__signed__type.xhtml#aeab553c4422f2a498954db0b4eb15789',1,'arm_compute::test::common_promoted_signed_type']]]
 ];

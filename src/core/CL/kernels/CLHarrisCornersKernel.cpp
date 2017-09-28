@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"
 
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -91,8 +92,8 @@ void CLHarrisScoreKernel::configure(const ICLImage *input1, const ICLImage *inpu
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 4;
     constexpr unsigned int num_elems_written_per_iteration   = 4;
-    constexpr unsigned int num_elems_read_per_iteration      = 8;
-    constexpr unsigned int num_rows_read_per_iteration       = 3;
+    const unsigned int     num_elems_read_per_iteration      = block_size == 7 ? 10 : 8;
+    const unsigned int     num_rows_read_per_iteration       = block_size;
 
     Window win = calculate_max_window(*_input1->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
 

@@ -12,14 +12,14 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="37,-0.5 37,-19.5 79,-19.5 79,-0.5 37,-0.5"/>
-<text text-anchor="middle" x="58" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">Steps</text>
+<text text-anchor="middle" x="58" y="-7.5" font-family="Helvetica" font-size="10.00">Steps</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_dimensions.xhtml" target="_top" xlink:title="Dimensions\&lt; unsigned\l int \&gt;">
 <polygon fill="white" stroke="black" points="-7.10543e-15,-57.5 -7.10543e-15,-87.5 116,-87.5 116,-57.5 -7.10543e-15,-57.5"/>
-<text text-anchor="start" x="8" y="-75.5" font-family="Helvetica,sans-Serif" font-size="10.00">Dimensions&lt; unsigned</text>
-<text text-anchor="middle" x="58" y="-64.5" font-family="Helvetica,sans-Serif" font-size="10.00"> int &gt;</text>
+<text text-anchor="start" x="8" y="-75.5" font-family="Helvetica" font-size="10.00">Dimensions&lt; unsigned</text>
+<text text-anchor="middle" x="58" y="-64.5" font-family="Helvetica" font-size="10.00"> int &gt;</text>
 </a>
 </g>
 </g>
@@ -32,7 +32,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_dimensions.xhtml" target="_top" xlink:title="Dimensions with dimensionality. ">
 <polygon fill="white" stroke="black" points="12,-135.5 12,-154.5 104,-154.5 104,-135.5 12,-135.5"/>
-<text text-anchor="middle" x="58" y="-142.5" font-family="Helvetica,sans-Serif" font-size="10.00">Dimensions&lt; T &gt;</text>
+<text text-anchor="middle" x="58" y="-142.5" font-family="Helvetica" font-size="10.00">Dimensions&lt; T &gt;</text>
 </a>
 </g>
 </g>
@@ -40,7 +40,7 @@
 <g id="edge2" class="edge"><title>Node3&#45;&gt;Node2</title>
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M58,-125.236C58,-113.408 58,-98.3829 58,-87.5762"/>
 <polygon fill="orange" stroke="orange" points="54.5001,-125.355 58,-135.355 61.5001,-125.355 54.5001,-125.355"/>
-<text text-anchor="middle" x="95" y="-109" font-family="Helvetica,sans-Serif" font-size="10.00"> &lt; unsigned int &gt;</text>
+<text text-anchor="middle" x="95" y="-109" font-family="Helvetica" font-size="10.00"> &lt; unsigned int &gt;</text>
 </g>
 </g>
 </svg>

@@ -23,6 +23,11 @@
  */
 #ifndef __ARM_COMPUTE_TEST_TYPES_H__
 #define __ARM_COMPUTE_TEST_TYPES_H__
+
+#include "arm_compute/core/Types.h"
+
+#include <vector>
+
 namespace arm_compute
 {
 /** Fixed point operation */
@@ -33,5 +38,14 @@ enum class FixedPointOp
     INV_SQRT,  /**< Inverse square root */
     RECIPROCAL /**< Reciprocal */
 };
+
+template <typename MinMaxType>
+struct MinMaxLocationValues
+{
+    MinMaxType                 min{};
+    MinMaxType                 max{};
+    std::vector<Coordinates2D> min_loc{};
+    std::vector<Coordinates2D> max_loc{};
+};
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_TYPES_H__ */

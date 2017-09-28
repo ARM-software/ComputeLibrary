@@ -110,5 +110,5 @@ private:
     ICLKeyPointArray *_corners;    /**< destination array */
     cl::Buffer       *_num_buffer; /**< CL memory to record number of key points in the array */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLFASTCORNERSKERNEL_H__ */

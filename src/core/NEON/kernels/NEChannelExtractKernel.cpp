@@ -148,12 +148,11 @@ void NEChannelExtractKernel::configure(const ITensor *input, Channel channel, IT
     _input  = input;
     _output = output;
 
-    Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowRectangle output_access(input->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / subsampling, 1.f / subsampling);
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowRectangle  output_access(output->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / subsampling, 1.f / subsampling);
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
-                              output_access);
+    update_window_and_padding(win, input_access, output_access);
 
     ValidRegion input_valid_region = input->info()->valid_region();
 
@@ -257,16 +256,17 @@ void NEChannelExtractKernel::configure(const IMultiImage *input, Channel channel
 
     _output                    = output;
     Window                 win = calculate_max_window(*_input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal input_access(_input->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, _input->info()->valid_region());
 
     INEKernel::configure(win);
 }
 
-void NEChannelExtractKernel::run(const Window &window)
+void NEChannelExtractKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

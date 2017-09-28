@@ -26,13 +26,13 @@
 #include "arm_compute/core/Error.h"
 #if ARM_COMPUTE_CPP_SCHEDULER
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
-#endif
+#endif /* ARM_COMPUTE_CPP_SCHEDULER */
 
 #include "arm_compute/runtime/SingleThreadScheduler.h"
 
 #if ARM_COMPUTE_OPENMP_SCHEDULER
 #include "arm_compute/runtime/OMP/OMPScheduler.h"
-#endif
+#endif /* ARM_COMPUTE_OPENMP_SCHEDULER */
 
 using namespace arm_compute;
 
@@ -42,9 +42,9 @@ Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::OMP;
 Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::CPP;
 #elif ARM_COMPUTE_CPP_SCHEDULER && ARM_COMPUTE_OPENMP_SCHEDULER
 Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::CPP;
-#else
+#else  /* ARM_COMPUTE_*_SCHEDULER */
 Scheduler::Type Scheduler::_scheduler_type = Scheduler::Type::ST;
-#endif
+#endif /* ARM_COMPUTE_*_SCHEDULER */
 
 void Scheduler::set(Type t)
 {
@@ -64,17 +64,17 @@ bool Scheduler::is_available(Type t)
         {
 #if ARM_COMPUTE_CPP_SCHEDULER
             return true;
-#else
+#else  /* ARM_COMPUTE_CPP_SCHEDULER */
             return false;
-#endif
+#endif /* ARM_COMPUTE_CPP_SCHEDULER */
         }
         case Type::OMP:
         {
 #if ARM_COMPUTE_OPENMP_SCHEDULER
             return true;
-#else
+#else  /* ARM_COMPUTE_OPENMP_SCHEDULER */
             return false;
-#endif
+#endif /* ARM_COMPUTE_OPENMP_SCHEDULER */
         }
         case Type::CUSTOM:
         {
@@ -105,18 +105,18 @@ IScheduler &Scheduler::get()
         {
 #if ARM_COMPUTE_CPP_SCHEDULER
             return CPPScheduler::get();
-#else
+#else  /* ARM_COMPUTE_CPP_SCHEDULER */
             ARM_COMPUTE_ERROR("Recompile with cppthreads=1 to use C++11 scheduler.");
-#endif
+#endif /* ARM_COMPUTE_CPP_SCHEDULER */
             break;
         }
         case Type::OMP:
         {
 #if ARM_COMPUTE_OPENMP_SCHEDULER
             return OMPScheduler::get();
-#else
+#else  /* ARM_COMPUTE_OPENMP_SCHEDULER */
             ARM_COMPUTE_ERROR("Recompile with openmp=1 to use openmp scheduler.");
-#endif
+#endif /* ARM_COMPUTE_OPENMP_SCHEDULER */
             break;
         }
         case Type::CUSTOM:

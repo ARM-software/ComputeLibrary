@@ -28,7 +28,9 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "support/ToolchainSupport.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/core/CL/OpenCL.h"
@@ -77,6 +79,49 @@ void draw_detection_rectangle(arm_compute::ITensor *tensor, const arm_compute::D
  * @return The width, height and max value stored in the header of the PPM file
  */
 std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs);
+
+/** Maps a tensor if needed
+ *
+ * @param[in] tensor   Tensor to be mapped
+ * @param[in] blocking Specified if map is blocking or not
+ */
+template <typename T>
+void map(T &tensor, bool blocking)
+{
+    ARM_COMPUTE_UNUSED(tensor);
+    ARM_COMPUTE_UNUSED(blocking);
+}
+
+/** Unmaps a tensor if needed
+ *
+ * @param tensor  Tensor to be unmapped
+ */
+template <typename T>
+void unmap(T &tensor)
+{
+    ARM_COMPUTE_UNUSED(tensor);
+}
+
+#ifdef ARM_COMPUTE_CL
+/** Maps a tensor if needed
+ *
+ * @param[in] tensor   Tensor to be mapped
+ * @param[in] blocking Specified if map is blocking or not
+ */
+void map(CLTensor &tensor, bool blocking)
+{
+    tensor.map(blocking);
+}
+
+/** Unmaps a tensor if needed
+ *
+ * @param tensor  Tensor to be unmapped
+ */
+void unmap(CLTensor &tensor)
+{
+    tensor.unmap();
+}
+#endif /* ARM_COMPUTE_CL */
 
 /** Class to load the content of a PPM file into an Image
  */
@@ -146,13 +191,9 @@ public:
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&image, arm_compute::Format::U8, arm_compute::Format::RGB888);
         try
         {
-#ifdef ARM_COMPUTE_CL
             // Map buffer if creating a CLTensor
-            if(std::is_same<typename std::decay<T>::type, arm_compute::CLImage>::value)
-            {
-                image.map();
-            }
-#endif
+            map(image, true);
+
             // Check if the file is large enough to fill the image
             const size_t current_position = _fs.tellg();
             _fs.seekg(0, std::ios_base::end);
@@ -213,13 +254,8 @@ public:
                     ARM_COMPUTE_ERROR("Unsupported format");
             }
 
-#ifdef ARM_COMPUTE_CL
             // Unmap buffer if creating a CLTensor
-            if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
-            {
-                image.unmap();
-            }
-#endif
+            unmap(image);
         }
         catch(const std::ifstream::failure &e)
         {
@@ -260,13 +296,8 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         fs << "P6\n"
            << width << " " << height << " 255\n";
 
-#ifdef ARM_COMPUTE_CL
         // Map buffer if creating a CLTensor
-        if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
-        {
-            tensor.map();
-        }
-#endif
+        map(tensor, true);
 
         switch(tensor.info()->format())
         {
@@ -307,17 +338,118 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
             default:
                 ARM_COMPUTE_ERROR("Unsupported format");
         }
-#ifdef ARM_COMPUTE_CL
+
         // Unmap buffer if creating a CLTensor
-        if(std::is_same<typename std::decay<T>::type, arm_compute::CLTensor>::value)
-        {
-            tensor.unmap();
-        }
-#endif
+        unmap(tensor);
     }
     catch(const std::ofstream::failure &e)
     {
         ARM_COMPUTE_ERROR("Writing %s: (%s)", ppm_filename.c_str(), e.what());
+    }
+}
+
+/** Load the tensor with pre-trained data from a binary file
+ *
+ * @param[in] tensor   The tensor to be filled. Data type supported: F32.
+ * @param[in] filename Filename of the binary file to load from.
+ */
+template <typename T>
+void load_trained_data(T &tensor, const std::string &filename)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
+
+    std::ifstream fs;
+
+    try
+    {
+        fs.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
+        // Open file
+        fs.open(filename, std::ios::in | std::ios::binary);
+
+        if(!fs.good())
+        {
+            throw std::runtime_error("Could not load binary data: " + filename);
+        }
+
+        // Map buffer if creating a CLTensor
+        map(tensor, true);
+
+        Window window;
+
+        window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, 1, 1));
+
+        for(unsigned int d = 1; d < tensor.info()->num_dimensions(); ++d)
+        {
+            window.set(d, Window::Dimension(0, tensor.info()->tensor_shape()[d], 1));
+        }
+
+        arm_compute::Iterator in(&tensor, window);
+
+        execute_window_loop(window, [&](const Coordinates & id)
+        {
+            fs.read(reinterpret_cast<std::fstream::char_type *>(in.ptr()), tensor.info()->tensor_shape()[0] * tensor.info()->element_size());
+        },
+        in);
+
+#ifdef ARM_COMPUTE_CL
+        // Unmap buffer if creating a CLTensor
+        unmap(tensor);
+#endif /* ARM_COMPUTE_CL */
+    }
+    catch(const std::ofstream::failure &e)
+    {
+        ARM_COMPUTE_ERROR("Writing %s: (%s)", filename.c_str(), e.what());
+    }
+}
+
+/** Obtain numpy type string from DataType.
+ *
+ * @param[in] data_type Data type.
+ *
+ * @return numpy type string.
+ */
+inline std::string get_typestring(DataType data_type)
+{
+    // Check endianness
+    const unsigned int i = 1;
+    const char        *c = reinterpret_cast<const char *>(&i);
+    std::string        endianness;
+    if(*c == 1)
+    {
+        endianness = std::string("<");
+    }
+    else
+    {
+        endianness = std::string(">");
+    }
+    const std::string no_endianness("|");
+
+    switch(data_type)
+    {
+        case DataType::U8:
+            return no_endianness + "u" + support::cpp11::to_string(sizeof(uint8_t));
+        case DataType::S8:
+            return no_endianness + "i" + support::cpp11::to_string(sizeof(int8_t));
+        case DataType::U16:
+            return endianness + "u" + support::cpp11::to_string(sizeof(uint16_t));
+        case DataType::S16:
+            return endianness + "i" + support::cpp11::to_string(sizeof(int16_t));
+        case DataType::U32:
+            return endianness + "u" + support::cpp11::to_string(sizeof(uint32_t));
+        case DataType::S32:
+            return endianness + "i" + support::cpp11::to_string(sizeof(int32_t));
+        case DataType::U64:
+            return endianness + "u" + support::cpp11::to_string(sizeof(uint64_t));
+        case DataType::S64:
+            return endianness + "i" + support::cpp11::to_string(sizeof(int64_t));
+        case DataType::F32:
+            return endianness + "f" + support::cpp11::to_string(sizeof(float));
+        case DataType::F64:
+            return endianness + "f" + support::cpp11::to_string(sizeof(double));
+        case DataType::SIZET:
+            return endianness + "u" + support::cpp11::to_string(sizeof(size_t));
+        default:
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
 }
 } // namespace utils

@@ -21,192 +21,108 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "CL/CLAccessor.h"
-#include "CL/Helper.h"
-#include "Globals.h"
-#include "TensorLibrary.h"
-#include "benchmark/Datasets.h"
-#include "benchmark/Profiler.h"
-#include "benchmark/WallClockTimer.h"
-
-#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "tests/CL/CLAccessor.h"
+#include "tests/benchmark/fixtures/ActivationLayerFixture.h"
+#include "tests/datasets/system_tests/alexnet/AlexNetActivationLayerDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ActivationLayerDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ActivationLayerDataset.h"
+#include "tests/datasets/system_tests/lenet5/LeNet5ActivationLayerDataset.h"
+#include "tests/datasets/system_tests/squeezenet/SqueezeNetActivationLayerDataset.h"
+#include "tests/datasets/system_tests/vgg/vgg16/VGG16ActivationLayerDataset.h"
+#include "tests/datasets/system_tests/yolo/v2/YOLOV2ActivationLayerDataset.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
-#include "benchmark/benchmark_api.h"
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::benchmark;
-using namespace arm_compute::test::cl;
-
-#include "benchmark/common/ActivationLayer.h"
-
+namespace arm_compute
+{
+namespace test
+{
 namespace
 {
-using ActivationLayerAlexNet   = ActivationLayer<AlexNetActivationLayerDataset, CLTensor, CLAccessor, CLActivationLayer>;
-using ActivationLayerLeNet5    = ActivationLayer<LeNet5ActivationLayerDataset, CLTensor, CLAccessor, CLActivationLayer>;
-using ActivationLayerGoogLeNet = ActivationLayer<GoogLeNetActivationLayerDataset, CLTensor, CLAccessor, CLActivationLayer>;
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8, DataType::QS16 });
 } // namespace
 
-BENCHMARK_DEFINE_F(ActivationLayerAlexNet, cl_alexnet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        act_layer.run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+using CLActivationLayerFixture = ActivationLayerFixture<CLTensor, CLActivationLayer, CLAccessor>;
 
-BENCHMARK_REGISTER_F(ActivationLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetActivationLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetActivationLayerDataset, 1, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetActivationLayerDataset, 2, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetActivationLayerDataset, 3, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetActivationLayerDataset, 4, 1, 4, 8>);
+TEST_SUITE(CL)
 
-BENCHMARK_DEFINE_F(ActivationLayerLeNet5, cl_lenet5)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        act_layer.run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_REGISTER_F(ActivationLayerLeNet5, cl_lenet5)
-->Threads(1)
-->Apply(DataSetArgBatched<LeNet5ActivationLayerDataset, 0, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_DEFINE_F(ActivationLayerGoogLeNet, cl_googlenet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        act_layer.run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 1, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 2, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 3, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 4, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 5, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 6, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 7, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 8, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 9, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 10, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 11, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 12, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 13, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 14, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 15, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 16, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 17, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 18, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 19, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 20, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 21, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 22, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 23, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 24, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 25, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 26, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 27, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 28, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 29, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 30, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 31, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ActivationLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetActivationLayerDataset, 32, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ActivationLayer, CLActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ActivationLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace test
+} // namespace arm_compute

@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLTableLookup.h"
 
 #include "arm_compute/core/CL/kernels/CLTableLookupKernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 void CLTableLookup::configure(const ICLTensor *input, const ICLLut *lut, ICLTensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLTableLookupKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLTableLookupKernel>();
     k->configure(input, lut, output);
     _kernel = std::move(k);
 }

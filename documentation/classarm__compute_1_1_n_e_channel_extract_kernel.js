@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_channel_extract_kernel =
     [ "configure", "classarm__compute_1_1_n_e_channel_extract_kernel.xhtml#aa9055d30c3643f63cbf4af54f174505e", null ],
     [ "operator=", "classarm__compute_1_1_n_e_channel_extract_kernel.xhtml#aa8e7c7a49ee3042eba01b2b7c0284f8c", null ],
     [ "operator=", "classarm__compute_1_1_n_e_channel_extract_kernel.xhtml#acf451199b29e2a9a737419455bd55757", null ],
-    [ "run", "classarm__compute_1_1_n_e_channel_extract_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_channel_extract_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

@@ -1,95 +1,324 @@
+namespace arm_compute
+{
+namespace test
+{
 /**
 @page tests Validation and benchmarks tests
 
 @tableofcontents
 
-@section building_test_dependencies Building dependencies
+@section tests_overview Overview
 
-The tests currently make use of Boost (Test and Program options) for validation
-and Google Benchmark for performance runs. Below are instructions about how to
-build these 3rd party libraries.
+Benchmark and validation tests are based on the same framework to setup and run
+the tests. In addition to running simple, self-contained test functions the
+framework supports fixtures and data test cases. The former allows to share
+common setup routines between various backends thus reducing the amount of
+duplicated code. The latter can be used to parameterize tests or fixtures with
+different inputs, e.g. different tensor shapes. One limitation is that
+tests/fixtures cannot be parameterized based on the data type if static type
+information is needed within the test (e.g. to validate the results).
 
-@note By default the build of the validation and benchmark tests is disabled, to enable it use `validation_tests=1` and `benchmark_tests=1`
+@subsection tests_overview_fixtures Fixtures
 
-@subsection building_boost Building Boost
+Fixtures can be used to share common setup, teardown or even run tasks among
+multiple test cases. For that purpose a fixture can define a `setup`,
+`teardown` and `run` method. Additionally the constructor and destructor might
+also be customized.
 
-First follow the instructions from the Boost library on how to setup the Boost
-build system
-(http://www.boost.org/doc/libs/1_64_0/more/getting_started/index.html).
-Afterwards the required libraries can be build with:
+An instance of the fixture is created immediately before the actual test is
+executed. After construction the @ref framework::Fixture::setup method is called. Then the test
+function or the fixtures `run` method is invoked. After test execution the
+@ref framework::Fixture::teardown method is called and lastly the fixture is destructed.
 
-    ./b2 --with-program_options --with-test link=static \
-    define=BOOST_TEST_ALTERNATIVE_INIT_API
+@subsubsection tests_overview_fixtures_fixture Fixture
 
-Additionally, depending on your environment, it might be necessary to specify
-the ```toolset=``` option to choose the right compiler. Moreover,
-```address-model=32``` can be used to force building for 32bit and
-```target-os=android``` must be specified to build for Android.
+Fixtures for non-parameterized test are straightforward. The custom fixture
+class has to inherit from @ref framework::Fixture and choose to implement any of the
+`setup`, `teardown` or `run` methods. None of the methods takes any arguments
+or returns anything.
 
-After executing the build command the libraries
-```libboost_program_options.a``` and ```libboost_unit_test_framework.a``` can
-be found in ```./stage/lib```.
+    class CustomFixture : public framework::Fixture
+    {
+        void setup()
+        {
+            _ptr = malloc(4000);
+        }
 
-@subsection building_google_benchmark Building Google Benchmark
+        void run()
+        {
+            ARM_COMPUTE_ASSERT(_ptr != nullptr);
+        }
 
-Instructions on how to build Google Benchmark using CMake can be found in their
-repository: https://github.com/google/benchmark. For example, building for
-Android 32bit can be achieved via
+        void teardown()
+        {
+            free(_ptr);
+        }
 
-    cmake -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_COMPILER=arm-linux-androideabi-clang++ \
-    -DBENCHMARK_ENABLE_LTO=false -DBENCHMARK_ENABLE_TESTING=false ..
+        void *_ptr;
+    };
 
-The library required by the compute library is ```libbenchmark.a```.
+@subsubsection tests_overview_fixtures_data_fixture Data fixture
+
+The advantage of a parameterized fixture is that arguments can be passed to the setup method at runtime. To make this possible the setup method has to be a template with a type parameter for every argument (though the template parameter doesn't have to be used). All other methods remain the same.
+
+    class CustomFixture : public framework::Fixture
+    {
+    #ifdef ALTERNATIVE_DECLARATION
+        template <typename ...>
+        void setup(size_t size)
+        {
+            _ptr = malloc(size);
+        }
+    #else
+        template <typename T>
+        void setup(T size)
+        {
+            _ptr = malloc(size);
+        }
+    #endif
+
+        void run()
+        {
+            ARM_COMPUTE_ASSERT(_ptr != nullptr);
+        }
+
+        void teardown()
+        {
+            free(_ptr);
+        }
+
+        void *_ptr;
+    };
+
+@subsection tests_overview_test_cases Test cases
+
+All following commands can be optionally prefixed with `EXPECTED_FAILURE_` or
+`DISABLED_`.
+
+@subsubsection tests_overview_test_cases_test_case Test case
+
+A simple test case function taking no inputs and having no (shared) state.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the dataset mode in which the test will be active.
+
+
+    TEST_CASE(TestCaseName, DatasetMode::PRECOMMIT)
+    {
+        ARM_COMPUTE_ASSERT_EQUAL(1 + 1, 2);
+    }
+
+@subsubsection tests_overview_test_cases_fixture_fixture_test_case Fixture test case
+
+A simple test case function taking no inputs that inherits from a fixture. The
+test case will have access to all public and protected members of the fixture.
+Only the setup and teardown methods of the fixture will be used. The body of
+this function will be used as test function.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the class name of the fixture.
+- Third argument is the dataset mode in which the test will be active.
+
+
+    class FixtureName : public framework::Fixture
+    {
+        public:
+            void setup() override
+            {
+                _one = 1;
+            }
+
+        protected:
+            int _one;
+    };
+
+    FIXTURE_TEST_CASE(TestCaseName, FixtureName, DatasetMode::PRECOMMIT)
+    {
+        ARM_COMPUTE_ASSERT_EQUAL(_one + 1, 2);
+    }
+
+@subsubsection tests_overview_test_cases_fixture_register_fixture_test_case Registering a fixture as test case
+
+Allows to use a fixture directly as test case. Instead of defining a new test
+function the run method of the fixture will be executed.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the class name of the fixture.
+- Third argument is the dataset mode in which the test will be active.
+
+
+    class FixtureName : public framework::Fixture
+    {
+        public:
+            void setup() override
+            {
+                _one = 1;
+            }
+
+            void run() override
+            {
+                ARM_COMPUTE_ASSERT_EQUAL(_one + 1, 2);
+            }
+
+        protected:
+            int _one;
+    };
+
+    REGISTER_FIXTURE_TEST_CASE(TestCaseName, FixtureName, DatasetMode::PRECOMMIT);
+
+
+@subsubsection tests_overview_test_cases_data_test_case Data test case
+
+A parameterized test case function that has no (shared) state. The dataset will
+be used to generate versions of the test case with different inputs.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the dataset mode in which the test will be active.
+- Third argument is the dataset.
+- Further arguments specify names of the arguments to the test function. The
+  number must match the arity of the dataset.
+
+
+    DATA_TEST_CASE(TestCaseName, DatasetMode::PRECOMMIT, framework::make("Numbers", {1, 2, 3}), num)
+    {
+        ARM_COMPUTE_ASSERT(num < 4);
+    }
+
+@subsubsection tests_overview_test_cases_fixture_data_test_case Fixture data test case
+
+A parameterized test case that inherits from a fixture. The test case will have
+access to all public and protected members of the fixture. Only the setup and
+teardown methods of the fixture will be used. The setup method of the fixture
+needs to be a template and has to accept inputs from the dataset as arguments.
+The body of this function will be used as test function. The dataset will be
+used to generate versions of the test case with different inputs.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the class name of the fixture.
+- Third argument is the dataset mode in which the test will be active.
+- Fourth argument is the dataset.
+
+
+    class FixtureName : public framework::Fixture
+    {
+        public:
+            template <typename T>
+            void setup(T num)
+            {
+                _num = num;
+            }
+
+        protected:
+            int _num;
+    };
+
+    FIXTURE_DATA_TEST_CASE(TestCaseName, FixtureName, DatasetMode::PRECOMMIT, framework::make("Numbers", {1, 2, 3}))
+    {
+        ARM_COMPUTE_ASSERT(_num < 4);
+    }
+
+@subsubsection tests_overview_test_cases_register_fixture_data_test_case Registering a fixture as data test case
+
+Allows to use a fixture directly as parameterized test case. Instead of
+defining a new test function the run method of the fixture will be executed.
+The setup method of the fixture needs to be a template and has to accept inputs
+from the dataset as arguments. The dataset will be used to generate versions of
+the test case with different inputs.
+
+- First argument is the name of the test case (has to be unique within the
+  enclosing test suite).
+- Second argument is the class name of the fixture.
+- Third argument is the dataset mode in which the test will be active.
+- Fourth argument is the dataset.
+
+
+    class FixtureName : public framework::Fixture
+    {
+        public:
+            template <typename T>
+            void setup(T num)
+            {
+                _num = num;
+            }
+
+            void run() override
+            {
+                ARM_COMPUTE_ASSERT(_num < 4);
+            }
+
+        protected:
+            int _num;
+    };
+
+    REGISTER_FIXTURE_DATA_TEST_CASE(TestCaseName, FixtureName, DatasetMode::PRECOMMIT, framework::make("Numbers", {1, 2, 3}));
+
+@section writing_tests Writing validation tests
+
+Before starting a new test case have a look at the existing ones. They should
+provide a good overview how test cases are structured.
+
+- The C++ reference needs to be added to `tests/validation/CPP/`. The
+  reference function is typically a template parameterized by the underlying
+  value type of the `SimpleTensor`. This makes it easy to specialise for
+  different data types.
+- If all backends have a common interface it makes sense to share the setup
+  code. This can be done by adding a fixture in
+  `tests/validation/fixtures/`. Inside of the `setup` method of a fixture
+  the tensors can be created and initialised and the function can be configured
+  and run. The actual test will only have to validate the results. To be shared
+  among multiple backends the fixture class is usually a template that accepts
+  the specific types (data, tensor class, function class etc.) as parameters.
+- The actual test cases need to be added for each backend individually.
+  Typically the will be multiple tests for different data types and for
+  different execution modes, e.g. precommit and nightly.
 
 @section tests_running_tests Running tests
 @subsection tests_running_tests_benchmarking Benchmarking
 @subsubsection tests_running_tests_benchmarking_filter Filter tests
 All tests can be run by invoking
 
-    ./arm_compute_benchmark -- ./data
+    ./arm_compute_benchmark ./data
 
 where `./data` contains the assets needed by the tests.
 
-If only a subset of the tests has to be executed the `--benchmark_filter` option takes a regular expression to select matching tests.
+If only a subset of the tests has to be executed the `--filter` option takes a
+regular expression to select matching tests.
 
-    ./arm_compute_benchmark --benchmark_filter=neon_bitwise_and ./data
+    ./arm_compute_benchmark --filter='NEON/.*AlexNet' ./data
 
-All available tests can be displayed with the `--benchmark_list_tests` switch.
+Additionally each test has a test id which can be used as a filter, too.
+However, the test id is not guaranteed to be stable when new tests are added.
+Only for a specific build the same the test will keep its id.
 
-    ./arm_compute_benchmark --benchmark_list_tests ./data
+    ./arm_compute_benchmark --filter-id=10 ./data
+
+All available tests can be displayed with the `--list-tests` switch.
+
+    ./arm_compute_benchmark --list-tests
+
+More options can be found in the `--help` message.
 
 @subsubsection tests_running_tests_benchmarking_runtime Runtime
-By default every test is run multiple *iterations* until a minimum time is reached. The minimum time (in seconds) can be controlled with the `--benchmark_min_time` flag. However, each test might have a hard coded value for the number of iterations or minimum execution time. In that case the command line argument is ignored for those specific tests.
-Additionally it is possible to specify multiple *repetitions* (`--benchmark_repetitions`) which will run each test multiple times (including the iterations). The average and standard deviation for all repetitions is automatically computed and reported.
+By default every test is run once on a single thread. The number of iterations
+can be controlled via the `--iterations` option and the number of threads via
+`--threads`.
 
-@subsubsection tests_running_tests_benchmarking_verbosity Verbosity
-The verbosity of the test output can be controlled via the `--v` flag. Though it should hardly ever be necessary.
+@subsubsection tests_running_tests_benchmarking_output Output
+By default the benchmarking results are printed in a human readable format on
+the command line. The colored output can be disabled via `--no-color-output`.
+As an alternative output format JSON is supported and can be selected via
+`--log-format=json`. To write the output to a file instead of stdout the
+`--log-file` option can be used.
 
 @subsection tests_running_tests_validation Validation
-@subsubsection tests_running_tests_validation_filter Filter tests
-All tests can be run by invoking
 
-    ./arm_compute_validation -- ./data
+@note The new validation tests have the same interface as the benchmarking tests.
 
-where `./data` contains the assets needed by the tests.
-
-As running all tests can take a lot of time the suite is split into "precommit" and "nightly" tests. The precommit tests will be fast to execute but still cover the most important features. In contrast the nightly tests offer more extensive coverage but take longer. The different subsets can be selected from the command line as follows:
-
-    ./arm_compute_validation -t @precommit -- ./data
-    ./arm_compute_validation -t @nightly -- ./data
-
-Additionally it is possible to select specific suites or tests:
-
-    ./arm_compute_validation -t CL -- ./data
-    ./arm_compute_validation -t NEON/BitwiseAnd/RunSmall/_0 -- ./data
-
-All available tests can be displayed with the `--list_content` switch.
-
-    ./arm_compute_validation --list_content -- ./data
-
-For a complete list of possible selectors please see: http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/runtime_config/test_unit_filtering.html
-
-@subsubsection tests_running_tests_validation_verbosity Verbosity
-There are two separate flags to control the verbosity of the test output. `--report_level` controls the verbosity of the summary produced after all tests have been executed. `--log_level` controls the verbosity of the information generated during the execution of tests. All available settings can be found in the Boost documentation for [--report_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/report_level.html) and [--log_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/log_level.html), respectively.
 */
+} // namespace test
+} // namespace arm_compute

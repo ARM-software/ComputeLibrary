@@ -49,8 +49,14 @@ INEWarpKernel::INEWarpKernel()
 {
 }
 
-void INEWarpKernel::run(const Window &window)
+BorderSize INEWarpKernel::border_size() const
 {
+    return BorderSize(1);
+}
+
+void INEWarpKernel::run(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
@@ -93,9 +99,9 @@ void INEWarpKernel::configure(const ITensor *input, ITensor *output, const float
 
     // Reads can occur within the valid region of the input
     AccessWindowStatic input_access(input->info(),
-                                    input_valid_region.anchor[0], input_valid_region.anchor[1],
-                                    input_valid_region.anchor[0] + input_valid_region.shape[0],
-                                    input_valid_region.anchor[1] + input_valid_region.shape[1]);
+                                    input_valid_region.anchor[0] - border_size().left, input_valid_region.anchor[1] - border_size().top,
+                                    input_valid_region.anchor[0] + input_valid_region.shape[0] + border_size().right,
+                                    input_valid_region.anchor[1] + input_valid_region.shape[1] + border_size().bottom);
     AccessWindowHorizontal output_access(output->info(), 0, 1);
 
     update_window_and_padding(win, input_access, output_access);
@@ -171,7 +177,7 @@ void NEWarpAffineKernel<interpolation>::warp_undefined(const Window &window)
                     *out.ptr() = nearest_interpolation(in.ptr(), x0, y0, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, x0, y0);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, x0, y0);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -250,7 +256,7 @@ void NEWarpAffineKernel<interpolation>::warp_constant(const Window &window)
                     *out.ptr() = nearest_interpolation(in.ptr(), x0, y0, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, x0, y0);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, x0, y0);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -330,7 +336,7 @@ void NEWarpAffineKernel<interpolation>::warp_replicate(const Window &window)
                     *out.ptr() = nearest_interpolation(in.ptr(), x0, y0, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, x0, y0);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, x0, y0);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -390,7 +396,11 @@ void NEWarpPerspectiveKernel<interpolation>::warp_undefined(const Window &window
     const float start_z0 = M20 * window.x().start();
 
     // Current row
-    int y_cur = window.y().start();
+    int y_cur  = window.y().start();
+    int z_cur  = window.z().start();
+    int d3_cur = window[3].start();
+    int d4_cur = window[4].start();
+    int d5_cur = window[5].start();
 
     // const_x0, const_y0 and const_z0 are the constant parts of x0, y0 and z0 during the row processing
     float const_x0 = M01 * y_cur + M02;
@@ -405,9 +415,13 @@ void NEWarpPerspectiveKernel<interpolation>::warp_undefined(const Window &window
     execute_window_loop(window, [&](const Coordinates & id)
     {
         // Check if we are processing a new row. If so, update the current processed row (y_cur), x0, y0 and z0
-        if(y_cur != id.y())
+        if((y_cur != id.y()) || (z_cur != id.z()) || (d3_cur != id[3]) || (d4_cur != id[4]) || (d5_cur != id[5]))
         {
-            y_cur = id.y();
+            y_cur  = id.y();
+            z_cur  = id.z();
+            d3_cur = id[3];
+            d4_cur = id[4];
+            d5_cur = id[5];
 
             const_x0 = M01 * y_cur + M02;
             const_y0 = M11 * y_cur + M12;
@@ -431,7 +445,7 @@ void NEWarpPerspectiveKernel<interpolation>::warp_undefined(const Window &window
                     *out.ptr() = nearest_interpolation(in.ptr(), xn, yn, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, xn, yn);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, xn, yn);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -484,7 +498,11 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
     const float start_z0 = M20 * window.x().start();
 
     // Current row
-    int y_cur = window.y().start();
+    int y_cur  = window.y().start();
+    int z_cur  = window.z().start();
+    int d3_cur = window[3].start();
+    int d4_cur = window[4].start();
+    int d5_cur = window[5].start();
 
     // const_x0, const_y0 and const_z0 are the constant parts of x0, y0 and z0 during the row processing
     float const_x0 = M01 * y_cur + M02;
@@ -498,10 +516,14 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        // Check if we are processing a new row. If so, update the current row (y_cur), x0, y0 and z0
-        if(y_cur != id.y())
+        // Check if we are processing a new row. If so, update the current processed row (y_cur), x0, y0 and z0
+        if((y_cur != id.y()) || (z_cur != id.z()) || (d3_cur != id[3]) || (d4_cur != id[4]) || (d5_cur != id[5]))
         {
-            y_cur = id.y();
+            y_cur  = id.y();
+            z_cur  = id.z();
+            d3_cur = id[3];
+            d4_cur = id[4];
+            d5_cur = id[5];
 
             const_x0 = M01 * y_cur + M02;
             const_y0 = M11 * y_cur + M12;
@@ -516,7 +538,6 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
         const float yn = y0 / z0;
 
         // Only use input values if xn and yn are within the valid region.
-        // Otherwise write the constant border value.
         if((min_y <= yn) && (yn < max_y) && (min_x <= xn) && (xn < max_x))
         {
             switch(interpolation)
@@ -525,7 +546,7 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
                     *out.ptr() = nearest_interpolation(in.ptr(), xn, yn, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, xn, yn);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, xn, yn);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -533,7 +554,34 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
         }
         else
         {
-            *out.ptr() = _constant_border_value;
+            switch(interpolation)
+            {
+                case InterpolationPolicy::NEAREST_NEIGHBOR:
+                    *out.ptr() = _constant_border_value;
+                    break;
+                case InterpolationPolicy::BILINEAR:
+                {
+                    const auto xi   = clamp<int>(std::floor(xn), min_x - 1, max_x);
+                    const auto yi   = clamp<int>(std::floor(yn), min_y - 1, max_y);
+                    const auto xi_1 = clamp<int>(std::floor(xn + 1), min_x - 1, max_x);
+                    const auto yi_1 = clamp<int>(std::floor(yn + 1), min_y - 1, max_y);
+
+                    const float dx  = xn - std::floor(xn);
+                    const float dy  = yn - std::floor(yn);
+                    const float dx1 = 1.0f - dx;
+                    const float dy1 = 1.0f - dy;
+
+                    const float a00 = *(in.ptr() + xi + yi * stride);
+                    const float a01 = *(in.ptr() + xi_1 + yi * stride);
+                    const float a10 = *(in.ptr() + xi + yi_1 * stride);
+                    const float a11 = *(in.ptr() + xi_1 + yi_1 * stride);
+
+                    *out.ptr() = a00 * (dx1 * dy1) + a01 * (dx * dy1) + a10 * (dx1 * dy) + a11 * (dx * dy);
+                }
+                break;
+                default:
+                    ARM_COMPUTE_ERROR("Interpolation not supported");
+            }
         }
 
         x0 += M00;
@@ -562,7 +610,11 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
     const size_t stride = _input->info()->strides_in_bytes()[1];
 
     // Current row
-    int y_cur = window.y().start();
+    int y_cur  = window.y().start();
+    int z_cur  = window.z().start();
+    int d3_cur = window[3].start();
+    int d4_cur = window[4].start();
+    int d5_cur = window[5].start();
 
     // x0 = M00 * x + M01 * y + M02
     // y0 = M10 * x + M11 * y + M12
@@ -596,10 +648,14 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        // Check if we are processing a new row. If so, update the current row (y_cur), x0, y0 and z0
-        if(y_cur != id.y())
+        // Check if we are processing a new row. If so, update the current processed row (y_cur), x0, y0 and z0
+        if((y_cur != id.y()) || (z_cur != id.z()) || (d3_cur != id[3]) || (d4_cur != id[4]) || (d5_cur != id[5]))
         {
-            y_cur = id.y();
+            y_cur  = id.y();
+            z_cur  = id.z();
+            d3_cur = id[3];
+            d4_cur = id[4];
+            d5_cur = id[5];
 
             const_x0 = M01 * y_cur + M02;
             const_y0 = M11 * y_cur + M12;
@@ -614,7 +670,6 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
         const float yn = y0 / z0;
 
         // Only load from (x0, y0) if the point is within the valid region.
-        // Otherwise load from the edge of the valid region.
         if((min_y <= yn) && (yn < max_y) && (min_x <= xn) && (xn < max_x))
         {
             switch(interpolation)
@@ -623,7 +678,7 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
                     *out.ptr() = nearest_interpolation(in.ptr(), xn, yn, stride);
                     break;
                 case InterpolationPolicy::BILINEAR:
-                    *out.ptr() = pixel_bilinear_c1u8(in.ptr(), stride, xn, yn);
+                    *out.ptr() = pixel_bilinear_c1(in.ptr(), stride, xn, yn);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");
@@ -632,10 +687,34 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
         else
         {
             // Clamp coordinates
-            const auto xi = clamp<int>(x0, min_x, max_x - 1);
-            const auto yi = clamp<int>(y0, min_y, max_y - 1);
+            const auto xi = clamp<int>(std::floor(xn), min_x, max_x - 1);
+            const auto yi = clamp<int>(std::floor(yn), min_y, max_y - 1);
+            switch(interpolation)
+            {
+                case InterpolationPolicy::NEAREST_NEIGHBOR:
+                    *out.ptr() = *(in.ptr() + xi + yi * stride);
+                    break;
+                case InterpolationPolicy::BILINEAR:
+                {
+                    const auto xi_1 = clamp<int>(std::floor(xn + 1), min_x, max_x - 1);
+                    const auto yi_1 = clamp<int>(std::floor(yn + 1), min_y, max_y - 1);
 
-            *out.ptr() = *(in.ptr() + xi + yi * stride);
+                    const float dx  = xn - std::floor(xn);
+                    const float dy  = yn - std::floor(yn);
+                    const float dx1 = 1.0f - dx;
+                    const float dy1 = 1.0f - dy;
+
+                    const float a00 = *(in.ptr() + xi + yi * stride);
+                    const float a01 = *(in.ptr() + xi_1 + yi * stride);
+                    const float a10 = *(in.ptr() + xi + yi_1 * stride);
+                    const float a11 = *(in.ptr() + xi_1 + yi_1 * stride);
+
+                    *out.ptr() = a00 * (dx1 * dy1) + a01 * (dx * dy1) + a10 * (dx1 * dy) + a11 * (dx * dy);
+                }
+                break;
+                default:
+                    ARM_COMPUTE_ERROR("Interpolation not supported");
+            }
         }
 
         x0 += M00;

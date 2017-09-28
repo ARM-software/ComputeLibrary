@@ -29,6 +29,7 @@
 namespace arm_compute
 {
 class ITensor;
+class Size2D;
 
 /** Interface for the im2col reshape kernel.
  *
@@ -71,17 +72,17 @@ public:
 
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input          The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                            while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/F32
-     * @param[out] output         The output tensor. Data types supported: Same as @p input
-     * @param[in]  convolved_dims The convolved output dimensions.
-     * @param[in]  conv_info      Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in]  has_bias       In case biases are provided expands the matrix with 1.
+     * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/F16/F32
+     * @param[out] output      The output tensor. Data types supported: Same as @p input
+     * @param[in]  kernel_dims The kernel dimensions (width and height).
+     * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
      */
-    void configure(const ITensor *input, ITensor *output, std::pair<unsigned int, unsigned int> convolved_dims, const PadStrideInfo &conv_info, bool has_bias);
+    void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Template function to run the im2col optimised for the fully connected layer case
@@ -107,8 +108,9 @@ private:
     ITensor          *_output;
     std::pair<unsigned int, unsigned int> _convolved_dims;
     PadStrideInfo _conv_info;
-    unsigned int  _kernel_size;
+    unsigned int  _kernel_width;
+    unsigned int  _kernel_height;
     bool          _has_bias;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEIM2COLKERNEL_H__ */

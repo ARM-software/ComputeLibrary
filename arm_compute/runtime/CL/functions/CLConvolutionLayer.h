@@ -34,9 +34,11 @@
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -50,10 +52,10 @@ class CLConvolutionLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    CLConvolutionLayerReshapeWeights();
+    CLConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: F32.
+     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QS16/F16/F32.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] output       Destination tensor. Data types supported: Same as @p weights.
      * @param[in]  transpose1xW True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise.
@@ -64,16 +66,17 @@ public:
     void run() override;
 
 private:
-    CLConvolutionLayerWeightsReshapeKernel _weights_reshape_kernel;
-    CLGEMMTranspose1xWKernel               _weights_transposed_kernel;
-    CLTensor                               _weights_reshaped;
-    bool                                   _transpose1xW;
+    CLMemoryGroup            _memory_group;
+    CLWeightsReshapeKernel   _weights_reshape_kernel;
+    CLGEMMTranspose1xWKernel _weights_transposed_kernel;
+    CLTensor                 _weights_reshaped;
+    bool                     _transpose1xW;
 };
 
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels:
  *
- * -# @ref CLConvolutionLayerWeightsReshapeKernel (executed only once for each configuration)
- * -# @ref CLGEMMTranspose1xWKernel               (executed only once for each configuration)
+ * -# @ref CLWeightsReshapeKernel (executed only once for each configuration)
+ * -# @ref CLGEMMTranspose1xWKernel (executed only once for each configuration)
  * -# @ref CLIm2ColKernel
  * -# @ref CLGEMMInterleave4x4Kernel
  * -# @ref CLGEMMMatrixMultiplyKernel
@@ -83,12 +86,12 @@ class CLConvolutionLayer : public IFunction
 {
 public:
     /** Default constructor */
-    CLConvolutionLayer();
+    CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: F16, F32.
+     *                          Data types supported: QS8/QS16/F16/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported:Same as @p input.
      * @param[out] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
@@ -103,6 +106,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup                    _memory_group;
     CLConvolutionLayerReshapeWeights _reshape_weights;
     CLIm2ColKernel                   _input_im2col_kernel;
     CLGEMMInterleave4x4Kernel        _input_interleave_kernel;

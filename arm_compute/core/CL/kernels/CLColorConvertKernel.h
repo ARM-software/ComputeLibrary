@@ -85,6 +85,5 @@ private:
     const ICLMultiImage *_multi_input;  /*pointer to multi-planar input */
     ICLMultiImage       *_multi_output; /*pointer to multi-planar output */
 };
-}
-
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLCOLORCONVERTKERNEL_H__ */

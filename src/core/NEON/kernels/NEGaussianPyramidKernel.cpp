@@ -110,8 +110,9 @@ void NEGaussianPyramidHorKernel::configure(const ITensor *input, ITensor *output
     INEKernel::configure(win);
 }
 
-void NEGaussianPyramidHorKernel::run(const Window &window)
+void NEGaussianPyramidHorKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(window.x().step() % 2);
@@ -215,8 +216,9 @@ void NEGaussianPyramidVertKernel::configure(const ITensor *input, ITensor *outpu
     INEKernel::configure(win);
 }
 
-void NEGaussianPyramidVertKernel::run(const Window &window)
+void NEGaussianPyramidVertKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(window.x().step() != 16);

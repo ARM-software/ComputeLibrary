@@ -6,5 +6,5 @@ var classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel =
     [ "configure", "classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml#a00d5b673b5a22ab77fde751ff5330411", null ],
     [ "operator=", "classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml#a6fbdf09b0ad8f3aafc550d4dc235dcc8", null ],
     [ "operator=", "classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml#aa05b3e5b37ad26879891dfcbe27a3202", null ],
-    [ "run", "classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

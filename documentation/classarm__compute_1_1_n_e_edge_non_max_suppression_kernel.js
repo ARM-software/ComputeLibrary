@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_edge_non_max_suppression_kernel =
     [ "configure", "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a57a36344e261edfdfa97b19ac40b7c30", null ],
     [ "operator=", "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a5f1f723a41130cb9ff98478cd958ac28", null ],
     [ "operator=", "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a6fcd697a53de530052da4ffd113d1dd9", null ],
-    [ "run", "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

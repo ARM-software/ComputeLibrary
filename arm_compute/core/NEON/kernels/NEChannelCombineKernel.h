@@ -71,7 +71,7 @@ public:
     void configure(const IImage *plane0, const IImage *plane1, const IImage *plane2, IMultiImage *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
 private:
@@ -121,5 +121,5 @@ private:
     unsigned int _num_elems_processed_per_iteration;
     bool         _is_parallelizable;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NECHANNELCOMBINEKERNEL_H__ */

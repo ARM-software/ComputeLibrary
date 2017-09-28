@@ -57,12 +57,13 @@ void NEFillInnerBorderKernel::configure(ITensor *input, BorderSize border_size, 
     Window win;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
     win.set(Window::DimY, Window::Dimension(0, 1, 1));
-    win.use_tensor_dimensions(_tensor->info(), Window::DimZ);
+    win.use_tensor_dimensions(_tensor->info()->tensor_shape(), Window::DimZ);
     INEKernel::configure(win);
 }
 
-void NEFillInnerBorderKernel::run(const Window &window)
+void NEFillInnerBorderKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

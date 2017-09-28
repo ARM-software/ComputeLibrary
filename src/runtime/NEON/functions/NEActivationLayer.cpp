@@ -23,14 +23,14 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
-void NEActivationLayer::configure(const ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
+void NEActivationLayer::configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
 {
-    auto k = arm_compute::cpp14::make_unique<NEActivationLayerKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEActivationLayerKernel>();
     k->configure(input, output, activation_info);
     _kernel = std::move(k);
 }

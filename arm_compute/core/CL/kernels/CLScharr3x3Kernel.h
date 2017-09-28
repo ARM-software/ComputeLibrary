@@ -82,5 +82,5 @@ private:
     ICLTensor       *_output_x;     /**< Output image for scharr X */
     ICLTensor       *_output_y;     /**< Output image for scharr Y */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLSCHARR3X3KERNEL_H__ */

@@ -12,13 +12,13 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="0,-0.5 0,-19.5 104,-19.5 104,-0.5 0,-0.5"/>
-<text text-anchor="middle" x="52" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">CLWarpPerspective</text>
+<text text-anchor="middle" x="52" y="-7.5" font-family="Helvetica" font-size="10.00">CLWarpPerspective</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_i_c_l_simple_function.xhtml" target="_top" xlink:title="Basic interface for functions which have a single OpenCL kernel. ">
 <polygon fill="white" stroke="black" points="2,-56.5 2,-75.5 102,-75.5 102,-56.5 2,-56.5"/>
-<text text-anchor="middle" x="52" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLSimpleFunction</text>
+<text text-anchor="middle" x="52" y="-63.5" font-family="Helvetica" font-size="10.00">ICLSimpleFunction</text>
 </a>
 </g>
 </g>
@@ -31,7 +31,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_function.xhtml" target="_top" xlink:title="Base class for all functions. ">
 <polygon fill="white" stroke="black" points="23.5,-112.5 23.5,-131.5 80.5,-131.5 80.5,-112.5 23.5,-112.5"/>
-<text text-anchor="middle" x="52" y="-119.5" font-family="Helvetica,sans-Serif" font-size="10.00">IFunction</text>
+<text text-anchor="middle" x="52" y="-119.5" font-family="Helvetica" font-size="10.00">IFunction</text>
 </a>
 </g>
 </g>

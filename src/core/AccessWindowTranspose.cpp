@@ -66,8 +66,8 @@ ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window, Va
     // a size of the region.
     // As the relation between input and output is transposed window.y() is
     // used for x shape and window.x() for y shape.
-    shape.set(0, std::min<int>(old_anchor[1] + old_shape[1] - border_size.right, (window.y().end() - window.y().step()) * _scale_x + _width) - anchor[0]);
-    shape.set(1, std::min<int>(old_anchor[0] + old_shape[0] - border_size.bottom, (window.x().end() - window.x().step()) * _scale_y + _height) - anchor[1]);
+    shape.set(0, std::min<int>((old_anchor[1] + old_shape[1]) * _scale_x - border_size.right, (window.y().end() - window.y().step()) * _scale_x + _width) - anchor[0]);
+    shape.set(1, std::min<int>((old_anchor[0] + old_shape[0]) * _scale_y - border_size.bottom, (window.x().end() - window.x().step()) * _scale_y + _height) - anchor[1]);
 
     // For higher dimensions use the intersection of the window size and the
     // valid region of the input

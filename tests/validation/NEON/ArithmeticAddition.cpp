@@ -18,211 +18,221 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/ConvertPolicyDataset.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/ArithmeticAdditionFixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
+namespace arm_compute
+{
+namespace test
+{
+namespace validation
+{
 namespace
 {
-/** Compute Neon arithmetic addition function.
- *
- * @param[in] shape  Shape of the input and output tensors.
- * @param[in] dt_in0 Data type of first input tensor.
- * @param[in] dt_in1 Data type of second input tensor.
- * @param[in] dt_out Data type of the output tensor.
- * @param[in] policy Overflow policy of the operation.
- *
- * @return Computed output tensor.
- */
-Tensor compute_arithmetic_addition(const TensorShape &shape, DataType dt_in0, DataType dt_in1, DataType dt_out, ConvertPolicy policy)
+/** Input data sets **/
+const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
+                                                 DataType::U8));
+const auto ArithmeticAdditionS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
+                                                  framework::dataset::make("DataType", DataType::S16));
+const auto ArithmeticAdditionQS8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QS8), framework::dataset::make("DataType", DataType::QS8)),
+                                                  framework::dataset::make("DataType", DataType::QS8));
+const auto ArithmeticAdditionQS16Dataset = combine(combine(framework::dataset::make("DataType", DataType::QS16), framework::dataset::make("DataType", DataType::QS16)),
+                                                   framework::dataset::make("DataType", DataType::QS16));
+#ifdef ARM_COMPUTE_ENABLE_FP16
+const auto ArithmeticAdditionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
+                                                   framework::dataset::make("DataType", DataType::F16));
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+const auto ArithmeticAdditionFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
+                                                   framework::dataset::make("DataType", DataType::F32));
+} // namespace
+
+TEST_SUITE(NEON)
+TEST_SUITE(ArithmeticAddition)
+
+template <typename T>
+using NEArithmeticAdditionFixture = ArithmeticAdditionValidationFixture<Tensor, Accessor, NEArithmeticAddition, T>;
+
+TEST_SUITE(U8)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+               shape, policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, dt_in0);
-    Tensor src2 = create_tensor(shape, dt_in1);
-    Tensor dst  = create_tensor(shape, dt_out);
+    Tensor ref_src1 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst      = create_tensor<Tensor>(shape, DataType::U8);
 
-    // Create and configure function
+    // Create and Configure function
     NEArithmeticAddition add;
-    add.configure(&src1, &src2, &dst, policy);
-
-    // Allocate tensors
-    src1.allocator()->allocate();
-    src2.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src1.info()->is_resizable());
-    BOOST_TEST(!src2.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src1), 0);
-    library->fill_tensor_uniform(NEAccessor(src2), 1);
-
-    // Compute function
-    add.run();
-
-    return dst;
-}
-
-void validate_configuration(const Tensor &src1, const Tensor &src2, Tensor &dst, TensorShape shape, ConvertPolicy policy)
-{
-    BOOST_TEST(src1.info()->is_resizable());
-    BOOST_TEST(src2.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
-
-    // Create and configure function
-    NEArithmeticAddition add;
-    add.configure(&src1, &src2, &dst, policy);
+    add.configure(&ref_src1, &ref_src2, &dst, policy);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src1.info()->valid_region(), valid_region);
-    validate(src2.info()->valid_region(), valid_region);
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, required_padding(shape.x(), 16), 0, 0);
-    validate(src1.info()->padding(), padding);
-    validate(src2.info()->padding(), padding);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(ref_src1.info()->padding(), padding);
+    validate(ref_src2.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }
-} // namespace
 
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(ArithmeticAddition)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionU8Dataset),
+                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(U8)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                     shape, policy)
+TEST_SUITE(S16)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
+                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+               shape, data_type, policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor ref_src1 = create_tensor<Tensor>(shape, data_type);
+    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::S16);
+    Tensor dst      = create_tensor<Tensor>(shape, DataType::S16);
 
-    validate_configuration(src1, src2, dst, shape, policy);
+    // Create and Configure function
+    NEArithmeticAddition add;
+    add.configure(&ref_src1, &ref_src2, &dst, policy);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(ref_src1.info()->padding(), padding);
+    validate(ref_src2.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                     shape, policy)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionS16Dataset),
+                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
-    // Compute function
-    Tensor dst = compute_arithmetic_addition(shape, DataType::U8, DataType::U8, DataType::U8, policy);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::U8, DataType::U8, DataType::U8, policy);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(S16)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ DataType::U8, DataType::S16 }) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                     shape, dt, policy)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticAdditionS16Dataset),
+                                                                                                                framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+template <typename T>
+using NEArithmeticAdditionFixedPointFixture = ArithmeticAdditionValidationFixedPointFixture<Tensor, Accessor, NEArithmeticAddition, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QS8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQS8Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("FractionalBits", 1, 7)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), ArithmeticAdditionQS8Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("FractionalBits", 1, 7)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QS16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQS16Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("FractionalBits", 1, 15)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), ArithmeticAdditionQS16Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("FractionalBits", 1, 15)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+TEST_SUITE(Float)
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(F16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP16Dataset),
+                                                                                                         framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
+TEST_SUITE(F32)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+               shape, policy)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, dt);
-    Tensor src2 = create_tensor(shape, DataType::S16);
-    Tensor dst  = create_tensor(shape, DataType::S16);
+    Tensor ref_src1 = create_tensor<Tensor>(shape, DataType::F32);
+    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::F32);
+    Tensor dst      = create_tensor<Tensor>(shape, DataType::F32);
 
-    validate_configuration(src1, src2, dst, shape, policy);
+    // Create and Configure function
+    NEArithmeticAddition add;
+    add.configure(&ref_src1, &ref_src2, &dst, policy);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(ref_src1.info()->padding(), padding);
+    validate(ref_src2.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ DataType::U8, DataType::S16 }) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                     shape, dt, policy)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP32Dataset),
+                                                                                                                framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
-    // Compute function
-    Tensor dst = compute_arithmetic_addition(shape, dt, DataType::S16, DataType::S16, policy);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, dt, DataType::S16, DataType::S16, policy);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ DataType::U8, DataType::S16 }) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                     shape, dt, policy)
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticAdditionFP32Dataset),
+                                                                                                              framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
-    // Compute function
-    Tensor dst = compute_arithmetic_addition(shape, dt, DataType::S16, DataType::S16, policy);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, dt, DataType::S16, DataType::S16, policy);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(F32)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                     shape, policy)
-{
-    // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::F32);
-    Tensor src2 = create_tensor(shape, DataType::F32);
-    Tensor dst  = create_tensor(shape, DataType::F32);
-
-    validate_configuration(src1, src2, dst, shape, policy);
-}
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
-{
-    // Compute function
-    Tensor dst = compute_arithmetic_addition(shape, DataType::F32, DataType::F32, DataType::F32, ConvertPolicy::WRAP);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::F32, DataType::F32, DataType::F32, ConvertPolicy::WRAP);
-
-    // Validate output
-    validate(NEAccessor(dst), ref_dst);
-}
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP }),
-                     shape, policy)
-{
-    // Compute function
-    Tensor dst = compute_arithmetic_addition(shape, DataType::F32, DataType::F32, DataType::F32, policy);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_arithmetic_addition(shape, DataType::F32, DataType::F32, DataType::F32, policy);
-
-    // Validate output
-    validate(NEAccessor(dst), ref_dst);
-}
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

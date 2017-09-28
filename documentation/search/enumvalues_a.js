@@ -1,7 +1,14 @@
 var searchData=
 [
-  ['nearest_5fneighbor',['NEAREST_NEIGHBOR',['../namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9a7f5ccbc3d30c2cd3fd04d567946cbde2',1,'arm_compute']]],
-  ['nopadding',['NoPadding',['../structarm__compute_1_1_i_o_format_info.xhtml#ae283722f31a4c59039f9abd44f10dbd0a23bb2bd76e5604aace0bdaa7b279a8fd',1,'arm_compute::IOFormatInfo']]],
-  ['nv12',['NV12',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a202f5d8c2c70d31048154d8b8b28e755',1,'arm_compute']]],
-  ['nv21',['NV21',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a8e9f6aa1af7e0abbc7e64521e6ffe1b4',1,'arm_compute']]]
+  ['mali',['MALI',['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005a53bc5501e639292688fa56780570a1c1',1,'arm_compute::test::framework']]],
+  ['mali_5fname_5fblock_5fjm',['MALI_NAME_BLOCK_JM',['../namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06a9e4b72e32bbb15e27d24efef32ad4f42',1,'mali_userspace']]],
+  ['mali_5fname_5fblock_5fmmu',['MALI_NAME_BLOCK_MMU',['../namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06a09df8300ce0c6bd06a914aa374ebd899',1,'mali_userspace']]],
+  ['mali_5fname_5fblock_5fshader',['MALI_NAME_BLOCK_SHADER',['../namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c',1,'mali_userspace']]],
+  ['mali_5fname_5fblock_5fsize',['MALI_NAME_BLOCK_SIZE',['../namespacemali__userspace.xhtml#adc29c2ff13d900c2f185ee95427fb06caea314174cf525a72ddeb959934326fd6',1,'mali_userspace']]],
+  ['mali_5fname_5fblock_5ftiler',['MALI_NAME_BLOCK_TILER',['../namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06ada88186c7e6f6c048ad7866407c1eeb1',1,'mali_userspace']]],
+  ['max',['MAX',['../namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5',1,'arm_compute::MAX()'],['../namespacearm__compute.xhtml#a9172da722f0a434e5cc07c0a3c115d93a26a4b44a837bf97b972628509912b4a5',1,'arm_compute::MAX()']]],
+  ['measurements',['MEASUREMENTS',['../namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9a9632e44563b724240d9299f0ab14aae8',1,'arm_compute::test::framework']]],
+  ['median',['MEDIAN',['../namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a8ab0c3a037e882577dec378985477074',1,'arm_compute']]],
+  ['midgard',['MIDGARD',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3afa362f4daec88442a387ff7cda411a38',1,'arm_compute']]],
+  ['min',['MIN',['../namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858ace31e2a082d17e038fcc6e3006166653',1,'arm_compute']]]
 ];

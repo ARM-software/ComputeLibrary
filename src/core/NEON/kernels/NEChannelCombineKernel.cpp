@@ -284,8 +284,9 @@ bool NEChannelCombineKernel::is_parallelisable() const
     return _is_parallelizable;
 }
 
-void NEChannelCombineKernel::run(const Window &window)
+void NEChannelCombineKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

@@ -12,13 +12,13 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="0,-0.5 0,-19.5 119,-19.5 119,-0.5 0,-0.5"/>
-<text text-anchor="middle" x="59.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">NEGradientFP16Kernel</text>
+<text text-anchor="middle" x="59.5" y="-7.5" font-family="Helvetica" font-size="10.00">NEGradientFP16Kernel</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_n_e_gradient_kernel.xhtml" target="_top" xlink:title="Computes magnitude and quantised phase from inputs gradients. ">
 <polygon fill="white" stroke="black" points="12,-56.5 12,-75.5 107,-75.5 107,-56.5 12,-56.5"/>
-<text text-anchor="middle" x="59.5" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">NEGradientKernel</text>
+<text text-anchor="middle" x="59.5" y="-63.5" font-family="Helvetica" font-size="10.00">NEGradientKernel</text>
 </a>
 </g>
 </g>
@@ -31,7 +31,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_c_p_p_kernel.xhtml" target="_top" xlink:title="Common interface for all kernels implemented in C++. ">
 <polygon fill="white" stroke="black" points="28.5,-112.5 28.5,-131.5 90.5,-131.5 90.5,-112.5 28.5,-112.5"/>
-<text text-anchor="middle" x="59.5" y="-119.5" font-family="Helvetica,sans-Serif" font-size="10.00">INEKernel</text>
+<text text-anchor="middle" x="59.5" y="-119.5" font-family="Helvetica" font-size="10.00">INEKernel</text>
 </a>
 </g>
 </g>
@@ -44,7 +44,7 @@
 <g id="node4" class="node"><title>Node4</title>
 <g id="a_node4"><a xlink:href="classarm__compute_1_1_i_kernel.xhtml" target="_top" xlink:title="Common information for all the kernels. ">
 <polygon fill="white" stroke="black" points="36,-168.5 36,-187.5 83,-187.5 83,-168.5 36,-168.5"/>
-<text text-anchor="middle" x="59.5" y="-175.5" font-family="Helvetica,sans-Serif" font-size="10.00">IKernel</text>
+<text text-anchor="middle" x="59.5" y="-175.5" font-family="Helvetica" font-size="10.00">IKernel</text>
 </a>
 </g>
 </g>

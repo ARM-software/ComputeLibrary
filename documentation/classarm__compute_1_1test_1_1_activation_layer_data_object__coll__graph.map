@@ -1,6 +1,0 @@
-<map id="ActivationLayerDataObject" name="ActivationLayerDataObject">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_tensor_shape.xhtml" title="Shape of a tensor. " alt="" coords="31,171,130,197"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions\&lt; size_t \&gt;" alt="" coords="5,95,156,121"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality. " alt="" coords="19,5,142,32"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_activation_layer_info.xhtml" title="Activation Layer Information class. " alt="" coords="155,171,289,197"/>
-</map>

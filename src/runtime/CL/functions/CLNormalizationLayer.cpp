@@ -33,28 +33,26 @@
 using namespace arm_compute;
 
 CLNormalizationLayer::CLNormalizationLayer()
-    : _squared_input(), _norm_kernel(), _multiply_kernel(), _border_handler()
+    : _norm_kernel(), _border_handler()
 {
 }
 
-void CLNormalizationLayer::configure(const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info)
+void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info)
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
 
-    _squared_input.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, input->info()->data_type()));
+    // Configure normalization kernel
+    _norm_kernel.configure(input, output, norm_info);
 
-    _norm_kernel.configure(input, &_squared_input, output, norm_info);
-    _multiply_kernel.configure(input, input, &_squared_input, 1.0f, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     // Fill the border by 3 elements since we need vload4 in the IN_MAP normalization kernel
-    _border_handler.configure(&_squared_input, _norm_kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
-
-    // Allocate intermediate buffers
-    _squared_input.allocator()->allocate();
+    _border_handler.configure(input, _norm_kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
 }
 
 void CLNormalizationLayer::run()
 {
-    CLScheduler::get().enqueue(_multiply_kernel, false);
+    // Run border handler
     CLScheduler::get().enqueue(_border_handler, false);
-    CLScheduler::get().enqueue(_norm_kernel, false);
+
+    // Run normalization kernel
+    CLScheduler::get().enqueue(_norm_kernel);
 }

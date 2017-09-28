@@ -26,10 +26,10 @@
 
 #include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/NEON/kernels/NEGaussianPyramidKernel.h"
-#include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussian5x5.h"
+#include "arm_compute/runtime/NEON/functions/NEScale.h"
 #include "arm_compute/runtime/Pyramid.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -114,9 +114,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<Image[]>         _offsets;
     std::unique_ptr<NEGaussian5x5[]> _gaus5x5;
-    std::unique_ptr<NEScaleKernel[]> _scale_nearest;
+    std::unique_ptr<NEScale[]>       _scale_nearest;
 };
 }
 #endif /*__ARM_COMPUTE_NEGAUSSIANPYRAMID_H__ */

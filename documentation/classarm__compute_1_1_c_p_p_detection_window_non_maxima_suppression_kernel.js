@@ -7,5 +7,5 @@ var classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel =
     [ "is_parallelisable", "classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283", null ],
     [ "operator=", "classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel.xhtml#aa5182561cc171d1c74872e91fdb2d7fb", null ],
     [ "operator=", "classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel.xhtml#abc2f7094d5e8e45b4775d302fb43dae2", null ],
-    [ "run", "classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

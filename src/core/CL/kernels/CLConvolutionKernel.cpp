@@ -79,7 +79,7 @@ void CLConvolutionKernel<matrix_size>::configure(const ICLTensor *input, ICLTens
         options.insert(mat_str.str());
     }
 
-    options.insert("-DSCALE=" + val_to_string(scale));
+    options.insert("-DSCALE=" + support::cpp11::to_string(scale));
 
     DataType data_type = data_type_for_convolution_matrix(conv, matrix_size * matrix_size);
     options.insert("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
@@ -143,7 +143,7 @@ void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *in
 
     for(unsigned int j = 0; j < matrix_size * matrix_size; j++)
     {
-        build_opts.insert("-DMAT" + val_to_string(j) + "=" + val_to_string(mat[j]));
+        build_opts.insert("-DMAT" + support::cpp11::to_string(j) + "=" + support::cpp11::to_string(mat[j]));
     }
 
     build_opts.insert("-DSCALE=0");
@@ -151,7 +151,7 @@ void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *in
     build_opts.insert("-DDATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution_separable1x" + val_to_string(matrix_size) + "_static", build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution_separable1x" + support::cpp11::to_string(matrix_size) + "_static", build_opts));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -195,10 +195,10 @@ void CLSeparableConvolutionVertKernel<matrix_size>::configure(const ICLTensor *i
 
     for(unsigned int j = 0; j < matrix_size * matrix_size; j++)
     {
-        build_opts.insert("-DMAT" + val_to_string(j) + "=" + val_to_string(mat[j]));
+        build_opts.insert("-DMAT" + support::cpp11::to_string(j) + "=" + support::cpp11::to_string(mat[j]));
     }
 
-    build_opts.insert("-DSCALE=" + val_to_string(scale));
+    build_opts.insert("-DSCALE=" + support::cpp11::to_string(scale));
 
     build_opts.insert("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
 
@@ -209,7 +209,7 @@ void CLSeparableConvolutionVertKernel<matrix_size>::configure(const ICLTensor *i
     build_opts.insert(out_type.str());
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution_separable" + val_to_string(matrix_size) + "x1_static", build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution_separable" + support::cpp11::to_string(matrix_size) + "x1_static", build_opts));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -270,16 +270,16 @@ void CLConvolutionRectangleKernel::configure(const ICLTensor *input, ICLTensor *
 
     for(unsigned int j = 0; j < MAX_MATRIX_SIZE; j++)
     {
-        options.insert("-DMAT" + val_to_string(j) + "=" + val_to_string(mat[j]));
+        options.insert("-DMAT" + support::cpp11::to_string(j) + "=" + support::cpp11::to_string(mat[j]));
     }
 
-    options.insert("-DSCALE=" + val_to_string(scale));
+    options.insert("-DSCALE=" + support::cpp11::to_string(scale));
 
     DataType data_type = data_type_for_convolution_matrix(conv, matrix_size);
     options.insert("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
 
-    options.insert("-DMATRIX_WIDTH=" + val_to_string(width));
-    options.insert("-DMATRIX_HEIGHT=" + val_to_string(height));
+    options.insert("-DMATRIX_WIDTH=" + support::cpp11::to_string(width));
+    options.insert("-DMATRIX_HEIGHT=" + support::cpp11::to_string(height));
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution_rectangle", options));
 

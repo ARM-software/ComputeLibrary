@@ -77,6 +77,5 @@ private:
     ICLDetectionWindowArray *_detection_windows;
     cl::Buffer              *_num_detection_windows;
 };
-}
-
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLHOGDETECTORKERNEL_H__ */
