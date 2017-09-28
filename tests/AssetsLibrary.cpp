@@ -153,7 +153,7 @@ RawTensor load_ppm(const std::string &path)
 
     if(!file.good())
     {
-        throw std::runtime_error("Could not load PPM image: " + path);
+        throw framework::FileNotFound("Could not load PPM image: " + path);
     }
 
     unsigned int width  = 0;

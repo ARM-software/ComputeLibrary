@@ -35,6 +35,7 @@
 #include "tests/RawTensor.h"
 #include "tests/TensorCache.h"
 #include "tests/Utils.h"
+#include "tests/framework/Exceptions.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -663,7 +664,10 @@ void AssetsLibrary::fill_layer_data(T &&tensor, std::string name) const
 
     // Open file
     std::ifstream stream(path, std::ios::in | std::ios::binary);
-    ARM_COMPUTE_ERROR_ON_MSG(!stream.good(), "Failed to load binary data");
+    if(!stream.good())
+    {
+        throw framework::FileNotFound("Could not load npy file: " + path);
+    }
     // Check magic bytes and version number
     unsigned char v_major = 0;
     unsigned char v_minor = 0;

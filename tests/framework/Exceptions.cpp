@@ -104,6 +104,11 @@ std::string to_string(LogLevel level)
     return stream.str();
 }
 
+FileNotFound::FileNotFound(const std::string &msg)
+    : std::runtime_error{ msg }
+{
+}
+
 TestError::TestError(const std::string &msg, LogLevel level, std::string context)
     : std::runtime_error{ msg }, _level{ level }, _msg{ msg }, _context{ std::move(context) }, _combined{ "ERROR: " + msg }
 {

@@ -57,7 +57,7 @@ BOOST_DATA_TEST_CASE(FixedPointQS8Inputs, boost::unit_test::data::make(func_name
     std::ifstream     inputs_file{ base_file_name + ".in", std::ios::binary | std::ios::in };
 
     BOOST_TEST_INFO(base_file_name + ".in");
-    BOOST_TEST_REQUIRE(inputs_file.good());
+    BOOST_TEST_REQUIRE(inputs_file.good()); //FIXME: When moving to new framework: throw a FileNotFound exception
 
     float float_val = 0.f;
 
@@ -90,9 +90,9 @@ BOOST_DATA_TEST_CASE(FixedPointQS8Outputs, (boost::unit_test::data::make(func_na
     std::ifstream     reference_file{ base_file_name + ".out", std::ios::binary | std::ios::in };
 
     BOOST_TEST_INFO(base_file_name + ".in");
-    BOOST_TEST_REQUIRE(inputs_file.good());
+    BOOST_TEST_REQUIRE(inputs_file.good()); //FIXME: When moving to new framework: throw a FileNotFound exception
     BOOST_TEST_INFO(base_file_name + ".out");
-    BOOST_TEST_REQUIRE(reference_file.good());
+    BOOST_TEST_REQUIRE(reference_file.good()); //FIXME: When moving to new framework: throw a FileNotFound exception
 
     const float step_size = std::pow(2.f, -frac_bits);
 

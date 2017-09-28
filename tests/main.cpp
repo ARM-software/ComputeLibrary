@@ -120,20 +120,21 @@ int main(int argc, char **argv)
     auto log_file = parser.add_option<framework::SimpleOption<std::string>>("log-file");
     log_file->set_help("Write output to file instead of to the console");
     auto log_level = parser.add_option<framework::EnumOption<framework::LogLevel>>("log-level", supported_log_levels, framework::LogLevel::ALL);
-    log_file->set_help("Verbosity of the output");
+    log_level->set_help("Verbosity of the output");
     auto throw_errors = parser.add_option<framework::ToggleOption>("throw-errors");
     throw_errors->set_help("Don't catch fatal errors (useful for debugging)");
     auto stop_on_error = parser.add_option<framework::ToggleOption>("stop-on-error");
-    throw_errors->set_help("Abort execution after the first failed test (useful for debugging)");
+    stop_on_error->set_help("Abort execution after the first failed test (useful for debugging)");
     auto seed = parser.add_option<framework::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
     seed->set_help("Global seed for random number generation");
     auto color_output = parser.add_option<framework::ToggleOption>("color-output", true);
     color_output->set_help("Produce colored output on the console");
     auto list_tests = parser.add_option<framework::ToggleOption>("list-tests", false);
     list_tests->set_help("List all test names");
+    auto error_on_missing_assets = parser.add_option<framework::ToggleOption>("error-on-missing-assets", false);
+    error_on_missing_assets->set_help("Mark a test as failed instead of skipping it when assets are missing");
     auto assets = parser.add_positional_option<framework::SimpleOption<std::string>>("assets");
     assets->set_help("Path to the assets directory");
-    assets->set_required(true);
 
     try
     {
@@ -196,6 +197,7 @@ int main(int argc, char **argv)
         framework.set_printer(printer.get());
         framework.set_throw_errors(throw_errors->value());
         framework.set_stop_on_error(stop_on_error->value());
+        framework.set_error_on_missing_assets(error_on_missing_assets->value());
 
         bool success = true;
 

@@ -233,6 +233,18 @@ public:
      */
     void set_stop_on_error(bool stop_on_error);
 
+    /** Indicates if a test should be marked as failed when its assets are missing.
+     *
+     * @return True if a test should be marked as failed when its assets are missing.
+     */
+    bool error_on_missing_assets() const;
+
+    /** Set whether a test should be considered as failed if its assets cannot be found.
+     *
+     * @param[in] error_on_missing_assets True if a test should be marked as failed when its assets are missing.
+     */
+    void set_error_on_missing_assets(bool error_on_missing_assets);
+
     /** Run all enabled test cases.
      *
      * @return True if all test cases executed successful.
@@ -308,6 +320,7 @@ private:
     int      _num_iterations{ 1 };
     bool     _throw_errors{ false };
     bool     _stop_on_error{ false };
+    bool     _error_on_missing_assets{ false };
     Printer *_printer{ nullptr };
 
     using create_function = std::unique_ptr<Instrument>();

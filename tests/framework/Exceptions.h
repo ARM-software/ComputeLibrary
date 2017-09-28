@@ -63,6 +63,17 @@ LogLevel log_level_from_name(const std::string &name);
 ::std::ostream &operator<<(::std::ostream &stream, LogLevel level);
 std::string to_string(LogLevel level);
 
+/** Error class for when some external assets are missing */
+class FileNotFound : public std::runtime_error
+{
+public:
+    /** Construct error with message
+     *
+     * @param[in] msg Error message
+     */
+    FileNotFound(const std::string &msg);
+};
+
 /** Error class for failures during test execution. */
 class TestError : public std::runtime_error
 {

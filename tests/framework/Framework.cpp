@@ -216,6 +216,16 @@ bool Framework::stop_on_error() const
     return _stop_on_error;
 }
 
+void Framework::set_error_on_missing_assets(bool error_on_missing_assets)
+{
+    _error_on_missing_assets = error_on_missing_assets;
+}
+
+bool Framework::error_on_missing_assets() const
+{
+    return _error_on_missing_assets;
+}
+
 void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 {
     if(test_factory.status() == TestCaseFactory::Status::DISABLED)
@@ -267,6 +277,33 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
             if(result.status == TestResult::Status::NOT_RUN)
             {
                 result.status = TestResult::Status::SUCCESS;
+            }
+        }
+        catch(const FileNotFound &error)
+        {
+            if(_error_on_missing_assets)
+            {
+                if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+                {
+                    TestError test_error(error.what(), LogLevel::ERRORS);
+                    _printer->print_error(test_error, is_expected_failure);
+                }
+
+                result.status = TestResult::Status::FAILED;
+
+                if(_throw_errors)
+                {
+                    throw;
+                }
+            }
+            else
+            {
+                if(_log_level >= LogLevel::DEBUG && _printer != nullptr)
+                {
+                    _printer->print_info(error.what());
+                }
+
+                result.status = TestResult::Status::NOT_RUN;
             }
         }
         catch(const TestError &error)
