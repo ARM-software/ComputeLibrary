@@ -228,7 +228,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     _memory_group.manage(&_input_im2col_reshaped);
 
     // Create tensor (interleave) to prepare input tensor for GEMM
-    if(!_is_fully_connected_convolution)
+    if(!_is_fully_connected_convolution && _mm_optimised_kernel == nullptr)
     {
         TensorShape shape_interleaved(shape_im2col);
         shape_interleaved.set(0, shape_interleaved.x() * 4);
