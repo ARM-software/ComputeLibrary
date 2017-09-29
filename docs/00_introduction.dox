@@ -480,11 +480,11 @@ The examples get automatically built by scons as part of the build process of th
 
 To cross compile a NEON example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -std=c++11 -mfpu=neon -L. -larm_compute -o neon_convolution
+	arm-linux-gnueabihf-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -o neon_convolution
 
 To cross compile a NEON example for Linux 64bit:
 
-	aarch64-linux-gnu-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -std=c++11 -L. -larm_compute -o neon_convolution
+	aarch64-linux-gnu-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -o neon_convolution
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
 
@@ -500,11 +500,11 @@ To cross compile an OpenCL example for Linux 64bit:
 
 To compile natively (i.e directly on an ARM device) for NEON for Linux 32bit:
 
-	g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -std=c++11 -mfpu=neon -larm_compute -o neon_convolution
+	g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -larm_compute -o neon_convolution
 
 To compile natively (i.e directly on an ARM device) for NEON for Linux 64bit:
 
-	g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -std=c++11 -larm_compute -o neon_convolution
+	g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -o neon_convolution
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option)
 
