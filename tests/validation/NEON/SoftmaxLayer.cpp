@@ -21,100 +21,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/SoftmaxLayerFixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
+namespace arm_compute
+{
+namespace test
+{
+namespace validation
+{
 namespace
 {
 /** Tolerance for float operations */
-const float tolerance = 0.000001f;
+constexpr AbsoluteTolerance<float> tolerance_f32(0.000001f);
+#ifdef ARM_COMPUTE_ENABLE_FP16
+constexpr AbsoluteTolerance<float> tolerance_f16(0.0001f);
+#endif /* ARM_COMPUTE_ENABLE_FP16*/
 /** Tolerance for fixed point operations */
-const float tolerance_fixed_point = 2.f;
+constexpr AbsoluteTolerance<int16_t> tolerance_fixed_point(2);
 
-/** Compute Neon softmax layer function.
- *
- * @param[in] shape                Shape of the input and output tensors.
- * @param[in] dt                   Shape Data type of tensors.
- * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of fixed point numbers.
- *
- * @return Computed output tensor.
- */
-Tensor compute_softmax_layer(const TensorShape &shape, DataType dt, int fixed_point_position = 0)
+/** CNN data types */
+const auto CNNDataTypes = framework::dataset::make("DataType",
 {
-    // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
-
-    // Create and configure function
-    NESoftmaxLayer smx_layer;
-    smx_layer.configure(&src, &dst);
-
-    // Allocate tensors
-    src.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    if(arm_compute::is_data_type_float(dt))
-    {
-        std::uniform_real_distribution<> distribution(-10, 10);
-        library->fill(NEAccessor(src), distribution, 0);
-    }
-    else
-    {
-        int                             one_fixed = 1 << fixed_point_position;
-        std::uniform_int_distribution<> distribution(-one_fixed, one_fixed);
-        library->fill(NEAccessor(src), distribution, 0);
-    }
-
-    // Compute function
-    smx_layer.run();
-
-    return dst;
-}
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    DataType::F16,
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+    DataType::F32,
+    DataType::QS8,
+    DataType::QS16,
+});
 } // namespace
 
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(SoftmaxLayer)
+TEST_SUITE(NEON)
+TEST_SUITE(SoftmaxLayer)
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTypes(), shape, dt)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), CNNDataTypes), shape, data_type)
 {
     // Set fixed point position data type allowed
-    int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
+    const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
 
     // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, data_type, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, data_type, 1, fixed_point_position);
 
-    BOOST_TEST(src.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NESoftmaxLayer smx_layer;
@@ -126,71 +87,90 @@ BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * CNNDataTyp
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    int               step = 16 / arm_compute::data_size_from_type(dt);
-    const PaddingSize padding(0, required_padding(shape.x(), step), 0, 0);
+    const int         step    = 16 / data_size_from_type(data_type);
+    const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
     validate(src.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }
 
-BOOST_AUTO_TEST_SUITE(Float)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFloatDataTypes(), shape, dt)
+template <typename T>
+using NESoftmaxLayerFixture = SoftmaxValidationFixture<Tensor, Accessor, NESoftmaxLayer, T>;
+
+TEST_SUITE(Float)
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)))
 {
-    // Compute function
-    Tensor dst = compute_softmax_layer(shape, dt);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance);
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * CNNFloatDataTypes(), shape, dt)
+FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)))
 {
-    // Compute function
-    Tensor dst = compute_softmax_layer(shape, dt);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance);
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-BOOST_AUTO_TEST_SUITE(Quantized)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using NESoftmaxLayerFixedPointFixture = SoftmaxValidationFixedPointFixture<Tensor, Accessor, NESoftmaxLayer, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QS8)
 // Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * CNNFixedPointDataTypes() * boost::unit_test::data::xrange(1, 6),
-                     shape, dt, fixed_point_position)
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                     DataType::QS8)),
+                                                                                                                     framework::dataset::make("FractionalBits", 1, 6)))
 {
-    // Compute function
-    Tensor dst = compute_softmax_layer(shape, dt, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(Accessor(_target), _reference, tolerance_fixed_point);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * CNNFixedPointDataTypes() * boost::unit_test::data::xrange(1, 6),
-                     shape, dt, fixed_point_position)
+FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::QS8)),
+                                                                                                                   framework::dataset::make("FractionalBits", 1, 6)))
 {
-    // Compute function
-    Tensor dst = compute_softmax_layer(shape, dt, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_softmax_layer(shape, dt, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_fixed_point);
+    validate(Accessor(_target), _reference, tolerance_fixed_point);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+TEST_SUITE(QS16)
+// Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
+                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                              DataType::QS16)),
+                                                                                                                      framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fixed_point);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::QS16)),
+                                                                                                                    framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fixed_point);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

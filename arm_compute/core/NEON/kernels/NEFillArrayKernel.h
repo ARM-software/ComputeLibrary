@@ -61,7 +61,7 @@ public:
     void configure(const IImage *input, uint8_t threshold, IKeyPointArray *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
 private:
@@ -69,5 +69,5 @@ private:
     IKeyPointArray *_output;
     uint8_t         _threshold;
 };
-}
-#endif
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_NEFILLARRAYKERNEL_H__*/

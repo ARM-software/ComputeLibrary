@@ -12,13 +12,13 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="14,-0.5 14,-19.5 83,-19.5 83,-0.5 14,-0.5"/>
-<text text-anchor="middle" x="48.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">Coordinates</text>
+<text text-anchor="middle" x="48.5" y="-7.5" font-family="Helvetica" font-size="10.00">Coordinates</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_dimensions.xhtml" target="_top" xlink:title="Dimensions\&lt; int \&gt;">
 <polygon fill="white" stroke="black" points="-7.10543e-15,-57.5 -7.10543e-15,-76.5 97,-76.5 97,-57.5 -7.10543e-15,-57.5"/>
-<text text-anchor="middle" x="48.5" y="-64.5" font-family="Helvetica,sans-Serif" font-size="10.00">Dimensions&lt; int &gt;</text>
+<text text-anchor="middle" x="48.5" y="-64.5" font-family="Helvetica" font-size="10.00">Dimensions&lt; int &gt;</text>
 </a>
 </g>
 </g>
@@ -31,7 +31,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_dimensions.xhtml" target="_top" xlink:title="Dimensions with dimensionality. ">
 <polygon fill="white" stroke="black" points="2.5,-124.5 2.5,-143.5 94.5,-143.5 94.5,-124.5 2.5,-124.5"/>
-<text text-anchor="middle" x="48.5" y="-131.5" font-family="Helvetica,sans-Serif" font-size="10.00">Dimensions&lt; T &gt;</text>
+<text text-anchor="middle" x="48.5" y="-131.5" font-family="Helvetica" font-size="10.00">Dimensions&lt; T &gt;</text>
 </a>
 </g>
 </g>
@@ -39,7 +39,7 @@
 <g id="edge2" class="edge"><title>Node3&#45;&gt;Node2</title>
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M48.5,-114.037C48.5,-101.67 48.5,-86.1198 48.5,-76.6273"/>
 <polygon fill="orange" stroke="orange" points="45.0001,-114.234 48.5,-124.234 52.0001,-114.234 45.0001,-114.234"/>
-<text text-anchor="middle" x="64.5" y="-98" font-family="Helvetica,sans-Serif" font-size="10.00"> &lt; int &gt;</text>
+<text text-anchor="middle" x="64.5" y="-98" font-family="Helvetica" font-size="10.00"> &lt; int &gt;</text>
 </g>
 </g>
 </svg>

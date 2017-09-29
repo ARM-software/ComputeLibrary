@@ -206,12 +206,11 @@ __kernel void fast_corners(
         return;
     }
 
-#ifndef USE_MAXSUPPRESSION
-    *out.ptr = 1;
-#else
-
+#ifdef USE_MAXSUPPRESSION
     *out.ptr = compute_strength(p, in.ptr, input_stride_y, threshold);
-#endif
+#else  /* USE_MAXSUPPRESSION */
+    *out.ptr = 1;
+#endif /* USE_MAXSUPPRESSION */
 }
 
 /** Copy result to Keypoint buffer and count number of corners
@@ -240,7 +239,7 @@ __kernel void copy_to_keypoint(
     {
         return;
     }
-#endif
+#endif /* UPDATE_NUMBER */
 
     Image in = CONVERT_TO_IMAGE_STRUCT(input);
 

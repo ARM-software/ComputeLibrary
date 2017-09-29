@@ -39,7 +39,6 @@ class ICLTensor;
 
 /** Basic function to simulate a normalization layer. This function calls the following CL kernels:
  *
- * -# @ref CLPixelWiseMultiplicationKernel
  * -# @ref CLFillBorderKernel
  * -# @ref CLNormalizationLayerKernel
  *
@@ -51,21 +50,19 @@ public:
     CLNormalizationLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                       and an optional 4th dimension for batch of inputs. Data types supported: F16, F32. Number of channels must be 1.
-     * @param[out] output    Destination tensor. Dimensions, data type and number of channels must match the input ones.
-     * @param[in]  norm_info Normalization layer information like the normalization type, normalization size and other parameters.
+     * @param[in, out] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
+     *                           and an optional 4th dimension for batch of inputs. Data types supported: F16/F32 (Written to by the border handler)
+     * @param[out]     output    Destination tensor. Dimensions, data type and number of channels must match the input ones.
+     * @param[in]      norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info);
+    void configure(ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    CLTensor                        _squared_input;   /**< The intermediate buffer which stores results of squaring input*/
-    CLNormalizationLayerKernel      _norm_kernel;     /**< Normalization layer kernel to run */
-    CLPixelWiseMultiplicationKernel _multiply_kernel; /**< Pixel multiplication kernel to run */
-    CLFillBorderKernel              _border_handler;  /**< Kernel to handle  borders */
+    CLNormalizationLayerKernel _norm_kernel;    /**< Normalization layer kernel to run */
+    CLFillBorderKernel         _border_handler; /**< Kernel to handle  borders */
 };
 }
 #endif /* __ARM_COMPUTE_CLNORMALIZATIONLAYER_H__ */

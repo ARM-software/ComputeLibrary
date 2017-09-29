@@ -21,134 +21,71 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "dataset/ThresholdDataset.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEThreshold.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/datasets/ThresholdDataset.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/ThresholdFixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
-namespace
+namespace arm_compute
 {
-/** Compute Threshold function.
- *
- * @param[in] shape       Shape of the input and output tensors.
- * @param[in] threshold   Threshold. When the threshold type is RANGE, this is used as the lower threshold.
- * @param[in] false_value value to set when the condition is not respected.
- * @param[in] true_value  value to set when the condition is respected.
- * @param[in] type        Thresholding type. Either RANGE or BINARY.
- * @param[in] upper       Upper threshold. Only used when the thresholding type is RANGE.
- *
- * @return Computed output tensor.
- */
-Tensor compute_threshold(const TensorShape &shape, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
+namespace test
+{
+namespace validation
+{
+TEST_SUITE(NEON)
+TEST_SUITE(Threshold)
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), datasets::MixedThresholdDataset()),
+                                                                   framework::dataset::make("DataType", DataType::U8)),
+               shape, threshold, false_value, true_value, type, upper, data_type)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src = create_tensor<Tensor>(shape, data_type);
+    Tensor dst = create_tensor<Tensor>(shape, data_type);
+
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEThreshold thrsh;
-    thrsh.configure(&src1, &dst, threshold, false_value, true_value, type, upper);
-
-    // Allocate tensors
-    src1.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src1.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src1), 0);
-
-    // Compute function
-    thrsh.run();
-
-    return dst;
-}
-} // namespace
-
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(Threshold)
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration,
-                     (SmallShapes() + LargeShapes()) * ThresholdDataset(),
-                     shape, thrshConf)
-{
-    // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
-
-    BOOST_TEST(src1.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
-
-    // Create and configure function
-    NEThreshold thrsh;
-    thrsh.configure(&src1, &dst, thrshConf.threshold, thrshConf.false_value, thrshConf.true_value, thrshConf.type, thrshConf.upper);
+    thrsh.configure(&src, &dst, threshold, false_value, true_value, type, upper);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src1.info()->valid_region(), valid_region);
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, required_padding(shape.x(), 16), 0, 0);
-    validate(src1.info()->padding(), padding);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall,
-                     SmallShapes() * ThresholdDataset(),
-                     shape, thrshConf)
+template <typename T>
+using ThresholdFixture = ThresholdValidationFixture<Tensor, Accessor, NEThreshold, T>;
+
+FIXTURE_DATA_TEST_CASE(RunSmall, ThresholdFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), datasets::MixedThresholdDataset()),
+                                                                                                       framework::dataset::make("DataType",
+                                                                                                               DataType::U8)))
 {
-    // Compute function
-    Tensor dst = compute_threshold(shape, thrshConf.threshold, thrshConf.false_value, thrshConf.true_value, thrshConf.type, thrshConf.upper);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_threshold(shape, thrshConf.threshold, thrshConf.false_value, thrshConf.true_value, thrshConf.type, thrshConf.upper);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge,
-                     LargeShapes() * ThresholdDataset(),
-                     shape, thrshConf)
+FIXTURE_DATA_TEST_CASE(RunLarge, ThresholdFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), datasets::MixedThresholdDataset()),
+                                                                                                     framework::dataset::make("DataType",
+                                                                                                             DataType::U8)))
 {
-    // Compute function
-    Tensor dst = compute_threshold(shape, thrshConf.threshold, thrshConf.false_value, thrshConf.true_value, thrshConf.type, thrshConf.upper);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_threshold(shape, thrshConf.threshold, thrshConf.false_value, thrshConf.true_value, thrshConf.type, thrshConf.upper);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

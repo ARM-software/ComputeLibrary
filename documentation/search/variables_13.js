@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['value',['value',['../structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml#a5b4ee4ae6cba6bb75200ba7af1910873',1,'arm_compute::enable_bitwise_ops&lt; arm_compute::GPUTarget &gt;::value()'],['../structarm__compute_1_1enable__bitwise__ops.xhtml#a5b4ee4ae6cba6bb75200ba7af1910873',1,'arm_compute::enable_bitwise_ops::value()'],['../classarm__compute_1_1_pixel_value.xhtml#a3e79b9ee2384b30bb1a1bb85155bb803',1,'arm_compute::PixelValue::value()']]]
+  ['unit',['unit',['../structarm__compute_1_1test_1_1framework_1_1_i_measurement.xhtml#a1729796f03559082040198b11c08f0ff',1,'arm_compute::test::framework::IMeasurement']]],
+  ['unused',['unused',['../structmali__userspace_1_1mali__base__gpu__props.xhtml#a427562a781574201b47267386cc0d2ce',1,'mali_userspace::mali_base_gpu_props']]],
+  ['unused_5f1',['unused_1',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a01a2e4f2e3aa6544f900174de8e06626',1,'mali_userspace::gpu_raw_gpu_props']]]
 ];

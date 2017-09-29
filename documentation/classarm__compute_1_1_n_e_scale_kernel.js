@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_scale_kernel =
     [ "configure", "classarm__compute_1_1_n_e_scale_kernel.xhtml#a70b4c72d8ed742fb43242db66918e699", null ],
     [ "operator=", "classarm__compute_1_1_n_e_scale_kernel.xhtml#a9bc5c918a86ea34e0a7cc2559c010596", null ],
     [ "operator=", "classarm__compute_1_1_n_e_scale_kernel.xhtml#aa2d0e6d7ced452bc623cd3020e3026c7", null ],
-    [ "run", "classarm__compute_1_1_n_e_scale_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_scale_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

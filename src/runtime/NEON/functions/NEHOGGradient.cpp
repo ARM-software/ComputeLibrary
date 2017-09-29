@@ -23,15 +23,19 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEHOGGradient.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEMagnitudePhaseKernel.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
-NEHOGGradient::NEHOGGradient()
-    : _derivative(), _mag_phase(nullptr), _gx(), _gy()
+NEHOGGradient::NEHOGGradient(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _derivative(),
+      _mag_phase(nullptr),
+      _gx(),
+      _gy()
 {
 }
 
@@ -48,19 +52,23 @@ void NEHOGGradient::configure(ITensor *input, ITensor *output_magnitude, ITensor
     _gx.allocator()->init(info);
     _gy.allocator()->init(info);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_gx);
+    _memory_group.manage(&_gy);
+
     // Initialise derivate kernel
     _derivative.configure(input, &_gx, &_gy, border_mode, constant_border_value);
 
     // Initialise magnitude/phase kernel
     if(PhaseType::UNSIGNED == phase_type)
     {
-        auto k = arm_compute::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::UNSIGNED>>();
+        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::UNSIGNED>>();
         k->configure(&_gx, &_gy, output_magnitude, output_phase);
         _mag_phase = std::move(k);
     }
     else
     {
-        auto k = arm_compute::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
+        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
         k->configure(&_gx, &_gy, output_magnitude, output_phase);
         _mag_phase = std::move(k);
     }
@@ -72,9 +80,13 @@ void NEHOGGradient::configure(ITensor *input, ITensor *output_magnitude, ITensor
 
 void NEHOGGradient::run()
 {
+    _memory_group.acquire();
+
     // Run derivative
     _derivative.run();
 
     // Run magnitude/phase kernel
     NEScheduler::get().schedule(_mag_phase.get(), Window::DimY);
+
+    _memory_group.release();
 }

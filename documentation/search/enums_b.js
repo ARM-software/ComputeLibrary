@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['phasetype',['PhaseType',['../namespacearm__compute.xhtml#af00a42ecad444bbda75cde1b64bd7e72',1,'arm_compute']]],
-  ['poolingtype',['PoolingType',['../namespacearm__compute.xhtml#a9172da722f0a434e5cc07c0a3c115d93',1,'arm_compute']]],
-  ['precisiontype',['PrecisionType',['../structarm__compute_1_1_i_o_format_info.xhtml#a36c28b28da4e04d698d6b598fb1eaca6',1,'arm_compute::IOFormatInfo']]],
-  ['printregion',['PrintRegion',['../structarm__compute_1_1_i_o_format_info.xhtml#ae283722f31a4c59039f9abd44f10dbd0',1,'arm_compute::IOFormatInfo']]]
+  ['option',['Option',['../classarm__compute_1_1test_1_1_padding_calculator.xhtml#a0e65ad13124ea2cb5e255b640464e35f',1,'arm_compute::test::PaddingCalculator']]],
+  ['overflowpolicy',['OverflowPolicy',['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml#a0ada8f647402027261407be09bdf25ff',1,'arm_compute::test::fixed_point_arithmetic']]]
 ];

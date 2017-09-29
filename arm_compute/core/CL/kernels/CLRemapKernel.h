@@ -66,5 +66,5 @@ private:
     const ICLTensor *_map_x;
     const ICLTensor *_map_y;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLREMAPKERNEL_H__ */

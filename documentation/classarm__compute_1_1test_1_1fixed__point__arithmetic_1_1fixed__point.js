@@ -15,7 +15,5 @@ var classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point =
     [ "operator=", "classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a88fd8172c8f0683b0d1876631427b4f5", null ],
     [ "precision", "classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a89deb954a617641af987e59a483ca5e9", null ],
     [ "raw", "classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a3fe723fdc332e453550710b2925002a0", null ],
-    [ "rescale", "classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a80db15090eed5a0bb5e7977eabeae132", null ],
-    [ "detail::constant_expr< T >", "classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a512a7a11b3fd7de408cc8503c5d772e7", null ],
-    [ "detail::functions", "classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a8c62dbcc77cd228ff65300d012535a09", null ]
+    [ "rescale", "classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a80db15090eed5a0bb5e7977eabeae132", null ]
 ];

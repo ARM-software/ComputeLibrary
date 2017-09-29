@@ -31,8 +31,8 @@
 
 using namespace arm_compute;
 
-NEHOGDescriptor::NEHOGDescriptor()
-    : _gradient(), _orient_bin(), _block_norm(), _mag(), _phase(), _hog_space()
+NEHOGDescriptor::NEHOGDescriptor(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _gradient(), _orient_bin(), _block_norm(), _mag(), _phase(), _hog_space()
 {
 }
 
@@ -71,8 +71,15 @@ void NEHOGDescriptor::configure(ITensor *input, ITensor *output, const IHOG *hog
     TensorInfo info_space(shape_hog_space, num_bins, DataType::F32);
     _hog_space.allocator()->init(info_space);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_mag);
+    _memory_group.manage(&_phase);
+
     // Initialise gradient kernel
     _gradient.configure(input, &_mag, &_phase, hog_info->phase_type(), border_mode, constant_border_value);
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_hog_space);
 
     // Initialise orientation binning kernel
     _orient_bin.configure(&_mag, &_phase, &_hog_space, hog->info());
@@ -88,6 +95,8 @@ void NEHOGDescriptor::configure(ITensor *input, ITensor *output, const IHOG *hog
 
 void NEHOGDescriptor::run()
 {
+    _memory_group.acquire();
+
     // Run gradient
     _gradient.run();
 
@@ -96,4 +105,6 @@ void NEHOGDescriptor::run()
 
     // Run block normalization kernel
     NEScheduler::get().schedule(&_block_norm, Window::DimY);
+
+    _memory_group.release();
 }

@@ -21,132 +21,121 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TypePrinter.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/NormalizationTypesDataset.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/NormalizationLayerFixture.h"
 
-#include <random>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
+namespace arm_compute
+{
+namespace test
+{
+namespace validation
+{
 namespace
 {
-/** Define tolerance of the normalization layer depending on values data type.
- *
- * @param[in] dt Data type of the tensors' values.
- *
- * @return Tolerance depending on the data type.
- */
-float normalization_layer_tolerance(DataType dt)
-{
-    switch(dt)
-    {
-        case DataType::QS8:
-            return 2.0f;
-        case DataType::F32:
-            return 1e-05;
-        default:
-            return 0.f;
-    }
-}
+/** Tolerance for float operations */
+#ifdef ARM_COMPUTE_ENABLE_FP16
+constexpr AbsoluteTolerance<float> tolerance_f16(0.001f);
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
+/** Tolerance for fixed point operations */
+constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
+constexpr AbsoluteTolerance<int16_t> tolerance_qs16(4);
 
-/** Compute Neon normalization layer function.
- *
- * @param[in] shape                Shape of the input and output tensors.
- * @param[in] dt                   Data type of input and output tensors.
- * @param[in] norm_info            Normalization Layer information.
- * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16 (default = 0).
- *
- * @return Computed output tensor.
- */
-Tensor compute_normalization_layer(const TensorShape &shape, DataType dt, NormalizationLayerInfo norm_info, int fixed_point_position = 0)
-{
-    // Create tensors
-    Tensor src = create_tensor(shape, dt, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt, 1, fixed_point_position);
-
-    // Create and configure function
-    NENormalizationLayer norm;
-    norm.configure(&src, &dst, norm_info);
-
-    // Allocate tensors
-    src.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    if(dt == DataType::QS8)
-    {
-        const int8_t one_fixed_point       = 1 << fixed_point_position;
-        const int8_t minus_one_fixed_point = -one_fixed_point;
-        library->fill_tensor_uniform(NEAccessor(src), 0, minus_one_fixed_point, one_fixed_point);
-    }
-    else
-    {
-        library->fill_tensor_uniform(NEAccessor(src), 0);
-    }
-
-    // Compute function
-    norm.run();
-
-    return dst;
-}
+/** Input data set. */
+const auto NormalizationDataset = combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()), framework::dataset::make("NormalizationSize", 3, 9, 2)),
+                                          framework::dataset::make("Beta", { 0.5f, 1.f, 2.f }));
 } // namespace
 
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(NormalizationLayer)
+TEST_SUITE(NEON)
+TEST_SUITE(NormalizationLayer)
 
-BOOST_AUTO_TEST_SUITE(Float)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall,
-                     SmallShapes() * DataType::F32 *NormalizationTypes() * boost::unit_test::data::xrange(3, 9, 2) * boost::unit_test::data::make({ 0.5f, 1.0f, 2.0f }),
-                     shape, dt, norm_type, norm_size, beta)
+template <typename T>
+using NENormalizationLayerFixture = NormalizationValidationFixture<Tensor, Accessor, NENormalizationLayer, T>;
+
+TEST_SUITE(Float)
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
 {
-    // Provide normalization layer information
-    NormalizationLayerInfo norm_info(norm_type, norm_size, 5, beta);
-
-    // Compute function
-    Tensor dst = compute_normalization_layer(shape, dt, norm_info);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_normalization_layer(shape, dt, norm_info);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, normalization_layer_tolerance(DataType::F32));
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(Quantized)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall,
-                     SmallShapes() * DataType::QS8 *NormalizationTypes() * boost::unit_test::data::xrange(3, 7, 2) * (boost::unit_test::data::xrange(1, 6) * boost::unit_test::data::make({ 0.5f, 1.0f, 2.0f })),
-                     shape, dt, norm_type, norm_size, fixed_point_position, beta)
+FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
 {
-    // Provide normalization layer information
-    NormalizationLayerInfo norm_info(norm_type, norm_size, 5, beta, 1.f);
-
-    // Compute function
-    Tensor dst = compute_normalization_layer(shape, dt, norm_info, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_normalization_layer(shape, dt, norm_info, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, normalization_layer_tolerance(DataType::QS8));
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using NENormalizationLayerFixedPointFixture = NormalizationValidationFixedPointFixture<Tensor, Accessor, NENormalizationLayer, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QS8)
+// Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
+FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+                       DataType::QS8)),
+                       framework::dataset::make("FractionalBits", 1, 6)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qs8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+                       DataType::QS8)),
+                       framework::dataset::make("FractionalBits", 1, 6)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qs8);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QS16)
+// Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
+FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+                       DataType::QS16)),
+                       framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qs16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+                       DataType::QS16)),
+                       framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qs16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

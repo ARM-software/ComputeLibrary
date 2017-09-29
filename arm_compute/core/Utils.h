@@ -78,18 +78,6 @@ std::string build_information();
  */
 std::string read_file(const std::string &filename, bool binary);
 
-/** Return a value as a string
- *
- * @param[in] val Input value.
- *
- * @return Value represented as a string
- */
-template <typename T>
-const std::string val_to_string(T val)
-{
-    return static_cast<const std::ostringstream &>(std::ostringstream() << val).str();
-}
-
 /** The size in bytes of the data type
  *
  * @param[in] data_type Input data type
@@ -112,6 +100,7 @@ inline size_t data_size_from_type(DataType data_type)
         case DataType::F32:
         case DataType::U32:
         case DataType::S32:
+        case DataType::QS32:
             return 4;
         case DataType::F64:
         case DataType::U64:
@@ -185,6 +174,7 @@ inline size_t element_size_from_data_type(DataType dt)
         case DataType::U32:
         case DataType::S32:
         case DataType::F32:
+        case DataType::QS32:
             return 4;
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
@@ -542,21 +532,17 @@ inline DataType data_type_for_convolution_matrix(const int16_t *conv, size_t siz
 
 /** Returns expected width and height of output scaled tensor depending on dimensions rounding mode.
  *
- * @param[in] width       Width of input tensor (Number of columns)
- * @param[in] height      Height of input tensor (Number of rows)
- * @param[in] kernel_size Kernel size.
- * @param[in] stride_x    Stride of the operation in the x dimension.
- * @param[in] stride_y    Stride of the operation in the y dimension.
- * @param[in] pad_x       Padding size in the x dimension.
- * @param[in] pad_y       Padding size in the y dimension.
- * @param[in] round_type  Dimensions rounding mode.
+ * @param[in] width           Width of input tensor (Number of columns)
+ * @param[in] height          Height of input tensor (Number of rows)
+ * @param[in] kernel_width    Kernel width.
+ * @param[in] kernel_height   Kernel height.
+ * @param[in] pad_stride_info Pad and stride information.
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
-const std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height, unsigned int kernel_size,
-                                                              unsigned int stride_x, unsigned int stride_y,
-                                                              unsigned int pad_x, unsigned int pad_y,
-                                                              DimensionRoundingType round_type);
+const std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height,
+                                                              unsigned int kernel_width, unsigned int kernel_height,
+                                                              const PadStrideInfo &pad_stride_info);
 
 /** Convert a tensor format into a string.
  *
@@ -623,6 +609,13 @@ const std::string &string_from_border_mode(BorderMode border_mode);
  * @return The string describing the normalization type.
  */
 const std::string &string_from_norm_type(NormType type);
+/** Translates a given pooling type to a string.
+ *
+ * @param[in] type @ref PoolingType to be translated to string.
+ *
+ * @return The string describing the pooling type.
+ */
+const std::string &string_from_pooling_type(PoolingType type);
 /** Lower a given string.
  *
  * @param[in] val Given string to lower.
@@ -661,10 +654,25 @@ inline bool is_data_type_fixed_point(DataType dt)
     {
         case DataType::QS8:
         case DataType::QS16:
+        case DataType::QS32:
             return true;
         default:
             return false;
     }
+}
+
+/** Create a string with the float in full precision.
+ *
+ * @param val Floating point value
+ *
+ * @return String with the floating point value.
+ */
+inline std::string float_to_string_with_full_precision(float val)
+{
+    std::stringstream ss;
+    ss.precision(std::numeric_limits<float>::digits10 + 1);
+    ss << val;
+    return ss.str();
 }
 
 /** Print consecutive elements to an output stream.

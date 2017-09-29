@@ -42,11 +42,11 @@ class CLPoolingLayer : public ICLSimpleFunction
 public:
     /** Set the input and output tensors.
      *
-     * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: F16, F32.
+     * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: QS8/QS16/F16/F32.
      * @param[out]    output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLPOOLINGLAYER_H__ */

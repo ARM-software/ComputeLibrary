@@ -21,257 +21,99 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "CL/CLAccessor.h"
-#include "CL/Helper.h"
-#include "Globals.h"
-#include "TensorLibrary.h"
-#include "benchmark/Datasets.h"
-#include "benchmark/Profiler.h"
-#include "benchmark/WallClockTimer.h"
-
-#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
+#include "tests/CL/CLAccessor.h"
+#include "tests/benchmark/fixtures/ConvolutionLayerFixture.h"
+#include "tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ConvolutionLayerDataset.h"
+#include "tests/datasets/system_tests/lenet5/LeNet5ConvolutionLayerDataset.h"
+#include "tests/datasets/system_tests/squeezenet/SqueezeNetConvolutionLayerDataset.h"
+#include "tests/datasets/system_tests/vgg/vgg16/VGG16ConvolutionLayerDataset.h"
+#include "tests/datasets/system_tests/yolo/v2/YOLOV2ConvolutionLayerDataset.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
-#include "benchmark/benchmark_api.h"
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::benchmark;
-using namespace arm_compute::test::cl;
-
-#include "benchmark/common/ConvolutionLayer.h"
-
+namespace arm_compute
+{
+namespace test
+{
 namespace
 {
-using ConvolutionLayerAlexNet    = ConvolutionLayer<AlexNetConvolutionLayerDataset, CLTensor, CLAccessor, CLConvolutionLayer>;
-using ConvolutionLayerLeNet5     = ConvolutionLayer<LeNet5ConvolutionLayerDataset, CLTensor, CLAccessor, CLConvolutionLayer>;
-using ConvolutionLayerGoogLeNet1 = ConvolutionLayer<GoogLeNetConvolutionLayerDataset1, CLTensor, CLAccessor, CLConvolutionLayer>;
-using ConvolutionLayerGoogLeNet2 = ConvolutionLayer<GoogLeNetConvolutionLayerDataset2, CLTensor, CLAccessor, CLConvolutionLayer>;
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8, DataType::QS16 });
 } // namespace
 
-BENCHMARK_DEFINE_F(ConvolutionLayerAlexNet, cl_alexnet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        conv_layer->run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+using CLConvolutionLayerFixture = ConvolutionLayerFixture<CLTensor, CLConvolutionLayer, CLAccessor>;
 
-BENCHMARK_REGISTER_F(ConvolutionLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetConvolutionLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetConvolutionLayerDataset, 1, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetConvolutionLayerDataset, 2, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetConvolutionLayerDataset, 3, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetConvolutionLayerDataset, 4, 1, 4, 8>);
+TEST_SUITE(CL)
 
-BENCHMARK_DEFINE_F(ConvolutionLayerLeNet5, cl_lenet5)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        conv_layer->run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_REGISTER_F(ConvolutionLayerLeNet5, cl_lenet5)
-->Threads(1)
-->Apply(DataSetArgBatched<LeNet5ConvolutionLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerLeNet5, cl_lenet5)
-->Threads(1)
-->Apply(DataSetArgBatched<LeNet5ConvolutionLayerDataset, 1, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_DEFINE_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        conv_layer->run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_DEFINE_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        conv_layer->run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 1, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 2, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 3, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 4, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 5, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 6, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 7, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 8, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 9, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 10, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 11, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 12, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 13, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 14, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 15, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 16, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 17, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 18, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 19, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 20, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 21, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 22, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 23, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 24, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 25, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 26, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 27, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 28, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 29, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 30, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet1, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset1, 31, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 1, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 2, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 3, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 4, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 5, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 6, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 7, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 8, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 9, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 10, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 11, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 12, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 13, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 14, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 15, 1, 4, 8>);
-BENCHMARK_REGISTER_F(ConvolutionLayerGoogLeNet2, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetConvolutionLayerDataset2, 16, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+// 8 batches use about 1.8GB of memory which is too much for most devices!
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 1, 4 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ConvolutionLayer, CLConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ConvolutionLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace test
+} // namespace arm_compute

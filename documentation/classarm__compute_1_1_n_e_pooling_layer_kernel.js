@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_pooling_layer_kernel =
     [ "configure", "classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#acfc7162ac184ca219f917d039c58233c", null ],
     [ "operator=", "classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#a1729479f9686c64edfd1a4af834d634b", null ],
     [ "operator=", "classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#a0e9871f265535f65226b65ae64ab2cfb", null ],
-    [ "run", "classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

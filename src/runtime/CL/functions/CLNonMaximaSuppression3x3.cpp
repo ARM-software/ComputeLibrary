@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
 
 #include "arm_compute/core/CL/kernels/CLNonMaximaSuppression3x3Kernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 void CLNonMaximaSuppression3x3::configure(ICLTensor *input, ICLTensor *output, BorderMode border_mode)
 {
-    auto k = arm_compute::cpp14::make_unique<CLNonMaximaSuppression3x3Kernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLNonMaximaSuppression3x3Kernel>();
     k->configure(input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
 

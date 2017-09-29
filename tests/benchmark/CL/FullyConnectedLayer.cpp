@@ -15,102 +15,92 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITCLSS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "CL/CLAccessor.h"
-#include "CL/Helper.h"
-#include "Globals.h"
-#include "TensorLibrary.h"
-#include "benchmark/Datasets.h"
-#include "benchmark/Profiler.h"
-#include "benchmark/WallClockTimer.h"
-
-#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
+#include "tests/CL/CLAccessor.h"
+#include "tests/benchmark/fixtures/FullyConnectedLayerFixture.h"
+#include "tests/datasets/system_tests/alexnet/AlexNetFullyConnectedLayerDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1FullyConnectedLayerDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4FullyConnectedLayerDataset.h"
+#include "tests/datasets/system_tests/lenet5/LeNet5FullyConnectedLayerDataset.h"
+#include "tests/datasets/system_tests/vgg/vgg16/VGG16FullyConnectedLayerDataset.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
-#include "benchmark/benchmark_api.h"
-
-#include <memory>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::benchmark;
-using namespace arm_compute::test::cl;
-
-#include "benchmark/common/FullyConnectedLayer.h"
-
+namespace arm_compute
+{
+namespace test
+{
 namespace
 {
-using FullyConnectedLayerAlexNet   = FullyConnectedLayer<AlexNetFullyConnectedLayerDataset, CLTensor, CLAccessor, CLFullyConnectedLayer>;
-using FullyConnectedLayerLeNet5    = FullyConnectedLayer<LeNet5FullyConnectedLayerDataset, CLTensor, CLAccessor, CLFullyConnectedLayer>;
-using FullyConnectedLayerGoogLeNet = FullyConnectedLayer<GoogLeNetFullyConnectedLayerDataset, CLTensor, CLAccessor, CLFullyConnectedLayer>;
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8, DataType::QS16 });
 } // namespace
 
-BENCHMARK_DEFINE_F(FullyConnectedLayerAlexNet, cl_alexnet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        fc_layer->run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+using CLFullyConnectedLayerFixture = FullyConnectedLayerFixture<CLTensor, CLFullyConnectedLayer, CLAccessor>;
 
-BENCHMARK_REGISTER_F(FullyConnectedLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetFullyConnectedLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(FullyConnectedLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetFullyConnectedLayerDataset, 1, 1, 4, 8>);
-BENCHMARK_REGISTER_F(FullyConnectedLayerAlexNet, cl_alexnet)
-->Threads(1)
-->Apply(DataSetArgBatched<AlexNetFullyConnectedLayerDataset, 2, 1, 4, 8>);
+TEST_SUITE(CL)
 
-BENCHMARK_DEFINE_F(FullyConnectedLayerLeNet5, cl_lenet5)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        fc_layer->run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_REGISTER_F(FullyConnectedLayerLeNet5, cl_lenet5)
-->Threads(1)
-->Apply(DataSetArgBatched<LeNet5FullyConnectedLayerDataset, 0, 1, 4, 8>);
-BENCHMARK_REGISTER_F(FullyConnectedLayerLeNet5, cl_lenet5)
-->Threads(1)
-->Apply(DataSetArgBatched<LeNet5FullyConnectedLayerDataset, 1, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_DEFINE_F(FullyConnectedLayerGoogLeNet, cl_googlenet)
-(::benchmark::State &state)
-{
-    while(state.KeepRunning())
-    {
-        // Run function
-        profiler.start();
-        fc_layer->run();
-        CLScheduler::get().sync();
-        profiler.stop();
-    }
-}
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
 
-BENCHMARK_REGISTER_F(FullyConnectedLayerGoogLeNet, cl_googlenet)
-->Threads(1)
-->Apply(DataSetArgBatched<GoogLeNetFullyConnectedLayerDataset, 0, 1, 4, 8>);
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+TEST_SUITE(NIGHTLY)
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetFullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetFullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(VGG16FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4FullyConnectedLayer, CLFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4FullyConnectedLayerDataset(),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace test
+} // namespace arm_compute

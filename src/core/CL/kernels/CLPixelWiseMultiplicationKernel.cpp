@@ -48,12 +48,36 @@ CLPixelWiseMultiplicationKernel::CLPixelWiseMultiplicationKernel()
 void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
                                                 ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+
+    // Auto initialize output if not initialized
+    {
+        set_shape_if_empty(*output->info(), input1->info()->tensor_shape());
+
+        if(input1->info()->data_type() == DataType::S16 || input2->info()->data_type() == DataType::S16)
+        {
+            set_format_if_unknown(*output->info(), Format::S16);
+        }
+        else if(input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32)
+        {
+            set_format_if_unknown(*output->info(), Format::F32);
+        }
+    }
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input1, input2, output);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->data_type() == DataType::U8 && (input1->info()->data_type() != DataType::U8 || input2->info()->data_type() != DataType::U8),
                              "Output can only be U8 if both inputs are U8");
     ARM_COMPUTE_ERROR_ON_MSG(scale < 0, "Scale cannot be negative. ");
+    if(is_data_type_fixed_point(input1->info()->data_type()))
+    {
+        // All data types must be all QS8 or all QS16
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input1, input2, output);
+        ARM_COMPUTE_ERROR_ON_MSG(scale != 1, "Unsupported scaling factor for QS8/QS16. Scale must be 1.");
+    }
 
     _input1 = input1;
     _input2 = input2;
@@ -79,13 +103,28 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
     if(is_data_type_float(input1->info()->data_type()) || is_data_type_float(input2->info()->data_type()))
     {
         scale_int    = -1;
-        compute_type = (DataType::F32 == input1->info()->data_type() || DataType::F32 == input2->info()->data_type()) ? "float" : "half";
+        compute_type = (input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32) ? "float" : "half";
         data_type    = "DATA_TYPE_FLOAT";
     }
     else
     {
-        compute_type = (DataType::S16 == input1->info()->data_type() || DataType::S16 == input2->info()->data_type()) ? "int" : "ushort";
-        data_type    = "DATA_TYPE_INT";
+        if(input1->info()->data_type() == DataType::S16 || input2->info()->data_type() == DataType::S16)
+        {
+            compute_type = "int";
+        }
+        else if(input1->info()->data_type() == DataType::QS8)
+        {
+            compute_type = "qs8";
+        }
+        else if(input1->info()->data_type() == DataType::QS16)
+        {
+            compute_type = "qs16";
+        }
+        else
+        {
+            compute_type = "ushort";
+        }
+        data_type = "DATA_TYPE_INT";
     }
 
     // Construct kernel name
@@ -96,6 +135,10 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
     std::set<std::string> build_opts;
     build_opts.emplace((overflow_policy == ConvertPolicy::WRAP || is_data_type_float(output->info()->data_type())) ? "-DWRAP" : "-DSATURATE");
     build_opts.emplace((rounding_policy == RoundingPolicy::TO_ZERO) ? "-DROUND=_rtz" : "-DROUND=_rte");
+    if(is_data_type_fixed_point(input1->info()->data_type()))
+    {
+        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input1->info()->fixed_point_position()));
+    }
     build_opts.emplace("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(input1->info()->data_type()));
     build_opts.emplace("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(input2->info()->data_type()));
     build_opts.emplace("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
@@ -106,7 +149,7 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Set scale argument
-    unsigned int idx = 3 * num_arguments_per_2D_tensor(); //Skip the inputs and output parameters
+    unsigned int idx = 3 * num_arguments_per_3D_tensor(); //Skip the inputs and output parameters
 
     if(scale_int >= 0)
     {
@@ -140,15 +183,15 @@ void CLPixelWiseMultiplicationKernel::run(const Window &window, cl::CommandQueue
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    Window slice = window.first_slice_window_2D();
+    Window slice = window.first_slice_window_3D();
 
     do
     {
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input1, slice);
-        add_2D_tensor_argument(idx, _input2, slice);
-        add_2D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, _input1, slice);
+        add_3D_tensor_argument(idx, _input2, slice);
+        add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window.slide_window_slice_3D(slice));
 }

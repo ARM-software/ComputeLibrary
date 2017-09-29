@@ -38,7 +38,7 @@ PROJECT_NAME           = "Compute Library"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = v17.06
+PROJECT_NUMBER         = 17.09
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -771,11 +771,14 @@ WARN_LOGFILE           =
 INPUT                  = ./docs/00_introduction.dox \
                          ./docs/01_library.dox \
                          ./docs/02_tests.dox \
+                         ./docs/03_scripts.dox \
                          ./arm_compute/ \
+                         ./scripts/ \
                          ./src/core/CL/cl_kernels/ \
                          ./examples/ \
                          ./tests/ \
-                         ./utils/
+                         ./utils/ \
+                         ./support/
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1054,7 +1057,7 @@ VERBATIM_HEADERS       = YES
 # compiled with the --with-libclang option.
 # The default value is: NO.
 
-#CLANG_ASSISTED_PARSING = NO
+CLANG_ASSISTED_PARSING = NO
 
 # If clang assisted parsing is enabled you can provide the compiler with command
 # line options that you would normally use when invoking the compiler. Note that
@@ -1062,7 +1065,7 @@ VERBATIM_HEADERS       = YES
 # specified with INPUT and INCLUDE_PATH.
 # This tag requires that the tag CLANG_ASSISTED_PARSING is set to YES.
 
-#CLANG_OPTIONS          = 
+CLANG_OPTIONS          = -std=c++11
 
 #---------------------------------------------------------------------------
 # Configuration options related to the alphabetical class index

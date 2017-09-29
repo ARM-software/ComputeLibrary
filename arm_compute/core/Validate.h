@@ -147,6 +147,21 @@ void error_on_invalid_subwindow(const char *function, const char *file, const in
                                 const Window &full, const Window &sub);
 #define ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(f, s) ::arm_compute::error_on_invalid_subwindow(__func__, __FILE__, __LINE__, f, s)
 
+/** Throw an error if the window can't be collapsed at the given dimension.
+ *
+ * The window cannot be collapsed if the given dimension not equal to the full window's dimension or not start from 0.
+ *
+ *  @param[in] function Function in which the error occurred.
+ *  @param[in] file     Name of the file where the error occurred.
+ *  @param[in] line     Line on which the error occurred.
+ *  @param[in] full     Full size window
+ *  @param[in] window   Window to be collapsed.
+ *  @param[in] dim      Dimension need to be checked.
+ */
+void error_on_window_not_collapsable_at_dimension(const char *function, const char *file, const int line,
+                                                  const Window &full, const Window &window, const int dim);
+#define ARM_COMPUTE_ERROR_ON_WINDOW_NOT_COLLAPSABLE_AT_DIMENSION(f, w, d) ::arm_compute::error_on_window_not_collapsable_at_dimension(__func__, __FILE__, __LINE__, f, w, d)
+
 /** Throw an error if the passed coordinates have too many dimensions.
  *
  * The coordinates have too many dimensions if any of the dimensions greater or equal to max_dim is different from 0.
@@ -249,29 +264,30 @@ void error_on_mismatching_shapes(const char *function, const char *file, const i
  *  @param[in] function Function in which the error occurred.
  *  @param[in] file     Name of the file where the error occurred.
  *  @param[in] line     Line on which the error occurred.
- *  @param[in] tensor_1 The first tensor to be compared.
- *  @param[in] tensor_2 The second tensor to be compared.
+ *  @param[in] tensor   The first tensor to be compared.
  *  @param[in] tensors  (Optional) Further allowed tensors.
  */
 template <typename... Ts>
 void error_on_mismatching_data_types(const char *function, const char *file, const int line,
-                                     const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
+                                     const ITensor *tensor, Ts... tensors)
 {
     ARM_COMPUTE_UNUSED(function);
     ARM_COMPUTE_UNUSED(file);
     ARM_COMPUTE_UNUSED(line);
-    ARM_COMPUTE_UNUSED(tensor_1);
-    ARM_COMPUTE_UNUSED(tensor_2);
+    ARM_COMPUTE_UNUSED(tensor);
 
-    DataType &&first_data_type = tensor_1->info()->data_type();
-    ARM_COMPUTE_UNUSED(first_data_type);
+    ARM_COMPUTE_ERROR_ON_LOC(tensor == nullptr, function, file, line);
+
+    DataType &&tensor_data_type = tensor->info()->data_type();
+    ARM_COMPUTE_UNUSED(tensor_data_type);
 
     const std::array<const ITensor *, sizeof...(Ts)> tensors_array{ { std::forward<Ts>(tensors)... } };
     ARM_COMPUTE_UNUSED(tensors_array);
 
-    ARM_COMPUTE_ERROR_ON_LOC_MSG(tensor_2->info()->data_type() != first_data_type || std::any_of(tensors_array.begin(), tensors_array.end(), [&](const ITensor * tensor)
+    ARM_COMPUTE_ERROR_ON_LOC_MSG(std::any_of(tensors_array.begin(), tensors_array.end(), [&](const ITensor * tensor_obj)
     {
-        return tensor->info()->data_type() != first_data_type;
+        ARM_COMPUTE_ERROR_ON_LOC(tensor_obj == nullptr, function, file, line);
+        return tensor_obj->info()->data_type() != tensor_data_type;
     }),
     function, file, line, "Tensors have different data types");
 }

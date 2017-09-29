@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_CLMEANSTDDEV_H__
 
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLMeanStdDevKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -38,17 +39,18 @@ public:
     CLMeanStdDev();
     /** Initialise the kernel's inputs and outputs.
      *
-     * @param[in]  input  Input image. Data types supported: U8.
-     * @param[out] mean   Output average pixel value.
-     * @param[out] stddev (Optional)Output standard deviation of pixel values.
+     * @param[in, out] input  Input image. Data types supported: U8. (Written to only for border filling)
+     * @param[out]     mean   Output average pixel value.
+     * @param[out]     stddev (Optional)Output standard deviation of pixel values.
      */
-    void configure(const ICLImage *input, float *mean, float *stddev = nullptr);
+    void configure(ICLImage *input, float *mean, float *stddev = nullptr);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
     CLMeanStdDevKernel _mean_stddev_kernel; /**< Kernel that standard deviation calculation. */
+    CLFillBorderKernel _fill_border_kernel; /**< Kernel that fills the border with zeroes. */
     cl::Buffer         _global_sum;         /**< Variable that holds the global sum among calls in order to ease reduction */
     cl::Buffer         _global_sum_squared; /**< Variable that holds the global sum of squared values among calls in order to ease reduction */
 };

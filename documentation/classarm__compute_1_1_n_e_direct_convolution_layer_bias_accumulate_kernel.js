@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel =
     [ "configure", "classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel.xhtml#af20f630faf157c73ec46bbe3e6e213a6", null ],
     [ "operator=", "classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel.xhtml#a76ca44a55930947dcf9046d9cff7142b", null ],
     [ "operator=", "classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel.xhtml#a06797151270b4836593b45b930bb5cc3", null ],
-    [ "run", "classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

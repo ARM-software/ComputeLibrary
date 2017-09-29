@@ -24,7 +24,7 @@
 #include "helpers.h"
 #include "types.h"
 
-#if(defined CELL_WIDTH && defined CELL_HEIGHT && defined NUM_BINS && defined PHASE_SCALE)
+#if defined(CELL_WIDTH) && defined(CELL_HEIGHT) && defined(NUM_BINS) && defined(PHASE_SCALE)
 
 /** This OpenCL kernel computes the HOG orientation binning
  *
@@ -159,21 +159,21 @@ __kernel void hog_orientation_binning(IMAGE_DECLARATION(mag),
         ((__global float *)dst.ptr)[xc] = bins[xc];
     }
 }
-#endif // (defined CELL_WIDTH && defined CELL_HEIGHT && defined NUM_BINS && defined PHASE_SCALE)
+#endif /* CELL_WIDTH and CELL_HEIGHT and NUM_BINS and PHASE_SCALE */
 
-#if(defined NUM_CELLS_PER_BLOCK_HEIGHT && defined NUM_BINS_PER_BLOCK_X && defined NUM_BINS_PER_BLOCK && HOG_NORM_TYPE && defined L2_HYST_THRESHOLD)
+#if defined(NUM_CELLS_PER_BLOCK_HEIGHT) && defined(NUM_BINS_PER_BLOCK_X) && defined(NUM_BINS_PER_BLOCK) && defined(HOG_NORM_TYPE) && defined(L2_HYST_THRESHOLD)
 
 #ifndef L2_NORM
 #error The value of enum class HOGNormType::L2_NORM has not be passed to the OpenCL kernel
-#endif
+#endif /* not L2_NORM */
 
 #ifndef L2HYS_NORM
 #error The value of enum class HOGNormType::L2HYS_NORM has not be passed to the OpenCL kernel
-#endif
+#endif /* not L2HYS_NORM */
 
 #ifndef L1_NORM
 #error The value of enum class HOGNormType::L1_NORM has not be passed to the OpenCL kernel
-#endif
+#endif /* not L1_NORM */
 
 /** This OpenCL kernel computes the HOG block normalization
  *
@@ -231,13 +231,13 @@ __kernel void hog_block_normalization(IMAGE_DECLARATION(src),
             sum_f32 += val1 * val1;
             sum_f32 += val2 * val2;
             sum_f32 += val3 * val3;
-#else
+#else  /* (HOG_NORM_TYPE == L2_NORM) || (HOG_NORM_TYPE == L2HYS_NORM) */
             // Compute |val| for L1_NORM
             sum_f32 += fabs(val0);
             sum_f32 += fabs(val1);
             sum_f32 += fabs(val2);
             sum_f32 += fabs(val3);
-#endif // (HOG_NORM_TYPE == L2_NORM) || (HOG_NORM_TYPE == L2HYS_NORM)
+#endif /* (HOG_NORM_TYPE == L2_NORM) || (HOG_NORM_TYPE == L2HYS_NORM) */
 
             // Store linearly the input values un-normalized in the output image. These values will be reused for the normalization.
             // This approach will help us to be cache friendly in the next for loop where the normalization will be done because all the values
@@ -255,9 +255,9 @@ __kernel void hog_block_normalization(IMAGE_DECLARATION(src),
 
 #if(HOG_NORM_TYPE == L2_NORM) || (HOG_NORM_TYPE == L2HYS_NORM)
             sum += val * val;
-#else
+#else  /* (HOG_NORM_TYPE == L2_NORM) || (HOG_NORM_TYPE == L2HYS_NORM) */
             sum += fabs(val);
-#endif // (HOG_NORM_TYPE == L2_NORM) || (HOG_NORM_TYPE == L2HYS_NORM)
+#endif /* (HOG_NORM_TYPE == L2_NORM) || (HOG_NORM_TYPE == L2HYS_NORM) */
 
             ((__global float *)dst.ptr)[xc + 0 + yc * NUM_BINS_PER_BLOCK_X] = val;
         }
@@ -322,7 +322,7 @@ __kernel void hog_block_normalization(IMAGE_DECLARATION(src),
     // We use the same constants of OpenCV
     scale = 1.0f / (sqrt(sum) + 1e-3f);
 
-#endif // (HOG_NORM_TYPE == L2HYS_NORM)
+#endif /* (HOG_NORM_TYPE == L2HYS_NORM) */
 
     int i = 0;
     for(; i <= (NUM_BINS_PER_BLOCK - 16); i += 16)
@@ -349,9 +349,9 @@ __kernel void hog_block_normalization(IMAGE_DECLARATION(src),
         ((__global float *)dst.ptr)[i] *= scale;
     }
 }
-#endif // (defined NUM_CELLS_PER_BLOCK_HEIGHT && defined NUM_BINS_PER_BLOCK_X && defined NUM_BINS_PER_BLOCK && HOG_NORM_TYPE && defined L2_HYST_THRESHOLD)
+#endif /* NUM_CELLS_PER_BLOCK_HEIGHT and NUM_BINS_PER_BLOCK_X and NUM_BINS_PER_BLOCK and HOG_NORM_TYPE and L2_HYST_THRESHOLD */
 
-#if(defined NUM_BLOCKS_PER_DESCRIPTOR_Y && defined NUM_BINS_PER_DESCRIPTOR_X && defined THRESHOLD && defined MAX_NUM_DETECTION_WINDOWS && defined IDX_CLASS && defined BLOCK_STRIDE_WIDTH && defined BLOCK_STRIDE_HEIGHT && defined DETECTION_WINDOW_WIDTH && defined DETECTION_WINDOW_HEIGHT)
+#if defined(NUM_BLOCKS_PER_DESCRIPTOR_Y) && defined(NUM_BINS_PER_DESCRIPTOR_X) && defined(THRESHOLD) && defined(MAX_NUM_DETECTION_WINDOWS) && defined(IDX_CLASS) && defined(BLOCK_STRIDE_WIDTH) && defined(BLOCK_STRIDE_HEIGHT) && defined(DETECTION_WINDOW_WIDTH) && defined(DETECTION_WINDOW_HEIGHT)
 
 /** This OpenCL kernel computes the HOG detector using linear SVM
  *
@@ -452,4 +452,5 @@ __kernel void hog_detector(IMAGE_DECLARATION(src),
         }
     }
 }
-#endif // defined BIAS && defined NUM_BLOCKS_PER_DESCRIPTOR_Y && defined NUM_BINS_PER_DESCRIPTOR_X && ...
+#endif /* NUM_BLOCKS_PER_DESCRIPTOR_Y && NUM_BINS_PER_DESCRIPTOR_X && THRESHOLD && MAX_NUM_DETECTION_WINDOWS && IDX_CLASS &&
+        * BLOCK_STRIDE_WIDTH && BLOCK_STRIDE_HEIGHT && DETECTION_WINDOW_WIDTH && DETECTION_WINDOW_HEIGHT */

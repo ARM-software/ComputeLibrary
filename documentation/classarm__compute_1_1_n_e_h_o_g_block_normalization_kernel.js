@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel =
     [ "configure", "classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml#abe08b9f8d4a3bd083ebae3d1cb65a2b5", null ],
     [ "operator=", "classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml#a82a657d81256fe50dadf69b32daeff7f", null ],
     [ "operator=", "classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml#ab4a44853a753d8217b53760a605ad81f", null ],
-    [ "run", "classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

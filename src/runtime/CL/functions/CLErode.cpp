@@ -24,8 +24,8 @@
 #include "arm_compute/runtime/CL/functions/CLErode.h"
 
 #include "arm_compute/core/CL/kernels/CLErodeKernel.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -33,8 +33,8 @@ using namespace arm_compute;
 
 void CLErode::configure(ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
-    auto k = arm_compute::cpp14::make_unique<CLErodeKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLErodeKernel>();
     k->configure(input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
-    _border_handler.configure(input, 1, border_mode, PixelValue(constant_border_value));
+    _border_handler.configure(input, BorderSize(1), border_mode, PixelValue(constant_border_value));
 }

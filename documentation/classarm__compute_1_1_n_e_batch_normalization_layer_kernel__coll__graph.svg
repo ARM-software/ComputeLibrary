@@ -12,14 +12,14 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="0,-0.5 0,-30.5 140,-30.5 140,-0.5 0,-0.5"/>
-<text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">NEBatchNormalizationLayer</text>
-<text text-anchor="middle" x="70" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">Kernel</text>
+<text text-anchor="start" x="8" y="-18.5" font-family="Helvetica" font-size="10.00">NEBatchNormalizationLayer</text>
+<text text-anchor="middle" x="70" y="-7.5" font-family="Helvetica" font-size="10.00">Kernel</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_i_c_p_p_kernel.xhtml" target="_top" xlink:title="Common interface for all kernels implemented in C++. ">
 <polygon fill="white" stroke="black" points="39,-67.5 39,-86.5 101,-86.5 101,-67.5 39,-67.5"/>
-<text text-anchor="middle" x="70" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">INEKernel</text>
+<text text-anchor="middle" x="70" y="-74.5" font-family="Helvetica" font-size="10.00">INEKernel</text>
 </a>
 </g>
 </g>
@@ -32,7 +32,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_kernel.xhtml" target="_top" xlink:title="Common information for all the kernels. ">
 <polygon fill="white" stroke="black" points="46.5,-123.5 46.5,-142.5 93.5,-142.5 93.5,-123.5 46.5,-123.5"/>
-<text text-anchor="middle" x="70" y="-130.5" font-family="Helvetica,sans-Serif" font-size="10.00">IKernel</text>
+<text text-anchor="middle" x="70" y="-130.5" font-family="Helvetica" font-size="10.00">IKernel</text>
 </a>
 </g>
 </g>

@@ -45,5 +45,5 @@ public:
      */
     void configure(const ICLTensor *input, ICLTensor *output);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLBITWISENOTKERNEL_H__ */

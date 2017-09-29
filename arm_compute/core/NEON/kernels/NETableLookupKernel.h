@@ -54,7 +54,7 @@ public:
     void configure(const ITensor *input, const ILut *lut, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Perform table lookup on a given window.
@@ -72,5 +72,5 @@ private:
     TableLookupFunction _func;
     const ILut         *_lut;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NETABLELOOKUPKERNEL_H__ */

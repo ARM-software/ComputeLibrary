@@ -10,5 +10,5 @@ var classarm__compute_1_1_n_e_color_convert_kernel =
     [ "configure", "classarm__compute_1_1_n_e_color_convert_kernel.xhtml#a0bfe568a4d43a9be6db3210cdc69e6c2", null ],
     [ "operator=", "classarm__compute_1_1_n_e_color_convert_kernel.xhtml#abcba384fd1d11e611380b5751fd1b112", null ],
     [ "operator=", "classarm__compute_1_1_n_e_color_convert_kernel.xhtml#ad45cf44ba984cab65018746c5dd0220c", null ],
-    [ "run", "classarm__compute_1_1_n_e_color_convert_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_color_convert_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

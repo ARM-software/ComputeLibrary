@@ -71,7 +71,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
-     *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QS8/F32
+     *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QS8/QS16/F32
      * @param[in]  bias   The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
      *                    dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
      * @param[out] output The output tensor. Data types supported: Same as @p input
@@ -79,7 +79,7 @@ public:
     void configure(const ITensor *input, const ITensor *bias, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     using WeightsReshapeKernel = void(const ITensor *input, const ITensor *bias, ITensor *output, const Window &window);
@@ -89,6 +89,5 @@ private:
     const ITensor        *_bias;
     ITensor              *_output;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H__ */

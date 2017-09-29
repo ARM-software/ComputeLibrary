@@ -69,5 +69,5 @@ public:
 private:
     ICLTensor *_in_out;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLINTEGRALIMAGEKERNEL_H__ */

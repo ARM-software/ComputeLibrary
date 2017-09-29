@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_magnitude_phase_kernel =
     [ "configure", "classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#a885b754efced9144226ada4c202574b6", null ],
     [ "operator=", "classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#a792f1b5315b3678896a2dd5eab8b692b", null ],
     [ "operator=", "classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#ad45c0851db2721a94c831cbc6f30a037", null ],
-    [ "run", "classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

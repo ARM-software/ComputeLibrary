@@ -43,5 +43,5 @@ public:
      */
     void configure(const ICLTensor *input, const ICLLut *lut, ICLTensor *output);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLTABLELOOKUPKERNEL_H__ */

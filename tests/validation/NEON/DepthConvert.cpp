@@ -18,483 +18,467 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConvert.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/ConvertPolicyDataset.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/DepthConvertFixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
+namespace arm_compute
+{
+namespace test
+{
+namespace validation
+{
 namespace
 {
-/** Compute Neon depth convert function.
- *
- * @param[in] shape                Shape of the input and output tensors.
- * @param[in] dt_in                Data type of input tensor.
- * @param[in] dt_out               Data type of the output tensor.
- * @param[in] policy               Conversion policy.
- * @param[in] shift                Value for down/up conversions. Must be 0 <= shift < 8.
- * @param[in] fixed_point_position Fixed point position.
- *
- * @return Computed output tensor.
- */
-Tensor compute_depth_convert(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position)
+/** Input data sets **/
+const auto DepthConvertU8toU16Dataset             = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U16));
+const auto DepthConvertU8toS16Dataset             = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S16));
+const auto DepthConvertU8toS32Dataset             = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S32));
+const auto DepthConvertU16toU8Dataset             = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U8));
+const auto DepthConvertU16toU32Dataset            = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U32));
+const auto DepthConvertS16toU8Dataset             = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::U8));
+const auto DepthConvertS16toS32Dataset            = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::S32));
+const auto DepthConvertQS8toFP32Dataset           = combine(framework::dataset::make("DataType", DataType::QS8), framework::dataset::make("DataType", DataType::F32));
+const auto DepthConvertQS16toFP32Dataset          = combine(framework::dataset::make("DataType", DataType::QS16), framework::dataset::make("DataType", DataType::F32));
+const auto DepthConvertFP32toQS8Dataset           = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QS8));
+const auto DepthConvertFP32toQS16Dataset          = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QS16));
+const auto DepthConvertShiftDataset               = framework::dataset::make("Shift", 0, 7);
+const auto DepthConvertFixedPointQuantizedDataset = framework::dataset::make("FractionalBits", 1, 7);
+} // namespace
+
+TEST_SUITE(NEON)
+TEST_SUITE(DepthConvert)
+template <typename T>
+using NEDepthConvertToU16Fixture = DepthConvertValidationFixture<Tensor, Accessor, NEDepthConvert, T, uint16_t>;
+template <typename T>
+using NEDepthConvertToS16Fixture = DepthConvertValidationFixture<Tensor, Accessor, NEDepthConvert, T, int16_t>;
+template <typename T>
+using NEDepthConvertToS32Fixture = DepthConvertValidationFixture<Tensor, Accessor, NEDepthConvert, T, int32_t>;
+template <typename T>
+using NEDepthConvertToU8Fixture = DepthConvertValidationFixture<Tensor, Accessor, NEDepthConvert, T, uint8_t>;
+template <typename T>
+using NEDepthConvertToU32Fixture = DepthConvertValidationFixture<Tensor, Accessor, NEDepthConvert, T, uint32_t>;
+template <typename T>
+using NEDepthConvertToFP32FixedPointFixture = DepthConvertValidationFractionalBitsFixture<Tensor, Accessor, NEDepthConvert, T, float>;
+template <typename T>
+using NEDepthConvertToQS8FixedPointFixture = DepthConvertValidationFractionalBitsFixture<Tensor, Accessor, NEDepthConvert, T, int8_t>;
+template <typename T>
+using NEDepthConvertToQS16FixedPointFixture = DepthConvertValidationFractionalBitsFixture<Tensor, Accessor, NEDepthConvert, T, int16_t>;
+
+TEST_SUITE(U8_to_U16)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertShiftDataset),
+               shape, policy, shift)
 {
+    int fixed_point_position = 0;
+
     // Create tensors
-    Tensor src = create_tensor(shape, dt_in, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt_out, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U16, 1, fixed_point_position);
 
-    // Create and configure function
-    NEDepthConvert depth_convert;
-    depth_convert.configure(&src, &dst, policy, shift);
-
-    // Allocate tensors
-    src.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src), 0);
-
-    // Compute function
-    depth_convert.run();
-
-    return dst;
-}
-/** Configure and validate region/padding function.
- *
- * @param[in] shape                Shape of the input and output tensors.
- * @param[in] dt_in                Data type of input tensor.
- * @param[in] dt_out               Data type of the output tensor.
- * @param[in] policy               Conversion policy.
- * @param[in] shift                Value for down/up conversions. Must be 0 <= shift < 8.
- * @param[in] fixed_point_position Fixed point position.
- *
- */
-
-void compute_configure_validate(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position)
-{
-    // Create tensors
-    Tensor src = create_tensor(shape, dt_in, 1, fixed_point_position);
-    Tensor dst = create_tensor(shape, dt_out, 1, fixed_point_position);
-
-    BOOST_TEST(src.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
-
-    // Create and configure function
+    // Create and Configure function
     NEDepthConvert depth_convert;
     depth_convert.configure(&src, &dst, policy, shift);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(src.info()->valid_region(), valid_region);
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, required_padding(shape.x(), 16), 0, 0);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
     validate(src.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }
-} // namespace
 
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(DepthConvert)
-
-BOOST_AUTO_TEST_SUITE(QS8_to_F32)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
-                     * boost::unit_test::data::xrange(1, 7, 1),
-                     shape, policy, fixed_point_position)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertToU16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertU8toU16Dataset),
+                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                 DepthConvertShiftDataset))
 {
-    // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
-}
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
-                     * boost::unit_test::data::xrange(1, 7, 1),
-                     shape, policy, fixed_point_position)
-{
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
-                     * boost::unit_test::data::xrange(1, 7, 1),
-                     shape, policy, fixed_point_position)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertToU16Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertU8toU16Dataset),
+                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                               DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::QS8, DataType::F32, policy, 0, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(U8_to_S16)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertShiftDataset),
+               shape, policy, shift)
+{
+    int fixed_point_position = 0;
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::S16, 1, fixed_point_position);
+
+    // Create and Configure function
+    NEDepthConvert depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(F32_to_QS8)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
-                     * boost::unit_test::data::xrange(1, 7, 1),
-                     shape, policy, fixed_point_position)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertToS16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertU8toS16Dataset),
+                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                 DepthConvertShiftDataset))
 {
-    // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
-}
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
-                     * boost::unit_test::data::xrange(1, 7, 1),
-                     shape, policy, fixed_point_position)
-{
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE })
-                     * boost::unit_test::data::xrange(1, 7, 1),
-                     shape, policy, fixed_point_position)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertToS16Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertU8toS16Dataset),
+                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                               DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::F32, DataType::QS8, policy, 0, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(U8_to_U16)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+TEST_SUITE_END()
+TEST_SUITE(U8_to_S32)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertShiftDataset),
+               shape, policy, shift)
 {
-    // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::U8, DataType::U16, policy, shift, 0);
+    int fixed_point_position = 0;
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::S32, 1, fixed_point_position);
+
+    // Create and Configure function
+    NEDepthConvert depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertToS32Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertU8toS32Dataset),
+                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                 DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::U16, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::U16, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertToS32Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertU8toS32Dataset),
+                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                               DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::U16, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::U16, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(U8_to_S16)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+TEST_SUITE(U16_to_U8)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertShiftDataset),
+               shape, policy, shift)
 {
-    // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::U8, DataType::S16, policy, shift, 0);
+    int fixed_point_position = 0;
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, DataType::U16, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
+
+    // Create and Configure function
+    NEDepthConvert depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertToU8Fixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertU16toU8Dataset),
+                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                 DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S16, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S16, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertToU8Fixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertU16toU8Dataset),
+                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                               DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S16, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S16, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(U8_to_S32)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+TEST_SUITE(U16_to_U32)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertShiftDataset),
+               shape, policy, shift)
 {
-    // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::U8, DataType::S32, policy, shift, 0);
+    int fixed_point_position = 0;
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, DataType::U16, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U32, 1, fixed_point_position);
+
+    // Create and Configure function
+    NEDepthConvert depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertToU32Fixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertU16toU32Dataset),
+                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                  DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S32, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S32, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertToU32Fixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertU16toU32Dataset),
+                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U8, DataType::S32, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U8, DataType::S32, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(U16_to_U8)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+TEST_SUITE(S16_to_U8)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertShiftDataset),
+               shape, policy, shift)
 {
-    // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::U16, DataType::U8, policy, shift, 0);
+    int fixed_point_position = 0;
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, DataType::S16, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
+
+    // Create and Configure function
+    NEDepthConvert depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertToU8Fixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertS16toU8Dataset),
+                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U8, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U8, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertToU8Fixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertS16toU8Dataset),
+                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                              DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U8, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U8, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(U16_to_U32)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+TEST_SUITE(S16_to_S32)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertShiftDataset),
+               shape, policy, shift)
 {
-    // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::U16, DataType::U32, policy, shift, 0);
+    int fixed_point_position = 0;
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, DataType::S16, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::S32, 1, fixed_point_position);
+
+    // Create and Configure function
+    NEDepthConvert depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertToS32Fixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertS16toS32Dataset),
+                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                 DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U32, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U32, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertToS32Fixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertS16toS32Dataset),
+                                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                               DepthConvertShiftDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::U16, DataType::U32, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::U16, DataType::U32, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(S16_to_U8)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+TEST_SUITE(Quantized_to_FP32)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::QS8, DataType::QS16 })),
+                                                                           framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertFixedPointQuantizedDataset),
+               shape, dt, policy, fixed_point_position)
 {
-    // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::S16, DataType::U8, policy, shift, 0);
+    int shift = 0;
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::F32, 1, fixed_point_position);
+
+    // Create and Configure function
+    NEDepthConvert depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunSmallQS8, NEDepthConvertToFP32FixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertQS8toFP32Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       DepthConvertFixedPointQuantizedDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::U8, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::U8, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunSmallQS16, NEDepthConvertToFP32FixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertQS16toFP32Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       DepthConvertFixedPointQuantizedDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::U8, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::U8, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(S16_to_S32)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, (SmallShapes() + LargeShapes()) * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunLargeQS8, NEDepthConvertToFP32FixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertQS8toFP32Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       DepthConvertFixedPointQuantizedDataset))
 {
-    // Compute configure and validate region/padding
-    compute_configure_validate(shape, DataType::S16, DataType::S32, policy, shift, 0);
-}
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
-{
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::S32, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::S32, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes() * boost::unit_test::data::make({ ConvertPolicy::SATURATE, ConvertPolicy::WRAP })
-                     * boost::unit_test::data::xrange(0, 7, 1),
-                     shape, policy, shift)
+FIXTURE_DATA_TEST_CASE(RunLargeQS16, NEDepthConvertToFP32FixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertQS16toFP32Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       DepthConvertFixedPointQuantizedDataset))
 {
-    // Compute function
-    Tensor dst = compute_depth_convert(shape, DataType::S16, DataType::S32, policy, shift, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_depth_convert(shape, DataType::S16, DataType::S32, policy, shift, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+TEST_SUITE(FP32_to_Quantized)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::QS8, DataType::QS16 })),
+                                                                           framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertFixedPointQuantizedDataset),
+               shape, dt, policy, fixed_point_position)
+{
+    int shift = 0;
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, DataType::F32, 1, fixed_point_position);
+    Tensor dst = create_tensor<Tensor>(shape, dt, 1, fixed_point_position);
+
+    // Create and Configure function
+    NEDepthConvert depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallQS8, NEDepthConvertToQS8FixedPointFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertFP32toQS8Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       DepthConvertFixedPointQuantizedDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallQS16, NEDepthConvertToQS16FixedPointFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertFP32toQS16Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       DepthConvertFixedPointQuantizedDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeQS8, NEDepthConvertToQS8FixedPointFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertFP32toQS8Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       DepthConvertFixedPointQuantizedDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeQS16, NEDepthConvertToQS16FixedPointFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertFP32toQS16Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       DepthConvertFixedPointQuantizedDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

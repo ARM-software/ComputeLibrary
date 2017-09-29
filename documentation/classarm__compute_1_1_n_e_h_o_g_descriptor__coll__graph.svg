@@ -12,13 +12,13 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="-7.10543e-15,-0.5 -7.10543e-15,-19.5 98,-19.5 98,-0.5 -7.10543e-15,-0.5"/>
-<text text-anchor="middle" x="49" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">NEHOGDescriptor</text>
+<text text-anchor="middle" x="49" y="-7.5" font-family="Helvetica" font-size="10.00">NEHOGDescriptor</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_i_function.xhtml" target="_top" xlink:title="Base class for all functions. ">
 <polygon fill="white" stroke="black" points="20.5,-56.5 20.5,-75.5 77.5,-75.5 77.5,-56.5 20.5,-56.5"/>
-<text text-anchor="middle" x="49" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">IFunction</text>
+<text text-anchor="middle" x="49" y="-63.5" font-family="Helvetica" font-size="10.00">IFunction</text>
 </a>
 </g>
 </g>

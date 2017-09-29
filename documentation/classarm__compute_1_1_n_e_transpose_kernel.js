@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_transpose_kernel =
     [ "configure", "classarm__compute_1_1_n_e_transpose_kernel.xhtml#a83a344e60eb7db895953a942abf16628", null ],
     [ "operator=", "classarm__compute_1_1_n_e_transpose_kernel.xhtml#a6feb51cd492d39a63e9455dac72bc030", null ],
     [ "operator=", "classarm__compute_1_1_n_e_transpose_kernel.xhtml#aef05df94b7db653754d21e0b341cb911", null ],
-    [ "run", "classarm__compute_1_1_n_e_transpose_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_transpose_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

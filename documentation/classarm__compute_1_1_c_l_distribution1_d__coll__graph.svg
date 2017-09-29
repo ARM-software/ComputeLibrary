@@ -12,13 +12,13 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="1.5,-0.5 1.5,-19.5 93.5,-19.5 93.5,-0.5 1.5,-0.5"/>
-<text text-anchor="middle" x="47.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">CLDistribution1D</text>
+<text text-anchor="middle" x="47.5" y="-7.5" font-family="Helvetica" font-size="10.00">CLDistribution1D</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_i_c_l_distribution1_d.xhtml" target="_top" xlink:title="ICLDistribution1D interface class. ">
 <polygon fill="white" stroke="black" points="0,-56.5 0,-75.5 95,-75.5 95,-56.5 0,-56.5"/>
-<text text-anchor="middle" x="47.5" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLDistribution1D</text>
+<text text-anchor="middle" x="47.5" y="-63.5" font-family="Helvetica" font-size="10.00">ICLDistribution1D</text>
 </a>
 </g>
 </g>
@@ -31,7 +31,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_distribution1_d.xhtml" target="_top" xlink:title="1D Distribution interface ">
 <polygon fill="white" stroke="black" points="6.5,-112.5 6.5,-131.5 88.5,-131.5 88.5,-112.5 6.5,-112.5"/>
-<text text-anchor="middle" x="47.5" y="-119.5" font-family="Helvetica,sans-Serif" font-size="10.00">IDistribution1D</text>
+<text text-anchor="middle" x="47.5" y="-119.5" font-family="Helvetica" font-size="10.00">IDistribution1D</text>
 </a>
 </g>
 </g>
@@ -44,7 +44,7 @@
 <g id="node4" class="node"><title>Node4</title>
 <g id="a_node4"><a xlink:href="classarm__compute_1_1_i_distribution.xhtml" target="_top" xlink:title="Interface for distribution objects. ">
 <polygon fill="white" stroke="black" points="13,-168.5 13,-187.5 82,-187.5 82,-168.5 13,-168.5"/>
-<text text-anchor="middle" x="47.5" y="-175.5" font-family="Helvetica,sans-Serif" font-size="10.00">IDistribution</text>
+<text text-anchor="middle" x="47.5" y="-175.5" font-family="Helvetica" font-size="10.00">IDistribution</text>
 </a>
 </g>
 </g>

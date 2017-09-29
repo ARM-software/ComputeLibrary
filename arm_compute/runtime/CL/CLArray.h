@@ -37,16 +37,23 @@ template <class T>
 class CLArray : public ICLArray<T>
 {
 public:
+    /** Default constructor: empty array */
+    CLArray()
+        : ICLArray<T>(0), _buffer()
+    {
+    }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLArray(const CLArray &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    const CLArray &operator=(const CLArray &) = delete;
+    CLArray &operator=(const CLArray &) = delete;
+    CLArray(CLArray &&)                 = default;
+    CLArray &operator=(CLArray &&) = default;
     /** Constructor: initializes an array which can contain up to max_num_points values
      *
      * @param[in] max_num_values Maximum number of values the array will be able to stored
      */
     CLArray(size_t max_num_values)
-        : ICLArray<T>(max_num_values), _buffer(cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, max_num_values * sizeof(T)))
+        : ICLArray<T>(max_num_values), _buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, max_num_values * sizeof(T))
     {
     }
     /** Enqueue a map operation of the allocated buffer.
@@ -97,6 +104,7 @@ private:
 using CLKeyPointArray        = CLArray<KeyPoint>;
 using CLCoordinates2DArray   = CLArray<Coordinates2D>;
 using CLDetectionWindowArray = CLArray<DetectionWindow>;
+using CLROIArray             = CLArray<ROI>;
 using CLSize2DArray          = CLArray<Size2D>;
 using CLUInt8Array           = CLArray<cl_uchar>;
 using CLUInt16Array          = CLArray<cl_ushort>;

@@ -29,5 +29,5 @@
 namespace arm_compute
 {
 using INEKernel = ICPPKernel;
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_INEKERNEL_H__ */

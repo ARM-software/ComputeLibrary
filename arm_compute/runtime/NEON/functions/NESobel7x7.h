@@ -28,9 +28,12 @@
 #include "arm_compute/core/NEON/kernels/NESobel7x7Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -47,7 +50,7 @@ class NESobel7x7 : public IFunction
 {
 public:
     /** Default constructor */
-    NESobel7x7();
+    NESobel7x7(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source, destinations and border mode.
      *
      * @note At least one of output_x or output_y must be not NULL.
@@ -65,6 +68,7 @@ public:
     void run() override;
 
 protected:
+    MemoryGroup          _memory_group;   /**< Function memory group */
     NESobel7x7HorKernel  _sobel_hor;      /**< Sobel Horizontal 7x7 kernel */
     NESobel7x7VertKernel _sobel_vert;     /**< Sobel Vertical 7x7 kernel */
     Tensor               _tmp_x;          /**< Temporary buffer for Sobel X */

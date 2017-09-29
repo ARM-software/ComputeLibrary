@@ -24,28 +24,29 @@
 #include "arm_compute/runtime/NEON/functions/NEDepthConcatenate.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEDepthConcatenateKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
-NEDepthConcatenate::NEDepthConcatenate()
-    : _inputs_vector(), _concat_kernels_vector(), _border_handlers_vector(), _num_inputs(0)
+NEDepthConcatenate::NEDepthConcatenate() // NOLINT
+    : _inputs_vector(),
+      _concat_kernels_vector(),
+      _border_handlers_vector(),
+      _num_inputs(0)
 {
 }
 
-void NEDepthConcatenate::configure(std::vector<ITensor *> inputs_vector, ITensor *output)
+void NEDepthConcatenate::configure(std::vector<ITensor *> inputs_vector, ITensor *output) // NOLINT
 {
     ARM_COMPUTE_ERROR_ON(inputs_vector.size() < 2);
 
     _num_inputs             = inputs_vector.size();
-    _concat_kernels_vector  = arm_compute::cpp14::make_unique<NEDepthConcatenateKernel[]>(_num_inputs);
-    _border_handlers_vector = arm_compute::cpp14::make_unique<NEFillBorderKernel[]>(_num_inputs);
+    _concat_kernels_vector  = arm_compute::support::cpp14::make_unique<NEDepthConcatenateKernel[]>(_num_inputs);
+    _border_handlers_vector = arm_compute::support::cpp14::make_unique<NEFillBorderKernel[]>(_num_inputs);
 
     unsigned int depth_offset = 0;
     for(unsigned int i = 0; i < _num_inputs; ++i)

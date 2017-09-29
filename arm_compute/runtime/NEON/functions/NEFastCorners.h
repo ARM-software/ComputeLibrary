@@ -31,9 +31,12 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <cstdint>
+#include <memory>
 
 namespace arm_compute
 {
@@ -51,7 +54,7 @@ class NEFastCorners : public IFunction
 {
 public:
     /** Constructor */
-    NEFastCorners();
+    NEFastCorners(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialize the function's source, destination, conv and border_mode.
      *
      * @param[in, out] input                 Source image. Data type supported: U8. (Written to only for @p border_mode != UNDEFINED)
@@ -68,6 +71,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                     _memory_group;
     NEFastCornersKernel             _fast_corners_kernel;
     NEFillBorderKernel              _border_handler;
     NENonMaximaSuppression3x3Kernel _nonmax_kernel;

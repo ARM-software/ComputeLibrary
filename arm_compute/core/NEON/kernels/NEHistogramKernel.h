@@ -25,10 +25,10 @@
 #define __ARM_COMPUTE_NEHISTOGRAMKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "support/Mutex.h"
 
 #include <cstddef>
 #include <cstdint>
-#include <mutex>
 
 namespace arm_compute
 {
@@ -77,7 +77,7 @@ public:
     void configure(const IImage *input, IDistribution1D *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Function to merge multiple partial histograms.
@@ -95,15 +95,17 @@ private:
     void merge_min(uint8_t *global_min, const uint8_t &local_min);
     /** Function to perform histogram on the given window
       *
-     *  @param[in] win Region on which to execute the kernel
+     *  @param[in] win  Region on which to execute the kernel
+     *  @param[in] info Info about the executing thread
      */
-    void histogram_U8(Window win);
+    void histogram_U8(Window win, const ThreadInfo &info);
     /** Function to perform histogram on the given window where histogram is
      *         of fixed size 256 without ranges and offsets.
      *
-     *  @param[in] win Region on which to execute the kernel
+     *  @param[in] win  Region on which to execute the kernel
+     *  @param[in] info Info about the executing thread
      */
-    void histogram_fixed_U8(Window win);
+    void histogram_fixed_U8(Window win, const ThreadInfo &info);
     /** Pre-calculate the pixel windowing for every possible pixel
      *
      * Calculate (V - offset) * numBins / range where V is every possible pixel value.
@@ -115,15 +117,15 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using HistogramFunctionPtr = void (NEHistogramKernel::*)(Window window);
+    using HistogramFunctionPtr = void (NEHistogramKernel::*)(Window window, const ThreadInfo &info);
 
     HistogramFunctionPtr          _func; ///< Histogram function to use for the particular image types passed to configure()
     const IImage                 *_input;
     IDistribution1D              *_output;
     uint32_t                     *_local_hist;
     uint32_t                     *_window_lut;
-    std::mutex                    _hist_mtx;
+    arm_compute::Mutex            _hist_mtx;
     static constexpr unsigned int _max_range_size{ 256 }; ///< 256 possible pixel values as we handle only U8 images
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEHISTOGRAMKERNEL_H__ */

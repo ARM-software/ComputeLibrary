@@ -34,8 +34,8 @@
 
 using namespace arm_compute;
 
-NEGEMMLowp::NEGEMMLowp()
-    : _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _tmp_a(), _tmp_b()
+NEGEMMLowp::NEGEMMLowp(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _tmp_a(), _tmp_b()
 {
 }
 
@@ -63,6 +63,10 @@ void NEGEMMLowp::configure(const ITensor *a, const ITensor *b, ITensor *output, 
     _tmp_a.allocator()->init(info_a);
     _tmp_b.allocator()->init(info_b);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_tmp_a);
+    _memory_group.manage(&_tmp_b);
+
     _interleave_kernel.configure(a, &_tmp_a);
     _transpose_kernel.configure(b, &_tmp_b);
     _mm_kernel.configure(&_tmp_a, &_tmp_b, output, a_offset, b_offset, output_offset, output_mult_int, shift);
@@ -73,6 +77,8 @@ void NEGEMMLowp::configure(const ITensor *a, const ITensor *b, ITensor *output, 
 
 void NEGEMMLowp::run()
 {
+    _memory_group.acquire();
+
     /* Run interleave kernel */
     NEScheduler::get().schedule(&_interleave_kernel, Window::DimY);
 
@@ -81,4 +87,6 @@ void NEGEMMLowp::run()
 
     /* Run matrix multiply kernel */
     NEScheduler::get().schedule(&_mm_kernel, Window::DimY);
+
+    _memory_group.release();
 }

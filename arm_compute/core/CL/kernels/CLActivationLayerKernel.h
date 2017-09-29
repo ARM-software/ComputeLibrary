@@ -24,23 +24,45 @@
 #ifndef __ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__
 #define __ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__
 
-#include "arm_compute/core/CL/ICLSimple3DKernel.h"
+#include "arm_compute/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
 /** Interface for the activation layer kernel. */
-class CLActivationLayerKernel : public ICLSimple3DKernel
+class CLActivationLayerKernel : public ICLKernel
 {
 public:
+    /** Default constructor */
+    CLActivationLayerKernel();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLActivationLayerKernel(const CLActivationLayerKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLActivationLayerKernel &operator=(const CLActivationLayerKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    CLActivationLayerKernel(CLActivationLayerKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    CLActivationLayerKernel &operator=(CLActivationLayerKernel &&) = default;
+    /** Default destructor */
+    ~CLActivationLayerKernel() = default;
     /** Set the input and output tensor.
      *
-     * @param[in]  input    Source tensor. Data types supported: F16, F32, U16, S16.
-     * @param[out] output   Destination tensor. Data type should match the input data type.
-     * @param[in]  act_info Activation layer information.
+     * @note If the output tensor is a nullptr, the activation function will be performed in-place
+     *
+     * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
+     *                          of the activation function. Data types supported: QS8/QS16/F16/F32.
+     * @param[out]     output   Destination tensor. Data type supported: same as @p input
+     * @param[in]      act_info Activation layer information.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);
+    void configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);
+
+    // Inherited methods overridden:
+    void run(const Window &window, cl::CommandQueue &queue) override;
+
+private:
+    ICLTensor *_input;
+    ICLTensor *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__ */

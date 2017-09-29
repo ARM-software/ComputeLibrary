@@ -26,6 +26,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
@@ -44,6 +45,38 @@ class Coordinates;
 
 namespace
 {
+void sub_wrap_QS8_QS8_QS8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+    Iterator input1(in1, window);
+    Iterator input2(in2, window);
+    Iterator output(out, window);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const qint8x16_t a = vld1q_qs8(reinterpret_cast<const qint8_t *>(input1.ptr()));
+        const qint8x16_t b = vld1q_qs8(reinterpret_cast<const qint8_t *>(input2.ptr()));
+
+        vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), vsubq_qs8(a, b));
+    },
+    input1, input2, output);
+}
+
+void sub_saturate_QS8_QS8_QS8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+    Iterator input1(in1, window);
+    Iterator input2(in2, window);
+    Iterator output(out, window);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const qint8x16_t a = vld1q_qs8(reinterpret_cast<const qint8_t *>(input1.ptr()));
+        const qint8x16_t b = vld1q_qs8(reinterpret_cast<const qint8_t *>(input2.ptr()));
+
+        vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), vqsubq_qs8(a, b));
+    },
+    input1, input2, output);
+}
+
 void sub_wrap_U8_U8_U8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     Iterator input1(in1, window);
@@ -122,6 +155,45 @@ void sub_saturate_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *o
         vst2q_s16(reinterpret_cast<int16_t *>(output.ptr()), ta3);
     },
     input1, input2, output);
+}
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+inline float16x8x2_t vsub2q_f16(const float16x8x2_t &a, const float16x8x2_t &b)
+{
+    const float16x8x2_t res =
+    {
+        {
+            vsubq_f16(a.val[0], b.val[0]),
+            vsubq_f16(a.val[1], b.val[1])
+        }
+    };
+
+    return res;
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
+void sub_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    Iterator input1(in1, window);
+    Iterator input2(in2, window);
+    Iterator output(out, window);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const float16x8x2_t a = vld2q_f16(reinterpret_cast<const float16_t *>(input1.ptr()));
+        const float16x8x2_t b = vld2q_f16(reinterpret_cast<const float16_t *>(input2.ptr()));
+
+        vst2q_f16(reinterpret_cast<float16_t *>(output.ptr()), vsub2q_f16(a, b));
+    },
+    input1, input2, output);
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
+    ARM_COMPUTE_UNUSED(in1);
+    ARM_COMPUTE_UNUSED(in2);
+    ARM_COMPUTE_UNUSED(out);
+    ARM_COMPUTE_UNUSED(window);
+    ARM_COMPUTE_ERROR("Not supported, recompile the library with arch=arm64-v8.2-a");
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 }
 
 void sub_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
@@ -287,26 +359,40 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
 
-    set_shape_if_empty(*output->info(), input1->info()->tensor_shape());
+    // Auto initialize output if not initialized
+    {
+        set_shape_if_empty(*output->info(), input1->info()->tensor_shape());
 
-    if(input1->info()->data_type() == DataType::S16 || input2->info()->data_type() == DataType::S16)
-    {
-        set_format_if_unknown(*output->info(), Format::S16);
-    }
-    else if(input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32)
-    {
-        set_format_if_unknown(*output->info(), Format::F32);
+        if(input1->info()->data_type() == DataType::S16 || input2->info()->data_type() == DataType::S16)
+        {
+            set_format_if_unknown(*output->info(), Format::S16);
+        }
+        else if(input1->info()->data_type() == DataType::F16 || input2->info()->data_type() == DataType::F16)
+        {
+            set_format_if_unknown(*output->info(), Format::F16);
+        }
+        else if(input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32)
+        {
+            set_format_if_unknown(*output->info(), Format::F32);
+        }
     }
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input1, input2, output);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::S16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::S16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::QS8, DataType::U8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::QS8, DataType::U8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::U8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->data_type() == DataType::U8 && (input1->info()->data_type() != DataType::U8 || input2->info()->data_type() != DataType::U8),
                              "Output can only be U8 if both inputs are U8");
+    if(is_data_type_fixed_point(input1->info()->data_type()) || is_data_type_fixed_point(input2->info()->data_type()) || is_data_type_fixed_point(output->info()->data_type()))
+    {
+        // Check that all data types are the same and all fixed-point positions are the same
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input1, input2, output);
+    }
 
     static std::map<std::string, SubFunction *> map_function =
     {
+        { "sub_wrap_QS8_QS8_QS8", &sub_wrap_QS8_QS8_QS8 },
+        { "sub_saturate_QS8_QS8_QS8", &sub_saturate_QS8_QS8_QS8 },
         { "sub_wrap_U8_U8_U8", &sub_wrap_U8_U8_U8 },
         { "sub_wrap_U8_U8_S16", &sub_wrap_U8_U8_S16 },
         { "sub_saturate_U8_U8_U8", &sub_saturate_U8_U8_U8 },
@@ -315,10 +401,15 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
         { "sub_wrap_S16_U8_S16", &sub_wrap_S16_U8_S16 },
         { "sub_saturate_U8_S16_S16", &sub_saturate_U8_S16_S16 },
         { "sub_saturate_S16_U8_S16", &sub_saturate_S16_U8_S16 },
+        { "sub_wrap_QS16_QS16_QS16", &sub_wrap_S16_S16_S16 },
+        { "sub_saturate_QS16_QS16_QS16", &sub_saturate_S16_S16_S16 },
         { "sub_wrap_S16_S16_S16", &sub_wrap_S16_S16_S16 },
         { "sub_saturate_S16_S16_S16", &sub_saturate_S16_S16_S16 },
         { "sub_wrap_F32_F32_F32", &sub_F32_F32_F32 },
         { "sub_saturate_F32_F32_F32", &sub_F32_F32_F32 },
+        { "sub_wrap_F16_F16_F16", &sub_F16_F16_F16 },
+        { "sub_saturate_F16_F16_F16", &sub_F16_F16_F16 },
+
     };
 
     _input1 = input1;
@@ -361,8 +452,9 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
     INEKernel::configure(win);
 }
 
-void NEArithmeticSubtractionKernel::run(const Window &window)
+void NEArithmeticSubtractionKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

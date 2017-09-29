@@ -28,7 +28,9 @@
 
 #include "arm_compute/core/CL/kernels/CLCannyEdgeKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/IMemoryManager.h"
 
 #include <memory>
 
@@ -49,7 +51,7 @@ class CLCannyEdge : public IFunction
 {
 public:
     /** Constructor */
-    CLCannyEdge();
+    CLCannyEdge(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source, destination, thresholds, gradient size, normalization type and border mode.
      *
      * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for border_mode != UNDEFINED)
@@ -68,6 +70,7 @@ public:
     virtual void run() override;
 
 private:
+    CLMemoryGroup                 _memory_group;                                    /**< Function's memory group */
     std::unique_ptr<IFunction>    _sobel;                                           /**< Pointer to Sobel kernel. */
     CLGradientKernel              _gradient;                                        /**< Gradient kernel. */
     CLFillBorderKernel            _border_mag_gradient;                             /**< Fill border on magnitude tensor kernel */

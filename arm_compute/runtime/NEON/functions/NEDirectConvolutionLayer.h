@@ -29,7 +29,11 @@
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -45,11 +49,17 @@ class NEDirectConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEDirectConvolutionLayer();
+    NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input, weights, biases and output tensors.
       *
-      * @param[in, out] input     Input tensor. Data types supported: QS8/F32.
+      * @note: DirectConvolution only works in the following configurations:
+      *    1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = QS8/QS16/F16/F32
+      *    3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = QS8/F16/F32
+      *    5x5 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F32
+      *
+      * @param[in, out] input     Input tensor. Data types supported: QS8/QS16/F16/F32.
       * @param[in]      weights   Set of kernels to convolve the input volume.
+      *                           Supported sizes: 1x1, 3x3 and 5x5.
       *                           The 3rd dimension must be the same as the input's volume 3rd dimension.
       *                           Data type supported: Same as @p input.
       * @param[in]      bias      Set of biases. Data type supported: Same as @p input.
@@ -63,6 +73,7 @@ public:
     void run() override;
 
 private:
+    MemoryGroup                                  _memory_group;
     NEDirectConvolutionLayerBiasAccumulateKernel _accumulate_bias_kernel;
     NEDirectConvolutionLayerKernel               _conv_kernel;
     NEFillBorderKernel                           _input_border_handler;

@@ -61,7 +61,7 @@ public:
     void configure(const ITensor *gx, const ITensor *gy, ITensor *magnitude, ITensor *phase);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Function to perform magnitude on the given window
@@ -125,7 +125,7 @@ public:
     void configure(const ITensor *gx, const ITensor *gy, ITensor *magnitude, ITensor *phase);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Function to perform magnitude on the given window
@@ -156,9 +156,9 @@ private:
     ITensor                  *_magnitude; /**< Output - Magnitude */
     ITensor                  *_phase;     /**< Output - Phase */
 };
-#else
+#else  /* ARM_COMPUTE_ENABLE_FP16 */
 template <MagnitudeType mag_type, PhaseType phase_type>
 using NEMagnitudePhaseFP16Kernel = NEMagnitudePhaseKernel<mag_type, phase_type>;
-#endif
-}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEMAGNITUDEPHASEKERNEL_H__ */

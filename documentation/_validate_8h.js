@@ -22,6 +22,7 @@ var _validate_8h =
     [ "ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL", "_validate_8h.xhtml#a1b35b0d258183cf9ef36adf684d0b88c", null ],
     [ "ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT", "_validate_8h.xhtml#a6c48a8f0fea0f127b56dcc7c107fd168", null ],
     [ "ARM_COMPUTE_ERROR_ON_WINDOW_DIMENSIONS_GTE", "_validate_8h.xhtml#af5084ef537306d09b1ef82aed5d1f63f", null ],
+    [ "ARM_COMPUTE_ERROR_ON_WINDOW_NOT_COLLAPSABLE_AT_DIMENSION", "_validate_8h.xhtml#a693decaffb042b3ff76e274f983e8ac1", null ],
     [ "error_on_channel_not_in", "_validate_8h.xhtml#a593d972357b3bcfeecb87207dc925417", null ],
     [ "error_on_channel_not_in_known_format", "_validate_8h.xhtml#ad0d001a84424d440f9a11fc1b80ed2ff", null ],
     [ "error_on_coordinates_dimensions_gte", "_validate_8h.xhtml#a130822528598f21a48f7ee0e6d8438a0", null ],
@@ -32,7 +33,7 @@ var _validate_8h =
     [ "error_on_invalid_subtensor", "_validate_8h.xhtml#a36ffb104aed50deb360db6f3afa4c394", null ],
     [ "error_on_invalid_subtensor_valid_region", "_validate_8h.xhtml#a858e835f22c359080a09709c6dd950b1", null ],
     [ "error_on_invalid_subwindow", "_validate_8h.xhtml#a0916477887763c20822b43be144963eb", null ],
-    [ "error_on_mismatching_data_types", "_validate_8h.xhtml#ad35d92af32949e38ec38b3d8e46b566c", null ],
+    [ "error_on_mismatching_data_types", "_validate_8h.xhtml#a464883e1c23b02d47d8db21956a8f117", null ],
     [ "error_on_mismatching_dimensions", "_validate_8h.xhtml#aff062b84c57c614a2de4d54db2cbc31c", null ],
     [ "error_on_mismatching_fixed_point", "_validate_8h.xhtml#a526ed43a37ba0faf2c1789175ec1a350", null ],
     [ "error_on_mismatching_fixed_point_position", "_validate_8h.xhtml#a064db352a2f4153e6237054343d5fe7a", null ],
@@ -44,5 +45,6 @@ var _validate_8h =
     [ "error_on_unconfigured_kernel", "_validate_8h.xhtml#a21a4884cd1dbfa83351b8efa265f526a", null ],
     [ "error_on_value_not_representable_in_fixed_point", "_validate_8h.xhtml#a9afdaa4d8bbb78938110ada1daf87f8b", null ],
     [ "error_on_window_dimensions_gte", "_validate_8h.xhtml#a6fed5543ae383442a51362e6607c4e65", null ],
+    [ "error_on_window_not_collapsable_at_dimension", "_validate_8h.xhtml#ade618d7802413e82df0d9c1dbb049138", null ],
     [ "have_different_dimensions", "_validate_8h.xhtml#a45d610a8bc262f7007c934293361e888", null ]
 ];

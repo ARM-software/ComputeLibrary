@@ -24,18 +24,21 @@
 #include "arm_compute/runtime/CL/functions/CLLaplacianReconstruct.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 #include <cstddef>
 
 using namespace arm_compute;
 
-CLLaplacianReconstruct::CLLaplacianReconstruct()
-    : _tmp_pyr(), _addf(), _scalef(), _depthf()
+CLLaplacianReconstruct::CLLaplacianReconstruct() // NOLINT
+    : _tmp_pyr(),
+      _addf(),
+      _scalef(),
+      _depthf()
 {
 }
 
@@ -60,8 +63,8 @@ void CLLaplacianReconstruct::configure(const CLPyramid *pyramid, const ICLTensor
     _tmp_pyr.init(pyramid_info);
 
     // Allocate add and scale functions. Level 0 does not need to be scaled.
-    _addf   = arm_compute::cpp14::make_unique<CLArithmeticAddition[]>(num_levels);
-    _scalef = arm_compute::cpp14::make_unique<CLScale[]>(num_levels - 1);
+    _addf   = arm_compute::support::cpp14::make_unique<CLArithmeticAddition[]>(num_levels);
+    _scalef = arm_compute::support::cpp14::make_unique<CLScale[]>(num_levels - 1);
 
     const size_t last_level = num_levels - 1;
 

@@ -59,7 +59,7 @@ public:
     void configure(const ITensor *input, const ITensor *map_x, const ITensor *map_y, ITensor *output, InterpolationPolicy policy);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** function to perform nearest interpolation on the given window */
@@ -74,5 +74,5 @@ private:
     const ITensor *_map_x;  /**< Input remap x coordinates */
     const ITensor *_map_y;  /**< Input remap y coordinates */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEREMAPKERNEL_H__ */

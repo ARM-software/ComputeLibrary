@@ -46,9 +46,10 @@ BorderSize CLScaleKernel::border_size() const
 
 void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, bool border_undefined)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON(output == input);
 
     _input  = input;
     _output = output;
@@ -76,24 +77,33 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 4;
-    const int              border_offset                     = (border_undefined) ? 0 : border_size().left;
 
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic input_access(input->info(), -border_offset, -border_offset,
-                                    input->info()->dimension(0) + border_offset, input->info()->dimension(1) + border_offset);
+    const ValidRegion &input_valid_region = input->info()->valid_region();
+
+    // Reads can occur within the valid region of the input
+    AccessWindowStatic input_access(input->info(),
+                                    input_valid_region.anchor[0] - border_size().left, input_valid_region.anchor[1] - border_size().top,
+                                    input_valid_region.anchor[0] + input_valid_region.shape[0] + border_size().right,
+                                    input_valid_region.anchor[1] + input_valid_region.shape[1] + border_size().bottom);
+
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, input_access, output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()), output->info()->tensor_shape(), policy, border_size(),
+                                                                     border_undefined));
 
     ICLKernel::configure(win);
 
     // Set static kernel arguments
+    const float scale_x = static_cast<float>(input->info()->dimension(0)) / output->info()->dimension(0);
+    const float scale_y = static_cast<float>(input->info()->dimension(1)) / output->info()->dimension(1);
+
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
     _kernel.setArg<float>(idx++, input->info()->dimension(0));
     _kernel.setArg<float>(idx++, input->info()->dimension(1));
-    _kernel.setArg<float>(idx++, output->info()->dimension(0));
-    _kernel.setArg<float>(idx++, output->info()->dimension(1));
+    _kernel.setArg<float>(idx++, scale_x);
+    _kernel.setArg<float>(idx++, scale_y);
 }

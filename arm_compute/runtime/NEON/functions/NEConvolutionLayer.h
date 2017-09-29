@@ -28,13 +28,17 @@
 
 #include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -48,20 +52,22 @@ class NEConvolutionLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayerReshapeWeights();
+    NEConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/F32.
+     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QS16/F32.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] output       Destination tensor. Data types supported: Same as @p weights.
      * @param[in]  transpose1xW True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise.
      *                          Data types supported: Same as @p weights.
      */
     void configure(const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose1xW);
+
     // Inherited methods overridden:
     void run() override;
 
 private:
+    MemoryGroup              _memory_group;
     NEWeightsReshapeKernel   _weights_reshape_kernel;
     NEGEMMTranspose1xWKernel _weights_transposed_kernel;
     Tensor                   _weights_reshaped;
@@ -79,12 +85,13 @@ class NEConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayer();
+    NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+
     /** Set the input and output tensors.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QS8/F32.
+     *                          Data types supported: QS8/QS16/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
      * @param[out] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
@@ -94,22 +101,26 @@ public:
      *                          tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      */
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo());
+
     // Inherited methods overridden:
     void run() override;
 
 private:
-    NEIm2ColKernel                   _input_im2col_kernel;
-    NEGEMMInterleave4x4Kernel        _input_interleave_kernel;
-    NEConvolutionLayerReshapeWeights _reshape_weights;
-    NEGEMMMatrixMultiplyKernel       _mm_kernel;
-    NECol2ImKernel                   _output_col2im_kernel;
-    Tensor                           _input_im2col_reshaped;
-    Tensor                           _input_interleaved_reshaped;
-    Tensor                           _weights_reshaped;
-    Tensor                           _gemm_output;
-    bool                             _has_bias;
-    bool                             _is_fully_connected_convolution;
-    bool                             _are_weights_reshaped;
+    MemoryGroup                               _memory_group;
+    NEIm2ColKernel                            _input_im2col_kernel;
+    NEGEMMInterleave4x4Kernel                 _input_interleave_kernel;
+    NEConvolutionLayerReshapeWeights          _reshape_weights;
+    NEGEMMMatrixMultiplyKernel                _mm_kernel;
+    std::unique_ptr<NEGEMMAssemblyBaseKernel> _mm_optimised_kernel;
+    NECol2ImKernel                            _output_col2im_kernel;
+    Tensor                                    _input_im2col_reshaped;
+    Tensor                                    _input_interleaved_reshaped;
+    Tensor                                    _weights_reshaped;
+    Tensor                                    _gemm_output;
+    Tensor                                    _workspace;
+    bool                                      _has_bias;
+    bool                                      _is_fully_connected_convolution;
+    bool                                      _are_weights_reshaped;
 };
 }
 #endif /* __ARM_COMPUTE_NECONVOLUTIONLAYER_H__ */

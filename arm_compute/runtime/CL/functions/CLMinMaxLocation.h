@@ -55,15 +55,15 @@ public:
      *
      * @note When locations of min and max occurrences are requested, the reported number of locations is limited to the given array size.
      *
-     * @param[in]  input     Input image. Data types supported: U8 or S16.
-     * @param[out] min       Minimum value of image.
-     * @param[out] max       Maximum value of image.
+     * @param[in]  input     Input image. Data types supported: U8/S16/F32.
+     * @param[out] min       Minimum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
+     * @param[out] max       Maximum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
      * @param[out] min_loc   (Optional) Array of Coordinates2D used to store minimum value locations.
      * @param[out] max_loc   (Optional) Array of Coordinates2D used to store maximum value locations.
      * @param[out] min_count (Optional) Number of minimum value encounters.
      * @param[out] max_count (Optional) Number of maximum value encounters.
      */
-    void configure(const ICLImage *input, int32_t *min, int32_t *max,
+    void configure(const ICLImage *input, void *min, void *max,
                    CLCoordinates2DArray *min_loc = nullptr, CLCoordinates2DArray *max_loc = nullptr,
                    uint32_t *min_count = nullptr, uint32_t *max_count = nullptr);
 
@@ -75,8 +75,8 @@ private:
     CLMinMaxLocationKernel _min_max_loc_kernel; /**< Kernel that counts min/max occurrences and identifies their positions */
     cl::Buffer             _min_max_vals;       /**< Buffer to collect min, max values */
     cl::Buffer             _min_max_count_vals; /**< Buffer to collect min, max values */
-    int32_t               *_min;                /**< Minimum value. */
-    int32_t               *_max;                /**< Maximum value. */
+    void                  *_min;                /**< Minimum value. */
+    void                  *_max;                /**< Maximum value. */
     uint32_t              *_min_count;          /**< Minimum value occurrences. */
     uint32_t              *_max_count;          /**< Maximum value occurrences. */
     CLCoordinates2DArray *_min_loc;             /**< Minimum value occurrences coordinates. */

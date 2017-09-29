@@ -1,8 +1,22 @@
 var searchData=
 [
   ['a',['A',['../namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa7fc56270e7a70fa81a5935b72eacbe29',1,'arm_compute']]],
+  ['a53',['A53',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853daecf3e2493afebcfefb0b9b86bd50ef0d',1,'arm_compute']]],
+  ['a55',['A55',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da83a0ae9a921c5de44da55ab444611649',1,'arm_compute']]],
+  ['a55_5fdot',['A55_DOT',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da8a2396eb11e41f727e6cdaa783d7d893',1,'arm_compute']]],
+  ['a5x',['A5x',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da58cf3eba9701a090bfa99b54df20eced',1,'arm_compute']]],
+  ['a72',['A72',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da05f60b9c3ca8212c8ebeb166d58bc937',1,'arm_compute']]],
+  ['a73',['A73',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853daaf79f683ceaea4650b20e898d6c4c373',1,'arm_compute']]],
+  ['a75',['A75',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853dadb48626fe69fc2fa2191287510a76831',1,'arm_compute']]],
+  ['a75_5fdot',['A75_DOT',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da3ccaa97eef88d0725900d73d2c54aa15',1,'arm_compute']]],
+  ['a7x',['A7x',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da2e661c06783635c6781ed83ba9091a0e',1,'arm_compute']]],
   ['abs',['ABS',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa7d8a220d2262f9d6c658d549ee12cf2c',1,'arm_compute::ActivationLayerInfo']]],
+  ['active',['ACTIVE',['../classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70ba18ff74f43da410c5529f7d6fca84f115',1,'arm_compute::test::framework::TestCaseFactory']]],
+  ['all',['ALL',['../namespacearm__compute_1_1test_1_1framework.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfa5fb1f955b45e38e31789286a1790398d',1,'arm_compute::test::framework::ALL()'],['../namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9a5fb1f955b45e38e31789286a1790398d',1,'arm_compute::test::framework::ALL()'],['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005a5fb1f955b45e38e31789286a1790398d',1,'arm_compute::test::framework::ALL()']]],
+  ['arch_5fmask',['ARCH_MASK',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da7bb4605304408687bbcfe83a1c85c5d2',1,'arm_compute']]],
   ['area',['AREA',['../namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9a639aaa22a784d5e5cb03a522267e79c4',1,'arm_compute']]],
-  ['arity',['arity',['../classarm__compute_1_1test_1_1_border_modes.xhtml#adf764cbdea00d65edcd07bb9953ad2b7a3e9a21bf74887eff2f2826d1478670b2',1,'arm_compute::test::BorderModes::arity()'],['../classarm__compute_1_1test_1_1_convert_policies.xhtml#a99fb83031ce9923c84392b4e92f956b5a3e9a21bf74887eff2f2826d1478670b2',1,'arm_compute::test::ConvertPolicies::arity()'],['../classarm__compute_1_1test_1_1_data_types.xhtml#abc6126af1d45847bc59afa0aa3216b04a3e9a21bf74887eff2f2826d1478670b2',1,'arm_compute::test::DataTypes::arity()'],['../classarm__compute_1_1test_1_1_generic_dataset.xhtml#adc29c2ff13d900c2f185ee95427fb06ca3e9a21bf74887eff2f2826d1478670b2',1,'arm_compute::test::GenericDataset::arity()'],['../classarm__compute_1_1test_1_1_image_dataset.xhtml#a61dadd085c1777f559549e05962b2c9ea3e9a21bf74887eff2f2826d1478670b2',1,'arm_compute::test::ImageDataset::arity()'],['../classarm__compute_1_1test_1_1_interpolation_policies.xhtml#a726ca809ffd3d67ab4b8476646f26635a3e9a21bf74887eff2f2826d1478670b2',1,'arm_compute::test::InterpolationPolicies::arity()'],['../classarm__compute_1_1test_1_1_normalization_types.xhtml#a0411cd49bb5b71852cecd93bcbf0ca2da3e9a21bf74887eff2f2826d1478670b2',1,'arm_compute::test::NormalizationTypes::arity()'],['../classarm__compute_1_1test_1_1_rounding_policies.xhtml#abed82baf7f470b522273a3e37c24c600a3e9a21bf74887eff2f2826d1478670b2',1,'arm_compute::test::RoundingPolicies::arity()'],['../classarm__compute_1_1test_1_1_shape_dataset.xhtml#ab04a0655cd1e3bcac5e8f48c18df1a57a3e9a21bf74887eff2f2826d1478670b2',1,'arm_compute::test::ShapeDataset::arity()']]],
+  ['armv7',['ARMV7',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da45a830a4c6240ac27c392266589a630c',1,'arm_compute']]],
+  ['armv8',['ARMV8',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853dae756f50f85aff43114661560586b0cdd',1,'arm_compute']]],
+  ['armv8_5f2',['ARMV8_2',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da3d16766c34a116d6c2a9c5bc116f8f3d',1,'arm_compute']]],
   ['avg',['AVG',['../namespacearm__compute.xhtml#a9172da722f0a434e5cc07c0a3c115d93afcefd647d6a866603c627b11347c707a',1,'arm_compute']]]
 ];

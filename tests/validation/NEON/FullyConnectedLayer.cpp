@@ -21,201 +21,190 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TypePrinter.h"
-#include "dataset/FullyConnectedLayerDataset.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/FullyConnectedLayerDataset.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/FullyConnectedLayerFixture.h"
 
-#include <random>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
+namespace arm_compute
+{
+namespace test
+{
+namespace validation
+{
 namespace
 {
-const float tolerance_f32 = 1e-03f; /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-const float tolerance_qs8 = 1.0f;   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
+/** Tolerance for float operations */
+constexpr RelativeTolerance<float> tolerance_f32(0.01f);
+#ifdef ARM_COMPUTE_ENABLE_FP16
+constexpr RelativeTolerance<float> tolerance_f16(0.01f);
+#endif /* ARM_COMPUTE_ENABLE_FP16*/
+/** Tolerance for fixed point operations */
+constexpr AbsoluteTolerance<float> tolerance_fixed_point(1.f);
 
-Tensor compute_fully_connected_layer(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, DataType dt,
-                                     bool transpose_weights, int fixed_point_position)
+/** CNN data types */
+const auto CNNDataTypes = framework::dataset::make("DataType",
 {
-    // Create tensors
-    Tensor src  = create_tensor(input_shape, dt, 1, fixed_point_position);
-    Tensor bias = create_tensor(bias_shape, dt, 1, fixed_point_position);
-    Tensor dst  = create_tensor(output_shape, dt, 1, fixed_point_position);
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    DataType::F16,
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+    DataType::F32,
+    DataType::QS8,
+    DataType::QS16,
+});
 
-    // Swap the first and second dimension of weights' shape if transpose_weights is true
-    TensorShape ws = weights_shape;
-    if(transpose_weights)
-    {
-        const size_t dimx = ws.x();
-        ws.set(0, ws.y());
-        ws.set(1, dimx);
-    }
-
-    Tensor weights = create_tensor(ws, dt, 1, fixed_point_position);
-
-    // Create and configure function.
-    // Note: We pass the weights already transposed
-    NEFullyConnectedLayer fc;
-    fc.configure(&src, &weights, &bias, &dst, false);
-
-    // Allocate tensors
-    src.allocator()->allocate();
-    weights.allocator()->allocate();
-    bias.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src.info()->is_resizable());
-    BOOST_TEST(!weights.info()->is_resizable());
-    BOOST_TEST(!bias.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    if(dt == DataType::F32)
-    {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-        library->fill(NEAccessor(src), distribution, 0);
-        library->fill(NEAccessor(weights), distribution, 1);
-        library->fill(NEAccessor(bias), distribution, 2);
-    }
-    else
-    {
-        library->fill_tensor_uniform(NEAccessor(src), 0);
-        library->fill_tensor_uniform(NEAccessor(weights), 1);
-        library->fill_tensor_uniform(NEAccessor(bias), 2);
-    }
-
-    // Compute NEFullyConnectedLayer function
-    fc.run();
-
-    return dst;
-}
+const auto FullyConnectedParameters = combine(framework::dataset::make("TransposeWeights", { false, true }), framework::dataset::make("ReshapeWeights", { false, true }));
 } // namespace
 
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(FullyConnectedLayer)
+TEST_SUITE(NEON)
+TEST_SUITE(FullyConnectedLayer)
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration,
-                     SmallFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::F32, DataType::QS8 }),
-                     fc_set, dt)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallFullyConnectedLayerDataset(), datasets::LargeFullyConnectedLayerDataset()),
+                                                                           FullyConnectedParameters),
+                                                                   CNNDataTypes),
+               src_shape, weights_shape, bias_shape, dst_shape, transpose_weights, reshape_weights, data_type)
 {
     // Set fixed point position data type allowed
-    int fixed_point_position = (dt == DataType::F32) ? 0 : 3;
+    int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
 
-    // Create tensors
-    Tensor src  = create_tensor(fc_set.src_shape, dt, 1, fixed_point_position);
-    Tensor bias = create_tensor(fc_set.bias_shape, dt, 1, fixed_point_position);
-    Tensor dst  = create_tensor(fc_set.dst_shape, dt, 1, fixed_point_position);
+    TensorShape ws(weights_shape);
 
-    // Swap the first and second dimension of weights' shape if transpose_weights is true
-    TensorShape ws = fc_set.weights_shape;
-    if(fc_set.transpose_weights)
+    // Transpose weights if not done in the function
+    if(!reshape_weights || !transpose_weights)
     {
-        const size_t dimx = ws.x();
+        const size_t shape_x = ws.x();
         ws.set(0, ws.y());
-        ws.set(1, dimx);
+        ws.set(1, shape_x);
+
+        // Weights have to be passed reshaped
+        // Transpose 1xW for batched version
+        if(!reshape_weights && dst_shape.y() > 1)
+        {
+            const float  transpose_width = 16.0f / data_size_from_type(data_type);
+            const size_t shape_x         = ws.x();
+            ws.set(0, ws.y() * static_cast<unsigned int>(transpose_width));
+            ws.set(1, static_cast<unsigned int>(std::ceil(shape_x / transpose_width)));
+        }
     }
 
-    Tensor weights = create_tensor(ws, dt, 1, fixed_point_position);
+    // Create tensors
+    Tensor src     = create_tensor<Tensor>(src_shape, data_type, 1, fixed_point_position);
+    Tensor weights = create_tensor<Tensor>(ws, data_type, 1, fixed_point_position);
+    Tensor bias    = create_tensor<Tensor>(bias_shape, data_type, 1, fixed_point_position);
+    Tensor dst     = create_tensor<Tensor>(dst_shape, data_type, 1, fixed_point_position);
 
-    BOOST_TEST(src.info()->is_resizable());
-    BOOST_TEST(weights.info()->is_resizable());
-    BOOST_TEST(bias.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function.
-    // Note: We pass the weights already transposed
     NEFullyConnectedLayer fc;
-    fc.configure(&src, &weights, &bias, &dst, false);
+    fc.configure(&src, &weights, &bias, &dst, transpose_weights, !reshape_weights);
 
     // Validate valid region
-    const ValidRegion src_valid_region     = shape_to_valid_region(fc_set.src_shape);
-    const ValidRegion weights_valid_region = shape_to_valid_region(ws);
-    const ValidRegion bias_valid_region    = shape_to_valid_region(fc_set.bias_shape);
-    const ValidRegion dst_valid_region     = shape_to_valid_region(fc_set.dst_shape);
-
-    validate(src.info()->valid_region(), src_valid_region);
-    validate(weights.info()->valid_region(), weights_valid_region);
-    validate(bias.info()->valid_region(), bias_valid_region);
+    const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);
     validate(dst.info()->valid_region(), dst_valid_region);
 }
 
-BOOST_AUTO_TEST_SUITE(Float)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall,
-                     SmallFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::F32 }),
-                     fc_set, dt)
+template <typename T>
+using NEFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
+
+TEST_SUITE(Float)
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+                                                                                                                        FullyConnectedParameters),
+                                                                                                                framework::dataset::make("DataType", DataType::F16)))
 {
-    // Compute function
-    Tensor dst = compute_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge,
-                     LargeFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::F32 }),
-                     fc_set, dt)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(),
+                                                                                                                      FullyConnectedParameters),
+                                                                                                              framework::dataset::make("DataType", DataType::F16)))
 {
-    // Compute function
-    Tensor dst = compute_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, 0);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, 0);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_f32);
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 
-BOOST_AUTO_TEST_SUITE(Quantized)
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall,
-                     SmallFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::QS8 }) * boost::unit_test::data::xrange(4, 7),
-                     fc_set, dt, fixed_point_position)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32)))
 {
-    // Compute function
-    Tensor dst = compute_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
+    validate(Accessor(_target), _reference, tolerance_f32);
 }
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge,
-                     LargeFullyConnectedLayerDataset() * boost::unit_test::data::make({ DataType::QS8 }) * boost::unit_test::data::xrange(4, 7),
-                     fc_set, dt, fixed_point_position)
+FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
+                                                                                                               framework::dataset::make("DataType", DataType::F32)))
 {
-    // Compute function
-    Tensor dst = compute_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, fixed_point_position);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_fully_connected_layer(fc_set.src_shape, fc_set.weights_shape, fc_set.bias_shape, fc_set.dst_shape, dt, fc_set.transpose_weights, fixed_point_position);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst, tolerance_qs8);
+    validate(Accessor(_target), _reference, tolerance_f32);
 }
-BOOST_AUTO_TEST_SUITE_END()
+TEST_SUITE_END()
+TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+template <typename T>
+using NEFullyConnectedLayerFixedPointFixture = FullyConnectedLayerValidationFixedPointFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QS8)
+// Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+                       FullyConnectedParameters),
+                       framework::dataset::make("DataType",
+                                                DataType::QS8)),
+                       framework::dataset::make("FractionalBits", 1, 6)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fixed_point);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(),
+                       FullyConnectedParameters),
+                       framework::dataset::make("DataType",
+                                                DataType::QS8)),
+                       framework::dataset::make("FractionalBits", 1, 6)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fixed_point);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QS16)
+// Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+                       FullyConnectedParameters),
+                       framework::dataset::make("DataType",
+                                                DataType::QS16)),
+                       framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fixed_point);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(),
+                       FullyConnectedParameters),
+                       framework::dataset::make("DataType",
+                                                DataType::QS16)),
+                       framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fixed_point);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

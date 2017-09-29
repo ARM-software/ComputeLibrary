@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel =
     [ "configure", "classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml#a329a69e4b661c7135cdef8aceef4005b", null ],
     [ "operator=", "classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml#ad460f5c37074598ab512070cbaca08b3", null ],
     [ "operator=", "classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml#af3dc430bb888b95a18b84f41100d5f8a", null ],
-    [ "run", "classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

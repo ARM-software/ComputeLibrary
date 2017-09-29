@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel =
     [ "configure", "classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml#a165cde4f51d6dc5cb425237cdf7535a4", null ],
     [ "operator=", "classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml#abd07bcfd3e6a025406dfaffbf9d44e3d", null ],
     [ "operator=", "classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml#aef123a42a08a4258997924a27803a565", null ],
-    [ "run", "classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

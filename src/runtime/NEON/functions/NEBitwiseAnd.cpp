@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEBitwiseAnd.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEBitwiseAndKernel.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 void NEBitwiseAnd::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEBitwiseAndKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEBitwiseAndKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }

@@ -79,5 +79,5 @@ private:
     std::array<uint32_t, 3> _x_subsampling;
     std::array<uint32_t, 3> _y_subsampling;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLCHANNELCOMBINEKERNEL_H__ */

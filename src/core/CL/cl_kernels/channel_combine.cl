@@ -337,11 +337,11 @@ __kernel void channel_combine_NV(
     uchar8 data1 = vload8(0, src_plane1.ptr);
     uchar8 data2 = vload8(0, src_plane2.ptr);
 
-#if defined NV12
+#ifdef NV12
     vstore16(shuffle2(data1, data2, (uchar16)(0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15)), 0, dst_plane1.ptr);
-#elif defined NV21
+#elif defined(NV21)
     vstore16(shuffle2(data2, data1, (uchar16)(0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15)), 0, dst_plane1.ptr);
-#endif
+#endif /* NV12 or NV21 */
 }
 
 /** This function combines three planes to a single YUV444 or IYUV image.
@@ -405,12 +405,12 @@ __kernel void copy_planes_3p(
 
     // Copy plane data
     vstore16(vload16(0, src_plane0.ptr), 0, dst_plane0.ptr);
-#if defined YUV444
+#ifdef YUV444
     vstore16(vload16(0, src_plane1.ptr), 0, dst_plane1.ptr);
     vstore16(vload16(0, src_plane2.ptr), 0, dst_plane2.ptr);
-#elif defined IYUV
+#elif defined(IYUV)
     vstore16(vload16(0, offset(&src_plane0, 0, height)), 0, (__global uchar *)offset(&dst_plane0, 0, height));
     vstore8(vload8(0, src_plane1.ptr), 0, dst_plane1.ptr);
     vstore8(vload8(0, src_plane2.ptr), 0, dst_plane2.ptr);
-#endif
+#endif /* YUV444 or IYUV */
 }

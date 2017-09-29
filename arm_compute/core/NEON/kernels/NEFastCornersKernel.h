@@ -59,7 +59,7 @@ public:
     void configure(const IImage *input, IImage *output, uint8_t threshold, bool non_max_suppression, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -68,5 +68,5 @@ private:
     uint8_t       _threshold;           /**< threshold on difference between intensity */
     bool          _non_max_suppression; /** true if non-maxima suppression is applied in the next stage */
 };
-}
-#endif
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_NEFASTCORNERSKERNEL_H__ */

@@ -29,55 +29,6 @@
 
 namespace arm_compute
 {
-inline uint8_t delta_bilinear_c1u8(const uint8_t *pixel_ptr, size_t stride, float dx, float dy)
-{
-    ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
-
-    const float dx1 = 1.0f - dx;
-    const float dy1 = 1.0f - dy;
-
-    const float a00 = *pixel_ptr;
-    const float a01 = *(pixel_ptr + 1);
-    const float a10 = *(pixel_ptr + stride);
-    const float a11 = *(pixel_ptr + stride + 1);
-
-    const float w1 = dx1 * dy1;
-    const float w2 = dx * dy1;
-    const float w3 = dx1 * dy;
-    const float w4 = dx * dy;
-
-    return a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4;
-}
-
-inline uint8_t pixel_bilinear_c1u8(const uint8_t *first_pixel_ptr, size_t stride, float x, float y)
-{
-    ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
-
-    const int32_t xi = x;
-    const int32_t yi = y;
-
-    const float dx = x - xi;
-    const float dy = y - yi;
-
-    return delta_bilinear_c1u8(first_pixel_ptr + xi + yi * stride, stride, dx, dy);
-}
-
-inline uint8_t pixel_bilinear_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float x, float y)
-{
-    ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
-
-    x = std::max(-1.f, std::min(x, static_cast<float>(width)));
-    y = std::max(-1.f, std::min(y, static_cast<float>(height)));
-
-    const float xi = std::floor(x);
-    const float yi = std::floor(y);
-
-    const float dx = x - xi;
-    const float dy = y - yi;
-
-    return delta_bilinear_c1u8(first_pixel_ptr + static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride, stride, dx, dy);
-}
-
 inline uint8_t pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float wr, float hr, int x, int y)
 {
     ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
@@ -251,8 +202,8 @@ inline bool auto_init_if_empty(ITensorInfo &info, const TensorShape &shape, int 
     if(info.tensor_shape().total_size() == 0)
     {
         info.set_data_type(data_type);
-        info.set_tensor_shape(shape);
         info.set_num_channels(num_channels);
+        info.set_tensor_shape(shape);
         info.set_fixed_point_position(fixed_point_position);
         return true;
     }
@@ -302,5 +253,72 @@ inline bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_
     }
 
     return false;
+}
+
+inline ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined)
+{
+    const auto  wr = static_cast<float>(dst_shape[0]) / static_cast<float>(src_info.tensor_shape()[0]);
+    const auto  hr = static_cast<float>(dst_shape[1]) / static_cast<float>(src_info.tensor_shape()[1]);
+    Coordinates anchor;
+    anchor.set_num_dimensions(src_info.tensor_shape().num_dimensions());
+    TensorShape new_dst_shape(dst_shape);
+    anchor.set(0, (policy == InterpolationPolicy::BILINEAR
+                   && border_undefined) ?
+               ((static_cast<int>(src_info.valid_region().anchor[0]) + border_size.left + 0.5f) * wr - 0.5f) :
+               ((static_cast<int>(src_info.valid_region().anchor[0]) + 0.5f) * wr - 0.5f));
+    anchor.set(1, (policy == InterpolationPolicy::BILINEAR
+                   && border_undefined) ?
+               ((static_cast<int>(src_info.valid_region().anchor[1]) + border_size.top + 0.5f) * hr - 0.5f) :
+               ((static_cast<int>(src_info.valid_region().anchor[1]) + 0.5f) * hr - 0.5f));
+    float shape_out_x = (policy == InterpolationPolicy::BILINEAR
+                         && border_undefined) ?
+                        ((static_cast<int>(src_info.valid_region().anchor[0]) + static_cast<int>(src_info.valid_region().shape[0]) - 1) - 1 + 0.5f) * wr - 0.5f :
+                        ((static_cast<int>(src_info.valid_region().anchor[0]) + static_cast<int>(src_info.valid_region().shape[0])) + 0.5f) * wr - 0.5f;
+    float shape_out_y = (policy == InterpolationPolicy::BILINEAR
+                         && border_undefined) ?
+                        ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1]) - 1) - 1 + 0.5f) * hr - 0.5f :
+                        ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1])) + 0.5f) * hr - 0.5f;
+
+    new_dst_shape.set(0, shape_out_x - anchor[0]);
+    new_dst_shape.set(1, shape_out_y - anchor[1]);
+
+    return ValidRegion(std::move(anchor), std::move(new_dst_shape));
+}
+
+inline Coordinates index2coords(const TensorShape &shape, int index)
+{
+    int num_elements = shape.total_size();
+
+    ARM_COMPUTE_ERROR_ON_MSG(index < 0 || index >= num_elements, "Index has to be in [0, num_elements]!");
+    ARM_COMPUTE_ERROR_ON_MSG(num_elements == 0, "Cannot create coordinate from empty shape!");
+
+    Coordinates coord{ 0 };
+
+    for(int d = shape.num_dimensions() - 1; d >= 0; --d)
+    {
+        num_elements /= shape[d];
+        coord.set(d, index / num_elements);
+        index %= num_elements;
+    }
+
+    return coord;
+}
+
+inline int coords2index(const TensorShape &shape, const Coordinates &coord)
+{
+    int num_elements = shape.total_size();
+    ARM_COMPUTE_UNUSED(num_elements);
+    ARM_COMPUTE_ERROR_ON_MSG(num_elements == 0, "Cannot create linear index from empty shape!");
+
+    int index  = 0;
+    int stride = 1;
+
+    for(unsigned int d = 0; d < coord.num_dimensions(); ++d)
+    {
+        index += coord[d] * stride;
+        stride *= shape[d];
+    }
+
+    return index;
 }
 } // namespace arm_compute

@@ -12,13 +12,13 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="0,-0.5 0,-19.5 129,-19.5 129,-0.5 0,-0.5"/>
-<text text-anchor="middle" x="64.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">AccessWindowRectangle</text>
+<text text-anchor="middle" x="64.5" y="-7.5" font-family="Helvetica" font-size="10.00">AccessWindowRectangle</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_i_access_window.xhtml" target="_top" xlink:title="Interface describing methods to update access window and padding based on kernel parameters. ">
 <polygon fill="white" stroke="black" points="20.5,-56.5 20.5,-75.5 108.5,-75.5 108.5,-56.5 20.5,-56.5"/>
-<text text-anchor="middle" x="64.5" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">IAccessWindow</text>
+<text text-anchor="middle" x="64.5" y="-63.5" font-family="Helvetica" font-size="10.00">IAccessWindow</text>
 </a>
 </g>
 </g>

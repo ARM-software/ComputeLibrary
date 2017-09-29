@@ -37,8 +37,8 @@ namespace test
 class IAccessor
 {
 public:
-    /** Pure virtual destructor. */
-    virtual ~IAccessor() = 0;
+    /** Virtual destructor. */
+    virtual ~IAccessor() = default;
 
     /** Shape of the tensor. */
     virtual TensorShape shape() const = 0;
@@ -61,6 +61,9 @@ public:
     /** Number of elements of the tensor. */
     virtual int num_elements() const = 0;
 
+    /** Available padding around the tensor. */
+    virtual PaddingSize padding() const = 0;
+
     /** Number of bits for the fractional part. */
     virtual int fixed_point_position() const = 0;
 
@@ -80,10 +83,6 @@ public:
      */
     virtual void *operator()(const Coordinates &coord) = 0;
 };
-
-inline IAccessor::~IAccessor()
-{
-}
 } // namespace test
 } // namespace arm_compute
-#endif
+#endif /* __ARM_COMPUTE_TEST_IACCESSOR_H__ */

@@ -41,9 +41,19 @@ using namespace arm_compute;
 
 void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+
+    // Softmax across the x dimension
+    TensorShape output_shape{ input->info()->tensor_shape() };
+    output_shape.set(0, 1);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
     _input  = input;
     _output = output;
@@ -52,7 +62,16 @@ void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
     const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 16);
 
     // Set build options
-    std::set<std::string> build_opts{ "-DUSE_" + string_from_data_type(input->info()->data_type()) };
+    std::set<std::string> build_opts;
+    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
+    }
+    else if(input->info()->data_type() == DataType::F16)
+    {
+        build_opts.emplace("-DUSE_F16");
+    }
 
     // Tell the kernel that the width is not a multiple of 16
     if((input->info()->dimension(0) % max_cl_vector_width) != 0)
@@ -64,7 +83,7 @@ void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("softmax_layer_max", build_opts));
 
     // Set fixed arguments
-    unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
+    unsigned int idx = 2 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
     _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
 
     // Configure kernel window
@@ -88,11 +107,17 @@ CLLogits1DShiftExpSumKernel::CLLogits1DShiftExpSumKernel()
 
 void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(max, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(sum, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(max, sum, output);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, max, sum);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output, max, sum);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(max, sum);
 
     _input  = input;
     _max    = max;
@@ -103,7 +128,16 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
     const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 16);
 
     // Set build options
-    std::set<std::string> build_opts{ "-DUSE_" + string_from_data_type(input->info()->data_type()) };
+    std::set<std::string> build_opts;
+    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
+    }
+    else if(input->info()->data_type() == DataType::F16)
+    {
+        build_opts.emplace("-DUSE_F16");
+    }
 
     // Tell the kernel that the width is not a multiple of 16
     if((input->info()->dimension(0) % max_cl_vector_width) != 0)
@@ -115,7 +149,7 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("softmax_layer_shift_exp_sum", build_opts));
 
     // Set fixed arguments
-    unsigned int idx = 4 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
+    unsigned int idx = 4 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
     _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
 
     // Configure window
@@ -139,19 +173,20 @@ void CLLogits1DShiftExpSumKernel::run(const Window &window, cl::CommandQueue &qu
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    Window slice = window.first_slice_window_2D();
+    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window slice            = window_collapsed.first_slice_window_3D();
 
     do
     {
         unsigned int idx = 0;
         // Set inputs
-        add_2D_tensor_argument(idx, _input, slice);
-        add_2D_tensor_argument(idx, _max, slice);
-        add_2D_tensor_argument(idx, _output, slice);
-        add_2D_tensor_argument(idx, _sum, slice);
+        add_3D_tensor_argument(idx, _input, slice);
+        add_3D_tensor_argument(idx, _max, slice);
+        add_3D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, _sum, slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window_collapsed.slide_window_slice_3D(slice));
 }
 
 CLLogits1DNormKernel::CLLogits1DNormKernel()
@@ -161,10 +196,15 @@ CLLogits1DNormKernel::CLLogits1DNormKernel()
 
 void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(sum, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, sum);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(sum, output);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, sum, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
     _input  = input;
     _sum    = sum;
@@ -172,7 +212,11 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
 
     // Set build options
     std::set<std::string> build_opts;
-    build_opts.emplace(("-DUSE_" + string_from_data_type(input->info()->data_type())));
+    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    if(is_data_type_fixed_point(input->info()->data_type()))
+    {
+        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("softmax_layer_norm", build_opts));
@@ -198,7 +242,8 @@ void CLLogits1DNormKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    Window slice = window.first_slice_window_2D();
+    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window slice            = window_collapsed.first_slice_window_3D();
 
     do
     {
@@ -207,10 +252,10 @@ void CLLogits1DNormKernel::run(const Window &window, cl::CommandQueue &queue)
 
         unsigned int idx = 0;
         // Set inputs
-        add_2D_tensor_argument(idx, _input, slice);
-        add_2D_tensor_argument(idx, _sum, sum_slice);
-        add_2D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, _input, slice);
+        add_3D_tensor_argument(idx, _sum, sum_slice);
+        add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window_collapsed.slide_window_slice_3D(slice));
 }

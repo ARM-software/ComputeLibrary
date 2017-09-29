@@ -27,7 +27,6 @@
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -36,14 +35,28 @@
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "arm_compute/runtime/Scheduler.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 #include <utility>
 
 using namespace arm_compute;
 
-CLHarrisCorners::CLHarrisCorners()
-    : _sobel(), _harris_score(), _non_max_suppr(), _candidates(), _sort_euclidean(), _border_gx(), _border_gy(), _gx(), _gy(), _score(), _nonmax(), _corners_list(), _num_corner_candidates(0),
+CLHarrisCorners::CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _sobel(nullptr),
+      _harris_score(),
+      _non_max_suppr(),
+      _candidates(),
+      _sort_euclidean(),
+      _border_gx(),
+      _border_gy(),
+      _gx(),
+      _gy(),
+      _score(),
+      _nonmax(),
+      _corners_list(nullptr),
+      _num_corner_candidates(0),
       _corners(nullptr)
 {
 }
@@ -62,6 +75,7 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     const TensorShape shape = input->info()->tensor_shape();
     const DataType    dt    = (gradient_size < 7) ? DataType::S16 : DataType::S32;
     TensorInfo        tensor_info(shape, 1, dt);
+
     _gx.allocator()->init(tensor_info);
     _gy.allocator()->init(tensor_info);
 
@@ -69,28 +83,32 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     _score.allocator()->init(info_f32);
     _nonmax.allocator()->init(info_f32);
 
-    _corners_list = arm_compute::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
+    _corners_list = arm_compute::support::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_gx);
+    _memory_group.manage(&_gy);
 
     /* Set/init Sobel kernel accordingly with gradient_size */
     switch(gradient_size)
     {
         case 3:
         {
-            auto k = arm_compute::cpp14::make_unique<CLSobel3x3>();
+            auto k = arm_compute::support::cpp14::make_unique<CLSobel3x3>();
             k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 5:
         {
-            auto k = arm_compute::cpp14::make_unique<CLSobel5x5>();
+            auto k = arm_compute::support::cpp14::make_unique<CLSobel5x5>();
             k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 7:
         {
-            auto k = arm_compute::cpp14::make_unique<CLSobel7x7>();
+            auto k = arm_compute::support::cpp14::make_unique<CLSobel7x7>();
             k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
@@ -99,36 +117,48 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
             ARM_COMPUTE_ERROR("Gradient size not implemented");
     }
 
-    // Configure border filling before harris score
-    _border_gx.configure(&_gx, block_size / 2, border_mode, constant_border_value);
-    _border_gy.configure(&_gy, block_size / 2, border_mode, constant_border_value);
-
     // Normalization factor
     const float norm_factor               = 1.0f / (255.0f * pow(4.0f, gradient_size / 2) * block_size);
     const float pow4_normalization_factor = pow(norm_factor, 4);
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_score);
+
     // Set/init Harris Score kernel accordingly with block_size
     _harris_score.configure(&_gx, &_gy, &_score, block_size, pow4_normalization_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
 
-    // Init non-maxima suppression function
-    _non_max_suppr.configure(&_score, &_nonmax, border_mode == BorderMode::UNDEFINED);
-
-    // Init corner candidates kernel
-    _candidates.configure(&_nonmax, _corners_list.get(), &_num_corner_candidates);
-
-    // Init euclidean distance
-    _sort_euclidean.configure(_corners_list.get(), _corners, &_num_corner_candidates, min_dist);
+    // Configure border filling using harris score kernel's block size
+    _border_gx.configure(&_gx, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_gy.configure(&_gy, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
 
     // Allocate intermediate buffers
     _gx.allocator()->allocate();
     _gy.allocator()->allocate();
+
+    // Manage intermediate buffers
+    _memory_group.manage(&_nonmax);
+
+    // Init non-maxima suppression function
+    _non_max_suppr.configure(&_score, &_nonmax, border_mode);
+
+    // Allocate intermediate buffers
     _score.allocator()->allocate();
+
+    // Init corner candidates kernel
+    _candidates.configure(&_nonmax, _corners_list.get(), &_num_corner_candidates);
+
+    // Allocate intermediate buffers
     _nonmax.allocator()->allocate();
+
+    // Init euclidean distance
+    _sort_euclidean.configure(_corners_list.get(), _corners, &_num_corner_candidates, min_dist);
 }
 
 void CLHarrisCorners::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
+
+    _memory_group.acquire();
 
     // Init to 0 number of corner candidates
     _num_corner_candidates = 0;
@@ -144,7 +174,7 @@ void CLHarrisCorners::run()
     CLScheduler::get().enqueue(_harris_score, false);
 
     // Run non-maxima suppression
-    CLScheduler::get().enqueue(_non_max_suppr);
+    _non_max_suppr.run();
 
     // Run corner candidate kernel
     _nonmax.map(true);
@@ -152,6 +182,8 @@ void CLHarrisCorners::run()
     _nonmax.unmap();
 
     _corners->map(CLScheduler::get().queue(), true);
-    _sort_euclidean.run(_sort_euclidean.window());
+    Scheduler::get().schedule(&_sort_euclidean, Window::DimY);
     _corners->unmap(CLScheduler::get().queue());
+
+    _memory_group.release();
 }

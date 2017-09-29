@@ -33,8 +33,9 @@
 
 using namespace arm_compute;
 
-NELocallyConnectedLayer::NELocallyConnectedLayer()
-    : _input_im2col_kernel(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(), _is_first_run(false)
+NELocallyConnectedLayer::NELocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(),
+      _is_first_run(false)
 {
 }
 
@@ -65,11 +66,14 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
     std::tie(stride_x, stride_y) = conv_info.stride();
     std::tie(pad_x, pad_y)       = conv_info.pad();
 
+    const unsigned int kernel_width  = weights->info()->dimension(0);
+    const unsigned int kernel_height = weights->info()->dimension(1);
+
     // Get convolved dimensions
     unsigned int conv_w = 0;
     unsigned int conv_h = 0;
-    std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0),
-                                                 stride_x, stride_y, pad_x, pad_y, conv_info.round());
+    std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_width, kernel_height,
+                                                 conv_info);
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(4) != (conv_w * conv_h), "Weights shape does not match the expected one");
@@ -99,8 +103,12 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
     shape_gemm.set(1, mat_input_rows);
     _gemm_output.allocator()->init(TensorInfo(shape_gemm, 1, input->info()->data_type()));
 
+    // Manage intermediate buffers
+    _memory_group.manage(&_input_im2col_reshaped);
+    _memory_group.manage(&_gemm_output);
+
     // Configure kernels
-    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, std::make_pair(conv_w, conv_h), conv_info, _has_bias);
+    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
     _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
     _mm_kernel.configure(&_input_im2col_reshaped, &_weights_reshaped, &_gemm_output);
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
@@ -120,6 +128,8 @@ void NELocallyConnectedLayer::run()
         NEScheduler::get().schedule(&_weights_reshape_kernel, 3);
     }
 
+    _memory_group.acquire();
+
     // Run input reshaping
     NEScheduler::get().schedule(&_input_im2col_kernel, Window::DimY);
 
@@ -128,4 +138,6 @@ void NELocallyConnectedLayer::run()
 
     // Reshape output matrix
     NEScheduler::get().schedule(&_output_col2im_kernel, Window::DimY);
+
+    _memory_group.release();
 }

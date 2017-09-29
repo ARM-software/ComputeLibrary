@@ -143,5 +143,5 @@ private:
     ICLTensor       *_l1_stack;         /**< L1 hysteris stack */
     ICLTensor       *_l1_stack_counter; /**< L1 hysteris stack counter */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLCANNYEDGEKERNEL_H__ */

@@ -160,6 +160,8 @@ const std::string &arm_compute::string_from_activation_func(ActivationLayerInfo:
         { ActivationLayerInfo::ActivationFunction::LOGISTIC, "LOGISTIC" },
         { ActivationLayerInfo::ActivationFunction::RELU, "RELU" },
         { ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, "BRELU" },
+        { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, "LU_BRELU" },
+        { ActivationLayerInfo::ActivationFunction::LEAKY_RELU, "LRELU" },
         { ActivationLayerInfo::ActivationFunction::SOFT_RELU, "SRELU" },
         { ActivationLayerInfo::ActivationFunction::SQRT, "SQRT" },
         { ActivationLayerInfo::ActivationFunction::SQUARE, "SQUARE" },
@@ -230,6 +232,18 @@ const std::string &arm_compute::string_from_norm_type(NormType type)
     return norm_type_map[type];
 }
 
+const std::string &arm_compute::string_from_pooling_type(PoolingType type)
+{
+    static std::map<PoolingType, const std::string> pool_type_map =
+    {
+        { PoolingType::MAX, "MAX" },
+        { PoolingType::AVG, "AVG" },
+        { PoolingType::L2, "L2" },
+    };
+
+    return pool_type_map[type];
+}
+
 std::string arm_compute::lower_string(const std::string &val)
 {
     std::string res = val;
@@ -237,22 +251,25 @@ std::string arm_compute::lower_string(const std::string &val)
     return res;
 }
 
-const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height, unsigned int kernel_size,
-                                                                           unsigned int stride_x, unsigned int stride_y,
-                                                                           unsigned int pad_x, unsigned int pad_y,
-                                                                           DimensionRoundingType round_type)
+const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height,
+                                                                           unsigned int kernel_width, unsigned int kernel_height,
+                                                                           const PadStrideInfo &pad_stride_info)
 {
-    unsigned int w = 0;
-    unsigned int h = 0;
-    switch(round_type)
+    const unsigned int pad_x    = pad_stride_info.pad().first;
+    const unsigned int pad_y    = pad_stride_info.pad().second;
+    const unsigned int stride_x = pad_stride_info.stride().first;
+    const unsigned int stride_y = pad_stride_info.stride().second;
+    unsigned int       w        = 0;
+    unsigned int       h        = 0;
+    switch(pad_stride_info.round())
     {
         case DimensionRoundingType::FLOOR:
-            w = static_cast<unsigned int>(std::floor((static_cast<float>(width + 2 * pad_x - kernel_size) / stride_x) + 1));
-            h = static_cast<unsigned int>(std::floor((static_cast<float>(height + 2 * pad_y - kernel_size) / stride_y) + 1));
+            w = static_cast<unsigned int>(std::floor((static_cast<float>(width + 2 * pad_x - kernel_width) / stride_x) + 1));
+            h = static_cast<unsigned int>(std::floor((static_cast<float>(height + 2 * pad_y - kernel_height) / stride_y) + 1));
             break;
         case DimensionRoundingType::CEIL:
-            w = static_cast<unsigned int>(std::ceil((static_cast<float>(width + 2 * pad_x - kernel_size) / stride_x) + 1));
-            h = static_cast<unsigned int>(std::ceil((static_cast<float>(height + 2 * pad_y - kernel_size) / stride_y) + 1));
+            w = static_cast<unsigned int>(std::ceil((static_cast<float>(width + 2 * pad_x - kernel_width) / stride_x) + 1));
+            h = static_cast<unsigned int>(std::ceil((static_cast<float>(height + 2 * pad_y - kernel_height) / stride_y) + 1));
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported rounding type");
@@ -287,6 +304,7 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
         case DataType::U16:
             print_consecutive_elements_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n, stream_width, element_delim);
             break;
+        case DataType::QS16:
         case DataType::S16:
             print_consecutive_elements_impl<int16_t>(s, reinterpret_cast<const int16_t *>(ptr), n, stream_width, element_delim);
             break;
@@ -317,6 +335,7 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
             return max_consecutive_elements_display_width_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n);
         case DataType::U16:
             return max_consecutive_elements_display_width_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n);
+        case DataType::QS16:
         case DataType::S16:
             return max_consecutive_elements_display_width_impl<int16_t>(s, reinterpret_cast<const int16_t *>(ptr), n);
         case DataType::U32:

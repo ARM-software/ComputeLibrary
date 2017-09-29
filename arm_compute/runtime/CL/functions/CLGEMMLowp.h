@@ -25,12 +25,15 @@
 #define __ARM_COMPUTE_CLGEMMLOWP_H__
 
 #include "arm_compute/core/CL/ICLKernel.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/IFunction.h"
-
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -47,7 +50,7 @@ class CLGEMMLowp : public IFunction
 {
 public:
     /** Constructor */
-    CLGEMMLowp();
+    CLGEMMLowp(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the kernel's inputs, output
     *
     * @note GEMM_LOWP:  low precision matrix multiply kernel
@@ -75,6 +78,7 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup                  _memory_group;
     CLGEMMInterleave4x4Kernel      _interleave_kernel;
     CLGEMMTranspose1xWKernel       _transpose_kernel;
     CLGEMMLowpMatrixMultiplyKernel _mm_kernel;

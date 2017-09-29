@@ -36,8 +36,9 @@
 
 using namespace arm_compute;
 
-CLFastCorners::CLFastCorners()
-    : _fast_corners_kernel(),
+CLFastCorners::CLFastCorners(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)),
+      _fast_corners_kernel(),
       _suppr_func(),
       _copy_array_kernel(),
       _output(),
@@ -70,6 +71,7 @@ void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonma
 
     const bool update_number = (nullptr != _num_corners);
 
+    _memory_group.manage(&_output);
     _fast_corners_kernel.configure(input, &_output, threshold, nonmax_suppression, border_mode);
 
     if(!_non_max)
@@ -79,6 +81,7 @@ void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonma
     else
     {
         _suppr.allocator()->init(tensor_info);
+        _memory_group.manage(&_suppr);
 
         _suppr_func.configure(&_output, &_suppr, border_mode);
         _copy_array_kernel.configure(&_suppr, update_number, corners, &_num_buffer);
@@ -93,6 +96,8 @@ void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonma
 void CLFastCorners::run()
 {
     cl::CommandQueue q = CLScheduler::get().queue();
+
+    _memory_group.acquire();
 
     if(_non_max)
     {
@@ -124,4 +129,6 @@ void CLFastCorners::run()
     }
 
     q.flush();
+
+    _memory_group.release();
 }

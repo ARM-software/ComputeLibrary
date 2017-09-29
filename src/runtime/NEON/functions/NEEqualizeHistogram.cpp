@@ -55,7 +55,7 @@ void NEEqualizeHistogram::run()
     NEScheduler::get().schedule(&_histogram_kernel, Window::DimY);
 
     // Calculate cumulative distribution of histogram and create LUT.
-    _cd_histogram_kernel.run(_cd_histogram_kernel.window());
+    NEScheduler::get().schedule(&_cd_histogram_kernel, Window::DimY);
 
     // Map input to output using created LUT.
     NEScheduler::get().schedule(&_map_histogram_kernel, Window::DimY);

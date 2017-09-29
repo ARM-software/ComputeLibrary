@@ -43,7 +43,9 @@ public:
 
     ICLArray(const ICLArray &) = delete;
     ICLArray &operator=(const ICLArray &) = delete;
-    virtual ~ICLArray()                   = default;
+    ICLArray(ICLArray &&)                 = default;
+    ICLArray &operator=(ICLArray &&) = default;
+    virtual ~ICLArray()              = default;
     /** Interface to be implemented by the child class to return a reference to the OpenCL buffer containing the array's data.
      *
      * @return A reference to an OpenCL buffer containing the array's data.
@@ -107,6 +109,7 @@ private:
 using ICLKeyPointArray        = ICLArray<KeyPoint>;
 using ICLCoordinates2DArray   = ICLArray<Coordinates2D>;
 using ICLDetectionWindowArray = ICLArray<DetectionWindow>;
+using ICLROIArray             = ICLArray<ROI>;
 using ICLSize2DArray          = ICLArray<Size2D>;
 using ICLUInt8Array           = ICLArray<cl_uchar>;
 using ICLUInt16Array          = ICLArray<cl_ushort>;

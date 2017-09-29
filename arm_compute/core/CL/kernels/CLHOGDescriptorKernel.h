@@ -101,5 +101,5 @@ private:
     ICLTensor       *_output;
     Size2D           _num_cells_per_block_stride;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLHOGDESCRIPTORKERNEL_H__ */

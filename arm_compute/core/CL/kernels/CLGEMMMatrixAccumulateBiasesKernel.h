@@ -46,7 +46,7 @@ public:
     CLGEMMMatrixAccumulateBiasesKernel &operator=(CLGEMMMatrixAccumulateBiasesKernel &&) = default;
     /** Set the accumulate buffer and the biases of the kernel.
      *
-     * @param[in, out] accum  The accumulate tensor to convert. Data types supported: F16/F32
+     * @param[in, out] accum  The accumulate tensor to convert. Data types supported: QS8/QS16/F16/F32
      * @param[in]      biases The shared biases tensor to append. It must be 1D tensor. Data types supported: Same as @p input
      */
     void configure(ICLTensor *accum, const ICLTensor *biases);
@@ -58,6 +58,5 @@ private:
     ICLTensor       *_accum;
     const ICLTensor *_biases;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGEMMMATRIXACCUMULATEBIASESKERNEL_H__ */

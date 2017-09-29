@@ -59,7 +59,7 @@ public:
     void configure(const ITensor *input_magnitude, const ITensor *input_phase, ITensor *output, const HOGInfo *hog_info);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised block normalization functions
@@ -113,7 +113,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const HOGInfo *hog_info);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised block normalization functions
@@ -137,5 +137,5 @@ private:
     size_t         _num_bins;
     float          _l2_hyst_threshold;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEHOGDESCRIPTORKERNEL_H__ */

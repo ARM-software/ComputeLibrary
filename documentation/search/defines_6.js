@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['flt_5fscale',['FLT_SCALE',['../optical__flow__pyramid__lk_8cl.xhtml#a1852457538f524c42f96b66882bd9b35',1,'optical_flow_pyramid_lk.cl']]]
+  ['gpu_5fmax_5fjob_5fslots',['GPU_MAX_JOB_SLOTS',['../hwc_8hpp.xhtml#aa6dbd48b180e4ae2949aab4ce28eadf0',1,'hwc.hpp']]]
 ];

@@ -21,90 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Globals.h"
-#include "NEON/Helper.h"
-#include "NEON/NEAccessor.h"
-#include "TensorLibrary.h"
-#include "TypePrinter.h"
-#include "Utils.h"
-#include "validation/Datasets.h"
-#include "validation/Reference.h"
-#include "validation/Validation.h"
-
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEBitwiseXor.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
+#include "tests/validation/fixtures/BitwiseXorFixture.h"
 
-#include "boost_wrapper.h"
-
-#include <random>
-#include <string>
-
-using namespace arm_compute;
-using namespace arm_compute::test;
-using namespace arm_compute::test::neon;
-using namespace arm_compute::test::validation;
-
-namespace
+namespace arm_compute
 {
-/** Compute Neon bitwise xor function.
- *
- * @param[in] shape Shape of the input and output tensors.
- *
- * @return Computed output tensor.
- */
-Tensor compute_bitwise_xor(const TensorShape &shape)
+namespace test
 {
-    // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+namespace validation
+{
+TEST_SUITE(NEON)
+TEST_SUITE(BitwiseXor)
 
-    // Create xor configure function
-    NEBitwiseXor bxor;
-    bxor.configure(&src1, &src2, &dst);
-
-    // Allocate tensors
-    src1.allocator()->allocate();
-    src2.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    BOOST_TEST(!src1.info()->is_resizable());
-    BOOST_TEST(!src2.info()->is_resizable());
-    BOOST_TEST(!dst.info()->is_resizable());
-
-    // Fill tensors
-    library->fill_tensor_uniform(NEAccessor(src1), 0);
-    library->fill_tensor_uniform(NEAccessor(src2), 1);
-
-    // Compute function
-    bxor.run();
-
-    return dst;
-}
-} // namespace
-
-#ifndef DOXYGEN_SKIP_THIS
-BOOST_AUTO_TEST_SUITE(NEON)
-BOOST_AUTO_TEST_SUITE(BitwiseXor)
-
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit") * boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
 {
     // Create tensors
-    Tensor src1 = create_tensor(shape, DataType::U8);
-    Tensor src2 = create_tensor(shape, DataType::U8);
-    Tensor dst  = create_tensor(shape, DataType::U8);
+    Tensor src1 = create_tensor<Tensor>(shape, data_type);
+    Tensor src2 = create_tensor<Tensor>(shape, data_type);
+    Tensor dst  = create_tensor<Tensor>(shape, data_type);
 
-    BOOST_TEST(src1.info()->is_resizable());
-    BOOST_TEST(src2.info()->is_resizable());
-    BOOST_TEST(dst.info()->is_resizable());
+    ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-    // Create xor configure function
-    NEBitwiseXor bxor;
-    bxor.configure(&src1, &src2, &dst);
+    // Create and configure function
+    NEBitwiseXor bitwise_xor;
+    bitwise_xor.configure(&src1, &src2, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
@@ -113,38 +65,30 @@ BOOST_DATA_TEST_CASE(Configuration, SmallShapes() + LargeShapes(), shape)
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, required_padding(shape.x(), 16), 0, 0);
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
     validate(src1.info()->padding(), padding);
     validate(src2.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("precommit"))
-BOOST_DATA_TEST_CASE(RunSmall, SmallShapes(), shape)
+template <typename T>
+using NEBitwiseXorFixture = BitwiseXorValidationFixture<Tensor, Accessor, NEBitwiseXor, T>;
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBitwiseXorFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                          DataType::U8)))
 {
-    // Compute function
-    Tensor dst = compute_bitwise_xor(shape);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_bitwise_xor(shape);
-
     // Validate output
-    validate(NEAccessor(dst), ref_dst);
+    validate(Accessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEBitwiseXorFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                        DataType::U8)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
 }
 
-BOOST_TEST_DECORATOR(*boost::unit_test::label("nightly"))
-BOOST_DATA_TEST_CASE(RunLarge, LargeShapes(), shape)
-{
-    // Compute function
-    Tensor dst = compute_bitwise_xor(shape);
-
-    // Compute reference
-    RawTensor ref_dst = Reference::compute_reference_bitwise_xor(shape);
-
-    // Validate output
-    validate(NEAccessor(dst), ref_dst);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()
-#endif
+TEST_SUITE_END()
+TEST_SUITE_END()
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

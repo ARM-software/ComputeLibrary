@@ -25,9 +25,9 @@
 #define __ARM_COMPUTE_NEMEANSTDDEVKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "support/Mutex.h"
 
 #include <cstdint>
-#include <mutex>
 
 namespace arm_compute
 {
@@ -62,15 +62,18 @@ public:
     void configure(const IImage *input, float *mean, uint64_t *global_sum, float *stddev = nullptr, uint64_t *global_sum_squared = nullptr);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
+
+    BorderSize border_size() const override;
 
 private:
-    const IImage *_input;
-    float        *_mean;
-    float        *_stddev;
-    uint64_t     *_global_sum;
-    uint64_t     *_global_sum_squared;
-    std::mutex    _mtx;
+    const IImage      *_input;
+    float             *_mean;
+    float             *_stddev;
+    uint64_t          *_global_sum;
+    uint64_t          *_global_sum_squared;
+    arm_compute::Mutex _mtx;
+    BorderSize         _border_size;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEMEANSTDDEVKERNEL_H__ */

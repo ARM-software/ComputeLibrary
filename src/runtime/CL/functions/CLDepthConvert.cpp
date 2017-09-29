@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLDepthConvert.h"
 
 #include "arm_compute/core/CL/kernels/CLDepthConvertKernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 void CLDepthConvert::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
 {
-    auto k = arm_compute::cpp14::make_unique<CLDepthConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLDepthConvertKernel>();
     k->configure(input, output, policy, shift);
     _kernel = std::move(k);
 }

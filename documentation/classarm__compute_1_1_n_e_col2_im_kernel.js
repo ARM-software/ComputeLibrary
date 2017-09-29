@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_col2_im_kernel =
     [ "configure", "classarm__compute_1_1_n_e_col2_im_kernel.xhtml#a6375279b8bdfa6b39296e7d41ae94ce5", null ],
     [ "operator=", "classarm__compute_1_1_n_e_col2_im_kernel.xhtml#aaf4d8c425a336a01399b68cd46ef3467", null ],
     [ "operator=", "classarm__compute_1_1_n_e_col2_im_kernel.xhtml#a792c2be01569939e6d09097bf3e72994", null ],
-    [ "run", "classarm__compute_1_1_n_e_col2_im_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_col2_im_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

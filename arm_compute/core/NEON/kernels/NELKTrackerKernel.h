@@ -91,7 +91,7 @@ public:
                    size_t level, size_t num_levels, float pyramid_scale);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -140,5 +140,5 @@ private:
     unsigned int                _num_levels;
     ValidRegion                 _valid_region;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NELKTRACKERKERNEL_H__ */

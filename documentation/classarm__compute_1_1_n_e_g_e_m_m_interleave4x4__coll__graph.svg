@@ -12,13 +12,13 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="-7.10543e-15,-0.5 -7.10543e-15,-19.5 120,-19.5 120,-0.5 -7.10543e-15,-0.5"/>
-<text text-anchor="middle" x="60" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">NEGEMMInterleave4x4</text>
+<text text-anchor="middle" x="60" y="-7.5" font-family="Helvetica" font-size="10.00">NEGEMMInterleave4x4</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_i_n_e_simple_function.xhtml" target="_top" xlink:title="Basic interface for functions which have a single NEON kernel. ">
 <polygon fill="white" stroke="black" points="9.5,-56.5 9.5,-75.5 110.5,-75.5 110.5,-56.5 9.5,-56.5"/>
-<text text-anchor="middle" x="60" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">INESimpleFunction</text>
+<text text-anchor="middle" x="60" y="-63.5" font-family="Helvetica" font-size="10.00">INESimpleFunction</text>
 </a>
 </g>
 </g>
@@ -31,7 +31,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_function.xhtml" target="_top" xlink:title="Base class for all functions. ">
 <polygon fill="white" stroke="black" points="31.5,-112.5 31.5,-131.5 88.5,-131.5 88.5,-112.5 31.5,-112.5"/>
-<text text-anchor="middle" x="60" y="-119.5" font-family="Helvetica,sans-Serif" font-size="10.00">IFunction</text>
+<text text-anchor="middle" x="60" y="-119.5" font-family="Helvetica" font-size="10.00">IFunction</text>
 </a>
 </g>
 </g>

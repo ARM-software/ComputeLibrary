@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
@@ -76,7 +77,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
 
     // Define select type required by replicate border > 1
     const DataType dt          = tensor->info()->data_type();
-    std::string    select_type = get_cl_type_from_data_type(dt);
+    std::string    select_type = get_underlying_cl_type_from_data_type(dt);
     if(is_data_type_float(dt))
     {
         select_type = (DataType::F32 == dt) ? "int" : "short";
@@ -84,12 +85,16 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
 
     // Define build options
     std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
+    build_opts.emplace(("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(dt)));
     build_opts.emplace(("-DSELECT_TYPE=" + select_type));
-    build_opts.emplace(("-DBORDER_SIZE_TOP=" + val_to_string(border_size.top)));
-    build_opts.emplace(("-DBORDER_SIZE_BOTTOM=" + val_to_string(border_size.bottom)));
-    build_opts.emplace(("-DBORDER_SIZE_LEFT=" + val_to_string(border_size.left)));
-    build_opts.emplace(("-DBORDER_SIZE_RIGHT=" + val_to_string(border_size.right)));
+    build_opts.emplace(("-DBORDER_SIZE_TOP=" + support::cpp11::to_string(border_size.top)));
+    build_opts.emplace(("-DBORDER_SIZE_BOTTOM=" + support::cpp11::to_string(border_size.bottom)));
+    build_opts.emplace(("-DBORDER_SIZE_LEFT=" + support::cpp11::to_string(border_size.left)));
+    build_opts.emplace(("-DBORDER_SIZE_RIGHT=" + support::cpp11::to_string(border_size.right)));
+    if(is_data_type_fixed_point(tensor->info()->data_type()))
+    {
+        build_opts.emplace("-DFIXED_POINT_POSITION");
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
@@ -108,7 +113,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     const unsigned int total_valid_width = border_size.left + valid_width + border_size.right;
 
     // Set static kernel arguments
-    unsigned int idx = num_arguments_per_2D_tensor(); //Skip the tensor parameters
+    unsigned int idx = num_arguments_per_3D_tensor(); //Skip the tensor parameters
     ICLKernel::add_argument<cl_uint>(idx, valid_width);
     ICLKernel::add_argument<cl_uint>(idx, valid_height);
     ICLKernel::add_argument<cl_int2>(idx, valid_region_coords);
@@ -119,9 +124,14 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
             case DataType::U8:
                 set_constant_border<uint8_t>(idx, constant_border_value);
                 break;
+            case DataType::QS8:
+            case DataType::S8:
+                set_constant_border<int8_t>(idx, constant_border_value);
+                break;
             case DataType::U16:
                 set_constant_border<uint16_t>(idx, constant_border_value);
                 break;
+            case DataType::QS16:
             case DataType::S16:
                 set_constant_border<int16_t>(idx, constant_border_value);
                 break;
@@ -148,7 +158,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     Window win;
     win.set(Window::DimX, Window::Dimension(0, total_valid_width + valid_height));
     win.set(Window::DimY, Window::Dimension(0, 1, 1));
-    win.use_tensor_dimensions(tensor->info(), Window::DimZ);
+    win.use_tensor_dimensions(tensor->info()->tensor_shape(), Window::DimZ);
     ICLKernel::configure(win);
 }
 
@@ -163,13 +173,13 @@ void CLFillBorderKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
-    Window slice = window.first_slice_window_2D();
+    Window slice = window.first_slice_window_3D();
 
     do
     {
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _tensor, slice);
+        add_3D_tensor_argument(idx, _tensor, slice);
         enqueue(queue, *this, slice, cl::NullRange);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window.slide_window_slice_3D(slice));
 }

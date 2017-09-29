@@ -40,8 +40,13 @@
 using namespace arm_compute;
 
 CLMeanStdDevKernel::CLMeanStdDevKernel()
-    : _input(nullptr), _mean(nullptr), _stddev(nullptr), _global_sum(nullptr), _global_sum_squared(nullptr)
+    : _input(nullptr), _mean(nullptr), _stddev(nullptr), _global_sum(nullptr), _global_sum_squared(nullptr), _border_size(0)
 {
+}
+
+BorderSize CLMeanStdDevKernel::border_size() const
+{
+    return _border_size;
 }
 
 void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffer *global_sum, float *stddev, cl::Buffer *global_sum_squared)
@@ -82,6 +87,8 @@ void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffe
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration_x = 8;
     const unsigned int     num_elems_processed_per_iteration_y = input->info()->dimension(1);
+
+    _border_size = BorderSize(ceil_to_multiple(input->info()->dimension(0), num_elems_processed_per_iteration_x) - input->info()->dimension(0));
 
     Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);

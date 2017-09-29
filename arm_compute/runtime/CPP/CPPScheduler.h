@@ -26,7 +26,7 @@
 
 #include "arm_compute/runtime/IScheduler.h"
 
-#include <memory>
+#include <list>
 
 namespace arm_compute
 {
@@ -46,6 +46,7 @@ public:
      * @return Number of threads available in CPPScheduler.
      */
     unsigned int num_threads() const override;
+
     /** Access the scheduler singleton
      *
      * @return The scheduler
@@ -66,8 +67,8 @@ private:
     /** Constructor: create a pool of threads. */
     CPPScheduler();
 
-    unsigned int _num_threads;
-    std::unique_ptr<Thread[], void (*)(Thread *)> _threads;
+    unsigned int      _num_threads;
+    std::list<Thread> _threads;
 };
 }
 #endif /* __ARM_COMPUTE_CPPSCHEDULER_H__ */

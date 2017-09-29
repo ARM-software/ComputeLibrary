@@ -43,7 +43,8 @@ using namespace arm_compute;
 
 void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16,
+                                                  DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     TensorShape  output_shape{ input->info()->tensor_shape() };
@@ -56,28 +57,33 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
-    const float        scale_x                           = num_elems_processed_per_iteration;
+    const int          scale_x                           = num_elems_processed_per_iteration;
 
     _input  = input;
     _output = output;
 
     // Configure kernel window
-    Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+
+    ARM_COMPUTE_ERROR_ON_MSG((win.x().end() / scale_x) == 0, "Transposed shape would be 0 in the second dimension");
+
     AccessWindowTranspose output_access(output->info(), 0, 0, num_elems_processed_per_iteration, 1, scale_x, 1.f / scale_x);
 
     update_window_and_padding(win,
                               AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
                               output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
 
-void NEGEMMTranspose1xWKernel::run(const Window &window)
+void NEGEMMTranspose1xWKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 

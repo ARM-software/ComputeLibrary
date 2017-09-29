@@ -24,20 +24,20 @@
 #ifndef __ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__
 #define __ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__
 
-#include "arm_compute/core/CL/ICLSimple2DKernel.h"
+#include "arm_compute/core/CL/ICLSimple3DKernel.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
 /** Interface for the identifying the max value of 1D Logits */
-class CLLogits1DMaxKernel : public ICLSimple2DKernel
+class CLLogits1DMaxKernel : public ICLSimple3DKernel
 {
 public:
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F16, F32. Number of channels must be 1.
-     * @param[out] output Destination tensor. Matching input type and channel number.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
 };
@@ -58,10 +58,10 @@ public:
     CLLogits1DShiftExpSumKernel &operator=(CLLogits1DShiftExpSumKernel &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F16, F32. Number of channels must be 1.
-     * @param[in]  max    Max values tensor. Matching input type and channel number.
-     * @param[out] output Destination tensor. Matching input type and channel number.
-     * @param[out] sum    Sum of 1D logits tensor. Matching input type and channel number.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  max    Max values tensor. Data types supported: same as @p input
+     * @param[out] output Destination tensor. Data types supported: same as @p input
+     * @param[out] sum    Sum of 1D logits tensor. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum);
 
@@ -91,9 +91,9 @@ public:
     CLLogits1DNormKernel &operator=(CLLogits1DNormKernel &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F16, F32. Number of channels must be 1.
-     * @param[in]  sum    Sum tensor. Dimensions should be dim(input)-1. Matching input type and channel number.
-     * @param[out] output Destination tensor. Matching input type and channel number.
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  sum    Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
+     * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output);
 
@@ -105,5 +105,5 @@ private:
     const ICLTensor *_sum;
     ICLTensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__ */

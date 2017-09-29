@@ -64,5 +64,5 @@ private:
     const ICLTensor *_input1;
     ICLTensor       *_output;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLLOCALLYCONNECTEDMATRIXMULTIPLYKERNEL_H__ */

@@ -29,14 +29,18 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 class ICLTensor;
 
-/** Basic function to execute GEMM on OpenCL. Data types supported: F32, F16. This function calls the following OpenCL kernels:
+/** Basic function to execute GEMM on OpenCL. This function calls the following OpenCL kernels:
  *
  *  -# @ref CLGEMMInterleave4x4Kernel (if the output tensor is a matrix)
  *  -# @ref CLGEMMTranspose1xWKernel (if the output tensor is a matrix)
@@ -48,16 +52,16 @@ class CLGEMM : public IFunction
 {
 public:
     /** Default constructor. */
-    CLGEMM();
+    CLGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the kernel's inputs and output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
      *
-     * @note All tensors must have the same data type. Data types supported: F32, F16
+     * @note All tensors must have the same data type.
      *
      * @note Whilst the first input tensor can be a vector, the second input tensor must be at least a matrix
      *
-     * @param[in]  a      First input tensor  (Matrix or Vector A). Data types supported: F32, F16
+     * @param[in]  a      First input tensor  (Matrix or Vector A). Data types supported: QS8/QS16/F16/F32
      * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a.
      * @param[in]  c      Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
      * @param[out] output Output tensor. Data type supported: same as @p a
@@ -70,13 +74,14 @@ public:
     void run() override;
 
 private:
+    CLMemoryGroup              _memory_group;
     CLGEMMInterleave4x4Kernel  _interleave_kernel;
     CLGEMMTranspose1xWKernel   _transpose_kernel;
     CLGEMMMatrixMultiplyKernel _mm_kernel;
     CLGEMMMatrixAdditionKernel _ma_kernel;
     CLTensor                   _tmp_a;
     CLTensor                   _tmp_b;
-    bool                       _run_vector_matrix_multiplication;
+    bool                       _is_interleaved_transposed;
     bool                       _run_addition;
 };
 }

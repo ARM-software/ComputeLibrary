@@ -38,7 +38,7 @@ NEBatchNormalizationLayerKernel::NEBatchNormalizationLayerKernel()
 {
 }
 
-void batch_normalization_q8(const ITensor *in, ITensor *out, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon, const Window &window)
+void batch_normalization_q8(ITensor *in, ITensor *out, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon, const Window &window)
 {
     Iterator input(in, window);
     Iterator output(out, window);
@@ -47,7 +47,7 @@ void batch_normalization_q8(const ITensor *in, ITensor *out, const ITensor *mean
     // Only compute denominator and NEON vectors once per feature map.
     int slice = -1;
 
-    int        fixed_point_position = in->info()->fixed_point_position();
+    const int  fixed_point_position = in->info()->fixed_point_position();
     const auto input_mean           = reinterpret_cast<const qint8_t *>(mean->ptr_to_element(Coordinates(0, 0)));
     const auto input_var            = reinterpret_cast<const qint8_t *>(var->ptr_to_element(Coordinates(0, 0)));
     const auto input_gamma          = reinterpret_cast<const qint8_t *>(gamma->ptr_to_element(Coordinates(0, 0)));
@@ -58,7 +58,7 @@ void batch_normalization_q8(const ITensor *in, ITensor *out, const ITensor *mean
     qint8x16_t       gamma_vec   = vdupq_n_qs8(0);
     qint8x16_t       beta_vec    = vdupq_n_qs8(0);
     qint8x16_t       denominator = vdupq_n_qs8(0);
-    const qint8x16_t epsilon_vec = vdupq_n_qs8(scvt_qs8_f32(epsilon, fixed_point_position));
+    const qint8x16_t epsilon_vec = vdupq_n_qs8(sqcvt_qs8_f32(epsilon, fixed_point_position));
     execute_window_loop(window, [&](const Coordinates & id)
     {
         if(slice != id.z())
@@ -82,7 +82,51 @@ void batch_normalization_q8(const ITensor *in, ITensor *out, const ITensor *mean
     input, output);
 }
 
-void batch_normalization_fp32(const ITensor *in, ITensor *out, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon, const Window &window)
+void batch_normalization_q16(ITensor *in, ITensor *out, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon, const Window &window)
+{
+    Iterator input(in, window);
+    Iterator output(out, window);
+
+    // Hold information about the current feature map we are iterating.
+    // Only compute denominator and NEON vectors once per feature map.
+    int slice = -1;
+
+    const int  fixed_point_position = in->info()->fixed_point_position();
+    const auto input_mean           = reinterpret_cast<const qint16_t *>(mean->ptr_to_element(Coordinates(0, 0)));
+    const auto input_var            = reinterpret_cast<const qint16_t *>(var->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma          = reinterpret_cast<const qint16_t *>(gamma->ptr_to_element(Coordinates(0, 0)));
+    const auto input_beta           = reinterpret_cast<const qint16_t *>(beta->ptr_to_element(Coordinates(0, 0)));
+
+    qint16x8_t       mean_vec    = vdupq_n_qs16(0);
+    qint16x8_t       var_vec     = vdupq_n_qs16(0);
+    qint16x8_t       gamma_vec   = vdupq_n_qs16(0);
+    qint16x8_t       beta_vec    = vdupq_n_qs16(0);
+    qint16x8_t       denominator = vdupq_n_qs16(0);
+    const qint16x8_t epsilon_vec = vdupq_n_qs16(sqcvt_qs16_f32(epsilon, fixed_point_position));
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        if(slice != id.z())
+        {
+            // Conctruct vectors
+            mean_vec  = vdupq_n_qs16(*(input_mean + id.z()));
+            var_vec   = vdupq_n_qs16(*(input_var + id.z()));
+            gamma_vec = vdupq_n_qs16(*(input_gamma + id.z()));
+            beta_vec  = vdupq_n_qs16(*(input_beta + id.z()));
+
+            // Calculate denominator
+            denominator = vqinvsqrtq_qs16(vqaddq_qs16(var_vec, epsilon_vec), fixed_point_position);
+            slice       = id.z();
+        }
+
+        // Calculate x bar and store results
+        const qint16x8_t numerator = vqsubq_qs16(vld1q_qs16(reinterpret_cast<const qint16_t *>(input.ptr())), mean_vec);
+        const qint16x8_t x_bar     = vqmulq_qs16(numerator, denominator, fixed_point_position);
+        vst1q_qs16(reinterpret_cast<qint16_t *>(output.ptr()), vqmlaq_qs16(beta_vec, x_bar, gamma_vec, fixed_point_position));
+    },
+    input, output);
+}
+
+void batch_normalization_fp32(ITensor *in, ITensor *out, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon, const Window &window)
 {
     Iterator input(in, window);
     Iterator output(out, window);
@@ -125,28 +169,77 @@ void batch_normalization_fp32(const ITensor *in, ITensor *out, const ITensor *me
     input, output);
 }
 
-void NEBatchNormalizationLayerKernel::configure(const ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon)
+#ifdef ARM_COMPUTE_ENABLE_FP16
+void batch_normalization_fp16(ITensor *in, ITensor *out, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon, const Window &window)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mean, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(var, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gamma, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(beta, 1, DataType::QS8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, beta);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, gamma);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    Iterator input(in, window);
+    Iterator output(out, window);
+
+    // Hold information about the current feature map we are iterating.
+    // Only compute denominator and NEON vectors once per feature map.
+    int slice = -1;
+
+    const auto input_mean  = reinterpret_cast<const float16_t *>(mean->ptr_to_element(Coordinates(0, 0)));
+    const auto input_var   = reinterpret_cast<const float16_t *>(var->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma = reinterpret_cast<const float16_t *>(gamma->ptr_to_element(Coordinates(0, 0)));
+    const auto input_beta  = reinterpret_cast<const float16_t *>(beta->ptr_to_element(Coordinates(0, 0)));
+
+    float16x8_t       mean_vec    = vdupq_n_f16(0.0);
+    float16x8_t       var_vec     = vdupq_n_f16(0.0);
+    float16x8_t       gamma_vec   = vdupq_n_f16(0.0);
+    float16x8_t       beta_vec    = vdupq_n_f16(0.0);
+    float16x8_t       denominator = vdupq_n_f16(0.0);
+    const float16x8_t epsilon_vec = vdupq_n_f16(epsilon);
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        if(slice != id.z())
+        {
+            // Conctruct vectors
+            mean_vec  = vdupq_n_f16(*(input_mean + id.z()));
+            var_vec   = vdupq_n_f16(*(input_var + id.z()));
+            gamma_vec = vdupq_n_f16(*(input_gamma + id.z()));
+            beta_vec  = vdupq_n_f16(*(input_beta + id.z()));
+
+            // Calculate denominator
+            denominator = vinvsqrtq_f16(vaddq_f16(var_vec, epsilon_vec));
+            slice       = id.z();
+        }
+
+        // Calculate x bar and store results
+        const float16x8_t numerator = vsubq_f16(vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr())), mean_vec);
+        const float16x8_t x_bar     = vmulq_f16(numerator, denominator);
+        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vaddq_f16(beta_vec, vmulq_f16(x_bar, gamma_vec)));
+    },
+    input, output);
+}
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
+void NEBatchNormalizationLayerKernel::configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
 
     _input   = input;
-    _output  = output;
+    _output  = input;
     _mean    = mean;
     _var     = var;
     _gamma   = gamma;
     _beta    = beta;
     _epsilon = epsilon;
+
+    if(output != nullptr)
+    {
+        // Output tensor auto initialization if not yet initialized
+        auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+
+        _output = output;
+    }
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, mean, var, beta, gamma);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, mean, var, beta, gamma);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
+    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != mean->info()->dimension(0));
 
     unsigned int num_elems_processed_per_iteration = 0;
 
@@ -156,29 +249,43 @@ void NEBatchNormalizationLayerKernel::configure(const ITensor *input, ITensor *o
             _func                             = &batch_normalization_q8;
             num_elems_processed_per_iteration = 16;
             break;
+        case DataType::QS16:
+            _func                             = &batch_normalization_q16;
+            num_elems_processed_per_iteration = 8;
+            break;
         case DataType::F32:
             _func                             = &batch_normalization_fp32;
             num_elems_processed_per_iteration = 4;
             break;
+        case DataType::F16:
+#ifdef ARM_COMPUTE_ENABLE_FP16
+            _func                             = &batch_normalization_fp16;
+            num_elems_processed_per_iteration = 8;
+            break;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
         default:
             ARM_COMPUTE_ERROR("Element size not supported");
             break;
     }
 
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-
-    update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
-
+    if(output != nullptr)
+    {
+        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+        update_window_and_padding(win, input_access, output_access);
+        output_access.set_valid_region(win, input->info()->valid_region());
+    }
+    else
+    {
+        update_window_and_padding(win, input_access);
+    }
     INEKernel::configure(win);
 }
 
-void NEBatchNormalizationLayerKernel::run(const Window &window)
+void NEBatchNormalizationLayerKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

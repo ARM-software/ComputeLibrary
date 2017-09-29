@@ -24,14 +24,14 @@
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 
 #include "arm_compute/core/CL/kernels/CLPoolingLayerKernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info)
 {
     // Configure pooling kernel
-    auto k = arm_compute::cpp14::make_unique<CLPoolingLayerKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLPoolingLayerKernel>();
     k->configure(input, output, pool_info);
     _kernel = std::move(k);
 

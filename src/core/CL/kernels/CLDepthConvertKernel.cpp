@@ -40,13 +40,21 @@ using namespace arm_compute;
 
 void CLDepthConvertKernel::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::U8, DataType::S16, DataType::QS16,
+                                                  DataType::U16, DataType::U32, DataType::S32, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::U8, DataType::S16, DataType::QS16,
+                                                  DataType::U16, DataType::U32, DataType::S32, DataType::F32);
     ARM_COMPUTE_ERROR_ON(input == output);
     ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == output->info()->data_type(), "Input and output data types must be different");
     ARM_COMPUTE_ERROR_ON(shift >= 8);
 
     // Check if convertion is supported
+    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::QS8 && output->info()->data_type() != DataType::F32,
+                             "Only data types supported [in] QS8 -> [out] F32");
+    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::QS16 && (output->info()->data_type() != DataType::F32),
+                             "Only data types supported [in] QS16 -> [out] F32");
+    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::F32 && ((output->info()->data_type() != DataType::QS8) && output->info()->data_type() != DataType::QS16),
+                             "Only data types supported [in] F32 -> [out] QS8, QS16");
     ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::U8 && (output->info()->data_type() != DataType::U16 && output->info()->data_type() != DataType::S16
                                                                             && output->info()->data_type() != DataType::U32 && output->info()->data_type() != DataType::S32),
                              "Only data types supported [in] U8 -> [out] U16, S16, U32, S32");
@@ -67,6 +75,11 @@ void CLDepthConvertKernel::configure(const ICLTensor *input, ICLTensor *output, 
                                                                              && output->info()->data_type() != DataType::S16),
                              "Only data types supported [in] S32 ->  [out] U8, U16, S16");
 
+    // Auto initialize output shape if not initialized (We can only auto-configure the shape, datatype must be given)
+    set_shape_if_empty(*output->info(), input->info()->tensor_shape());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+
     // Get data sizes
     const size_t input_size  = data_size_from_type(input->info()->data_type());
     const size_t output_size = data_size_from_type(output->info()->data_type());
@@ -83,8 +96,12 @@ void CLDepthConvertKernel::configure(const ICLTensor *input, ICLTensor *output, 
     {
         kernel_name += "_up";
     }
-    build_opts.insert("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.insert("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
+    build_opts.emplace("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.emplace("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
+    if(is_data_type_fixed_point(input->info()->data_type()) || is_data_type_fixed_point(output->info()->data_type()))
+    {
+        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));

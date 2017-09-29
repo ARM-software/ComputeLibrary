@@ -133,8 +133,9 @@ void NETableLookupKernel::configure(const ITensor *input, const ILut *lut, ITens
     INESimpleKernel::configure(input, output, num_num_elems_processed_per_iteration);
 }
 
-void NETableLookupKernel::run(const Window &window)
+void NETableLookupKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);

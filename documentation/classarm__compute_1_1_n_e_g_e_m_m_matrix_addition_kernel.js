@@ -6,5 +6,5 @@ var classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel =
     [ "configure", "classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#abd3df2f9251266926538e4c020652996", null ],
     [ "operator=", "classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a7bf4194c21adc060991ddb88ed4c8b60", null ],
     [ "operator=", "classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#adc1be2dee3a4aeeb959cf2ec7aec7657", null ],
-    [ "run", "classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

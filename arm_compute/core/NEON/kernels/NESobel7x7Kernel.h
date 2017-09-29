@@ -61,7 +61,7 @@ public:
     void configure(const ITensor *input, ITensor *output_x, ITensor *output_y, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -107,7 +107,7 @@ public:
     void configure(const ITensor *input_x, const ITensor *input_y, ITensor *output_x, ITensor *output_y, bool border_undefined);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
@@ -118,5 +118,5 @@ private:
     bool           _run_sobel_x; /**< Do we need to run sobel X? */
     bool           _run_sobel_y; /**< Do we need to run sobel Y? */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESOBEL7x7KERNEL_H__ */

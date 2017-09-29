@@ -58,7 +58,10 @@ public:
     virtual void configure(const ITensor *input, ITensor *output, const float *matrix, BorderMode border_mode, uint8_t constant_border_value);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
+
+    // Inherited methods overridden:
+    BorderSize border_size() const override;
 
 protected:
     /** function to perform warp affine or warp perspective on the given window when border mode == UNDEFINED
@@ -113,5 +116,5 @@ private:
     void warp_constant(const Window &window) override;
     void warp_replicate(const Window &window) override;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEWARPKERNEL_H__ */

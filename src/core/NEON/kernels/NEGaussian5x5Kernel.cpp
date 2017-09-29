@@ -73,8 +73,9 @@ void NEGaussian5x5HorKernel::configure(const ITensor *input, ITensor *output, bo
     INEKernel::configure(win);
 }
 
-void NEGaussian5x5HorKernel::run(const Window &window)
+void NEGaussian5x5HorKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
@@ -116,8 +117,8 @@ BorderSize NEGaussian5x5VertKernel::border_size() const
 
 void NEGaussian5x5VertKernel::configure(const ITensor *input, ITensor *output, bool border_undefined)
 {
-    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(input, Format::S16);
-    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::U8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S16);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
 
     _input  = input;
     _output = output;
@@ -140,8 +141,9 @@ void NEGaussian5x5VertKernel::configure(const ITensor *input, ITensor *output, b
     INEKernel::configure(win);
 }
 
-void NEGaussian5x5VertKernel::run(const Window &window)
+void NEGaussian5x5VertKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
 

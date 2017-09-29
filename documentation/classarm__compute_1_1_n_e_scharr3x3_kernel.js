@@ -8,5 +8,5 @@ var classarm__compute_1_1_n_e_scharr3x3_kernel =
     [ "configure", "classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#ace7523f9c3073ad82b77e46318a1ea77", null ],
     [ "operator=", "classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#a9e56daa4acb0848264206cbcabd71fb6", null ],
     [ "operator=", "classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#aa4a99a8888c2b726eb11026235e1df4b", null ],
-    [ "run", "classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

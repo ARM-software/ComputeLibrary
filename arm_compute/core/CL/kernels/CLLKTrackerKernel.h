@@ -179,5 +179,5 @@ public:
 private:
     const ICLTensor *_new_input;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLLKTRACKERKERNEL_H__ */

@@ -75,5 +75,5 @@ private:
     uint32_t         _num_elems_processed_per_iteration;
     uint32_t         _subsampling;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLCHANNELEXTRACTKERNEL_H__ */

@@ -36,33 +36,50 @@ You should have the following file organisation:
 	├── arm_compute --> All the arm_compute headers
 	│   ├── core
 	│   │   ├── CL
+	│   │   │   ├── CLKernelLibrary.h --> Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
 	│   │   │   ├── CLKernels.h --> Includes all the OpenCL kernels at once
 	│   │   │   ├── CL specialisation of all the generic objects interfaces (ICLTensor, ICLImage, etc.)
 	│   │   │   ├── kernels --> Folder containing all the OpenCL kernels
 	│   │   │   │   └── CL*Kernel.h
 	│   │   │   └── OpenCL.h --> Wrapper to configure the Khronos OpenCL C++ header
 	│   │   ├── CPP
+	│   │   │   ├── CPPKernels.h --> Includes all the CPP kernels at once
 	│   │   │   └── kernels --> Folder containing all the CPP kernels
-	│   │   │   │   └── CPP*Kernel.h
+	│   │   │       └── CPP*Kernel.h
 	│   │   ├── NEON
 	│   │   │   ├── kernels --> Folder containing all the NEON kernels
+	│   │   │   │   ├── arm64 --> Folder containing the interfaces for the assembly arm64 NEON kernels
+	│   │   │   │   ├── arm32 --> Folder containing the interfaces for the assembly arm32 NEON kernels
+	│   │   │   │   ├── assembly --> Folder containing the NEON assembly routines.
 	│   │   │   │   └── NE*Kernel.h
 	│   │   │   └── NEKernels.h --> Includes all the NEON kernels at once
 	│   │   ├── All common basic types (Types.h, Window, Coordinates, Iterator, etc.)
 	│   │   ├── All generic objects interfaces (ITensor, IImage, etc.)
 	│   │   └── Objects metadata classes (ImageInfo, TensorInfo, MultiImageInfo)
+	│   ├── graph
+	│   │   ├── CL --> OpenCL specific operations
+	│   │   │   └── CLMap.h / CLUnmap.h
+	│   │   ├── nodes
+	│   │   │   └── The various nodes supported by the graph API
+	│   │   ├── Nodes.h --> Includes all the Graph nodes at once.
+	│   │   └── Graph objects ( INode, ITensorAccessor, Graph, etc.)
 	│   └── runtime
 	│       ├── CL
 	│       │   ├── CL objects & allocators (CLArray, CLImage, CLTensor, etc.)
 	│       │   ├── functions --> Folder containing all the OpenCL functions
 	│       │   │   └── CL*.h
+	│       │   ├── CLScheduler.h --> Interface to enqueue OpenCL kernels and get/set the OpenCL CommandQueue and ICLTuner.
 	│       │   └── CLFunctions.h --> Includes all the OpenCL functions at once
 	│       ├── CPP
-	│       │   └── Scheduler.h --> Basic pool of threads to execute CPP/NEON code on several cores in parallel
+	│       │   ├── CPPKernels.h --> Includes all the CPP functions at once.
+	│       │   └── CPPScheduler.h --> Basic pool of threads to execute CPP/NEON code on several cores in parallel
 	│       ├── NEON
 	│       │   ├── functions --> Folder containing all the NEON functions
 	│       │   │   └── NE*.h
 	│       │   └── NEFunctions.h --> Includes all the NEON functions at once
+	│       ├── OMP
+	│       │   └── OMPScheduler.h --> OpenMP scheduler (Alternative to the CPPScheduler)
+	│       ├── Memory manager files (LifetimeManager, PoolManager, etc.)
 	│       └── Basic implementations of the generic object interfaces (Array, Image, Tensor, etc.)
 	├── documentation
 	│   ├── index.xhtml
@@ -70,36 +87,55 @@ You should have the following file organisation:
 	├── documentation.xhtml -> documentation/index.xhtml
 	├── examples
 	│   ├── cl_convolution.cpp
+	│   ├── cl_events.cpp
+	│   ├── graph_lenet.cpp
 	│   ├── neoncl_scale_median_gaussian.cpp
+	│   ├── neon_cnn.cpp
+	│   ├── neon_copy_objects.cpp
 	│   ├── neon_convolution.cpp
 	│   └── neon_scale.cpp
 	├── include
-	│   └── CL
-	│       └── Khronos OpenCL C headers and C++ wrapper
+	│   ├── CL
+	│   │   └── Khronos OpenCL C headers and C++ wrapper
+	│   ├── half --> FP16 library available from http://half.sourceforge.net
+	│   └── libnpy --> Library to load / write npy buffers, available from https://github.com/llohse/libnpy
 	├── opencl-1.2-stubs
 	│   └── opencl_stubs.c
+	├── scripts
+	│   ├── caffe_data_extractor.py --> Basic script to export weights from Caffe to npy files
+	│   └── tensorflow_data_extractor.py --> Basic script to export weights from Tensor Flow to npy files
 	├── src
 	│   ├── core
 	│   │   └── ... (Same structure as headers)
 	│   │       └── CL
 	│   │           └── cl_kernels --> All the OpenCL kernels
+	│   ├── graph
+	│   │   └── ... (Same structure as headers)
 	│   └── runtime
 	│       └── ... (Same structure as headers)
+	├── support
+	│   └── Various headers to work around toolchains / platform issues.
 	├── tests
 	│   ├── All test related files shared between validation and benchmark
-	│   ├── CL --> OpenCL specific files (shared)
-	│   ├── NEON --> NEON specific files (shared)
+	│   ├── CL --> OpenCL accessors
+	│   ├── NEON --> NEON accessors
 	│   ├── benchmark --> Sources for benchmarking
 	│   │   ├── Benchmark specific files
-	│   │   ├── main.cpp --> Entry point for benchmark test framework
 	│   │   ├── CL --> OpenCL benchmarking tests
 	│   │   └── NEON --> NEON benchmarking tests
+	│   ├── datasets
+	│   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
+	│   ├── framework
+	│   │   └── Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
+	│   ├── networks
+	│   │   └── Examples of how to instantiate networks.
 	│   ├── validation --> Sources for validation
 	│   │   ├── Validation specific files
-	│   │   ├── main.cpp --> Entry point for validation test framework
 	│   │   ├── CL --> OpenCL validation tests
-	│   │   ├── NEON --> NEON validation tests
-	│   │   └── UNIT --> Library validation tests
+	│   │   ├── CPP --> C++ reference implementations
+	│   │   ├── fixtures
+	│   │   │   └── Fixtures to initialise and run the runtime Functions.
+	│   │   └── NEON --> NEON validation tests
 	│   └── dataset --> Datasets defining common sets of input parameters
 	└── utils --> Boiler plate code used by examples
 	    └── Utils.h
@@ -118,6 +154,35 @@ If there is more than one release in a month then an extra sequential number is 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
 
 @subsection S2_2_changelog Changelog
+
+v17.09 Public major release
+ - Experimental Graph support: initial implementation of a simple stream API to easily chain machine learning layers.
+ - Memory Manager (@ref arm_compute::BlobLifetimeManager, @ref arm_compute::BlobMemoryPool, @ref arm_compute::ILifetimeManager, @ref arm_compute::IMemoryGroup, @ref arm_compute::IMemoryManager, @ref arm_compute::IMemoryPool, @ref arm_compute::IPoolManager, @ref arm_compute::MemoryManagerOnDemand, @ref arm_compute::PoolManager)
+ - New validation and benchmark frameworks (Boost and Google frameworks replaced by homemade framework).
+ - Most machine learning functions support both fixed point 8 and 16 bit (QS8, QS16) for both NEON and OpenCL.
+ - New NEON kernels / functions:
+    - @ref arm_compute::NEGEMMAssemblyBaseKernel @ref arm_compute::NEGEMMAArch64Kernel
+    - @ref arm_compute::NEDequantizationLayerKernel / @ref arm_compute::NEDequantizationLayer
+    - @ref arm_compute::NEFloorKernel / @ref arm_compute::NEFloor
+    - @ref arm_compute::NEL2NormalizeKernel / @ref arm_compute::NEL2Normalize
+    - @ref arm_compute::NEQuantizationLayerKernel @ref arm_compute::NEMinMaxLayerKernel / @ref arm_compute::NEQuantizationLayer
+    - @ref arm_compute::NEROIPoolingLayerKernel / @ref arm_compute::NEROIPoolingLayer
+    - @ref arm_compute::NEReductionOperationKernel / @ref arm_compute::NEReductionOperation
+    - @ref arm_compute::NEReshapeLayerKernel / @ref arm_compute::NEReshapeLayer
+
+ - New OpenCL kernels / functions:
+    - @ref arm_compute::CLDepthwiseConvolution3x3Kernel @ref arm_compute::CLDepthwiseIm2ColKernel @ref arm_compute::CLDepthwiseVectorToTensorKernel @ref arm_compute::CLDepthwiseWeightsReshapeKernel / @ref arm_compute::CLDepthwiseConvolution3x3 @ref arm_compute::CLDepthwiseConvolution @ref arm_compute::CLDepthwiseSeparableConvolutionLayer
+    - @ref arm_compute::CLDequantizationLayerKernel / @ref arm_compute::CLDequantizationLayer
+    - @ref arm_compute::CLDirectConvolutionLayerKernel / @ref arm_compute::CLDirectConvolutionLayer
+    - @ref arm_compute::CLFlattenLayer
+    - @ref arm_compute::CLFloorKernel / @ref arm_compute::CLFloor
+    - @ref arm_compute::CLGEMMTranspose1xW
+    - @ref arm_compute::CLGEMMMatrixVectorMultiplyKernel
+    - @ref arm_compute::CLL2NormalizeKernel / @ref arm_compute::CLL2Normalize
+    - @ref arm_compute::CLQuantizationLayerKernel @ref arm_compute::CLMinMaxLayerKernel / @ref arm_compute::CLQuantizationLayer
+    - @ref arm_compute::CLROIPoolingLayerKernel / @ref arm_compute::CLROIPoolingLayer
+    - @ref arm_compute::CLReductionOperationKernel / @ref arm_compute::CLReductionOperation
+    - @ref arm_compute::CLReshapeLayerKernel / @ref arm_compute::CLReshapeLayer
 
 v17.06 Public major release
  - Various bug fixes
@@ -172,7 +237,6 @@ v17.04 Public bug fixes release
  -  @ref arm_compute::NENonMaximaSuppression3x3FP16Kernel
  -  @ref arm_compute::NENonMaximaSuppression3x3Kernel
 
-
 v17.03.1 First Major public release of the sources
  - Renamed the library to arm_compute
  - New CPP target introduced for C++ kernels shared between NEON and CL functions.
@@ -205,7 +269,7 @@ v17.02.1 Sources preview
  - New OpenCL kernels / functions:
    - @ref arm_compute::CLLogits1DMaxKernel, @ref arm_compute::CLLogits1DShiftExpSumKernel, @ref arm_compute::CLLogits1DNormKernel / @ref arm_compute::CLSoftmaxLayer
    - @ref arm_compute::CLPoolingLayerKernel / @ref arm_compute::CLPoolingLayer
-   - @ref arm_compute::CLIm2ColKernel, @ref arm_compute::CLCol2ImKernel, @ref arm_compute::CLConvolutionLayerWeightsReshapeKernel / @ref arm_compute::CLConvolutionLayer
+   - @ref arm_compute::CLIm2ColKernel, @ref arm_compute::CLCol2ImKernel, arm_compute::CLConvolutionLayerWeightsReshapeKernel / @ref arm_compute::CLConvolutionLayer
    - @ref arm_compute::CLRemapKernel / @ref arm_compute::CLRemap
    - @ref arm_compute::CLGaussianPyramidHorKernel, @ref arm_compute::CLGaussianPyramidVertKernel / @ref arm_compute::CLGaussianPyramid, @ref arm_compute::CLGaussianPyramidHalf, @ref arm_compute::CLGaussianPyramidOrb
    - @ref arm_compute::CLMinMaxKernel, @ref arm_compute::CLMinMaxLocationKernel / @ref arm_compute::CLMinMaxLocation
@@ -303,6 +367,10 @@ To see the build options available simply run ```scons -h```:
 		default: False
 		actual: False
 
+	mali: Enable Mali hardware counters (yes|no)
+		default: False
+		actual: False
+
 	validation_tests: Build validation test programs (yes|no)
 		default: False
 		actual: False
@@ -349,13 +417,11 @@ Example:
 
 @b validation_tests: Enable the build of the validation suite.
 
-@note You will need the Boost Test and Program options headers and libraries to build the validation tests. See @ref building_boost for more information.
-
 @b benchmark_tests: Enable the build of the benchmark tests
 
 @b pmu: Enable the PMU cycle counter to measure execution time in benchmark tests. (Your device needs to support it)
 
-@note You will need the Boost Program options and Google Benchmark headers and libraries to build the benchmark tests. See @ref building_google_benchmark for more information.
+@b mali: Enable the collection of Mali hardware counters to measure execution time in benchmark tests. (Your device needs to have a Mali driver that supports it)
 
 @b openmp Build in the OpenMP scheduler for NEON.
 
@@ -365,7 +431,7 @@ Example:
 
 @sa arm_compute::Scheduler::set
 
-@subsection S3_2_linux Linux
+@subsection S3_2_linux Building for Linux
 
 @subsubsection S3_2_1_library How to build the library ?
 
@@ -424,11 +490,11 @@ To cross compile a NEON example for Linux 64bit:
 
 To cross compile an OpenCL example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -lOpenCL -o cl_convolution
+	arm-linux-gnueabihf-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
 
 To cross compile an OpenCL example for Linux 64bit:
 
-	aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -lOpenCL -o cl_convolution
+	aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
 
@@ -444,7 +510,7 @@ To compile natively (i.e directly on an ARM device) for NEON for Linux 64bit:
 
 To compile natively (i.e directly on an ARM device) for OpenCL for Linux 32bit or Linux 64bit:
 
-	g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -lOpenCL -o cl_convolution
+	g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
 
 
 @note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L
@@ -459,7 +525,7 @@ or
 
 @note If you built the library with support for both OpenCL and NEON you will need to link against OpenCL even if your application only uses NEON.
 
-@subsection S3_3_android Android
+@subsection S3_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
  - arm-linux-androideabi-4.9 for armv7a (clang++)
@@ -509,9 +575,9 @@ To cross compile a NEON example:
 To cross compile an OpenCL example:
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL
+	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL
+	aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 
 @note Due to some issues in older versions of the Mali OpenCL DDK (<= r13p0), we recommend to link arm_compute statically on Android.
 
@@ -537,7 +603,35 @@ And finally to run the example:
 	adb shell /data/local/tmp/neon_convolution_aarch64
 	adb shell /data/local/tmp/cl_convolution_aarch64
 
-@subsection S3_4_cl_stub_library The OpenCL stub library
+@subsection S3_4_windows_host Building on a Windows host system
+
+Using `scons` directly from the Windows command line is known to cause
+problems. The reason seems to be that if `scons` is setup for cross-compilation
+it gets confused about Windows style paths (using backslashes). Thus it is
+recommended to follow one of the options outlined below.
+
+@subsubsection S3_4_1_ubuntu_on_windows Bash on Ubuntu on Windows
+
+The best and easiest option is to use 
+<a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows</a>. 
+This feature is still marked as *beta* and thus might not be available.
+However, if it is building the library is as simple as opening a *Bash on
+Ubuntu on Windows* shell and following the general guidelines given above.
+
+@subsubsection S3_4_2_cygwin Cygwin
+
+If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a> 
+can be used to install and run `scons`. In addition to the default packages
+installed by Cygwin `scons` has to be selected in the installer. (`git` might
+also be useful but is not strictly required if you already have got the source
+code of the library.) Linaro provides pre-built versions of 
+<a href="http://releases.linaro.org/components/toolchain/binaries/">GCC cross-compilers</a> 
+that can be used from the Cygwin terminal. When building for Android the
+compiler is included in the Android standalone toolchain. After everything has
+been set up in the Cygwin terminal the general guide on building the library
+can be followed.
+
+@subsection S3_5_cl_stub_library The OpenCL stub library
 
 In the opencl-1.2-stubs folder you will find the sources to build a stub OpenCL library which then can be used to link your application or arm_compute against.
 

@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLColorConvert.h"
 
 #include "arm_compute/core/CL/kernels/CLColorConvertKernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,28 +32,28 @@ using namespace arm_compute;
 
 void CLColorConvert::configure(const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLColorConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLColorConvertKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
 
 void CLColorConvert::configure(const ICLImage *input, ICLMultiImage *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLColorConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLColorConvertKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
 
 void CLColorConvert::configure(const ICLMultiImage *input, ICLImage *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLColorConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLColorConvertKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
 
 void CLColorConvert::configure(const ICLMultiImage *input, ICLMultiImage *output)
 {
-    auto k = arm_compute::cpp14::make_unique<CLColorConvertKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<CLColorConvertKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }

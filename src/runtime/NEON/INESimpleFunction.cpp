@@ -27,13 +27,14 @@
 
 using namespace arm_compute;
 
-INESimpleFunction::INESimpleFunction()
-    : _kernel(), _border_handler()
+INESimpleFunction::INESimpleFunction() // NOLINT
+    : _kernel(),
+      _border_handler()
 {
 }
 
 void INESimpleFunction::run()
 {
-    _border_handler.run(_border_handler.window());
+    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
     NEScheduler::get().schedule(_kernel.get(), Window::DimY);
 }

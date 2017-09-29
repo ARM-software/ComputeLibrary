@@ -23,132 +23,152 @@
  */
 #include "helpers.h"
 
+#if defined(FIXED_POINT_POSITION)
+
+#include "fixed_point.h"
+#define MUL_OP(x, y) MUL_SAT_OP_EXPAND((x), (y), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
+#define ADD_OP(x, y) ADD_SAT_OP_EXPAND((x), (y), DATA_TYPE, VEC_SIZE)
+#define DIV_OP(x, y) DIV_SAT_OP_VEC_EXPAND((x), (y), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
+#define EXP_OP(x) EXP_OP_EXPAND((x), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
+#define LOG_OP(x) LOG_OP_EXPAND((x), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
+#define POW_OP(x, y) EXP_OP(MUL_OP(LOG_OP((x)), (y)))
+#define SQCVT_SAT(a) SQCVT_SAT_OP_EXPAND((a), DATA_TYPE, FIXED_POINT_POSITION)
+
+#define LOAD_OP(offset, ptr) vload16(offset, ptr)
+#define STORE_OP(data, offset, ptr) vstore16(data, offset, ptr)
+
+#else // FIXED_POINT_POSITION
+
+#define MUL_OP(x, y) ((x) * (y))
+#define ADD_OP(x, y) ((x) + (y))
+#define DIV_OP(x, y) ((x) / (y))
+#define POW_OP(x, y) pow((x), (y))
+#define SQCVT_SAT(a) (a)
+
+#define LOAD_OP(offset, ptr) vload4(offset, ptr)
+#define STORE_OP(data, offset, ptr) vstore4(data, offset, ptr)
+
+#endif // FIXED_POINT_POSITION
+
 /** Apply cross map normalization.
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size, e.g. -DVEC_SIZE=16
+ * @note The radius should be given as a preprocessor argument using -DRADIUS=size. e.g. -DRADIUS=5
+ * @note The number of slices should be given as a preprocessor argument using -DNUM_SLICES=size. e.g. -DNUM_SLICES=192
+ * @note In case of fixed-point operation -DFIXED_POINT_POSITION=fixed_point_position must be provided: e.g. -DFIXED_POINT_POSITION=3
+ * @note Scaling coefficient (= alpha/norm_size), beta and kappa need to be passed at compile time using -DCOEFF, -DALPHA and -DKAPPA
  *
- * @param[in]  input_ptr                                   Pointer to the first source tensor. Supported data types: F16, F32
- * @param[in]  input_stride_x                              Stride of the first source tensor in X dimension (in bytes)
- * @param[in]  input_step_x                                input_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  input_stride_y                              Stride of the first source tensor in Y dimension (in bytes)
- * @param[in]  input_step_y                                input_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  input_stride_z                              Stride of the first source tensor in Z dimension (in bytes)
- * @param[in]  input_step_z                                input_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  input_offset_first_element_in_bytes         The offset of the first element in the first source tensor
- * @param[in]  squared_input_ptr                           Pointer to the second source tensor. Supported data types: F16, F32
- * @param[in]  squared_input_stride_x                      Stride of the second source tensor in X dimension (in bytes)
- * @param[in]  squared_input_step_x                        input_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  squared_input_stride_y                      Stride of the second source tensor in Y dimension (in bytes)
- * @param[in]  squared_input_step_y                        input_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  squared_input_stride_z                      Stride of the second source tensor in Z dimension (in bytes)
- * @param[in]  squared_input_step_z                        input_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  squared_input_offset_first_element_in_bytes The offset of the second element in the second source tensor
- * @param[out] output_ptr                                  Pointer to the destination tensor. Supported data types: F16, F32
- * @param[in]  output_stride_x                             Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  output_step_x                               output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  output_stride_y                             Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  output_step_y                               output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  output_stride_z                             Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  output_step_z                               output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  output_offset_first_element_in_bytes        The offset of the first element in the destination tensor
- * @param[in]  coeff                                       Alpha parameter / norm_size
- * @param[in]  beta                                        Beta parameter in the normalization equation
- * @param[in]  kappa                                       Kappa parameter in the normalization equation
- * @param[in]  radius                                      Number of elements on the right or left side to normalize across
+ * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
+ * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  input_stride_y                       Stride of the first source tensor in Y dimension (in bytes)
+ * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  input_stride_z                       Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the first source tensor
+ * @param[out] output_ptr                           Pointer to the destination tensor. Supported data types: same as @p input_ptr
+ * @param[in]  output_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  output_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  output_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void normalization_layer_cross_map(TENSOR3D_DECLARATION(input),
-                                            TENSOR3D_DECLARATION(squared_input),
-                                            TENSOR3D_DECLARATION(output),
-                                            float coeff,
-                                            float beta,
-                                            float kappa,
-                                            uint  radius)
+                                            TENSOR3D_DECLARATION(output))
 {
-    Tensor3D in         = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D squared_in = CONVERT_TO_TENSOR3D_STRUCT(squared_input);
-    Tensor3D out        = CONVERT_TO_TENSOR3D_STRUCT(output);
+    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(input);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
 
-    DATA_TYPE acc = 0;
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    acc = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0;
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    coeff_v = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))SQCVT_SAT(COEFF);
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    beta_v = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))SQCVT_SAT(BETA);
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    kappa_v = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))SQCVT_SAT(KAPPA);
 
-    const int num_of_slices = get_global_size(2);
     const int current_slice = get_global_id(2);
 
-    const int left_slice  = max(current_slice - (int)radius, (int)0);
-    const int right_slice = min(current_slice + (int)radius, (int)(num_of_slices - 1));
+    const int left_slice  = max(current_slice - (int)RADIUS, (int)0);
+    const int right_slice = min(current_slice + (int)RADIUS, (int)(NUM_SLICES - 1));
 
     for(int i = left_slice; i <= right_slice; i++)
     {
-        acc += *(__global DATA_TYPE *)tensor3D_offset(&squared_in, 0, 0, i - current_slice);
+        VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        values = LOAD_OP(0, (__global DATA_TYPE *)tensor3D_offset(&in, 0, 0, i - current_slice));
+        acc    = ADD_OP(acc, MUL_OP(values, values));
     }
 
-    const float normalized = pow(kappa + coeff * (float)acc, beta);
+    acc = ADD_OP(MUL_OP(acc, coeff_v), kappa_v);
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    normalized = POW_OP(acc, beta_v);
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    normalized_pixel = DIV_OP(LOAD_OP(0, (__global DATA_TYPE *)in.ptr), normalized);
 
-    const float normalized_pixel = (float) * ((__global DATA_TYPE *)in.ptr) / normalized;
-
-    *(__global DATA_TYPE *)out.ptr = CONVERT(normalized_pixel, DATA_TYPE);
+    STORE_OP(normalized_pixel, 0, (__global DATA_TYPE *)out.ptr);
 }
 
 /** Apply in map normalization.
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size, e.g. -DVEC_SIZE=16
+ * @note The radius should be given as a preprocessor argument using -DRADIUS=size. e.g. -DRADIUS=5
+ * @note In case of fixed-point operation -DFIXED_POINT_POSITION=fixed_point_position must be provided: e.g. -DFIXED_POINT_POSITION=3
+ * @note Scaling coefficient (= alpha/norm_size), beta and kappa need to be passed at compile time using -DCOEFF, -DALPHA and -DKAPPA
  *
- * @param[in]  input_ptr                                   Pointer to the first source tensor. Supported data types: F16, F32
- * @param[in]  input_stride_x                              Stride of the first source tensor in X dimension (in bytes)
- * @param[in]  input_step_x                                input_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  input_stride_y                              Stride of the first source tensor in Y dimension (in bytes)
- * @param[in]  input_step_y                                input_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  input_stride_z                              Stride of the first source tensor in Z dimension (in bytes)
- * @param[in]  input_step_z                                input_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  input_offset_first_element_in_bytes         The offset of the first element in the first source tensor
- * @param[in]  squared_input_ptr                           Pointer to the second source tensor. Supported data types: F16, F32
- * @param[in]  squared_input_stride_x                      Stride of the second source tensor in X dimension (in bytes)
- * @param[in]  squared_input_step_x                        input_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  squared_input_stride_y                      Stride of the second source tensor in Y dimension (in bytes)
- * @param[in]  squared_input_step_y                        input_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  squared_input_stride_z                      Stride of the second source tensor in Z dimension (in bytes)
- * @param[in]  squared_input_step_z                        input_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  squared_input_offset_first_element_in_bytes The offset of the second element in the second source tensor
- * @param[out] output_ptr                                  Pointer to the destination tensor. Supported data types: F16, F32
- * @param[in]  output_stride_x                             Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  output_step_x                               output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  output_stride_y                             Stride of the first destination tensor in Y dimension (in bytes)
- * @param[in]  output_step_y                               output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  output_stride_z                             Stride of the first source tensor in Z dimension (in bytes)
- * @param[in]  output_step_z                               output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  output_offset_first_element_in_bytes        The offset of the first element in the destination tensor
- * @param[in]  coeff                                       Alpha parameter / norm_size
- * @param[in]  beta                                        Beta parameter in the normalization equation
- * @param[in]  kappa                                       Kappa parameter in the normalization equation
- * @param[in]  radius                                      Number of elements on the right or left side to normalize across
+ * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: QS8/F16/F32
+ * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
+ * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  input_stride_y                       Stride of the first source tensor in Y dimension (in bytes)
+ * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  input_stride_z                       Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the first source tensor
+ * @param[out] output_ptr                           Pointer to the destination tensor. Supported data types: same as @p input_ptr
+ * @param[in]  output_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  output_stride_y                      Stride of the first destination tensor in Y dimension (in bytes)
+ * @param[in]  output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  output_stride_z                      Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void normalization_layer_in_map_1D(TENSOR3D_DECLARATION(input),
-                                            TENSOR3D_DECLARATION(squared_input),
-                                            TENSOR3D_DECLARATION(output),
-                                            float coeff,
-                                            float beta,
-                                            float kappa,
-                                            uint  radius)
+                                            TENSOR3D_DECLARATION(output))
 {
-    Tensor3D in         = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D squared_in = CONVERT_TO_TENSOR3D_STRUCT(squared_input);
-    Tensor3D out        = CONVERT_TO_TENSOR3D_STRUCT(output);
+    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(input);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
 
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    acc_vec = 0;
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    acc = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))0;
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    coeff_v = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))SQCVT_SAT(COEFF);
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    beta_v = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))SQCVT_SAT(BETA);
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    kappa_v = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))SQCVT_SAT(KAPPA);
 
     const int current_pos = get_global_id(0) << 2;
 
-    const int left_pos  = max(current_pos - (int)radius, -3);
-    const int right_pos = min(current_pos + (int)radius, (int)((get_global_size(0) << 2) + 3 - 1));
+    const int left_pos  = max(current_pos - (int)RADIUS, -3);
+    const int right_pos = min(current_pos + (int)RADIUS, (int)((get_global_size(0) << 2) + 3 - 1));
 
     for(int i = left_pos; i <= right_pos; i += 1)
     {
-        acc_vec += vload4(0, (__global DATA_TYPE *)tensor3D_offset(&squared_in, i - current_pos, 0, 0));
+        VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+        values = LOAD_OP(0, (__global DATA_TYPE *)tensor3D_offset(&in, i - current_pos, 0, 0));
+        acc    = ADD_OP(acc, MUL_OP(values, values));
     }
 
-    const float4 normalized = pow((float4)kappa + coeff * (float4)acc_vec, beta);
+    acc = ADD_OP(MUL_OP(acc, coeff_v), kappa_v);
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    normalized = POW_OP(acc, beta_v);
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    normalized_pixel = DIV_OP(LOAD_OP(0, (__global DATA_TYPE *)in.ptr), normalized);
 
-    const float4 normalized_pixel = CONVERT(vload4(0, (__global DATA_TYPE *)in.ptr), float4) / normalized;
-
-    vstore4(CONVERT(normalized_pixel, VEC_DATA_TYPE(DATA_TYPE, 4)), 0, (__global DATA_TYPE *)out.ptr);
+    STORE_OP(normalized_pixel, 0, (__global DATA_TYPE *)out.ptr);
 }

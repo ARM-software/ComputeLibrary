@@ -194,8 +194,8 @@ bool AccessWindowStatic::update_padding_if_needed(const Window &window) const
     PaddingSize padding;
     padding.left   = std::max(0, -_start_x);
     padding.right  = std::max<int>(0, _end_x - shape[0]);
-    padding.top    = shape.num_dimensions() == 1 ? 0 : std::max(0, -_start_y);
-    padding.bottom = shape.num_dimensions() == 1 ? 0 : std::max<int>(0, _end_y - shape[1]);
+    padding.top    = std::max(0, -_start_y);
+    padding.bottom = std::max<int>(0, _end_y - shape[1]);
 
     // Update strides in tensor info
     return _info->extend_padding(padding);

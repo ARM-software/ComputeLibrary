@@ -52,29 +52,29 @@ __kernel void derivative(
 #ifdef GRAD_X
     ,
     IMAGE_DECLARATION(dst_gx)
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     ,
     IMAGE_DECLARATION(dst_gy)
-#endif
+#endif /* GRAD_Y */
 )
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 #ifdef GRAD_X
     Image dst_gx = CONVERT_TO_IMAGE_STRUCT(dst_gx);
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     Image dst_gy = CONVERT_TO_IMAGE_STRUCT(dst_gy);
-#endif
+#endif /* GRAD_Y */
 
 #ifdef GRAD_X
     short16 l_data = convert_short16(vload16(0, offset(&src, -1, 0)));
     short16 r_data = convert_short16(vload16(0, offset(&src, 1, 0)));
     vstore16(r_data - l_data, 0, ((__global short *)dst_gx.ptr));
-#endif
+#endif /* GRAD_X */
 #ifdef GRAD_Y
     short16 t_data = convert_short16(vload16(0, offset(&src, 0, -1)));
     short16 b_data = convert_short16(vload16(0, offset(&src, 0, 1)));
     vstore16(b_data - t_data, 0, ((__global short *)dst_gy.ptr));
-#endif
+#endif /* GRAD_Y */
 }

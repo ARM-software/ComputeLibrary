@@ -29,6 +29,7 @@
 namespace arm_compute
 {
 class ICLTensor;
+class Size2D;
 
 /** Interface for the im2col reshape kernel.
  *
@@ -67,15 +68,15 @@ public:
     CLIm2ColKernel &operator=(CLIm2ColKernel &&) = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input          The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                            while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F16, F32
-     * @param[out] output         The output tensor. First 2 lower dimensions represent a transform of each 3D input,
-     *                            while every dimension above represents a batch. Data types supported: Same as @p input
-     * @param[in]  convolved_dims The convolved output dimensions.
-     * @param[in]  conv_info      Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in]  has_bias       In case biases are provided expands the matrix with 1.
+     * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/F16/F32
+     * @param[out] output      The output tensor. First 2 lower dimensions represent a transform of each 3D input,
+     *                         while every dimension above represents a batch. Data types supported: Same as @p input
+     * @param[in]  kernel_dims The kernel dimensions (width and height).
+     * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims, const PadStrideInfo &conv_info, bool has_bias);
+    void configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -101,11 +102,8 @@ private:
     const ICLTensor *_input;
     ICLTensor       *_output;
     std::pair<unsigned int, unsigned int> _convolved_dims;
-    PadStrideInfo  _conv_info;
-    int            _kernel_size;
     unsigned int   _num_elems_processed_per_iteration;
     Im2ColFunction _run_func;
 };
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLIM2COLKERNEL_H__ */

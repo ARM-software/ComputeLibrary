@@ -73,7 +73,13 @@ public:
      */
     void set(size_t dimension, size_t value)
     {
-        ARM_COMPUTE_ERROR_ON(value < 1);
+        // Clear entire shape if one dimension is zero
+        if(value == 0)
+        {
+            _num_dimensions = 0;
+            std::fill(_id.begin(), _id.end(), 0);
+            return;
+        }
 
         // Make sure all empty dimensions are filled with 1
         std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
@@ -81,6 +87,29 @@ public:
         // Set the specified dimension and increase the number of dimensions if
         // necessary
         Dimensions::set(dimension, value);
+
+        // Correct number dimensions to ignore trailing dimensions of size 1
+        apply_dimension_correction();
+    }
+
+    /** Accessor to remove the dimension n from the tensor shape.
+     *
+     * @note The upper dimensions of the tensor shape will be shifted down by 1
+     *
+     * @param[in] n Dimension to remove
+     */
+    void remove_dimension(size_t n)
+    {
+        ARM_COMPUTE_ERROR_ON(_num_dimensions < 1);
+        ARM_COMPUTE_ERROR_ON(n >= _num_dimensions);
+
+        std::copy(_id.begin() + n + 1, _id.end(), _id.begin() + n);
+
+        // Reduce number of dimensions
+        _num_dimensions--;
+
+        // Make sure all empty dimensions are filled with 1
+        std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
 
         // Correct number dimensions to ignore trailing dimensions of size 1
         apply_dimension_correction();
@@ -109,15 +138,26 @@ public:
     }
     /** Collapses given dimension and above.
      *
-     * @note Precondition: dimension < TensorShape::num_max_dimensions
-     *
      * @param[in] dimension Size of the wanted dimension
      *
      * @return The linear size of the collapsed dimensions
      */
     size_t total_size_upper(size_t dimension) const
     {
+        ARM_COMPUTE_ERROR_ON(dimension >= TensorShape::num_max_dimensions);
         return std::accumulate(_id.begin() + dimension, _id.end(), 1, std::multiplies<size_t>());
+    }
+
+    /** Compute size of dimensions lower than the given one.
+     *
+     * @param[in] dimension Upper boundary.
+     *
+     * @return The linear size of the collapsed dimensions.
+     */
+    size_t total_size_lower(size_t dimension) const
+    {
+        ARM_COMPUTE_ERROR_ON(dimension > TensorShape::num_max_dimensions);
+        return std::accumulate(_id.begin(), _id.begin() + dimension, 1, std::multiplies<size_t>());
     }
 
 private:

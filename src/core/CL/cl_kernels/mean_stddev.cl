@@ -44,19 +44,19 @@ __kernel void mean_stddev_accumulate(
     IMAGE_DECLARATION(src),
     uint     height,
     __global ulong *global_sum
-#if defined         STDDEV
+#ifdef STDDEV
     ,
     __global ulong *global_sum_sq
-#endif
+#endif /* STDDEV */
 )
 {
     // Get pixels pointer
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 
-    uint8   tmp_sum = 0;
-#if defined STDDEV
-    uint8   tmp_sum_sq = 0;
-#endif
+    uint8 tmp_sum = 0;
+#ifdef STDDEV
+    uint8 tmp_sum_sq = 0;
+#endif /* STDDEV */
     // Calculate partial sum
     for(int i = 0; i < height; i++)
     {
@@ -64,20 +64,20 @@ __kernel void mean_stddev_accumulate(
         uint8 data = convert_uint8(vload8(0, offset(&src, 0, i)));
 
         tmp_sum += data;
-#if defined STDDEV
+#ifdef STDDEV
         tmp_sum_sq += data * data;
-#endif
+#endif /* STDDEV */
     }
     // Perform reduction
     tmp_sum.s0123 += tmp_sum.s4567;
     tmp_sum.s01 += tmp_sum.s23;
     atom_add(global_sum, tmp_sum.s0 + tmp_sum.s1);
 
-#if defined STDDEV
+#ifdef STDDEV
     tmp_sum_sq.s0123 += tmp_sum_sq.s4567;
     tmp_sum_sq.s01 += tmp_sum_sq.s23;
     atom_add(global_sum_sq, tmp_sum_sq.s0 + tmp_sum_sq.s1);
-#endif
+#endif /* STDDEV */
 }
 
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : disable

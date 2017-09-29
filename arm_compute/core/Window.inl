@@ -24,7 +24,7 @@
 namespace arm_compute
 {
 inline Window::Window(const Window &src)
-    : _dims(), _thread_id(src._thread_id), _num_threads(src._num_threads)
+    : _dims()
 {
     for(size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
     {
@@ -32,18 +32,47 @@ inline Window::Window(const Window &src)
     }
 }
 
-inline constexpr const Window::Dimension &Window::operator[](const size_t dimension) const
+inline constexpr const Window::Dimension &Window::operator[](size_t dimension) const
 {
     // Precondition: dimension < Coordinates::num_max_dimensions
     return _dims.at(dimension);
 }
-inline void Window::set(const size_t dimension, const Window::Dimension &dim)
+inline void Window::set(size_t dimension, const Window::Dimension &dim)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
     _dims[dimension] = dim;
 }
 
-inline void Window::shift(const size_t dimension, const int shift_value)
+inline Window Window::collapse_if_possible(const Window &full_window, size_t first) const
+{
+    bool   is_collapsable = false;
+    Window collapsed;
+    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
+    {
+        if(is_collapsable)
+        {
+            collapsed.set(first, Window::Dimension(collapsed[first].end() * _dims[d].start(), collapsed[first].end() * _dims[d].end()));
+        }
+        else
+        {
+            collapsed.set(d, _dims[d]);
+        }
+
+        if(is_collapsable || d == first) // Try to start collapsing from this dimension
+        {
+            // The _dims's dimension must match the full _dims dimension to be collapsable:
+            is_collapsable = _dims[d].start() == 0 && _dims[d].start() == full_window[d].start()
+                             && full_window[d].end() == _dims[d].end();
+        }
+        else
+        {
+            is_collapsable = false;
+        }
+    }
+    return collapsed;
+}
+
+inline void Window::shift(size_t dimension, int shift_value)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
     Window::Dimension &d = _dims[dimension];
@@ -65,7 +94,7 @@ inline void Window::adjust(size_t dimension, int adjust_value, bool is_at_start)
     }
 }
 
-inline void Window::scale(const size_t dimension, float scale_value)
+inline void Window::scale(size_t dimension, float scale_value)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
     Window::Dimension &d           = _dims[dimension];
@@ -74,7 +103,7 @@ inline void Window::scale(const size_t dimension, float scale_value)
     d                              = Window::Dimension(d.start() * scale_value, scaled_end, scaled_step);
 }
 
-inline void Window::set_dimension_step(const size_t dimension, const int step)
+inline void Window::set_dimension_step(size_t dimension, int step)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
     _dims[dimension].set_step(step);
@@ -85,7 +114,7 @@ inline void Window::validate() const
     for(size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_ERROR_ON(_dims[i].step() == 0);
-        ARM_COMPUTE_ERROR_ON(_dims[i].end() <= _dims[i].start());
+        ARM_COMPUTE_ERROR_ON(_dims[i].end() < _dims[i].start());
         ARM_COMPUTE_ERROR_ON((_dims[i].end() - _dims[i].start()) % _dims[i].step());
     }
 }
@@ -97,7 +126,7 @@ inline constexpr size_t Window::num_iterations(size_t dimension) const
     return (_dims.at(dimension).end() - _dims.at(dimension).start()) / _dims.at(dimension).step();
 }
 
-inline Window Window::split_window(const size_t dimension, const size_t id, const size_t total) const
+inline Window Window::split_window(size_t dimension, size_t id, size_t total) const
 {
     ARM_COMPUTE_ERROR_ON(id >= total);
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
@@ -172,11 +201,11 @@ inline Window          Window::first_slice_window() const
     return slice;
 }
 
-inline void Window::use_tensor_dimensions(const ITensorInfo *info, const size_t first_dimension)
+inline void Window::use_tensor_dimensions(const TensorShape &shape, size_t first_dimension)
 {
-    for(unsigned int n = first_dimension; n < info->num_dimensions(); ++n)
+    for(unsigned int n = first_dimension; n < shape.num_dimensions(); ++n)
     {
-        set(n, Window::Dimension(0, std::max(info->dimension(n), static_cast<size_t>(1))));
+        set(n, Window::Dimension(0, std::max(shape[n], static_cast<size_t>(1))));
     }
 }
 }

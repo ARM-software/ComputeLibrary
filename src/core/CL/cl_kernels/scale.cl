@@ -70,20 +70,20 @@ inline const float8 transform_bilinear(const float2 coord, const float2 scale)
  * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
  * @param[in]  input_width                       Input image width
  * @param[in]  input_height                      Input image height
- * @param[in]  output_width                      Output image width
- * @param[in]  output_height                     Output image height
+ * @param[in]  scale_x                           The scale factor along x dimension
+ * @param[in]  scale_y                           The scale factor along y dimension
  */
 __kernel void scale_nearest_neighbour(
     IMAGE_DECLARATION(in),
     IMAGE_DECLARATION(out),
     const float input_width,
     const float input_height,
-    const float output_width,
-    const float output_height)
+    const float scale_x,
+    const float scale_y)
 {
     Image        in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
     Image        out = CONVERT_TO_IMAGE_STRUCT(out);
-    const float2 r   = (float2)(input_width / output_width, input_height / output_height);
+    const float2 r   = (float2)(scale_x, scale_y);
     const float8 tc  = clamp_to_border(transform_nearest(get_current_coords(), r), input_width, input_height);
     vstore4(read_texels4(&in, convert_int8(tc)), 0, (__global DATA_TYPE *)out.ptr);
 }
@@ -104,20 +104,20 @@ __kernel void scale_nearest_neighbour(
  * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
  * @param[in]  input_width                       Input image width
  * @param[in]  input_height                      Input image height
- * @param[in]  output_width                      Output image width
- * @param[in]  output_height                     Output image height
+ * @param[in]  scale_x                           The scale factor along x dimension
+ * @param[in]  scale_y                           The scale factor along y dimension
  */
 __kernel void scale_bilinear(
     IMAGE_DECLARATION(in),
     IMAGE_DECLARATION(out),
     const float input_width,
     const float input_height,
-    const float output_width,
-    const float output_height)
+    const float scale_x,
+    const float scale_y)
 {
     Image        in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
     Image        out = CONVERT_TO_IMAGE_STRUCT(out);
-    const float2 r   = (float2)(input_width / output_width, input_height / output_height);
-    const float8 tc  = clamp_to_border(transform_bilinear(get_current_coords(), r), input_width, input_height);
+    const float2 r   = (float2)(scale_x, scale_y);
+    const float8 tc  = transform_bilinear(get_current_coords(), r);
     vstore4(bilinear_interpolate(&in, tc, input_width, input_height), 0, (__global DATA_TYPE *)out.ptr);
 }

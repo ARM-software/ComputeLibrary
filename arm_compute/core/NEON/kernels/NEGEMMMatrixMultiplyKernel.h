@@ -54,7 +54,7 @@ public:
      * @note If the output tensor is a matrix, the input matrices @p input0 and @p input1 should be the output of the kernels: @ref NEGEMMInterleave4x4Kernel and @ref NEGEMMTranspose1xWKernel
      *       These two kernels change the layout of the original matrices to be more cache-friendly.
      *
-     * @param[in]  input0 Input tensor containing the interleaved Matrix A or the vector A. Data types supported: F16/F32
+     * @param[in]  input0 Input tensor containing the interleaved Matrix A or the vector A. Data types supported: QS8/QS16/F16/F32
      * @param[in]  input1 Input tensor containing the transposed Matrix B if the first input tensor A is not a vector.
      *                    If the output tensor is a vector, input1 must contain the matrix B not reshaped. Data type supported: same as @p input0
      * @param[out] output Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
@@ -63,7 +63,7 @@ public:
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output, float alpha);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     const ITensor *_input0;
@@ -71,5 +71,5 @@ private:
     ITensor       *_output;
     float          _alpha;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMMATRIXMULTIPLYKERNEL_H__*/

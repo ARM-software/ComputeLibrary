@@ -24,8 +24,8 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v17.06"
-SONAME_VERSION="3.0.0"
+VERSION = "v17.09"
+SONAME_VERSION="4.0.0"
 
 Import('env')
 Import('vars')
@@ -138,22 +138,22 @@ core_files = Glob('src/core/*.cpp')
 core_files += Glob('src/core/CPP/*.cpp')
 core_files += Glob('src/core/CPP/kernels/*.cpp')
 
-files = Glob('src/runtime/*.cpp')
+runtime_files = Glob('src/runtime/*.cpp')
 # CLHarrisCorners uses the Scheduler to run CPP kernels
-files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
+runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
 
 if env['cppthreads']:
-     files += Glob('src/runtime/CPP/CPPScheduler.cpp')
+     runtime_files += Glob('src/runtime/CPP/CPPScheduler.cpp')
 
 if env['openmp']:
-     files += Glob('src/runtime/OMP/OMPScheduler.cpp')
+     runtime_files += Glob('src/runtime/OMP/OMPScheduler.cpp')
 
 if env['opencl']:
     core_files += Glob('src/core/CL/*.cpp')
     core_files += Glob('src/core/CL/kernels/*.cpp')
 
-    files += Glob('src/runtime/CL/*.cpp')
-    files += Glob('src/runtime/CL/functions/*.cpp')
+    runtime_files += Glob('src/runtime/CL/*.cpp')
+    runtime_files += Glob('src/runtime/CL/functions/*.cpp')
 
     # Generate embed files
     if env['embed_kernels']:
@@ -169,8 +169,14 @@ if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
 
-    files += Glob('src/runtime/NEON/*.cpp')
-    files += Glob('src/runtime/NEON/functions/*.cpp')
+    if env['arch'] == "armv7a":
+        core_files += Glob('src/core/NEON/kernels/arm32/*.cpp')
+
+    if "arm64-v8" in env['arch']:
+        core_files += Glob('src/core/NEON/kernels/arm64/*.cpp')
+
+    runtime_files += Glob('src/runtime/NEON/*.cpp')
+    runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
 
 static_core_objects = [arm_compute_env.StaticObject(f) for f in core_files]
 shared_core_objects = [arm_compute_env.SharedObject(f) for f in core_files]
@@ -178,22 +184,49 @@ shared_core_objects = [arm_compute_env.SharedObject(f) for f in core_files]
 arm_compute_core_a = build_library('arm_compute_core-static', static_core_objects, static=True)
 Export('arm_compute_core_a')
 
-if env['os'] != 'bare_metal':
+if env['os'] != 'bare_metal' and not env['standalone']:
     arm_compute_core_so = build_library('arm_compute_core', shared_core_objects, static=False)
     Export('arm_compute_core_so')
 
-shared_objects = [arm_compute_env.SharedObject(f) for f in files]
-static_objects = [arm_compute_env.StaticObject(f) for f in files]
+shared_runtime_objects = [arm_compute_env.SharedObject(f) for f in runtime_files]
+static_runtime_objects = [arm_compute_env.StaticObject(f) for f in runtime_files]
 
-arm_compute_a = build_library('arm_compute-static', static_core_objects + static_objects, static=True)
+arm_compute_a = build_library('arm_compute-static', static_core_objects + static_runtime_objects, static=True)
 Export('arm_compute_a')
 
-if env['os'] != 'bare_metal':
-    arm_compute_so = build_library('arm_compute', shared_core_objects + shared_objects, static=False)
+if env['os'] != 'bare_metal' and not env['standalone']:
+    arm_compute_so = build_library('arm_compute', shared_core_objects + shared_runtime_objects, static=False)
     Export('arm_compute_so')
 
-alias = arm_compute_env.Alias("arm_compute", [arm_compute_a, arm_compute_so])
+if env['neon'] and env['opencl']:
+    graph_files = Glob('src/graph/*.cpp')
+    graph_files += Glob('src/graph/nodes/*.cpp')
+
+    graph_files += Glob('src/graph/CL/*.cpp')
+    graph_files += Glob('src/graph/NEON/*.cpp')
+
+    shared_graph_objects = [arm_compute_env.SharedObject(f) for f in graph_files]
+    static_graph_objects = [arm_compute_env.StaticObject(f) for f in graph_files]
+
+    arm_compute_graph_a = build_library('arm_compute_graph-static', static_core_objects + static_runtime_objects + static_graph_objects, static=True)
+    Export('arm_compute_graph_a')
+
+    arm_compute_graph_so = build_library('arm_compute_graph', shared_core_objects + shared_runtime_objects + shared_graph_objects, static=False)
+    Export('arm_compute_graph_so')
+
+    graph_alias = arm_compute_env.Alias("arm_compute_graph", [arm_compute_graph_a, arm_compute_graph_so])
+    Default(graph_alias)
+
+if env['standalone']:
+    alias = arm_compute_env.Alias("arm_compute", [arm_compute_a])
+else:
+    alias = arm_compute_env.Alias("arm_compute", [arm_compute_a, arm_compute_so])
+
 Default(alias)
 
 Default(generate_embed)
-Depends([alias,arm_compute_core_so, arm_compute_core_a], generate_embed)
+
+if env['standalone']:
+    Depends([alias,arm_compute_core_a], generate_embed)
+else:
+    Depends([alias,arm_compute_core_so, arm_compute_core_a], generate_embed)

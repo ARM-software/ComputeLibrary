@@ -12,14 +12,14 @@
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
 <polygon fill="#bfbfbf" stroke="black" points="5,-0.5 5,-19.5 135,-19.5 135,-0.5 5,-0.5"/>
-<text text-anchor="middle" x="70" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">CLGaussian5x5HorKernel</text>
+<text text-anchor="middle" x="70" y="-7.5" font-family="Helvetica" font-size="10.00">CLGaussian5x5HorKernel</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_c_l_separable_convolution_hor_kernel.xhtml" target="_top" xlink:title="Kernel for the Horizontal pass of a Separable Convolution. ">
 <polygon fill="white" stroke="black" points="0,-56.5 0,-86.5 140,-86.5 140,-56.5 0,-56.5"/>
-<text text-anchor="start" x="8" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">CLSeparableConvolution5x5</text>
-<text text-anchor="middle" x="70" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">HorKernel</text>
+<text text-anchor="start" x="8" y="-74.5" font-family="Helvetica" font-size="10.00">CLSeparableConvolution5x5</text>
+<text text-anchor="middle" x="70" y="-63.5" font-family="Helvetica" font-size="10.00">HorKernel</text>
 </a>
 </g>
 </g>
@@ -32,7 +32,7 @@
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" target="_top" xlink:title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. ">
 <polygon fill="white" stroke="black" points="18.5,-123.5 18.5,-142.5 121.5,-142.5 121.5,-123.5 18.5,-123.5"/>
-<text text-anchor="middle" x="70" y="-130.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLSimple2DKernel</text>
+<text text-anchor="middle" x="70" y="-130.5" font-family="Helvetica" font-size="10.00">ICLSimple2DKernel</text>
 </a>
 </g>
 </g>
@@ -45,7 +45,7 @@
 <g id="node4" class="node"><title>Node4</title>
 <g id="a_node4"><a xlink:href="classarm__compute_1_1_i_c_l_simple_kernel.xhtml" target="_top" xlink:title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. ">
 <polygon fill="white" stroke="black" points="25,-179.5 25,-198.5 115,-198.5 115,-179.5 25,-179.5"/>
-<text text-anchor="middle" x="70" y="-186.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLSimpleKernel</text>
+<text text-anchor="middle" x="70" y="-186.5" font-family="Helvetica" font-size="10.00">ICLSimpleKernel</text>
 </a>
 </g>
 </g>
@@ -58,7 +58,7 @@
 <g id="node5" class="node"><title>Node5</title>
 <g id="a_node5"><a xlink:href="classarm__compute_1_1_i_c_l_kernel.xhtml" target="_top" xlink:title="Common interface for all the OpenCL kernels. ">
 <polygon fill="white" stroke="black" points="40,-235.5 40,-254.5 100,-254.5 100,-235.5 40,-235.5"/>
-<text text-anchor="middle" x="70" y="-242.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLKernel</text>
+<text text-anchor="middle" x="70" y="-242.5" font-family="Helvetica" font-size="10.00">ICLKernel</text>
 </a>
 </g>
 </g>
@@ -71,7 +71,7 @@
 <g id="node6" class="node"><title>Node6</title>
 <g id="a_node6"><a xlink:href="classarm__compute_1_1_i_kernel.xhtml" target="_top" xlink:title="Common information for all the kernels. ">
 <polygon fill="white" stroke="black" points="46.5,-291.5 46.5,-310.5 93.5,-310.5 93.5,-291.5 46.5,-291.5"/>
-<text text-anchor="middle" x="70" y="-298.5" font-family="Helvetica,sans-Serif" font-size="10.00">IKernel</text>
+<text text-anchor="middle" x="70" y="-298.5" font-family="Helvetica" font-size="10.00">IKernel</text>
 </a>
 </g>
 </g>

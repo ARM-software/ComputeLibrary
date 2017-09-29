@@ -51,10 +51,11 @@ public:
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
+     *       For QS8/QS16 scale = 1 is the only supported value.
      *
-     * @param[in]  input1          An input tensor. Data types supported: U8/QS8/S16/F32.
-     * @param[in]  input2          An input tensor. Data types supported: U8/QS8/S16/F32.
-     * @param[out] output          The output tensor. Data types supported: U8 (Only if both inputs are U8) /S16/F32.
+     * @param[in]  input1          An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
+     * @param[in]  input2          An input tensor. Data types supported: U8, QS8 (only if @p input1 is QS8), QS16 (only if @p input1 is QS16), S16/F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
+     * @param[out] output          The output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
      * @param[in]  scale           Scale to apply after multiplication.
      *                             Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]  overflow_policy Overflow policy.
@@ -63,7 +64,7 @@ public:
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised multiplication functions with integer scaling factor
@@ -101,5 +102,5 @@ private:
     float          _scale;
     int            _scale_exponent;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEPIXELWISEMULTIPLICATIONKERNEL_H__ */

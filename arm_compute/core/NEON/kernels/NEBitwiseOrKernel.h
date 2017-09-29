@@ -57,12 +57,12 @@ public:
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     const ITensor *_input1; /**< Source tensor 1 */
     const ITensor *_input2; /**< Source tensor 2 */
     ITensor       *_output; /**< Destination tensor */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEBITWISEORKERNEL_H__ */

@@ -61,7 +61,7 @@ public:
     void configure(ITensor *input, BorderSize border_size, const PixelValue &constant_border_value = PixelValue());
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     template <typename T>
@@ -71,5 +71,5 @@ private:
     BorderSize _border_size;
     PixelValue _constant_border_value;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEFILLINNERBORDERKERNEL_H__ */

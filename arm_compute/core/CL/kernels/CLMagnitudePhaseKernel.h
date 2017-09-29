@@ -72,6 +72,5 @@ private:
     bool             _run_mag;   /**< Calculate magnitude ? */
     bool             _run_phase; /**< Calculate phase ? */
 };
-}
-
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLMAGNITUDEPHASEKERNEL_H__ */

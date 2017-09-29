@@ -385,8 +385,9 @@ void NELKTrackerKernel::configure(const ITensor *input_old, const ITensor *input
     INEKernel::configure(window);
 }
 
-void NELKTrackerKernel::run(const Window &window)
+void NELKTrackerKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

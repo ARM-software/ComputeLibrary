@@ -56,11 +56,11 @@ public:
     void configure(const ITensor *input, ITensor *output);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     const ITensor *_input;  /**< Source tensor */
     ITensor       *_output; /**< Destination tensor */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEBITWISENOTKERNEL_H__ */

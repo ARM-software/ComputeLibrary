@@ -37,7 +37,8 @@ namespace
 template <typename T>
 void weights_reshape(const ITensor *input, const ITensor *bias, ITensor *output, const Window &window)
 {
-    const unsigned int kernel_size     = input->info()->dimension(0);
+    const unsigned int kernel_size_x   = input->info()->dimension(0);
+    const unsigned int kernel_size_y   = input->info()->dimension(1);
     const unsigned int kernel_depth    = input->info()->dimension(2);
     const unsigned int input_stride_x  = input->info()->strides_in_bytes().x();
     const unsigned int input_stride_y  = input->info()->strides_in_bytes().y();
@@ -61,9 +62,9 @@ void weights_reshape(const ITensor *input, const ITensor *bias, ITensor *output,
         // Linearize volume
         for(unsigned int d = 0; d < kernel_depth; ++d)
         {
-            for(unsigned int j = 0; j < kernel_size; ++j)
+            for(unsigned int j = 0; j < kernel_size_y; ++j)
             {
-                for(unsigned int i = 0; i < kernel_size; ++i)
+                for(unsigned int i = 0; i < kernel_size_x; ++i)
                 {
                     *(reinterpret_cast<T *>(tmp_output_ptr)) = *(reinterpret_cast<const T *>(tmp_input_ptr));
                     tmp_input_ptr += input_stride_x;
@@ -94,62 +95,60 @@ NEWeightsReshapeKernel::NEWeightsReshapeKernel()
 
 void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QS8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != input->info()->dimension(1));
 
-    const DataType dt                   = input->info()->data_type();
-    const int      fixed_point_position = input->info()->fixed_point_position();
-
-    TensorShape output_shape{ input->info()->tensor_shape() };
+    const int          fixed_point_position = input->info()->fixed_point_position();
+    const DataType     dt                   = input->info()->data_type();
+    const TensorShape &input_shape          = input->info()->tensor_shape();
+    TensorShape        output_shape{ input_shape };
     output_shape.collapse(3);
+
     const size_t tmp_dim = output_shape[0];
     output_shape.set(0, output_shape[1]);
     output_shape.set(1, tmp_dim + (bias != nullptr ? 1 : 0));
 
-    // Set data type and shape for output tensor if not yet configured
-    set_data_type_if_unknown(*output->info(), dt);
-    set_fixed_point_position_if_zero(*output->info(), fixed_point_position);
+    // Output tensor auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, dt, fixed_point_position);
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32, DataType::QS8);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     if(bias != nullptr)
     {
-        TensorShape bias_shape{ input->info()->tensor_shape()[3] };
-
-        // Set data type and shape for bias tensor if not yet configured
-        set_data_type_if_unknown(*bias->info(), dt);
-        set_fixed_point_position_if_zero(*bias->info(), fixed_point_position);
-        set_shape_if_empty(*bias->info(), bias_shape);
-
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(bias->info()->tensor_shape(), bias_shape);
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::F32, DataType::QS8);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, bias);
+        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (bias->info()->num_dimensions() != 1));
+        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (bias->info()->num_dimensions() != 2));
+        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (bias->info()->dimension(0) != input->info()->tensor_shape()[3]));
+        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (bias->info()->dimension(0) != input->info()->tensor_shape()[3] || bias->info()->dimension(1) != input->info()->tensor_shape()[4]));
     }
 
     _input  = input;
     _bias   = bias;
     _output = output;
 
-    switch(_input->info()->data_type())
+    switch(_input->info()->element_size())
     {
-        case DataType::F32:
+        case 4:
         {
             _func = &weights_reshape<uint32_t>;
             break;
         }
-        case DataType::QS8:
+        case 2:
+        {
+            _func = &weights_reshape<uint16_t>;
+            break;
+        }
+        case 1:
         {
             _func = &weights_reshape<uint8_t>;
             break;
         }
         default:
         {
-            ARM_COMPUTE_ERROR_ON("Data type not supported");
+            ARM_COMPUTE_ERROR_ON("Element size not supported");
             break;
         }
     }
@@ -166,8 +165,9 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
     INEKernel::configure(window);
 }
 
-void NEWeightsReshapeKernel::run(const Window &window)
+void NEWeightsReshapeKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 

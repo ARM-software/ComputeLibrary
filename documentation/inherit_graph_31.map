@@ -1,5 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1_data_types.xhtml" title="DataTypes\&lt; 2 \&gt;" alt="" coords="5,31,123,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_c_n_n_data_types.xhtml" title="Supported CNN types. " alt="" coords="187,5,303,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1_fixed_point_data_types.xhtml" title="Data set containing all fixed point data types. " alt="" coords="171,56,319,83"/>
+<area shape="rect" id="node1" href="$structarm__compute_1_1_coordinates2_d.xhtml" title="Coordinate type. " alt="" coords="5,5,115,32"/>
 </map>

@@ -24,19 +24,27 @@
 #ifndef __ARM_COMPUTE_CLTENSORALLOCATOR_H__
 #define __ARM_COMPUTE_CLTENSORALLOCATOR_H__
 
-#include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+
+#include "arm_compute/core/CL/OpenCL.h"
 
 #include <cstdint>
 
 namespace arm_compute
 {
+class CLTensor;
+template <typename>
+class MemoryGroupBase;
+using CLMemoryGroup = MemoryGroupBase<CLTensor>;
+
 /** Basic implementation of a CL memory tensor allocator. */
 class CLTensorAllocator : public ITensorAllocator
 {
 public:
     /** Default constructor. */
-    CLTensorAllocator();
+    CLTensorAllocator(CLTensor *owner = nullptr);
+    /** Default destructor */
+    ~CLTensorAllocator();
     /** Prevent instances of this class from being copied (As this class contains pointers). */
     CLTensorAllocator(const CLTensorAllocator &) = delete;
     /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
@@ -45,8 +53,6 @@ public:
     CLTensorAllocator(CLTensorAllocator &&) = default;
     /** Allow instances of this class to be moved */
     CLTensorAllocator &operator=(CLTensorAllocator &&) = default;
-    /** Default destructor */
-    ~CLTensorAllocator() = default;
 
     /** Interface to be implemented by the child class to return the pointer to the mapped data. */
     uint8_t *data();
@@ -85,6 +91,11 @@ public:
      *
      */
     void free() override;
+    /** Associates the tensor with a memory group
+     *
+     * @param[in] associated_memory_group Memory group to associate the tensor with
+     */
+    void set_associated_memory_group(CLMemoryGroup *associated_memory_group);
 
 protected:
     /** Call map() on the OpenCL buffer.
@@ -96,8 +107,10 @@ protected:
     void unlock() override;
 
 private:
-    cl::Buffer _buffer;  /**< OpenCL buffer containing the tensor data. */
-    uint8_t   *_mapping; /**< Pointer to the CPU mapping of the OpenCL buffer. */
+    CLMemoryGroup *_associated_memory_group; /**< Registered memory manager */
+    cl::Buffer     _buffer;                  /**< OpenCL buffer containing the tensor data. */
+    uint8_t       *_mapping;                 /**< Pointer to the CPU mapping of the OpenCL buffer. */
+    CLTensor      *_owner;                   /**< Owner of the allocator */
 };
 }
 #endif /* __ARM_COMPUTE_CLTENSORALLOCATOR_H__ */

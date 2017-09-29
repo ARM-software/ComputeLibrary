@@ -26,15 +26,26 @@
 
 #ifndef DATA_TYPE_MIN
 #define DATA_TYPE_MIN 0x0
-#endif
+#endif /* DATA_TYPE_MIN */
 
 #ifndef DATA_TYPE_MAX
 #define DATA_TYPE_MAX 0xFF
-#endif
+#endif /* DATA_TYPE_MAX */
+
+inline int FloatFlip(float val)
+{
+    union
+    {
+        int   int_val;
+        float flt_val;
+    } u_val;
+    u_val.flt_val = val;
+    return (u_val.int_val >= 0) ? u_val.int_val : u_val.int_val ^ 0x7FFFFFFF;
+}
 
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_min = (VEC_DATA_TYPE(DATA_TYPE, 16))(DATA_TYPE_MIN);
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_max = (VEC_DATA_TYPE(DATA_TYPE, 16))(DATA_TYPE_MAX);
-__constant uint16 idx16 = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+__constant int16 idx16 = (int16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 
 /** This function identifies the min and maximum value of an input image.
  *
@@ -54,7 +65,7 @@ __constant uint16 idx16 = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
 __kernel void minmax(
     IMAGE_DECLARATION(src),
     __global int *min_max,
-    uint          width)
+    int           width)
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 
@@ -65,11 +76,11 @@ __kernel void minmax(
     local_max = type_min;
 
     // Calculate min/max of row
-    uint width4 = width >> 4;
-    for(uint i = 0; i < width4; i++)
+    int i = 0;
+    for(; i + 16 <= width; i += 16)
     {
         VEC_DATA_TYPE(DATA_TYPE, 16)
-        data      = vload16(0, (__global DATA_TYPE *)offset(&src, i << 4, 0));
+        data      = vload16(0, (__global DATA_TYPE *)offset(&src, i, 0));
         local_min = min(data, local_min);
         local_max = max(data, local_max);
     }
@@ -77,12 +88,16 @@ __kernel void minmax(
 #ifdef NON_MULTIPLE_OF_16
     // Handle non multiple of 16
     VEC_DATA_TYPE(DATA_TYPE, 16)
-    data = vload16(0, (__global DATA_TYPE *)offset(&src, width4 << 4, 0));
+    data = vload16(0, (__global DATA_TYPE *)offset(&src, i, 0));
+#ifdef IS_DATA_TYPE_FLOAT
+    int16 valid_indices = (i + idx16) < width;
+#else  /* IS_DATA_TYPE_FLOAT */
     VEC_DATA_TYPE(DATA_TYPE, 16)
-    widx      = CONVERT(((uint16)(width4 << 4) + idx16) < width, VEC_DATA_TYPE(DATA_TYPE, 16));
-    local_max = max(local_max, select(type_min, data, widx));
-    local_min = min(local_min, select(type_max, data, widx));
-#endif
+    valid_indices = CONVERT((i + idx16) < width, VEC_DATA_TYPE(DATA_TYPE, 16));
+#endif /* IS_DATA_TYPE_FLOAT */
+    local_max = max(local_max, select(type_min, data, valid_indices));
+    local_min = min(local_min, select(type_max, data, valid_indices));
+#endif /* NON_MULTIPLE_OF_16 */
 
     // Perform min/max reduction
     local_min.s01234567 = min(local_min.s01234567, local_min.s89ABCDEF);
@@ -98,8 +113,13 @@ __kernel void minmax(
     local_max.s0 = max(local_max.s0, local_max.s1);
 
     // Update global min/max
+#ifdef IS_DATA_TYPE_FLOAT
+    atomic_min(&min_max[0], FloatFlip(local_min.s0));
+    atomic_max(&min_max[1], FloatFlip(local_max.s0));
+#else  /* IS_DATA_TYPE_FLOAT */
     atomic_min(&min_max[0], local_min.s0);
     atomic_max(&min_max[1], local_max.s0);
+#endif /* IS_DATA_TYPE_FLOAT */
 }
 
 /** This function counts the min and max occurrences in an image and tags their position.
@@ -124,41 +144,50 @@ __kernel void minmaxloc(
     IMAGE_DECLARATION(src),
     __global int *min_max,
     __global uint *min_max_count
-#if defined        LOCATE_MIN
+#ifdef LOCATE_MIN
     ,
     __global Coordinates2D *min_loc, uint max_min_loc_count
-#endif
-#if defined LOCATE_MAX
+#endif /* LOCATE_MIN */
+#ifdef LOCATE_MAX
     ,
     __global Coordinates2D *max_loc, uint max_max_loc_count
-#endif
+#endif /* LOCATE_MAX */
 )
 {
     Image src = CONVERT_TO_IMAGE_STRUCT(src);
 
+#ifdef IS_DATA_TYPE_FLOAT
+    __global float *min_max_ptr = (__global float *)min_max;
+    float           min_value   = min_max_ptr[0];
+    float           max_value   = min_max_ptr[1];
+#else  /* IS_DATA_TYPE_FLOAT */
+    int min_value = min_max[0];
+    int max_value = min_max[1];
+#endif /* IS_DATA_TYPE_FLOAT */
+
     DATA_TYPE value = *((__global DATA_TYPE *)src.ptr);
-#if defined COUNT_MIN_MAX
-    if(value == min_max[0])
+#ifdef COUNT_MIN_MAX
+    if(value == min_value)
     {
         uint idx = atomic_inc(&min_max_count[0]);
-#if defined  LOCATE_MIN
+#ifdef LOCATE_MIN
         if(idx < max_min_loc_count)
         {
             min_loc[idx].x = get_global_id(0);
             min_loc[idx].y = get_global_id(1);
         }
-#endif
+#endif /* LOCATE_MIN */
     }
-    if(value == min_max[1])
+    if(value == max_value)
     {
         uint idx = atomic_inc(&min_max_count[1]);
-#if defined  LOCATE_MAX
+#ifdef LOCATE_MAX
         if(idx < max_max_loc_count)
         {
             max_loc[idx].x = get_global_id(0);
             max_loc[idx].y = get_global_id(1);
         }
-#endif
+#endif /* LOCATE_MAX */
     }
-#endif
+#endif /* COUNT_MIN_MAX */
 }

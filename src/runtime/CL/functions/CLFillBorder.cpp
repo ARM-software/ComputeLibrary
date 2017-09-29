@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLFillBorder.h"
 
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 void CLFillBorder::configure(ICLTensor *tensor, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value)
 {
-    auto k = arm_compute::cpp14::make_unique<CLFillBorderKernel>();
-    k->configure(tensor, border_width, border_mode, constant_border_value);
+    auto k = arm_compute::support::cpp14::make_unique<CLFillBorderKernel>();
+    k->configure(tensor, BorderSize(border_width), border_mode, constant_border_value);
     _kernel = std::move(k);
 }

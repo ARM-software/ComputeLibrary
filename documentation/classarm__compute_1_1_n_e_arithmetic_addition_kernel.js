@@ -7,5 +7,5 @@ var classarm__compute_1_1_n_e_arithmetic_addition_kernel =
     [ "configure", "classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#ae549ed675eab6d763ac6ffd18d226c27", null ],
     [ "operator=", "classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#a1a359a25f8e2d5b781df6fe2ccfc09a2", null ],
     [ "operator=", "classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#a9095b3a8068080cd67214ffac9cbb7f8", null ],
-    [ "run", "classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69", null ]
+    [ "run", "classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]
 ];

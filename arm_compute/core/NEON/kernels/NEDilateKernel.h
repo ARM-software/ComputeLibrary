@@ -42,8 +42,8 @@ public:
      */
     void configure(const ITensor *input, ITensor *output, bool border_undefined);
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEDILATEKERNEL_H__ */

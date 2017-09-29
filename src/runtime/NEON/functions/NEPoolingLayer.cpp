@@ -23,15 +23,15 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
 {
     // Configure pooling kernel
-    auto k = arm_compute::cpp14::make_unique<NEPoolingLayerKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEPoolingLayerKernel>();
     k->configure(input, output, pool_info);
     _kernel = std::move(k);
 

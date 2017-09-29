@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_ICPPKERNEL_H__
 #define __ARM_COMPUTE_ICPPKERNEL_H__
 
+#include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/IKernel.h"
 
 namespace arm_compute
@@ -46,8 +47,9 @@ public:
      * @note The width of the window has to be a multiple of num_elems_processed_per_iteration().
      *
      * @param[in] window Region on which to execute the kernel. (Must be a region of the window returned by window())
+     * @param[in] info   Info about executing thread and CPU.
      */
-    virtual void run(const Window &window) = 0;
+    virtual void run(const Window &window, const ThreadInfo &info) = 0;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_ICPPKERNEL_H__ */

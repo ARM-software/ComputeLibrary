@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEAbsoluteDifference.h"
 
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/kernels/NEAbsoluteDifferenceKernel.h"
+#include "support/ToolchainSupport.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@ using namespace arm_compute;
 
 void NEAbsoluteDifference::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
 {
-    auto k = arm_compute::cpp14::make_unique<NEAbsoluteDifferenceKernel>();
+    auto k = arm_compute::support::cpp14::make_unique<NEAbsoluteDifferenceKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }

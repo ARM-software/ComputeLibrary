@@ -26,7 +26,7 @@
 using namespace arm_compute;
 
 Tensor::Tensor()
-    : _allocator()
+    : _allocator(this)
 {
 }
 
