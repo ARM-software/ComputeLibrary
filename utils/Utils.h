@@ -467,7 +467,6 @@ inline std::string get_typestring(DataType data_type)
         default:
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
-#endif // ARM_NO_EXCEPTIONS
 }
 } // namespace utils
 } // namespace arm_compute
