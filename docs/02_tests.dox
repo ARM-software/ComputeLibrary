@@ -298,13 +298,13 @@ the test case with different inputs.
 Before starting a new test case have a look at the existing ones. They should
 provide a good overview how test cases are structured.
 
-- The C++ reference needs to be added to `tests/validation_new/CPP/`. The
+- The C++ reference needs to be added to `tests/validation/CPP/`. The
   reference function is typically a template parameterized by the underlying
   value type of the `SimpleTensor`. This makes it easy to specialise for
   different data types.
 - If all backends have a common interface it makes sense to share the setup
   code. This can be done by adding a fixture in
-  `tests/validation_new/fixtures/`. Inside of the `setup` method of a fixture
+  `tests/validation/fixtures/`. Inside of the `setup` method of a fixture
   the tensors can be created and initialised and the function can be configured
   and run. The actual test will only have to validate the results. To be shared
   among multiple backends the fixture class is usually a template that accepts
@@ -382,6 +382,23 @@ As an alternative output format JSON is supported and can be selected via
 `--log-format=json`. To write the output to a file instead of stdout the
 `--log-file` option can be used.
 
+@subsubsection tests_running_tests_benchmarking_mode Mode
+Tests contain different datasets of different sizes, some of which will take several hours to run.
+You can select which datasets to use by using the `--mode` option, we recommed you use `--mode=precommit` to start with.
+
+@subsubsection tests_running_tests_benchmarking_instruments Instruments
+You can use the `--instruments` option to select one or more instruments to measure the execution time of the benchmark tests.
+
+`PMU` will try to read the CPU PMU events from the kernel (They need to be enabled on your platform)
+
+`MALI` will try to collect Mali hardware performance counters. (You need to have a recent enough Mali driver)
+
+`WALL_CLOCK` will measure time using `gettimeofday`: this should work on all platforms.
+
+You can pass a combinations of these instruments: `--instruments=PMU,MALI,WALL_CLOCK`
+
+@note You need to make sure the instruments have been selected at compile time using the `pmu=1` or `mali=1` scons options.
+
 <!-- FIXME: Remove before release and change above to benchmark and validation -->
 @subsection tests_running_tests_validation Validation
 
@@ -412,6 +429,7 @@ For a complete list of possible selectors please see: http://www.boost.org/doc/l
 
 @subsubsection tests_running_tests_validation_verbosity Verbosity
 There are two separate flags to control the verbosity of the test output. `--report_level` controls the verbosity of the summary produced after all tests have been executed. `--log_level` controls the verbosity of the information generated during the execution of tests. All available settings can be found in the Boost documentation for [--report_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/report_level.html) and [--log_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/log_level.html), respectively.
+<!-- FIXME: end remove -->
 */
 } // namespace test
 } // namespace arm_compute

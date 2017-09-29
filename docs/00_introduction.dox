@@ -417,8 +417,6 @@ Example:
 
 @b validation_tests: Enable the build of the validation suite.
 
-@note You will need the Boost Test and Program options headers and libraries to build the validation tests. See @ref building_boost for more information.
-
 @b benchmark_tests: Enable the build of the benchmark tests
 
 @b pmu: Enable the PMU cycle counter to measure execution time in benchmark tests. (Your device needs to support it)

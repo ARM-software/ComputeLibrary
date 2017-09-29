@@ -74,9 +74,10 @@ void PMU::open(const perf_event_attr &perf_config)
     ARM_COMPUTE_ERROR_ON_MSG(_fd < 0, "perf_event_open failed");
 
     const int result = ioctl(_fd, PERF_EVENT_IOC_ENABLE, 0);
-
-    ARM_COMPUTE_ERROR_ON_MSG(result == -1, "Failed to enable PMU counter: %d", errno);
-    ARM_COMPUTE_UNUSED(result);
+    if(result == -1)
+    {
+        ARM_COMPUTE_ERROR("Failed to enable PMU counter: %d", errno);
+    }
 }
 
 void PMU::close()
@@ -91,8 +92,10 @@ void PMU::close()
 void PMU::reset()
 {
     const int result = ioctl(_fd, PERF_EVENT_IOC_RESET, 0);
-    ARM_COMPUTE_ERROR_ON_MSG(result == -1, "Failed to reset PMU counter: %d", errno);
-    ARM_COMPUTE_UNUSED(result);
+    if(result == -1)
+    {
+        ARM_COMPUTE_ERROR("Failed to reset PMU counter: %d", errno);
+    }
 }
 } // namespace framework
 } // namespace test
