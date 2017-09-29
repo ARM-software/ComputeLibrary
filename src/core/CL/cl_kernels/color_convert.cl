@@ -54,7 +54,7 @@ __kernel void RGB888_to_RGBA8888_bt709(
     uchar16 rgb_2 = vload16(0, in.ptr + 32);
 
     uchar16 rgba_0 = (uchar16)(rgb_0.s012, 255, rgb_0.s345, 255, rgb_0.s678, 255, rgb_0.s9ab, 255);
-    uchar16 rgba_1 = (uchar16)(rgb_0.scde, 255, rgb_0.f, rgb_1.s01, 255, rgb_1.s234, 255, rgb_1.s567, 255);
+    uchar16 rgba_1 = (uchar16)(rgb_0.scde, 255, rgb_0.sf, rgb_1.s01, 255, rgb_1.s234, 255, rgb_1.s567, 255);
     uchar16 rgba_2 = (uchar16)(rgb_1.s89a, 255, rgb_1.sbcd, 255, rgb_1.sef, rgb_2.s0, 255, rgb_2.s123, 255);
     uchar16 rgba_3 = (uchar16)(rgb_2.s456, 255, rgb_2.s789, 255, rgb_2.sabc, 255, rgb_2.sdef, 255);
 
