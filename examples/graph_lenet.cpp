@@ -93,16 +93,18 @@ void main_graph_lenet(int argc, const char **argv)
     }
 
     // Check if OpenCL is available and initialize the scheduler
+    Hint hint = Hint::NEON;
     if(arm_compute::opencl_is_available())
     {
         arm_compute::CLScheduler::get().default_init();
+        hint = Hint::OPENCL;
     }
 
     Graph graph;
     graph.set_info_enablement(true);
 
     //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
-    graph << Hint::OPENCL
+    graph << hint
           << Tensor(TensorInfo(TensorShape(28U, 28U, 1U, batches), 1, DataType::F32), DummyAccessor())
           << ConvolutionLayer(
               5U, 5U, 20U,
