@@ -99,7 +99,7 @@ class Coordinates;
 } // namespace arm_compute
 
 NEFillBorderKernel::NEFillBorderKernel()
-    : _tensor(nullptr), _border_size(0), _mode(BorderMode::UNDEFINED), _constant_border_value(0)
+    : _tensor(nullptr), _border_size(0), _mode(BorderMode::UNDEFINED), _constant_border_value(static_cast<float>(0.f))
 {
 }
 

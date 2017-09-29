@@ -37,5 +37,5 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
 
     // Configure border depending on operation required
     BorderMode border_mode = (pool_info.pool_type() == PoolingType::MAX) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
-    _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(0));
+    _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(static_cast<float>(0.f)));
 }

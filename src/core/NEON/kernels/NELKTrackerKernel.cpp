@@ -130,7 +130,7 @@ void NELKTrackerKernel::init_keypoints(int start, int end)
     }
 }
 
-std::tuple<int, int, int> NELKTrackerKernel::compute_spatial_gradient_matrix(const NELKInternalKeypoint &keypoint, int *bilinear_ix, int *bilinear_iy)
+std::tuple<int, int, int> NELKTrackerKernel::compute_spatial_gradient_matrix(const NELKInternalKeypoint &keypoint, int32_t *bilinear_ix, int32_t *bilinear_iy)
 {
     int iA11 = 0;
     int iA12 = 0;
@@ -218,7 +218,8 @@ std::tuple<int, int, int> NELKTrackerKernel::compute_spatial_gradient_matrix(con
     return std::make_tuple(iA11, iA12, iA22);
 }
 
-std::pair<int, int> NELKTrackerKernel::compute_image_mismatch_vector(const NELKInternalKeypoint &old_keypoint, const NELKInternalKeypoint &new_keypoint, const int *bilinear_ix, const int *bilinear_iy)
+std::pair<int, int> NELKTrackerKernel::compute_image_mismatch_vector(const NELKInternalKeypoint &old_keypoint, const NELKInternalKeypoint &new_keypoint, const int32_t *bilinear_ix,
+                                                                     const int32_t *bilinear_iy)
 {
     int ib1 = 0;
     int ib2 = 0;
@@ -402,8 +403,8 @@ void NELKTrackerKernel::run(const Window &window, const ThreadInfo &info)
     init_keypoints(list_start, list_end);
 
     const int buffer_size = _window_dimension * _window_dimension;
-    int       bilinear_ix[buffer_size];
-    int       bilinear_iy[buffer_size];
+    int32_t   bilinear_ix[buffer_size];
+    int32_t   bilinear_iy[buffer_size];
 
     const int half_window = _window_dimension / 2;
 
