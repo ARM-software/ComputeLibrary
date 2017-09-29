@@ -30,6 +30,8 @@
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -75,16 +77,30 @@ public:
     * @param[in]  shift           Number of bits to shift right the result.
     */
     void configure(const ITensor *a, const ITensor *b, ITensor *output, int32_t a_offset, int32_t b_offset, int32_t output_offset, int32_t output_mult_int, int32_t shift);
+    /** Initialise the kernel's inputs, output
+    *
+    * @note GEMM_LOWP:  low precision GEMM kernel
+    *  This kernel performs the following computation:
+    *
+    * @param[in]  a      First input tensor  (Matrix A). Data type supported: U8.
+    * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a
+    * @param[out] output Output tensor. Data type supported: U32.
+    */
+    void configure(const ITensor *a, const ITensor *b, ITensor *output);
+
     // Inherited methods overridden:
     void run() override;
 
 private:
-    MemoryGroup                    _memory_group;
-    NEGEMMInterleave4x4Kernel      _interleave_kernel;
-    NEGEMMTranspose1xWKernel       _transpose_kernel;
-    NEGEMMLowpMatrixMultiplyKernel _mm_kernel;
-    Tensor                         _tmp_a;
-    Tensor                         _tmp_b;
+    MemoryGroup                                   _memory_group;
+    NEGEMMInterleave4x4Kernel                     _interleave_kernel;
+    NEGEMMTranspose1xWKernel                      _transpose_kernel;
+    NEGEMMLowpMatrixMultiplyKernel                _mm_kernel;
+    std::unique_ptr<NEGEMMLowpAssemblyBaseKernel> _mm_optimised_kernel;
+    NEGEMMInterleaveBlockedKernel                 _interleave_blocked;
+    NEGEMMInterleaveBlockedKernel                 _interleave_blocked_transposed;
+    Tensor                                        _tmp_a;
+    Tensor                                        _tmp_b;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWP_H__ */

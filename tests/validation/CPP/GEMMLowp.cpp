@@ -34,6 +34,42 @@ namespace validation
 {
 namespace reference
 {
+SimpleTensor<uint32_t> gemmlowp(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, SimpleTensor<uint32_t> &c)
+{
+    ARM_COMPUTE_UNUSED(a);
+    ARM_COMPUTE_UNUSED(b);
+    ARM_COMPUTE_UNUSED(c);
+    const int            K       = a.shape().x();
+    const int            b_width = b.shape().x();
+    const int            rows    = c.shape().y(); //M
+    const int            cols    = c.shape().x(); //N
+    std::vector<int32_t> acc;
+    acc.resize(cols);
+    for(int i = 0; i < rows; ++i)
+    {
+        for(int j = 0; j < cols; ++j)
+        {
+            acc[j] = 0;
+        }
+        for(int k = 0; k < K; ++k)
+        {
+            auto tmp_a = static_cast<int32_t>(a[k + i * K]);
+            for(int j = 0; j < b_width; ++j)
+            {
+                auto          tmp_b       = static_cast<int32_t>(b[j + k * b_width]);
+                const int32_t mult_as_int = tmp_a * tmp_b;
+                acc[j] += mult_as_int;
+            }
+        }
+        for(int j = 0; j < cols; ++j)
+        {
+            c[j + i * cols] = acc[j];
+        }
+    }
+
+    return c;
+}
+
 template <typename T>
 SimpleTensor<T> gemmlowp(const SimpleTensor<T> &a, const SimpleTensor<T> &b, SimpleTensor<T> &c,
                          int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift)

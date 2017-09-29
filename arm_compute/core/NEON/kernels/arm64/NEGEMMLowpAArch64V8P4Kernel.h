@@ -21,27 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_GEMMLOWP_H__
-#define __ARM_COMPUTE_TEST_GEMMLOWP_H__
+#ifndef __ARM_COMPUTE_NEGEMMLOWPAARCH64V8P4KERNEL_H__
+#define __ARM_COMPUTE_NEGEMMLOWPAARCH64V8P4KERNEL_H__
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpAssemblyBaseKernel.h"
 
 namespace arm_compute
 {
-namespace test
-{
-namespace validation
-{
-namespace reference
-{
-SimpleTensor<uint32_t> gemmlowp(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, SimpleTensor<uint32_t> &c);
+class ITensor;
 
-template <typename T>
-SimpleTensor<T> gemmlowp(const SimpleTensor<T> &a, const SimpleTensor<T> &b, SimpleTensor<T> &c,
-                         int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift);
-} // namespace reference
-} // namespace validation
-} // namespace test
+/** AArch64 NEON kernel to multiply two input matrices "A" and "B". */
+class NEGEMMLowpAArch64V8P4Kernel : public NEGEMMLowpAssemblyBaseKernel
+{
+public:
+    // Inherited methods overridden:
+    void run(const Window &window, const ThreadInfo &info) override;
+    bool is_parallelisable() const override;
+
+protected:
+    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output) override;
+};
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_GEMMLOWP_H__ */
+#endif /*__ARM_COMPUTE_NEGEMMLOWPAARCH64V8P4KERNEL_H__*/
