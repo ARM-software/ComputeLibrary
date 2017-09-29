@@ -30,12 +30,12 @@ SONAME_VERSION="1.0.0"
 Import('env')
 Import('vars')
 
-def build_library(name, sources, static=False):
+def build_library(name, sources, static=False, libs=[]):
     if static:
-        obj = arm_compute_env.StaticLibrary(name, source=sources)
+        obj = arm_compute_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
     else:
         if env['set_soname']:
-            obj = arm_compute_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION)
+            obj = arm_compute_env.SharedLibrary(name, source=sources, SHLIBVERSION = SONAME_VERSION, LIBS = arm_compute_env["LIBS"] + libs)
 
             symlinks = []
             # Manually delete symlinks or SCons will get confused:
@@ -51,7 +51,7 @@ def build_library(name, sources, static=False):
             Default(clean)
             Depends(obj, clean)
         else:
-            obj = arm_compute_env.SharedLibrary(name, source=sources)
+            obj = arm_compute_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
     Default(obj)
     return obj
@@ -191,11 +191,12 @@ if env['os'] != 'bare_metal' and not env['standalone']:
 shared_runtime_objects = [arm_compute_env.SharedObject(f) for f in runtime_files]
 static_runtime_objects = [arm_compute_env.StaticObject(f) for f in runtime_files]
 
-arm_compute_a = build_library('arm_compute-static', static_core_objects + static_runtime_objects, static=True)
+arm_compute_a = build_library('arm_compute-static', static_runtime_objects, static=True, libs = [ arm_compute_core_a ])
 Export('arm_compute_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_so = build_library('arm_compute', shared_core_objects + shared_runtime_objects, static=False)
+    arm_compute_so = build_library('arm_compute', shared_runtime_objects, static=False, libs = [ "arm_compute_core" ])
+    Depends(arm_compute_so, arm_compute_core_so)
     Export('arm_compute_so')
 
 if env['neon'] and env['opencl']:
@@ -208,10 +209,11 @@ if env['neon'] and env['opencl']:
     shared_graph_objects = [arm_compute_env.SharedObject(f) for f in graph_files]
     static_graph_objects = [arm_compute_env.StaticObject(f) for f in graph_files]
 
-    arm_compute_graph_a = build_library('arm_compute_graph-static', static_core_objects + static_runtime_objects + static_graph_objects, static=True)
+    arm_compute_graph_a = build_library('arm_compute_graph-static', static_graph_objects, static=True, libs = [ arm_compute_a ])
     Export('arm_compute_graph_a')
 
-    arm_compute_graph_so = build_library('arm_compute_graph', shared_core_objects + shared_runtime_objects + shared_graph_objects, static=False)
+    arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core" ])
+    Depends( arm_compute_graph_so, arm_compute_so)
     Export('arm_compute_graph_so')
 
     graph_alias = arm_compute_env.Alias("arm_compute_graph", [arm_compute_graph_a, arm_compute_graph_so])

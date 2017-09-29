@@ -59,11 +59,12 @@ if old_validation_env['openblas']:
 
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import('arm_compute_a')
-    old_validation_env.Append(LIBS = [arm_compute_a])
+    Import('arm_compute_core_a')
+    old_validation_env.Append(LIBS = [arm_compute_a, arm_compute_core_a])
     arm_compute_lib = arm_compute_a
 else:
     Import('arm_compute_so')
-    old_validation_env.Append(LIBS = ["arm_compute"])
+    old_validation_env.Append(LIBS = ["arm_compute", "arm_compute_core"])
     arm_compute_lib = arm_compute_so
 
 #FIXME Delete before release

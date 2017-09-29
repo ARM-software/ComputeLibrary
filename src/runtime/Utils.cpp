@@ -28,6 +28,10 @@
 
 using namespace arm_compute;
 
+static const std::string information =
+#include "arm_compute_version.embed"
+    ;
+
 const std::string &arm_compute::string_from_scheduler_type(Scheduler::Type t)
 {
     static std::map<Scheduler::Type, const std::string> scheduler_type_map =

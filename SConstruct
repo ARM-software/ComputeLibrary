@@ -56,6 +56,7 @@ vars.AddVariables(
 )
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
+env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
 
 SConsignFile('build/.%s' % env['build_dir'])
 
