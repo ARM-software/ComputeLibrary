@@ -81,6 +81,9 @@ common_objects = [test_env.StaticObject(f) for f in common_files]
 files_benchmark = Glob('benchmark/*.cpp')
 files_validation = Glob('validation/*.cpp')
 
+# Add unit tests
+files_validation += Glob('validation/UNIT/*.cpp')
+
 # Always compile reference for validation
 files_validation += Glob('validation/CPP/*.cpp')
 

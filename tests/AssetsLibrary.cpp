@@ -191,6 +191,11 @@ AssetsLibrary::AssetsLibrary(std::string path, std::random_device::result_type s
 {
 }
 
+std::string AssetsLibrary::path() const
+{
+    return _library_path;
+}
+
 std::random_device::result_type AssetsLibrary::seed() const
 {
     return _seed;

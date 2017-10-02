@@ -153,6 +153,15 @@ inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
 {
     switch(op)
     {
+        case FixedPointOp::ADD:
+            os << "ADD";
+            break;
+        case FixedPointOp::SUB:
+            os << "SUB";
+            break;
+        case FixedPointOp::MUL:
+            os << "MUL";
+            break;
         case FixedPointOp::EXP:
             os << "EXP";
             break;
@@ -171,6 +180,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
 
     return os;
 }
+
 inline std::string to_string(const FixedPointOp &op)
 {
     std::stringstream str;
