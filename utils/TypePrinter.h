@@ -535,7 +535,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy 
     return os;
 }
 
-//FIXME: Check why this doesn't work and the TensorShape overload is needed
+//FIXME: Check why this doesn't work and the TensorShape and Coordinates overload are needed
 template <typename T>
 inline std::string to_string(const Dimensions<T> &dimensions)
 {
@@ -549,6 +549,14 @@ inline std::string to_string(const TensorShape &shape)
 {
     std::stringstream str;
     str << shape;
+    return str.str();
+}
+
+/** Formatted output of the Coordinates type. */
+inline std::string to_string(const Coordinates &coord)
+{
+    std::stringstream str;
+    str << coord;
     return str.str();
 }
 

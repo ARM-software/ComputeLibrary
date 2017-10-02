@@ -84,6 +84,10 @@ files_validation = Glob('validation/*.cpp')
 # Always compile reference for validation
 files_validation += Glob('validation/CPP/*.cpp')
 
+# Add unit tests
+files_validation += Glob('validation/UNIT/*/*.cpp')
+files_validation += Glob('validation/UNIT/*.cpp')
+
 if env['opencl']:
     Import('opencl')
 
