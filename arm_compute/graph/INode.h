@@ -58,8 +58,6 @@ public:
      */
     TargetHint override_target_hint(TargetHint target_hint) const;
 
-    virtual void print_info() = 0;
-
 protected:
     /** Interface to be implement that override the hints
      *
@@ -71,8 +69,6 @@ protected:
 
 protected:
     TargetHint _target_hint{ TargetHint::DONT_CARE };
-    ITensor   *_input{ nullptr };
-    ITensor   *_output{ nullptr };
 };
 } // namespace graph
 } // namespace arm_compute

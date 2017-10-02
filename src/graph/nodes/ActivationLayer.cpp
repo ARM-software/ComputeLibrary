@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/nodes/ActivationLayer.h"
 
+#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
@@ -71,36 +72,24 @@ std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphC
 {
     std::unique_ptr<arm_compute::IFunction> func;
     _target_hint = ctx.hints().target_hint();
-    _input       = input;
-    _output      = output;
 
     if(_target_hint == TargetHint::OPENCL)
     {
         func = instantiate<TargetHint::OPENCL>(input, output, _activation_info);
+        ARM_COMPUTE_LOG("Instantiating CLActivationLayer");
     }
     else
     {
         func = instantiate<TargetHint::NEON>(input, output, _activation_info);
+        ARM_COMPUTE_LOG("Instantiating NEActivationLayer");
     }
+
+    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
+                    << " Input shape: " << input->info()->tensor_shape()
+                    << " Output shape: " << output->info()->tensor_shape()
+                    << " Activation function: " << _activation_info.activation()
+                    << " a: " << _activation_info.a()
+                    << " b: " << _activation_info.b()
+                    << std::endl);
     return func;
-}
-
-void ActivationLayer::print_info()
-{
-    if(_target_hint == TargetHint::OPENCL)
-    {
-        std::cout << "Instantiating CLActivationLayer";
-    }
-    else
-    {
-        std::cout << "Instantiating NEActivationLayer";
-    }
-
-    std::cout << " Data Type: " << _input->info()->data_type()
-              << " Input shape: " << _input->info()->tensor_shape()
-              << " Output shape: " << _output->info()->tensor_shape()
-              << " Activation function: " << _activation_info.activation()
-              << " a: " << _activation_info.a()
-              << " b: " << _activation_info.b()
-              << std::endl;
 }

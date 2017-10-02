@@ -78,23 +78,26 @@ public:
 
     // Inherited methods overriden:
     std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
-    void print_info() override;
 
 private:
     /** Instantiates a non-grouped convolution
      *
+     * @param[in] input            Input tensor
+     * @param[in] output           Output tensor
      * @param[in] conv_method_hint Hint that specifies which convolution layer method to use
      *
      * @return Convolution function
      */
-    std::unique_ptr<arm_compute::IFunction> instantiate_convolution(ConvolutionMethodHint conv_method_hint);
+    std::unique_ptr<arm_compute::IFunction> instantiate_convolution(ITensor *input, ITensor *output, ConvolutionMethodHint conv_method_hint);
     /** Instantiates a grouped convolution
      *
+     * @param[in] input            Input tensor
+     * @param[in] output           Output tensor
      * @param[in] conv_method_hint Hint that specifies which convolution layer method to use
      *
      * @return Grouped Convolution function
      */
-    std::unique_ptr<arm_compute::IFunction> instantiate_grouped_convolution(ConvolutionMethodHint conv_method_hint);
+    std::unique_ptr<arm_compute::IFunction> instantiate_grouped_convolution(ITensor *input, ITensor *output, ConvolutionMethodHint conv_method_hint);
 
 private:
     unsigned int        _conv_width;   /**< Convolution width */

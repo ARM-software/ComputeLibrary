@@ -25,6 +25,7 @@
 #error "This example needs to be built with -DARM_COMPUTE_CL"
 #endif /* ARM_COMPUTE_CL */
 
+#include "arm_compute/core/Logger.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Nodes.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -102,7 +103,7 @@ void main_graph_alexnet(int argc, const char **argv)
     }
 
     Graph graph;
-    graph.set_info_enablement(true);
+    arm_compute::Logger::get().set_logger(std::cout, arm_compute::LoggerVerbosity::INFO);
 
     graph << hint
           << Tensor(TensorInfo(TensorShape(227U, 227U, 3U, batches), 1, DataType::F32), DummyAccessor())

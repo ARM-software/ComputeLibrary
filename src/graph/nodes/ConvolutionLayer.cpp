@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/nodes/ConvolutionLayer.h"
 
+#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -184,8 +185,6 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
 
     std::unique_ptr<arm_compute::IFunction> func;
     _target_hint                                 = ctx.hints().target_hint();
-    _input                                       = input;
-    _output                                      = output;
     const ConvolutionMethodHint conv_method_hint = ctx.hints().convolution_method_hint();
 
     // Check if the weights and biases are loaded
@@ -197,19 +196,21 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
     _biases.set_target(_target_hint);
 
     // Calculate output shape
-    TensorShape output_shape = calculate_convolution_layer_output_shape(_input->info()->tensor_shape(), _weights.info().tensor_shape(), _conv_info);
+    TensorShape output_shape = calculate_convolution_layer_output_shape(input->info()->tensor_shape(), _weights.info().tensor_shape(), _conv_info);
 
     // Output auto inizialitation if not yet initialized
-    arm_compute::auto_init_if_empty(*_output->info(), output_shape, 1, _input->info()->data_type(), _input->info()->fixed_point_position());
+    arm_compute::auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
 
     // Create appropriate convolution function
     if(_num_groups == 1)
     {
-        func = instantiate_convolution(conv_method_hint);
+        func = instantiate_convolution(input, output, conv_method_hint);
+        ARM_COMPUTE_LOG("Instantiating CLConvolutionLayer");
     }
     else
     {
-        func = instantiate_grouped_convolution(conv_method_hint);
+        func = instantiate_grouped_convolution(input, output, conv_method_hint);
+        ARM_COMPUTE_LOG("Instantiating NEConvolutionLayer");
     }
 
     // Fill weights
@@ -223,49 +224,38 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
         _biases.allocate_and_fill_if_needed();
     }
 
+    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
+                    << " Input Shape: " << input->info()->tensor_shape()
+                    << " Weights shape: " << _weights.info().tensor_shape()
+                    << " Biases Shape: " << _biases.info().tensor_shape()
+                    << " Output Shape: " << output->info()->tensor_shape()
+                    << " PadStrideInfo: " << _conv_info
+                    << " Groups: " << _num_groups
+                    << " WeightsInfo: " << _weights_info
+                    << std::endl);
+
     return func;
 }
 
-void ConvolutionLayer::print_info()
-{
-    if(_target_hint == TargetHint::OPENCL)
-    {
-        std::cout << "Instantiating CLConvolutionLayer";
-    }
-    else
-    {
-        std::cout << "Instantiating NEConvolutionLayer";
-    }
-    std::cout << " Data Type: " << _input->info()->data_type()
-              << " Input Shape: " << _input->info()->tensor_shape()
-              << " Weights shape: " << _weights.info().tensor_shape()
-              << " Biases Shape: " << _biases.info().tensor_shape()
-              << " Output Shape: " << _output->info()->tensor_shape()
-              << " PadStrideInfo: " << _conv_info
-              << " Groups: " << _num_groups
-              << " WeightsInfo: " << _weights_info
-              << std::endl;
-}
-
-std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_convolution(ConvolutionMethodHint conv_method_hint)
+std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_convolution(ITensor *input, ITensor *output, ConvolutionMethodHint conv_method_hint)
 {
     std::unique_ptr<arm_compute::IFunction> func;
     if(_target_hint == TargetHint::OPENCL)
     {
-        func = instantiate<TargetHint::OPENCL>(_input, _weights.tensor(), _biases.tensor(), _output, _conv_info, _weights_info, conv_method_hint);
+        func = instantiate<TargetHint::OPENCL>(input, _weights.tensor(), _biases.tensor(), output, _conv_info, _weights_info, conv_method_hint);
     }
     else
     {
-        func = instantiate<TargetHint::NEON>(_input, _weights.tensor(), _biases.tensor(), _output, _conv_info, _weights_info, conv_method_hint);
+        func = instantiate<TargetHint::NEON>(input, _weights.tensor(), _biases.tensor(), output, _conv_info, _weights_info, conv_method_hint);
     }
     return func;
 }
 
-std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_grouped_convolution(ConvolutionMethodHint conv_method_hint)
+std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_grouped_convolution(ITensor *input, ITensor *output, ConvolutionMethodHint conv_method_hint)
 {
     // Get tensor shapes
-    TensorShape input_shape   = _input->info()->tensor_shape();
-    TensorShape output_shape  = _output->info()->tensor_shape();
+    TensorShape input_shape   = input->info()->tensor_shape();
+    TensorShape output_shape  = output->info()->tensor_shape();
     TensorShape weights_shape = _weights.info().tensor_shape();
     TensorShape biases_shape  = _biases.info().tensor_shape();
 
@@ -309,8 +299,8 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_grouped_co
 
         // Create sub-tensors for input, output, weights and bias
         auto hint_to_use = (_target_hint == TargetHint::OPENCL) ? TargetHint::OPENCL : TargetHint::NEON;
-        _is[i]           = SubTensor(_input, input_shape, input_coord, hint_to_use);
-        _os[i]           = SubTensor(_output, output_shape, output_coord, hint_to_use);
+        _is[i]           = SubTensor(input, input_shape, input_coord, hint_to_use);
+        _os[i]           = SubTensor(output, output_shape, output_coord, hint_to_use);
         _ws[i]           = SubTensor(_weights.tensor(), weights_shape, weights_coord, hint_to_use);
         _bs[i]           = SubTensor(_biases.tensor(), biases_shape, biases_coord, hint_to_use);
 

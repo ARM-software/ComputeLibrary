@@ -28,7 +28,6 @@
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/Types.h"
-
 namespace arm_compute
 {
 namespace graph
@@ -39,7 +38,6 @@ class SoftmaxLayer : public INode
 public:
     // Inherited methods overriden:
     std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
-    void print_info() override;
 };
 
 } // namespace graph

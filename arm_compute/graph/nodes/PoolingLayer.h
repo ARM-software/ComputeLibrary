@@ -45,7 +45,6 @@ public:
 
     // Inherited methods overriden:
     std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
-    void print_info() override;
 
 private:
     const PoolingLayerInfo _pool_info; /**< Pooling layer information */

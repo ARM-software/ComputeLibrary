@@ -119,7 +119,7 @@ public:
 private:
     const std::string _filename;
 };
-} // namespace graph
+} // namespace graph_utils
 } // namespace arm_compute
 
 #endif /* __ARM_COMPUTE_GRAPH_UTILS_H__ */

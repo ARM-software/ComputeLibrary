@@ -21,33 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NORMALIZATION_LAYER_H__
-#define __ARM_COMPUTE_GRAPH_NORMALIZATION_LAYER_H__
 
-#include "arm_compute/graph/GraphContext.h"
-#include "arm_compute/graph/INode.h"
-#include "arm_compute/graph/Types.h"
+#include "arm_compute/core/Logger.h"
 
-namespace arm_compute
+using namespace arm_compute;
+
+Logger::Logger()
+    : _ostream(&std::cout), _nullstream(nullptr), _verbosity(LoggerVerbosity::NONE)
 {
-namespace graph
-{
-/** Normalization layer node */
-class NormalizationLayer final : public INode
-{
-public:
-    /** Default Constructor
-     *
-     * @param[in] norm_info Normalization layer information
-     */
-    explicit NormalizationLayer(const NormalizationLayerInfo norm_info);
+}
 
-    // Inherited methods overriden:
-    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
+Logger &Logger::get()
+{
+    static Logger _instance;
+    return _instance;
+}
 
-private:
-    const NormalizationLayerInfo _norm_info; /**< Normalization layer information */
-};
-} // namespace graph
-} // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NORMALIZATION_LAYER_H__ */
+void Logger::set_logger(std::ostream &ostream, LoggerVerbosity verbosity)
+{
+    _ostream   = &ostream;
+    _verbosity = verbosity;
+}
+
+std::ostream &Logger::log_info()
+{
+    if(_verbosity == LoggerVerbosity::INFO)
+    {
+        return *_ostream;
+    }
+    else
+    {
+        return _nullstream;
+    }
+}

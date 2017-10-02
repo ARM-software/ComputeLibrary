@@ -48,12 +48,6 @@ public:
      */
     void configure(GraphHints _next_hints);
 
-    /** Sets whether to enable information print out
-     *
-     * @param[in] is_enabled Set to true if need info printed out
-     */
-    void set_info_enablement(bool is_enabled);
-
     GraphContext                         _ctx{};
     std::vector<Stage>                   _pipeline{};
     std::vector<std::unique_ptr<Tensor>> _tensors{};
@@ -64,7 +58,6 @@ public:
     std::unique_ptr<Tensor>              _graph_output{ nullptr };
     std::unique_ptr<INode>               _current_node{ nullptr };
     Tensor                              *_current_output{ nullptr };
-    bool                                 _info_enabled{ false };
 
 private:
     Tensor    *_current_input{ nullptr };
@@ -161,11 +154,6 @@ void Graph::Private::configure(GraphHints _next_hints)
     std::swap(_current_hints, _next_hints);
 }
 
-void Graph::Private::set_info_enablement(bool is_enabled)
-{
-    _info_enabled = is_enabled;
-}
-
 void Graph::add_node(std::unique_ptr<INode> node)
 {
     ARM_COMPUTE_ERROR_ON_MSG(_pimpl->_graph_input == nullptr, "The graph's input must be set before the first node is added");
@@ -179,11 +167,6 @@ void Graph::add_node(std::unique_ptr<INode> node)
     {
         //Finalize the previous Node:
         _pimpl->configure(_pimpl->_next_hints);
-
-        if(_pimpl->_info_enabled)
-        {
-            _pimpl->_current_node->print_info();
-        }
     }
     else
     {
@@ -229,11 +212,6 @@ void Graph::set_temp(TensorInfo &&tmp)
 
     _pimpl->_tensors.push_back(arm_compute::support::cpp14::make_unique<Tensor>(std::move(tmp)));
     _pimpl->_current_output = _pimpl->_tensors.back().get();
-}
-
-void Graph::set_info_enablement(bool is_enabled)
-{
-    _pimpl->set_info_enablement(is_enabled);
 }
 
 GraphHints &Graph::hints()

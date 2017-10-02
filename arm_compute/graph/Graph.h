@@ -70,11 +70,7 @@ public:
      * @param[in] tmp Output info to set
      */
     void set_temp(TensorInfo &&tmp);
-    /** Sets whether to enable information print out
-     *
-     * @param[in] is_enabled Set to true if need info printed out
-     */
-    void set_info_enablement(bool is_enabled);
+
     /** Returns the graph hints that are currently used
      *
      * @return Graph hints

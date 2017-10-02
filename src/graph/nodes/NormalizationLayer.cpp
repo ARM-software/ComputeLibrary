@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/nodes/NormalizationLayer.h"
 
+#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
@@ -71,35 +72,23 @@ std::unique_ptr<arm_compute::IFunction> NormalizationLayer::instantiate_node(Gra
 {
     std::unique_ptr<arm_compute::IFunction> func;
     _target_hint = ctx.hints().target_hint();
-    _input       = input;
-    _output      = output;
 
     if(_target_hint == TargetHint::OPENCL)
     {
         func = instantiate<TargetHint::OPENCL>(input, output, _norm_info);
+        ARM_COMPUTE_LOG("Instantiating CLNormalizationLayer");
     }
     else
     {
         func = instantiate<TargetHint::NEON>(input, output, _norm_info);
+        ARM_COMPUTE_LOG("Instantiating NENormalizationLayer");
     }
+
+    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
+                    << " Input shape: " << input->info()->tensor_shape()
+                    << " Output shape: " << output->info()->tensor_shape()
+                    << " Normalization info: " << _norm_info
+                    << std::endl);
 
     return func;
-}
-
-void NormalizationLayer::print_info()
-{
-    if(_target_hint == TargetHint::OPENCL)
-    {
-        std::cout << "Instantiating CLNormalizationLayer";
-    }
-    else
-    {
-        std::cout << "Instantiating NENormalizationLayer";
-    }
-
-    std::cout << " Data Type: " << _input->info()->data_type()
-              << " Input shape: " << _input->info()->tensor_shape()
-              << " Output shape: " << _output->info()->tensor_shape()
-              << " Normalization info: " << _norm_info
-              << std::endl;
 }
