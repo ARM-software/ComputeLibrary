@@ -21,43 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_CLUNMAP_H__
-#define __ARM_COMPUTE_GRAPH_CLUNMAP_H__
+#ifndef __ARM_COMPUTE_GRAPH_DEPTH_CONCATENATE_LAYER_H__
+#define __ARM_COMPUTE_GRAPH_DEPTH_CONCATENATE_LAYER_H__
 
+#include "arm_compute/graph/GraphContext.h"
+#include "arm_compute/graph/INode.h"
+#include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/Types.h"
-#include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
 {
-class ICLTensor;
-
 namespace graph
 {
-class ITensorObject;
-/** OpenCL un-map function */
-class CLUnmap : public arm_compute::IFunction
+/** Depth Concatenate Layer node */
+class DepthConcatenateLayer
 {
 public:
-    /** Constructor
-     *
-     * @param[in] tensor Tensor to un-map
-     */
-    CLUnmap(ITensorObject *tensor);
-    /** Prevent instances from being copy constructed */
-    CLUnmap(const CLUnmap &) = delete;
-    /** Prevent instances from being copy assigned */
-    const CLUnmap &operator=(const CLUnmap &) = delete;
-    /** Allow instances to be move constructed */
-    CLUnmap(CLUnmap &&) = default;
-    /** Allow instances to be move assigned */
-    CLUnmap &operator=(CLUnmap &&) = default;
+    /** Default Constructor */
+    DepthConcatenateLayer()                              = default;
+    DepthConcatenateLayer(const DepthConcatenateLayer &) = delete;
+    DepthConcatenateLayer &operator=(const DepthConcatenateLayer &) = delete;
+    DepthConcatenateLayer(DepthConcatenateLayer &&)                 = default;
+    DepthConcatenateLayer &operator=(DepthConcatenateLayer &&) = delete;
 
     // Inherited methods overriden:
-    void run() override;
+    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, std::vector<ITensor *> inputs, ITensor *output);
+    void print_info();
 
 private:
-    arm_compute::ICLTensor *_tensor; /**< Tensor */
+    TargetHint             _hint{ TargetHint::DONT_CARE };
+    std::vector<ITensor *> _inputs{ nullptr };
+    ITensor               *_output{ nullptr };
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_CLUNMAP_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_DEPTH_CONCATENATE_LAYER_H__ */

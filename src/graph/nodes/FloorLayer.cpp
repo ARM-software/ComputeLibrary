@@ -36,7 +36,7 @@ using namespace arm_compute::graph;
 namespace
 {
 template <typename FloorType, typename TensorType, TargetHint hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate_function(arm_compute::ITensor *input, arm_compute::ITensor *output)
 {
     auto floorlayer = arm_compute::support::cpp14::make_unique<FloorType>();
     floorlayer->configure(
@@ -47,40 +47,46 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITe
 }
 
 template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *output);
+std::unique_ptr<arm_compute::IFunction> instantiate(arm_compute::ITensor *input, arm_compute::ITensor *output);
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(arm_compute::ITensor *input, arm_compute::ITensor *output)
 {
     return instantiate_function<arm_compute::CLFloor, arm_compute::ICLTensor, TargetHint::OPENCL>(input, output);
 }
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(arm_compute::ITensor *input, arm_compute::ITensor *output)
 {
     return instantiate_function<arm_compute::NEFloor, arm_compute::ITensor, TargetHint::NEON>(input, output);
 }
 } // namespace
 
-std::unique_ptr<arm_compute::IFunction> FloorLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> FloorLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
+    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+
     std::unique_ptr<arm_compute::IFunction> func;
     _target_hint = ctx.hints().target_hint();
 
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+
     if(_target_hint == TargetHint::OPENCL)
     {
-        func = instantiate<TargetHint::OPENCL>(input, output);
+        func = instantiate<TargetHint::OPENCL>(in, out);
         ARM_COMPUTE_LOG("Instantiating CLFloorLayer");
     }
     else
     {
-        func = instantiate<TargetHint::NEON>(input, output);
+        func = instantiate<TargetHint::NEON>(in, out);
         ARM_COMPUTE_LOG("Instantiating NEFloorLayer");
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
-                    << " Input shape: " << input->info()->tensor_shape()
-                    << " Output shape: " << output->info()->tensor_shape()
+    ARM_COMPUTE_LOG(" Data Type: " << in->info()->data_type()
+                    << " Input shape: " << in->info()->tensor_shape()
+                    << " Output shape: " << out->info()->tensor_shape()
                     << std::endl);
 
     return func;

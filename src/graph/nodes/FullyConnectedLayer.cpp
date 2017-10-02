@@ -45,7 +45,7 @@ TensorShape calculate_fullyconnected_layer_output_shape(const TensorShape &input
     return TensorShape(output_neurons, batches);
 }
 template <typename FullyConnectedType, typename TensorType, TargetHint target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate_function(arm_compute::ITensor *input, Tensor &weights, Tensor &biases, arm_compute::ITensor *output)
 {
     bool weights_are_loaded = weights.tensor() != nullptr;
     bool biases_are_loaded  = biases.tensor() != nullptr;
@@ -69,27 +69,33 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, Ten
 }
 
 template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output);
+std::unique_ptr<arm_compute::IFunction> instantiate(arm_compute::ITensor *input, Tensor &weights, Tensor &biases, arm_compute::ITensor *output);
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(arm_compute::ITensor *input, Tensor &weights, Tensor &biases, arm_compute::ITensor *output)
 {
-    return instantiate_function<arm_compute::CLFullyConnectedLayer, arm_compute::CLTensor, TargetHint::OPENCL>(input, weights, biases, output);
+    return instantiate_function<arm_compute::CLFullyConnectedLayer, arm_compute::ICLTensor, TargetHint::OPENCL>(input, weights, biases, output);
 }
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(arm_compute::ITensor *input, Tensor &weights, Tensor &biases, arm_compute::ITensor *output)
 {
-    return instantiate_function<arm_compute::NEFullyConnectedLayer, arm_compute::Tensor, TargetHint::NEON>(input, weights, biases, output);
+    return instantiate_function<arm_compute::NEFullyConnectedLayer, arm_compute::ITensor, TargetHint::NEON>(input, weights, biases, output);
 }
 } // namespace
 
-std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
+    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+
     if(_weights.tensor() == nullptr)
     {
         unsigned int num_weights    = 1;
-        unsigned int num_dimensions = input->info()->num_dimensions();
+        unsigned int num_dimensions = in->info()->num_dimensions();
         // Ignore the batch dimension if there is one:
         if(num_dimensions == 2 || num_dimensions == 4)
         {
@@ -97,39 +103,37 @@ std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(Gr
         }
         for(unsigned int i = 0; i < num_dimensions; i++)
         {
-            num_weights *= input->info()->dimension(i);
+            num_weights *= in->info()->dimension(i);
         }
-        _weights.set_info(TensorInfo(TensorShape(num_weights, _num_neurons), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+        _weights.set_info(TensorInfo(TensorShape(num_weights, _num_neurons), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
     }
     if(_biases.tensor() == nullptr)
     {
-        _biases.set_info(TensorInfo(TensorShape(_num_neurons), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+        _biases.set_info(TensorInfo(TensorShape(_num_neurons), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
     }
 
     // Auto configure output
-    arm_compute::auto_init_if_empty(*output->info(),
-                                    calculate_fullyconnected_layer_output_shape(input->info()->tensor_shape(), _num_neurons),
-                                    input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
+    arm_compute::auto_init_if_empty(*out->info(),
+                                    calculate_fullyconnected_layer_output_shape(in->info()->tensor_shape(), _num_neurons),
+                                    in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position());
 
     std::unique_ptr<arm_compute::IFunction> func;
     _target_hint = ctx.hints().target_hint();
 
     if(_target_hint == TargetHint::OPENCL)
     {
-        func = instantiate<TargetHint::OPENCL>(input, _weights, _biases, output);
-        ARM_COMPUTE_LOG("Instantiating CLFullyConnectedLayer");
+        func = instantiate<TargetHint::OPENCL>(in, _weights, _biases, out);
     }
     else
     {
-        func = instantiate<TargetHint::NEON>(input, _weights, _biases, output);
-        ARM_COMPUTE_LOG("Instantiating NEFullyConnectedLayer");
+        func = instantiate<TargetHint::NEON>(in, _weights, _biases, out);
     }
 
-    ARM_COMPUTE_LOG(" Type: " << input->info()->data_type()
-                    << " Input Shape: " << input->info()->tensor_shape()
+    ARM_COMPUTE_LOG(" Type: " << in->info()->data_type()
+                    << " Input Shape: " << in->info()->tensor_shape()
                     << " Weights shape: " << _weights.info().tensor_shape()
                     << " Biases Shape: " << _biases.info().tensor_shape()
-                    << " Output Shape: " << output->info()->tensor_shape()
+                    << " Output Shape: " << out->info()->tensor_shape()
                     << std::endl);
 
     return func;

@@ -21,43 +21,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_CLUNMAP_H__
-#define __ARM_COMPUTE_GRAPH_CLUNMAP_H__
+#ifndef __ARM_COMPUTE_GRAPH_ITENSOROBJECT_H__
+#define __ARM_COMPUTE_GRAPH_ITENSOROBJECT_H__
 
+#include "arm_compute/graph/ITensorAccessor.h"
 #include "arm_compute/graph/Types.h"
-#include "arm_compute/runtime/IFunction.h"
+#include "support/ToolchainSupport.h"
+
+#include <memory>
 
 namespace arm_compute
 {
-class ICLTensor;
-
 namespace graph
 {
-class ITensorObject;
-/** OpenCL un-map function */
-class CLUnmap : public arm_compute::IFunction
+/** Tensor object interface */
+class ITensorObject
 {
 public:
-    /** Constructor
+    /** Default Destructor */
+    virtual ~ITensorObject() = default;
+    /** Calls accessor on tensor
      *
-     * @param[in] tensor Tensor to un-map
+     * @return True if succeeds else false
      */
-    CLUnmap(ITensorObject *tensor);
-    /** Prevent instances from being copy constructed */
-    CLUnmap(const CLUnmap &) = delete;
-    /** Prevent instances from being copy assigned */
-    const CLUnmap &operator=(const CLUnmap &) = delete;
-    /** Allow instances to be move constructed */
-    CLUnmap(CLUnmap &&) = default;
-    /** Allow instances to be move assigned */
-    CLUnmap &operator=(CLUnmap &&) = default;
-
-    // Inherited methods overriden:
-    void run() override;
-
-private:
-    arm_compute::ICLTensor *_tensor; /**< Tensor */
+    virtual bool call_accessor() = 0;
+    /** Checks if tensor has an accessor set.
+     *
+     * @return True if an accessor has been set else false
+     */
+    virtual bool has_accessor() const = 0;
+    /** Sets target of the tensor
+     *
+     * @param[in] target Target where the tensor should be pinned in
+     *
+     * @return Backend tensor
+     */
+    virtual ITensor *set_target(TargetHint target) = 0;
+    /** Returns a pointer to the internal tensor
+     *
+     * @return Tensor
+     */
+    virtual ITensor *tensor() = 0;
+    /** Return the target that this tensor is pinned on
+     *
+     * @return Target of the tensor
+     */
+    virtual TargetHint target() const = 0;
+    /** Allocates the tensor */
+    virtual void allocate() = 0;
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_CLUNMAP_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_ITENSOROBJECT_H__ */

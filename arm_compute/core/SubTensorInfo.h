@@ -61,6 +61,14 @@ public:
     SubTensorInfo(SubTensorInfo &&) = default;
     /** Allow instances of this class to be moved */
     SubTensorInfo &operator=(SubTensorInfo &&) = default;
+    /** Returns the coordinates of the sub-tensor inside the parent tensor
+     *
+     * @return Sub-tensor coordinates
+     */
+    Coordinates coords() const
+    {
+        return _coords;
+    }
 
     // Inherited methods overridden:
     void set_data_type(DataType data_type) override
@@ -171,7 +179,11 @@ public:
     void set_valid_region(ValidRegion valid_region) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
-        ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(_parent->valid_region(), valid_region);
+        // Check if subtensor is valid if parent is configured
+        if(_parent->tensor_shape().total_size() != 0)
+        {
+            ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(_parent->valid_region(), valid_region);
+        }
         _valid_region = std::move(valid_region);
     }
 

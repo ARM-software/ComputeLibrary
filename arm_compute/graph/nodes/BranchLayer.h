@@ -21,44 +21,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_FULLY_CONNECTED_LAYER_H__
-#define __ARM_COMPUTE_GRAPH_FULLY_CONNECTED_LAYER_H__
+#ifndef __ARM_COMPUTE_GRAPH_BRANCH_LAYER_H__
+#define __ARM_COMPUTE_GRAPH_BRANCH_LAYER_H__
 
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/graph/ITensorObject.h"
-#include "arm_compute/graph/Tensor.h"
+#include "arm_compute/graph/SubGraph.h"
+#include "arm_compute/graph/SubTensor.h"
 #include "arm_compute/graph/Types.h"
+
+#include "arm_compute/core/Helpers.h"
+
+#include <vector>
 
 namespace arm_compute
 {
 namespace graph
 {
-/** Fully connected layer node */
-class FullyConnectedLayer final : public INode
+/** Branch Layer node */
+class BranchLayer final : public INode
 {
 public:
-    /** Default constructor
+    /** Default Constructor
      *
-     * @param[in] num_neurons Number of neurons
-     * @param[in] weights     Weights of the fully connected layer
-     * @param[in] biases      Biases of the fully connected layer
+     * @param[in] merge_method    Branch merging method
+     * @param[in] sub_graph1      First graph branch
+     * @param[in] sub_graph2      Second graph branch
+     * @param[in] rest_sub_graphs Rest sub-graph branches
      */
-    template <typename AccessorTypeWeights, typename AccessorTypeBiases>
-    FullyConnectedLayer(unsigned int num_neurons, AccessorTypeWeights &&weights, AccessorTypeBiases &&biases)
-        : _num_neurons(num_neurons), _weights(std::move(weights)), _biases(std::move(biases))
+    template <typename... Ts>
+    BranchLayer(BranchMergeMethod merge_method, SubGraph &&sub_graph1, SubGraph &&sub_graph2, Ts &&... rest_sub_graphs)
+        : _branch_merge_method(merge_method), _sub_graphs()
     {
+        /* TODO:(geopin01) Use traits to make sure variadic arguments are of SubGraph type */
+        _sub_graphs.push_back(arm_compute::support::cpp14::make_unique<SubGraph>(std::move(sub_graph1)));
+        _sub_graphs.push_back(arm_compute::support::cpp14::make_unique<SubGraph>(std::move(sub_graph2)));
+
+        for_each([&](SubGraph & sub_graph)
+        {
+            _sub_graphs.push_back(arm_compute::support::cpp14::make_unique<SubGraph>(std::move(sub_graph)));
+        },
+        std::move(rest_sub_graphs)...);
     }
 
     // Inherited methods overriden:
     std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) override;
 
-    // Inherited methods overriden:
 private:
-    unsigned int _num_neurons; /**< Number of neurons */
-    Tensor       _weights;     /**< Weights tensor */
-    Tensor       _biases;      /**< Biases tensor */
+    BranchMergeMethod                      _branch_merge_method;
+    std::vector<std::unique_ptr<SubGraph>> _sub_graphs;
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_FULLY_CONNECTED_LAYER_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_BRANCH_LAYER_H__ */

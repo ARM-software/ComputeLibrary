@@ -26,6 +26,7 @@
 
 #include "arm_compute/graph/nodes/ActivationLayer.h"
 #include "arm_compute/graph/nodes/BatchNormalizationLayer.h"
+#include "arm_compute/graph/nodes/BranchLayer.h"
 #include "arm_compute/graph/nodes/ConvolutionLayer.h"
 #include "arm_compute/graph/nodes/FloorLayer.h"
 #include "arm_compute/graph/nodes/FullyConnectedLayer.h"

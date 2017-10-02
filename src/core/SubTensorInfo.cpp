@@ -38,7 +38,11 @@ SubTensorInfo::SubTensorInfo(ITensorInfo *parent, const TensorShape &tensor_shap
     : _parent(parent), _tensor_shape(tensor_shape), _coords(coords), _valid_region{ Coordinates(), _tensor_shape }
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(parent->tensor_shape(), coords, tensor_shape);
+    // Check if subtensor is valid if parent is configured
+    if(parent->tensor_shape().total_size() != 0)
+    {
+        ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(parent->tensor_shape(), coords, tensor_shape);
+    }
 
     // Initialize valid region
     Coordinates coordinates;
@@ -49,7 +53,11 @@ SubTensorInfo::SubTensorInfo(ITensorInfo *parent, const TensorShape &tensor_shap
 void SubTensorInfo::set_tensor_shape(TensorShape shape)
 {
     ARM_COMPUTE_ERROR_ON(_parent == nullptr);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(_parent->tensor_shape(), _coords, shape);
+    // Check if subtensor is valid if parent is configured
+    if(_parent->tensor_shape().total_size() != 0)
+    {
+        ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(_parent->tensor_shape(), _coords, shape);
+    }
     _tensor_shape = shape;
 }
 

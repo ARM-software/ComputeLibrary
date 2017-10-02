@@ -36,7 +36,7 @@ using namespace arm_compute::graph;
 namespace
 {
 template <typename ActivationType, typename TensorType, TargetHint target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
+std::unique_ptr<arm_compute::IFunction> instantiate_function(arm_compute::ITensor *input, arm_compute::ITensor *output, const ActivationLayerInfo &activation_info)
 {
     auto activation = arm_compute::support::cpp14::make_unique<ActivationType>();
     activation->configure(
@@ -48,18 +48,18 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITe
 }
 
 template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info);
+std::unique_ptr<arm_compute::IFunction> instantiate(arm_compute::ITensor *input, arm_compute::ITensor *output, const ActivationLayerInfo &activation_info);
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(arm_compute::ITensor *input, arm_compute::ITensor *output, const ActivationLayerInfo &activation_info)
 {
-    return instantiate_function<arm_compute::CLActivationLayer, arm_compute::CLTensor, TargetHint::OPENCL>(input, output, activation_info);
+    return instantiate_function<arm_compute::CLActivationLayer, arm_compute::ICLTensor, TargetHint::OPENCL>(input, output, activation_info);
 }
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(arm_compute::ITensor *input, arm_compute::ITensor *output, const ActivationLayerInfo &activation_info)
 {
-    return instantiate_function<arm_compute::NEActivationLayer, arm_compute::Tensor, TargetHint::NEON>(input, output, activation_info);
+    return instantiate_function<arm_compute::NEActivationLayer, arm_compute::ITensor, TargetHint::NEON>(input, output, activation_info);
 }
 } // namespace
 
@@ -68,25 +68,29 @@ ActivationLayer::ActivationLayer(const ActivationLayerInfo activation_info)
 {
 }
 
-std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
+    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+
     std::unique_ptr<arm_compute::IFunction> func;
     _target_hint = ctx.hints().target_hint();
 
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+
     if(_target_hint == TargetHint::OPENCL)
     {
-        func = instantiate<TargetHint::OPENCL>(input, output, _activation_info);
-        ARM_COMPUTE_LOG("Instantiating CLActivationLayer");
+        func = instantiate<TargetHint::OPENCL>(in, out, _activation_info);
     }
     else
     {
-        func = instantiate<TargetHint::NEON>(input, output, _activation_info);
-        ARM_COMPUTE_LOG("Instantiating NEActivationLayer");
+        func = instantiate<TargetHint::NEON>(in, out, _activation_info);
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
-                    << " Input shape: " << input->info()->tensor_shape()
-                    << " Output shape: " << output->info()->tensor_shape()
+    ARM_COMPUTE_LOG(" Data Type: " << in->info()->data_type()
+                    << " Input shape: " << in->info()->tensor_shape()
+                    << " Output shape: " << out->info()->tensor_shape()
                     << " Activation function: " << _activation_info.activation()
                     << " a: " << _activation_info.a()
                     << " b: " << _activation_info.b()

@@ -32,19 +32,20 @@ namespace arm_compute
 {
 namespace graph
 {
-using arm_compute::ITensor;
-using arm_compute::TensorInfo;
-using arm_compute::SubTensorInfo;
-using arm_compute::DataType;
-using arm_compute::Coordinates;
-using arm_compute::TensorShape;
-using arm_compute::PadStrideInfo;
-using arm_compute::WeightsInfo;
 using arm_compute::ActivationLayerInfo;
+using arm_compute::Coordinates;
+using arm_compute::DataType;
+using arm_compute::DimensionRoundingType;
+using arm_compute::ITensorInfo;
 using arm_compute::NormType;
 using arm_compute::NormalizationLayerInfo;
+using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
+using arm_compute::SubTensorInfo;
+using arm_compute::TensorInfo;
+using arm_compute::TensorShape;
+using arm_compute::WeightsInfo;
 
 /**< Execution hint to the graph executor */
 enum class TargetHint
@@ -54,11 +55,17 @@ enum class TargetHint
     NEON       /**< Run node on a NEON capable device */
 };
 
-/**< Convolution method hint to the graph executor */
+/** Convolution method hint to the graph executor */
 enum class ConvolutionMethodHint
 {
     GEMM,  /**< Convolution using GEMM */
     DIRECT /**< Direct convolution */
+};
+
+/** Branch layer merging method */
+enum class BranchMergeMethod
+{
+    DEPTH_CONCATENATE /**< Concatenate across depth */
 };
 } // namespace graph
 } // namespace arm_compute

@@ -36,7 +36,7 @@ using namespace arm_compute::graph;
 namespace
 {
 template <typename L2NormalizeType, typename TensorType, TargetHint hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *output, unsigned int axis, float epsilon)
+std::unique_ptr<arm_compute::IFunction> instantiate_function(arm_compute::ITensor *input, arm_compute::ITensor *output, unsigned int axis, float epsilon)
 {
     auto l2norm = arm_compute::support::cpp14::make_unique<L2NormalizeType>();
     l2norm->configure(
@@ -49,40 +49,46 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITe
 }
 
 template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *output, unsigned int axis, float epsilon);
+std::unique_ptr<arm_compute::IFunction> instantiate(arm_compute::ITensor *input, arm_compute::ITensor *output, unsigned int axis, float epsilon);
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *output, unsigned int axis, float epsilon)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(arm_compute::ITensor *input, arm_compute::ITensor *output, unsigned int axis, float epsilon)
 {
     return instantiate_function<arm_compute::CLL2Normalize, arm_compute::ICLTensor, TargetHint::OPENCL>(input, output, axis, epsilon);
 }
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *output, unsigned int axis, float epsilon)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(arm_compute::ITensor *input, arm_compute::ITensor *output, unsigned int axis, float epsilon)
 {
     return instantiate_function<arm_compute::NEL2Normalize, arm_compute::ITensor, TargetHint::NEON>(input, output, axis, epsilon);
 }
 } // namespace
 
-std::unique_ptr<arm_compute::IFunction> L2NormalizeLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> L2NormalizeLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
+    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+
     std::unique_ptr<arm_compute::IFunction> func;
     _target_hint = ctx.hints().target_hint();
 
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+
     if(_target_hint == TargetHint::OPENCL)
     {
-        func = instantiate<TargetHint::OPENCL>(input, output, _axis, _epsilon);
+        func = instantiate<TargetHint::OPENCL>(in, out, _axis, _epsilon);
         ARM_COMPUTE_LOG("Instantiating CLL2NormalizeLayer");
     }
     else
     {
-        func = instantiate<TargetHint::NEON>(input, output, _axis, _epsilon);
+        func = instantiate<TargetHint::NEON>(in, out, _axis, _epsilon);
         ARM_COMPUTE_LOG("Instantiating NEL2NormalizeLayer");
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
-                    << " Input shape: " << input->info()->tensor_shape()
-                    << " Output shape: " << output->info()->tensor_shape()
+    ARM_COMPUTE_LOG(" Data Type: " << in->info()->data_type()
+                    << " Input shape: " << in->info()->tensor_shape()
+                    << " Output shape: " << out->info()->tensor_shape()
                     << std::endl);
 
     return func;

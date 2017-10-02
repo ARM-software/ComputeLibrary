@@ -23,20 +23,21 @@
  */
 #include "arm_compute/graph/CL/CLUnmap.h"
 
+#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/graph/Tensor.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/graph/ITensorObject.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
 
 using namespace arm_compute::graph;
 
-CLUnmap::CLUnmap(Tensor *tensor)
-    : _tensor(dynamic_cast<arm_compute::CLTensor *>(tensor->tensor()))
+CLUnmap::CLUnmap(ITensorObject *tensor)
+    : _tensor(dynamic_cast<arm_compute::ICLTensor *>(tensor->tensor()))
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(_tensor);
 }
 
 void CLUnmap::run()
 {
-    _tensor->unmap();
+    _tensor->unmap(arm_compute::CLScheduler::get().queue());
 }
