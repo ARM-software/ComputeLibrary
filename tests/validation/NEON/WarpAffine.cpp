@@ -105,9 +105,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWarpAffineFixture<uint8_t>, framework::Datase
     // Validate output
     validate(Accessor(_target), _reference, _valid_mask, tolerance, 0.02f);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEWarpAffineFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::U8)),
-                                                                                                                framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                        datasets::BorderModes()))
+DISABLED_FIXTURE_DATA_TEST_CASE(RunLarge, NEWarpAffineFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::U8)),
+                                                                                                                 framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                 datasets::BorderModes()))
 {
     // Validate output
     validate(Accessor(_target), _reference, _valid_mask, tolerance, 0.02f);
