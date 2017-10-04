@@ -65,25 +65,21 @@ public:
      * @param[in] tensor Tensor to add
      */
     void add_tensor(std::unique_ptr<Tensor> tensor);
-    /** Sets an execution hint to the graph
-     *
-     * @note Hint is propagated to the following node and as per name
-     *       its just a hint/preference to be considered by the graph executor
-     *
-     * @param[in] hint execution hint
-     */
-    void set_hint(Hint hint);
     /** Manually sets the output of the current node
      *
      * @param[in] tmp Output info to set
      */
     void set_temp(TensorInfo &&tmp);
-
     /** Sets whether to enable information print out
      *
      * @param[in] is_enabled Set to true if need info printed out
      */
     void set_info_enablement(bool is_enabled);
+    /** Returns the graph hints that are currently used
+     *
+     * @return Graph hints
+     */
+    GraphHints &hints();
 
 private:
     class Private;
@@ -106,14 +102,22 @@ Graph &operator<<(Graph &graph, TensorInfo &&info);
  * @return Updated graph
  */
 Graph &operator<<(Graph &graph, Tensor &&tensor);
-/** Overloaded stream operator to provide an execution hint to the graph
+/** Overloaded stream operator to provide a target hint to the graph
  *
- * @param[in, out] graph Graph to provide the hint to
- * @param[in]      hint  Execution hint to be considered
+ * @param[in, out] graph       Graph to provide the hint to
+ * @param[in]      target_hint Target hint to be considered
  *
  * @return Updated graph
  */
-Graph &operator<<(Graph &graph, Hint hint);
+Graph &operator<<(Graph &graph, TargetHint target_hint);
+/** Overloaded stream operator to provide a convolution method hint to the graph
+ *
+ * @param[in, out] graph            Graph to provide the hint to
+ * @param[in]      conv_method_hint Convolution method hint to be considered
+ *
+ * @return Updated graph
+ */
+Graph &operator<<(Graph &graph, ConvolutionMethodHint conv_method_hint);
 /** Overloaded stream operator to add a node to the graph
  *
  * @param[in, out] graph Graph to add the tensor

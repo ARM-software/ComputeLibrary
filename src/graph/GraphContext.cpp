@@ -21,27 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_SOFTMAX_LAYER_H__
-#define __ARM_COMPUTE_GRAPH_SOFTMAX_LAYER_H__
-
 #include "arm_compute/graph/GraphContext.h"
-#include "arm_compute/graph/INode.h"
-#include "arm_compute/graph/Tensor.h"
-#include "arm_compute/graph/Types.h"
 
-namespace arm_compute
-{
-namespace graph
-{
-/** Softmax layer node */
-class SoftmaxLayer : public INode
-{
-public:
-    // Inherited methods overriden:
-    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
-    void print_info() override;
-};
+using namespace arm_compute::graph;
 
-} // namespace graph
-} // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_SOFTMAX_LAYER_H__ */
+GraphHints::GraphHints(TargetHint target_hint, ConvolutionMethodHint conv_method_hint)
+    : _target_hint(target_hint), _convolution_method_hint(conv_method_hint)
+{
+}
+
+void GraphHints::set_target_hint(TargetHint target_hint)
+{
+    _target_hint = target_hint;
+}
+
+void GraphHints::set_convolution_method_hint(ConvolutionMethodHint convolution_method)
+{
+    _convolution_method_hint = convolution_method;
+}
+
+TargetHint GraphHints::target_hint() const
+{
+    return _target_hint;
+}
+
+ConvolutionMethodHint GraphHints::convolution_method_hint() const
+{
+    return _convolution_method_hint;
+}
+
+GraphContext::GraphContext()
+    : _hints()
+{
+}
+
+GraphHints &GraphContext::hints()
+{
+    return _hints;
+}
+
+const GraphHints &GraphContext::hints() const
+{
+    return _hints;
+}

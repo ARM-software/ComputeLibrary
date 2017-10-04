@@ -43,7 +43,7 @@ TensorShape calculate_fullyconnected_layer_output_shape(const TensorShape &input
     }
     return TensorShape(output_neurons, batches);
 }
-template <typename FullyConnectedType, typename TensorType, Hint hint>
+template <typename FullyConnectedType, typename TensorType, TargetHint target_hint>
 std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output)
 {
     bool weights_are_loaded = weights.tensor() != nullptr;
@@ -52,8 +52,8 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, Ten
     auto conv = arm_compute::support::cpp14::make_unique<FullyConnectedType>();
     conv->configure(
         dynamic_cast<TensorType *>(input),
-        dynamic_cast<TensorType *>(weights.set_target(hint)),
-        dynamic_cast<TensorType *>(biases.set_target(hint)),
+        dynamic_cast<TensorType *>(weights.set_target(target_hint)),
+        dynamic_cast<TensorType *>(biases.set_target(target_hint)),
         dynamic_cast<TensorType *>(output));
     if(!weights_are_loaded)
     {
@@ -67,23 +67,23 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, Ten
     return std::move(conv);
 }
 
-template <Hint                          hint>
+template <TargetHint                    target_hint>
 std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output);
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<Hint::OPENCL>(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output)
 {
-    return instantiate_function<arm_compute::CLFullyConnectedLayer, arm_compute::CLTensor, Hint::OPENCL>(input, weights, biases, output);
+    return instantiate_function<arm_compute::CLFullyConnectedLayer, arm_compute::CLTensor, TargetHint::OPENCL>(input, weights, biases, output);
 }
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<Hint::NEON>(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, Tensor &weights, Tensor &biases, ITensor *output)
 {
-    return instantiate_function<arm_compute::NEFullyConnectedLayer, arm_compute::Tensor, Hint::NEON>(input, weights, biases, output);
+    return instantiate_function<arm_compute::NEFullyConnectedLayer, arm_compute::Tensor, TargetHint::NEON>(input, weights, biases, output);
 }
 } // namespace
 
-std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(Hint hint, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
 {
     if(_weights.tensor() == nullptr)
     {
@@ -111,17 +111,17 @@ std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(Hi
                                     input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
 
     std::unique_ptr<arm_compute::IFunction> func;
-    _hint   = hint;
-    _input  = input;
-    _output = output;
+    _target_hint = ctx.hints().target_hint();
+    _input       = input;
+    _output      = output;
 
-    if(_hint == Hint::OPENCL)
+    if(_target_hint == TargetHint::OPENCL)
     {
-        func = instantiate<Hint::OPENCL>(input, _weights, _biases, output);
+        func = instantiate<TargetHint::OPENCL>(input, _weights, _biases, output);
     }
     else
     {
-        func = instantiate<Hint::NEON>(input, _weights, _biases, output);
+        func = instantiate<TargetHint::NEON>(input, _weights, _biases, output);
     }
 
     return func;
@@ -129,7 +129,7 @@ std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(Hi
 
 void FullyConnectedLayer::print_info()
 {
-    if(_hint == Hint::OPENCL)
+    if(_target_hint == TargetHint::OPENCL)
     {
         std::cout << "Instantiating CLFullyConnectedLayer";
     }

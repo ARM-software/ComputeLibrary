@@ -55,7 +55,7 @@ public:
      * @param[in] coords       Starting coordinates of the sub-tensor in the parent tensor
      * @param[in] target       Execution target
      */
-    SubTensor(ITensor *parent, TensorShape tensor_shape, Coordinates coords, Hint target);
+    SubTensor(ITensor *parent, TensorShape tensor_shape, Coordinates coords, TargetHint target);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     SubTensor(const SubTensor &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -86,14 +86,14 @@ public:
      *
      * @return Target of the tensor
      */
-    Hint target() const;
+    TargetHint target() const;
 
 private:
     /** Instantiates a sub-tensor */
     void instantiate_subtensor();
 
 private:
-    Hint                     _target;    /**< Target that this tensor is pinned on */
+    TargetHint               _target;    /**< Target that this tensor is pinned on */
     Coordinates              _coords;    /**< SubTensor Coordinates */
     SubTensorInfo            _info;      /**< SubTensor metadata */
     ITensor                 *_parent;    /**< Parent tensor */

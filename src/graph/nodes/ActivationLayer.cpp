@@ -34,7 +34,7 @@ using namespace arm_compute::graph;
 
 namespace
 {
-template <typename ActivationType, typename TensorType, Hint hint>
+template <typename ActivationType, typename TensorType, TargetHint target_hint>
 std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
 {
     auto activation = arm_compute::support::cpp14::make_unique<ActivationType>();
@@ -46,19 +46,19 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITe
     return std::move(activation);
 }
 
-template <Hint                          hint>
+template <TargetHint                    target_hint>
 std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info);
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<Hint::OPENCL>(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
 {
-    return instantiate_function<arm_compute::CLActivationLayer, arm_compute::CLTensor, Hint::OPENCL>(input, output, activation_info);
+    return instantiate_function<arm_compute::CLActivationLayer, arm_compute::CLTensor, TargetHint::OPENCL>(input, output, activation_info);
 }
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<Hint::NEON>(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
 {
-    return instantiate_function<arm_compute::NEActivationLayer, arm_compute::Tensor, Hint::NEON>(input, output, activation_info);
+    return instantiate_function<arm_compute::NEActivationLayer, arm_compute::Tensor, TargetHint::NEON>(input, output, activation_info);
 }
 } // namespace
 
@@ -67,27 +67,27 @@ ActivationLayer::ActivationLayer(const ActivationLayerInfo activation_info)
 {
 }
 
-std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(Hint hint, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
 {
     std::unique_ptr<arm_compute::IFunction> func;
-    _hint   = hint;
-    _input  = input;
-    _output = output;
+    _target_hint = ctx.hints().target_hint();
+    _input       = input;
+    _output      = output;
 
-    if(_hint == Hint::OPENCL)
+    if(_target_hint == TargetHint::OPENCL)
     {
-        func = instantiate<Hint::OPENCL>(input, output, _activation_info);
+        func = instantiate<TargetHint::OPENCL>(input, output, _activation_info);
     }
     else
     {
-        func = instantiate<Hint::NEON>(input, output, _activation_info);
+        func = instantiate<TargetHint::NEON>(input, output, _activation_info);
     }
     return func;
 }
 
 void ActivationLayer::print_info()
 {
-    if(_hint == Hint::OPENCL)
+    if(_target_hint == TargetHint::OPENCL)
     {
         std::cout << "Instantiating CLActivationLayer";
     }

@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "arm_compute/graph/SubTensor.h"
 
 #include "arm_compute/core/Error.h"
@@ -45,12 +44,12 @@ std::unique_ptr<ITensor> initialise_subtensor(ITensor *parent, TensorShape shape
 } // namespace
 
 SubTensor::SubTensor()
-    : _target(Hint::DONT_CARE), _coords(), _info(), _parent(nullptr), _subtensor(nullptr)
+    : _target(TargetHint::DONT_CARE), _coords(), _info(), _parent(nullptr), _subtensor(nullptr)
 {
 }
 
 SubTensor::SubTensor(Tensor &parent, TensorShape tensor_shape, Coordinates coords)
-    : _target(Hint::DONT_CARE), _coords(coords), _info(), _parent(nullptr), _subtensor(nullptr)
+    : _target(TargetHint::DONT_CARE), _coords(coords), _info(), _parent(nullptr), _subtensor(nullptr)
 {
     ARM_COMPUTE_ERROR_ON(parent.tensor() == nullptr);
     _parent = parent.tensor();
@@ -60,7 +59,7 @@ SubTensor::SubTensor(Tensor &parent, TensorShape tensor_shape, Coordinates coord
     instantiate_subtensor();
 }
 
-SubTensor::SubTensor(ITensor *parent, TensorShape tensor_shape, Coordinates coords, Hint target)
+SubTensor::SubTensor(ITensor *parent, TensorShape tensor_shape, Coordinates coords, TargetHint target)
     : _target(target), _coords(coords), _info(), _parent(parent), _subtensor(nullptr)
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
@@ -84,7 +83,7 @@ ITensor *SubTensor::tensor()
     return _subtensor.get();
 }
 
-Hint SubTensor::target() const
+TargetHint SubTensor::target() const
 {
     return _target;
 }
@@ -93,13 +92,13 @@ void SubTensor::instantiate_subtensor()
 {
     switch(_target)
     {
-        case Hint::OPENCL:
+        case TargetHint::OPENCL:
             _subtensor = initialise_subtensor<arm_compute::CLSubTensor, arm_compute::ICLTensor>(_parent, _info.tensor_shape(), _coords);
             break;
-        case Hint::NEON:
+        case TargetHint::NEON:
             _subtensor = initialise_subtensor<arm_compute::SubTensor, arm_compute::ITensor>(_parent, _info.tensor_shape(), _coords);
             break;
         default:
-            ARM_COMPUTE_ERROR("Invalid Hint");
+            ARM_COMPUTE_ERROR("Invalid TargetHint");
     }
 }

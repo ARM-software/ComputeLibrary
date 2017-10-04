@@ -94,11 +94,11 @@ void main_graph_alexnet(int argc, const char **argv)
     }
 
     // Check if OpenCL is available and initialize the scheduler
-    Hint hint = Hint::NEON;
+    TargetHint hint = TargetHint::NEON;
     if(arm_compute::opencl_is_available())
     {
         arm_compute::CLScheduler::get().default_init();
-        hint = Hint::OPENCL;
+        hint = TargetHint::OPENCL;
     }
 
     Graph graph;
@@ -116,6 +116,7 @@ void main_graph_alexnet(int argc, const char **argv)
           << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
           << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)))
           // Layer 2
+          << ConvolutionMethodHint::DIRECT
           << ConvolutionLayer(
               5U, 5U, 256U,
               get_accessor(data_path, "/cnn_data/alexnet_model/conv2_w.npy"),

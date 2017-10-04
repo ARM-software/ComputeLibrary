@@ -93,11 +93,11 @@ void main_graph_lenet(int argc, const char **argv)
     }
 
     // Check if OpenCL is available and initialize the scheduler
-    Hint hint = Hint::NEON;
+    TargetHint hint = TargetHint::NEON;
     if(arm_compute::opencl_is_available())
     {
         arm_compute::CLScheduler::get().default_init();
-        hint = Hint::OPENCL;
+        hint = TargetHint::OPENCL;
     }
 
     Graph graph;

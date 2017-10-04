@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_GRAPH_POOLING_LAYER_H__
 #define __ARM_COMPUTE_GRAPH_POOLING_LAYER_H__
 
+#include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/Types.h"
@@ -33,7 +34,7 @@ namespace arm_compute
 namespace graph
 {
 /** Pooling layer node */
-class PoolingLayer : public INode
+class PoolingLayer final : public INode
 {
 public:
     /** Default Constructor
@@ -43,7 +44,7 @@ public:
     PoolingLayer(const PoolingLayerInfo pool_info);
 
     // Inherited methods overriden:
-    std::unique_ptr<arm_compute::IFunction> instantiate_node(Hint hint, ITensor *input, ITensor *output) override;
+    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
     void print_info() override;
 
 private:

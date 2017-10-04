@@ -47,7 +47,7 @@ using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
 
 /**< Execution hint to the graph executor */
-enum class Hint
+enum class TargetHint
 {
     DONT_CARE, /**< Run node in any device */
     OPENCL,    /**< Run node on an OpenCL capable device (GPU) */

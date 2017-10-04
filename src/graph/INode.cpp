@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "arm_compute/graph/INode.h"
 
 #include "arm_compute/core/CL/OpenCL.h"
@@ -31,17 +30,20 @@
 
 using namespace arm_compute::graph;
 
-Hint INode::override_hint(Hint hint) const
+TargetHint INode::override_target_hint(TargetHint target_hint) const
 {
-    if(hint == Hint::OPENCL && !opencl_is_available())
+    if(target_hint == TargetHint::OPENCL && !opencl_is_available())
     {
-        hint = Hint::DONT_CARE;
+        target_hint = TargetHint::DONT_CARE;
     }
-    hint = node_override_hint(hint);
-    ARM_COMPUTE_ERROR_ON(hint == Hint::OPENCL && !opencl_is_available());
-    return hint;
+    GraphHints hints{ target_hint };
+    target_hint = node_override_hints(hints).target_hint();
+    ARM_COMPUTE_ERROR_ON(target_hint == TargetHint::OPENCL && !opencl_is_available());
+    return target_hint;
 }
-Hint INode::node_override_hint(Hint hint) const
+GraphHints INode::node_override_hints(GraphHints hints) const
 {
-    return hint == Hint::DONT_CARE ? Hint::NEON : hint;
+    TargetHint target_hint = hints.target_hint();
+    hints.set_target_hint((target_hint == TargetHint::DONT_CARE) ? TargetHint::NEON : target_hint);
+    return hints;
 }

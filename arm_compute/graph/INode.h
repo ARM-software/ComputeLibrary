@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_GRAPH_INODE_H__
 #define __ARM_COMPUTE_GRAPH_INODE_H__
 
+#include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -41,37 +42,37 @@ public:
     virtual ~INode() = default;
     /** Interface to be implemented that instantiates the node
      *
-     * @param[in] hint   Hint to where the node should be executed
+     * @param[in] ctx    Graph context to be used
      * @param[in] input  Input tensor of the node
      * @param[in] output Output tensor of the node
      */
-    virtual std::unique_ptr<arm_compute::IFunction> instantiate_node(Hint hint, ITensor *input, ITensor *output) = 0;
-    /** Override the existing hint
+    virtual std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) = 0;
+    /** Override the existing target hint
      *
      * @note If the input is DONT_CARE then the method has to pick a technology,
      *       else it can accept the hint or override it (But not with DONT_CARE)
      *
-     * @param[in] hint Hint to be considered
+     * @param[in] target_hint Target hint to be considered
      *
-     * @return The updated hint
+     * @return The updated target hint
      */
-    Hint override_hint(Hint hint) const;
+    TargetHint override_target_hint(TargetHint target_hint) const;
 
     virtual void print_info() = 0;
 
 protected:
-    /** Interface to be implement that override the hint
+    /** Interface to be implement that override the hints
      *
-     * @param[in] hint Hint to be considered
+     * @param[in] hints Hints to be considered
      *
-     * @return The updated hint
+     * @return The updated hints
      */
-    virtual Hint node_override_hint(Hint hint) const;
+    virtual GraphHints node_override_hints(GraphHints hints) const;
 
 protected:
-    Hint     _hint{ Hint::DONT_CARE };
-    ITensor *_input{ nullptr };
-    ITensor *_output{ nullptr };
+    TargetHint _target_hint{ TargetHint::DONT_CARE };
+    ITensor   *_input{ nullptr };
+    ITensor   *_output{ nullptr };
 };
 } // namespace graph
 } // namespace arm_compute
