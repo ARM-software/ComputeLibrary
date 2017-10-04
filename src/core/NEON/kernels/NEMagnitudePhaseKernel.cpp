@@ -143,7 +143,7 @@ inline float32x4_t sqrtv(float32x4_t x)
 
 inline int16x8_t magnitude_l1(int16x8_t input1, int16x8_t input2)
 {
-    return vqaddq_s16(vabsq_s16(input1), vabsq_s16(input2));
+    return vqaddq_s16(vqabsq_s16(input1), vqabsq_s16(input2));
 }
 
 inline int16x8_t magnitude_l2(int16x8_t input1, int16x8_t input2)
@@ -575,11 +575,8 @@ inline int16x8_t magnitude_l2(int16x8_t input1, int16x8_t input2)
 
 inline int16x8_t magnitude_l1(int16x8_t input1, int16x8_t input2)
 {
-    int16x8_t gx_abs = vabsq_s16(input1);
-    int16x8_t gy_abs = vabsq_s16(input2);
-
     /* Saturating add */
-    return vqaddq_s16(gx_abs, gy_abs);
+    return vqaddq_s16(vqabsq_s16(input1), vqabsq_s16(input2));
 }
 
 inline uint8x8_t phase_signed(int16x8_t input1, int16x8_t input2)

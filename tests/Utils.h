@@ -106,6 +106,10 @@ using promote_t = typename promote<T>::type;
 
 template <typename T>
 using make_signed_conditional_t = typename std::conditional<std::is_integral<T>::value, std::make_signed<T>, std::common_type<T>>::type;
+
+template <typename T>
+using make_unsigned_conditional_t = typename std::conditional<std::is_integral<T>::value, std::make_unsigned<T>, std::common_type<T>>::type;
+
 // clang-format on
 // *INDENT-ON*
 }
@@ -296,6 +300,16 @@ struct common_promoted_signed_type
     using common_type       = typename std::common_type<T...>::type;
     using promoted_type     = traits::promote_t<common_type>;
     using intermediate_type = typename traits::make_signed_conditional_t<promoted_type>::type;
+};
+
+/** Find the unsigned promoted common type.
+ */
+template <typename... T>
+struct common_promoted_unsigned_type
+{
+    using common_type       = typename std::common_type<T...>::type;
+    using promoted_type     = traits::promote_t<common_type>;
+    using intermediate_type = typename traits::make_unsigned_conditional_t<promoted_type>::type;
 };
 
 /** Convert a linear index into n-dimensional coordinates.

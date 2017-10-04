@@ -739,5 +739,30 @@ inline std::string to_string(const arm_compute::PhaseType &type)
     str << type;
     return str.str();
 }
+
+/** Formatted output of the MagnitudeType type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const MagnitudeType &magnitude_type)
+{
+    switch(magnitude_type)
+    {
+        case MagnitudeType::L1NORM:
+            os << "L1NORM";
+            break;
+        case MagnitudeType::L2NORM:
+            os << "L2NORM";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const arm_compute::MagnitudeType &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

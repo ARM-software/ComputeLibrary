@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,28 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEMAGNITUDE_H__
-#define __ARM_COMPUTE_NEMAGNITUDE_H__
+#ifndef __ARM_COMPUTE_TEST_MAGNITUDE_H__
+#define __ARM_COMPUTE_TEST_MAGNITUDE_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "tests/SimpleTensor.h"
 
 namespace arm_compute
 {
-class ITensor;
-
-/** Basic function to run NEMagnitudePhaseKernel */
-class NEMagnitude : public INESimpleFunction
+namespace test
 {
-public:
-    /** Initialise the kernel's inputs.
-     *
-     * @param[in]  input1   First tensor input. Data type supported: S16.
-     * @param[in]  input2   Second tensor input. Data type supported: S16.
-     * @param[out] output   Output tensor. Data type supported: S16.
-     * @param[in]  mag_type (Optional) Magnitude calculation type. Default: L2NORM.
-     * @param[in]  use_fp16 (Optional) If true the FP16 kernels will be used. If false F32 kernels are used.
-     */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, MagnitudeType mag_type = MagnitudeType::L2NORM, bool use_fp16 = false);
-};
-}
-#endif /*__ARM_COMPUTE_NEMAGNITUDE_H__ */
+namespace validation
+{
+namespace reference
+{
+template <typename T>
+SimpleTensor<T> magnitude(const SimpleTensor<T> &gx, const SimpleTensor<T> &gy, MagnitudeType magnitude_type);
+} // namespace reference
+} // namespace validation
+} // namespace test
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_TEST_MAGNITUDE_H__ */
