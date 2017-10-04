@@ -108,7 +108,7 @@ if env['arch'] == 'armv7a':
         prefix = "arm-linux-gnueabihf-"
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
     elif env['os'] == 'bare_metal':
-        prefix = "arm-none-eabi-"
+        prefix = "arm-eabi-"
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
     elif env['os'] == 'android':
         prefix = "arm-linux-androideabi-"
@@ -119,7 +119,7 @@ elif env['arch'] == 'arm64-v8a':
     if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
     elif env['os'] == 'bare_metal':
-        prefix = "aarch64-none-elf-"
+        prefix = "aarch64-elf-"
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
 elif env['arch'] == 'arm64-v8.2-a':
@@ -217,7 +217,7 @@ SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate
 if env['opencl']:
     SConscript("./opencl-1.2-stubs/SConscript", variant_dir="build/%s/opencl-1.2-stubs" % env['build_dir'], duplicate=0)
 
-if env['examples']:
+if env['examples'] and env['os'] != 'bare_metal':
     SConscript('./examples/SConscript', variant_dir='#build/%s/examples' % env['build_dir'], duplicate=0)
 
 if env['os'] != 'bare_metal':

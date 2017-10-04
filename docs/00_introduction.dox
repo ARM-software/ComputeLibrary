@@ -636,14 +636,34 @@ And finally to run the example:
 	adb shell /data/local/tmp/neon_convolution_aarch64
 	adb shell /data/local/tmp/cl_convolution_aarch64
 
-@subsection S3_4_windows_host Building on a Windows host system
+@subsection S3_4_bare_metal Building for bare metal
+
+For bare metal, the library was successfully built using linaros's latest (gcc-linaro-6.3.1-2017.05) bare metal toolchains:
+ - arm-eabi for armv7a
+ - aarch64-elf for arm64-v8a
+
+Download linaro for <a href="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/arm-eabi/">armv7a</a> and <a href="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/aarch64-elf/">arm64-v8a</a>.
+
+@note Make sure to add the toolchains to your PATH: export PATH=$PATH:$MY_TOOLCHAINS/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-elf/bin:$MY_TOOLCHAINS/gcc-linaro-6.3.1-2017.05-x86_64_arm-eabi/bin
+
+@subsubsection S3_4_1_library How to build the library ?
+
+To cross-compile the library with NEON support for baremetal arm64-v8a:
+
+	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=bare_metal arch=arm64-v8a build=cross_compile cppthreads=0 openmp=0 standalone=1
+
+@subsubsection S3_4_2_examples How to manually build the examples ?
+
+Examples are disabled when building for bare metal. If you want to build the examples you need to provide a custom bootcode depending on the target architecture and link against the compute library. More information about bare metal bootcode can be found <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0527a/index.html">here</a>.
+
+@subsection S3_5_windows_host Building on a Windows host system
 
 Using `scons` directly from the Windows command line is known to cause
 problems. The reason seems to be that if `scons` is setup for cross-compilation
 it gets confused about Windows style paths (using backslashes). Thus it is
 recommended to follow one of the options outlined below.
 
-@subsubsection S3_4_1_ubuntu_on_windows Bash on Ubuntu on Windows
+@subsubsection S3_5_1_ubuntu_on_windows Bash on Ubuntu on Windows
 
 The best and easiest option is to use 
 <a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows</a>. 
@@ -651,7 +671,7 @@ This feature is still marked as *beta* and thus might not be available.
 However, if it is building the library is as simple as opening a *Bash on
 Ubuntu on Windows* shell and following the general guidelines given above.
 
-@subsubsection S3_4_2_cygwin Cygwin
+@subsubsection S3_5_2_cygwin Cygwin
 
 If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a> 
 can be used to install and run `scons`. In addition to the default packages
@@ -664,7 +684,7 @@ compiler is included in the Android standalone toolchain. After everything has
 been set up in the Cygwin terminal the general guide on building the library
 can be followed.
 
-@subsection S3_5_cl_stub_library The OpenCL stub library
+@subsection S3_6_cl_stub_library The OpenCL stub library
 
 In the opencl-1.2-stubs folder you will find the sources to build a stub OpenCL library which then can be used to link your application or arm_compute against.
 
