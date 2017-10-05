@@ -28,12 +28,11 @@ Import('vars')
 SConscript('./framework/SConscript', duplicate=0)
 
 #FIXME: Remove before release
-SConscript('./validation_old/SConscript', duplicate=0)
+if env['internal_only']:
+    SConscript('./validation_old/SConscript', duplicate=0)
 
 # vars is imported from arm_compute:
 variables = [
-    #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
-    BoolVariable("internal_only", "Enable ARM internal only tests", True),
     BoolVariable("validation_tests", "Build validation test programs", True),
     BoolVariable("benchmark_tests", "Build benchmark test programs", True)
 ]
@@ -65,7 +64,7 @@ else:
     arm_compute_lib = arm_compute_so
 
 #FIXME Delete before release
-if test_env['internal_only']:
+if env['internal_only']:
     test_env.Append(CPPDEFINES=['INTERNAL_ONLY'])
 
 test_env.Append(CPPPATH = ["#3rdparty/include"])

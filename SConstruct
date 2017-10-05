@@ -52,6 +52,8 @@ vars.AddVariables(
     BoolVariable("openmp", "Enable OpenMP backend", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
+    #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
+    BoolVariable("internal_only", "Enable ARM internal only tests", True),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", "")
 )
 
