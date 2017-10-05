@@ -36,7 +36,7 @@ NESoftmaxLayer::NESoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
 {
 }
 
-void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
+void NESoftmaxLayer::configure(ITensor *input, ITensor *output, float beta)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
 
@@ -57,7 +57,7 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output)
 
     // Configure Kernels
     _max_kernel.configure(input, &_max);
-    _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum);
+    _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum, beta);
     _norm_kernel.configure(&_tmp, &_sum, output);
     _fill_border_kernel.configure(input, _max_kernel.border_size(), BorderMode::REPLICATE);
 

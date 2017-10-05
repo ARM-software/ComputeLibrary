@@ -53,8 +53,9 @@ public:
      *
      * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
+     * @param[in]  beta   (Optional) A scaling factor for the exponent. QS8/QS16 only support a beta value of 1.
      */
-    void configure(ITensor *input, ITensor *output);
+    void configure(ITensor *input, ITensor *output, float beta = 1.0f);
 
     // Inherited methods overridden:
     void run() override;

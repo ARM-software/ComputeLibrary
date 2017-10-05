@@ -57,7 +57,7 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 TEST_SUITE(GC)
 TEST_SUITE(SoftmaxLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), CNNDataTypes), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SoftmaxLayerSmallShapes(), datasets::SoftmaxLayerLargeShapes()), CNNDataTypes), shape, data_type)
 {
     // Set fixed point position data type allowed
     const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
@@ -89,12 +89,16 @@ using GCSoftmaxLayerFixture = SoftmaxValidationFixture<GCTensor, GCAccessor, GCS
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                     framework::dataset::make("Beta", 1.0f)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCSoftmaxLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, GCSoftmaxLayerFixture<half_float::half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                   framework::dataset::make("Beta", 1.0f)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16);
@@ -102,12 +106,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCSoftmaxLayerFixture<half_float::half>, framew
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCSoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                  framework::dataset::make("DataType", DataType::F32)),
+                                                                                                          framework::dataset::make("Beta", 1.0f)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, GCSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                framework::dataset::make("DataType", DataType::F32)),
+                                                                                                        framework::dataset::make("Beta", 1.0f)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);

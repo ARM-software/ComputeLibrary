@@ -501,7 +501,7 @@ bool auto_init_if_empty(ITensorInfo       &info,
  *
  * @return True if the tensor info has been initialized
  */
-bool auto_init_if_empty(ITensorInfo &info_sink, ITensorInfo &info_source);
+bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source);
 
 /* Set the shape to the specified value if the current assignment is empty.
  *

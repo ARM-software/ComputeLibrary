@@ -68,8 +68,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
         // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output,
-                           *input->clone());
+        auto_init_if_empty(*output, *input);
     }
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();

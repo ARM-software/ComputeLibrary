@@ -148,12 +148,16 @@ using CLSoftmaxLayerFixture = SoftmaxValidationFixture<CLTensor, CLAccessor, CLS
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                           framework::dataset::make("DataType", DataType::F16)),
+                                                                                                   framework::dataset::make("Beta", { 1.0f, 2.0f })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayerLargeShapes(), framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                               framework::dataset::make("DataType", DataType::F16)),
+                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.0f })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -161,12 +165,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<half>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                            framework::dataset::make("DataType", DataType::F32)),
+                                                                                                    framework::dataset::make("Beta", { 1.0f, 2.0f })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::SoftmaxLayerLargeShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                framework::dataset::make("DataType", DataType::F32)),
+                                                                                                        framework::dataset::make("Beta", { 1.0f, 2.0f })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -223,17 +231,17 @@ using CLSoftmaxLayerQuantizedFixture = SoftmaxValidationQuantizedFixture<CLTenso
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                       framework::dataset::make("DataType",
-                                                                                                                               DataType::QASYMM8)),
-                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) })))
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                               combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.f }))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::QASYMM8)),
-                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) })))
+                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                   combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f }))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);

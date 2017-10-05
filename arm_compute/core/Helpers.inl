@@ -217,7 +217,7 @@ inline bool auto_init_if_empty(ITensorInfo       &info,
     return false;
 }
 
-inline bool auto_init_if_empty(ITensorInfo &info_sink, ITensorInfo &info_source)
+inline bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source)
 {
     if(info_sink.tensor_shape().total_size() == 0)
     {

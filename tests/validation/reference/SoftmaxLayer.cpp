@@ -35,7 +35,7 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src)
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta)
 {
     // Create reference
     SimpleTensor<T> dst{ src.shape(), src.data_type(), 1, src.fixed_point_position() };
@@ -54,9 +54,9 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src)
 
         // Regularize
         T sum(0.f);
-        std::transform(src_row_ptr, src_row_ptr + cols, dst_row_ptr, [&sum, max](T val)
+        std::transform(src_row_ptr, src_row_ptr + cols, dst_row_ptr, [&sum, max, beta](T val)
         {
-            const T res(std::exp(val - max));
+            const T res(std::exp((val - max) * beta));
             sum += res;
             return res;
         });
@@ -72,8 +72,10 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src)
 }
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src)
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta)
 {
+    ARM_COMPUTE_UNUSED(beta);
+
     using namespace fixed_point_arithmetic;
 
     // Create reference
@@ -113,21 +115,21 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src)
 }
 
 template <>
-SimpleTensor<uint8_t> softmax_layer<uint8_t>(const SimpleTensor<uint8_t> &src)
+SimpleTensor<uint8_t> softmax_layer<uint8_t>(const SimpleTensor<uint8_t> &src, float beta)
 {
     // Note: Output quantization info should always have scale = 1/256 and offset = 0
     const QuantizationInfo output_quantization_info = QuantizationInfo(1.f / 256, 0);
 
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
-    SimpleTensor<float>   dst_tmp = softmax_layer<float>(src_tmp);
+    SimpleTensor<float>   dst_tmp = softmax_layer<float>(src_tmp, beta);
     SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, output_quantization_info);
     return dst;
 }
 
-template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src);
-template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src);
-template SimpleTensor<qint8_t> softmax_layer(const SimpleTensor<qint8_t> &src);
-template SimpleTensor<qint16_t> softmax_layer(const SimpleTensor<qint16_t> &src);
+template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src, float beta);
+template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src, float beta);
+template SimpleTensor<qint8_t> softmax_layer(const SimpleTensor<qint8_t> &src, float beta);
+template SimpleTensor<qint16_t> softmax_layer(const SimpleTensor<qint16_t> &src, float beta);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -51,8 +51,9 @@ public:
      *
      * @param[in]  input  Source tensor. Data types supported: F16/F32
      * @param[out] output Destination tensor. Data types supported: same as @p input
+     * @param[in]  beta   (Optional) A scaling factor for the exponent. Only beta = 1 is supported.
      */
-    void configure(const IGCTensor *input, IGCTensor *output);
+    void configure(const IGCTensor *input, IGCTensor *output, float beta = 1.0f);
 
     // Inherited methods overridden:
     void run() override;
