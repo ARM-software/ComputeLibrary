@@ -127,7 +127,7 @@ __kernel void direct_convolution5x5(
     const int kernel_index = get_global_id(2);
     weights_addr += kernel_index * weights_stride_w;
 
-    for(int d = 0; d < WEIGHTS_DEPTH; ++d)
+    for(volatile int d = 0; d < WEIGHTS_DEPTH; ++d)
     {
         CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)src_addr, (__global DATA_TYPE *)weights_addr);
         CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y));

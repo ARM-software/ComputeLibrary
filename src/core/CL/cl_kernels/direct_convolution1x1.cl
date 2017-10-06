@@ -191,7 +191,7 @@ __kernel void direct_convolution1x1(
 
     weights.ptr += z_index * weights_stride_w;
 
-    for(int d = 0; d < WEIGHTS_DEPTH; ++d)
+    for(volatile int d = 0; d < WEIGHTS_DEPTH; ++d)
     {
         DATA_TYPE weight = *(__global DATA_TYPE *)weights.ptr;
         VEC_DATA_TYPE(DATA_TYPE, 8)
