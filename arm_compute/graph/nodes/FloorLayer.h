@@ -21,17 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_H__
-#define __ARM_COMPUTE_GRAPH_NODES_H__
+#ifndef __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__
+#define __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__
 
-#include "arm_compute/graph/nodes/ActivationLayer.h"
-#include "arm_compute/graph/nodes/BatchNormalizationLayer.h"
-#include "arm_compute/graph/nodes/ConvolutionLayer.h"
-#include "arm_compute/graph/nodes/FloorLayer.h"
-#include "arm_compute/graph/nodes/FullyConnectedLayer.h"
-#include "arm_compute/graph/nodes/L2NormalizeLayer.h"
-#include "arm_compute/graph/nodes/NormalizationLayer.h"
-#include "arm_compute/graph/nodes/PoolingLayer.h"
-#include "arm_compute/graph/nodes/SoftmaxLayer.h"
+#include "arm_compute/graph/GraphContext.h"
+#include "arm_compute/graph/INode.h"
+#include "arm_compute/graph/Tensor.h"
+#include "arm_compute/graph/Types.h"
+namespace arm_compute
+{
+namespace graph
+{
+/** Floor layer node */
+class FloorLayer : public INode
+{
+public:
+    // Inherited methods overriden:
+    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
+};
 
-#endif /* __ARM_COMPUTE_GRAPH_NODES_H__ */
+} // namespace graph
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__ */

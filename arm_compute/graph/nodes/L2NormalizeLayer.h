@@ -21,17 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_H__
-#define __ARM_COMPUTE_GRAPH_NODES_H__
+#ifndef __ARM_COMPUTE_GRAPH_L2NORMALIZE_LAYER_H__
+#define __ARM_COMPUTE_GRAPH_L2NORMALIZE_LAYER_H__
 
-#include "arm_compute/graph/nodes/ActivationLayer.h"
-#include "arm_compute/graph/nodes/BatchNormalizationLayer.h"
-#include "arm_compute/graph/nodes/ConvolutionLayer.h"
-#include "arm_compute/graph/nodes/FloorLayer.h"
-#include "arm_compute/graph/nodes/FullyConnectedLayer.h"
-#include "arm_compute/graph/nodes/L2NormalizeLayer.h"
-#include "arm_compute/graph/nodes/NormalizationLayer.h"
-#include "arm_compute/graph/nodes/PoolingLayer.h"
-#include "arm_compute/graph/nodes/SoftmaxLayer.h"
+#include "arm_compute/graph/GraphContext.h"
+#include "arm_compute/graph/INode.h"
+#include "arm_compute/graph/Tensor.h"
+#include "arm_compute/graph/Types.h"
 
-#endif /* __ARM_COMPUTE_GRAPH_NODES_H__ */
+namespace arm_compute
+{
+namespace graph
+{
+/** L2Normalize layer node */
+class L2NormalizeLayer final : public INode
+{
+public:
+    /** Default Constructor
+     *
+     * @param[in] axis    Dimension along which to reduce.
+     * @param[in] epsilon Lower bound value for the normalization.
+     */
+    explicit L2NormalizeLayer(unsigned int axis, float epsilon)
+        : _axis(axis), _epsilon(epsilon)
+    {
+    }
+
+    // Inherited methods overriden:
+    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
+
+private:
+    unsigned int _axis;
+    float        _epsilon;
+};
+} // namespace graph
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_GRAPH_L2NORMALIZE_LAYER_H__ */
