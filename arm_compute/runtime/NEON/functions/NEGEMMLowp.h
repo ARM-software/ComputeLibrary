@@ -25,17 +25,13 @@
 #define __ARM_COMPUTE_NEGEMMLOWP_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpFinalizeKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/Tensor.h"
-
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpAssemblyBaseKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
+#include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
 
@@ -43,12 +39,13 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to execute GEMMLowp on NEON. This function calls the following NEON kernels:
-*
-*  -# @ref NEGEMMInterleave4x4Kernel
-*  -# @ref NEGEMMTranspose1xWKernel
-*  -# @ref NEGEMMLowpMatrixMultiplyKernel
-*
+/** Basic function to execute GEMMLowp on NEON. This function calls the following NEON kernels/function:
+ *
+ *  -# @ref NEGEMMLowpMatrixAReductionKernel
+ *  -# @ref NEGEMMLowpMatrixBReductionKernel
+ *  -# @ref NEGEMMLowpMatrixMultiplyCore
+ *  -# @ref NEGEMMLowpFinalizeKernel
+ *
 */
 class NEGEMMLowp : public IFunction
 {
@@ -58,7 +55,7 @@ public:
     /** Initialise the kernel's inputs, output
     *
     * @note GEMM_LOWP:  low precision GEMM kernel
-    *  This kernel performs the following computation:
+    *  This kernel performs the following computations:
     *
     *  -# Convert a values from uint8 to int32 and add a_offset to each of them.
     *  -# Convert b values from uint8 to int32 and add b_offset to each of them.
@@ -72,35 +69,26 @@ public:
     * @param[out] output          Output tensor. Data type supported: same as @p a.
     * @param[in]  a_offset        Offset to be added to each element of the matrix A.
     * @param[in]  b_offset        Offset to be added to each element of the matrix B.
-    * @param[in]  output_offset   Offset to be added to each element of the output matrix
+    * @param[in]  c_offset        Offset to be added to each element of the output matrix
     * @param[in]  output_mult_int Value to be multiplied to each element of the output matrix
     * @param[in]  shift           Number of bits to shift right the result.
     */
-    void configure(const ITensor *a, const ITensor *b, ITensor *output, int32_t a_offset, int32_t b_offset, int32_t output_offset, int32_t output_mult_int, int32_t shift);
-    /** Initialise the kernel's inputs, output
-    *
-    * @note GEMM_LOWP:  low precision GEMM kernel
-    *  This kernel performs the following computation:
-    *
-    * @param[in]  a      First input tensor  (Matrix A). Data type supported: U8.
-    * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a
-    * @param[out] output Output tensor. Data type supported: U32.
-    */
-    void configure(const ITensor *a, const ITensor *b, ITensor *output);
+    void configure(const ITensor *a, const ITensor *b, ITensor *output, int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t output_mult_int, int32_t shift);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    MemoryGroup                                   _memory_group;
-    NEGEMMInterleave4x4Kernel                     _interleave_kernel;
-    NEGEMMTranspose1xWKernel                      _transpose_kernel;
-    NEGEMMLowpMatrixMultiplyKernel                _mm_kernel;
-    std::unique_ptr<NEGEMMLowpAssemblyBaseKernel> _mm_optimised_kernel;
-    NEGEMMInterleaveBlockedKernel                 _interleave_blocked;
-    NEGEMMInterleaveBlockedKernel                 _interleave_blocked_transposed;
-    Tensor                                        _tmp_a;
-    Tensor                                        _tmp_b;
+    MemoryGroup                      _memory_group;
+    NEGEMMLowpMatrixMultiplyCore     _mm_func;
+    NEGEMMLowpMatrixAReductionKernel _mtx_a_reduction_kernel;
+    NEGEMMLowpMatrixBReductionKernel _mtx_b_reduction_kernel;
+    NEGEMMLowpFinalizeKernel         _finalize_kernel;
+    Tensor                           _vector_sum_col;
+    Tensor                           _vector_sum_row;
+    Tensor                           _mm_output;
+    int32_t                          _a_offset;
+    int32_t                          _b_offset;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWP_H__ */

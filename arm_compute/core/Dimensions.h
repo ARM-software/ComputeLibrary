@@ -119,8 +119,8 @@ public:
 
     /** Collapse dimensions.
      *
-     * @param[in] first Dimensions into which the following @p n are collapsed.
      * @param[in] n     Number of dimensions to collapse into @p first.
+     * @param[in] first Dimensions into which the following @p n are collapsed.
      */
     void collapse(size_t n, size_t first = 0)
     {

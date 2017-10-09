@@ -21,11 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowp.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
+#include "tests/NEON/Helper.h"
 #include "tests/datasets/LargeGEMMLowpDataset.h"
 #include "tests/datasets/SmallGEMMLowpDataset.h"
 #include "tests/framework/Asserts.h"
@@ -35,9 +37,6 @@
 #include "tests/validation/fixtures/GEMMInterleaveBlockedFixture.h"
 #include "tests/validation/fixtures/GEMMLowpFixture.h"
 
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h"
-#include "tests/NEON/Helper.h"
-
 namespace arm_compute
 {
 namespace test
@@ -46,15 +45,8 @@ namespace validation
 {
 namespace
 {
-const auto data_mnk     = framework::dataset::make("M", 12, 20) * framework::dataset::make("N", 12, 20) * framework::dataset::make("K", 12, 15);
-const auto data_offsets = framework::dataset::make("a", -3, 3) * framework::dataset::make("b", -1, 2) * framework::dataset::make("c", 1, 3) * framework::dataset::make("cm", 0,
-                          3)
-                          * framework::dataset::make("shift", 0, 4);
-
-const auto data_int_blk = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12) * framework::dataset::make("by", 8, 13) * framework::dataset::make("block", 4, 9);
-
+const auto data_int_blk    = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12) * framework::dataset::make("by", 8, 13) * framework::dataset::make("block", 4, 9);
 const auto data_int_blk_tr = framework::dataset::make("M", 8, 17) * framework::dataset::make("N", 8, 14) * framework::dataset::make("by", 12) * framework::dataset::make("block", 4);
-
 } // namespace
 
 TEST_SUITE(NEON)
@@ -115,7 +107,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpOffsetFixture, framework::DatasetMode
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
 
 //FIXME: This is in the process of being updated, for more info please refer to COMPMID-624.
 #if 0  // defined(__aarch64__)
@@ -129,6 +120,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpFixture, framework::DatasetMode::PREC
 }
 TEST_SUITE_END()
 #endif // defined(__aarch64__)
+TEST_SUITE_END()
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace validation
