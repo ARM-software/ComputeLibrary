@@ -47,7 +47,7 @@ BOOST_DATA_TEST_CASE(Construction,
                                                     TensorShape{ 2U, 3U, 5U, 7U, 11U },
                                                     TensorShape{ 2U, 3U, 5U, 7U, 11U, 13U }
                                                   })
-                     ^ boost::unit_test::data::make({ 0, 0, 1, 2, 3, 4, 5, 6 }) ^ boost::unit_test::data::make({ 0, 1, 2, 6, 30, 210, 2310, 30030 }),
+                     ^ boost::unit_test::data::make({ 0, 1, 1, 2, 3, 4, 5, 6 }) ^ boost::unit_test::data::make({ 0, 1, 2, 6, 30, 210, 2310, 30030 }),
                      shape, num_dimensions, total_size)
 {
     BOOST_TEST(shape.num_dimensions() == num_dimensions);

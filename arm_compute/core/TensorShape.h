@@ -164,7 +164,7 @@ private:
     /** Remove trailing dimensions of size 1 from the reported number of dimensions. */
     void apply_dimension_correction()
     {
-        for(int i = static_cast<int>(_num_dimensions) - 1; i >= 0; --i)
+        for(int i = static_cast<int>(_num_dimensions) - 1; i > 0; --i)
         {
             if(_id[i] == 1)
             {
