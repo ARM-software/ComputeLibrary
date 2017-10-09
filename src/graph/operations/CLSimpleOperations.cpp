@@ -106,6 +106,90 @@ REGISTER_SIMPLE_OPERATION(CLBatchNormalizationLayerOperation, OPENCL, OperationT
     return std::move(batch_norm);
 }
 
+/* DepthConvert Layer */
+REGISTER_SIMPLE_OPERATION(CLDepthConvertLayerOperation, OPENCL, OperationType::DepthConvertLayer)
+{
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 1);
+    ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 1);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);
+
+    // Extract IO and info
+    auto      *in          = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
+    auto      *out         = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
+    const auto conv_policy = ctx.parameter<ConvertPolicy>("ConvertPolicy");
+    const auto shift       = ctx.parameter<uint32_t>("shift");
+
+    // Create and configure function
+    auto depthconvert = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthConvert>();
+    depthconvert->configure(in, out, conv_policy, shift);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLDepthConvertLayer"
+                               << " Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << " shift: " << shift
+                               << std::endl);
+
+    return std::move(depthconvert);
+}
+
+/* DeQuantizationLayer Layer */
+REGISTER_SIMPLE_OPERATION(CLDequantizationLayerOperation, OPENCL, OperationType::DequantizationLayer)
+{
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 1);
+    ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 2);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(1)) == nullptr);
+
+    // Extract IO and info
+    auto *in      = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
+    auto *out     = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
+    auto *min_max = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(1));
+
+    // Create and configure function
+    auto dequantization = arm_compute::support::cpp14::make_unique<arm_compute::CLDequantizationLayer>();
+    dequantization->configure(in, out, min_max);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLDequantizationLayer"
+                               << " Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << " Min max shape: " << min_max->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(dequantization);
+}
+
+/* Flatten Layer */
+REGISTER_SIMPLE_OPERATION(CLFlattenLayerOperation, OPENCL, OperationType::FlattenLayer)
+{
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 1);
+    ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 1);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);
+
+    // Extract IO and info
+    auto *in  = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
+    auto *out = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
+
+    // Create and configure function
+    auto flatten = arm_compute::support::cpp14::make_unique<arm_compute::CLFlattenLayer>();
+    flatten->configure(in, out);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEFlattenLayer"
+                               << " Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(flatten);
+}
+
 /* Floor Layer */
 REGISTER_SIMPLE_OPERATION(CLFloorLayerOperation, OPENCL, OperationType::FloorLayer)
 {
@@ -248,6 +332,58 @@ REGISTER_SIMPLE_OPERATION(CLPoolingLayerOperation, OPENCL, OperationType::Poolin
                                << std::endl);
 
     return std::move(pool);
+}
+
+/* Quantization Layer */
+REGISTER_SIMPLE_OPERATION(CLQuantizationLayerOperation, OPENCL, OperationType::QuantizationLayer)
+{
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 1);
+    ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 1);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);
+
+    // Extract IO and info
+    auto *in  = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
+    auto *out = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
+
+    // Create and configure function
+    auto quantization = arm_compute::support::cpp14::make_unique<arm_compute::CLQuantizationLayer>();
+    quantization->configure(in, out);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEQuantizationLayer"
+                               << " Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(quantization);
+}
+
+/* Reshape Layer */
+REGISTER_SIMPLE_OPERATION(CLReshapeLayerOperation, OPENCL, OperationType::ReshapeLayer)
+{
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 1);
+    ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 1);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);
+
+    // Extract IO and info
+    auto *in  = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
+    auto *out = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
+
+    // Create and configure function
+    auto reshape = arm_compute::support::cpp14::make_unique<arm_compute::CLReshapeLayer>();
+    reshape->configure(in, out);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEReshapeLayer"
+                               << " Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(reshape);
 }
 
 /* Softmax Layer */

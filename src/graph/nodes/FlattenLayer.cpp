@@ -21,23 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_H__
-#define __ARM_COMPUTE_GRAPH_NODES_H__
-
-#include "arm_compute/graph/nodes/ActivationLayer.h"
-#include "arm_compute/graph/nodes/BatchNormalizationLayer.h"
-#include "arm_compute/graph/nodes/BranchLayer.h"
-#include "arm_compute/graph/nodes/ConvolutionLayer.h"
-#include "arm_compute/graph/nodes/DepthConvertLayer.h"
-#include "arm_compute/graph/nodes/DequantizationLayer.h"
 #include "arm_compute/graph/nodes/FlattenLayer.h"
-#include "arm_compute/graph/nodes/FloorLayer.h"
-#include "arm_compute/graph/nodes/FullyConnectedLayer.h"
-#include "arm_compute/graph/nodes/L2NormalizeLayer.h"
-#include "arm_compute/graph/nodes/NormalizationLayer.h"
-#include "arm_compute/graph/nodes/PoolingLayer.h"
-#include "arm_compute/graph/nodes/QuantizationLayer.h"
-#include "arm_compute/graph/nodes/ReshapeLayer.h"
-#include "arm_compute/graph/nodes/SoftmaxLayer.h"
 
-#endif /* __ARM_COMPUTE_GRAPH_NODES_H__ */
+#include "arm_compute/graph/NodeContext.h"
+#include "arm_compute/graph/OperationRegistry.h"
+#include "support/ToolchainSupport.h"
+
+using namespace arm_compute::graph;
+
+std::unique_ptr<arm_compute::IFunction> FlattenLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
+{
+    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+
+    _target_hint              = ctx.hints().target_hint();
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+
+    // Auto configure output
+    arm_compute::auto_init_if_empty(*out->info(), in->info()->tensor_shape(), 1, in->info()->data_type(), in->info()->fixed_point_position());
+
+    // Create node context
+    NodeContext node_ctx(OperationType::FlattenLayer);
+    node_ctx.set_target(_target_hint);
+    node_ctx.add_input(in);
+    node_ctx.add_output(out);
+
+    // Get function
+    return OperationRegistry::get().find_operation(OperationType::FlattenLayer, _target_hint)->configure(node_ctx);
+}

@@ -55,6 +55,7 @@ using arm_compute::TensorShape;
 using arm_compute::WeightsInfo;
 
 using arm_compute::logging::LogLevel;
+using arm_compute::ConvertPolicy;
 
 /**< Execution hint to the graph executor */
 enum class TargetHint
@@ -77,11 +78,16 @@ enum class OperationType
     ActivationLayer,
     BatchNormalizationLayer,
     ConvolutionLayer,
+    DepthConvertLayer,
+    DequantizationLayer,
+    FlattenLayer,
     FloorLayer,
     FullyConnectedLayer,
     L2NormalizeLayer,
     NormalizationLayer,
     PoolingLayer,
+    QuantizationLayer,
+    ReshapeLayer,
     SoftmaxLayer
 };
 

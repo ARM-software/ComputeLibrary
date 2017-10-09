@@ -21,25 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__
-#define __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__
+#ifndef __ARM_COMPUTE_GRAPH_DEPTHCONVERT_LAYER_H__
+#define __ARM_COMPUTE_GRAPH_DEPTHCONVERT_LAYER_H__
 
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/graph/ITensorObject.h"
 #include "arm_compute/graph/Types.h"
+
 namespace arm_compute
 {
 namespace graph
 {
-/** Floor layer node */
-class FloorLayer final : public INode
+/** DepthConvertLayer layer node */
+class DepthConvertLayer final : public INode
 {
 public:
+    /** Default constructor
+     *
+     * @param[in] policy          Convertion policy
+     * @param[in] shift           Shift value
+     * @param[in] output_datatype Output datatype
+     */
+    DepthConvertLayer(const ConvertPolicy policy, uint32_t shift, DataType output_datatype);
+
     // Inherited methods overriden:
     std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) override;
-};
 
+private:
+    const ConvertPolicy _policy;
+    uint32_t            _shift;
+    DataType            _output_datatype;
+};
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_DEPTHCONVERT_LAYER_H__ */

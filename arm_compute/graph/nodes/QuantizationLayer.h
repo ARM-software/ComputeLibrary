@@ -21,25 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__
-#define __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__
+#ifndef __ARM_COMPUTE_GRAPH_QUANTIZATION_LAYER_H__
+#define __ARM_COMPUTE_GRAPH_QUANTIZATION_LAYER_H__
 
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/graph/ITensorObject.h"
 #include "arm_compute/graph/Types.h"
+
 namespace arm_compute
 {
 namespace graph
 {
-/** Floor layer node */
-class FloorLayer final : public INode
+/** Quantization layer node */
+class QuantizationLayer final : public INode
 {
 public:
     // Inherited methods overriden:
     std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) override;
 };
-
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_QUANTIZATION_LAYER_H__ */

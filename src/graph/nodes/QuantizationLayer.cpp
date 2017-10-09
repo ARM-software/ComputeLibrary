@@ -21,25 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__
-#define __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__
+#include "arm_compute/graph/nodes/QuantizationLayer.h"
 
-#include "arm_compute/graph/GraphContext.h"
-#include "arm_compute/graph/INode.h"
-#include "arm_compute/graph/ITensorObject.h"
-#include "arm_compute/graph/Types.h"
-namespace arm_compute
-{
-namespace graph
-{
-/** Floor layer node */
-class FloorLayer final : public INode
-{
-public:
-    // Inherited methods overriden:
-    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) override;
-};
+#include "arm_compute/graph/NodeContext.h"
+#include "arm_compute/graph/OperationRegistry.h"
 
-} // namespace graph
-} // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_FLOOR_LAYER_H__ */
+using namespace arm_compute::graph;
+
+std::unique_ptr<arm_compute::IFunction> QuantizationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
+{
+    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+
+    _target_hint              = ctx.hints().target_hint();
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+
+    // Create node context
+    NodeContext node_ctx(OperationType::QuantizationLayer);
+    node_ctx.set_target(_target_hint);
+    node_ctx.add_input(in);
+    node_ctx.add_output(out);
+
+    // Get function
+    return OperationRegistry::get().find_operation(OperationType::QuantizationLayer, _target_hint)->configure(node_ctx);
+}
