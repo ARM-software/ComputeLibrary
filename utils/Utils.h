@@ -382,7 +382,9 @@ void load_trained_data(T &tensor, const std::string &filename)
 
         if(!fs.good())
         {
+#ifndef ARM_NO_EXCEPTIONS
             throw std::runtime_error("Could not load binary data: " + filename);
+#endif  // ARM_NO_EXCEPTIONS
         }
 
         // Map buffer if creating a CLTensor
