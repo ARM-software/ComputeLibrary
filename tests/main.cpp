@@ -106,7 +106,7 @@ int main(int argc, char **argv)
     help->set_help("Show this help message");
     auto dataset_mode = parser.add_option<framework::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::PRECOMMIT);
     dataset_mode->set_help("For managed datasets select which group to use");
-    auto instruments = parser.add_option<framework::EnumListOption<framework::InstrumentType>>("instruments", allowed_instruments, std::initializer_list<framework::InstrumentType> { framework::InstrumentType::ALL });
+    auto instruments = parser.add_option<framework::EnumListOption<framework::InstrumentType>>("instruments", allowed_instruments, std::initializer_list<framework::InstrumentType> { framework::InstrumentType::WALL_CLOCK_TIMER });
     instruments->set_help("Set the profiling instruments to use");
     auto iterations = parser.add_option<framework::SimpleOption<int>>("iterations", 1);
     iterations->set_help("Number of iterations per test case");
