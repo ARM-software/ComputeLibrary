@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/ITensorInfo.h"
 
+#include "ITensorInfo.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
@@ -97,6 +98,16 @@ public:
      * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
      */
     TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position = 0);
+
+    /** Constructor
+     *
+     * @param[in] tensor_shape      It specifies the size for each dimension of the tensor in number of elements.
+     * @param[in] num_channels      It indicates the number of channels for each tensor element
+     * @param[in] data_type         Data type to use for each tensor element
+     * @param[in] quantization_info The quantization settings for the tensor data.
+     */
+    TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, QuantizationInfo quantization_info);
+
     /** Constructor
      *
      * @param[in] hog_info HOG's metadata used to allocate normalized HOG space
@@ -147,6 +158,7 @@ public:
      * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
      */
     void init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position = 0);
+
     /** Initialize the metadata structure with the given parameters
      *
      * @param[in] tensor_shape                  Size for each dimension of the tensor in number of elements.
@@ -276,6 +288,14 @@ public:
     {
         _valid_region = std::move(valid_region);
     }
+    QuantizationInfo quantization_info() const override
+    {
+        return _quantization_info;
+    }
+    void set_quantization_info(QuantizationInfo quantization_info) override
+    {
+        _quantization_info = quantization_info;
+    }
 
 private:
     /** Calculates strides, offset and total size resulting from the specified padding around the XY plane.
@@ -284,17 +304,18 @@ private:
      */
     std::tuple<Strides, size_t, size_t> calculate_padding_requirements(const PaddingSize &padding);
 
-    size_t      _total_size;
-    int         _fixed_point_position;
-    size_t      _offset_first_element_in_bytes;
-    Strides     _strides_in_bytes;
-    size_t      _num_channels;
-    TensorShape _tensor_shape;
-    DataType    _data_type;
-    Format      _format;
-    bool        _is_resizable;
-    ValidRegion _valid_region;
-    PaddingSize _padding;
+    size_t           _total_size;
+    int              _fixed_point_position;
+    size_t           _offset_first_element_in_bytes;
+    Strides          _strides_in_bytes;
+    size_t           _num_channels;
+    TensorShape      _tensor_shape;
+    DataType         _data_type;
+    Format           _format;
+    bool             _is_resizable;
+    ValidRegion      _valid_region;
+    PaddingSize      _padding;
+    QuantizationInfo _quantization_info;
 };
 }
 #endif /*__ARM_COMPUTE_TENSORINFO_H__ */

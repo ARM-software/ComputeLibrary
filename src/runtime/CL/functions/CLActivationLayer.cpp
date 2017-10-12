@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
+#include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;

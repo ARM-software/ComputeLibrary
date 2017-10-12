@@ -67,6 +67,7 @@ enum class DataType
     U8,
     S8,
     QS8,
+    QASYMM8,
     U16,
     S16,
     QS16,
@@ -89,6 +90,46 @@ constexpr float SCALE_PYRAMID_HALF = 0.5f;
 
 /* Constant value used to indicate a ORB scaled pyramid */
 constexpr float SCALE_PYRAMID_ORB = 8.408964152537146130583778358414e-01;
+
+/** Quantization settings (used for QASYMM8 data type) */
+struct QuantizationInfo
+{
+    QuantizationInfo()
+        : scale(0.0f), offset(0)
+    {
+    }
+
+    QuantizationInfo(float scale, int offset)
+        : scale(scale), offset(offset)
+    {
+    }
+
+    float scale;  /**< scale */
+    int   offset; /**< offset */
+
+    /** Quantizes a value using the scale/offset in this QuantizationInfo */
+    uint8_t quantize(float value) const
+    {
+        ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::quantize: scale == 0");
+        int quantized = static_cast<int>(value / scale + offset);
+        quantized     = std::max(0, std::min(quantized, 255));
+        return quantized;
+    }
+
+    /** Dequantizes a value using the scale/offset in this QuantizationInfo */
+    float dequantize(uint8_t value) const
+    {
+        ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::dequantize: scale == 0");
+        float dequantized = (value - offset) * scale;
+        return dequantized;
+    }
+
+    /** Indicates whether this QuantizationInfo has valid settings or not */
+    bool empty() const
+    {
+        return scale == 0;
+    }
+};
 
 struct ValidRegion
 {

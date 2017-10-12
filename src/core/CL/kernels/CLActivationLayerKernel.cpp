@@ -34,6 +34,9 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
 #include "support/ToolchainSupport.h"
 
 #include <cmath>
@@ -47,7 +50,14 @@ CLActivationLayerKernel::CLActivationLayerKernel()
 
 void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32, DataType::QASYMM8);
+
+    // For QA8 only lower/upper bounded relu is supported
+    if(input->info()->data_type() == DataType::QASYMM8)
+    {
+        ARM_COMPUTE_ERROR_ON_MSG(act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                 "For QASYMM8 only lower/upper bounded relu is supported");
+    }
 
     if(output != nullptr)
     {
@@ -74,8 +84,22 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     build_opts.emplace(("-DACT=" + lower_string(string_from_activation_func(act_info.activation()))));
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
-    build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const)));
-    build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const)));
+
+    if(input->info()->data_type() == DataType::QASYMM8)
+    {
+        // For lower/upper bounded relu make sure that the min/max values are in the quantized input space
+        int a_const_u8 = input->info()->quantization_info().quantize(a_const);
+        int b_const_u8 = input->info()->quantization_info().quantize(b_const);
+
+        build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const_u8)));
+        build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const_u8)));
+    }
+    else
+    {
+        build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const)));
+        build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const)));
+    }
+
     build_opts.emplace(output == nullptr ? "-DIN_PLACE" : "");
     if(is_data_type_fixed_point(input->info()->data_type()))
     {
@@ -83,7 +107,23 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("activation_layer", build_opts));
+    if(input->info()->data_type() == DataType::QASYMM8)
+    {
+        float s1 = input->info()->quantization_info().scale;
+        float o1 = input->info()->quantization_info().offset;
+        // If output is nullptr, assume same quantization scale/offset as input
+        float s2 = output != nullptr ? output->info()->quantization_info().scale : s1;
+        float o2 = output != nullptr ? output->info()->quantization_info().offset : o1;
+        build_opts.emplace(("-DS1_VAL=" + support::cpp11::to_string(s1)));
+        build_opts.emplace(("-DS2_VAL=" + support::cpp11::to_string(s2)));
+        build_opts.emplace(("-DO1_VAL=" + support::cpp11::to_string(o1)));
+        build_opts.emplace(("-DO2_VAL=" + support::cpp11::to_string(o2)));
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("activation_layer_qa8", build_opts));
+    }
+    else
+    {
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("activation_layer", build_opts));
+    }
 
     // Make sure _kernel is initialized before calling the parent's configure
 

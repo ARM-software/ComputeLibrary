@@ -92,6 +92,7 @@ inline size_t data_size_from_type(DataType data_type)
         case DataType::U8:
         case DataType::S8:
         case DataType::QS8:
+        case DataType::QASYMM8:
             return 1;
         case DataType::U16:
         case DataType::S16:
@@ -166,6 +167,7 @@ inline size_t element_size_from_data_type(DataType dt)
         case DataType::S8:
         case DataType::U8:
         case DataType::QS8:
+        case DataType::QASYMM8:
             return 1;
         case DataType::U16:
         case DataType::S16:

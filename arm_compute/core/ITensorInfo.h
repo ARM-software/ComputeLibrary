@@ -190,6 +190,18 @@ public:
      * @param[in] valid_region Valid region to set.
      */
     virtual void set_valid_region(ValidRegion valid_region) = 0;
+
+    /** Get the quantization settings (scale and offset) of the tensor.
+    *
+    * @return A QuantizationInfo containing the scale and offset.
+    */
+    virtual QuantizationInfo quantization_info() const = 0;
+
+    /** Set the quantization settings (scale and offset) of the tensor.
+    *
+    * @param[in] quantization_info QuantizationInfo containing the scale and offset.
+    */
+    virtual void set_quantization_info(QuantizationInfo quantization_info) = 0;
 };
 }
 #endif /*__ARM_COMPUTE_TENSORINFO_H__ */

@@ -186,6 +186,16 @@ public:
         }
         _valid_region = std::move(valid_region);
     }
+    QuantizationInfo quantization_info() const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return _parent->quantization_info();
+    }
+    void set_quantization_info(QuantizationInfo quantization_info) override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        _parent->set_quantization_info(quantization_info);
+    }
 
 private:
     ITensorInfo *_parent;

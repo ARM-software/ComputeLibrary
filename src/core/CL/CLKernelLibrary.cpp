@@ -107,6 +107,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "accumulate_squared", "accumulate.cl" },
     { "accumulate_weighted", "accumulate.cl" },
     { "activation_layer", "activation_layer.cl" },
+    { "activation_layer_qa8", "activation_layer_qa8.cl" },
     { "arithmetic_add", "arithmetic_op.cl" },
     { "arithmetic_sub", "arithmetic_op.cl" },
     { "bitwise_or", "bitwise_op.cl" },
@@ -304,6 +305,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "activation_layer.cl",
 #include "./cl_kernels/activation_layer.clembed"
+    },
+    {
+        "activation_layer_qa8.cl",
+#include "./cl_kernels/activation_layer_qa8.clembed"
     },
     {
         "arithmetic_op.cl",

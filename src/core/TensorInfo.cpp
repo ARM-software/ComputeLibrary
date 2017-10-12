@@ -26,13 +26,14 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/HOGInfo.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
 using namespace arm_compute;
 
 TensorInfo::TensorInfo()
     : _total_size(0), _fixed_point_position(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN),
-      _is_resizable{ true }, _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }
+      _is_resizable{ true }, _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info()
 {
 }
 
@@ -78,6 +79,13 @@ TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, Dat
     : TensorInfo()
 {
     init(tensor_shape, num_channels, data_type, fixed_point_position);
+}
+
+TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, QuantizationInfo quantization_info)
+    : TensorInfo()
+{
+    init(tensor_shape, num_channels, data_type, 0);
+    _quantization_info = quantization_info;
 }
 
 TensorInfo::TensorInfo(const HOGInfo &hog_info, unsigned int width, unsigned int height)
