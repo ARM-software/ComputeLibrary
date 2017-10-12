@@ -44,6 +44,19 @@ const auto FuncNamesDataset = framework::dataset::make("FunctionNames", { FixedP
                                                                           FixedPointOp::LOG,
                                                                           FixedPointOp::INV_SQRT
                                                                         });
+
+template <typename T>
+void load_array_from_numpy(const std::string &file, std::vector<unsigned long> &shape, std::vector<T> &data) // NOLINT
+{
+    try
+    {
+        npy::LoadArrayFromNumpy(file, shape, data);
+    }
+    catch(const std::runtime_error &e)
+    {
+        throw framework::FileNotFound("Could not load npy file: " + file + " (" + e.what() + ")");
+    }
+}
 } // namespace
 
 TEST_SUITE(UNIT)
@@ -71,8 +84,7 @@ DATA_TEST_CASE(FixedPointQS8Inputs, framework::DatasetMode::ALL, combine(
     + support::cpp11::to_string(frac_bits)
     + ".in.npy";
 
-    ARM_COMPUTE_TEST_INFO(inputs_file);
-    npy::LoadArrayFromNumpy(inputs_file, shape, data);
+    load_array_from_numpy(inputs_file, shape, data);
 
     // Values stored as doubles so reinterpret as floats
     const auto *float_val    = reinterpret_cast<float *>(&data[0]);
@@ -126,11 +138,8 @@ DATA_TEST_CASE(FixedPointQS8Outputs, framework::DatasetMode::ALL, zip(combine(
     const std::string inputs_file    = base_file_name + ".in.npy";
     const std::string reference_file = base_file_name + ".out.npy";
 
-    ARM_COMPUTE_TEST_INFO(base_file_name + ".in");
-    npy::LoadArrayFromNumpy(inputs_file, in_shape, in_data);
-
-    ARM_COMPUTE_TEST_INFO(base_file_name + ".out");
-    npy::LoadArrayFromNumpy(reference_file, out_shape, out_data);
+    load_array_from_numpy(inputs_file, in_shape, in_data);
+    load_array_from_numpy(reference_file, out_shape, out_data);
 
     ARM_COMPUTE_EXPECT(in_shape.front() == out_shape.front(), framework::LogLevel::ERRORS);
 
