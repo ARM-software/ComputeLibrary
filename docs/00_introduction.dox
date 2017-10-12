@@ -155,6 +155,17 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v17.10 Public maintenance release
+ - Bug fixes:
+    - Check the maximum local workgroup size supported by OpenCL devices
+    - Minor documentation updates (Fixed instructions to build the examples)
+    - Introduced a arm_compute::graph::GraphContext
+    - Added a few new Graph nodes, support for branches and grouping.
+    - Automatically enable cl_printf in debug builds
+    - Fixed bare metal builds for armv7a
+    - Added AlexNet and cartoon effect examples
+    - Fixed library builds: libraries are no longer built as supersets of each other.(It means application using the Runtime part of the library now need to link against both libarm_compute_core and libarm_compute)
+
 v17.09 Public major release
  - Experimental Graph support: initial implementation of a simple stream API to easily chain machine learning layers.
  - Memory Manager (@ref arm_compute::BlobLifetimeManager, @ref arm_compute::BlobMemoryPool, @ref arm_compute::ILifetimeManager, @ref arm_compute::IMemoryGroup, @ref arm_compute::IMemoryManager, @ref arm_compute::IMemoryPool, @ref arm_compute::IPoolManager, @ref arm_compute::MemoryManagerOnDemand, @ref arm_compute::PoolManager)
