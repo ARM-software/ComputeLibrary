@@ -1,0 +1,6 @@
+<map id="PoolingTypes" name="PoolingTypes">
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset.xhtml" title="ContainerDataset\&lt; std\l::vector\&lt; PoolingType \&gt; \&gt;" alt="" coords="5,247,180,288"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_named_dataset.xhtml" title="Abstract implementation of a named dataset. " alt="" coords="13,81,124,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset.xhtml" title="Implementation of a dataset created from a container. " alt="" coords="91,157,247,184"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_dataset.xhtml" title="Abstract dataset base class. " alt="" coords="35,5,103,32"/>
+</map>
