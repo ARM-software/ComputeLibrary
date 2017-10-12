@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_VALIDATION_PROGRAM_OPTIONS_H__
-#define __ARM_COMPUTE_TEST_VALIDATION_PROGRAM_OPTIONS_H__
+#ifndef __ARM_COMPUTE_TEST_ACCUMULATE_H__
+#define __ARM_COMPUTE_TEST_ACCUMULATE_H__
 
-#include "ProgramOptions.h"
+#include "tests/SimpleTensor.h"
+#include "tests/validation/Helpers.h"
 
 namespace arm_compute
 {
@@ -32,14 +33,18 @@ namespace test
 {
 namespace validation
 {
-/** Subclass of @ref ProgramOptions that adds validation specific options. */
-class ValidationProgramOptions : public ProgramOptions
+namespace reference
 {
-public:
-    /** Defines additonal options. */
-    ValidationProgramOptions();
-};
+template <typename T1, typename T2>
+SimpleTensor<T2> accumulate(const SimpleTensor<T1> &src, DataType output_data_type);
+
+template <typename T1, typename T2>
+SimpleTensor<T2> accumulate_weighted(const SimpleTensor<T1> &src, float alpha, DataType output_data_type);
+
+template <typename T1, typename T2>
+SimpleTensor<T2> accumulate_squared(const SimpleTensor<T1> &src, uint32_t shift, DataType output_data_type);
+} // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_VALIDATION_PROGRAM_OPTIONS_H__ */
+#endif /* __ARM_COMPUTE_TEST_ACCUMULATE_H__ */
