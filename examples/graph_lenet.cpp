@@ -25,7 +25,7 @@
 #error "This example needs to be built with -DARM_COMPUTE_CL"
 #endif /* ARM_COMPUTE_CL */
 
-#include "arm_compute/core/Logger.h"
+#include "arm_compute/core/utils/logging/LoggerRegistry.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Nodes.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -40,6 +40,7 @@
 
 using namespace arm_compute::graph;
 using namespace arm_compute::graph_utils;
+using namespace arm_compute::logging;
 
 /** Generates appropriate accessor according to the specified path
  *
@@ -102,7 +103,7 @@ void main_graph_lenet(int argc, const char **argv)
     }
 
     Graph graph;
-    arm_compute::Logger::get().set_logger(std::cout, arm_compute::LoggerVerbosity::INFO);
+    LoggerRegistry::get().create_reserved_loggers(LogLevel::INFO, { std::make_shared<StdPrinter>() });
 
     //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
     graph << hint

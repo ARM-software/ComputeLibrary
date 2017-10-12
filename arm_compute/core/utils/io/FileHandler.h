@@ -21,51 +21,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef __ARM_COMPUTE_IO_FILE_HANDLER_H__
+#define __ARM_COMPUTE_IO_FILE_HANDLER_H__
 
-#ifndef __ARM_COMPUTE_LOGGER_H__
-#define __ARM_COMPUTE_LOGGER_H__
-
-#include <iostream>
-#include <memory>
-
-#ifdef ARM_COMPUTE_DEBUG_ENABLED
-#define ARM_COMPUTE_LOG(x) (arm_compute::Logger::get().log_info() << x)
-#else /* ARM_COMPUTE_DEBUG_ENABLED */
-#define ARM_COMPUTE_LOG(...)
-#endif /* ARM_COMPUTE_DEBUG_ENABLED */
+#include <fstream>
+#include <string>
 
 namespace arm_compute
 {
-/**< Verbosity of the logger */
-enum class LoggerVerbosity
+namespace io
 {
-    NONE, /**< No info */
-    INFO  /**< Log info */
-};
-
-/** Logger singleton class */
-class Logger
+/** File Handling interface */
+class FileHandler
 {
 public:
-    static Logger &get();
-    void set_logger(std::ostream &ostream, LoggerVerbosity verbosity);
-    std::ostream &log_info();
+    /** Default Constructor */
+    FileHandler();
+    /** Default Destructor */
+    ~FileHandler();
+    /** Allow instances of this class to be moved */
+    FileHandler(FileHandler &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    FileHandler(const FileHandler &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    FileHandler &operator=(const FileHandler &) = delete;
+    /** Allow instances of this class to be moved */
+    FileHandler &operator=(FileHandler &&) = default;
+    /** Opens file
+     *
+     * @param[in] filename File name
+     * @param[in] mode     File open mode
+     */
+    void open(const std::string &filename, std::ios_base::openmode mode);
+    /** Closes file */
+    void close();
+    /** Returns the file stream
+     *
+     * @return File stream
+     */
+    std::fstream &stream();
+    /** Returns filename of the handled file
+     *
+     * @return File filename
+     */
+    std::string filename() const;
 
 private:
-    /** Default constructor */
-    Logger();
-    /** Allow instances of this class to be moved */
-    Logger(Logger &&) = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    Logger(const Logger &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    Logger &operator=(const Logger &) = delete;
-    /** Allow instances of this class to be moved */
-    Logger &operator=(Logger &&) = default;
-
-    std::ostream   *_ostream;
-    std::ostream    _nullstream;
-    LoggerVerbosity _verbosity;
+    std::fstream            _filestream;
+    std::string             _filename;
+    std::ios_base::openmode _mode;
 };
-} // arm_compute
-#endif /* __ARM_COMPUTE_LOGGER_H__ */
+} // namespace io
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_IO_FILE_HANDLER_H__ */

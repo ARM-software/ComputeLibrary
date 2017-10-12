@@ -23,7 +23,6 @@
  */
 #include "arm_compute/graph/nodes/BatchNormalizationLayer.h"
 
-#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h"
@@ -100,18 +99,18 @@ std::unique_ptr<arm_compute::IFunction> BatchNormalizationLayer::instantiate_nod
     if(_target_hint == TargetHint::OPENCL)
     {
         func = instantiate<TargetHint::OPENCL>(in, out, _mean, _var, _beta, _gamma, _epsilon);
-        ARM_COMPUTE_LOG("Instantiating CLBatchNormalizationLayer");
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLBatchNormalizationLayer");
     }
     else
     {
         func = instantiate<TargetHint::NEON>(in, out, _mean, _var, _beta, _gamma, _epsilon);
-        ARM_COMPUTE_LOG("Instantiating NEBatchNormalizationLayer");
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEBatchNormalizationLayer");
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << in->info()->data_type()
-                    << " Input shape: " << in->info()->tensor_shape()
-                    << " Output shape: " << out->info()->tensor_shape()
-                    << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_INFO(" Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << std::endl);
 
     return func;
 }

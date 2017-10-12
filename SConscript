@@ -137,6 +137,7 @@ arm_compute_env.Append(LIBS = ['dl'])
 core_files = Glob('src/core/*.cpp')
 core_files += Glob('src/core/CPP/*.cpp')
 core_files += Glob('src/core/CPP/kernels/*.cpp')
+core_files += Glob('src/core/utils/*/*.cpp')
 
 runtime_files = Glob('src/runtime/*.cpp')
 # CLHarrisCorners uses the Scheduler to run CPP kernels

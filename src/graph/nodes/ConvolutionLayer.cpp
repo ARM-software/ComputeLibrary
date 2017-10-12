@@ -23,7 +23,6 @@
  */
 #include "arm_compute/graph/nodes/ConvolutionLayer.h"
 
-#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -217,12 +216,12 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
     if(_num_groups == 1)
     {
         func = instantiate_convolution(in, out, conv_method_hint);
-        ARM_COMPUTE_LOG("Instantiating CLConvolutionLayer");
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLConvolutionLayer");
     }
     else
     {
         func = instantiate_grouped_convolution(in, out, conv_method_hint);
-        ARM_COMPUTE_LOG("Instantiating NEConvolutionLayer");
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEConvolutionLayer");
     }
 
     // Fill weights
@@ -236,15 +235,15 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
         _biases.allocate_and_fill_if_needed();
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << in->info()->data_type()
-                    << " Input Shape: " << in->info()->tensor_shape()
-                    << " Weights shape: " << _weights.info().tensor_shape()
-                    << " Biases Shape: " << _biases.info().tensor_shape()
-                    << " Output Shape: " << out->info()->tensor_shape()
-                    << " PadStrideInfo: " << _conv_info
-                    << " Groups: " << _num_groups
-                    << " WeightsInfo: " << _weights_info
-                    << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_INFO(" Data Type: " << in->info()->data_type()
+                               << " Input Shape: " << in->info()->tensor_shape()
+                               << " Weights shape: " << _weights.info().tensor_shape()
+                               << " Biases Shape: " << _biases.info().tensor_shape()
+                               << " Output Shape: " << out->info()->tensor_shape()
+                               << " PadStrideInfo: " << _conv_info
+                               << " Groups: " << _num_groups
+                               << " WeightsInfo: " << _weights_info
+                               << std::endl);
 
     return func;
 }

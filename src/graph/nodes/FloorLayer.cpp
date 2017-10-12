@@ -23,7 +23,6 @@
  */
 #include "arm_compute/graph/nodes/FloorLayer.h"
 
-#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLFloor.h"
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"
@@ -76,18 +75,18 @@ std::unique_ptr<arm_compute::IFunction> FloorLayer::instantiate_node(GraphContex
     if(_target_hint == TargetHint::OPENCL)
     {
         func = instantiate<TargetHint::OPENCL>(in, out);
-        ARM_COMPUTE_LOG("Instantiating CLFloorLayer");
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLFloorLayer");
     }
     else
     {
         func = instantiate<TargetHint::NEON>(in, out);
-        ARM_COMPUTE_LOG("Instantiating NEFloorLayer");
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEFloorLayer");
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << in->info()->data_type()
-                    << " Input shape: " << in->info()->tensor_shape()
-                    << " Output shape: " << out->info()->tensor_shape()
-                    << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_INFO(" Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << std::endl);
 
     return func;
 }

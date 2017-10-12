@@ -23,7 +23,6 @@
  */
 #include "arm_compute/graph/nodes/PoolingLayer.h"
 
-#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
@@ -82,16 +81,18 @@ std::unique_ptr<arm_compute::IFunction> PoolingLayer::instantiate_node(GraphCont
     if(_target_hint == TargetHint::OPENCL)
     {
         func = instantiate<TargetHint::OPENCL>(in, out, _pool_info);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLPoolingLayer");
     }
     else
     {
         func = instantiate<TargetHint::NEON>(in, out, _pool_info);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEPoolingLayer");
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << in->info()->data_type()
-                    << " Input shape: " << in->info()->tensor_shape()
-                    << " Output shape: " << out->info()->tensor_shape()
-                    << " Pooling info: " << _pool_info << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_INFO(" Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << " Pooling info: " << _pool_info << std::endl);
 
     return func;
 }

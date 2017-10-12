@@ -39,6 +39,7 @@ vars = Variables("scons")
 vars.AddVariables(
     BoolVariable("debug", "Debug", False),
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
+    BoolVariable("logging", "Logging", False),
     EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "x86_32", "x86_64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile")),
@@ -206,6 +207,9 @@ else:
 if env['asserts']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ASSERTS_ENABLED'])
     env.Append(CXXFLAGS = ['-fstack-protector-strong'])
+
+if env['logging']:
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_LOGGING_ENABLED'])
 
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])

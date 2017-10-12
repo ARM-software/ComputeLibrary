@@ -23,7 +23,6 @@
  */
 #include "arm_compute/graph/nodes/ActivationLayer.h"
 
-#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
@@ -82,18 +81,20 @@ std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphC
     if(_target_hint == TargetHint::OPENCL)
     {
         func = instantiate<TargetHint::OPENCL>(in, out, _activation_info);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLActivationLayer");
     }
     else
     {
         func = instantiate<TargetHint::NEON>(in, out, _activation_info);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEActivationLayer");
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << in->info()->data_type()
-                    << " Input shape: " << in->info()->tensor_shape()
-                    << " Output shape: " << out->info()->tensor_shape()
-                    << " Activation function: " << _activation_info.activation()
-                    << " a: " << _activation_info.a()
-                    << " b: " << _activation_info.b()
-                    << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_INFO(" Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << " Activation function: " << _activation_info.activation()
+                               << " a: " << _activation_info.a()
+                               << " b: " << _activation_info.b()
+                               << std::endl);
     return func;
 }

@@ -27,6 +27,13 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/SubTensorInfo.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/logging/Macros.h"
+
+#define ARM_COMPUTE_LOG_GRAPH(log_level, x) \
+    ARM_COMPUTE_LOG_STREAM("GRAPH", log_level, x)
+
+#define ARM_COMPUTE_LOG_GRAPH_INFO(x) \
+    ARM_COMPUTE_LOG_STREAM("GRAPH", arm_compute::logging::LogLevel::INFO, x)
 
 namespace arm_compute
 {
@@ -46,6 +53,8 @@ using arm_compute::SubTensorInfo;
 using arm_compute::TensorInfo;
 using arm_compute::TensorShape;
 using arm_compute::WeightsInfo;
+
+using arm_compute::logging::LogLevel;
 
 /**< Execution hint to the graph executor */
 enum class TargetHint

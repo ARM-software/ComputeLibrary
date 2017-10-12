@@ -24,7 +24,6 @@
 #include "arm_compute/graph/nodes/FullyConnectedLayer.h"
 
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "support/ToolchainSupport.h"
@@ -123,18 +122,20 @@ std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(Gr
     if(_target_hint == TargetHint::OPENCL)
     {
         func = instantiate<TargetHint::OPENCL>(in, _weights, _biases, out);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLFullyConnectedLayer");
     }
     else
     {
         func = instantiate<TargetHint::NEON>(in, _weights, _biases, out);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEFullyConnectedLayer");
     }
 
-    ARM_COMPUTE_LOG(" Type: " << in->info()->data_type()
-                    << " Input Shape: " << in->info()->tensor_shape()
-                    << " Weights shape: " << _weights.info().tensor_shape()
-                    << " Biases Shape: " << _biases.info().tensor_shape()
-                    << " Output Shape: " << out->info()->tensor_shape()
-                    << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_INFO(" Type: " << in->info()->data_type()
+                               << " Input Shape: " << in->info()->tensor_shape()
+                               << " Weights shape: " << _weights.info().tensor_shape()
+                               << " Biases Shape: " << _biases.info().tensor_shape()
+                               << " Output Shape: " << out->info()->tensor_shape()
+                               << std::endl);
 
     return func;
 }

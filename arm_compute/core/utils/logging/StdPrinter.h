@@ -21,36 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef __ARM_COMPUTE_LOGGING_STD_PRINTER_H__
+#define __ARM_COMPUTE_LOGGING_STD_PRINTER_H__
 
-#include "arm_compute/core/Logger.h"
+#include "arm_compute/core/utils/logging/IPrinter.h"
 
-using namespace arm_compute;
+#include <iostream>
 
-Logger::Logger()
-    : _ostream(&std::cout), _nullstream(nullptr), _verbosity(LoggerVerbosity::NONE)
+namespace arm_compute
 {
-}
-
-Logger &Logger::get()
+namespace logging
 {
-    static Logger _instance;
-    return _instance;
-}
-
-void Logger::set_logger(std::ostream &ostream, LoggerVerbosity verbosity)
+/** Std Printer */
+class StdPrinter final : public Printer
 {
-    _ostream   = &ostream;
-    _verbosity = verbosity;
-}
-
-std::ostream &Logger::log_info()
-{
-    if(_verbosity == LoggerVerbosity::INFO)
+private:
+    // Inherited methods overridden:
+    void print_internal(const std::string &msg) override
     {
-        return *_ostream;
+        std::cout << msg << std::endl;
     }
-    else
-    {
-        return _nullstream;
-    }
-}
+};
+} // namespace logging
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_LOGGING_STD_PRINTER_H__ */
