@@ -35,6 +35,7 @@
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLDistribution1D.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #endif /* ARM_COMPUTE_CL */
 #ifdef ARM_COMPUTE_GC
@@ -188,6 +189,25 @@ inline void map(CLTensor &tensor, bool blocking)
 inline void unmap(CLTensor &tensor)
 {
     tensor.unmap();
+}
+
+/** Maps a distribution if needed
+ *
+ * @param[in] distribution Distribution to be mapped
+ * @param[in] blocking     Specified if map is blocking or not
+ */
+inline void map(CLDistribution1D &distribution, bool blocking)
+{
+    distribution.map(blocking);
+}
+
+/** Unmaps a distribution if needed
+ *
+ * @param distribution  Distribution to be unmapped
+ */
+inline void unmap(CLDistribution1D &distribution)
+{
+    distribution.unmap();
 }
 #endif /* ARM_COMPUTE_CL */
 
