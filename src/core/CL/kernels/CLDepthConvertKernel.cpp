@@ -90,7 +90,8 @@ void CLDepthConvertKernel::configure(const ICLTensor *input, ICLTensor *output, 
     if(input_size > output_size)
     {
         kernel_name += "_down";
-        build_opts.insert((policy == ConvertPolicy::WRAP) ? "-DWRAP" : "-DSATURATE");
+        // Down conversions from float always SATURATE as out-of-bounds conversion from float->integer is implementation defined
+        build_opts.insert(((policy == ConvertPolicy::WRAP) && !is_data_type_float(input->info()->data_type())) ? "-DWRAP" : "-DSATURATE");
     }
     else
     {
