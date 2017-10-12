@@ -203,7 +203,7 @@ inline void internal_vst1q(qint16_t *p, const qint16x8_t &v)
     vst1q_qs16(p, v);
 }
 
-inline void internal_vst1q(int *p, const qint32x4x2_t &v)
+inline void internal_vst1q(int32_t *p, const qint32x4x2_t &v)
 {
     vst1q_s32(p, v.val[0]);
     vst1q_s32(p + 4, v.val[1]);

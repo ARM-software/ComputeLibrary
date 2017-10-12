@@ -162,7 +162,7 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     _edge_trace.configure(&_nonmax, output);
 
     // Fill border with "No edge" to stop recursion in edge trace
-    _border_edge_trace.configure(&_nonmax, _edge_trace.border_size(), BorderMode::CONSTANT, 0);
+    _border_edge_trace.configure(&_nonmax, _edge_trace.border_size(), BorderMode::CONSTANT, static_cast<float>(0.f));
 
     // Allocate intermediate tensors
     _nonmax.allocator()->allocate();

@@ -35,6 +35,8 @@ var searchData=
   ['nedequantizationlayerfixture',['NEDequantizationLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a0e4e4f183ba5d27e36349e99ddfb5561',1,'arm_compute::test::validation']]],
   ['nedirectconvolutionlayerfixedpointfixture',['NEDirectConvolutionLayerFixedPointFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#aa649a5972a5d0aecea568824038cd66d',1,'arm_compute::test::validation']]],
   ['nedirectconvolutionlayerfixture',['NEDirectConvolutionLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#aa9969002af02172f58bcbc59fcb319c1',1,'arm_compute::test::validation']]],
+  ['nefixedpointfixture',['NEFixedPointFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a9736531e44c325a6854828f1762a0362',1,'arm_compute::test::validation']]],
+  ['neflattenlayerfixture',['NEFlattenLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a00e95983de8e4d699d9f2b7fb64fcb43',1,'arm_compute::test::validation']]],
   ['nefloorfixture',['NEFloorFixture',['../namespacearm__compute_1_1test.xhtml#ac8cf6873b0e9ac7334bcbc042fdc5f02',1,'arm_compute::test::NEFloorFixture()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a6cc35d5c6f16df2aa67e16246b4ee0e3',1,'arm_compute::test::validation::NEFloorFixture()']]],
   ['nefullyconnectedlayerfixedpointfixture',['NEFullyConnectedLayerFixedPointFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a34729f17e601787674b9e1ba0b732af3',1,'arm_compute::test::validation']]],
   ['nefullyconnectedlayerfixture',['NEFullyConnectedLayerFixture',['../namespacearm__compute_1_1test.xhtml#a0b4f7a523ddb2b823750ff5bdc03470c',1,'arm_compute::test::NEFullyConnectedLayerFixture()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a9cc6be64f8913024dcc18993181b066c',1,'arm_compute::test::validation::NEFullyConnectedLayerFixture()']]],
@@ -42,6 +44,8 @@ var searchData=
   ['negaussian5x5fixture',['NEGaussian5x5Fixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a9b118c770168493f8f26ece3b49d437b',1,'arm_compute::test::validation']]],
   ['negemmfixedpointfixture',['NEGEMMFixedPointFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a991700e61227d029255d362ff9871fd3',1,'arm_compute::test::validation']]],
   ['negemmfixture',['NEGEMMFixture',['../namespacearm__compute_1_1test.xhtml#a789c444c1307e85eec5f8b0d75fd5f7d',1,'arm_compute::test::NEGEMMFixture()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a70bc5be1a91942b87f6992b37f87b62e',1,'arm_compute::test::validation::NEGEMMFixture()']]],
+  ['negemmlowpoffsetfixture',['NEGEMMLowpOffsetFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a3e2cfaac39d98b43158ab2df8bb577a0',1,'arm_compute::test::validation']]],
+  ['neglobalpoolinglayerfixture',['NEGlobalPoolingLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a27ba649227f83754a45396109054d60c',1,'arm_compute::test::validation']]],
   ['neharriscornersfixture',['NEHarrisCornersFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a56a25219f8de732328604fce8d0a3ba9',1,'arm_compute::test::validation']]],
   ['neintegralimagefixture',['NEIntegralImageFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a2e851719fcfcc79afca41a602ab692fe',1,'arm_compute::test::validation']]],
   ['nel2normalizefixture',['NEL2NormalizeFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#aa836387a721f6811c862edcc293b1ac7',1,'arm_compute::test::validation']]],
@@ -70,5 +74,7 @@ var searchData=
   ['nesobel7x7fixture',['NESobel7x7Fixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a0003f45ddaf84d43adbffd1d84f3cb73',1,'arm_compute::test::validation']]],
   ['nesoftmaxlayerfixedpointfixture',['NESoftmaxLayerFixedPointFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a856bcbd3311a6604c90ab49c939ac151',1,'arm_compute::test::validation']]],
   ['nesoftmaxlayerfixture',['NESoftmaxLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#aa5c860447aeecd9eda9bdbf2d3e31e20',1,'arm_compute::test::validation']]],
-  ['netablelookupfixture',['NETableLookupFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a8b2397cf81e1a0537876f3c7ff52b853',1,'arm_compute::test::validation']]]
+  ['netablelookupfixture',['NETableLookupFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a8b2397cf81e1a0537876f3c7ff52b853',1,'arm_compute::test::validation']]],
+  ['newarpaffinefixture',['NEWarpAffineFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a0ff935e5e31e02ad2cfbe40efac2ae60',1,'arm_compute::test::validation']]],
+  ['newarpperspectivefixture',['NEWarpPerspectiveFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a1d7164aca011490876c383d2c0827d86',1,'arm_compute::test::validation']]]
 ];

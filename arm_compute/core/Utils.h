@@ -35,6 +35,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace arm_compute
 {
@@ -417,6 +418,37 @@ inline uint32_t calculate_matrix_scale(const int16_t *matrix, unsigned int matri
     const size_t size = matrix_size * matrix_size;
 
     return std::max(1, std::abs(std::accumulate(matrix, matrix + size, 0)));
+}
+
+/** Calculate the output shapes of the depth concatenate function.
+ *
+ * @param[in] inputs_vector The vector that stores all the pointers to input.
+ *
+ * @return the output shape
+ */
+template <typename T>
+TensorShape calculate_depth_concatenate_shape(const std::vector<T *> &inputs_vector)
+{
+    TensorShape out_shape = inputs_vector[0]->info()->tensor_shape();
+
+    size_t max_x = 0;
+    size_t max_y = 0;
+    size_t depth = 0;
+
+    for(const auto &tensor : inputs_vector)
+    {
+        ARM_COMPUTE_ERROR_ON(tensor == nullptr);
+        const TensorShape shape = tensor->info()->tensor_shape();
+        max_x                   = std::max(shape.x(), max_x);
+        max_y                   = std::max(shape.y(), max_y);
+        depth += shape.z();
+    }
+
+    out_shape.set(0, max_x);
+    out_shape.set(1, max_y);
+    out_shape.set(2, depth);
+
+    return out_shape;
 }
 
 /** Calculate accurary required by the horizontal and vertical convolution computations

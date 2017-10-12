@@ -84,6 +84,25 @@ public:
     {
         value.s32 = v;
     }
+
+    /** Initialize the union with a U64 pixel value
+     *
+     * @param[in] v U64 value.
+     */
+    PixelValue(uint64_t v)
+        : PixelValue()
+    {
+        value.u64 = v;
+    }
+    /** Initialize the union with a S64 pixel value
+     *
+     * @param[in] v S64 value.
+     */
+    PixelValue(int64_t v)
+        : PixelValue()
+    {
+        value.s64 = v;
+    }
     /** Initialize the union with a F16 pixel value
      *
      * @param[in] v F16 value.
@@ -102,6 +121,15 @@ public:
     {
         value.f32 = v;
     }
+    /** Initialize the union with a F64 pixel value
+     *
+     * @param[in] v F64 value.
+     */
+    PixelValue(double v)
+        : PixelValue()
+    {
+        value.f64 = v;
+    }
     /** Union which describes the value of a pixel for any image format.
      * Use the field corresponding to the image format
      */
@@ -110,6 +138,7 @@ public:
             uint8_t  rgb[3];  /**< 3 channels: RGB888 */
             uint8_t  yuv[3];  /**< 3 channels: Any YUV format */
             uint8_t  rgbx[4]; /**< 4 channels: RGBX8888 */
+            double   f64;     /**< Single channel double */
             float    f32;     /**< Single channel float 32 */
             half     f16;     /**< Single channel F16 */
             uint8_t  u8;      /**< Single channel U8 */
@@ -118,6 +147,8 @@ public:
             int16_t  s16;     /**< Single channel S16 */
             uint32_t u32;     /**< Single channel U32 */
             int32_t  s32;     /**< Single channel S32 */
+            uint64_t u64;     /**< Single channel U64 */
+            int64_t  s64;     /**< Single channel S64 */
         } value;
     /** Interpret the pixel value as a U8
      *
@@ -167,6 +198,22 @@ public:
     {
         v = value.s32;
     }
+    /** Interpret the pixel value as a U64
+     *
+     * @param[out] v Returned value
+     */
+    void get(uint64_t &v) const
+    {
+        v = value.u64;
+    }
+    /** Interpret the pixel value as a S64
+     *
+     * @param[out] v Returned value
+     */
+    void get(int64_t &v) const
+    {
+        v = value.s64;
+    }
     /** Interpret the pixel value as a F16
      *
      * @param[out] v Returned value
@@ -182,6 +229,25 @@ public:
     void get(float &v) const
     {
         v = value.f32;
+    }
+    /** Interpret the pixel value as a double
+     *
+     * @param[out] v Returned value
+     */
+    void get(double &v) const
+    {
+        v = value.f64;
+    }
+    /** Get the pixel value
+     *
+     * @return Pixel value
+     */
+    template <typename T>
+    T get() const
+    {
+        T val;
+        get(val);
+        return val;
     }
 };
 }

@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEDepthConcatenate.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
@@ -48,11 +49,16 @@ void NEDepthConcatenate::configure(std::vector<ITensor *> inputs_vector, ITensor
     _concat_kernels_vector  = arm_compute::support::cpp14::make_unique<NEDepthConcatenateKernel[]>(_num_inputs);
     _border_handlers_vector = arm_compute::support::cpp14::make_unique<NEFillBorderKernel[]>(_num_inputs);
 
+    TensorShape output_shape = calculate_depth_concatenate_shape(inputs_vector);
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type(), inputs_vector[0]->info()->fixed_point_position());
+
     unsigned int depth_offset = 0;
     for(unsigned int i = 0; i < _num_inputs; ++i)
     {
         _concat_kernels_vector[i].configure(inputs_vector.at(i), depth_offset, output);
-        _border_handlers_vector[i].configure(inputs_vector.at(i), _concat_kernels_vector[i].border_size(), BorderMode::CONSTANT, PixelValue(0));
+        _border_handlers_vector[i].configure(inputs_vector.at(i), _concat_kernels_vector[i].border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
 
         depth_offset += inputs_vector.at(i)->info()->dimension(2);
     }

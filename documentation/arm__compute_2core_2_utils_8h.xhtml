@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -128,6 +128,7 @@ $(document).ready(function(){initNavTree('arm__compute_2core_2_utils_8h.xhtml','
 <code>#include &lt;string&gt;</code><br/>
 <code>#include &lt;type_traits&gt;</code><br/>
 <code>#include &lt;utility&gt;</code><br/>
+<code>#include &lt;vector&gt;</code><br/>
 </div>
 <p><a href="arm__compute_2core_2_utils_8h_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -183,6 +184,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a0101a40c4a6acc2af3b55afa7632f16a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a0101a40c4a6acc2af3b55afa7632f16a">calculate_matrix_scale</a> (const int16_t *matrix, unsigned int matrix_size)</td></tr>
 <tr class="memdesc:a0101a40c4a6acc2af3b55afa7632f16a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the scale of the given square matrix.  <a href="#a0101a40c4a6acc2af3b55afa7632f16a">More...</a><br/></td></tr>
 <tr class="separator:a0101a40c4a6acc2af3b55afa7632f16a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a075313545533c34978309ed57d18333f"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a075313545533c34978309ed57d18333f"><td class="memTemplItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a075313545533c34978309ed57d18333f">calculate_depth_concatenate_shape</a> (const std::vector&lt; T * &gt; &amp;inputs_vector)</td></tr>
+<tr class="memdesc:a075313545533c34978309ed57d18333f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the output shapes of the depth concatenate function.  <a href="#a075313545533c34978309ed57d18333f">More...</a><br/></td></tr>
+<tr class="separator:a075313545533c34978309ed57d18333f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01adc12d8e07c06cdb0f03c56a455bf3"><td class="memItemLeft" align="right" valign="top">std::pair&lt; DataType, DataType &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a01adc12d8e07c06cdb0f03c56a455bf3">data_type_for_convolution</a> (const int16_t *conv_col, const int16_t *conv_row, size_t <a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>)</td></tr>
 <tr class="memdesc:a01adc12d8e07c06cdb0f03c56a455bf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate accurary required by the horizontal and vertical convolution computations.  <a href="#a01adc12d8e07c06cdb0f03c56a455bf3">More...</a><br/></td></tr>
 <tr class="separator:a01adc12d8e07c06cdb0f03c56a455bf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -256,7 +261,7 @@ unsigned int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d4d363c0979c7ffda4833df3f93b5668.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_62e76289bb143101bef0ade0babfd908.xhtml">core</a></li><li class="navelem"><a class="el" href="arm__compute_2core_2_utils_8h.xhtml">Utils.h</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:52 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -83,6 +83,8 @@ public:
     using clGetDeviceInfo_func           = cl_int (*)(cl_device_id, cl_device_info, size_t, void *, size_t *);
     using clGetDeviceIDs_func            = cl_int (*)(cl_platform_id, cl_device_type, cl_uint, cl_device_id *, cl_uint *);
     using clRetainEvent_func             = cl_int (*)(cl_event);
+    using clGetPlatformIDs_func          = cl_int (*)(cl_uint, cl_platform_id *, cl_uint *);
+    using clGetKernelWorkGroupInfo_func  = cl_int (*)(cl_kernel, cl_device_id, cl_kernel_work_group_info, size_t, void *, size_t *);
 
     clBuildProgram_func            clBuildProgram            = nullptr;
     clEnqueueNDRangeKernel_func    clEnqueueNDRangeKernel    = nullptr;
@@ -113,6 +115,8 @@ public:
     clGetDeviceInfo_func           clGetDeviceInfo           = nullptr;
     clGetDeviceIDs_func            clGetDeviceIDs            = nullptr;
     clRetainEvent_func             clRetainEvent             = nullptr;
+    clGetPlatformIDs_func          clGetPlatformIDs          = nullptr;
+    clGetKernelWorkGroupInfo_func  clGetKernelWorkGroupInfo  = nullptr;
 
 private:
     std::pair<bool, bool> _loaded{ false, false };

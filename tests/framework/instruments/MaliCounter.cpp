@@ -23,6 +23,8 @@
  */
 #include "MaliCounter.h"
 
+#include "arm_compute/core/Error.h"
+
 namespace arm_compute
 {
 namespace test
@@ -46,7 +48,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
 
     if(fd < 0)
     {
-        throw std::runtime_error("Failed to get HW info.");
+        ARM_COMPUTE_ERROR("Failed to get HW info.");
     }
 
     {
@@ -57,7 +59,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
 
         if(mali_userspace::mali_ioctl(fd, version_check_args) != 0)
         {
-            throw std::runtime_error("Failed to check version.");
+            ARM_COMPUTE_ERROR("Failed to check version.");
             close(fd);
         }
     }
@@ -70,7 +72,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
 
         if(mali_userspace::mali_ioctl(fd, flags) != 0)
         {
-            throw std::runtime_error("Failed settings flags ioctl.");
+            ARM_COMPUTE_ERROR("Failed settings flags ioctl.");
             close(fd);
         }
     }
@@ -81,7 +83,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
 
         if(mali_ioctl(fd, props) != 0)
         {
-            throw std::runtime_error("Failed settings flags ioctl.");
+            ARM_COMPUTE_ERROR("Failed settings flags ioctl.");
             close(fd);
         }
 
@@ -141,7 +143,7 @@ void MaliCounter::init()
 
     if(_fd < 0)
     {
-        throw std::runtime_error("Failed to open /dev/mali0.");
+        ARM_COMPUTE_ERROR("Failed to open /dev/mali0.");
     }
 
     {
@@ -150,11 +152,11 @@ void MaliCounter::init()
 
         if(mali_userspace::mali_ioctl(_fd, check) != 0)
         {
-            throw std::runtime_error("Failed to get ABI version.");
+            ARM_COMPUTE_ERROR("Failed to get ABI version.");
         }
         else if(check.major < 10)
         {
-            throw std::runtime_error("Unsupported ABI version 10.");
+            ARM_COMPUTE_ERROR("Unsupported ABI version 10.");
         }
     }
 
@@ -166,7 +168,7 @@ void MaliCounter::init()
 
         if(mali_userspace::mali_ioctl(_fd, flags) != 0)
         {
-            throw std::runtime_error("Failed settings flags ioctl.");
+            ARM_COMPUTE_ERROR("Failed settings flags ioctl.");
         }
     }
 
@@ -183,7 +185,7 @@ void MaliCounter::init()
 
         if(mali_userspace::mali_ioctl(_fd, setup) != 0)
         {
-            throw std::runtime_error("Failed setting hwcnt reader ioctl.");
+            ARM_COMPUTE_ERROR("Failed setting hwcnt reader ioctl.");
         }
 
         _hwc_fd = setup.fd;
@@ -194,34 +196,34 @@ void MaliCounter::init()
 
         if(ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_GET_API_VERSION, &api_version) != 0) // NOLINT
         {
-            throw std::runtime_error("Could not determine hwcnt reader API.");
+            ARM_COMPUTE_ERROR("Could not determine hwcnt reader API.");
         }
         else if(api_version != mali_userspace::HWCNT_READER_API)
         {
-            throw std::runtime_error("Invalid API version.");
+            ARM_COMPUTE_ERROR("Invalid API version.");
         }
     }
 
     if(ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_BUFFER_SIZE), &_buffer_size) != 0) // NOLINT
     {
-        throw std::runtime_error("Failed to get buffer size.");
+        ARM_COMPUTE_ERROR("Failed to get buffer size.");
     }
 
     if(ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_HWVER), &_hw_ver) != 0) // NOLINT
     {
-        throw std::runtime_error("Could not determine HW version.");
+        ARM_COMPUTE_ERROR("Could not determine HW version.");
     }
 
     if(_hw_ver < 5)
     {
-        throw std::runtime_error("Unsupported HW version.");
+        ARM_COMPUTE_ERROR("Unsupported HW version.");
     }
 
     _sample_data = static_cast<uint8_t *>(mmap(nullptr, _buffer_count * _buffer_size, PROT_READ, MAP_PRIVATE, _hwc_fd, 0));
 
     if(_sample_data == MAP_FAILED) // NOLINT
     {
-        throw std::runtime_error("Failed to map sample data.");
+        ARM_COMPUTE_ERROR("Failed to map sample data.");
     }
 
     auto product = std::find_if(std::begin(mali_userspace::products), std::end(mali_userspace::products), [&](const mali_userspace::CounterMapping & cm)
@@ -235,7 +237,7 @@ void MaliCounter::init()
     }
     else
     {
-        throw std::runtime_error("Could not identify GPU.");
+        ARM_COMPUTE_ERROR("Could not identify GPU.");
     }
 
     _raw_counter_buffer.resize(_buffer_size / sizeof(uint32_t));
@@ -279,7 +281,7 @@ void MaliCounter::sample_counters()
 {
     if(ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_DUMP, 0) != 0)
     {
-        throw std::runtime_error("Could not sample hardware counters.");
+        ARM_COMPUTE_ERROR("Could not sample hardware counters.");
     }
 }
 
@@ -293,7 +295,7 @@ void MaliCounter::wait_next_event()
 
     if(count < 0)
     {
-        throw std::runtime_error("poll() failed.");
+        ARM_COMPUTE_ERROR("poll() failed.");
     }
 
     if((poll_fd.revents & POLLIN) != 0)
@@ -302,7 +304,7 @@ void MaliCounter::wait_next_event()
 
         if(ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_BUFFER), &meta) != 0) // NOLINT
         {
-            throw std::runtime_error("Failed READER_GET_BUFFER.");
+            ARM_COMPUTE_ERROR("Failed READER_GET_BUFFER.");
         }
 
         memcpy(_raw_counter_buffer.data(), _sample_data + _buffer_size * meta.buffer_idx, _buffer_size);
@@ -310,12 +312,12 @@ void MaliCounter::wait_next_event()
 
         if(ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_PUT_BUFFER, &meta) != 0) // NOLINT
         {
-            throw std::runtime_error("Failed READER_PUT_BUFFER.");
+            ARM_COMPUTE_ERROR("Failed READER_PUT_BUFFER.");
         }
     }
     else if((poll_fd.revents & POLLHUP) != 0)
     {
-        throw std::runtime_error("HWC hung up.");
+        ARM_COMPUTE_ERROR("HWC hung up.");
     }
 }
 
@@ -337,7 +339,7 @@ const uint32_t *MaliCounter::get_counters(mali_userspace::MaliCounterBlockName b
         default:
             if(core < 0)
             {
-                std::runtime_error("Invalid core number.");
+                ARM_COMPUTE_ERROR("Invalid core number.");
             }
 
             return _raw_counter_buffer.data() + mali_userspace::MALI_NAME_BLOCK_SIZE * (3 + _core_index_remap[core]);

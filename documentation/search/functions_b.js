@@ -2,6 +2,7 @@ var searchData=
 [
   ['l2_5fhyst_5fthreshold',['l2_hyst_threshold',['../classarm__compute_1_1_h_o_g_info.xhtml#a954d05635b1ff48daffdd70d8a1a6443',1,'arm_compute::HOGInfo']]],
   ['l2_5fnormalize',['l2_normalize',['../l2__normalize_8cl.xhtml#ab09ea0cc113c0aed126f90b6de71eb2d',1,'l2_normalize():&#160;l2_normalize.cl'],['../namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a238d3ab8cdae100387631d6491204c6b',1,'arm_compute::test::validation::reference::l2_normalize(const SimpleTensor&lt; T &gt; &amp;src, unsigned int axis, float epsilon)'],['../namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#af0e1f08a54d6896f4d1e7b5ee7f54852',1,'arm_compute::test::validation::reference::l2_normalize(const SimpleTensor&lt; float &gt; &amp;src, unsigned int axis, float epsilon)']]],
+  ['l2normalizelayer',['L2NormalizeLayer',['../classarm__compute_1_1graph_1_1_l2_normalize_layer.xhtml#ae6c901659a168b351b78a8eaeed4810f',1,'arm_compute::graph::L2NormalizeLayer']]],
   ['large2dshapes',['Large2DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large2_d_shapes.xhtml#aec6e35680c5a27de50d771cc7a4ab568',1,'arm_compute::test::datasets::Large2DShapes']]],
   ['large3dshapes',['Large3DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large3_d_shapes.xhtml#aa6c076c0bc51f626dc92e460434f39a0',1,'arm_compute::test::datasets::Large3DShapes']]],
   ['large4dshapes',['Large4DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large4_d_shapes.xhtml#aeca085a1350713335ede663fcbcfe5f0',1,'arm_compute::test::datasets::Large4DShapes']]],
@@ -30,7 +31,7 @@ var searchData=
   ['log',['log',['../structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1functions.xhtml#a33520868a877b6b9a1beccdc1aaa4ec6',1,'arm_compute::test::fixed_point_arithmetic::detail::functions::log()'],['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a8c8ce35c61b4f71cccec28d18161eaa1',1,'arm_compute::test::fixed_point_arithmetic::detail::log()']]],
   ['log_5ffailed_5fexpectation',['log_failed_expectation',['../classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a0128e62cd67888b56078dac05dd59761',1,'arm_compute::test::framework::Framework']]],
   ['log_5fformat_5ffrom_5fname',['log_format_from_name',['../namespacearm__compute_1_1test_1_1framework.xhtml#a613d31469acfd34ea5c3df83e6d9f5f3',1,'arm_compute::test::framework']]],
-  ['log_5finfo',['log_info',['../classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a60b060774255916807ef1cca44bfbfe1',1,'arm_compute::test::framework::Framework']]],
+  ['log_5finfo',['log_info',['../classarm__compute_1_1_logger.xhtml#ac0dde419974561d54f73c3585043691f',1,'arm_compute::Logger::log_info()'],['../classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a60b060774255916807ef1cca44bfbfe1',1,'arm_compute::test::framework::Framework::log_info()']]],
   ['log_5flevel',['log_level',['../classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#ae7de2e3a2078977fcf1ba9132e829c0e',1,'arm_compute::test::framework::Framework']]],
   ['log_5flevel_5ffrom_5fname',['log_level_from_name',['../namespacearm__compute_1_1test_1_1framework.xhtml#a60b68e691a66d273555f1a8f06c2d387',1,'arm_compute::test::framework']]],
   ['log_5fsat_5fqs16x16',['log_sat_qs16x16',['../fixed__point_8h.xhtml#a1e9b9fe0c93606b92d8b4a3f1e28a460',1,'fixed_point.h']]],

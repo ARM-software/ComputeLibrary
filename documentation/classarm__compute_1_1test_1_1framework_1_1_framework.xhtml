@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -417,7 +417,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_framework_8cpp_source.xhtml#l00055">55</a> of file <a class="el" href="_framework_8cpp_source.xhtml">Framework.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;{</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    std::set&lt;InstrumentType&gt; types;</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
@@ -506,7 +506,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_framework_8cpp_source.xhtml#l00079">79</a> of file <a class="el" href="_framework_8cpp_source.xhtml">Framework.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="_asserts_8h_source.xhtml#l00057">arm_compute::test::framework::ARM_COMPUTE_PRINT_INFO()</a>, <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>, <a class="el" href="_registrars_8h_source.xhtml#l00080">TestCaseRegistrar&lt; T &gt;::TestCaseRegistrar()</a>, and <a class="el" href="_registrars_8h_source.xhtml#l00100">TestSuiteRegistrar::TestSuiteRegistrar()</a>.</p>
+<p>Referenced by <a class="el" href="_asserts_8h_source.xhtml#l00057">arm_compute::test::framework::ARM_COMPUTE_PRINT_INFO()</a>, <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>, <a class="el" href="_registrars_8h_source.xhtml#l00080">TestCaseRegistrar&lt; T &gt;::TestCaseRegistrar()</a>, and <a class="el" href="_registrars_8h_source.xhtml#l00100">TestSuiteRegistrar::TestSuiteRegistrar()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;{</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keyword">static</span> Framework instance;</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keywordflow">return</span> instance;</div>
@@ -534,6 +534,8 @@ Static Public Member Functions</h2></td></tr>
 <p>Definition at line <a class="el" href="_framework_8cpp_source.xhtml#l00501">501</a> of file <a class="el" href="_framework_8cpp_source.xhtml">Framework.cpp</a>.</p>
 
 <p>References <a class="el" href="_profiler_8cpp_source.xhtml#l00035">Profiler::add()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfa5fb1f955b45e38e31789286a1790398d">arm_compute::test::framework::ALL</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00204">mali_userspace::type</a>.</p>
+
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;{</div>
 <div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;    Profiler <a class="code" href="classprofiler.xhtml">profiler</a>;</div>
 <div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;</div>
@@ -657,7 +659,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>References <a class="el" href="_framework_8cpp_source.xhtml#l00556">Framework::log_level()</a>, and <a class="el" href="_framework_8cpp_source.xhtml#l00189">Framework::num_iterations()</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;{</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    _test_filter    = TestFilter(mode, name_filter, id_filter);</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    _num_iterations = <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a30181518d2f7c76c7692e8ab99ea1808">num_iterations</a>;</div>
@@ -1081,7 +1083,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>References <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70ba9c51674930e03c276344d19f9e4398fb">TestResult::CRASHED</a>, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70ba055c1a591abb0e8cd86dc969727bcc0b">TestResult::DISABLED</a>, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70babdb2c34681be3432a08e0450b707a014">TestResult::EXPECTED_FAILURE</a>, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70bab9e14d9b2886bcff408b85aefa780419">TestResult::FAILED</a>, <a class="el" href="hwc_8hpp_source.xhtml#l00252">id</a>, <a class="el" href="_test_filter_8cpp_source.xhtml#l00043">TestFilter::is_selected()</a>, <a class="el" href="_test_case_factory_8h_source.xhtml#l00152">TestCaseFactory::mode()</a>, <a class="el" href="_test_case_factory_8h_source.xhtml#l00140">TestCaseFactory::name()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9ab50339a10e1de285ac99d4c3990b8693">arm_compute::test::framework::NONE</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_printer.xhtml#a2551b01adb00e6af451202a3aa2fe30a">Printer::print_run_footer()</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_printer.xhtml#aa8974e876a9d2e4ed49aeab9b0a18a96">Printer::print_run_header()</a>, <a class="el" href="_test_case_factory_8h_source.xhtml#l00157">TestCaseFactory::status()</a>, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70bad0749aaba8b833466dfcbb0428e4f89c">TestResult::SUCCESS</a>, and <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9ac769ef7bddc01ed21a9f7c5fecbe2430">arm_compute::test::framework::TESTS</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;{</div>
 <div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;    <span class="comment">// Clear old test results</span></div>
 <div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    _test_results.clear();</div>
@@ -1172,7 +1174,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>References <a class="el" href="_framework_8cpp_source.xhtml#l00224">Framework::error_on_missing_assets()</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;{</div>
 <div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;    _error_on_missing_assets = <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a4cf459f20010856da7946767ba4da183">error_on_missing_assets</a>;</div>
 <div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;}</div>
@@ -1236,7 +1238,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_framework_8cpp_source.xhtml#l00530">530</a> of file <a class="el" href="_framework_8cpp_source.xhtml">Framework.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160;{</div>
 <div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;    _printer = printer;</div>
 <div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;}</div>
@@ -1269,7 +1271,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>References <a class="el" href="_framework_8cpp_source.xhtml#l00214">Framework::stop_on_error()</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;{</div>
 <div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    _stop_on_error = <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a4d22ec5d060270ed5e0c348ca0177cdb">stop_on_error</a>;</div>
 <div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;}</div>
@@ -1344,7 +1346,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>References <a class="el" href="_framework_8cpp_source.xhtml#l00204">Framework::throw_errors()</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;{</div>
 <div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    _throw_errors = <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a98bab95a13c24f15f3fa7d81f0222a09">throw_errors</a>;</div>
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;}</div>
@@ -1397,7 +1399,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>References <a class="el" href="hwc_8hpp_source.xhtml#l00252">id</a>, and <a class="el" href="_test_filter_8cpp_source.xhtml#l00043">TestFilter::is_selected()</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;{</div>
 <div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;    std::vector&lt;TestInfo&gt; ids;</div>
 <div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;</div>
@@ -1457,7 +1459,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1_framework.xhtml">Framework</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:59 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

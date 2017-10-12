@@ -86,7 +86,7 @@ std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs);
  * @param[in] blocking Specified if map is blocking or not
  */
 template <typename T>
-void map(T &tensor, bool blocking)
+inline void map(T &tensor, bool blocking)
 {
     ARM_COMPUTE_UNUSED(tensor);
     ARM_COMPUTE_UNUSED(blocking);
@@ -97,7 +97,7 @@ void map(T &tensor, bool blocking)
  * @param tensor  Tensor to be unmapped
  */
 template <typename T>
-void unmap(T &tensor)
+inline void unmap(T &tensor)
 {
     ARM_COMPUTE_UNUSED(tensor);
 }
@@ -108,7 +108,7 @@ void unmap(T &tensor)
  * @param[in] tensor   Tensor to be mapped
  * @param[in] blocking Specified if map is blocking or not
  */
-void map(CLTensor &tensor, bool blocking)
+inline void map(CLTensor &tensor, bool blocking)
 {
     tensor.map(blocking);
 }
@@ -117,7 +117,7 @@ void map(CLTensor &tensor, bool blocking)
  *
  * @param tensor  Tensor to be unmapped
  */
-void unmap(CLTensor &tensor)
+inline void unmap(CLTensor &tensor)
 {
     tensor.unmap();
 }

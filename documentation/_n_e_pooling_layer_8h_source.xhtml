@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -141,26 +141,43 @@ $(document).ready(function(){initNavTree('_n_e_pooling_layer_8h_source.xhtml',''
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">#ifndef __ARM_COMPUTE_NEPOOLINGLAYER_H__</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define __ARM_COMPUTE_NEPOOLINGLAYER_H__</span></div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="_i_n_e_simple_function_8h.xhtml">arm_compute/runtime/NEON/INESimpleFunction.h</a>&quot;</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="_i_function_8h.xhtml">arm_compute/runtime/IFunction.h</a>&quot;</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="arm__compute_2core_2_types_8h.xhtml">arm_compute/core/Types.h</a>&quot;</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keyword">namespace </span>arm_compute</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;{</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">class </span>ITensor;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">   40</a></span>&#160;<span class="keyword">class </span><a class="code" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">NEPoolingLayer</a> : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1_i_n_e_simple_function.xhtml">INESimpleFunction</a></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classarm__compute_1_1_n_e_pooling_layer.xhtml#a6fa6e4b65796fd0bf43da9b4d617d568">configure</a>(<a class="code" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="code" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, <span class="keyword">const</span> <a class="code" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a> &amp;pool_info);</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;};</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;}</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* __ARM_COMPUTE_NEPOOLINGLAYER_H__ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="_i_n_e_simple_function_8h_xhtml"><div class="ttname"><a href="_i_n_e_simple_function_8h.xhtml">INESimpleFunction.h</a></div></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="_n_e_fill_border_kernel_8h.xhtml">arm_compute/core/NEON/kernels/NEFillBorderKernel.h</a>&quot;</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="_n_e_pooling_layer_kernel_8h.xhtml">arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h</a>&quot;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="arm__compute_2core_2_types_8h.xhtml">arm_compute/core/Types.h</a>&quot;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">namespace </span>arm_compute</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;{</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">class </span>ITensor;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">   42</a></span>&#160;<span class="keyword">class </span><a class="code" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">NEPoolingLayer</a> : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1_i_function.xhtml">IFunction</a></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <a class="code" href="classarm__compute_1_1_n_e_pooling_layer.xhtml#adfb415099e7d78f4444e0fb45e405091">NEPoolingLayer</a>();</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classarm__compute_1_1_n_e_pooling_layer.xhtml#a6fa6e4b65796fd0bf43da9b4d617d568">configure</a>(<a class="code" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="code" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, <span class="keyword">const</span> <a class="code" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a> &amp;pool_info);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="comment">// Inherited methods overridden:</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classarm__compute_1_1_n_e_pooling_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a>() <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <a class="code" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml">NEPoolingLayerKernel</a> _pooling_layer_kernel;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <a class="code" href="classarm__compute_1_1_n_e_fill_border_kernel.xhtml">NEFillBorderKernel</a>   _border_handler;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keywordtype">bool</span>                 _is_global_pooling_layer;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;};</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;}</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* __ARM_COMPUTE_NEPOOLINGLAYER_H__ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="classarm__compute_1_1_i_function_xhtml"><div class="ttname"><a href="classarm__compute_1_1_i_function.xhtml">arm_compute::IFunction</a></div><div class="ttdoc">Base class for all functions. </div><div class="ttdef"><b>Definition:</b> <a href="_i_function_8h_source.xhtml#l00030">IFunction.h:30</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml">arm_compute::ITensor</a></div><div class="ttdoc">Interface for NEON tensor. </div><div class="ttdef"><b>Definition:</b> <a href="_i_tensor_8h_source.xhtml#l00036">ITensor.h:36</a></div></div>
+<div class="ttc" id="_n_e_fill_border_kernel_8h_xhtml"><div class="ttname"><a href="_n_e_fill_border_kernel_8h.xhtml">NEFillBorderKernel.h</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_n_e_pooling_layer_xhtml_ad1717410afd0be936c6213a63c8005fb"><div class="ttname"><a href="classarm__compute_1_1_n_e_pooling_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">arm_compute::NEPoolingLayer::run</a></div><div class="ttdeci">void run() override</div><div class="ttdoc">Run the kernels contained in the function. </div></div>
+<div class="ttc" id="_n_e_pooling_layer_kernel_8h_xhtml"><div class="ttname"><a href="_n_e_pooling_layer_kernel_8h.xhtml">NEPoolingLayerKernel.h</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_n_e_pooling_layer_kernel_xhtml"><div class="ttname"><a href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml">arm_compute::NEPoolingLayerKernel</a></div><div class="ttdoc">Interface for the pooling layer kernel. </div><div class="ttdef"><b>Definition:</b> <a href="_n_e_pooling_layer_kernel_8h_source.xhtml#l00034">NEPoolingLayerKernel.h:34</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_n_e_pooling_layer_xhtml_adfb415099e7d78f4444e0fb45e405091"><div class="ttname"><a href="classarm__compute_1_1_n_e_pooling_layer.xhtml#adfb415099e7d78f4444e0fb45e405091">arm_compute::NEPoolingLayer::NEPoolingLayer</a></div><div class="ttdeci">NEPoolingLayer()</div><div class="ttdoc">Constructor. </div></div>
+<div class="ttc" id="_i_function_8h_xhtml"><div class="ttname"><a href="_i_function_8h.xhtml">IFunction.h</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_n_e_pooling_layer_xhtml_a6fa6e4b65796fd0bf43da9b4d617d568"><div class="ttname"><a href="classarm__compute_1_1_n_e_pooling_layer.xhtml#a6fa6e4b65796fd0bf43da9b4d617d568">arm_compute::NEPoolingLayer::configure</a></div><div class="ttdeci">void configure(ITensor *input, ITensor *output, const PoolingLayerInfo &amp;pool_info)</div><div class="ttdoc">Set the input and output tensors. </div></div>
-<div class="ttc" id="classarm__compute_1_1_n_e_pooling_layer_xhtml"><div class="ttname"><a href="classarm__compute_1_1_n_e_pooling_layer.xhtml">arm_compute::NEPoolingLayer</a></div><div class="ttdoc">Basic function to simulate a pooling layer with the specified pooling operation. </div><div class="ttdef"><b>Definition:</b> <a href="_n_e_pooling_layer_8h_source.xhtml#l00040">NEPoolingLayer.h:40</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_i_n_e_simple_function_xhtml"><div class="ttname"><a href="classarm__compute_1_1_i_n_e_simple_function.xhtml">arm_compute::INESimpleFunction</a></div><div class="ttdoc">Basic interface for functions which have a single NEON kernel. </div><div class="ttdef"><b>Definition:</b> <a href="_i_n_e_simple_function_8h_source.xhtml#l00036">INESimpleFunction.h:36</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_n_e_pooling_layer_xhtml"><div class="ttname"><a href="classarm__compute_1_1_n_e_pooling_layer.xhtml">arm_compute::NEPoolingLayer</a></div><div class="ttdoc">Basic function to simulate a pooling layer with the specified pooling operation. </div><div class="ttdef"><b>Definition:</b> <a href="_n_e_pooling_layer_8h_source.xhtml#l00042">NEPoolingLayer.h:42</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_n_e_fill_border_kernel_xhtml"><div class="ttname"><a href="classarm__compute_1_1_n_e_fill_border_kernel.xhtml">arm_compute::NEFillBorderKernel</a></div><div class="ttdoc">Interface for the kernel to fill borders. </div><div class="ttdef"><b>Definition:</b> <a href="_n_e_fill_border_kernel_8h_source.xhtml#l00036">NEFillBorderKernel.h:36</a></div></div>
 <div class="ttc" id="arm__compute_2core_2_types_8h_xhtml"><div class="ttname"><a href="arm__compute_2core_2_types_8h.xhtml">Types.h</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_pooling_layer_info_xhtml"><div class="ttname"><a href="classarm__compute_1_1_pooling_layer_info.xhtml">arm_compute::PoolingLayerInfo</a></div><div class="ttdoc">Pooling Layer Information class. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00445">Types.h:445</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -169,7 +186,7 @@ $(document).ready(function(){initNavTree('_n_e_pooling_layer_8h_source.xhtml',''
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d4d363c0979c7ffda4833df3f93b5668.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_9464f60aea3c9b524aea6b3ae09a377f.xhtml">runtime</a></li><li class="navelem"><a class="el" href="dir_19dd10388c828caf656635151589eeb5.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_35f65bf11a4f103b6aa0588a205e65e2.xhtml">functions</a></li><li class="navelem"><a class="el" href="_n_e_pooling_layer_8h.xhtml">NEPoolingLayer.h</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:50 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:33 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

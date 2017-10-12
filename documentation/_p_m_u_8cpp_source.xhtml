@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -191,36 +191,39 @@ $(document).ready(function(){initNavTree('_p_m_u_8cpp_source.xhtml','');});
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <a class="code" href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(_fd &lt; 0, <span class="stringliteral">&quot;perf_event_open failed&quot;</span>);</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> result = ioctl(_fd, PERF_EVENT_IOC_ENABLE, 0);</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <a class="code" href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(result == -1, <span class="stringliteral">&quot;Failed to enable PMU counter: %d&quot;</span>, errno);</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <a class="code" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(result);</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;}</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;</div>
-<div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#a5ae591df94fc66ccb85cbb6565368bca">   82</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#a5ae591df94fc66ccb85cbb6565368bca">PMU::close</a>()</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;{</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <span class="keywordflow">if</span>(_fd != -1)</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    {</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#a5ae591df94fc66ccb85cbb6565368bca">::close</a>(_fd);</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        _fd = -1;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    }</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;}</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
-<div class="line"><a name="l00091"></a><span class="lineno"><a class="line" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#ad20897c5c8bd47f5d4005989bead0e55">   91</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#ad20897c5c8bd47f5d4005989bead0e55">PMU::reset</a>()</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;{</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> result = ioctl(_fd, PERF_EVENT_IOC_RESET, 0);</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <a class="code" href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(result == -1, <span class="stringliteral">&quot;Failed to reset PMU counter: %d&quot;</span>, errno);</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <a class="code" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(result);</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;} <span class="comment">// namespace framework</span></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;} <span class="comment">// namespace test</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;} <span class="comment">// namespace arm_compute</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <span class="keywordflow">if</span>(result == -1)</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    {</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <a class="code" href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a>(<span class="stringliteral">&quot;Failed to enable PMU counter: %d&quot;</span>, errno);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    }</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;}</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
+<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#a5ae591df94fc66ccb85cbb6565368bca">   83</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#a5ae591df94fc66ccb85cbb6565368bca">PMU::close</a>()</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;{</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keywordflow">if</span>(_fd != -1)</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    {</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#a5ae591df94fc66ccb85cbb6565368bca">::close</a>(_fd);</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        _fd = -1;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    }</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;}</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
+<div class="line"><a name="l00092"></a><span class="lineno"><a class="line" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#ad20897c5c8bd47f5d4005989bead0e55">   92</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#ad20897c5c8bd47f5d4005989bead0e55">PMU::reset</a>()</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;{</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> result = ioctl(_fd, PERF_EVENT_IOC_RESET, 0);</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keywordflow">if</span>(result == -1)</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    {</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <a class="code" href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a>(<span class="stringliteral">&quot;Failed to reset PMU counter: %d&quot;</span>, errno);</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    }</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;}</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;} <span class="comment">// namespace framework</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;} <span class="comment">// namespace test</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;} <span class="comment">// namespace arm_compute</span></div>
+<div class="ttc" id="_error_8h_xhtml_a05b19c75afe9c24200a62b9724734bbd"><div class="ttname"><a href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR(...)</div><div class="ttdoc">Print the given message then throw an std::runtime_error. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00031">Error.h:31</a></div></div>
 <div class="ttc" id="_p_m_u_8h_xhtml"><div class="ttname"><a href="_p_m_u_8h.xhtml">PMU.h</a></div></div>
-<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_p_m_u_xhtml_a5ae591df94fc66ccb85cbb6565368bca"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#a5ae591df94fc66ccb85cbb6565368bca">arm_compute::test::framework::PMU::close</a></div><div class="ttdeci">void close()</div><div class="ttdoc">Close the currently open counter. </div><div class="ttdef"><b>Definition:</b> <a href="_p_m_u_8cpp_source.xhtml#l00082">PMU.cpp:82</a></div></div>
-<div class="ttc" id="_error_8h_xhtml_a4103adbb45806b2f2002d44b91d0d206"><div class="ttname"><a href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(var)</div><div class="ttdoc">To avoid unused variables warnings. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00049">Error.h:49</a></div></div>
+<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_p_m_u_xhtml_a5ae591df94fc66ccb85cbb6565368bca"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#a5ae591df94fc66ccb85cbb6565368bca">arm_compute::test::framework::PMU::close</a></div><div class="ttdeci">void close()</div><div class="ttdoc">Close the currently open counter. </div><div class="ttdef"><b>Definition:</b> <a href="_p_m_u_8cpp_source.xhtml#l00083">PMU.cpp:83</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_p_m_u_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml">arm_compute::test::framework::PMU</a></div><div class="ttdoc">Class provides access to CPU hardware counters. </div><div class="ttdef"><b>Definition:</b> <a href="_p_m_u_8h_source.xhtml#l00042">PMU.h:42</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_p_m_u_xhtml_a9f1c02afefdd48c31913e6c358422727"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#a9f1c02afefdd48c31913e6c358422727">arm_compute::test::framework::PMU::open</a></div><div class="ttdeci">void open(uint64_t config)</div><div class="ttdoc">Open the specified counter based on the default configuration. </div><div class="ttdef"><b>Definition:</b> <a href="_p_m_u_8cpp_source.xhtml#l00063">PMU.cpp:63</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_p_m_u_xhtml_ab30d96d1a047f366dd309049f139fa35"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#ab30d96d1a047f366dd309049f139fa35">arm_compute::test::framework::PMU::~PMU</a></div><div class="ttdeci">~PMU()</div><div class="ttdoc">Default destructor. </div><div class="ttdef"><b>Definition:</b> <a href="_p_m_u_8cpp_source.xhtml#l00058">PMU.cpp:58</a></div></div>
-<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_p_m_u_xhtml_ad20897c5c8bd47f5d4005989bead0e55"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#ad20897c5c8bd47f5d4005989bead0e55">arm_compute::test::framework::PMU::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">Reset counter. </div><div class="ttdef"><b>Definition:</b> <a href="_p_m_u_8cpp_source.xhtml#l00091">PMU.cpp:91</a></div></div>
+<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_p_m_u_xhtml_ad20897c5c8bd47f5d4005989bead0e55"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#ad20897c5c8bd47f5d4005989bead0e55">arm_compute::test::framework::PMU::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">Reset counter. </div><div class="ttdef"><b>Definition:</b> <a href="_p_m_u_8cpp_source.xhtml#l00092">PMU.cpp:92</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_p_m_u_xhtml_af16eae86d803112e6466140aaced812b"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml#af16eae86d803112e6466140aaced812b">arm_compute::test::framework::PMU::PMU</a></div><div class="ttdeci">PMU()</div><div class="ttdoc">Default constructor. </div><div class="ttdef"><b>Definition:</b> <a href="_p_m_u_8cpp_source.xhtml#l00037">PMU.cpp:37</a></div></div>
 <div class="ttc" id="_error_8h_xhtml_a5bbdcf574d3f5e412fa6a1117911e67b"><div class="ttname"><a href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON_MSG(cond,...)</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00115">Error.h:115</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -229,7 +232,7 @@ $(document).ready(function(){initNavTree('_p_m_u_8cpp_source.xhtml','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_3b4cc335dce0408d77b688e575522aa5.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_2dd0e1a78595595cf02ec0d9123d5f3a.xhtml">framework</a></li><li class="navelem"><a class="el" href="dir_4ed310e4362bed366d89846820e9a88b.xhtml">instruments</a></li><li class="navelem"><a class="el" href="_p_m_u_8cpp.xhtml">PMU.cpp</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:51 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

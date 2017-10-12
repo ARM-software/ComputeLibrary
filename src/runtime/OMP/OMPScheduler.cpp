@@ -51,32 +51,34 @@ unsigned int OMPScheduler::num_threads() const
 void OMPScheduler::set_num_threads(unsigned int num_threads)
 {
     const unsigned int num_cores = omp_get_max_threads();
-    _num_threads                 = num_threads == 0 ? num_cores : num_threads;
+    _num_threads                 = (num_threads == 0) ? num_cores : num_threads;
 }
 
 void OMPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 
+    ThreadInfo info;
+    info.cpu_info = _info;
+
     const Window      &max_window     = kernel->window();
     const unsigned int num_iterations = max_window.num_iterations(split_dimension);
-    const unsigned int num_threads    = std::min(num_iterations, _num_threads);
+    info.num_threads                  = std::min(num_iterations, _num_threads);
 
-    if(!kernel->is_parallelisable() || 1 == num_threads)
+    if(!kernel->is_parallelisable() || info.num_threads == 1)
     {
-        kernel->run(max_window);
+        kernel->run(max_window, info);
     }
     else
     {
-        #pragma omp parallel num_threads(num_threads)
+        #pragma omp parallel num_threads(info.num_threads)
         {
             #pragma omp for
-            for(unsigned int t = 0; t < num_threads; ++t)
+            for(int t = 0; t < info.num_threads; ++t)
             {
-                Window win = max_window.split_window(split_dimension, t, num_threads);
-                win.set_thread_id(t);
-                win.set_num_threads(num_threads);
-                kernel->run(win);
+                Window win     = max_window.split_window(split_dimension, t, info.num_threads);
+                info.thread_id = t;
+                kernel->run(win, info);
             }
         }
     }

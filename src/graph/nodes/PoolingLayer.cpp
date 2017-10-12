@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/nodes/PoolingLayer.h"
 
+#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
@@ -34,7 +35,7 @@ using namespace arm_compute::graph;
 
 namespace
 {
-template <typename PoolingType, typename TensorType, Hint hint>
+template <typename PoolingType, typename TensorType, TargetHint target_hint>
 std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
 {
     auto pool = arm_compute::support::cpp14::make_unique<PoolingType>();
@@ -46,19 +47,19 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITe
     return std::move(pool);
 }
 
-template <Hint                          hint>
+template <TargetHint                    target_hint>
 std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info);
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<Hint::OPENCL>(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
 {
-    return instantiate_function<arm_compute::CLPoolingLayer, arm_compute::CLTensor, Hint::OPENCL>(input, output, pool_info);
+    return instantiate_function<arm_compute::CLPoolingLayer, arm_compute::CLTensor, TargetHint::OPENCL>(input, output, pool_info);
 }
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<Hint::NEON>(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
 {
-    return instantiate_function<arm_compute::NEPoolingLayer, arm_compute::Tensor, Hint::NEON>(input, output, pool_info);
+    return instantiate_function<arm_compute::NEPoolingLayer, arm_compute::Tensor, TargetHint::NEON>(input, output, pool_info);
 }
 } // namespace
 
@@ -67,38 +68,26 @@ PoolingLayer::PoolingLayer(const PoolingLayerInfo pool_info)
 {
 }
 
-std::unique_ptr<arm_compute::IFunction> PoolingLayer::instantiate_node(Hint hint, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> PoolingLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
 {
     std::unique_ptr<arm_compute::IFunction> func;
-    _hint   = hint;
-    _input  = input;
-    _output = output;
+    _target_hint = ctx.hints().target_hint();
 
-    if(_hint == Hint::OPENCL)
+    if(_target_hint == TargetHint::OPENCL)
     {
-        func = instantiate<Hint::OPENCL>(input, output, _pool_info);
+        func = instantiate<TargetHint::OPENCL>(input, output, _pool_info);
+        ARM_COMPUTE_LOG("Instantiating CLPoolingLayer");
     }
     else
     {
-        func = instantiate<Hint::NEON>(input, output, _pool_info);
+        func = instantiate<TargetHint::NEON>(input, output, _pool_info);
+        ARM_COMPUTE_LOG("Instantiating NEPoolingLayer");
     }
+
+    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
+                    << " Input shape: " << input->info()->tensor_shape()
+                    << " Output shape: " << output->info()->tensor_shape()
+                    << " Pooling info: " << _pool_info << std::endl);
 
     return func;
-}
-
-void PoolingLayer::print_info()
-{
-    if(_hint == Hint::OPENCL)
-    {
-        std::cout << "Instantiating CLPoolingLayer";
-    }
-    else
-    {
-        std::cout << "Instantiating NEPoolingLayer";
-    }
-
-    std::cout << " Data Type: " << _input->info()->data_type()
-              << " Input shape: " << _input->info()->tensor_shape()
-              << " Output shape: " << _output->info()->tensor_shape()
-              << " Pooling info: " << _pool_info << std::endl;
 }

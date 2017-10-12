@@ -74,7 +74,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
     // Configure fill border kernel
     BorderSize fill_border_size = (axis == 0) ? _reduction_kernel.border_size() : BorderSize();
     BorderMode fill_border_mode = reduction_operation_border_mode(op);
-    _fill_border_kernel.configure(input, fill_border_size, fill_border_mode, PixelValue(0));
+    _fill_border_kernel.configure(input, fill_border_size, fill_border_mode, PixelValue(static_cast<float>(0.f)));
 }
 
 void NEReductionOperation::run()

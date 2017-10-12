@@ -23,5 +23,6 @@ var classarm__compute_1_1test_1_1_assets_library =
     [ "get", "classarm__compute_1_1test_1_1_assets_library.xhtml#a8c511f7046a704b8352ea8a8bbf456fa", null ],
     [ "get", "classarm__compute_1_1test_1_1_assets_library.xhtml#ad6182f07b3eda32931598aa4f2bfc11a", null ],
     [ "get_image_shape", "classarm__compute_1_1test_1_1_assets_library.xhtml#acc474b96886b5fd500460c7b25dc84fa", null ],
+    [ "path", "classarm__compute_1_1test_1_1_assets_library.xhtml#a9b67b266207227062c7a2961ef85293a", null ],
     [ "seed", "classarm__compute_1_1test_1_1_assets_library.xhtml#a4035a1140831801ced5dfa1d9fe6988a", null ]
 ];

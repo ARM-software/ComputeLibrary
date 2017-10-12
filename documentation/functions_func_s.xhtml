@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -218,6 +218,9 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a293edc1bbcbddffb7228ac97917ed107">CLKernelLibrary</a>
 , <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml#a293edc1bbcbddffb7228ac97917ed107">CLScheduler</a>
 </li>
+<li>set_convolution_method_hint()
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph_hints.xhtml#ab735e95cc0f2bc3a7c16c672c4929fc4">GraphHints</a>
+</li>
 <li>set_data_type()
 : <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a4b622a0346ec30baf0b9a387e00c9ace">ITensorInfo</a>
 , <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#ab499d647cc2a22dbd8bd21e39eb2aa58">SubTensorInfo</a>
@@ -245,14 +248,9 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 <li>set_help()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_option.xhtml#a48a2672f362eeed9a3e93403f4d3de37">Option</a>
 </li>
-<li>set_hint()
-: <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#abcff5566e5609c884be1880d023c81af">Graph</a>
-</li>
 <li>set_info()
-: <a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml#a8a47fb3f9c4a913a82e7a0b3cbd9df9e">Tensor</a>
-</li>
-<li>set_info_enablement()
-: <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#afaff225242efe5b2c39c932cfdd0f459">Graph</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_sub_tensor.xhtml#a3274e3bbd7e999565b6f63037d0e8733">SubTensor</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml#a8a47fb3f9c4a913a82e7a0b3cbd9df9e">Tensor</a>
 </li>
 <li>set_is_resizable()
 : <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#afc2a8e64645655d3bb8f37003c27a7ea">ITensorInfo</a>
@@ -261,6 +259,9 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 </li>
 <li>set_kernel_path()
 : <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a66a558a56f5d0dcd6305c405ebc38cc2">CLKernelLibrary</a>
+</li>
+<li>set_logger()
+: <a class="el" href="classarm__compute_1_1_logger.xhtml#a8ce097d129855b3ce7f3fcd6c30551ba">Logger</a>
 </li>
 <li>set_lws_hint()
 : <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a44c701b9dbd01a171de4928254d1ecbf">ICLKernel</a>
@@ -311,9 +312,12 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 </li>
 <li>set_target()
 : <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml#ad5ba9d34a3a855bf1dd2e36316ff550a">CLScheduler</a>
-, <a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml#a0193e95d4f31d17d4a46d396c2f31453">Tensor</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml#aa1cadaf6294a53ceeba961d6bc673e33">Tensor</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#ad5ba9d34a3a855bf1dd2e36316ff550a">ICLKernel</a>
 , <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a6a49fcb6640894fb5ec2da99f10a1593">IScheduler</a>
+</li>
+<li>set_target_hint()
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph_hints.xhtml#a2e992645bdc3cb2a9bd6abe27a537213">GraphHints</a>
 </li>
 <li>set_temp()
 : <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a3945abf22acb665acda99694b5478dd8">Graph</a>
@@ -377,12 +381,14 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_dequantization_validation_fixture.xhtml#a8e81f3e3a398b216ac76aaa32d884220">DequantizationValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_direct_convolution_validation_fixed_point_fixture.xhtml#a80cf460fccc2e11417a5e9ac50f573f1">DirectConvolutionValidationFixedPointFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_direct_convolution_validation_fixture.xhtml#aa066ba38977b9ce2addae3ad1b9396b6">DirectConvolutionValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_fixed_point_validation_fixture.xhtml#a6b1f26ea0df1d4ec46250dccf466d43d">FixedPointValidationFixture&lt; TensorType, AccessorType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_flatten_layer_validation_fixture.xhtml#a8e81f3e3a398b216ac76aaa32d884220">FlattenLayerValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_floor_validation_fixture.xhtml#a8e81f3e3a398b216ac76aaa32d884220">FloorValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_fully_connected_layer_validation_fixed_point_fixture.xhtml#a9cf85fdf748668d730a30e60a77e80ff">FullyConnectedLayerValidationFixedPointFixture&lt; TensorType, AccessorType, FunctionType, T, run_interleave &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_fully_connected_layer_validation_fixture.xhtml#a76ed145b5e59fffbf17a6165423f9c3c">FullyConnectedLayerValidationFixture&lt; TensorType, AccessorType, FunctionType, T, run_interleave &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_gaussian3x3_validation_fixture.xhtml#af0466ca71197e96e212ed52f6a249ec0">Gaussian3x3ValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_gaussian5x5_validation_fixture.xhtml#af0466ca71197e96e212ed52f6a249ec0">Gaussian5x5ValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_offset_validation_fixture.xhtml#a87b4d66d3720492b2c1f839b9b2d564f">GEMMLowpOffsetValidationFixture&lt; TensorType, AccessorType, FunctionType &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixed_point_fixture.xhtml#a43dfdb916cf28a03cc45bbce3e0d62d0">GEMMValidationFixedPointFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixture.xhtml#a8e7efde385250fc5e1b64e1ddcc2e3f4">GEMMValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_global_pooling_layer_validation_fixture.xhtml#a21c3933be328b1ca0bacb020ab4b13a5">GlobalPoolingLayerValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
@@ -406,6 +412,8 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_softmax_validation_fixture.xhtml#a8e81f3e3a398b216ac76aaa32d884220">SoftmaxValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_table_lookup_validation_fixture.xhtml#a8e81f3e3a398b216ac76aaa32d884220">TableLookupValidationFixture&lt; TensorType, AccessorType, FunctionType, LutAccessorType, LutType, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_threshold_validation_fixture.xhtml#ab6ba3f24183b1e763158ec5f93cabcee">ThresholdValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_warp_affine_validation_fixture.xhtml#a098cb4d9deddf6515a9ce06a9bf25e5d">WarpAffineValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_warp_perspective_validation_fixture.xhtml#a55e8d7690eee28837d2fcdc690619436">WarpPerspectiveValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
 </li>
 <li>shape()
 : <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">Accessor</a>
@@ -435,7 +443,7 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 : <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a011bb65bd16aaf66b8efb3929692b2ce">SimpleTensor&lt; T &gt;</a>
 </li>
 <li>SingletonDataset()
-: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset.xhtml#a8a4f32d87c0e1f8d764c90a1abfaaa76">SingletonDataset&lt; T &gt;</a>
+: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset.xhtml#ad23d34842f593ae646353d39fc0466cd">SingletonDataset&lt; T &gt;</a>
 </li>
 <li>size()
 : <a class="el" href="classarm__compute_1_1_i_distribution1_d.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">IDistribution1D</a>
@@ -464,7 +472,7 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; T &gt;</a>
 </li>
 <li>Size2D()
-: <a class="el" href="classarm__compute_1_1_size2_d.xhtml#a9863cd6393417aa75ad980189b0fedaf">Size2D</a>
+: <a class="el" href="classarm__compute_1_1_size2_d.xhtml#ad03359b3091fe30dfef90a96ea4eba31">Size2D</a>
 </li>
 <li>size_in_bytes()
 : <a class="el" href="classarm__compute_1_1_c_l_lut.xhtml#a68f33e9afee896dc24b32093d25c6766">CLLut</a>
@@ -529,7 +537,7 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_window.xhtml#aa4ce41fc0f8c3203753a4fbee8211f5a">Window</a>
 </li>
 <li>SqueezeNetActivationLayerDataset()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_squeeze_net_activation_layer_dataset.xhtml#a11df01900099140a94ef5f553cda8efb">SqueezeNetActivationLayerDataset</a>
+: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_squeeze_net_activation_layer_dataset.xhtml#a0cdf847b63f45a609248370b51cb1a93">SqueezeNetActivationLayerDataset</a>
 </li>
 <li>SqueezeNetConvolutionLayerDataset()
 : <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_squeeze_net_convolution_layer_dataset.xhtml#abbc7600599ae6338fce43997e633f595">SqueezeNetConvolutionLayerDataset</a>
@@ -584,10 +592,10 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 : <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1functions.xhtml#a287e18f5dec27ac32bfd30039a57dddf">functions</a>
 </li>
 <li>SubTensor()
-: <a class="el" href="classarm__compute_1_1_sub_tensor.xhtml#ad0a116b24d728e2c9cca9646f6c9165e">SubTensor</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_sub_tensor.xhtml#a4d7f0813294db763fadf9ebf62b512d3">SubTensor</a>
 </li>
 <li>SubTensorInfo()
-: <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a9025d7eb7c8e0d40239ddc3568d2e201">SubTensorInfo</a>
+: <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#ae2f91fa1c229a5e05f81c4b50e667236">SubTensorInfo</a>
 </li>
 <li>sync()
 : <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml#ad55f80ed3cd8b6c4f247763b747016af">CLScheduler</a>
@@ -598,7 +606,7 @@ $(document).ready(function(){initNavTree('functions_func_s.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Sep 28 2017 14:38:02 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

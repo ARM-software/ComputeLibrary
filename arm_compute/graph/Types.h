@@ -25,30 +25,41 @@
 #define __ARM_COMPUTE_GRAPH_TYPES_H__
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/SubTensorInfo.h"
 #include "arm_compute/core/TensorInfo.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-using arm_compute::ActivationLayerInfo;
 using arm_compute::ITensor;
 using arm_compute::TensorInfo;
+using arm_compute::SubTensorInfo;
 using arm_compute::DataType;
+using arm_compute::Coordinates;
 using arm_compute::TensorShape;
 using arm_compute::PadStrideInfo;
 using arm_compute::WeightsInfo;
+using arm_compute::ActivationLayerInfo;
+using arm_compute::NormType;
+using arm_compute::NormalizationLayerInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
 
 /**< Execution hint to the graph executor */
-enum class Hint
+enum class TargetHint
 {
     DONT_CARE, /**< Run node in any device */
     OPENCL,    /**< Run node on an OpenCL capable device (GPU) */
     NEON       /**< Run node on a NEON capable device */
 };
 
+/**< Convolution method hint to the graph executor */
+enum class ConvolutionMethodHint
+{
+    GEMM,  /**< Convolution using GEMM */
+    DIRECT /**< Direct convolution */
+};
 } // namespace graph
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_GRAPH_TYPES_H__*/

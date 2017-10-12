@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -172,26 +172,26 @@ $(document).ready(function(){initNavTree('utils_2_utils_8h_source.xhtml','');});
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;std::tuple&lt;unsigned int, unsigned int, int&gt; <a class="code" href="namespacearm__compute_1_1utils.xhtml#a3aa8f5f1b94f88fdf5b43a53e29379cf">parse_ppm_header</a>(std::ifstream &amp;fs);</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00089"></a><span class="lineno"><a class="line" href="namespacearm__compute_1_1utils.xhtml#a9c3303817ba653b5d1e78efb88d02bcf">   89</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1utils.xhtml#a9c3303817ba653b5d1e78efb88d02bcf">map</a>(T &amp;tensor, <span class="keywordtype">bool</span> blocking)</div>
+<div class="line"><a name="l00089"></a><span class="lineno"><a class="line" href="namespacearm__compute_1_1utils.xhtml#a9c3303817ba653b5d1e78efb88d02bcf">   89</a></span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1utils.xhtml#a9c3303817ba653b5d1e78efb88d02bcf">map</a>(T &amp;tensor, <span class="keywordtype">bool</span> blocking)</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;{</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <a class="code" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(tensor);</div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <a class="code" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(blocking);</div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;}</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00100"></a><span class="lineno"><a class="line" href="namespacearm__compute_1_1utils.xhtml#a4ff2134cb88cb5a27120cddb98b59774">  100</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1utils.xhtml#a4ff2134cb88cb5a27120cddb98b59774">unmap</a>(T &amp;tensor)</div>
+<div class="line"><a name="l00100"></a><span class="lineno"><a class="line" href="namespacearm__compute_1_1utils.xhtml#a4ff2134cb88cb5a27120cddb98b59774">  100</a></span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1utils.xhtml#a4ff2134cb88cb5a27120cddb98b59774">unmap</a>(T &amp;tensor)</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;{</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <a class="code" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(tensor);</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;}</div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">#ifdef ARM_COMPUTE_CL</span></div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1utils.xhtml#a9c3303817ba653b5d1e78efb88d02bcf">map</a>(<a class="code" href="classarm__compute_1_1_c_l_tensor.xhtml">CLTensor</a> &amp;tensor, <span class="keywordtype">bool</span> blocking)</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1utils.xhtml#a9c3303817ba653b5d1e78efb88d02bcf">map</a>(<a class="code" href="classarm__compute_1_1_c_l_tensor.xhtml">CLTensor</a> &amp;tensor, <span class="keywordtype">bool</span> blocking)</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;{</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    tensor.<a class="code" href="classarm__compute_1_1_c_l_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">map</a>(blocking);</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;}</div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1utils.xhtml#a4ff2134cb88cb5a27120cddb98b59774">unmap</a>(CLTensor &amp;tensor)</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1utils.xhtml#a4ff2134cb88cb5a27120cddb98b59774">unmap</a>(CLTensor &amp;tensor)</div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;{</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    tensor.unmap();</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;}</div>
@@ -557,7 +557,7 @@ $(document).ready(function(){initNavTree('utils_2_utils_8h_source.xhtml','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_29327135a2a2ef098aeaaf2df19d2f1d.xhtml">utils</a></li><li class="navelem"><a class="el" href="utils_2_utils_8h.xhtml">Utils.h</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:50 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:33 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

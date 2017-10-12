@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -197,7 +197,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="warp__helpers_8h_source.xhtml#l00080">80</a> of file <a class="el" href="warp__helpers_8h_source.xhtml">warp_helpers.h</a>.</p>
 
-<p>References <a class="el" href="warp__helpers_8h_source.xhtml#l00033">clamp_to_border()</a>, <a class="el" href="fixed__point_8h_source.xhtml#l00098">CONVERT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, <a class="el" href="warp__helpers_8h_source.xhtml#l00068">get_neighbour_coords()</a>, <a class="el" href="helpers_8h_source.xhtml#l00292">offset()</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
+<p>References <a class="el" href="warp__helpers_8h_source.xhtml#l00033">clamp_to_border()</a>, <a class="el" href="fixed__point_8h_source.xhtml#l00098">CONVERT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, <a class="el" href="warp__helpers_8h_source.xhtml#l00068">get_neighbour_coords()</a>, <a class="el" href="helpers_8h_source.xhtml#l00295">offset()</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
 
 <p>Referenced by <a class="el" href="remap_8cl_source.xhtml#l00113">remap_bilinear()</a>, <a class="el" href="scale_8cl_source.xhtml#l00110">scale_bilinear()</a>, <a class="el" href="warp__affine_8cl_source.xhtml#l00111">warp_affine_bilinear()</a>, and <a class="el" href="warp__perspective_8cl_source.xhtml#l00119">warp_perspective_bilinear()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;{</div>
@@ -234,7 +234,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="fixed__point_8h_xhtml_aa8d95ba04fc73845abc6045952cae5be"><div class="ttname"><a href="fixed__point_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be">CONVERT</a></div><div class="ttdeci">#define CONVERT(x, type)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00098">fixed_point.h:98</a></div></div>
 <div class="ttc" id="warp__helpers_8h_xhtml_adbdf2ca9e8fe0b67f9359929ef743126"><div class="ttname"><a href="warp__helpers_8h.xhtml#adbdf2ca9e8fe0b67f9359929ef743126">clamp_to_border</a></div><div class="ttdeci">const float8 clamp_to_border(float8 coords, const float width, const float height)</div><div class="ttdoc">Clamps the given coordinates to the borders. </div><div class="ttdef"><b>Definition:</b> <a href="warp__helpers_8h_source.xhtml#l00033">warp_helpers.h:33</a></div></div>
 <div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00292">helpers.h:292</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00295">helpers.h:295</a></div></div>
 <div class="ttc" id="warp__helpers_8h_xhtml_a2d8047717d6464cad02c5979d09576db"><div class="ttname"><a href="warp__helpers_8h.xhtml#a2d8047717d6464cad02c5979d09576db">get_neighbour_coords</a></div><div class="ttdeci">const float8 get_neighbour_coords(const float2 coord)</div><div class="ttdoc">Given a texel coordinates this function will return the following array of coordinates: [ P...</div><div class="ttdef"><b>Definition:</b> <a href="warp__helpers_8h_source.xhtml#l00068">warp_helpers.h:68</a></div></div>
 <div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
 </div><!-- fragment -->
@@ -292,7 +292,7 @@ Functions</h2></td></tr>
 
 <p>References <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00201">arm_compute::clamp()</a>.</p>
 
-<p>Referenced by <a class="el" href="warp__helpers_8h_source.xhtml#l00080">bilinear_interpolate()</a>, <a class="el" href="remap_8cl_source.xhtml#l00113">remap_bilinear()</a>, <a class="el" href="remap_8cl_source.xhtml#l00059">remap_nearest_neighbour()</a>, <a class="el" href="scale_8cl_source.xhtml#l00076">scale_nearest_neighbour()</a>, <a class="el" href="warp__affine_8cl_source.xhtml#l00111">warp_affine_bilinear()</a>, <a class="el" href="warp__affine_8cl_source.xhtml#l00079">warp_affine_nearest_neighbour()</a>, and <a class="el" href="warp__perspective_8cl_source.xhtml#l00087">warp_perspective_nearest_neighbour()</a>.</p>
+<p>Referenced by <a class="el" href="warp__helpers_8h_source.xhtml#l00080">bilinear_interpolate()</a>, <a class="el" href="remap_8cl_source.xhtml#l00113">remap_bilinear()</a>, <a class="el" href="remap_8cl_source.xhtml#l00059">remap_nearest_neighbour()</a>, <a class="el" href="scale_8cl_source.xhtml#l00076">scale_nearest_neighbour()</a>, <a class="el" href="warp__affine_8cl_source.xhtml#l00079">warp_affine_nearest_neighbour()</a>, and <a class="el" href="warp__perspective_8cl_source.xhtml#l00087">warp_perspective_nearest_neighbour()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;{</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keyword">const</span> float4 clamped_x = <a class="code" href="namespacearm__compute.xhtml#a1c0b9414fe3a6ef6a7a23bd324ae9e67">clamp</a>(coords.even, -1.0f, width);</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keyword">const</span> float4 clamped_y = <a class="code" href="namespacearm__compute.xhtml#a1c0b9414fe3a6ef6a7a23bd324ae9e67">clamp</a>(coords.odd, -1.0f, height);</div>
@@ -419,7 +419,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="warp__helpers_8h_source.xhtml#l00045">45</a> of file <a class="el" href="warp__helpers_8h_source.xhtml">warp_helpers.h</a>.</p>
 
-<p>References <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, <a class="el" href="helpers_8h_source.xhtml#l00292">offset()</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
+<p>References <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, <a class="el" href="helpers_8h_source.xhtml#l00295">offset()</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
 
 <p>Referenced by <a class="el" href="remap_8cl_source.xhtml#l00059">remap_nearest_neighbour()</a>, <a class="el" href="scale_8cl_source.xhtml#l00076">scale_nearest_neighbour()</a>, <a class="el" href="warp__affine_8cl_source.xhtml#l00079">warp_affine_nearest_neighbour()</a>, and <a class="el" href="warp__perspective_8cl_source.xhtml#l00087">warp_perspective_nearest_neighbour()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;{</div>
@@ -429,7 +429,7 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                                         *((__global <a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a> *)<a class="code" href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>(in, coords.s6, coords.s7)));</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;}</div>
 <div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00292">helpers.h:292</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00295">helpers.h:295</a></div></div>
 <div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -440,7 +440,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_55b5a5006e943fb664ff8cff3cfe7768.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_f6c3ae42d7e27145d0a3c3e38ca1c000.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1b7ae9123c88e650426d50d95c19d414.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_b7c3d80b0dadb2139bc73b7161751c12.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="warp__helpers_8h.xhtml">warp_helpers.h</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:54 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

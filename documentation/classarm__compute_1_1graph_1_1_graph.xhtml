@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -154,15 +154,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad6aab51af350366d4844223107f54b33"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#ad6aab51af350366d4844223107f54b33">add_tensor</a> (std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml">Tensor</a> &gt; tensor)</td></tr>
 <tr class="memdesc:ad6aab51af350366d4844223107f54b33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a tensor to the graph.  <a href="#ad6aab51af350366d4844223107f54b33">More...</a><br/></td></tr>
 <tr class="separator:ad6aab51af350366d4844223107f54b33"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abcff5566e5609c884be1880d023c81af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#abcff5566e5609c884be1880d023c81af">set_hint</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">Hint</a> hint)</td></tr>
-<tr class="memdesc:abcff5566e5609c884be1880d023c81af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets an execution hint to the graph.  <a href="#abcff5566e5609c884be1880d023c81af">More...</a><br/></td></tr>
-<tr class="separator:abcff5566e5609c884be1880d023c81af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3945abf22acb665acda99694b5478dd8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a3945abf22acb665acda99694b5478dd8">set_temp</a> (<a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a> &amp;&amp;tmp)</td></tr>
 <tr class="memdesc:a3945abf22acb665acda99694b5478dd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manually sets the output of the current node.  <a href="#a3945abf22acb665acda99694b5478dd8">More...</a><br/></td></tr>
 <tr class="separator:a3945abf22acb665acda99694b5478dd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afaff225242efe5b2c39c932cfdd0f459"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#afaff225242efe5b2c39c932cfdd0f459">set_info_enablement</a> (bool is_enabled)</td></tr>
-<tr class="memdesc:afaff225242efe5b2c39c932cfdd0f459"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets whether to enable information print out.  <a href="#afaff225242efe5b2c39c932cfdd0f459">More...</a><br/></td></tr>
-<tr class="separator:afaff225242efe5b2c39c932cfdd0f459"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0dea194fb7dfe9413b77eb1d8960695"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1graph_1_1_graph_hints.xhtml">GraphHints</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#aa0dea194fb7dfe9413b77eb1d8960695">hints</a> ()</td></tr>
+<tr class="memdesc:aa0dea194fb7dfe9413b77eb1d8960695"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the graph hints that are currently used.  <a href="#aa0dea194fb7dfe9413b77eb1d8960695">More...</a><br/></td></tr>
+<tr class="separator:aa0dea194fb7dfe9413b77eb1d8960695"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> class. </p>
@@ -306,6 +303,24 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aa0dea194fb7dfe9413b77eb1d8960695"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1graph_1_1_graph_hints.xhtml">GraphHints</a>&amp; hints </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the graph hints that are currently used. </p>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> hints </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a5555577e36369d44917b04534e1740e7"></a>
 <div class="memitem">
 <div class="memproto">
@@ -373,58 +388,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Executes the graph. </p>
 
-<p>Referenced by <a class="el" href="graph__lenet_8cpp_source.xhtml#l00069">main_graph_lenet()</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="abcff5566e5609c884be1880d023c81af"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void set_hint </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">Hint</a>&#160;</td>
-          <td class="paramname"><em>hint</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Sets an execution hint to the graph. </p>
-<dl class="section note"><dt>Note</dt><dd>Hint is propagated to the following node and as per name its just a hint/preference to be considered by the graph executor</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hint</td><td>execution hint </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a class="anchor" id="afaff225242efe5b2c39c932cfdd0f459"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void set_info_enablement </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>is_enabled</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Sets whether to enable information print out. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">is_enabled</td><td>Set to true if need info printed out </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p>Referenced by <a class="el" href="graph__lenet_8cpp_source.xhtml#l00069">main_graph_lenet()</a>.</p>
+<p>Referenced by <a class="el" href="graph__alexnet_8cpp_source.xhtml#l00071">main_graph_alexnet()</a>, and <a class="el" href="graph__lenet_8cpp_source.xhtml#l00070">main_graph_lenet()</a>.</p>
 
 </div>
 </div>
@@ -461,7 +425,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:58 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

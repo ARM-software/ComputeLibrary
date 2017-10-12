@@ -21,5 +21,6 @@ var namespacemembers_func =
     [ "t", "namespacemembers_func_t.xhtml", null ],
     [ "u", "namespacemembers_func_u.xhtml", null ],
     [ "v", "namespacemembers_func_v.xhtml", null ],
+    [ "w", "namespacemembers_func_w.xhtml", null ],
     [ "z", "namespacemembers_func_z.xhtml", null ]
 ];

@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -192,6 +192,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a646cd535a16835b246c3367a63d96250"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a646cd535a16835b246c3367a63d96250">get_target</a> () const </td></tr>
 <tr class="memdesc:a646cd535a16835b246c3367a63d96250"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the targeted GPU architecture.  <a href="#a646cd535a16835b246c3367a63d96250">More...</a><br/></td></tr>
 <tr class="separator:a646cd535a16835b246c3367a63d96250"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abca336f832d730e8494049bd714df60a"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#abca336f832d730e8494049bd714df60a">get_max_workgroup_size</a> ()</td></tr>
+<tr class="memdesc:abca336f832d730e8494049bd714df60a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum workgroup size for the device the <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml" title="CLKernelLibrary class. ">CLKernelLibrary</a> uses.  <a href="#abca336f832d730e8494049bd714df60a">More...</a><br/></td></tr>
+<tr class="separator:abca336f832d730e8494049bd714df60a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d7c6b5f3332604ad6a637457f65c342"><td class="memTemplParams" colspan="2">template&lt;typename T , unsigned int dimension_size&gt; </td></tr>
 <tr class="memitem:a2d7c6b5f3332604ad6a637457f65c342"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a2d7c6b5f3332604ad6a637457f65c342">add_array_argument</a> (unsigned &amp;idx, const <a class="el" href="classarm__compute_1_1_i_c_l_array.xhtml">ICLArray</a>&lt; T &gt; *array, const <a class="el" href="classarm__compute_1_1_strides.xhtml">Strides</a> &amp;strides, unsigned int num_dimensions, const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>)</td></tr>
 <tr class="separator:a2d7c6b5f3332604ad6a637457f65c342"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -289,12 +292,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_i_c_l_kernel_8h_source.xhtml#l00260">260</a> of file <a class="el" href="_i_c_l_kernel_8h_source.xhtml">ICLKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_i_c_l_kernel_8h_source.xhtml#l00267">267</a> of file <a class="el" href="_i_c_l_kernel_8h_source.xhtml">ICLKernel.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;{</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    add_array_argument&lt;T, 1&gt;(idx, array, strides, num_dimensions, <a class="code" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>);</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;}</div>
+<div class="fragment"><div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;{</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    add_array_argument&lt;T, 1&gt;(idx, array, strides, num_dimensions, <a class="code" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>);</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;}</div>
 <div class="ttc" id="classarm__compute_1_1_i_kernel_xhtml_a3f5646133956f06348b310ccc3d36353"><div class="ttname"><a href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">arm_compute::IKernel::window</a></div><div class="ttdeci">const Window &amp; window() const </div><div class="ttdoc">The maximum window the kernel can be executed on. </div></div>
 </div><!-- fragment -->
 </div>
@@ -558,33 +561,33 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_i_c_l_kernel_8h_source.xhtml#l00233">233</a> of file <a class="el" href="_i_c_l_kernel_8h_source.xhtml">ICLKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_i_c_l_kernel_8h_source.xhtml#l00240">240</a> of file <a class="el" href="_i_c_l_kernel_8h_source.xhtml">ICLKernel.h</a>.</p>
 
 <p>References <a class="el" href="_error_8h_source.xhtml#l00115">ARM_COMPUTE_ERROR_ON_MSG</a>, <a class="el" href="_error_8h_source.xhtml#l00049">ARM_COMPUTE_UNUSED</a>, and <a class="el" href="classarm__compute_1_1_i_c_l_array.xhtml#a1fb4c50755a0ef424652246838ed91a6">ICLArray&lt; T &gt;::cl_buffer()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;{</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;    <span class="comment">// Calculate offset to the start of the window</span></div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> offset_first_element = 0;</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;</div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> n = 0; n &lt; num_dimensions; ++n)</div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;    {</div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        offset_first_element += <a class="code" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>[n].start() * strides[n];</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;    }</div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> idx_start = idx;</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    _kernel.setArg(idx++, array-&gt;cl_buffer());</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dimension = 0; dimension &lt; dimension_size; dimension++)</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    {</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;        _kernel.setArg&lt;cl_uint&gt;(idx++, strides[dimension]);</div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;        _kernel.setArg&lt;cl_uint&gt;(idx++, strides[dimension] * <a class="code" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>[dimension].step());</div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    }</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;    _kernel.setArg&lt;cl_uint&gt;(idx++, offset_first_element);</div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    <a class="code" href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(idx_start + num_arguments_per_array&lt;dimension_size&gt;() != idx,</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;                             <span class="stringliteral">&quot;add_%dD_array_argument() is supposed to add exactly %d arguments to the kernel&quot;</span>, dimension_size, num_arguments_per_array&lt;dimension_size&gt;());</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;    <a class="code" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(idx_start);</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;}</div>
+<div class="fragment"><div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;{</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    <span class="comment">// Calculate offset to the start of the window</span></div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> offset_first_element = 0;</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> n = 0; n &lt; num_dimensions; ++n)</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    {</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;        offset_first_element += <a class="code" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>[n].start() * strides[n];</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    }</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> idx_start = idx;</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    _kernel.setArg(idx++, array-&gt;cl_buffer());</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dimension = 0; dimension &lt; dimension_size; dimension++)</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    {</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;        _kernel.setArg&lt;cl_uint&gt;(idx++, strides[dimension]);</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;        _kernel.setArg&lt;cl_uint&gt;(idx++, strides[dimension] * <a class="code" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>[dimension].step());</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;    }</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;    _kernel.setArg&lt;cl_uint&gt;(idx++, offset_first_element);</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;    <a class="code" href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(idx_start + num_arguments_per_array&lt;dimension_size&gt;() != idx,</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;                             <span class="stringliteral">&quot;add_%dD_array_argument() is supposed to add exactly %d arguments to the kernel&quot;</span>, dimension_size, num_arguments_per_array&lt;dimension_size&gt;());</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    <a class="code" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(idx_start);</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;}</div>
 <div class="ttc" id="_error_8h_xhtml_a4103adbb45806b2f2002d44b91d0d206"><div class="ttname"><a href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(var)</div><div class="ttdoc">To avoid unused variables warnings. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00049">Error.h:49</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_kernel_xhtml_a3f5646133956f06348b310ccc3d36353"><div class="ttname"><a href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">arm_compute::IKernel::window</a></div><div class="ttdeci">const Window &amp; window() const </div><div class="ttdoc">The maximum window the kernel can be executed on. </div></div>
 <div class="ttc" id="_error_8h_xhtml_a5bbdcf574d3f5e412fa6a1117911e67b"><div class="ttname"><a href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON_MSG(cond,...)</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00115">Error.h:115</a></div></div>
@@ -623,6 +626,24 @@ This method should be called after the configuration of the kernel</dd></dl>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;        <span class="keywordflow">return</span> _config_id;</div>
 <div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    }</div>
 </div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="abca336f832d730e8494049bd714df60a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t get_max_workgroup_size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the maximum workgroup size for the device the <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml" title="CLKernelLibrary class. ">CLKernelLibrary</a> uses. </p>
+<dl class="section return"><dt>Returns</dt><dd>The maximum workgroup size value. </dd></dl>
+
 </div>
 </div>
 <a class="anchor" id="a646cd535a16835b246c3367a63d96250"></a>
@@ -892,7 +913,7 @@ This method should be called after the configuration of the kernel</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:55 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

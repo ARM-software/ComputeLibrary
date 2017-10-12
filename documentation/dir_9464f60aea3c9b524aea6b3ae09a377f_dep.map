@@ -1,12 +1,12 @@
 <map id="arm_compute/runtime" name="arm_compute/runtime">
 <area shape="rect" id="node6" href="dir_ab9b6c35b410e86d27de6bef9bc73a27.xhtml" title="support" alt="" coords="259,255,331,303"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000019_000037.xhtml" title="3" alt="" coords="273,227,281,242"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000020_000037.xhtml" title="3" alt="" coords="273,227,281,242"/>
 <area shape="rect" id="node2" href="dir_2c7d6b75b4949414a550064c78df77e5.xhtml" title="CL" alt="" coords="325,63,397,111"/>
 <area shape="rect" id="node7" href="dir_62e76289bb143101bef0ade0babfd908.xhtml" title="core" alt="" coords="325,159,397,207"/>
 <area shape="rect" id="edge2-headlabel" href="dir_000025_000001.xhtml" title="177" alt="" coords="359,133,380,148"/>
 <area shape="rect" id="node3" href="dir_d90cd6c6f1f4385b88fe2aee133f3914.xhtml" title="CPP" alt="" coords="229,63,301,111"/>
 <area shape="rect" id="node4" href="dir_19dd10388c828caf656635151589eeb5.xhtml" title="NEON" alt="" coords="421,63,493,111"/>
-<area shape="rect" id="edge3-headlabel" href="dir_000028_000001.xhtml" title="141" alt="" coords="393,145,414,159"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000028_000001.xhtml" title="144" alt="" coords="393,145,414,159"/>
 <area shape="rect" id="node5" href="dir_ef83c2acf9836fd30ada7f5db41c188b.xhtml" title="OMP" alt="" coords="37,63,109,111"/>
 <area shape="rect" id="edge4-headlabel" href="dir_000001_000037.xhtml" title="8" alt="" coords="324,237,332,252"/>
 <area shape="rect" id="clust2" href="dir_9464f60aea3c9b524aea6b3ae09a377f.xhtml" alt="" coords="27,52,504,121"/>

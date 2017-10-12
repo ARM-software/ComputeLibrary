@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "arm_compute/graph/Tensor.h"
 
 #include "arm_compute/core/Error.h"
@@ -53,7 +52,7 @@ void tensor_allocate(ITensor &tensor)
 } // namespace
 
 Tensor::Tensor(TensorInfo &&info)
-    : _target(Hint::DONT_CARE), _info(info), _accessor(nullptr), _tensor(nullptr)
+    : _target(TargetHint::DONT_CARE), _info(info), _accessor(nullptr), _tensor(nullptr)
 {
 }
 
@@ -96,7 +95,7 @@ const TensorInfo &Tensor::info() const
     return _info;
 }
 
-ITensor *Tensor::set_target(Hint target)
+ITensor *Tensor::set_target(TargetHint target)
 {
     if(_tensor != nullptr)
     {
@@ -106,14 +105,14 @@ ITensor *Tensor::set_target(Hint target)
     {
         switch(target)
         {
-            case Hint::OPENCL:
+            case TargetHint::OPENCL:
                 _tensor = initialise_tensor<arm_compute::CLTensor>(_info);
                 break;
-            case Hint::NEON:
+            case TargetHint::NEON:
                 _tensor = initialise_tensor<arm_compute::Tensor>(_info);
                 break;
             default:
-                ARM_COMPUTE_ERROR("Invalid Hint");
+                ARM_COMPUTE_ERROR("Invalid TargetHint");
         }
         _target = target;
     }
@@ -125,14 +124,14 @@ void Tensor::allocate()
     ARM_COMPUTE_ERROR_ON_NULLPTR(_tensor.get());
     switch(_target)
     {
-        case Hint::OPENCL:
+        case TargetHint::OPENCL:
             tensor_allocate<arm_compute::CLTensor>(*_tensor);
             break;
-        case Hint::NEON:
+        case TargetHint::NEON:
             tensor_allocate<arm_compute::Tensor>(*_tensor);
             break;
         default:
-            ARM_COMPUTE_ERROR("Invalid Hint");
+            ARM_COMPUTE_ERROR("Invalid TargetHint");
     }
 }
 
@@ -145,7 +144,7 @@ void Tensor::allocate_and_fill_if_needed()
     }
 }
 
-Hint Tensor::target() const
+TargetHint Tensor::target() const
 {
     return _target;
 }

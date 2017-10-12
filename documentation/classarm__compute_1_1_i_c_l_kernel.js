@@ -9,6 +9,7 @@ var classarm__compute_1_1_i_c_l_kernel =
     [ "add_argument", "classarm__compute_1_1_i_c_l_kernel.xhtml#a50f427a1d9419800972b9e03c4034311", null ],
     [ "add_array_argument", "classarm__compute_1_1_i_c_l_kernel.xhtml#a2d7c6b5f3332604ad6a637457f65c342", null ],
     [ "config_id", "classarm__compute_1_1_i_c_l_kernel.xhtml#a226d2e9e6d3c42d681666566fe950b2d", null ],
+    [ "get_max_workgroup_size", "classarm__compute_1_1_i_c_l_kernel.xhtml#abca336f832d730e8494049bd714df60a", null ],
     [ "get_target", "classarm__compute_1_1_i_c_l_kernel.xhtml#a646cd535a16835b246c3367a63d96250", null ],
     [ "kernel", "classarm__compute_1_1_i_c_l_kernel.xhtml#ae5121015ab09ece4d470f50c7ffe198e", null ],
     [ "num_arguments_per_1D_array", "classarm__compute_1_1_i_c_l_kernel.xhtml#a99fde125501fae43952af222c91236cd", null ],

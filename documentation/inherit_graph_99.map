@@ -1,6 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml" title="Tensor accessor interface. " alt="" coords="5,56,127,83"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml" title="Dummy accessor class. " alt="" coords="175,5,298,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml" title="Numpy Binary loader class. " alt="" coords="175,56,299,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1graph__utils_1_1_p_p_m_writer.xhtml" title="PPM writer class. " alt="" coords="193,107,280,133"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_scheduler.xhtml" title="Scheduler interface to run kernels. " alt="" coords="5,56,89,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_p_p_scheduler.xhtml" title="C++11 implementation of a pool of threads to automatically split a kernel&#39;s execution among several t..." alt="" coords="161,5,269,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_o_m_p_scheduler.xhtml" title="Pool of threads to automatically split a kernel&#39;s execution among several threads. " alt="" coords="160,56,271,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_single_thread_scheduler.xhtml" title="Pool of threads to automatically split a kernel&#39;s execution among several threads. " alt="" coords="137,107,293,133"/>
 </map>

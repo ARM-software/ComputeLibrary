@@ -81,7 +81,7 @@ var dir_9464f60aea3c9b524aea6b3ae09a377f =
     [ "SingleThreadScheduler.h", "_single_thread_scheduler_8h.xhtml", [
       [ "SingleThreadScheduler", "classarm__compute_1_1_single_thread_scheduler.xhtml", "classarm__compute_1_1_single_thread_scheduler" ]
     ] ],
-    [ "SubTensor.h", "_sub_tensor_8h.xhtml", [
+    [ "SubTensor.h", "runtime_2_sub_tensor_8h.xhtml", [
       [ "SubTensor", "classarm__compute_1_1_sub_tensor.xhtml", "classarm__compute_1_1_sub_tensor" ]
     ] ],
     [ "Tensor.h", "runtime_2_tensor_8h.xhtml", "runtime_2_tensor_8h" ],

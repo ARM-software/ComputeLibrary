@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -119,6 +119,7 @@ $(document).ready(function(){initNavTree('arm__compute_2graph_2_types_8h.xhtml',
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_i_tensor_8h_source.xhtml">arm_compute/core/ITensor.h</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="_sub_tensor_info_8h_source.xhtml">arm_compute/core/SubTensorInfo.h</a>&quot;</code><br/>
 <code>#include &quot;<a class="el" href="_tensor_info_8h_source.xhtml">arm_compute/core/TensorInfo.h</a>&quot;</code><br/>
 </div>
 <p><a href="arm__compute_2graph_2_types_8h_source.xhtml">Go to the source code of this file.</a></p>
@@ -132,12 +133,16 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a0e3ca6c9bf8d16363c1be8fddd2cfcae"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">Hint</a> { <a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcaea3d241dc381afd54422199a5e6864275a">DONT_CARE</a>, 
-<a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcaea542f952490e2db695a1d544338a70cda">OPENCL</a>, 
-<a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcaeacaf162e9233294cadf62d2a71a14ca09">NEON</a>
+<tr class="memitem:a8d5e69e9a697c2007e241eb413c9833b"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">TargetHint</a> { <a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833ba3d241dc381afd54422199a5e6864275a">DONT_CARE</a>, 
+<a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833ba542f952490e2db695a1d544338a70cda">OPENCL</a>, 
+<a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833bacaf162e9233294cadf62d2a71a14ca09">NEON</a>
  }</td></tr>
-<tr class="memdesc:a0e3ca6c9bf8d16363c1be8fddd2cfcae"><td class="mdescLeft">&#160;</td><td class="mdescRight">&lt; Execution hint to the graph executor  <a href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">More...</a><br/></td></tr>
-<tr class="separator:a0e3ca6c9bf8d16363c1be8fddd2cfcae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memdesc:a8d5e69e9a697c2007e241eb413c9833b"><td class="mdescLeft">&#160;</td><td class="mdescRight">&lt; Execution hint to the graph executor  <a href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">More...</a><br/></td></tr>
+<tr class="separator:a8d5e69e9a697c2007e241eb413c9833b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a92cf6a83b4d54786334cc37a7391a2"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a9a92cf6a83b4d54786334cc37a7391a2">ConvolutionMethodHint</a> { <a class="el" href="namespacearm__compute_1_1graph.xhtml#a9a92cf6a83b4d54786334cc37a7391a2a5174aac3927faa9ee34befb7fc87a9e3">GEMM</a>, 
+<a class="el" href="namespacearm__compute_1_1graph.xhtml#a9a92cf6a83b4d54786334cc37a7391a2a4c5d06b02c97731aaa976179c62dcf76">DIRECT</a>
+ }</td></tr>
+<tr class="separator:a9a92cf6a83b4d54786334cc37a7391a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -145,7 +150,7 @@ Enumerations</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d4d363c0979c7ffda4833df3f93b5668.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_d01487573ca59d0a224e6f631a1169e6.xhtml">graph</a></li><li class="navelem"><a class="el" href="arm__compute_2graph_2_types_8h.xhtml">Types.h</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:52 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

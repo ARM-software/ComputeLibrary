@@ -138,7 +138,7 @@ __kernel void direct_convolution3x3(
     const int kernel_index = get_global_id(2);
     weights_addr += kernel_index * weights_stride_w;
 
-    for(int d = 0; d < WEIGHTS_DEPTH; ++d)
+    for(volatile int d = 0; d < WEIGHTS_DEPTH; ++d)
     {
         CONVOLUTION1x3(pixels0, (__global DATA_TYPE *)(src_addr + 0 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y));
         CONVOLUTION1x3(pixels0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y));

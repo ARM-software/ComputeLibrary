@@ -190,8 +190,9 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     {
         if(_are_weights_reshaped)
         {
-            mat_weights_cols = weights_info.num_kernels();
-            mat_weights_rows = weights->info()->dimension(0) / 4 + (_has_bias ? 1 : 0);
+            const unsigned int transpose_width = 16 / input->info()->element_size();
+            mat_weights_cols                   = weights_info.num_kernels();
+            mat_weights_rows                   = weights->info()->dimension(0) / transpose_width + (_has_bias ? 1 : 0);
         }
         else
         {

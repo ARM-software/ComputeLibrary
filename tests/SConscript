@@ -51,11 +51,12 @@ Help(new_options.GenerateHelpText(test_env))
 
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
-    test_env.Append(LIBS = [arm_compute_a])
+    Import("arm_compute_core_a")
+    test_env.Append(LIBS = [arm_compute_a, arm_compute_core_a])
     arm_compute_lib = arm_compute_a
 else:
     Import("arm_compute_so")
-    test_env.Append(LIBS = ["arm_compute"])
+    test_env.Append(LIBS = ["arm_compute", "arm_compute_core"])
     arm_compute_lib = arm_compute_so
 
 test_env.Append(CPPPATH = ["#3rdparty/include"])
@@ -72,8 +73,15 @@ common_objects = [test_env.StaticObject(f) for f in common_files]
 files_benchmark = Glob('benchmark/*.cpp')
 files_validation = Glob('validation/*.cpp')
 
+# Add unit tests
+files_validation += Glob('validation/UNIT/*.cpp')
+
 # Always compile reference for validation
 files_validation += Glob('validation/CPP/*.cpp')
+
+# Add unit tests
+files_validation += Glob('validation/UNIT/*/*.cpp')
+files_validation += Glob('validation/UNIT/*.cpp')
 
 if env['opencl']:
     Import('opencl')

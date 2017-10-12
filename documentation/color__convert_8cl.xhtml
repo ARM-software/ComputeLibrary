@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -441,7 +441,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01703">1703</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01709"></a><span class="lineno"> 1709</span>&#160;{</div>
 <div class="line"><a name="l01710"></a><span class="lineno"> 1710</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_y   = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l01711"></a><span class="lineno"> 1711</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_u   = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(u_input);</div>
@@ -461,9 +461,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01725"></a><span class="lineno"> 1725</span>&#160;    vstore16(luma_1, 0, out_y.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + luma_output_stride_y);</div>
 <div class="line"><a name="l01726"></a><span class="lineno"> 1726</span>&#160;    vstore16(cbcr, 0, out_uv.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01727"></a><span class="lineno"> 1727</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -657,7 +657,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01462">1462</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01467"></a><span class="lineno"> 1467</span>&#160;{</div>
 <div class="line"><a name="l01468"></a><span class="lineno"> 1468</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_y    = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l01469"></a><span class="lineno"> 1469</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_u    = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(u_input);</div>
@@ -701,9 +701,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01507"></a><span class="lineno"> 1507</span>&#160;    vstore8(rgb_0, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgb_output_stride_y);</div>
 <div class="line"><a name="l01508"></a><span class="lineno"> 1508</span>&#160;    vstore4(rgb_1, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgb_output_stride_y + 8);</div>
 <div class="line"><a name="l01509"></a><span class="lineno"> 1509</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -897,7 +897,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01541">1541</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01546"></a><span class="lineno"> 1546</span>&#160;{</div>
 <div class="line"><a name="l01547"></a><span class="lineno"> 1547</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_y    = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l01548"></a><span class="lineno"> 1548</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_u    = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(u_input);</div>
@@ -941,9 +941,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01586"></a><span class="lineno"> 1586</span>&#160;    vstore8(rgb_0, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgba_output_stride_y);</div>
 <div class="line"><a name="l01587"></a><span class="lineno"> 1587</span>&#160;    vstore8(rgb_1, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgba_output_stride_y + 8);</div>
 <div class="line"><a name="l01588"></a><span class="lineno"> 1588</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1221,7 +1221,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01633">1633</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01640"></a><span class="lineno"> 1640</span>&#160;{</div>
 <div class="line"><a name="l01641"></a><span class="lineno"> 1641</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_y  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l01642"></a><span class="lineno"> 1642</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_u  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(u_input);</div>
@@ -1247,9 +1247,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01662"></a><span class="lineno"> 1662</span>&#160;    vstore16(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01663"></a><span class="lineno"> 1663</span>&#160;    vstore16(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + v_output_stride_y);</div>
 <div class="line"><a name="l01664"></a><span class="lineno"> 1664</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1485,7 +1485,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00949">949</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00955"></a><span class="lineno">  955</span>&#160;{</div>
 <div class="line"><a name="l00956"></a><span class="lineno">  956</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_y  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l00957"></a><span class="lineno">  957</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_uv = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(uv_input);</div>
@@ -1505,9 +1505,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00971"></a><span class="lineno">  971</span>&#160;    vstore8(cb, 0, out_u.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00972"></a><span class="lineno">  972</span>&#160;    vstore8(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00973"></a><span class="lineno">  973</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1659,7 +1659,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00410">410</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;{</div>
 <div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_luma = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_uv   = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(uv_input);</div>
@@ -1702,9 +1702,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;    vstore8(rgb_0, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgb_output_stride_y);</div>
 <div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;    vstore4(rgb_1, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgb_output_stride_y + 8);</div>
 <div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1856,7 +1856,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00867">867</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00871"></a><span class="lineno">  871</span>&#160;{</div>
 <div class="line"><a name="l00872"></a><span class="lineno">  872</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_luma = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l00873"></a><span class="lineno">  873</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_uv   = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(uv_input);</div>
@@ -1898,9 +1898,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00909"></a><span class="lineno">  909</span>&#160;    vstore8(rgb_0, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgb_output_stride_y);</div>
 <div class="line"><a name="l00910"></a><span class="lineno">  910</span>&#160;    vstore8(rgb_1, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgb_output_stride_y + 8);</div>
 <div class="line"><a name="l00911"></a><span class="lineno">  911</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2136,7 +2136,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01011">1011</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01017"></a><span class="lineno"> 1017</span>&#160;{</div>
 <div class="line"><a name="l01018"></a><span class="lineno"> 1018</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_y  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l01019"></a><span class="lineno"> 1019</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_uv = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(uv_input);</div>
@@ -2160,9 +2160,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01037"></a><span class="lineno"> 1037</span>&#160;    vstore16(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01038"></a><span class="lineno"> 1038</span>&#160;    vstore16(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + v_output_stride_y);</div>
 <div class="line"><a name="l01039"></a><span class="lineno"> 1039</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2398,7 +2398,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01285">1285</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01291"></a><span class="lineno"> 1291</span>&#160;{</div>
 <div class="line"><a name="l01292"></a><span class="lineno"> 1292</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_y  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l01293"></a><span class="lineno"> 1293</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_uv = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(uv_input);</div>
@@ -2417,9 +2417,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01306"></a><span class="lineno"> 1306</span>&#160;    vstore8(cb, 0, out_u.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01307"></a><span class="lineno"> 1307</span>&#160;    vstore8(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01308"></a><span class="lineno"> 1308</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2571,7 +2571,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01065">1065</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01069"></a><span class="lineno"> 1069</span>&#160;{</div>
 <div class="line"><a name="l01070"></a><span class="lineno"> 1070</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_y    = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l01071"></a><span class="lineno"> 1071</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_uv   = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(uv_input);</div>
@@ -2614,9 +2614,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01108"></a><span class="lineno"> 1108</span>&#160;    vstore8(rgb_0, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgb_output_stride_y);</div>
 <div class="line"><a name="l01109"></a><span class="lineno"> 1109</span>&#160;    vstore4(rgb_1, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgb_output_stride_y + 8);</div>
 <div class="line"><a name="l01110"></a><span class="lineno"> 1110</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -2768,7 +2768,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01136">1136</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01140"></a><span class="lineno"> 1140</span>&#160;{</div>
 <div class="line"><a name="l01141"></a><span class="lineno"> 1141</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_luma = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l01142"></a><span class="lineno"> 1142</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_uv   = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(uv_input);</div>
@@ -2811,9 +2811,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01179"></a><span class="lineno"> 1179</span>&#160;    vstore8(rgb_0, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgba_output_stride_y);</div>
 <div class="line"><a name="l01180"></a><span class="lineno"> 1180</span>&#160;    vstore8(rgb_1, 0, out_rgb.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + rgba_output_stride_y + 8);</div>
 <div class="line"><a name="l01181"></a><span class="lineno"> 1181</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -3049,7 +3049,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01219">1219</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01225"></a><span class="lineno"> 1225</span>&#160;{</div>
 <div class="line"><a name="l01226"></a><span class="lineno"> 1226</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_y  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_input);</div>
 <div class="line"><a name="l01227"></a><span class="lineno"> 1227</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_uv = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(uv_input);</div>
@@ -3073,9 +3073,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01245"></a><span class="lineno"> 1245</span>&#160;    vstore16(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01246"></a><span class="lineno"> 1246</span>&#160;    vstore16(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + v_output_stride_y);</div>
 <div class="line"><a name="l01247"></a><span class="lineno"> 1247</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -3269,7 +3269,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00554">554</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;{</div>
 <div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;    <span class="comment">// handle 4 pixels every time, two lines, each line for 2 pixels</span></div>
 <div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_rgb = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(rgb_input);</div>
@@ -3322,9 +3322,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;    *out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> = cbcr.y;</div>
 <div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;}</div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -3477,7 +3477,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00325">325</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;{</div>
 <div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in     = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(input);</div>
 <div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out_y  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma);</div>
@@ -3529,9 +3529,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;    vstore2(cbcr, 0, out_uv.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;}</div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -3642,7 +3642,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00044">44</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;{</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(input);</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(output);</div>
@@ -3653,7 +3653,7 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    uchar16 rgb_2 = vload16(0, in.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + 32);</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    uchar16 rgba_0 = (uchar16)(rgb_0.s012, 255, rgb_0.s345, 255, rgb_0.s678, 255, rgb_0.s9ab, 255);</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    uchar16 rgba_1 = (uchar16)(rgb_0.scde, 255, rgb_0.f, rgb_1.s01, 255, rgb_1.s234, 255, rgb_1.s567, 255);</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    uchar16 rgba_1 = (uchar16)(rgb_0.scde, 255, rgb_0.sf, rgb_1.s01, 255, rgb_1.s234, 255, rgb_1.s567, 255);</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    uchar16 rgba_2 = (uchar16)(rgb_1.s89a, 255, rgb_1.sbcd, 255, rgb_1.sef, rgb_2.s0, 255, rgb_2.s123, 255);</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    uchar16 rgba_3 = (uchar16)(rgb_2.s456, 255, rgb_2.s789, 255, rgb_2.sabc, 255, rgb_2.sdef, 255);</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
@@ -3662,9 +3662,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    vstore16(rgba_2, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + 32);</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    vstore16(rgba_3, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + 48);</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -3858,7 +3858,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00488">488</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;{</div>
 <div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;    <span class="comment">// handle 4 pixels every time</span></div>
 <div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_rgb = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(rgb_input);</div>
@@ -3889,9 +3889,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;    vstore4(cr_0, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;}</div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -4086,7 +4086,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00786">786</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00791"></a><span class="lineno">  791</span>&#160;{</div>
 <div class="line"><a name="l00792"></a><span class="lineno">  792</span>&#160;    <span class="comment">// handle 4 pixels every time, two lines, each line for 2 pixels</span></div>
 <div class="line"><a name="l00793"></a><span class="lineno">  793</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_rgb = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(rgba_input);</div>
@@ -4139,9 +4139,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00840"></a><span class="lineno">  840</span>&#160;    *out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> = cbcr.y;</div>
 <div class="line"><a name="l00841"></a><span class="lineno">  841</span>&#160;}</div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -4294,7 +4294,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00702">702</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00706"></a><span class="lineno">  706</span>&#160;{</div>
 <div class="line"><a name="l00707"></a><span class="lineno">  707</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in     = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(input);</div>
 <div class="line"><a name="l00708"></a><span class="lineno">  708</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out_y  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_output);</div>
@@ -4344,9 +4344,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;    vstore2(cbcr, 0, out_uv.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;}</div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -4457,7 +4457,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00085">85</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;{</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(input);</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(output);</div>
@@ -4475,9 +4475,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    vstore16(rgb_1, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + 16);</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    vstore16(rgb_2, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + 32);</div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -4671,7 +4671,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00642">642</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;{</div>
 <div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160;    <span class="comment">// handle 4 pixels every time</span></div>
 <div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_rgba = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(rgba_input);</div>
@@ -4702,9 +4702,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;    vstore4(cr_0, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160;}</div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -4899,7 +4899,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01341">1341</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01346"></a><span class="lineno"> 1346</span>&#160;{</div>
 <div class="line"><a name="l01347"></a><span class="lineno"> 1347</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_uyvy = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(uyvy_input);</div>
 <div class="line"><a name="l01348"></a><span class="lineno"> 1348</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out_y   = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_output);</div>
@@ -4924,9 +4924,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01367"></a><span class="lineno"> 1367</span>&#160;    vstore4(cb, 0, out_u.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01368"></a><span class="lineno"> 1368</span>&#160;    vstore4(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01369"></a><span class="lineno"> 1369</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -5078,7 +5078,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01803">1803</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01807"></a><span class="lineno"> 1807</span>&#160;{</div>
 <div class="line"><a name="l01808"></a><span class="lineno"> 1808</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in     = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(input_uyvy);</div>
 <div class="line"><a name="l01809"></a><span class="lineno"> 1809</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out_y  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma);</div>
@@ -5096,9 +5096,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01821"></a><span class="lineno"> 1821</span>&#160;    <span class="keyword">const</span> uchar8  cbcr   = convert_uchar8((cbcr_t + cbcr_b) / (ushort8)(2));</div>
 <div class="line"><a name="l01822"></a><span class="lineno"> 1822</span>&#160;    vstore8(cbcr, 0, out_uv.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01823"></a><span class="lineno"> 1823</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -5208,7 +5208,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00124">124</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;{</div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(input);</div>
 <div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(output);</div>
@@ -5235,9 +5235,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    vstore16(rgb_0, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    vstore8(rgb_1, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + 16);</div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -5347,7 +5347,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00172">172</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;{</div>
 <div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(input);</div>
 <div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(output);</div>
@@ -5375,9 +5375,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    vstore16(rgba_0, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    vstore16(rgba_1, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + 16);</div>
 <div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -5571,7 +5571,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01402">1402</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01407"></a><span class="lineno"> 1407</span>&#160;{</div>
 <div class="line"><a name="l01408"></a><span class="lineno"> 1408</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_yuyv = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(yuyv_input);</div>
 <div class="line"><a name="l01409"></a><span class="lineno"> 1409</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out_y   = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_output);</div>
@@ -5596,9 +5596,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01428"></a><span class="lineno"> 1428</span>&#160;    vstore4(cb, 0, out_u.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01429"></a><span class="lineno"> 1429</span>&#160;    vstore4(cr, 0, out_v.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01430"></a><span class="lineno"> 1430</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -5750,7 +5750,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l01754">1754</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l01758"></a><span class="lineno"> 1758</span>&#160;{</div>
 <div class="line"><a name="l01759"></a><span class="lineno"> 1759</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in_yuyv = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(yuyv_input);</div>
 <div class="line"><a name="l01760"></a><span class="lineno"> 1760</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out_y   = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(luma_output);</div>
@@ -5770,9 +5770,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l01774"></a><span class="lineno"> 1774</span>&#160;    uchar8 cbcr = convert_uchar8((cbcr_0 + cbcr_1) / (ushort8)(2));</div>
 <div class="line"><a name="l01775"></a><span class="lineno"> 1775</span>&#160;    vstore8(cbcr, 0, out_uv.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l01776"></a><span class="lineno"> 1776</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -5882,7 +5882,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00221">221</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;{</div>
 <div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(input);</div>
 <div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(output);</div>
@@ -5909,9 +5909,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    vstore16(rgb_0, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    vstore8(rgb_1, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + 16);</div>
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -6021,7 +6021,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="color__convert_8cl_source.xhtml#l00269">269</a> of file <a class="el" href="color__convert_8cl_source.xhtml">color_convert.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;{</div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in  = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(input);</div>
 <div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> out = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(output);</div>
@@ -6049,9 +6049,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;    vstore16(rgba_0, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;    vstore16(rgba_1, 0, out.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + 16);</div>
 <div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -6061,7 +6061,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_55b5a5006e943fb664ff8cff3cfe7768.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_f6c3ae42d7e27145d0a3c3e38ca1c000.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1b7ae9123c88e650426d50d95c19d414.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_b7c3d80b0dadb2139bc73b7161751c12.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="color__convert_8cl.xhtml">color_convert.cl</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:53 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

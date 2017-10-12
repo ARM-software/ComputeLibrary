@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -128,6 +128,8 @@ $(document).ready(function(){initNavTree('tests.xhtml','');});
 <li class="level1"><a href="#tests_running_tests">Running tests</a><ul><li class="level2"><a href="#tests_running_tests_benchmarking">Benchmarking</a><ul><li class="level3"><a href="#tests_running_tests_benchmarking_filter">Filter tests</a></li>
 <li class="level3"><a href="#tests_running_tests_benchmarking_runtime">Runtime</a></li>
 <li class="level3"><a href="#tests_running_tests_benchmarking_output">Output</a></li>
+<li class="level3"><a href="#tests_running_tests_benchmarking_mode">Mode</a></li>
+<li class="level3"><a href="#tests_running_tests_benchmarking_instruments">Instruments</a></li>
 </ul>
 </li>
 <li class="level2"><a href="#tests_running_tests_validation">Validation</a></li>
@@ -356,6 +358,17 @@ Runtime</h3>
 <h3><a class="anchor" id="tests_running_tests_benchmarking_output"></a>
 Output</h3>
 <p>By default the benchmarking results are printed in a human readable format on the command line. The colored output can be disabled via <code>--no-color-output</code>. As an alternative output format JSON is supported and can be selected via <code>--log-format=json</code>. To write the output to a file instead of stdout the <code>--log-file</code> option can be used.</p>
+<h3><a class="anchor" id="tests_running_tests_benchmarking_mode"></a>
+Mode</h3>
+<p>Tests contain different datasets of different sizes, some of which will take several hours to run. You can select which datasets to use by using the <code>--mode</code> option, we recommed you use <code>--mode=precommit</code> to start with.</p>
+<h3><a class="anchor" id="tests_running_tests_benchmarking_instruments"></a>
+Instruments</h3>
+<p>You can use the <code>--instruments</code> option to select one or more instruments to measure the execution time of the benchmark tests.</p>
+<p><code>PMU</code> will try to read the CPU PMU events from the kernel (They need to be enabled on your platform)</p>
+<p><code>MALI</code> will try to collect Mali hardware performance counters. (You need to have a recent enough Mali driver)</p>
+<p><code>WALL_CLOCK</code> will measure time using <code>gettimeofday</code>: this should work on all platforms.</p>
+<p>You can pass a combinations of these instruments: <code>--instruments=PMU,MALI,WALL_CLOCK</code></p>
+<dl class="section note"><dt>Note</dt><dd>You need to make sure the instruments have been selected at compile time using the <code>pmu=1</code> or <code>mali=1</code> scons options.</dd></dl>
 <h2><a class="anchor" id="tests_running_tests_validation"></a>
 Validation</h2>
 <dl class="section note"><dt>Note</dt><dd>The new validation tests have the same interface as the benchmarking tests. </dd></dl>
@@ -364,7 +377,7 @@ Validation</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:54 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -248,7 +248,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="gemm_8cl_source.xhtml#l00182">182</a> of file <a class="el" href="gemm_8cl_source.xhtml">gemm.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00292">offset()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00295">offset()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;{</div>
 <div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;    <span class="comment">/* Compute source and destination addresses */</span></div>
 <div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> src = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(src);</div>
@@ -272,10 +272,10 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;    val0 = (ushort8)((ushort4)(a0.s6, a1.s6, a2.s6, a3.s6), (ushort4)(a0.s7, a1.s7, a2.s7, a3.s7));</div>
 <div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;    vstore8(val0, 0, ((__global ushort *)dst.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>) + 24);</div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00292">helpers.h:292</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00295">helpers.h:295</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -384,7 +384,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="gemm_8cl_source.xhtml#l00141">141</a> of file <a class="el" href="gemm_8cl_source.xhtml">gemm.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00292">offset()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00295">offset()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;{</div>
 <div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    <span class="comment">/* Compute source and destination addresses */</span></div>
 <div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> src = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(src);</div>
@@ -408,10 +408,10 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    val0 = (uint4)(a0.s3, a1.s3, a2.s3, a3.s3);</div>
 <div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    vstore4(val0, 0, ((__global uint *)dst.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>) + 12);</div>
 <div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00292">helpers.h:292</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00295">helpers.h:295</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -520,7 +520,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="gemm_8cl_source.xhtml#l00223">223</a> of file <a class="el" href="gemm_8cl_source.xhtml">gemm.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00292">offset()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="helpers_8h_source.xhtml#l00295">offset()</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;{</div>
 <div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    <span class="comment">/* Compute source and destination addresses */</span></div>
 <div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> src = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(src);</div>
@@ -548,10 +548,10 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;                     (uchar4)(a0.sE, a1.sE, a2.sE, a3.sE), (uchar4)(a0.sF, a1.sF, a2.sF, a3.sF));</div>
 <div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    vstore16(val0, 0, ((__global uchar *)dst.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>) + 48);</div>
 <div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00292">helpers.h:292</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00295">helpers.h:295</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -660,7 +660,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="gemm_8cl_source.xhtml#l00109">109</a> of file <a class="el" href="gemm_8cl_source.xhtml">gemm.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;{</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    uint x = get_global_id(0);</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    uint y = get_global_id(1);</div>
@@ -675,8 +675,8 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    vstore16(b0, 0, (__global uchar *)(dst_ptr + dst_addr_in_bytes));</div>
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -785,7 +785,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="gemm_8cl_source.xhtml#l00045">45</a> of file <a class="el" href="gemm_8cl_source.xhtml">gemm.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;{</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    uint x = get_global_id(0);</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    uint y = get_global_id(1);</div>
@@ -800,8 +800,8 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    vstore4(b0, 0, (__global uint *)(dst_ptr + dst_addr_in_bytes));</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -910,7 +910,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="gemm_8cl_source.xhtml#l00077">77</a> of file <a class="el" href="gemm_8cl_source.xhtml">gemm.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;{</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    uint x = get_global_id(0);</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    uint y = get_global_id(1);</div>
@@ -925,8 +925,8 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    vstore8(b0, 0, (__global ushort *)(dst_ptr + dst_addr_in_bytes));</div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -936,7 +936,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_55b5a5006e943fb664ff8cff3cfe7768.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_f6c3ae42d7e27145d0a3c3e38ca1c000.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1b7ae9123c88e650426d50d95c19d414.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_b7c3d80b0dadb2139bc73b7161751c12.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="gemm_8cl.xhtml">gemm.cl</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:53 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

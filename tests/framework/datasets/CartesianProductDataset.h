@@ -158,6 +158,14 @@ CartesianProductDataset<T, U> combine(T &&dataset1, U &&dataset2)
 {
     return CartesianProductDataset<T, U>(std::forward<T>(dataset1), std::forward<U>(dataset2));
 }
+
+template <typename T, typename U>
+CartesianProductDataset<T, U>
+operator*(T &&dataset1, U &&dataset2)
+{
+    return CartesianProductDataset<T, U>(std::forward<T>(dataset1), std::forward<U>(dataset2));
+}
+
 } // namespace dataset
 } // namespace framework
 } // namespace test

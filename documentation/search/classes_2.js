@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['batchnormalizationlayer',['BatchNormalizationLayer',['../classarm__compute_1_1graph_1_1_batch_normalization_layer.xhtml',1,'arm_compute::graph']]],
   ['batchnormalizationlayerdataset',['BatchNormalizationLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['batchnormalizationlayerfixture',['BatchNormalizationLayerFixture',['../classarm__compute_1_1test_1_1_batch_normalization_layer_fixture.xhtml',1,'arm_compute::test']]],
   ['batchnormalizationlayervalidationfixedpointfixture',['BatchNormalizationLayerValidationFixedPointFixture',['../classarm__compute_1_1test_1_1validation_1_1_batch_normalization_layer_validation_fixed_point_fixture.xhtml',1,'arm_compute::test::validation']]],

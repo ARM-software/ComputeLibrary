@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['l2normalizelayer',['L2NormalizeLayer',['../classarm__compute_1_1graph_1_1_l2_normalize_layer.xhtml',1,'arm_compute::graph']]],
   ['l2normalizevalidationfixture',['L2NormalizeValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_l2_normalize_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['large2dshapes',['Large2DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large2_d_shapes.xhtml',1,'arm_compute::test::datasets']]],
   ['large3dshapes',['Large3DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large3_d_shapes.xhtml',1,'arm_compute::test::datasets']]],
@@ -18,6 +19,7 @@ var searchData=
   ['lenet5network_3c_20tensortype_2c_20arm_5fcompute_3a_3atest_3a_3aaccessor_2c_20activationlayerfunction_2c_20convolutionlayerfunction_2c_20fullyconnectedlayerfunction_2c_20poolinglayerfunction_2c_20softmaxlayerfunction_20_3e',['LeNet5Network&lt; TensorType, arm_compute::test::Accessor, ActivationLayerFunction, ConvolutionLayerFunction, FullyConnectedLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;',['../classarm__compute_1_1test_1_1networks_1_1_le_net5_network.xhtml',1,'arm_compute::test::networks']]],
   ['lenet5poolinglayerdataset',['LeNet5PoolingLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_le_net5_pooling_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['listoption',['ListOption',['../classarm__compute_1_1test_1_1framework_1_1_list_option.xhtml',1,'arm_compute::test::framework']]],
+  ['logger',['Logger',['../classarm__compute_1_1_logger.xhtml',1,'arm_compute']]],
   ['lut',['Lut',['../classarm__compute_1_1_lut.xhtml',1,'arm_compute']]],
   ['lutaccessor',['LutAccessor',['../classarm__compute_1_1test_1_1_lut_accessor.xhtml',1,'arm_compute::test']]],
   ['lutallocator',['LutAllocator',['../classarm__compute_1_1_lut_allocator.xhtml',1,'arm_compute']]]

@@ -24,6 +24,10 @@
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/Allocator.h"
+#include "arm_compute/runtime/BlobLifetimeManager.h"
+#include "arm_compute/runtime/MemoryManagerOnDemand.h"
+#include "arm_compute/runtime/PoolManager.h"
 #include "utils/Utils.h"
 
 using namespace arm_compute;
@@ -33,6 +37,18 @@ void main_cnn(int argc, const char **argv)
 {
     ARM_COMPUTE_UNUSED(argc);
     ARM_COMPUTE_UNUSED(argv);
+
+    // Create NEON allocator
+    Allocator allocator;
+
+    // Create memory manager components
+    // We need 2 memory managers: 1 for handling the tensors within the functions (mm_layers) and 1 for handling the input and output tensors of the functions (mm_transitions))
+    auto lifetime_mgr0  = std::make_shared<BlobLifetimeManager>();                           // Create lifetime manager
+    auto lifetime_mgr1  = std::make_shared<BlobLifetimeManager>();                           // Create lifetime manager
+    auto pool_mgr0      = std::make_shared<PoolManager>();                                   // Create pool manager
+    auto pool_mgr1      = std::make_shared<PoolManager>();                                   // Create pool manager
+    auto mm_layers      = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr0, pool_mgr0); // Create the memory manager
+    auto mm_transitions = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr1, pool_mgr1); // Create the memory manager
 
     // The src tensor should contain the input image
     Tensor src;
@@ -55,15 +71,16 @@ void main_cnn(int argc, const char **argv)
     Tensor out_fc0;
     Tensor out_softmax;
 
-    NEConvolutionLayer    conv0;
-    NEConvolutionLayer    conv1;
+    // Create layers and set memory manager where allowed to manage internal memory requirements
+    NEConvolutionLayer    conv0(mm_layers);
+    NEConvolutionLayer    conv1(mm_layers);
     NEPoolingLayer        pool0;
     NEPoolingLayer        pool1;
-    NEFullyConnectedLayer fc0;
+    NEFullyConnectedLayer fc0(mm_layers);
     NEActivationLayer     act0;
     NEActivationLayer     act1;
     NEActivationLayer     act2;
-    NESoftmaxLayer        softmax;
+    NESoftmaxLayer        softmax(mm_layers);
 
     /* [Initialize tensors] */
 
@@ -171,9 +188,37 @@ void main_cnn(int argc, const char **argv)
 
     /* -----------------------End: [Configure functions] */
 
+    /*[ Add tensors to memory manager ]*/
+
+    // We need 2 memory groups for handling the input and output
+    // We call explicitly allocate after manage() in order to avoid overlapping lifetimes
+    MemoryGroup memory_group0(mm_transitions);
+    MemoryGroup memory_group1(mm_transitions);
+
+    memory_group0.manage(&out_conv0);
+    out_conv0.allocator()->allocate();
+    memory_group1.manage(&out_act0);
+    out_act0.allocator()->allocate();
+    memory_group0.manage(&out_pool0);
+    out_pool0.allocator()->allocate();
+    memory_group1.manage(&out_conv1);
+    out_conv1.allocator()->allocate();
+    memory_group0.manage(&out_act1);
+    out_act1.allocator()->allocate();
+    memory_group1.manage(&out_pool1);
+    out_pool1.allocator()->allocate();
+    memory_group0.manage(&out_fc0);
+    out_fc0.allocator()->allocate();
+    memory_group1.manage(&out_act2);
+    out_act2.allocator()->allocate();
+    memory_group0.manage(&out_softmax);
+    out_softmax.allocator()->allocate();
+
+    /* -----------------------End: [ Add tensors to memory manager ] */
+
     /* [Allocate tensors] */
 
-    // Now that the padding requirements are known we can allocate the images:
+    // Now that the padding requirements are known we can allocate all tensors
     src.allocator()->allocate();
     weights0.allocator()->allocate();
     weights1.allocator()->allocate();
@@ -181,17 +226,31 @@ void main_cnn(int argc, const char **argv)
     biases0.allocator()->allocate();
     biases1.allocator()->allocate();
     biases2.allocator()->allocate();
-    out_conv0.allocator()->allocate();
-    out_conv1.allocator()->allocate();
-    out_act0.allocator()->allocate();
-    out_act1.allocator()->allocate();
-    out_act2.allocator()->allocate();
-    out_pool0.allocator()->allocate();
-    out_pool1.allocator()->allocate();
-    out_fc0.allocator()->allocate();
-    out_softmax.allocator()->allocate();
 
     /* -----------------------End: [Allocate tensors] */
+
+    // Finalize layers memory manager
+
+    // Set allocator that the memory manager will use
+    mm_layers->set_allocator(&allocator);
+
+    // Number of pools that the manager will create. This specifies how many layers you want to run in parallel
+    mm_layers->set_num_pools(1);
+
+    // Finalize the manager. (Validity checks, memory allocations etc)
+    mm_layers->finalize();
+
+    // Finalize transitions memory manager
+
+    // Set allocator that the memory manager will use
+    mm_transitions->set_allocator(&allocator);
+
+    // Number of pools that the manager will create. This specifies how many models we can run in parallel.
+    // Setting to 2 as we need one for the input and one for the output at any given time
+    mm_transitions->set_num_pools(2);
+
+    // Finalize the manager. (Validity checks, memory allocations etc)
+    mm_transitions->finalize();
 
     /* [Initialize weights and biases tensors] */
 
@@ -202,6 +261,10 @@ void main_cnn(int argc, const char **argv)
 
     /* [Execute the functions] */
 
+    // Acquire memory for the memory groups
+    memory_group0.acquire();
+    memory_group1.acquire();
+
     conv0.run();
     act0.run();
     pool0.run();
@@ -211,6 +274,10 @@ void main_cnn(int argc, const char **argv)
     fc0.run();
     act2.run();
     softmax.run();
+
+    // Release memory
+    memory_group0.release();
+    memory_group1.release();
 
     /* -----------------------End: [Execute the functions] */
 }

@@ -27,6 +27,7 @@
 #include "tests/framework/Exceptions.h"
 #include "tests/framework/Framework.h"
 #include "tests/framework/Macros.h"
+#include "tests/framework/Profiler.h"
 #include "tests/framework/command_line/CommandLineOptions.h"
 #include "tests/framework/command_line/CommandLineParser.h"
 #include "tests/framework/instruments/Instruments.h"
@@ -103,9 +104,9 @@ int main(int argc, char **argv)
 
     auto help = parser.add_option<framework::ToggleOption>("help");
     help->set_help("Show this help message");
-    auto dataset_mode = parser.add_option<framework::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::ALL);
+    auto dataset_mode = parser.add_option<framework::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::PRECOMMIT);
     dataset_mode->set_help("For managed datasets select which group to use");
-    auto instruments = parser.add_option<framework::EnumListOption<framework::InstrumentType>>("instruments", allowed_instruments, std::initializer_list<framework::InstrumentType> { framework::InstrumentType::ALL });
+    auto instruments = parser.add_option<framework::EnumListOption<framework::InstrumentType>>("instruments", allowed_instruments, std::initializer_list<framework::InstrumentType> { framework::InstrumentType::WALL_CLOCK_TIMER });
     instruments->set_help("Set the profiling instruments to use");
     auto iterations = parser.add_option<framework::SimpleOption<int>>("iterations", 1);
     iterations->set_help("Number of iterations per test case");
@@ -131,6 +132,8 @@ int main(int argc, char **argv)
     color_output->set_help("Produce colored output on the console");
     auto list_tests = parser.add_option<framework::ToggleOption>("list-tests", false);
     list_tests->set_help("List all test names");
+    auto test_instruments = parser.add_option<framework::ToggleOption>("test-instruments", false);
+    test_instruments->set_help("Test if the instruments work on the platform");
     auto error_on_missing_assets = parser.add_option<framework::ToggleOption>("error-on-missing-assets", false);
     error_on_missing_assets->set_help("Mark a test as failed instead of skipping it when assets are missing");
     auto assets = parser.add_positional_option<framework::SimpleOption<std::string>>("assets");
@@ -208,6 +211,18 @@ int main(int argc, char **argv)
                 std::cout << "[" << info.id << ", " << info.mode << ", " << info.status << "] " << info.name << "\n";
             }
 
+            return 0;
+        }
+
+        if(test_instruments->value())
+        {
+            framework::Profiler profiler = framework.get_profiler();
+            profiler.start();
+            profiler.stop();
+            if(printer != nullptr)
+            {
+                printer->print_measurements(profiler.measurements());
+            }
             return 0;
         }
 

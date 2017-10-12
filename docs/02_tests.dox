@@ -315,6 +315,23 @@ As an alternative output format JSON is supported and can be selected via
 `--log-format=json`. To write the output to a file instead of stdout the
 `--log-file` option can be used.
 
+@subsubsection tests_running_tests_benchmarking_mode Mode
+Tests contain different datasets of different sizes, some of which will take several hours to run.
+You can select which datasets to use by using the `--mode` option, we recommed you use `--mode=precommit` to start with.
+
+@subsubsection tests_running_tests_benchmarking_instruments Instruments
+You can use the `--instruments` option to select one or more instruments to measure the execution time of the benchmark tests.
+
+`PMU` will try to read the CPU PMU events from the kernel (They need to be enabled on your platform)
+
+`MALI` will try to collect Mali hardware performance counters. (You need to have a recent enough Mali driver)
+
+`WALL_CLOCK` will measure time using `gettimeofday`: this should work on all platforms.
+
+You can pass a combinations of these instruments: `--instruments=PMU,MALI,WALL_CLOCK`
+
+@note You need to make sure the instruments have been selected at compile time using the `pmu=1` or `mali=1` scons options.
+
 @subsection tests_running_tests_validation Validation
 
 @note The new validation tests have the same interface as the benchmarking tests.

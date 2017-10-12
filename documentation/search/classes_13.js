@@ -40,5 +40,6 @@ var searchData=
   ['steps',['Steps',['../classarm__compute_1_1_steps.xhtml',1,'arm_compute']]],
   ['strides',['Strides',['../classarm__compute_1_1_strides.xhtml',1,'arm_compute']]],
   ['subtensor',['SubTensor',['../classarm__compute_1_1_sub_tensor.xhtml',1,'arm_compute']]],
+  ['subtensor',['SubTensor',['../classarm__compute_1_1graph_1_1_sub_tensor.xhtml',1,'arm_compute::graph']]],
   ['subtensorinfo',['SubTensorInfo',['../classarm__compute_1_1_sub_tensor_info.xhtml',1,'arm_compute']]]
 ];

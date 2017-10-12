@@ -18,11 +18,15 @@ var NAVTREE =
           [ "How to build the library ?", "index.xhtml#S3_3_1_library", null ],
           [ "How to manually build the examples ?", "index.xhtml#S3_3_2_examples", null ]
         ] ],
-        [ "Building on a Windows host system", "index.xhtml#S3_4_windows_host", [
-          [ "Bash on Ubuntu on Windows", "index.xhtml#S3_4_1_ubuntu_on_windows", null ],
-          [ "Cygwin", "index.xhtml#S3_4_2_cygwin", null ]
+        [ "Building for bare metal", "index.xhtml#S3_4_bare_metal", [
+          [ "How to build the library ?", "index.xhtml#S3_4_1_library", null ],
+          [ "How to manually build the examples ?", "index.xhtml#S3_4_2_examples", null ]
         ] ],
-        [ "The OpenCL stub library", "index.xhtml#S3_5_cl_stub_library", null ]
+        [ "Building on a Windows host system", "index.xhtml#S3_5_windows_host", [
+          [ "Bash on Ubuntu on Windows", "index.xhtml#S3_5_1_ubuntu_on_windows", null ],
+          [ "Cygwin", "index.xhtml#S3_5_2_cygwin", null ]
+        ] ],
+        [ "The OpenCL stub library", "index.xhtml#S3_6_cl_stub_library", null ]
       ] ]
     ] ],
     [ "Library architecture", "architecture.xhtml", [
@@ -76,7 +80,9 @@ var NAVTREE =
         [ "Benchmarking", "tests.xhtml#tests_running_tests_benchmarking", [
           [ "Filter tests", "tests.xhtml#tests_running_tests_benchmarking_filter", null ],
           [ "Runtime", "tests.xhtml#tests_running_tests_benchmarking_runtime", null ],
-          [ "Output", "tests.xhtml#tests_running_tests_benchmarking_output", null ]
+          [ "Output", "tests.xhtml#tests_running_tests_benchmarking_output", null ],
+          [ "Mode", "tests.xhtml#tests_running_tests_benchmarking_mode", null ],
+          [ "Instruments", "tests.xhtml#tests_running_tests_benchmarking_instruments", null ]
         ] ],
         [ "Validation", "tests.xhtml#tests_running_tests_validation", null ]
       ] ]
@@ -132,43 +138,44 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_access_window_auto_padding_8h.xhtml",
-"_c_l_2_l2_normalize_8cpp.xhtml#a73e3a821b37933eebdf70b9e61d5a156",
-"_c_l_fast_corners_8h_source.xhtml",
-"_c_l_types_8h.xhtml#a735ac6c2a02e320969625308810444f3a0a91b0ff027767625b7d1a924e10c298",
-"_direct_convolution_layer_dataset_8h_source.xhtml",
-"_i_c_l_kernel_8h.xhtml",
-"_n_e_activation_layer_8h.xhtml",
-"_n_e_fixed_point_8h.xhtml#ac2edef8bf07bce91b37aa02b952b8ed6",
-"_n_e_l2_normalize_8h_source.xhtml",
-"_n_e_o_n_2_min_max_location_8cpp.xhtml#af8115bb60734e2ad3cc20b8f73b74cd8",
-"_range_dataset_8h.xhtml#a79a0f3a3229c216adf314eb6030d6e24",
-"_window_8inl.xhtml",
-"arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58af557448a61ad2927194f63442e131dfa",
-"benchmark_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a7da7dbada8d8e076c78d1402743b7de9",
-"classarm__compute_1_1_c_l_absolute_difference.xhtml#af53d66a8f8dd368d3c06b43c0c6a12f1",
-"classarm__compute_1_1_c_l_depthwise_im2_col_kernel.xhtml#a0a10e55699b26afdf2fbf336dc9cad09",
-"classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml#a3039d9b3acf6992402f841a9290338f9",
-"classarm__compute_1_1_c_l_magnitude_phase_kernel.xhtml#a26b6db53a3b87bcf6476d95d45dff938",
-"classarm__compute_1_1_c_l_sobel5x5_hor_kernel.xhtml#ab24f49526202babfe7df925cd326427b",
-"classarm__compute_1_1_h_o_g_info.xhtml#a8f6435e0a7c016e3cb0fc94b33067e50",
-"classarm__compute_1_1_i_scheduler.xhtml#a34956db09db14c551e9966c9b66036f9",
-"classarm__compute_1_1_n_e_canny_edge.xhtml",
-"classarm__compute_1_1_n_e_fill_inner_border_kernel.xhtml#a2a4252d6ad42d3828955547d4dce0c21",
-"classarm__compute_1_1_n_e_l_k_tracker_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82",
-"classarm__compute_1_1_n_e_reshape_layer_kernel.xhtml#a83a344e60eb7db895953a942abf16628",
-"classarm__compute_1_1_steps.xhtml#a48c1f75c6cf7bdb28eeec6a795c5cf0d",
-"classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml#ac5ae9597ba20e5581726743fe7c154b5",
-"classarm__compute_1_1test_1_1_tensor_cache.xhtml",
-"classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a80db15090eed5a0bb5e7977eabeae132",
-"classarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset.xhtml#abbe90a5f39f36d8160747d349be64f36",
-"data_import.xhtml#caffe_how_to",
-"fixed__point_8h.xhtml#aa3594535118e4158134b8de127757e70",
-"globals_w.xhtml",
-"namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml",
-"softmax__layer_8cl.xhtml#a538b4b63f40e7b12891774e03a4f0dec",
-"structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml#a9b45b3e13bd9167aab02e17e08916231",
-"tests_2framework_2_utils_8h.xhtml#a898a0423aace06af0f3a18a26a972a1a",
-"validation_2_c_p_p_2_convolution_layer_8cpp.xhtml#ac0a0d3a8a94f2f011d2969ff6b6c591f"
+"_c_l_2_global_pooling_layer_8cpp.xhtml",
+"_c_l_depthwise_im2_col_kernel_8h_source.xhtml",
+"_c_l_softmax_layer_8h_source.xhtml",
+"_coordinates_8h_source.xhtml",
+"_helpers_8cpp.xhtml",
+"_macros_8h.xhtml#ad05271218a1dc0111d1b07ecd8f94904",
+"_n_e_fixed_point_8h.xhtml#a5db8c0cf0dba918904733f0c9a8bedc8",
+"_n_e_g_e_m_m_8h.xhtml",
+"_n_e_o_n_2_depth_convert_8cpp.xhtml#ab683f67d5db4ac9155889c52a1a1dde8",
+"_n_e_softmax_layer_kernel_8h.xhtml",
+"_type_printer_8h.xhtml#a2c0e6c1c4cf10da25e7a7362ba151ba2",
+"arm__compute_2core_2_fixed_point_8h.xhtml#a217e5c603560d6f73971983c6d1572a1",
+"asmlib_8hpp.xhtml#a262a34c328c613ca472b4a07450cd259",
+"caffe__data__extractor_8py_source.xhtml",
+"classarm__compute_1_1_c_l_bitwise_xor_kernel.xhtml",
+"classarm__compute_1_1_c_l_fast_corners.xhtml#a5376467035ae425342d9feb333452d07",
+"classarm__compute_1_1_c_l_histogram_border_kernel.xhtml#a406ea1342bf3679752ba91525c59aaf6",
+"classarm__compute_1_1_c_l_pixel_wise_multiplication.xhtml#a3e0a2f39d9dc0f7083aef3b37335afff",
+"classarm__compute_1_1_c_l_symbols.xhtml#acf6ea30fe76b4d9cbd9e05aa3ed19fa2",
+"classarm__compute_1_1_i_c_l_multi_image.xhtml#ad136a4299cb6e978ab975fe4a4691fba",
+"classarm__compute_1_1_memory_manager_on_demand.xhtml#a068c36b905736af9b9752c5b8b301d27",
+"classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml#afa30a9b7652a405442adaed49119a323",
+"classarm__compute_1_1_n_e_gaussian5x5_hor_kernel.xhtml#a165cde4f51d6dc5cb425237cdf7535a4",
+"classarm__compute_1_1_n_e_min_max_kernel.xhtml#a6838da666c340e4d73e8779d710a2dfd",
+"classarm__compute_1_1_n_e_sobel7x7_vert_kernel.xhtml#a667242192107c5f9fb8368eaccca2103",
+"classarm__compute_1_1_tensor_info.xhtml#a4b7391b7025befbe44b743723feb4a9b",
+"classarm__compute_1_1test_1_1_assets_library.xhtml#a5ee4fc10b84f941236df524f618b96c6",
+"classarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset.xhtml#a5446368b6d98e0124488be5698abf97a",
+"classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#ab3e6a123f1a0717364f2bfe9e2dbaedf",
+"classarm__compute_1_1test_1_1validation_1_1_batch_normalization_layer_validation_fixed_point_fixture.xhtml",
+"dir_463ebbf2abb1a8cd3e39ae1d0da97cb5.xhtml",
+"fixed__point_8h.xhtml#ae391ff83d53deb586074fdad54f59d9b",
+"helpers_8h.xhtml#a4e0fc93c9a69863dcdf7672ab547026c",
+"namespacemembers_func_o.xhtml",
+"struct_internal_keypoint.xhtml#aa4f0d3eebc3c443f9be81bf48561a217",
+"structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00",
+"tests_2validation_2_c_p_p_2_pooling_layer_8h.xhtml#a9b408e7726bf08bb8bb9a289ee622df3",
+"validation_2_c_p_p_2_depthwise_convolution_8cpp.xhtml"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/nodes/SoftmaxLayer.h"
 
+#include "arm_compute/core/Logger.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
@@ -34,7 +35,7 @@ using namespace arm_compute::graph;
 
 namespace
 {
-template <typename SoftmaxType, typename TensorType, Hint hint>
+template <typename SoftmaxType, typename TensorType, TargetHint hint>
 std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *output)
 {
     auto softmax = arm_compute::support::cpp14::make_unique<SoftmaxType>();
@@ -45,53 +46,42 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITe
     return std::move(softmax);
 }
 
-template <Hint                          hint>
+template <TargetHint                    target_hint>
 std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *output);
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<Hint::OPENCL>(ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *output)
 {
-    return instantiate_function<arm_compute::CLSoftmaxLayer, arm_compute::CLTensor, Hint::OPENCL>(input, output);
+    return instantiate_function<arm_compute::CLSoftmaxLayer, arm_compute::CLTensor, TargetHint::OPENCL>(input, output);
 }
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<Hint::NEON>(ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *output)
 {
-    return instantiate_function<arm_compute::NESoftmaxLayer, arm_compute::Tensor, Hint::NEON>(input, output);
+    return instantiate_function<arm_compute::NESoftmaxLayer, arm_compute::Tensor, TargetHint::NEON>(input, output);
 }
 } // namespace
 
-std::unique_ptr<arm_compute::IFunction> SoftmaxLayer::instantiate_node(Hint hint, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> SoftmaxLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
 {
     std::unique_ptr<arm_compute::IFunction> func;
-    _hint   = hint;
-    _input  = input;
-    _output = output;
+    _target_hint = ctx.hints().target_hint();
 
-    if(_hint == Hint::OPENCL)
+    if(_target_hint == TargetHint::OPENCL)
     {
-        func = instantiate<Hint::OPENCL>(input, output);
+        func = instantiate<TargetHint::OPENCL>(input, output);
+        ARM_COMPUTE_LOG("Instantiating CLSoftmaxLayer");
     }
     else
     {
-        func = instantiate<Hint::NEON>(input, output);
+        func = instantiate<TargetHint::NEON>(input, output);
+        ARM_COMPUTE_LOG("Instantiating NESoftmaxLayer");
     }
+
+    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
+                    << " Input shape: " << input->info()->tensor_shape()
+                    << " Output shape: " << output->info()->tensor_shape()
+                    << std::endl);
 
     return func;
-}
-
-void SoftmaxLayer::print_info()
-{
-    if(_hint == Hint::OPENCL)
-    {
-        std::cout << "Instantiating CLSoftmaxLayer";
-    }
-    else
-    {
-        std::cout << "Instantiating NESoftmaxLayer";
-    }
-    std::cout << " Data Type: " << _input->info()->data_type()
-              << " Input shape: " << _input->info()->tensor_shape()
-              << " Output shape: " << _output->info()->tensor_shape()
-              << std::endl;
 }

@@ -109,7 +109,7 @@ private:
      *
      * @return Values A11, A12, A22
      */
-    std::tuple<int, int, int> compute_spatial_gradient_matrix(const NELKInternalKeypoint &keypoint, int *bilinear_ix, int *bilinear_iy);
+    std::tuple<int, int, int> compute_spatial_gradient_matrix(const NELKInternalKeypoint &keypoint, int32_t *bilinear_ix, int32_t *bilinear_iy);
     /** Compute the vector A^T * b, i.e. -sum(I_d * I_t) for d in {x,y}
      *
      * @param[in] old_keypoint Old keypoint for which gradient is computed
@@ -119,7 +119,7 @@ private:
      *
      * @return Values b1, b2
      */
-    std::pair<int, int> compute_image_mismatch_vector(const NELKInternalKeypoint &old_keypoint, const NELKInternalKeypoint &new_keypoint, const int *bilinear_ix, const int *bilinear_iy);
+    std::pair<int, int> compute_image_mismatch_vector(const NELKInternalKeypoint &old_keypoint, const NELKInternalKeypoint &new_keypoint, const int32_t *bilinear_ix, const int32_t *bilinear_iy);
 
     const ITensor              *_input_old;
     const ITensor              *_input_new;

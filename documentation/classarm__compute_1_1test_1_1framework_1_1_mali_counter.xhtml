@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -202,24 +202,24 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Default constructor. </p>
 
-<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00108">108</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;{</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    _counters =</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    {</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        { <span class="stringliteral">&quot;GPU_ACTIVE&quot;</span>, TypedMeasurement&lt;uint64_t&gt;(0, <span class="stringliteral">&quot;cycles&quot;</span>) },</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    };</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    _core_counters =</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    {</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        { <span class="stringliteral">&quot;ARITH_WORDS&quot;</span>, { <span class="stringliteral">&quot;Arithmetic pipe&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;instructions&quot;</span> } },</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        { <span class="stringliteral">&quot;LS_ISSUE&quot;</span>, { <span class="stringliteral">&quot;LS pipe&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;instructions&quot;</span> } },</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        { <span class="stringliteral">&quot;TEX_ISSUE&quot;</span>, { <span class="stringliteral">&quot;Texture pipe&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;instructions&quot;</span> } },</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        { <span class="stringliteral">&quot;COMPUTE_ACTIVE&quot;</span>, { <span class="stringliteral">&quot;Compute core&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;cycles&quot;</span> } },</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        { <span class="stringliteral">&quot;FRAG_ACTIVE&quot;</span>, { <span class="stringliteral">&quot;Fragment core&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;cycles&quot;</span> } },</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    };</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    init();</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;}</div>
+<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00110">110</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;{</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    _counters =</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    {</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        { <span class="stringliteral">&quot;GPU_ACTIVE&quot;</span>, TypedMeasurement&lt;uint64_t&gt;(0, <span class="stringliteral">&quot;cycles&quot;</span>) },</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    };</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    _core_counters =</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    {</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        { <span class="stringliteral">&quot;ARITH_WORDS&quot;</span>, { <span class="stringliteral">&quot;Arithmetic pipe&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;instructions&quot;</span> } },</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        { <span class="stringliteral">&quot;LS_ISSUE&quot;</span>, { <span class="stringliteral">&quot;LS pipe&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;instructions&quot;</span> } },</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        { <span class="stringliteral">&quot;TEX_ISSUE&quot;</span>, { <span class="stringliteral">&quot;Texture pipe&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;instructions&quot;</span> } },</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        { <span class="stringliteral">&quot;COMPUTE_ACTIVE&quot;</span>, { <span class="stringliteral">&quot;Compute core&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;cycles&quot;</span> } },</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        { <span class="stringliteral">&quot;FRAG_ACTIVE&quot;</span>, { <span class="stringliteral">&quot;Fragment core&quot;</span>, std::map&lt;int, uint64_t&gt;(), <span class="stringliteral">&quot;cycles&quot;</span> } },</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    };</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    init();</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -262,10 +262,10 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Default destructor. </p>
 
-<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00127">127</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;{</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    term();</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;}</div>
+<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00129">129</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;{</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    term();</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -295,10 +295,10 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#a93697d33dc9325ba180a9a2a8ade6937">Instrument</a>.</p>
 
-<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00398">398</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;{</div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Mali Counter&quot;</span>;</div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;}</div>
+<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00400">400</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;{</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;    <span class="keywordflow">return</span> <span class="stringliteral">&quot;Mali Counter&quot;</span>;</div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -327,28 +327,28 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#a4cf9eb56e129a841a24bd67bb548603b">Instrument</a>.</p>
 
-<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00403">403</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00405">405</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
 
 <p>References <a class="el" href="_toolchain_support_8h_source.xhtml#l00168">arm_compute::support::cpp11::to_string()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;{</div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;    <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#afc7df496e6026b91c3f48da6821c86a9">MeasurementsMap</a> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">measurements</a></div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;    {</div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;        { <span class="stringliteral">&quot;Timespan&quot;</span>, TypedMeasurement&lt;uint64_t&gt;(_stop_time - _start_time, <span class="stringliteral">&quot;ns&quot;</span>) },</div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;        { <span class="stringliteral">&quot;GPU active&quot;</span>, _counters.at(<span class="stringliteral">&quot;GPU_ACTIVE&quot;</span>) },</div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;    };</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;</div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;    <span class="keywordflow">for</span>(<span class="keyword">const</span> <span class="keyword">auto</span> &amp;counter : _core_counters)</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;    {</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;        <span class="keywordflow">for</span>(<span class="keyword">const</span> <span class="keyword">auto</span> &amp;core : counter.second.values)</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;        {</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;            <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">measurements</a>.emplace(counter.second.name + <span class="stringliteral">&quot; #&quot;</span> + <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#acc5dddee1cbe93a4eaf0a9f74ee96bb7">support::cpp11::to_string</a>(core.first), TypedMeasurement&lt;uint64_t&gt;(core.second, counter.second.unit));</div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;        }</div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;    }</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;</div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">measurements</a>;</div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;}</div>
+<div class="fragment"><div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;{</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;    <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#afc7df496e6026b91c3f48da6821c86a9">MeasurementsMap</a> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">measurements</a></div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;    {</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;        { <span class="stringliteral">&quot;Timespan&quot;</span>, TypedMeasurement&lt;uint64_t&gt;(_stop_time - _start_time, <span class="stringliteral">&quot;ns&quot;</span>) },</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;        { <span class="stringliteral">&quot;GPU active&quot;</span>, _counters.at(<span class="stringliteral">&quot;GPU_ACTIVE&quot;</span>) },</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;    };</div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;    <span class="keywordflow">for</span>(<span class="keyword">const</span> <span class="keyword">auto</span> &amp;counter : _core_counters)</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;    {</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;        <span class="keywordflow">for</span>(<span class="keyword">const</span> <span class="keyword">auto</span> &amp;core : counter.second.values)</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;        {</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;            <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">measurements</a>.emplace(counter.second.name + <span class="stringliteral">&quot; #&quot;</span> + <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#acc5dddee1cbe93a4eaf0a9f74ee96bb7">support::cpp11::to_string</a>(core.first), TypedMeasurement&lt;uint64_t&gt;(core.second, counter.second.unit));</div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;        }</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    }</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">measurements</a>;</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;}</div>
 <div class="ttc" id="namespacearm__compute_1_1support_1_1cpp11_xhtml_acc5dddee1cbe93a4eaf0a9f74ee96bb7"><div class="ttname"><a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#acc5dddee1cbe93a4eaf0a9f74ee96bb7">arm_compute::support::cpp11::to_string</a></div><div class="ttdeci">std::string to_string(T &amp;&amp;value)</div><div class="ttdoc">Convert integer and float values to string. </div><div class="ttdef"><b>Definition:</b> <a href="_toolchain_support_8h_source.xhtml#l00168">ToolchainSupport.h:168</a></div></div>
-<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_mali_counter_xhtml_a73cabccc9d4406bf48f1db033dc35005"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">arm_compute::test::framework::MaliCounter::measurements</a></div><div class="ttdeci">MeasurementsMap measurements() const override</div><div class="ttdoc">Return the latest measurement. </div><div class="ttdef"><b>Definition:</b> <a href="_mali_counter_8cpp_source.xhtml#l00403">MaliCounter.cpp:403</a></div></div>
+<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_mali_counter_xhtml_a73cabccc9d4406bf48f1db033dc35005"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">arm_compute::test::framework::MaliCounter::measurements</a></div><div class="ttdeci">MeasurementsMap measurements() const override</div><div class="ttdoc">Return the latest measurement. </div><div class="ttdef"><b>Definition:</b> <a href="_mali_counter_8cpp_source.xhtml#l00405">MaliCounter.cpp:405</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_instrument_xhtml_afc7df496e6026b91c3f48da6821c86a9"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#afc7df496e6026b91c3f48da6821c86a9">arm_compute::test::framework::Instrument::MeasurementsMap</a></div><div class="ttdeci">std::map&lt; std::string, Measurement &gt; MeasurementsMap</div><div class="ttdef"><b>Definition:</b> <a href="_instrument_8h_source.xhtml#l00067">Instrument.h:67</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -402,12 +402,12 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#ac0ae5f26cd2001d772aed9d2ea97d41c">Instrument</a>.</p>
 
-<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00362">362</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;{</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;    sample_counters();</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;    wait_next_event();</div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;    _start_time = _timestamp;</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;}</div>
+<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00364">364</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;{</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;    sample_counters();</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;    wait_next_event();</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;    _start_time = _timestamp;</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -436,36 +436,36 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#a0efff8623a2fb79dad94a96dcf16d966">Instrument</a>.</p>
 
-<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00369">369</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_mali_counter_8cpp_source.xhtml#l00371">371</a> of file <a class="el" href="_mali_counter_8cpp_source.xhtml">MaliCounter.cpp</a>.</p>
 
 <p>References <a class="el" href="hwc__names_8hpp_source.xhtml#l00030">mali_userspace::MALI_NAME_BLOCK_JM</a>, and <a class="el" href="hwc__names_8hpp_source.xhtml#l00032">mali_userspace::MALI_NAME_BLOCK_SHADER</a>.</p>
-<div class="fragment"><div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;{</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;    sample_counters();</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;    wait_next_event();</div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;    <span class="keyword">const</span> <span class="keyword">auto</span> counter               = get_counters(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06a9e4b72e32bbb15e27d24efef32ad4f42">mali_userspace::MALI_NAME_BLOCK_JM</a>);</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;    _counters.at(<span class="stringliteral">&quot;GPU_ACTIVE&quot;</span>).value = counter[find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06a9e4b72e32bbb15e27d24efef32ad4f42">mali_userspace::MALI_NAME_BLOCK_JM</a>, <span class="stringliteral">&quot;GPU_ACTIVE&quot;</span>)];</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;</div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> arith_index   = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;ARITH_WORDS&quot;</span>);</div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> ls_index      = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;LS_ISSUE&quot;</span>);</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> tex_index     = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;TEX_ISSUE&quot;</span>);</div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> compute_index = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;COMPUTE_ACTIVE&quot;</span>);</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> frag_index    = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;FRAG_ACTIVE&quot;</span>);</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;</div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;    <span class="comment">// Shader core counters can be averaged if desired, but here we don&#39;t.</span></div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> core = 0; core &lt; _num_cores; ++core)</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;    {</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;        <span class="keyword">const</span> <span class="keyword">auto</span> sc_counter = get_counters(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, core);</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;ARITH_WORDS&quot;</span>).values[core]    = sc_counter[arith_index];</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;LS_ISSUE&quot;</span>).values[core]       = sc_counter[ls_index];</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;TEX_ISSUE&quot;</span>).values[core]      = sc_counter[tex_index];</div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;COMPUTE_ACTIVE&quot;</span>).values[core] = sc_counter[compute_index];</div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;FRAG_ACTIVE&quot;</span>).values[core]    = sc_counter[frag_index];</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;    }</div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;    _stop_time = _timestamp;</div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;}</div>
+<div class="fragment"><div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;{</div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;    sample_counters();</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;    wait_next_event();</div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;    <span class="keyword">const</span> <span class="keyword">auto</span> counter               = get_counters(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06a9e4b72e32bbb15e27d24efef32ad4f42">mali_userspace::MALI_NAME_BLOCK_JM</a>);</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;    _counters.at(<span class="stringliteral">&quot;GPU_ACTIVE&quot;</span>).value = counter[find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06a9e4b72e32bbb15e27d24efef32ad4f42">mali_userspace::MALI_NAME_BLOCK_JM</a>, <span class="stringliteral">&quot;GPU_ACTIVE&quot;</span>)];</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> arith_index   = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;ARITH_WORDS&quot;</span>);</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> ls_index      = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;LS_ISSUE&quot;</span>);</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> tex_index     = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;TEX_ISSUE&quot;</span>);</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> compute_index = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;COMPUTE_ACTIVE&quot;</span>);</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> frag_index    = find_counter_index_by_name(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, <span class="stringliteral">&quot;FRAG_ACTIVE&quot;</span>);</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;    <span class="comment">// Shader core counters can be averaged if desired, but here we don&#39;t.</span></div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> core = 0; core &lt; _num_cores; ++core)</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;    {</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;        <span class="keyword">const</span> <span class="keyword">auto</span> sc_counter = get_counters(<a class="code" href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a>, core);</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;ARITH_WORDS&quot;</span>).values[core]    = sc_counter[arith_index];</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;LS_ISSUE&quot;</span>).values[core]       = sc_counter[ls_index];</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;TEX_ISSUE&quot;</span>).values[core]      = sc_counter[tex_index];</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;COMPUTE_ACTIVE&quot;</span>).values[core] = sc_counter[compute_index];</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;        _core_counters.at(<span class="stringliteral">&quot;FRAG_ACTIVE&quot;</span>).values[core]    = sc_counter[frag_index];</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;    }</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;    _stop_time = _timestamp;</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;}</div>
 <div class="ttc" id="namespacemali__userspace_xhtml_a5108465542fd3a21106324203a729e06a9e4b72e32bbb15e27d24efef32ad4f42"><div class="ttname"><a href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06a9e4b72e32bbb15e27d24efef32ad4f42">mali_userspace::MALI_NAME_BLOCK_JM</a></div><div class="ttdef"><b>Definition:</b> <a href="hwc__names_8hpp_source.xhtml#l00030">hwc_names.hpp:30</a></div></div>
 <div class="ttc" id="namespacemali__userspace_xhtml_a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c"><div class="ttname"><a href="namespacemali__userspace.xhtml#a5108465542fd3a21106324203a729e06aca9aa649a1cea3ef1b46603e678a727c">mali_userspace::MALI_NAME_BLOCK_SHADER</a></div><div class="ttdef"><b>Definition:</b> <a href="hwc__names_8hpp_source.xhtml#l00032">hwc_names.hpp:32</a></div></div>
 </div><!-- fragment -->
@@ -481,7 +481,7 @@ Additional Inherited Members</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml">MaliCounter</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:59 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
