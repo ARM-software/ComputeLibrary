@@ -714,5 +714,30 @@ inline ::std::ostream &operator<<(::std::ostream &os, const KeyPoint &point)
 
     return os;
 }
+
+/** Formatted output of the PhaseType type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const PhaseType &phase_type)
+{
+    switch(phase_type)
+    {
+        case PhaseType::SIGNED:
+            os << "SIGNED";
+            break;
+        case PhaseType::UNSIGNED:
+            os << "UNSIGNED";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const arm_compute::PhaseType &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

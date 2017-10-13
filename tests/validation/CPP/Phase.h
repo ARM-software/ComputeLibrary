@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NEPhase.h"
+#ifndef __ARM_COMPUTE_TEST_PHASE_H__
+#define __ARM_COMPUTE_TEST_PHASE_H__
 
-#include "arm_compute/core/NEON/kernels/NEMagnitudePhaseKernel.h"
-#include "support/ToolchainSupport.h"
+#include "tests/SimpleTensor.h"
 
-#include <utility>
-
-using namespace arm_compute;
-
-void NEPhase::configure(const ITensor *input1, const ITensor *input2, ITensor *output, PhaseType phase_type)
+namespace arm_compute
 {
-    if(phase_type == PhaseType::UNSIGNED)
-    {
-        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::UNSIGNED>>();
-        k->configure(input1, input2, nullptr, output);
-        _kernel = std::move(k);
-    }
-    else
-    {
-        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
-        k->configure(input1, input2, nullptr, output);
-        _kernel = std::move(k);
-    }
-}
+namespace test
+{
+namespace validation
+{
+namespace reference
+{
+template <typename T>
+SimpleTensor<uint8_t> phase(const SimpleTensor<T> &gx, const SimpleTensor<T> &gy, PhaseType phase_type);
+} // namespace reference
+} // namespace validation
+} // namespace test
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_TEST_PHASE_H__ */
