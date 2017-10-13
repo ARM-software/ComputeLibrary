@@ -136,10 +136,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     // Get parameters from conv_info
     unsigned int stride_x = 0;
     unsigned int stride_y = 0;
-    unsigned int pad_x    = 0;
-    unsigned int pad_y    = 0;
     std::tie(stride_x, stride_y) = conv_info.stride();
-    std::tie(pad_x, pad_y)       = conv_info.pad();
 
     // Get convolved dimensions
     unsigned int conv_w = 0;

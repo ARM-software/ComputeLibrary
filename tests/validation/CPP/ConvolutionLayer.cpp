@@ -26,6 +26,8 @@
 #include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
+#include "tests/framework/Asserts.h"
+
 namespace arm_compute
 {
 namespace test
@@ -149,21 +151,24 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
     const int width_weights  = weights.shape().x();
     const int height_weights = weights.shape().y();
     const int depth_weights  = weights.shape().z();
-    const int pad_xi         = std::min(static_cast<int>(info.pad().first), width_weights / 2);
-    const int pad_yi         = std::min(static_cast<int>(info.pad().second), height_weights / 2);
-    const int start_xi       = width_weights / 2 - pad_xi;
-    const int start_yi       = height_weights / 2 - pad_yi;
-    const int end_xi         = width_in - start_xi;
-    const int end_yi         = height_in - start_yi;
-    const int stride_xi      = info.stride().first;
-    const int stride_yi      = info.stride().second;
-    const int num_batches    = src.shape().total_size() / (width_in * height_in * depth_in);
+    const int pad_left       = std::min(static_cast<int>(info.pad_left()), width_weights / 2);
+    const int pad_top        = std::min(static_cast<int>(info.pad_top()), height_weights / 2);
+    const int pad_right      = std::min(static_cast<int>(info.pad_right()), width_weights / 2);
+    const int pad_bottom     = std::min(static_cast<int>(info.pad_bottom()), height_weights / 2);
+
+    const int start_xi    = width_weights / 2 - pad_left;
+    const int start_yi    = height_weights / 2 - pad_top;
+    const int end_xi      = width_in + pad_left - width_weights / 2 + pad_right - width_weights / 2;
+    const int end_yi      = height_in + pad_top - height_weights / 2 + pad_bottom - height_weights / 2;
+    const int stride_xi   = info.stride().first;
+    const int stride_yi   = info.stride().second;
+    const int num_batches = src.shape().total_size() / (width_in * height_in * depth_in);
 
     for(int r = 0; r < num_batches; ++r)
     {
-        for(int yi = start_yi; yi < end_yi; yi += stride_yi)
+        for(int yi = start_yi; yi < start_yi + end_yi; yi += stride_yi)
         {
-            for(int xi = start_xi; xi < end_xi; xi += stride_xi)
+            for(int xi = start_xi; xi < start_xi + end_xi; xi += stride_xi)
             {
                 for(int ofm = 0; ofm < depth_out; ++ofm)
                 {
@@ -172,6 +177,9 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
                     const int xo         = (xi - start_xi) / stride_xi;
                     const int yo         = (yi - start_yi) / stride_yi;
                     const int offset_out = xo + yo * width_out + ofm * width_out * height_out + r * width_out * height_out * depth_out;
+
+                    ARM_COMPUTE_ASSERT(xo < width_out);
+                    ARM_COMPUTE_ASSERT(yo < height_out);
 
                     // Compute 3D convolution
                     convolution3d(src.data() + offset_in,

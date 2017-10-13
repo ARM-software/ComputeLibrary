@@ -58,8 +58,10 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.emplace("-DSTRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
     build_opts.emplace("-DSTRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
-    build_opts.emplace("-DPAD_X=" + support::cpp11::to_string(conv_info.pad().first));
-    build_opts.emplace("-DPAD_Y=" + support::cpp11::to_string(conv_info.pad().second));
+    build_opts.emplace("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
+    build_opts.emplace("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
+    build_opts.emplace("-DPAD_RIGHT=" + support::cpp11::to_string(conv_info.pad_right()));
+    build_opts.emplace("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom()));
     build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.emplace("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
     build_opts.emplace("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));

@@ -51,29 +51,35 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
     SimpleTensor<T> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position() };
 
     // Compute reference
-    const size_t filter_width  = weights.shape().x();
-    const size_t filter_height = weights.shape().y();
-    const size_t filter_plane  = filter_width * filter_height;
-    const size_t input_width   = src.shape().x();
-    const size_t input_height  = src.shape().y();
-    const size_t input_depth   = src.shape().z();
-    const int    num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
+    const int filter_width  = weights.shape().x();
+    const int filter_height = weights.shape().y();
+    const int filter_plane  = filter_width * filter_height;
+    const int input_width   = src.shape().x();
+    const int input_height  = src.shape().y();
+    const int input_depth   = src.shape().z();
+    const int num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
 
-    const size_t filter_half_width  = filter_width / 2;
-    const size_t filter_half_height = filter_height / 2;
-    const size_t pad_x              = std::min(filter_half_width, static_cast<size_t>(conv_info.pad().first));
-    const size_t pad_y              = std::min(filter_half_height, static_cast<size_t>(conv_info.pad().second));
-    const size_t minimum_x          = -pad_x + filter_half_width;
-    const size_t minimum_y          = -pad_y + filter_half_height;
+    const int filter_half_width  = filter_width / 2;
+    const int filter_half_height = filter_height / 2;
+
+    const int pad_left   = std::min(static_cast<int>(conv_info.pad_left()), filter_half_width);
+    const int pad_top    = std::min(static_cast<int>(conv_info.pad_top()), filter_half_height);
+    const int pad_right  = std::min(static_cast<int>(conv_info.pad_right()), filter_half_width);
+    const int pad_bottom = std::min(static_cast<int>(conv_info.pad_bottom()), filter_half_height);
+
+    const int minimum_x = -pad_left + filter_half_width;
+    const int minimum_y = -pad_top + filter_half_height;
+    const int maximum_x = input_width + pad_left - filter_half_width + pad_right - filter_half_width;
+    const int maximum_y = input_height + pad_top - filter_half_height + pad_bottom - filter_half_height;
 
     int out_pos = 0;
     for(int r = 0; r < num_batches; ++r)
     {
-        for(size_t z = 0; z < input_depth; ++z)
+        for(int z = 0; z < input_depth; ++z)
         {
-            for(size_t y = minimum_y; y < input_height - minimum_y; y += conv_info.stride().second)
+            for(int y = minimum_y; y < minimum_y + maximum_y; y += conv_info.stride().second)
             {
-                for(size_t x = minimum_x; x < input_width - minimum_x; x += conv_info.stride().first)
+                for(int x = minimum_x; x < minimum_x + maximum_x; x += conv_info.stride().first)
                 {
                     Coordinates coords(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z), static_cast<int>(r));
                     size_t      filter_offset = filter_plane * z;

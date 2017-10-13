@@ -226,11 +226,11 @@ __kernel void depthwise_weights_reshape(TENSOR3D_DECLARATION(src), IMAGE_DECLARA
 }
 #endif //defined(SRC_WIDTH) && defined(DATA_TYPE)
 
-#if defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_X) && defined(PAD_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DATA_TYPE)
+#if defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DATA_TYPE)
 /** This kernel performs a reshaping of the input tensor to a tensor used to perform depthwise convolution using vector to matrix multiplication.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
- * @note The convolution information must be passed at compile time using -DSTRIDE_X, -DSTRIDE_Y, -DPAD_X, -DPAD_Y, -DKERNEL_WIDHT, -DKERNEL_HEIGHT, -DSRC_WIDTH, -DSRC_HEIGHT
+ * @note The convolution information must be passed at compile time using -DSTRIDE_X, -DSTRIDE_Y, -DPAD_LEFT, -DPAD_TOP, -DPAD_RIGHT, -DPAD_BOTTOM, -DKERNEL_WIDHT, -DKERNEL_HEIGHT, -DSRC_WIDTH, -DSRC_HEIGHT
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -255,11 +255,11 @@ __kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(d
     Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
 
     const int src_pixel_linear = get_global_id(1) * STRIDE_X;
-    const int full_length      = SRC_WIDTH + 2 * PAD_X;
+    const int full_length      = SRC_WIDTH + PAD_LEFT + PAD_RIGHT;
     const int max_initial_x    = STRIDE_X * (((full_length - KERNEL_WIDTH) / STRIDE_X) + 1);
 
-    const int src_x = -PAD_X + src_pixel_linear % max_initial_x;
-    const int src_y = -PAD_Y + src_pixel_linear / max_initial_x * STRIDE_Y;
+    const int src_x = -PAD_LEFT + src_pixel_linear % max_initial_x;
+    const int src_y = -PAD_TOP + src_pixel_linear / max_initial_x * STRIDE_Y;
     const int src_z = get_global_id(2);
 
     __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + src_z * src_stride_z;
@@ -281,7 +281,7 @@ __kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(d
     }
 }
 
-#endif //defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_X) && defined(PAD_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(DATA_TYPE)
+#endif //defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(DATA_TYPE)
 
 #if defined(CONV_WIDTH) && defined(CONV_HEIGHT) && defined(DATA_TYPE)
 

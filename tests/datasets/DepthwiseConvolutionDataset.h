@@ -125,6 +125,13 @@ public:
         add_config(TensorShape(17U, 31U, 2U), TensorShape(5U, 9U, 2U), TensorShape(15U, 13U, 2U), PadStrideInfo(1, 2, 1, 1));
         add_config(TensorShape(23U, 27U, 5U), TensorShape(11U, 3U, 5U), TensorShape(13U, 13U, 5U), PadStrideInfo(1, 2, 0, 0));
         add_config(TensorShape(17U, 31U, 2U, 3U), TensorShape(5U, 9U, 2U), TensorShape(15U, 13U, 2U, 3U), PadStrideInfo(1, 2, 1, 1));
+        // Asymmetric padding
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(10U, 11U, 7U), PadStrideInfo(3, 2, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(10U, 11U, 7U), PadStrideInfo(3, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
     }
 };
 

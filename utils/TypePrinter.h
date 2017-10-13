@@ -599,7 +599,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_s
 {
     os << pad_stride_info.stride().first << "," << pad_stride_info.stride().second;
     os << ";";
-    os << pad_stride_info.pad().first << "," << pad_stride_info.pad().second;
+    os << pad_stride_info.pad_left() << "," << pad_stride_info.pad_right() << ","
+       << pad_stride_info.pad_top() << "," << pad_stride_info.pad_bottom();
 
     return os;
 }

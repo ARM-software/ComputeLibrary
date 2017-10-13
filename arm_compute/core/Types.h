@@ -418,7 +418,32 @@ public:
                   unsigned int pad_x = 0, unsigned int pad_y = 0,
                   DimensionRoundingType round = DimensionRoundingType::FLOOR)
         : _stride(std::make_pair(stride_x, stride_y)),
-          _pad(std::make_pair(pad_x, pad_y)),
+          _pad_left(pad_x),
+          _pad_top(pad_y),
+          _pad_right(pad_x),
+          _pad_bottom(pad_y),
+          _round_type(round)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] stride_x   Stride, in elements, across x.
+     * @param[in] stride_y   Stride, in elements, across y.
+     * @param[in] pad_left   Padding across x on the left, in elements.
+     * @param[in] pad_top    Padding across y on the top, in elements.
+     * @param[in] pad_right  Padding across x on the right, in elements.
+     * @param[in] pad_bottom Padding across y on the bottom, in elements.
+     * @param[in] round      Dimensions rounding.
+     */
+    PadStrideInfo(unsigned int stride_x, unsigned int stride_y,
+                  unsigned int pad_left, unsigned int pad_right,
+                  unsigned int pad_top, unsigned int pad_bottom,
+                  DimensionRoundingType round)
+        : _stride(std::make_pair(stride_x, stride_y)),
+          _pad_left(pad_left),
+          _pad_top(pad_top),
+          _pad_right(pad_right),
+          _pad_bottom(pad_bottom),
           _round_type(round)
     {
     }
@@ -428,16 +453,45 @@ public:
     }
     std::pair<unsigned int, unsigned int> pad() const
     {
-        return _pad;
+        //this accessor should be used only when padding is symmetric
+        ARM_COMPUTE_ERROR_ON(_pad_left != _pad_right || _pad_top != _pad_bottom);
+        return std::make_pair(_pad_left, _pad_top);
     }
+
+    unsigned int pad_left() const
+    {
+        return _pad_left;
+    }
+    unsigned int pad_right() const
+    {
+        return _pad_right;
+    }
+    unsigned int pad_top() const
+    {
+        return _pad_top;
+    }
+    unsigned int pad_bottom() const
+    {
+        return _pad_bottom;
+    }
+
     DimensionRoundingType round() const
     {
         return _round_type;
     }
 
+    bool has_padding() const
+    {
+        return (_pad_left != 0 || _pad_top != 0 || _pad_right != 0 || _pad_bottom != 0);
+    }
+
 private:
     std::pair<unsigned int, unsigned int> _stride;
-    std::pair<unsigned int, unsigned int> _pad;
+    unsigned int _pad_left;
+    unsigned int _pad_top;
+    unsigned int _pad_right;
+    unsigned int _pad_bottom;
+
     DimensionRoundingType _round_type;
 };
 

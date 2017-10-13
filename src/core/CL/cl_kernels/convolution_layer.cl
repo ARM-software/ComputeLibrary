@@ -97,7 +97,7 @@ __kernel void reshape_to_columns(
     }
 }
 
-#if defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_X) && defined(PAD_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT)
+#if defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT)
 /** This kernel performs a reshaping of the input tensor to a tensor used to perform convolution using GEMM.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
@@ -134,8 +134,8 @@ __kernel void im2col_generic(
     const int batch = get_global_id(2) / filter_depth; // the batch
 
     // Calculate input indeces
-    const int xi = xc * STRIDE_X - PAD_X;
-    const int yi = yc * STRIDE_Y - PAD_Y;
+    const int xi = xc * STRIDE_X - PAD_LEFT;
+    const int yi = yc * STRIDE_Y - PAD_TOP;
 
     // Calculate output indeces
     const int xo = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
@@ -149,9 +149,9 @@ __kernel void im2col_generic(
     {
         for(int x = xi, x_e = xi + KERNEL_WIDTH; x < x_e; ++x, ++output_ptr)
         {
-#if PAD_X == 0 && PAD_Y == 0
+#if PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
             *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * src_stride_x + y * src_stride_y));
-#else  // PAD_X == 0 && PAD_Y == 0
+#else  // PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
             if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
             {
                 *output_ptr = 0;
@@ -160,7 +160,7 @@ __kernel void im2col_generic(
             {
                 *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * src_stride_x + y * src_stride_y));
             }
-#endif // PAD_X == 0 && PAD_Y == 0
+#endif // PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
         }
     }
 
@@ -245,7 +245,7 @@ __kernel void im2col_kernel3x3_padx0_pady0(
     }
 #endif // HAS_BIAS
 }
-#endif //defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_X) && defined(PAD_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT)
+#endif //defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT)
 
 #if defined(WIDTH_OUTPUT)
 /** This kernel performs a reshaping of the output of the convolution layer.

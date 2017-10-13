@@ -163,16 +163,17 @@ void NEIm2ColKernel::run_generic(const Window &window)
     const int input_stride_y = _input->info()->strides_in_bytes().y();
     const int input_stride_z = _input->info()->strides_in_bytes().z();
 
-    int pad_x    = 0;
-    int pad_y    = 0;
+    int pad_left = 0;
+    int pad_top  = 0;
     int stride_x = 0;
     int stride_y = 0;
-    std::tie(pad_x, pad_y)       = _conv_info.pad();
+    pad_left     = _conv_info.pad_left();
+    pad_top      = _conv_info.pad_top();
     std::tie(stride_x, stride_y) = _conv_info.stride();
 
     // Setup input window
-    const int start_x = -pad_x;
-    const int start_y = -pad_y;
+    const int start_x = -pad_left;
+    const int start_y = -pad_top;
 
     Window window_in(window);
     // The first three dimensions of the input are increased by the inner loops
@@ -291,18 +292,15 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                                         _conv_info);
     _has_bias = has_bias;
 
-    unsigned int pad_x    = 0;
-    unsigned int pad_y    = 0;
     unsigned int stride_x = 0;
     unsigned int stride_y = 0;
-    std::tie(pad_x, pad_y)       = conv_info.pad();
     std::tie(stride_x, stride_y) = conv_info.stride();
 
     bool run_img2col_reduced = (output->info()->dimension(0) == (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))) && (TensorShape::num_max_dimensions >= 4)
                                && (std::equal(input->info()->tensor_shape().cbegin() + 3,
                                               input->info()->tensor_shape().cend(),
                                               output->info()->tensor_shape().cbegin() + 1))
-                               && ((stride_x == 1) && (stride_y == 1) && (pad_x == 0) && (pad_y == 0));
+                               && ((stride_x == 1) && (stride_y == 1) && !conv_info.has_padding());
 
     Window window = calculate_max_window(*input->info(), Steps());
 
@@ -334,18 +332,18 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
         switch(_input->info()->data_type())
         {
             case DataType::F32:
-                _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<float, false> : &NEIm2ColKernel::run_generic<float, true>;
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<float, false> : &NEIm2ColKernel::run_generic<float, true>;
                 break;
 #ifdef ARM_COMPUTE_ENABLE_FP16
             case DataType::F16:
-                _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<float16_t, false> : &NEIm2ColKernel::run_generic<float16_t, true>;
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<float16_t, false> : &NEIm2ColKernel::run_generic<float16_t, true>;
                 break;
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
             case DataType::QS8:
-                _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<qint8_t, false> : &NEIm2ColKernel::run_generic<qint8_t, true>;
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<qint8_t, false> : &NEIm2ColKernel::run_generic<qint8_t, true>;
                 break;
             case DataType::QS16:
-                _func = ((pad_x == 0) && (pad_y == 0)) ? &NEIm2ColKernel::run_generic<qint16_t, false> : &NEIm2ColKernel::run_generic<qint16_t, true>;
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<qint16_t, false> : &NEIm2ColKernel::run_generic<qint16_t, true>;
                 break;
             default:
                 ARM_COMPUTE_ERROR("Data type not supported");

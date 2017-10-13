@@ -63,18 +63,16 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
         build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
     }
 
-    int pad_x    = 0;
-    int pad_y    = 0;
     int stride_x = 0;
     int stride_y = 0;
-    std::tie(pad_x, pad_y)       = conv_info.pad();
+
     std::tie(stride_x, stride_y) = conv_info.stride();
 
     const bool run_img2col_reduced = (output->info()->dimension(0) == (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))) && (TensorShape::num_max_dimensions >= 4)
                                      && (std::equal(input->info()->tensor_shape().cbegin() + 3,
                                                     input->info()->tensor_shape().cend(),
                                                     output->info()->tensor_shape().cbegin() + 1))
-                                     && ((stride_x == 1) && (stride_y == 1) && (pad_x == 0) && (pad_y == 0));
+                                     && ((stride_x == 1) && (stride_y == 1) && !conv_info.has_padding());
 
     if(!run_img2col_reduced)
     {
@@ -90,12 +88,14 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
         build_opts.emplace("-DCONVOLVED_HEIGHT=" + support::cpp11::to_string(_convolved_dims.second));
         build_opts.emplace("-DSTRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
         build_opts.emplace("-DSTRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
-        build_opts.emplace("-DPAD_X=" + support::cpp11::to_string(conv_info.pad().first));
-        build_opts.emplace("-DPAD_Y=" + support::cpp11::to_string(conv_info.pad().second));
+        build_opts.emplace("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
+        build_opts.emplace("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
+        build_opts.emplace("-DPAD_RIGHT=" + support::cpp11::to_string(conv_info.pad_right()));
+        build_opts.emplace("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom()));
         build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
         build_opts.emplace("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
 
-        if(kernel_dims.width == 3 && kernel_dims.height == 3 && conv_info.pad().first == 0 && conv_info.pad().second == 0)
+        if(kernel_dims.width == 3 && kernel_dims.height == 3 && !conv_info.has_padding())
         {
             _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("im2col_kernel3x3_padx0_pady0", build_opts));
         }
