@@ -26,6 +26,8 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
+#include "tests/datasets/LargeGEMMLowpDataset.h"
+#include "tests/datasets/SmallGEMMLowpDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -44,8 +46,6 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
-
 const auto data_mnk     = framework::dataset::make("M", 12, 20) * framework::dataset::make("N", 12, 20) * framework::dataset::make("K", 12, 15);
 const auto data_offsets = framework::dataset::make("a", -3, 3) * framework::dataset::make("b", -1, 2) * framework::dataset::make("c", 1, 3) * framework::dataset::make("cm", 0,
                           3)
@@ -69,7 +69,7 @@ using NEGEMMInterleaveBlockedFixture = GEMMInterleaveBlockedValidationFixture<Te
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleaveBlockedFixture, framework::DatasetMode::PRECOMMIT, data_int_blk)
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f);
+    validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END()
 
@@ -79,16 +79,41 @@ using NEGEMMInterleaveBlockedTransposedFixture = GEMMInterleaveBlockedValidation
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleaveBlockedTransposedFixture, framework::DatasetMode::PRECOMMIT, data_int_blk_tr)
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f);
+    validate(Accessor(_target), _reference);
 }
 
 TEST_SUITE_END()
 
 using NEGEMMLowpOffsetFixture = GEMMLowpOffsetValidationFixture<Tensor, Accessor, NEGEMMLowp>;
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpOffsetFixture, framework::DatasetMode::PRECOMMIT, data_mnk *data_offsets)
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()), framework::dataset::make("DataType",
+                                                                   DataType::U8)),
+               shape_a, shape_b, shape_c, a_offset, b_offset, c_offset, c_mult_int, out_shift, data_type)
+{
+    // Create tensors
+    Tensor a = create_tensor<Tensor>(shape_a, data_type);
+    Tensor b = create_tensor<Tensor>(shape_b, data_type);
+    Tensor c = create_tensor<Tensor>(shape_c, data_type);
+
+    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    NEGEMMLowp gemmlowp;
+    gemmlowp.configure(&a, &b, &c, a_offset, b_offset, c_offset, c_mult_int, out_shift);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpOffsetFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), framework::dataset::make("DataType", DataType::U8)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f);
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpOffsetFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMLowpDataset(), framework::dataset::make("DataType", DataType::U8)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END()
 
@@ -100,7 +125,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpFixture, framework::DatasetMode::PREC
                        16))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f);
+    validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END()
 #endif // defined(__aarch64__)

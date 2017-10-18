@@ -47,13 +47,10 @@ class GEMMLowpOffsetValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(size_t m, size_t n, size_t k, int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift, DataType data_type)
     {
-        const TensorShape shape_a(k, m);
-        const TensorShape shape_b(n, k);
-        const TensorShape shape_c(n, m);
-        _target    = compute_target(shape_a, shape_b, shape_c, a_offset, b_offset, c_offset, c_mult_int, out_shift);
-        _reference = compute_reference(shape_a, shape_b, shape_c, a_offset, b_offset, c_offset, c_mult_int, out_shift);
+        _target    = compute_target(shape_a, shape_b, shape_c, a_offset, b_offset, c_offset, c_mult_int, out_shift, data_type);
+        _reference = compute_reference(shape_a, shape_b, shape_c, a_offset, b_offset, c_offset, c_mult_int, out_shift, data_type);
     }
 
 protected:
@@ -66,12 +63,12 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c,
-                              int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift)
+                              int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift, DataType data_type)
     {
         // Create tensors
-        TensorType a = create_tensor<TensorType>(shape_a, DataType::U8, 1);
-        TensorType b = create_tensor<TensorType>(shape_b, DataType::U8, 1);
-        TensorType c = create_tensor<TensorType>(shape_c, DataType::U8, 1);
+        TensorType a = create_tensor<TensorType>(shape_a, data_type, 1);
+        TensorType b = create_tensor<TensorType>(shape_b, data_type, 1);
+        TensorType c = create_tensor<TensorType>(shape_c, data_type, 1);
 
         // Create and configure function
         FunctionType gemmlowp;
@@ -101,12 +98,12 @@ protected:
     }
 
     SimpleTensor<uint8_t> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c,
-                                            int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift)
+                                            int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift, DataType data_type)
     {
         // Create reference
-        SimpleTensor<uint8_t> a{ shape_a, DataType::U8, 1 };
-        SimpleTensor<uint8_t> b{ shape_b, DataType::U8, 1 };
-        SimpleTensor<uint8_t> c{ shape_c, DataType::U8, 1 };
+        SimpleTensor<uint8_t> a{ shape_a, data_type, 1 };
+        SimpleTensor<uint8_t> b{ shape_b, data_type, 1 };
+        SimpleTensor<uint8_t> c{ shape_c, data_type, 1 };
 
         // Fill reference
         fill(a, 0);
