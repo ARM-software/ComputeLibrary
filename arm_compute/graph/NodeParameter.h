@@ -21,37 +21,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/ActivationLayer.h"
+#ifndef __ARM_COMPUTE_GRAPH_NODE_PARAMETER_H__
+#define __ARM_COMPUTE_GRAPH_NODE_PARAMETER_H__
 
-#include "arm_compute/graph/NodeContext.h"
-#include "arm_compute/graph/OperationRegistry.h"
+#include <ostream>
+#include <string>
 
-using namespace arm_compute::graph;
-
-ActivationLayer::ActivationLayer(const ActivationLayerInfo activation_info)
-    : _activation_info(activation_info)
+namespace arm_compute
 {
-}
-
-std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
+namespace graph
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+/**Node Parameter Empty base class */
+class NodeParameterBase
+{
+};
 
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
+/** Template parameter implementation */
+template <typename T>
+class NodeParameter : public NodeParameterBase
+{
+public:
+    /** Default Constructor
+     *
+     * @param[in] name Paremeter name
+     * @param[in] val  Parameter value
+     */
+    NodeParameter(std::string name, T val)
+        : _name(name), _val(val) {};
+    /** Returns parameter's name
+     *
+     * @return the name of the parameter
+     */
+    std::string name() const
+    {
+        return _name;
+    }
+    /** Returns parameter's value
+     *
+     * @return the value of the parameter
+     */
+    T value()
+    {
+        return _val;
+    }
 
-    arm_compute::ITensor *in  = input->tensor();
-    arm_compute::ITensor *out = output->tensor();
-
-    // Create node context
-    NodeContext node_ctx("ActivationLayer");
-    node_ctx.add_input(in);
-    node_ctx.add_output(out);
-    node_ctx.add_parameter<ActivationLayerInfo>("ActivationLayerInfo", _activation_info);
-
-    // Get function
-    func = OperationRegistry::get().find_operation("ActivationLayer", _target_hint)->configure(node_ctx);
-
-    return func;
-}
+private:
+    std::string _name;
+    T           _val;
+};
+} // namespace graph
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_GRAPH_NODE_PARAMETER_H__ */

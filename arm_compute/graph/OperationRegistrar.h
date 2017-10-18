@@ -21,37 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/ActivationLayer.h"
+#ifndef ARM_COMPUTE_GRAPH_OPERATION_REGISTRAR
+#define ARM_COMPUTE_GRAPH_OPERATION_REGISTRAR
 
-#include "arm_compute/graph/NodeContext.h"
 #include "arm_compute/graph/OperationRegistry.h"
+#include "arm_compute/graph/Types.h"
 
-using namespace arm_compute::graph;
+#include <string>
+#include <utility>
 
-ActivationLayer::ActivationLayer(const ActivationLayerInfo activation_info)
-    : _activation_info(activation_info)
+namespace arm_compute
 {
-}
-
-std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
+namespace graph
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+namespace detail
+{
+/** Helper class to statically register an operation */
+template <typename T>
+class OperationRegistrar final
+{
+public:
+    /** Add a new test case with the given name to the framework.
+     *
+     * @param[in] operation_name Operation name
+     */
+    OperationRegistrar(std::string operation_name);
+};
 
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
-
-    arm_compute::ITensor *in  = input->tensor();
-    arm_compute::ITensor *out = output->tensor();
-
-    // Create node context
-    NodeContext node_ctx("ActivationLayer");
-    node_ctx.add_input(in);
-    node_ctx.add_output(out);
-    node_ctx.add_parameter<ActivationLayerInfo>("ActivationLayerInfo", _activation_info);
-
-    // Get function
-    func = OperationRegistry::get().find_operation("ActivationLayer", _target_hint)->configure(node_ctx);
-
-    return func;
+template <typename T>
+inline OperationRegistrar<T>::OperationRegistrar(std::string operation_name)
+{
+    OperationRegistry::get().add_operation<T>(std::move(operation_name));
 }
+} // namespace detail
+} // namespace graph
+} // namespace arm_compute
+#endif /* ARM_COMPUTE_GRAPH_OPERATION_REGISTRAR */

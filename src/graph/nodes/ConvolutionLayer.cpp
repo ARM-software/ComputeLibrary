@@ -216,12 +216,10 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
     if(_num_groups == 1)
     {
         func = instantiate_convolution(in, out, conv_method_hint);
-        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLConvolutionLayer");
     }
     else
     {
         func = instantiate_grouped_convolution(in, out, conv_method_hint);
-        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEConvolutionLayer");
     }
 
     // Fill weights
@@ -253,10 +251,12 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_convolutio
     std::unique_ptr<arm_compute::IFunction> func;
     if(_target_hint == TargetHint::OPENCL)
     {
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLConvolutionLayer");
         func = instantiate<TargetHint::OPENCL>(input, _weights.tensor(), _biases.tensor(), output, _conv_info, _weights_info, conv_method_hint);
     }
     else
     {
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEConvolutionLayer");
         func = instantiate<TargetHint::NEON>(input, _weights.tensor(), _biases.tensor(), output, _conv_info, _weights_info, conv_method_hint);
     }
     return func;
@@ -318,10 +318,12 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_grouped_co
         // Instantiate convolution function
         if(_target_hint == TargetHint::OPENCL)
         {
+            ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLConvolutionLayer");
             func = instantiate<TargetHint::OPENCL>(_is[i].tensor(), _ws[i].tensor(), _bs[i].tensor(), _os[i].tensor(), _conv_info, _weights_info, conv_method_hint);
         }
         else
         {
+            ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEConvolutionLayer");
             func = instantiate<TargetHint::NEON>(_is[i].tensor(), _ws[i].tensor(), _bs[i].tensor(), _os[i].tensor(), _conv_info, _weights_info, conv_method_hint);
         }
 

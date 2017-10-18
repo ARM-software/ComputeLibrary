@@ -21,37 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/ActivationLayer.h"
-
-#include "arm_compute/graph/NodeContext.h"
 #include "arm_compute/graph/OperationRegistry.h"
 
 using namespace arm_compute::graph;
 
-ActivationLayer::ActivationLayer(const ActivationLayerInfo activation_info)
-    : _activation_info(activation_info)
+OperationRegistry::OperationRegistry()
+    : _registered_ops()
 {
 }
 
-std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
+OperationRegistry &OperationRegistry::get()
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+    static OperationRegistry instance;
+    return instance;
+}
 
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
+IOperation *OperationRegistry::find_operation(const std::string &operation, TargetHint target)
+{
+    ARM_COMPUTE_ERROR_ON(!contains(operation, target));
+    auto it = std::find_if(_registered_ops[operation].begin(), _registered_ops[operation].end(), [&](const std::unique_ptr<IOperation> &op)
+    {
+        return (op->target() == target);
+    });
+    ARM_COMPUTE_ERROR_ON(it == _registered_ops[operation].end());
+    return (*it).get();
+}
 
-    arm_compute::ITensor *in  = input->tensor();
-    arm_compute::ITensor *out = output->tensor();
-
-    // Create node context
-    NodeContext node_ctx("ActivationLayer");
-    node_ctx.add_input(in);
-    node_ctx.add_output(out);
-    node_ctx.add_parameter<ActivationLayerInfo>("ActivationLayerInfo", _activation_info);
-
-    // Get function
-    func = OperationRegistry::get().find_operation("ActivationLayer", _target_hint)->configure(node_ctx);
-
-    return func;
+bool OperationRegistry::contains(const std::string &operation, TargetHint target) const
+{
+    auto it = _registered_ops.find(operation);
+    if(it != _registered_ops.end())
+    {
+        return std::any_of(it->second.begin(), it->second.end(), [&](const std::unique_ptr<IOperation> &op)
+        {
+            return (op->target() == target);
+        });
+    }
+    return false;
 }

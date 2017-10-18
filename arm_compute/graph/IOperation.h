@@ -21,37 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/ActivationLayer.h"
+#ifndef __ARM_COMPUTE_GRAPH_IOPERATION_H__
+#define __ARM_COMPUTE_GRAPH_IOPERATION_H__
 
 #include "arm_compute/graph/NodeContext.h"
-#include "arm_compute/graph/OperationRegistry.h"
+#include "arm_compute/graph/Types.h"
+#include "arm_compute/runtime/IFunction.h"
 
-using namespace arm_compute::graph;
+#include <memory>
 
-ActivationLayer::ActivationLayer(const ActivationLayerInfo activation_info)
-    : _activation_info(activation_info)
+namespace arm_compute
 {
-}
-
-std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
+namespace graph
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
-
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
-
-    arm_compute::ITensor *in  = input->tensor();
-    arm_compute::ITensor *out = output->tensor();
-
-    // Create node context
-    NodeContext node_ctx("ActivationLayer");
-    node_ctx.add_input(in);
-    node_ctx.add_output(out);
-    node_ctx.add_parameter<ActivationLayerInfo>("ActivationLayerInfo", _activation_info);
-
-    // Get function
-    func = OperationRegistry::get().find_operation("ActivationLayer", _target_hint)->configure(node_ctx);
-
-    return func;
-}
+/** Operation functor interface */
+class IOperation
+{
+public:
+    /** Virtual Destructor */
+    virtual ~IOperation() = default;
+    /** Interface to be implemented that configures an operation
+     *
+     * @param[in] ctx Node parameters to be used by the operation
+     */
+    virtual std::unique_ptr<arm_compute::IFunction> configure(NodeContext &ctx) = 0;
+    /** Interface to be implemented that returns the target of the operation
+     *
+     * @return Target of the operation
+     */
+    virtual TargetHint target() const = 0;
+};
+} // namespace graph
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_GRAPH_IOPERATION_H__ */

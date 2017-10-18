@@ -21,37 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/ActivationLayer.h"
-
 #include "arm_compute/graph/NodeContext.h"
-#include "arm_compute/graph/OperationRegistry.h"
 
 using namespace arm_compute::graph;
 
-ActivationLayer::ActivationLayer(const ActivationLayerInfo activation_info)
-    : _activation_info(activation_info)
+void NodeContext::add_input(arm_compute::ITensor *input)
 {
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    _inputs.emplace_back(input);
 }
 
-std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
+void NodeContext::add_output(arm_compute::ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+    _outputs.emplace_back(output);
+}
 
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
+std::string NodeContext::operation() const
+{
+    return _operation;
+}
 
-    arm_compute::ITensor *in  = input->tensor();
-    arm_compute::ITensor *out = output->tensor();
+TargetHint NodeContext::target() const
+{
+    return _target;
+}
 
-    // Create node context
-    NodeContext node_ctx("ActivationLayer");
-    node_ctx.add_input(in);
-    node_ctx.add_output(out);
-    node_ctx.add_parameter<ActivationLayerInfo>("ActivationLayerInfo", _activation_info);
+arm_compute::ITensor *NodeContext::input(size_t idx) const
+{
+    ARM_COMPUTE_ERROR_ON(idx >= _inputs.size());
+    return _inputs[idx];
+}
 
-    // Get function
-    func = OperationRegistry::get().find_operation("ActivationLayer", _target_hint)->configure(node_ctx);
+arm_compute::ITensor *NodeContext::output(size_t idx) const
+{
+    ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
+    return _outputs[idx];
+}
 
-    return func;
+size_t NodeContext::num_inputs() const
+{
+    return _inputs.size();
+}
+
+size_t NodeContext::num_outputs() const
+{
+    return _outputs.size();
 }
