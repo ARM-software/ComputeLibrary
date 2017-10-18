@@ -29,6 +29,7 @@
 #define MAX_OP(x, y, type, size) MAX_OP_EXPAND(x, y, type, size)
 #define ADD_OP(x, y, type, size) ADD_SAT_OP_EXPAND((x), (y), type, size)
 #define SUB_OP(x, y, type, size) SUB_SAT_OP_EXPAND((x), (y), type, size)
+#define MUL_OP(x, y, type, size) MUL_SAT_OP_EXPAND((x), (y), type, size, FIXED_POINT_POSITION)
 #define DIV_OP(x, y, type, size) DIV_SAT_OP_VEC_EXPAND((x), (y), type, size, FIXED_POINT_POSITION)
 #define EXP_OP(x, type, size) EXP_OP_EXPAND((x), type, size, FIXED_POINT_POSITION)
 
@@ -42,6 +43,7 @@
 #define MAX_OP(x, y, type, size) max((x), (y))
 #define ADD_OP(x, y, type, size) ((x) + (y))
 #define SUB_OP(x, y, type, size) ((x) - (y))
+#define MUL_OP(x, y, type, size) ((x) * (y))
 #define DIV_OP(x, y, type, size) ((x) / (y))
 #define EXP_OP(x, type, size) exp((x))
 
@@ -128,6 +130,7 @@ __kernel void softmax_layer_max(
  * @note Datatype must be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  * @note In case the input is not multiple of 16 -DNON_MULTIPLE_OF_16 must be passed.
+ * @note Beta can be optionally passed at compile time using -DBETA (if undefined, assume it equals 1.0)
  *
  * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QS8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -175,6 +178,12 @@ __kernel void softmax_layer_shift_exp_sum(
     Image max = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(max);
     Image sum = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(sum);
 
+#ifdef BETA
+    // Initialize beta
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    beta = (VEC_DATA_TYPE(DATA_TYPE, 16))BETA;
+#endif /* BETA */
+
     // Load max value of 1D logits vector (row)
     DATA_TYPE max_val = *((__global DATA_TYPE *)offset(&max, 0, 0));
 
@@ -189,6 +198,9 @@ __kernel void softmax_layer_shift_exp_sum(
         VEC_DATA_TYPE(DATA_TYPE, 16)
         data = vload16(0, (__global DATA_TYPE *)offset(&src, i << 4, 0));
         data = SUB_OP(data, max_val, DATA_TYPE, 16);
+#ifdef BETA
+        data = MUL_OP(data, beta, DATA_TYPE, 16);
+#endif /* BETA */
         data = EXP_OP(data, DATA_TYPE, 16);
         vstore16(data, 0, (__global DATA_TYPE *)offset(&dst, i << 4, 0));
         sum1D = ADD_OP(sum1D, data, DATA_TYPE, 16);
@@ -199,6 +211,9 @@ __kernel void softmax_layer_shift_exp_sum(
     VEC_DATA_TYPE(DATA_TYPE, 16)
     data = vload16(0, (__global DATA_TYPE *)offset(&src, width4 << 4, 0));
     data = SUB_OP(data, max_val, DATA_TYPE, 16);
+#ifdef BETA
+    data = MUL_OP(data, beta, DATA_TYPE, 16);
+#endif /* BETA */
     data = EXP_OP(data, DATA_TYPE, 16);
     VEC_DATA_TYPE(SELECT_DATA_TYPE, 16)
     widx = CONVERT(((uint16)(width4 << 4) + idx16) < width, VEC_DATA_TYPE(SELECT_DATA_TYPE, 16));

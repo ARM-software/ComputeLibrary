@@ -105,10 +105,11 @@ CLLogits1DShiftExpSumKernel::CLLogits1DShiftExpSumKernel()
 {
 }
 
-void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum)
+void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum, float beta)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(max, sum, output);
+    ARM_COMPUTE_ERROR_ON(beta != 1.0f && input->info()->data_type() != DataType::F32);
 
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
@@ -143,6 +144,11 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
     if((input->info()->dimension(0) % max_cl_vector_width) != 0)
     {
         build_opts.emplace("-DNON_MULTIPLE_OF_16");
+    }
+
+    if(beta != 1.0f)
+    {
+        build_opts.emplace(("-DBETA=" + float_to_string_with_full_precision(beta)));
     }
 
     // Create kernel

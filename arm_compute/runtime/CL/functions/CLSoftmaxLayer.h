@@ -54,9 +54,10 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  beta   A scaling factor for the exponent. QS8/QS16/F16 only support a beta value of 1.
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
-    void configure(const ICLTensor *input, ICLTensor *output);
+    void configure(const ICLTensor *input, ICLTensor *output, float beta = 1.0f);
 
     // Inherited methods overridden:
     void run() override;
