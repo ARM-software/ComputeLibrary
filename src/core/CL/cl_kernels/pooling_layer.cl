@@ -515,7 +515,7 @@ __kernel void pooling_layer_7(
 
 /** Performs a pooling function of pool size equal to N
  *
- * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16/F32;
+ * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note -DFP16 must be passed at compile time if half float data type is used
  * @note Pool size must be passed using -DPOOL_SIZE e.g. -DPOOL_SIZE=13;
  * @note In case of average pooling the following information must be passed at compile time:
@@ -524,7 +524,7 @@ __kernel void pooling_layer_7(
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QS8/QS16/F16/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)

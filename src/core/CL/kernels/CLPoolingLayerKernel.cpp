@@ -67,7 +67,6 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
-    ARM_COMPUTE_ERROR_ON(pool_size > 7 && is_data_type_fixed_point(input->info()->data_type()));
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
@@ -118,7 +117,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     }
 
     // Create kernel
-    if(pool_size <= 7)
+    if((pool_size == 2) || (pool_size == 3) || (pool_size == 7))
     {
         // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenCL kernel where
         // each thread computes 4 output elements
