@@ -88,7 +88,7 @@ void NEGEMMLowp::configure(const ITensor *a, const ITensor *b, ITensor *output)
     else
     {
         ARM_COMPUTE_ERROR("Not implemented");
-        // This is in the process of being updated, for more info please refer to COMPMID-624.
+        //FIXME: This is in the process of being updated, for more info please refer to COMPMID-624.
     }
 }
 

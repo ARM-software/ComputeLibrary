@@ -92,7 +92,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpOffsetFixture, framework::DatasetMode
 }
 TEST_SUITE_END()
 
-#if defined(__aarch64__)
+//FIXME: This is in the process of being updated, for more info please refer to COMPMID-624.
+#if 0  // defined(__aarch64__)
 TEST_SUITE(U32)
 using NEGEMMLowpFixture = GEMMLowpValidationFixture<Tensor, Accessor, NEGEMMLowp>;
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpFixture, framework::DatasetMode::PRECOMMIT, framework::dataset::make("M", 12, 20) * framework::dataset::make("N", 12, 20) * framework::dataset::make("K",
