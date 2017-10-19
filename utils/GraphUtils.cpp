@@ -34,8 +34,10 @@
 #include "arm_compute/core/PixelValue.h"
 #include "libnpy/npy.hpp"
 
+#include <algorithm>
+#include <iomanip>
+#include <ostream>
 #include <random>
-#include <sstream>
 
 using namespace arm_compute::graph_utils;
 
@@ -48,16 +50,8 @@ bool PPMWriter::access_tensor(ITensor &tensor)
 {
     std::stringstream ss;
     ss << _name << _iterator << ".ppm";
-    if(dynamic_cast<Tensor *>(&tensor) != nullptr)
-    {
-        arm_compute::utils::save_to_ppm(dynamic_cast<Tensor &>(tensor), ss.str());
-    }
-#ifdef ARM_COMPUTE_CL
-    else if(dynamic_cast<CLTensor *>(&tensor) != nullptr)
-    {
-        arm_compute::utils::save_to_ppm(dynamic_cast<CLTensor &>(tensor), ss.str());
-    }
-#endif /* ARM_COMPUTE_CL */
+
+    arm_compute::utils::save_to_ppm(tensor, ss.str());
 
     _iterator++;
     if(_maximum == 0)
@@ -85,6 +79,101 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
         _iterator++;
     }
     return ret;
+}
+
+PPMAccessor::PPMAccessor(const std::string &ppm_path, bool bgr, float mean_r, float mean_g, float mean_b)
+    : _ppm_path(ppm_path), _bgr(bgr), _mean_r(mean_r), _mean_g(mean_g), _mean_b(mean_b)
+{
+}
+
+bool PPMAccessor::access_tensor(ITensor &tensor)
+{
+    utils::PPMLoader ppm;
+    const float      mean[3] =
+    {
+        _bgr ? _mean_b : _mean_r,
+        _mean_g,
+        _bgr ? _mean_r : _mean_b
+    };
+
+    // Open PPM file
+    ppm.open(_ppm_path);
+
+    // Fill the tensor with the PPM content (BGR)
+    ppm.fill_planar_tensor(tensor, _bgr);
+
+    // Subtract the mean value from each channel
+    Window window;
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - mean[id.z()];
+        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value;
+    });
+
+    return true;
+}
+
+TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path, size_t top_n, std::ostream &output_stream)
+    : _labels(), _output_stream(output_stream), _top_n(top_n)
+{
+    _labels.clear();
+
+    std::ifstream ifs;
+
+    try
+    {
+        ifs.exceptions(std::ifstream::badbit);
+        ifs.open(labels_path, std::ios::in | std::ios::binary);
+
+        for(std::string line; !std::getline(ifs, line).fail();)
+        {
+            _labels.emplace_back(line);
+        }
+    }
+    catch(const std::ifstream::failure &e)
+    {
+        ARM_COMPUTE_ERROR("Accessing %s: %s", labels_path.c_str(), e.what());
+    }
+}
+
+bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON(_labels.size() != tensor.info()->dimension(0));
+
+    // Get the predicted class
+    std::vector<float>  classes_prob;
+    std::vector<size_t> index;
+
+    const auto   output_net  = reinterpret_cast<float *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
+    const size_t num_classes = tensor.info()->dimension(0);
+
+    classes_prob.resize(num_classes);
+    index.resize(num_classes);
+
+    std::copy(output_net, output_net + num_classes, classes_prob.begin());
+
+    // Sort results
+    std::iota(std::begin(index), std::end(index), static_cast<size_t>(0));
+    std::sort(std::begin(index), std::end(index),
+              [&](size_t a, size_t b)
+    {
+        return classes_prob[a] > classes_prob[b];
+    });
+
+    _output_stream << "---------- Top " << _top_n << " predictions ----------" << std::endl
+                   << std::endl;
+    for(size_t i = 0; i < _top_n; ++i)
+    {
+        _output_stream << std::fixed << std::setprecision(4)
+                       << classes_prob[index.at(i)]
+                       << " - [id = " << index.at(i) << "]"
+                       << ", " << _labels[index.at(i)] << std::endl;
+    }
+
+    return false;
 }
 
 RandomAccessor::RandomAccessor(PixelValue lower, PixelValue upper, std::random_device::result_type seed)

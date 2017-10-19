@@ -68,6 +68,16 @@ public:
      * @param[in] accessor Tensor accessor
      */
     template <typename AccessorType>
+    Tensor(TensorInfo &&info, std::unique_ptr<AccessorType> &&accessor)
+        : _target(TargetHint::DONT_CARE), _info(info), _accessor(std::move(accessor)), _tensor(nullptr)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] info     Tensor info to use
+     * @param[in] accessor Tensor accessor
+     */
+    template <typename AccessorType>
     Tensor(TensorInfo &&info, AccessorType &&accessor)
         : _target(TargetHint::DONT_CARE), _info(info), _accessor(arm_compute::support::cpp14::make_unique<AccessorType>(std::forward<AccessorType>(accessor))), _tensor(nullptr)
     {

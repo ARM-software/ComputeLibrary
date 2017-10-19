@@ -64,35 +64,91 @@ std::unique_ptr<ITensorAccessor> get_accessor(const std::string &path, const std
     }
 }
 
+/** Generates appropriate input accessor according to the specified ppm_path
+ *
+ * @note If ppm_path is empty will generate a DummyAccessor else will generate a PPMAccessor
+ *
+ * @param[in] ppm_path Path to PPM file
+ * @param[in] mean_r   Red mean value to be subtracted from red channel
+ * @param[in] mean_g   Green mean value to be subtracted from green channel
+ * @param[in] mean_b   Blue mean value to be subtracted from blue channel
+ *
+ * @return An appropriate tensor accessor
+ */
+std::unique_ptr<ITensorAccessor> get_input_accessor(const std::string &ppm_path, float mean_r, float mean_g, float mean_b)
+{
+    if(ppm_path.empty())
+    {
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>();
+    }
+    else
+    {
+        return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, true, mean_r, mean_g, mean_b);
+    }
+}
+
+/** Generates appropriate output accessor according to the specified labels_path
+ *
+ * @note If labels_path is empty will generate a DummyAccessor else will generate a TopNPredictionsAccessor
+ *
+ * @param[in]  labels_path   Path to labels text file
+ * @param[in]  top_n         (Optional) Number of output classes to print
+ * @param[out] output_stream (Optional) Output stream
+ *
+ * @return An appropriate tensor accessor
+ */
+std::unique_ptr<ITensorAccessor> get_output_accessor(const std::string &labels_path, size_t top_n = 5, std::ostream &output_stream = std::cout)
+{
+    if(labels_path.empty())
+    {
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>();
+    }
+    else
+    {
+        return arm_compute::support::cpp14::make_unique<TopNPredictionsAccessor>(labels_path, top_n, output_stream);
+    }
+}
+
 /** Example demonstrating how to implement AlexNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] batches )
+ * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
 void main_graph_alexnet(int argc, const char **argv)
 {
-    std::string  data_path;   /** Path to the trainable data */
-    unsigned int batches = 4; /** Number of batches */
+    std::string data_path; /* Path to the trainable data */
+    std::string image;     /* Image data */
+    std::string label;     /* Label data */
+
+    constexpr float mean_r = 122.68f; /* Mean value to subtract from red channel */
+    constexpr float mean_g = 116.67f; /* Mean value to subtract from green channel */
+    constexpr float mean_b = 104.01f; /* Mean value to subtract from blue channel */
 
     // Parse arguments
     if(argc < 2)
     {
         // Print help
-        std::cout << "Usage: " << argv[0] << " [path_to_data] [batches]\n\n";
+        std::cout << "Usage: " << argv[0] << " [path_to_data] [image] [labels]\n\n";
         std::cout << "No data folder provided: using random values\n\n";
     }
     else if(argc == 2)
     {
-        //Do something with argv[1]
         data_path = argv[1];
-        std::cout << "Usage: " << argv[0] << " [path_to_data] [batches]\n\n";
-        std::cout << "No number of batches where specified, thus will use the default : " << batches << "\n\n";
+        std::cout << "Usage: " << argv[0] << " " << argv[1] << " [image] [labels]\n\n";
+        std::cout << "No image provided: using random values\n\n";
+    }
+    else if(argc == 3)
+    {
+        data_path = argv[1];
+        image     = argv[2];
+        std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [labels]\n\n";
+        std::cout << "No text file with labels provided: skipping output accessor\n\n";
     }
     else
     {
-        //Do something with argv[1] and argv[2]
         data_path = argv[1];
-        batches   = std::strtol(argv[2], nullptr, 0);
+        image     = argv[2];
+        label     = argv[3];
     }
 
     // Check if OpenCL is available and initialize the scheduler
@@ -107,7 +163,8 @@ void main_graph_alexnet(int argc, const char **argv)
     LoggerRegistry::get().create_reserved_loggers(LogLevel::INFO, { std::make_shared<StdPrinter>() });
 
     graph << hint
-          << Tensor(TensorInfo(TensorShape(227U, 227U, 3U, batches), 1, DataType::F32), DummyAccessor())
+          << Tensor(TensorInfo(TensorShape(227U, 227U, 3U, 1U), 1, DataType::F32),
+                    get_input_accessor(image, mean_r, mean_g, mean_b))
           // Layer 1
           << ConvolutionLayer(
               11U, 11U, 96U,
@@ -168,7 +225,7 @@ void main_graph_alexnet(int argc, const char **argv)
               get_accessor(data_path, "/cnn_data/alexnet_model/fc8_b.npy"))
           // Softmax
           << SoftmaxLayer()
-          << Tensor(DummyAccessor());
+          << Tensor(get_output_accessor(label, 5));
 
     // Run graph
     graph.run();
@@ -177,7 +234,7 @@ void main_graph_alexnet(int argc, const char **argv)
 /** Main program for AlexNet
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] batches )
+ * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
 int main(int argc, const char **argv)
 {
