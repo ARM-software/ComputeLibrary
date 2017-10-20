@@ -1040,7 +1040,7 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
     VECTOR_TYPE acc3 = 0.0f;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-    for(; src_addr.s0 <= (end_row_vec_a - 2 * sizeof(DATA_TYPE)); src_addr += (int2)(2 * sizeof(DATA_TYPE), 2 * src1_stride_y))
+    for(; src_addr.s0 <= (end_row_vec_a - 2 * (int)sizeof(DATA_TYPE)); src_addr += (int2)(2 * sizeof(DATA_TYPE), 2 * src1_stride_y))
     {
         // Load values from matrix A
         VEC_DATA_TYPE(DATA_TYPE, 2)
@@ -1344,7 +1344,7 @@ __kernel void gemm_mm_qs16(IMAGE_DECLARATION(src0),
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
     // This for loop performs 4 accumulations per iteration
-    for(; src_addr.s0 <= (end_row_vec_a - 2 * sizeof(short)); src_addr += (int2)(2 * sizeof(short), 2 * src1_stride_y))
+    for(; src_addr.s0 <= (end_row_vec_a - 2 * (int)sizeof(short)); src_addr += (int2)(2 * sizeof(short), 2 * src1_stride_y))
     {
         short2 a0 = vload2(0, (__global short *)(src0_ptr + src_addr.s0 + 0 * src0_stride_y));
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
@@ -1629,7 +1629,7 @@ __kernel void gemm_lc_vm_f32(IMAGE_DECLARATION(src0),
 
     float4 acc = 0.0f;
 
-    for(; src_addr.s0 <= (end_row_vec_a - 2 * sizeof(float)); src_addr += (int2)(2 * sizeof(float), 2 * src1_stride_y))
+    for(; src_addr.s0 <= (end_row_vec_a - 2 * (int)sizeof(float)); src_addr += (int2)(2 * sizeof(float), 2 * src1_stride_y))
     {
         float2 a0 = vload2(0, (__global float *)(src0_ptr + src_addr.s0));
         float4 b0 = vload4(0, (__global float *)(src1_ptr + src_addr.s1));

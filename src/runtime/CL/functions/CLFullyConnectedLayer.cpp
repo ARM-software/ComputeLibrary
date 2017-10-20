@@ -85,7 +85,7 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
-    ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() != 2);
+    ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 2);
 
     _are_weights_reshaped = transpose_weights ? are_weights_reshaped : true;
     _is_fc_after_conv     = true;
