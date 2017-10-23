@@ -37,7 +37,7 @@
 using namespace arm_compute;
 
 CLDepthwiseConvolution3x3Kernel::CLDepthwiseConvolution3x3Kernel()
-    : _border_size(0), _input(), _output(), _weights(), _conv_stride_x(0), _conv_stride_y(0), _conv_pad_x(0), _conv_pad_y(0)
+    : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_x(0), _conv_stride_y(0), _conv_pad_x(0), _conv_pad_y(0)
 {
 }
 
@@ -46,12 +46,19 @@ BorderSize CLDepthwiseConvolution3x3Kernel::border_size() const
     return _border_size;
 }
 
-void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const PadStrideInfo &conv_info)
+void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const ICLTensor *biases, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
+
+    if(biases != nullptr)
+    {
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        ARM_COMPUTE_ERROR_ON(biases->info()->dimension(0) != weights->info()->dimension(2));
+        ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
+    }
 
     std::pair<unsigned int, unsigned int> expected_output = scaled_dimensions(input->info()->tensor_shape().x(), input->info()->tensor_shape().y(),
                                                                               weights->info()->tensor_shape().x(), weights->info()->tensor_shape().y(),
@@ -64,6 +71,7 @@ void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, ICLTenso
     _input         = input;
     _output        = output;
     _weights       = weights;
+    _biases        = biases;
     _conv_stride_x = conv_info.stride().first;
     _conv_stride_y = conv_info.stride().second;
     _conv_pad_x    = conv_info.pad().first;
@@ -73,6 +81,10 @@ void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, ICLTenso
     // Set build options
     ARM_COMPUTE_ERROR_ON(_conv_stride_x < 1 || _conv_stride_x > 3);
     std::set<std::string> options{ "-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x) };
+    if(_biases != nullptr)
+    {
+        options.emplace("-DHAS_BIAS");
+    }
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_convolution_3x3", options));
 
@@ -110,6 +122,15 @@ void CLDepthwiseConvolution3x3Kernel::run(const Window &window, cl::CommandQueue
     slice_in.set_dimension_step(Window::DimY, window.y().step() * _conv_stride_y);
     slice_weights.set_dimension_step(Window::DimX, 0);
     slice_weights.set_dimension_step(Window::DimY, 0);
+
+    // Set biases
+    if(_biases != nullptr)
+    {
+        unsigned int idx = 3 * num_arguments_per_3D_tensor();
+        Window       slice_biases;
+        slice_biases.use_tensor_dimensions(_biases->info()->tensor_shape());
+        add_1D_tensor_argument(idx, _biases, slice_biases);
+    }
 
     do
     {

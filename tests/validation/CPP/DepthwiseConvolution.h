@@ -36,7 +36,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const TensorShape &dst_shape, const PadStrideInfo &conv_info);
+SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

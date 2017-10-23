@@ -40,19 +40,22 @@ namespace reference
 {
 // Depthwise separable convolution layer
 template <typename T>
-SimpleTensor<T> depthwise_separable_convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &depthwise_weights, const TensorShape &depthwise_out_shape,
+SimpleTensor<T> depthwise_separable_convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &depthwise_weights, const SimpleTensor<T> &depthwise_biases,
+                                                      const TensorShape     &depthwise_out_shape,
                                                       const SimpleTensor<T> &pointwise_weights,
-                                                      const SimpleTensor<T> &biases, const TensorShape &dst_shape, const PadStrideInfo &depthwise_conv_info, const PadStrideInfo &pointwise_conv_info)
+                                                      const SimpleTensor<T> &pointwise_biases, const TensorShape &dst_shape, const PadStrideInfo &depthwise_conv_info, const PadStrideInfo &pointwise_conv_info)
 {
     // Compute reference
-    SimpleTensor<T> depthwise_out = depthwise_convolution(src, depthwise_weights, depthwise_out_shape, depthwise_conv_info);
-    SimpleTensor<T> dst           = convolution_layer(depthwise_out, pointwise_weights, biases, dst_shape, pointwise_conv_info);
+    SimpleTensor<T> depthwise_out = depthwise_convolution(src, depthwise_weights, depthwise_biases, depthwise_out_shape, depthwise_conv_info);
+    SimpleTensor<T> dst           = convolution_layer(depthwise_out, pointwise_weights, pointwise_biases, dst_shape, pointwise_conv_info);
 
     return dst;
 }
 
-template SimpleTensor<float> depthwise_separable_convolution_layer(const SimpleTensor<float> &in, const SimpleTensor<float> &depthwise_weights, const TensorShape &depthwise_out_shape,
-                                                                   const SimpleTensor<float> &pointwise_weights, const SimpleTensor<float> &biases, const TensorShape &dst_shape, const PadStrideInfo &depthwise_conv_info, const PadStrideInfo &pointwise_conv_info);
+template SimpleTensor<float> depthwise_separable_convolution_layer(const SimpleTensor<float> &in, const SimpleTensor<float> &depthwise_weights, const SimpleTensor<float> &depthwise_biases,
+                                                                   const TensorShape         &depthwise_out_shape,
+                                                                   const SimpleTensor<float> &pointwise_weights, const SimpleTensor<float> &pointwise_biases, const TensorShape &dst_shape, const PadStrideInfo &depthwise_conv_info,
+                                                                   const PadStrideInfo &pointwise_conv_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

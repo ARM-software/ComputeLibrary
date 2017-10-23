@@ -40,7 +40,7 @@ class DepthwiseConvolutionFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape dst_shape, PadStrideInfo info, DataType data_type, int batches)
+    void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape dst_shape, PadStrideInfo info, DataType data_type, int batches)
     {
         // Set batched in source and destination shapes
         const unsigned int fixed_point_position = 4;
@@ -50,14 +50,16 @@ public:
         // Create tensors
         src     = create_tensor<TensorType>(src_shape, data_type, 1, fixed_point_position);
         weights = create_tensor<TensorType>(weights_shape, data_type, 1, fixed_point_position);
+        biases  = create_tensor<TensorType>(biases_shape, data_type, 1, fixed_point_position);
         dst     = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
 
         // Create and configure function
-        depth_conv.configure(&src, &dst, &weights, info);
+        depth_conv.configure(&src, &dst, &weights, &biases, info);
 
         // Allocate tensors
         src.allocator()->allocate();
         weights.allocator()->allocate();
+        biases.allocator()->allocate();
         dst.allocator()->allocate();
 
         // Fill tensors
@@ -74,12 +76,14 @@ public:
     {
         src.allocator()->free();
         weights.allocator()->free();
+        biases.allocator()->free();
         dst.allocator()->free();
     }
 
 private:
     TensorType src{};
     TensorType weights{};
+    TensorType biases{};
     TensorType dst{};
     Function   depth_conv{};
 };

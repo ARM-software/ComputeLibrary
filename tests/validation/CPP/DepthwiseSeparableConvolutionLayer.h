@@ -36,9 +36,10 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> depthwise_separable_convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &depthwise_weights, const TensorShape &depthwise_out_shape,
-                                                      const SimpleTensor<T> &pointwise_weights,
-                                                      const SimpleTensor<T> &biases, const TensorShape &dst_shape, const PadStrideInfo &depthwise_conv_info, const PadStrideInfo &pointwise_conv_info);
+SimpleTensor<T> depthwise_separable_convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &depthwise_weights, const SimpleTensor<T> &depthwise_biases,
+                                                      const TensorShape     &depthwise_out_shape,
+                                                      const SimpleTensor<T> &pointwise_weights, const SimpleTensor<T> &pointwise_biases, const TensorShape &dst_shape,
+                                                      const PadStrideInfo &depthwise_conv_info, const PadStrideInfo &pointwise_conv_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

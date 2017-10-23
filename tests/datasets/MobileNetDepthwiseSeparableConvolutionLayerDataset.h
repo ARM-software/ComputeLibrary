@@ -42,9 +42,10 @@ class MobileNetDepthwiseSeparableConvolutionLayerDataset final : public Depthwis
 public:
     MobileNetDepthwiseSeparableConvolutionLayerDataset()
     {
-        add_config(TensorShape(14U, 14U, 512U), TensorShape(3U, 3U, 512U), TensorShape(14U, 14U, 512U), TensorShape(1U, 1U, 512U, 512U), TensorShape(512U), TensorShape(14U, 14U, 512U), PadStrideInfo(1, 1, 1,
-                   1,
-                   DimensionRoundingType::FLOOR),
+        add_config(TensorShape(14U, 14U, 512U), TensorShape(3U, 3U, 512U), TensorShape(512U), TensorShape(14U, 14U, 512U), TensorShape(1U, 1U, 512U, 512U), TensorShape(512U), TensorShape(14U, 14U, 512U),
+                   PadStrideInfo(1, 1, 1,
+                                 1,
+                                 DimensionRoundingType::FLOOR),
                    PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::FLOOR));
     }
 };

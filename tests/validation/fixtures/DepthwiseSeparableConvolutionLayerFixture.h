@@ -47,22 +47,25 @@ class DepthwiseSeparableConvolutionValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape in_shape, TensorShape depthwise_weights_shape, TensorShape depthwise_out_shape, TensorShape pointwise_weights_shape, TensorShape biases_shape, TensorShape output_shape,
+    void setup(TensorShape in_shape, TensorShape depthwise_weights_shape, TensorShape depthwise_biases_shape, TensorShape depthwise_out_shape, TensorShape pointwise_weights_shape,
+               TensorShape pointwise_biases_shape, TensorShape output_shape,
                PadStrideInfo pad_stride_depthwise_info, PadStrideInfo pad_stride_pointwise_info)
     {
-        _target    = compute_target(in_shape, depthwise_weights_shape, depthwise_out_shape, pointwise_weights_shape, biases_shape, output_shape, pad_stride_depthwise_info, pad_stride_pointwise_info);
-        _reference = compute_reference(in_shape, depthwise_weights_shape, depthwise_out_shape, pointwise_weights_shape, biases_shape, output_shape, pad_stride_depthwise_info, pad_stride_pointwise_info);
+        _target = compute_target(in_shape, depthwise_weights_shape, depthwise_biases_shape, depthwise_out_shape, pointwise_weights_shape, pointwise_biases_shape, output_shape, pad_stride_depthwise_info,
+                                 pad_stride_pointwise_info);
+        _reference = compute_reference(in_shape, depthwise_weights_shape, depthwise_biases_shape, depthwise_out_shape, pointwise_weights_shape, pointwise_biases_shape, output_shape, pad_stride_depthwise_info,
+                                       pad_stride_pointwise_info);
     }
 
 protected:
     template <typename U>
-    void fill(U &&tensor, int i)
+    void fill(U &&tensor, int i, bool zero_fill = false)
     {
         switch(tensor.data_type())
         {
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                std::uniform_real_distribution<> distribution((zero_fill) ? 0.f : -1.0f, (zero_fill) ? 0.f : 1.0f);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -71,42 +74,47 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &depthwise_weights_shape, const TensorShape &depthwise_out_shape, const TensorShape &pointwise_weights_shape,
-                              const TensorShape &biases_shape,
-                              const TensorShape &output_shape, const PadStrideInfo &pad_stride_depthwise_info, const PadStrideInfo &pad_stride_pointwise_info)
+    TensorType compute_target(const TensorShape &input_shape, const TensorShape &depthwise_weights_shape, const TensorShape &depthwise_biases_shape, const TensorShape &depthwise_out_shape,
+                              const TensorShape &pointwise_weights_shape, const TensorShape &pointwise_biases_shape, const TensorShape &output_shape,
+                              const PadStrideInfo &pad_stride_depthwise_info, const PadStrideInfo &pad_stride_pointwise_info)
     {
         // Create tensors
         TensorType src               = create_tensor<TensorType>(input_shape, DataType::F32);
         TensorType depthwise_weights = create_tensor<TensorType>(depthwise_weights_shape, DataType::F32);
+        TensorType depthwise_biases  = create_tensor<TensorType>(depthwise_biases_shape, DataType::F32);
         TensorType depthwise_out     = create_tensor<TensorType>(depthwise_out_shape, DataType::F32);
         TensorType pointwise_weights = create_tensor<TensorType>(pointwise_weights_shape, DataType::F32);
-        TensorType biases            = create_tensor<TensorType>(biases_shape, DataType::F32);
+        TensorType pointwise_biases  = create_tensor<TensorType>(pointwise_biases_shape, DataType::F32);
         TensorType dst               = create_tensor<TensorType>(output_shape, DataType::F32);
 
         // Create Depthwise Separable Convolution Layer configure function
         CLDepthwiseSeparableConvolutionLayer depthwise_separable_convolution_layer;
-        depthwise_separable_convolution_layer.configure(&src, &depthwise_weights, &depthwise_out, &pointwise_weights, &biases, &dst, pad_stride_depthwise_info, pad_stride_pointwise_info);
+        depthwise_separable_convolution_layer.configure(&src, &depthwise_weights, &depthwise_biases, &depthwise_out, &pointwise_weights, &pointwise_biases, &dst, pad_stride_depthwise_info,
+                                                        pad_stride_pointwise_info);
 
         // Allocate tensors
         src.allocator()->allocate();
         depthwise_weights.allocator()->allocate();
+        depthwise_biases.allocator()->allocate();
         depthwise_out.allocator()->allocate();
         pointwise_weights.allocator()->allocate();
-        biases.allocator()->allocate();
+        pointwise_biases.allocator()->allocate();
         dst.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!depthwise_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!depthwise_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!depthwise_out.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!pointwise_weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!biases.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!pointwise_biases.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(src), 0);
         fill(AccessorType(depthwise_weights), 1);
-        fill(AccessorType(pointwise_weights), 2);
-        fill(AccessorType(biases), 3);
+        fill(AccessorType(depthwise_biases), 2, true);
+        fill(AccessorType(pointwise_weights), 3);
+        fill(AccessorType(pointwise_biases), 4);
 
         // Compute function
         depthwise_separable_convolution_layer.run();
@@ -114,20 +122,27 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &in_shape, const TensorShape &depthwise_weights_shape, const TensorShape &depthwise_out_shape, const TensorShape &pointwise_weights_shape,
-                                      const TensorShape &biases_shape, const TensorShape &dst_shape, const PadStrideInfo &pad_stride_depthwise_info, const PadStrideInfo &pad_stride_pointwise_info)
+    SimpleTensor<T> compute_reference(const TensorShape &in_shape, const TensorShape &depthwise_weights_shape, const TensorShape &depthwise_biases_shape, const TensorShape &depthwise_out_shape,
+                                      const TensorShape &pointwise_weights_shape, const TensorShape &pointwise_biases_shape, const TensorShape &dst_shape,
+                                      const PadStrideInfo &pad_stride_depthwise_info, const PadStrideInfo &pad_stride_pointwise_info)
     {
         SimpleTensor<T> src(in_shape, DataType::F32);
         SimpleTensor<T> depthwise_weights(depthwise_weights_shape, DataType::F32);
+        SimpleTensor<T> depthwise_biases(depthwise_biases_shape, DataType::F32);
         SimpleTensor<T> pointwise_weights(pointwise_weights_shape, DataType::F32);
-        SimpleTensor<T> biases(biases_shape, DataType::F32);
+        SimpleTensor<T> pointwise_biases(pointwise_biases_shape, DataType::F32);
 
         fill(src, 0);
         fill(depthwise_weights, 1);
-        fill(pointwise_weights, 2);
-        fill(biases, 3);
+        fill(depthwise_biases, 2, true);
+        fill(pointwise_weights, 3);
+        fill(pointwise_biases, 4);
 
-        return reference::depthwise_separable_convolution_layer(src, depthwise_weights, depthwise_out_shape, pointwise_weights, biases, dst_shape, pad_stride_depthwise_info, pad_stride_pointwise_info);
+        return reference::depthwise_separable_convolution_layer(src,
+                                                                depthwise_weights, depthwise_biases, depthwise_out_shape,
+                                                                pointwise_weights, pointwise_biases,
+                                                                dst_shape,
+                                                                pad_stride_depthwise_info, pad_stride_pointwise_info);
     }
 
     TensorType      _target{};

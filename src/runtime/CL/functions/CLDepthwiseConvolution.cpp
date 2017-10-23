@@ -35,13 +35,13 @@ CLDepthwiseConvolution3x3::CLDepthwiseConvolution3x3()
 {
 }
 
-void CLDepthwiseConvolution3x3::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const PadStrideInfo &conv_info)
+void CLDepthwiseConvolution3x3::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const ICLTensor *biases, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
-    _kernel.configure(input, output, weights, conv_info);
+    _kernel.configure(input, output, weights, biases, conv_info);
     _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
 }
 
@@ -57,7 +57,7 @@ CLDepthwiseConvolution::CLDepthwiseConvolution()
 {
 }
 
-void CLDepthwiseConvolution::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const PadStrideInfo &conv_info)
+void CLDepthwiseConvolution::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const ICLTensor *biases, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
@@ -68,12 +68,14 @@ void CLDepthwiseConvolution::configure(ICLTensor *input, ICLTensor *output, cons
     const size_t weights_h = weights->info()->dimension(1);
     const size_t weights_z = weights->info()->dimension(2);
 
+    bool has_bias = (biases != nullptr);
+
     unsigned int conv_w = 0;
     unsigned int conv_h = 0;
     std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights_w, weights_h, conv_info);
 
     // Set up intermediate tensors
-    const size_t patch_size = weights_w * weights_h;
+    const size_t patch_size = weights_w * weights_h + ((has_bias) ? 1 : 0);
     const size_t conv_size  = conv_w * conv_h;
 
     TensorShape shape_im2col = input->info()->tensor_shape();
@@ -96,8 +98,8 @@ void CLDepthwiseConvolution::configure(ICLTensor *input, ICLTensor *output, cons
     _v2mm_output.allocator()->init(info_v2mm_out);
 
     // Configure kernels
-    _im2col_kernel.configure(input, &_input_reshaped, Size2D(weights_w, weights_h), conv_info);
-    _weights_reshape_kernel.configure(weights, &_weights_reshaped);
+    _im2col_kernel.configure(input, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, has_bias);
+    _weights_reshape_kernel.configure(weights, &_weights_reshaped, biases);
     _v2mm_kernel.configure(&_input_reshaped, &_weights_reshaped, &_v2mm_output);
     _vector_to_tensor_kernel.configure(&_v2mm_output, output, conv_w, conv_h);
 

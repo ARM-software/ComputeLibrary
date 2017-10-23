@@ -42,14 +42,14 @@ class MobileNetDepthwiseConvolutionDataset final : public DepthwiseConvolutionDa
 public:
     MobileNetDepthwiseConvolutionDataset()
     {
-        add_config(TensorShape(7U, 7U, 1024U), TensorShape(3U, 3U, 1024U), TensorShape(3U, 3U, 1024U), PadStrideInfo(2, 2, 1, 1));
-        add_config(TensorShape(14U, 14U, 512U), TensorShape(3U, 3U, 512U), TensorShape(7U, 7U, 512U), PadStrideInfo(2, 2, 1, 1));
-        add_config(TensorShape(28U, 28U, 256U), TensorShape(3U, 3U, 256U), TensorShape(14U, 14U, 256U), PadStrideInfo(2, 2, 1, 1));
-        add_config(TensorShape(28U, 28U, 256U), TensorShape(3U, 3U, 256U), TensorShape(28U, 28U, 256U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(56U, 56U, 128U), TensorShape(3U, 3U, 128U), TensorShape(28U, 28U, 128U), PadStrideInfo(2, 2, 1, 1));
-        add_config(TensorShape(56U, 56U, 128U), TensorShape(3U, 3U, 128U), TensorShape(56U, 56U, 128U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(112U, 112U, 64U), TensorShape(3U, 3U, 64U), TensorShape(56U, 56U, 64U), PadStrideInfo(2, 2, 1, 1));
-        add_config(TensorShape(112U, 112U, 32U), TensorShape(3U, 3U, 32U), TensorShape(112U, 112U, 32U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(7U, 7U, 1024U), TensorShape(3U, 3U, 1024U), TensorShape(1024U), TensorShape(3U, 3U, 1024U), PadStrideInfo(2, 2, 1, 1));
+        add_config(TensorShape(14U, 14U, 512U), TensorShape(3U, 3U, 512U), TensorShape(512U), TensorShape(7U, 7U, 512U), PadStrideInfo(2, 2, 1, 1));
+        add_config(TensorShape(28U, 28U, 256U), TensorShape(3U, 3U, 256U), TensorShape(256U), TensorShape(14U, 14U, 256U), PadStrideInfo(2, 2, 1, 1));
+        add_config(TensorShape(28U, 28U, 256U), TensorShape(3U, 3U, 256U), TensorShape(256U), TensorShape(28U, 28U, 256U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(56U, 56U, 128U), TensorShape(3U, 3U, 128U), TensorShape(128U), TensorShape(28U, 28U, 128U), PadStrideInfo(2, 2, 1, 1));
+        add_config(TensorShape(56U, 56U, 128U), TensorShape(3U, 3U, 128U), TensorShape(128U), TensorShape(56U, 56U, 128U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(112U, 112U, 64U), TensorShape(3U, 3U, 64U), TensorShape(64U), TensorShape(56U, 56U, 64U), PadStrideInfo(2, 2, 1, 1));
+        add_config(TensorShape(112U, 112U, 32U), TensorShape(3U, 3U, 32U), TensorShape(32U), TensorShape(112U, 112U, 32U), PadStrideInfo(1, 1, 1, 1));
     }
 };
 } // namespace datasets

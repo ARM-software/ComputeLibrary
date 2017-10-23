@@ -53,17 +53,20 @@ public:
      * @param[in]  input               Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                                 while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F32.
      * @param[in]  depthwise_weights   Depthwise convolution weights tensor. These are 3D tensors with dimensions [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
+     * @param[in]  depthwise_biases    (Optional) Biases tensor.Biases are 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                                 Data type supported: Same as @p weights.
      * @param[out] depthwise_out       Depthwise destination tensor.
      * @param[in]  pointwise_weights   Pointwise convolution weights tensor. These are 4D tensors with dimensions [1, 1, IFM, OFM]. Data type supported: Same as @p input.
-     * @param[in]  biases              Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[in]  pointwise_biases    (Optional) Biases tensor. Biases are 1D tensor with dimensions [OFM]. Must be nullptr if not needed.
+     *                                 Data type supported: Same as @p weights.
      * @param[out] output              Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                                 Data types supported: Same as @p input.
      * @param[in]  depthwise_conv_info Contains padding and stride information described in @ref PadStrideInfo for depthwise convolution.
      * @param[in]  pointwise_conv_info Contains padding and stride information described in @ref PadStrideInfo for pointwise convolution.
      */
-    void configure(ICLTensor *input, const ICLTensor *depthwise_weights, ICLTensor *depthwise_out, const ICLTensor *pointwise_weights, const ICLTensor *biases, ICLTensor *output,
-                   const PadStrideInfo &depthwise_conv_info,
-                   const PadStrideInfo &pointwise_conv_info);
+    void configure(ICLTensor *input, const ICLTensor *depthwise_weights, const ICLTensor *depthwise_biases, ICLTensor *depthwise_out,
+                   const ICLTensor *pointwise_weights, const ICLTensor *pointwise_biases, ICLTensor *output,
+                   const PadStrideInfo &depthwise_conv_info, const PadStrideInfo &pointwise_conv_info);
 
     // Inherited methods overriden:
     void run() override;

@@ -38,16 +38,18 @@ namespace datasets
 class DepthwiseConvolutionDataset
 {
 public:
-    using type = std::tuple<TensorShape, TensorShape, TensorShape, PadStrideInfo>;
+    using type = std::tuple<TensorShape, TensorShape, TensorShape, TensorShape, PadStrideInfo>;
 
     struct iterator
     {
         iterator(std::vector<TensorShape>::const_iterator   src_it,
                  std::vector<TensorShape>::const_iterator   weights_it,
+                 std::vector<TensorShape>::const_iterator   biases_it,
                  std::vector<TensorShape>::const_iterator   dst_it,
                  std::vector<PadStrideInfo>::const_iterator infos_it)
             : _src_it{ std::move(src_it) },
               _weights_it{ std::move(weights_it) },
+              _biases_it{ std::move(biases_it) },
               _dst_it{ std::move(dst_it) },
               _infos_it{ std::move(infos_it) }
         {
@@ -58,6 +60,7 @@ public:
             std::stringstream description;
             description << "In=" << *_src_it << ":";
             description << "Weights=" << *_weights_it << ":";
+            description << "Biases=" << *_biases_it << ":";
             description << "Out=" << *_dst_it << ":";
             description << "Info=" << *_infos_it;
             return description.str();
@@ -65,13 +68,14 @@ public:
 
         DepthwiseConvolutionDataset::type operator*() const
         {
-            return std::make_tuple(*_src_it, *_weights_it, *_dst_it, *_infos_it);
+            return std::make_tuple(*_src_it, *_weights_it, *_biases_it, *_dst_it, *_infos_it);
         }
 
         iterator &operator++()
         {
             ++_src_it;
             ++_weights_it;
+            ++_biases_it;
             ++_dst_it;
             ++_infos_it;
 
@@ -81,24 +85,26 @@ public:
     private:
         std::vector<TensorShape>::const_iterator   _src_it;
         std::vector<TensorShape>::const_iterator   _weights_it;
+        std::vector<TensorShape>::const_iterator   _biases_it;
         std::vector<TensorShape>::const_iterator   _dst_it;
         std::vector<PadStrideInfo>::const_iterator _infos_it;
     };
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _weight_shapes.begin(), _dst_shapes.begin(), _infos.begin());
+        return iterator(_src_shapes.begin(), _weight_shapes.begin(), _biases_shapes.begin(), _dst_shapes.begin(), _infos.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_weight_shapes.size(), std::min(_dst_shapes.size(), _infos.size())));
+        return std::min(_src_shapes.size(), std::min(_weight_shapes.size(), std::min(_biases_shapes.size(), std::min(_dst_shapes.size(), _infos.size()))));
     }
 
-    void add_config(TensorShape src, TensorShape weights, TensorShape dst, PadStrideInfo info)
+    void add_config(TensorShape src, TensorShape weights, TensorShape biases, TensorShape dst, PadStrideInfo info)
     {
         _src_shapes.emplace_back(std::move(src));
         _weight_shapes.emplace_back(std::move(weights));
+        _biases_shapes.emplace_back(std::move(biases));
         _dst_shapes.emplace_back(std::move(dst));
         _infos.emplace_back(std::move(info));
     }
@@ -110,6 +116,7 @@ protected:
 private:
     std::vector<TensorShape>   _src_shapes{};
     std::vector<TensorShape>   _weight_shapes{};
+    std::vector<TensorShape>   _biases_shapes{};
     std::vector<TensorShape>   _dst_shapes{};
     std::vector<PadStrideInfo> _infos{};
 };
@@ -118,20 +125,20 @@ class SmallDepthwiseConvolutionDataset final : public DepthwiseConvolutionDatase
 public:
     SmallDepthwiseConvolutionDataset()
     {
-        add_config(TensorShape(7U, 7U, 3U), TensorShape(3U, 3U, 3U), TensorShape(5U, 5U, 3U), PadStrideInfo(1, 1, 0, 0));
-        add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 5U, 5U), TensorShape(11U, 23U, 5U), PadStrideInfo(2, 1, 0, 0));
-        add_config(TensorShape(33U, 27U, 7U), TensorShape(7U, 3U, 7U), TensorShape(10U, 13U, 7U), PadStrideInfo(3, 2, 1, 0));
-        add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(31U, 14U, 11U), PadStrideInfo(1, 2, 0, 1));
-        add_config(TensorShape(17U, 31U, 2U), TensorShape(5U, 9U, 2U), TensorShape(15U, 13U, 2U), PadStrideInfo(1, 2, 1, 1));
-        add_config(TensorShape(23U, 27U, 5U), TensorShape(11U, 3U, 5U), TensorShape(13U, 13U, 5U), PadStrideInfo(1, 2, 0, 0));
-        add_config(TensorShape(17U, 31U, 2U, 3U), TensorShape(5U, 9U, 2U), TensorShape(15U, 13U, 2U, 3U), PadStrideInfo(1, 2, 1, 1));
+        add_config(TensorShape(7U, 7U, 3U), TensorShape(3U, 3U, 3U), TensorShape(3U), TensorShape(5U, 5U, 3U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 5U, 5U), TensorShape(5U), TensorShape(11U, 23U, 5U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(7U, 3U, 7U), TensorShape(7U), TensorShape(10U, 13U, 7U), PadStrideInfo(3, 2, 1, 0));
+        add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(11U), TensorShape(31U, 14U, 11U), PadStrideInfo(1, 2, 0, 1));
+        add_config(TensorShape(17U, 31U, 2U), TensorShape(5U, 9U, 2U), TensorShape(2U), TensorShape(15U, 13U, 2U), PadStrideInfo(1, 2, 1, 1));
+        add_config(TensorShape(23U, 27U, 5U), TensorShape(11U, 3U, 5U), TensorShape(5U), TensorShape(13U, 13U, 5U), PadStrideInfo(1, 2, 0, 0));
+        add_config(TensorShape(17U, 31U, 2U, 3U), TensorShape(5U, 9U, 2U), TensorShape(2U), TensorShape(15U, 13U, 2U, 3U), PadStrideInfo(1, 2, 1, 1));
         // Asymmetric padding
-        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(10U, 11U, 7U), PadStrideInfo(3, 2, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(10U, 11U, 7U), PadStrideInfo(3, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(7U), TensorShape(11U, 12U, 7U), PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(7U), TensorShape(10U, 11U, 7U), PadStrideInfo(3, 2, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U), TensorShape(7U), TensorShape(10U, 11U, 7U), PadStrideInfo(3, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
     }
 };
 
@@ -140,12 +147,12 @@ class LargeDepthwiseConvolutionDataset final : public DepthwiseConvolutionDatase
 public:
     LargeDepthwiseConvolutionDataset()
     {
-        add_config(TensorShape(233U, 277U, 55U), TensorShape(3U, 3U, 55U), TensorShape(116U, 275U, 55U), PadStrideInfo(2, 1, 0, 0));
-        add_config(TensorShape(333U, 277U, 77U), TensorShape(3U, 3U, 77U), TensorShape(111U, 138U, 77U), PadStrideInfo(3, 2, 1, 0));
-        add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(177U, 156U, 22U), PadStrideInfo(1, 2, 1, 1));
-        add_config(TensorShape(233U, 277U, 55U), TensorShape(3U, 3U, 55U), TensorShape(231U, 138U, 55U), PadStrideInfo(1, 2, 0, 0));
-        add_config(TensorShape(333U, 277U, 77U), TensorShape(3U, 3U, 77U), TensorShape(166U, 93U, 77U), PadStrideInfo(2, 3, 0, 1));
-        add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(89U, 311U, 22U), PadStrideInfo(2, 1, 1, 1));
+        add_config(TensorShape(233U, 277U, 55U), TensorShape(3U, 3U, 55U), TensorShape(55U), TensorShape(116U, 275U, 55U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(333U, 277U, 77U), TensorShape(3U, 3U, 77U), TensorShape(77U), TensorShape(111U, 138U, 77U), PadStrideInfo(3, 2, 1, 0));
+        add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(22U), TensorShape(177U, 156U, 22U), PadStrideInfo(1, 2, 1, 1));
+        add_config(TensorShape(233U, 277U, 55U), TensorShape(3U, 3U, 55U), TensorShape(55U), TensorShape(231U, 138U, 55U), PadStrideInfo(1, 2, 0, 0));
+        add_config(TensorShape(333U, 277U, 77U), TensorShape(3U, 3U, 77U), TensorShape(77U), TensorShape(166U, 93U, 77U), PadStrideInfo(2, 3, 0, 1));
+        add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(22U), TensorShape(89U, 311U, 22U), PadStrideInfo(2, 1, 1, 1));
     }
 };
 
@@ -154,10 +161,10 @@ class SmallDepthwiseConvolutionDataset3x3 final : public DepthwiseConvolutionDat
 public:
     SmallDepthwiseConvolutionDataset3x3()
     {
-        add_config(TensorShape(7U, 7U, 3U), TensorShape(3U, 3U, 3U), TensorShape(5U, 5U, 3U), PadStrideInfo(1, 1, 0, 0));
-        add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(11U, 14U, 11U), PadStrideInfo(3, 2, 1, 1));
-        add_config(TensorShape(21U, 31U, 9U), TensorShape(3U, 3U, 9U), TensorShape(21U, 15U, 9U), PadStrideInfo(1, 2, 1, 0));
-        add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(31U, 14U, 11U), PadStrideInfo(1, 2, 0, 1));
+        add_config(TensorShape(7U, 7U, 3U), TensorShape(3U, 3U, 3U), TensorShape(3U), TensorShape(5U, 5U, 3U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(11U), TensorShape(11U, 14U, 11U), PadStrideInfo(3, 2, 1, 1));
+        add_config(TensorShape(21U, 31U, 9U), TensorShape(3U, 3U, 9U), TensorShape(9U), TensorShape(21U, 15U, 9U), PadStrideInfo(1, 2, 1, 0));
+        add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(11U), TensorShape(31U, 14U, 11U), PadStrideInfo(1, 2, 0, 1));
     }
 };
 
@@ -166,12 +173,12 @@ class LargeDepthwiseConvolutionDataset3x3 final : public DepthwiseConvolutionDat
 public:
     LargeDepthwiseConvolutionDataset3x3()
     {
-        add_config(TensorShape(233U, 277U, 55U), TensorShape(3U, 3U, 55U), TensorShape(116U, 275U, 55U), PadStrideInfo(2, 1, 0, 0));
-        add_config(TensorShape(333U, 277U, 77U), TensorShape(3U, 3U, 77U), TensorShape(111U, 138U, 77U), PadStrideInfo(3, 2, 1, 0));
-        add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(177U, 156U, 22U), PadStrideInfo(1, 2, 1, 1));
-        add_config(TensorShape(233U, 277U, 55U), TensorShape(3U, 3U, 55U), TensorShape(231U, 138U, 55U), PadStrideInfo(1, 2, 0, 0));
-        add_config(TensorShape(333U, 277U, 77U), TensorShape(3U, 3U, 77U), TensorShape(166U, 93U, 77U), PadStrideInfo(2, 3, 0, 1));
-        add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(89U, 311U, 22U), PadStrideInfo(2, 1, 1, 1));
+        add_config(TensorShape(233U, 277U, 55U), TensorShape(3U, 3U, 55U), TensorShape(55U), TensorShape(116U, 275U, 55U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(333U, 277U, 77U), TensorShape(3U, 3U, 77U), TensorShape(77U), TensorShape(111U, 138U, 77U), PadStrideInfo(3, 2, 1, 0));
+        add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(22U), TensorShape(177U, 156U, 22U), PadStrideInfo(1, 2, 1, 1));
+        add_config(TensorShape(233U, 277U, 55U), TensorShape(3U, 3U, 55U), TensorShape(55U), TensorShape(231U, 138U, 55U), PadStrideInfo(1, 2, 0, 0));
+        add_config(TensorShape(333U, 277U, 77U), TensorShape(3U, 3U, 77U), TensorShape(77U), TensorShape(166U, 93U, 77U), PadStrideInfo(2, 3, 0, 1));
+        add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(22U), TensorShape(89U, 311U, 22U), PadStrideInfo(2, 1, 1, 1));
     }
 };
 } // namespace datasets
