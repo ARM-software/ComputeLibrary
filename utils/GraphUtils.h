@@ -29,6 +29,8 @@
 #include "arm_compute/graph/Types.h"
 
 #include <random>
+#include <string>
+#include <vector>
 
 namespace arm_compute
 {
@@ -74,6 +76,60 @@ public:
 private:
     unsigned int _iterator;
     unsigned int _maximum;
+};
+
+/** PPM accessor class */
+class PPMAccessor final : public graph::ITensorAccessor
+{
+public:
+    /** Constructor
+     *
+     * @param[in] ppm_path Path to PPM file
+     * @param[in] bgr      (Optional) Fill the first plane with blue channel (default = false)
+     * @param[in] mean_r   (Optional) Red mean value to be subtracted from red channel
+     * @param[in] mean_g   (Optional) Green mean value to be subtracted from green channel
+     * @param[in] mean_b   (Optional) Blue mean value to be subtracted from blue channel
+     */
+    PPMAccessor(const std::string &ppm_path, bool bgr = true, float mean_r = 0.0f, float mean_g = 0.0f, float mean_b = 0.0f);
+    /** Allow instances of this class to be move constructed */
+    PPMAccessor(PPMAccessor &&) = default;
+
+    // Inherited methods overriden:
+    bool access_tensor(ITensor &tensor) override;
+
+private:
+    const std::string &_ppm_path;
+    const bool         _bgr;
+    const float        _mean_r;
+    const float        _mean_g;
+    const float        _mean_b;
+};
+
+/** Result accessor class */
+class TopNPredictionsAccessor final : public graph::ITensorAccessor
+{
+public:
+    /** Constructor
+     *
+     * @param[in]  labels_path   Path to labels text file.
+     * @param[in]  top_n         (Optional) Number of output classes to print
+     * @param[out] output_stream (Optional) Output stream
+     */
+    TopNPredictionsAccessor(const std::string &labels_path, size_t top_n = 5, std::ostream &output_stream = std::cout);
+    /** Allow instances of this class to be move constructed */
+    TopNPredictionsAccessor(TopNPredictionsAccessor &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    TopNPredictionsAccessor(const TopNPredictionsAccessor &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    TopNPredictionsAccessor &operator=(const TopNPredictionsAccessor &) = delete;
+
+    // Inherited methods overriden:
+    bool access_tensor(ITensor &tensor) override;
+
+private:
+    std::vector<std::string> _labels;
+    std::ostream            &_output_stream;
+    size_t                   _top_n;
 };
 
 /** Random accessor class */
