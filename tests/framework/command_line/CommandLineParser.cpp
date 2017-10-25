@@ -56,7 +56,11 @@ void CommandLineParser::parse(int argc, char **argv)
 
     for(int i = 1; i < argc; ++i)
     {
-        const std::string option{ argv[i] };
+        std::string mixed_case_opt{ argv[i] };
+        int         equal_sign = mixed_case_opt.find('=');
+        int         pos        = (equal_sign == -1) ? strlen(argv[i]) : equal_sign;
+
+        const std::string option = tolower(mixed_case_opt.substr(0, pos)) + mixed_case_opt.substr(pos);
         std::smatch       option_matches;
 
         if(std::regex_match(option, option_matches, option_regex))
