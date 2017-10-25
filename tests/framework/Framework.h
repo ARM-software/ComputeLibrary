@@ -280,7 +280,7 @@ public:
      *
      * @param[in] printer Pointer to a printer.
      */
-    void set_printer(Printer *printer);
+    void add_printer(Printer *printer);
 
     /** List of @ref TestInfo's.
      *
@@ -314,14 +314,18 @@ private:
      */
     std::string current_suite_name() const;
 
+    /* Perform func on all printers */
+    template <typename F>
+    void func_on_all_printers(F &&func);
+
     std::vector<std::string>                      _test_suite_name{};
     std::vector<std::unique_ptr<TestCaseFactory>> _test_factories{};
     std::map<TestInfo, TestResult> _test_results{};
-    int      _num_iterations{ 1 };
-    bool     _throw_errors{ false };
-    bool     _stop_on_error{ false };
-    bool     _error_on_missing_assets{ false };
-    Printer *_printer{ nullptr };
+    int                    _num_iterations{ 1 };
+    bool                   _throw_errors{ false };
+    bool                   _stop_on_error{ false };
+    bool                   _error_on_missing_assets{ false };
+    std::vector<Printer *> _printers{};
 
     using create_function = std::unique_ptr<Instrument>();
     std::map<InstrumentType, create_function *> _available_instruments{};

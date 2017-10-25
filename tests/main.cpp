@@ -197,7 +197,7 @@ int main(int argc, char **argv)
         }
 
         framework.init(instruments->value(), iterations->value(), dataset_mode->value(), filter->value(), filter_id->value(), log_level->value());
-        framework.set_printer(printer.get());
+        framework.add_printer(printer.get());
         framework.set_throw_errors(throw_errors->value());
         framework.set_stop_on_error(stop_on_error->value());
         framework.set_error_on_missing_assets(error_on_missing_assets->value());

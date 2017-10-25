@@ -134,11 +134,20 @@ void Framework::print_test_info(std::ostream &os) const
     }
 }
 
+template <typename F>
+void Framework::func_on_all_printers(F &&func)
+{
+    std::for_each(std::begin(_printers), std::end(_printers), func);
+}
+
 void Framework::log_test_start(const TestInfo &info)
 {
-    if(_printer != nullptr && _log_level >= LogLevel::TESTS)
+    if(_log_level >= LogLevel::TESTS)
     {
-        _printer->print_test_header(info);
+        func_on_all_printers([&](Printer * p)
+        {
+            p->print_test_header(info);
+        });
     }
 }
 
@@ -149,17 +158,20 @@ void Framework::log_test_skipped(const TestInfo &info)
 
 void Framework::log_test_end(const TestInfo &info)
 {
-    if(_printer != nullptr)
+    if(_log_level >= LogLevel::MEASUREMENTS)
     {
-        if(_log_level >= LogLevel::MEASUREMENTS)
+        func_on_all_printers([&](Printer * p)
         {
-            _printer->print_measurements(_test_results.at(info).measurements);
-        }
+            p->print_measurements(_test_results.at(info).measurements);
+        });
+    }
 
-        if(_log_level >= LogLevel::TESTS)
+    if(_log_level >= LogLevel::TESTS)
+    {
+        func_on_all_printers([](Printer * p)
         {
-            _printer->print_test_footer();
-        }
+            p->print_test_footer();
+        });
     }
 }
 
@@ -170,9 +182,12 @@ void Framework::log_failed_expectation(const TestError &error)
 
     const bool is_expected_failure = _current_test_info->status == TestCaseFactory::Status::EXPECTED_FAILURE;
 
-    if(_log_level >= error.level() && _printer != nullptr)
+    if(_log_level >= error.level())
     {
-        _printer->print_error(error, is_expected_failure);
+        func_on_all_printers([&](Printer * p)
+        {
+            p->print_error(error, is_expected_failure);
+        });
     }
 
     _current_test_result->status = TestResult::Status::FAILED;
@@ -180,9 +195,12 @@ void Framework::log_failed_expectation(const TestError &error)
 
 void Framework::log_info(const std::string &info)
 {
-    if(_log_level >= LogLevel::DEBUG && _printer != nullptr)
+    if(_log_level >= LogLevel::DEBUG)
     {
-        _printer->print_info(info);
+        func_on_all_printers([&](Printer * p)
+        {
+            p->print_info(info);
+        });
     }
 }
 
@@ -243,9 +261,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     _current_test_info   = &info;
     _current_test_result = &result;
 
-    if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+    if(_log_level >= LogLevel::ERRORS)
     {
-        _printer->print_errors_header();
+        func_on_all_printers([](Printer * p)
+        {
+            p->print_errors_header();
+        });
     }
 
     const bool is_expected_failure = info.status == TestCaseFactory::Status::EXPECTED_FAILURE;
@@ -283,10 +304,13 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         {
             if(_error_on_missing_assets)
             {
-                if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+                if(_log_level >= LogLevel::ERRORS)
                 {
                     TestError test_error(error.what(), LogLevel::ERRORS);
-                    _printer->print_error(test_error, is_expected_failure);
+                    func_on_all_printers([&](Printer * p)
+                    {
+                        p->print_error(test_error, is_expected_failure);
+                    });
                 }
 
                 result.status = TestResult::Status::FAILED;
@@ -298,9 +322,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
             }
             else
             {
-                if(_log_level >= LogLevel::DEBUG && _printer != nullptr)
+                if(_log_level >= LogLevel::DEBUG)
                 {
-                    _printer->print_info(error.what());
+                    func_on_all_printers([&](Printer * p)
+                    {
+                        p->print_info(error.what());
+                    });
                 }
 
                 result.status = TestResult::Status::NOT_RUN;
@@ -308,9 +335,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(const TestError &error)
         {
-            if(_log_level >= error.level() && _printer != nullptr)
+            if(_log_level >= error.level())
             {
-                _printer->print_error(error, is_expected_failure);
+                func_on_all_printers([&](Printer * p)
+                {
+                    p->print_error(error, is_expected_failure);
+                });
             }
 
             result.status = TestResult::Status::FAILED;
@@ -323,12 +353,15 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #ifdef ARM_COMPUTE_CL
         catch(const ::cl::Error &error)
         {
-            if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+            if(_log_level >= LogLevel::ERRORS)
             {
                 std::stringstream stream;
                 stream << "Error code: " << error.err();
                 TestError test_error(error.what(), LogLevel::ERRORS, stream.str());
-                _printer->print_error(test_error, is_expected_failure);
+                func_on_all_printers([&](Printer * p)
+                {
+                    p->print_error(test_error, is_expected_failure);
+                });
             }
 
             result.status = TestResult::Status::FAILED;
@@ -341,9 +374,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #endif /* ARM_COMPUTE_CL */
         catch(const std::exception &error)
         {
-            if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+            if(_log_level >= LogLevel::ERRORS)
             {
-                _printer->print_error(error, is_expected_failure);
+                func_on_all_printers([&](Printer * p)
+                {
+                    p->print_error(error, is_expected_failure);
+                });
             }
 
             result.status = TestResult::Status::CRASHED;
@@ -355,9 +391,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(...)
         {
-            if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+            if(_log_level >= LogLevel::ERRORS)
             {
-                _printer->print_error(TestError("Received unknown exception"), is_expected_failure);
+                func_on_all_printers([&](Printer * p)
+                {
+                    p->print_error(TestError("Received unknown exception"), is_expected_failure);
+                });
             }
 
             result.status = TestResult::Status::CRASHED;
@@ -370,9 +409,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     }
     catch(const std::exception &error)
     {
-        if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+        if(_log_level >= LogLevel::ERRORS)
         {
-            _printer->print_error(error, is_expected_failure);
+            func_on_all_printers([&](Printer * p)
+            {
+                p->print_error(error, is_expected_failure);
+            });
         }
 
         result.status = TestResult::Status::CRASHED;
@@ -384,9 +426,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     }
     catch(...)
     {
-        if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+        if(_log_level >= LogLevel::ERRORS)
         {
-            _printer->print_error(TestError("Received unknown exception"), is_expected_failure);
+            func_on_all_printers([&](Printer * p)
+            {
+                p->print_error(TestError("Received unknown exception"), is_expected_failure);
+            });
         }
 
         result.status = TestResult::Status::CRASHED;
@@ -397,9 +442,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
     }
 
-    if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+    if(_log_level >= LogLevel::ERRORS)
     {
-        _printer->print_errors_footer();
+        func_on_all_printers([](Printer * p)
+        {
+            p->print_errors_footer();
+        });
     }
 
     _current_test_info   = nullptr;
@@ -432,9 +480,12 @@ bool Framework::run()
     // Clear old test results
     _test_results.clear();
 
-    if(_printer != nullptr && _log_level >= LogLevel::TESTS)
+    if(_log_level >= LogLevel::TESTS)
     {
-        _printer->print_run_header();
+        func_on_all_printers([](Printer * p)
+        {
+            p->print_run_header();
+        });
     }
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
@@ -456,9 +507,12 @@ bool Framework::run()
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
 
-    if(_printer != nullptr && _log_level >= LogLevel::TESTS)
+    if(_log_level >= LogLevel::TESTS)
     {
-        _printer->print_run_footer();
+        func_on_all_printers([](Printer * p)
+        {
+            p->print_run_footer();
+        });
     }
 
     auto runtime = std::chrono::duration_cast<std::chrono::seconds>(end - start);
@@ -527,9 +581,9 @@ Profiler Framework::get_profiler() const
     return profiler;
 }
 
-void Framework::set_printer(Printer *printer)
+void Framework::add_printer(Printer *printer)
 {
-    _printer = printer;
+    _printers.push_back(printer);
 }
 
 std::vector<TestInfo> Framework::test_infos() const
