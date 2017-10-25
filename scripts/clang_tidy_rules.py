@@ -89,6 +89,7 @@ def filter_clang_tidy_lines( lines ):
                ("ConvolutionLayer.cpp" in line and "move constructors should be marked noexcept" in line) or
                ("parameter 'memory_manager' is unused" in line) or
                ("parameter 'memory_manager' is copied for each invocation but only used as a const reference" in line) or
+               ("DeconvolutionLayer.cpp" in line and "casting (double + 0.5) to integer leads to incorrect rounding; consider using lround" in line) or
                "3rdparty" in line):
                 print_context=False
                 continue

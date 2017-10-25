@@ -49,8 +49,8 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     const int          width_scaled  = scaled.shape().x();
     const int          height_scaled = scaled.shape().y();
     const int          num_2d_slices = src.shape().total_size() / (width_in * height_in);
-    const auto         width_ratio   = static_cast<float>(width_in) / static_cast<float>(width_scaled);
-    const auto         height_ratio  = static_cast<float>(height_in) / static_cast<float>(height_scaled);
+    const float        width_ratio   = static_cast<float>(width_in) / static_cast<float>(width_scaled);
+    const float        height_ratio  = static_cast<float>(height_in) / static_cast<float>(height_scaled);
     const int          ax            = a.first;  // The number of zeros added to right edge of the input.
     const int          ay            = a.second; // The number of zeros added to bottom edge of the input.
     const unsigned int kernel_size   = weights.shape().x();
@@ -59,7 +59,6 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     const int transposed_convolution_pady = kernel_size - info.pad().second - 1;
     const int stridex                     = info.stride().first;
     const int stridey                     = info.stride().second;
-
     for(int j = 0; j < scaled.num_elements(); ++j)
     {
         scaled[j] = T(0);
@@ -83,8 +82,8 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
                 {
                     if(in_bounds)
                     {
-                        const int in_scaled_x = support::cpp11::round(x_src);
-                        const int in_scaled_y = support::cpp11::round(y_src);
+                        const int in_scaled_x = (x_src < 0.f) ? static_cast<int>(x_src - 0.5f) : static_cast<int>(x_src + 0.5f);
+                        const int in_scaled_y = (y_src < 0.f) ? static_cast<int>(y_src - 0.5f) : static_cast<int>(y_src + 0.5f);
                         const T *in          = src.data() + offset_slice_in + in_scaled_x + in_scaled_y * width_in;
                         *out                  = *in;
                     }
