@@ -25,6 +25,11 @@
 
 using namespace arm_compute::graph;
 
+void NodeContext::set_target(TargetHint target)
+{
+    _target = target;
+}
+
 void NodeContext::add_input(arm_compute::ITensor *input)
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
@@ -37,7 +42,7 @@ void NodeContext::add_output(arm_compute::ITensor *output)
     _outputs.emplace_back(output);
 }
 
-std::string NodeContext::operation() const
+OperationType NodeContext::operation() const
 {
     return _operation;
 }

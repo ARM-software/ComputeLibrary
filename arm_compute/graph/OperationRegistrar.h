@@ -43,15 +43,15 @@ class OperationRegistrar final
 public:
     /** Add a new test case with the given name to the framework.
      *
-     * @param[in] operation_name Operation name
+     * @param[in] operation Operation type
      */
-    OperationRegistrar(std::string operation_name);
+    OperationRegistrar(OperationType operation);
 };
 
 template <typename T>
-inline OperationRegistrar<T>::OperationRegistrar(std::string operation_name)
+inline OperationRegistrar<T>::OperationRegistrar(OperationType operation)
 {
-    OperationRegistry::get().add_operation<T>(std::move(operation_name));
+    OperationRegistry::get().add_operation<T>(std::move(operation));
 }
 } // namespace detail
 } // namespace graph

@@ -23,60 +23,20 @@
  */
 #include "arm_compute/graph/nodes/BatchNormalizationLayer.h"
 
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h"
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/graph/NodeContext.h"
+#include "arm_compute/graph/OperationRegistry.h"
 #include "support/ToolchainSupport.h"
-#include "utils/TypePrinter.h"
 
 using namespace arm_compute::graph;
-
-namespace
-{
-template <typename BatchBatchNormalizationLayer, typename TensorType, TargetHint target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(arm_compute::ITensor *input, arm_compute::ITensor *output, Tensor &mean, Tensor &var, Tensor &beta, Tensor &gamma, float epsilon)
-{
-    auto norm = arm_compute::support::cpp14::make_unique<BatchBatchNormalizationLayer>();
-    norm->configure(
-        dynamic_cast<TensorType *>(input),
-        dynamic_cast<TensorType *>(output),
-        dynamic_cast<TensorType *>(mean.set_target(target_hint)),
-        dynamic_cast<TensorType *>(var.set_target(target_hint)),
-        dynamic_cast<TensorType *>(beta.set_target(target_hint)),
-        dynamic_cast<TensorType *>(gamma.set_target(target_hint)),
-        epsilon);
-
-    return std::move(norm);
-}
-
-template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(arm_compute::ITensor *input, arm_compute::ITensor *output, Tensor &mean, Tensor &var, Tensor &beta, Tensor &gamma, float epsilon);
-
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(arm_compute::ITensor *input, arm_compute::ITensor *output, Tensor &mean, Tensor &var, Tensor &beta, Tensor &gamma,
-                                                                        float epsilon)
-{
-    return instantiate_function<arm_compute::CLBatchNormalizationLayer, arm_compute::ICLTensor, TargetHint::OPENCL>(input, output, mean, var, beta, gamma, epsilon);
-}
-
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(arm_compute::ITensor *input, arm_compute::ITensor *output, Tensor &mean, Tensor &var, Tensor &beta, Tensor &gamma, float epsilon)
-{
-    return instantiate_function<arm_compute::NEBatchNormalizationLayer, arm_compute::ITensor, TargetHint::NEON>(input, output, mean, var, beta, gamma, epsilon);
-}
-} // namespace
 
 std::unique_ptr<arm_compute::IFunction> BatchNormalizationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
 
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
-
     arm_compute::ITensor *in  = input->tensor();
     arm_compute::ITensor *out = output->tensor();
+    _target_hint              = ctx.hints().target_hint();
 
     unsigned int batch_norm_size = in->info()->dimension(2);
     if(_mean.tensor() == nullptr)
@@ -96,21 +56,17 @@ std::unique_ptr<arm_compute::IFunction> BatchNormalizationLayer::instantiate_nod
         _gamma.set_info(TensorInfo(TensorShape(batch_norm_size), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
     }
 
-    if(_target_hint == TargetHint::OPENCL)
-    {
-        func = instantiate<TargetHint::OPENCL>(in, out, _mean, _var, _beta, _gamma, _epsilon);
-        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLBatchNormalizationLayer");
-    }
-    else
-    {
-        func = instantiate<TargetHint::NEON>(in, out, _mean, _var, _beta, _gamma, _epsilon);
-        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEBatchNormalizationLayer");
-    }
+    // Create node context
+    NodeContext node_ctx(OperationType::BatchNormalizationLayer);
+    node_ctx.set_target(_target_hint);
+    node_ctx.add_input(in);
+    node_ctx.add_input(_mean.tensor());
+    node_ctx.add_input(_var.tensor());
+    node_ctx.add_input(_beta.tensor());
+    node_ctx.add_input(_gamma.tensor());
+    node_ctx.add_output(out);
+    node_ctx.add_parameter<float>("epsilon", _epsilon);
 
-    ARM_COMPUTE_LOG_GRAPH_INFO(" Data Type: " << in->info()->data_type()
-                               << " Input shape: " << in->info()->tensor_shape()
-                               << " Output shape: " << out->info()->tensor_shape()
-                               << std::endl);
-
-    return func;
+    // Get function
+    return OperationRegistry::get().find_operation(OperationType::BatchNormalizationLayer, _target_hint)->configure(node_ctx);
 }

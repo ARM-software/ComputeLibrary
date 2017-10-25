@@ -203,9 +203,7 @@ if env['os'] != 'bare_metal' and not env['standalone']:
 if env['neon'] and env['opencl']:
     graph_files = Glob('src/graph/*.cpp')
     graph_files += Glob('src/graph/nodes/*.cpp')
-
-    graph_files += Glob('src/graph/operations/CL/*.cpp')
-    graph_files += Glob('src/graph/operations/NEON/*.cpp')
+    graph_files += Glob('src/graph/operations/*.cpp')
 
     graph_files += Glob('src/graph/CL/*.cpp')
     graph_files += Glob('src/graph/NEON/*.cpp')

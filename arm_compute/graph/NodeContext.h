@@ -45,11 +45,10 @@ class NodeContext
 {
 public:
     /** Default Constructor
-     * (TODO(geopin01): Should we have an enum with all the supported ops instead?)
      *
      * @param[in] operation Name of the operation
      */
-    NodeContext(std::string operation)
+    NodeContext(OperationType operation)
         : _operation(operation), _target(TargetHint::DONT_CARE), _inputs(), _outputs(), _parameters() {};
     /** Sets the execution target of the node
      *
@@ -75,9 +74,9 @@ public:
     void add_parameter(std::string name, T parameter);
     /** Returns the operation of this node.
      *
-     * @return The operation name
+     * @return The operation type
      */
-    std::string operation() const;
+    OperationType operation() const;
     /** Returns the execution target of this node
      *
      * @return The execution target
@@ -117,7 +116,7 @@ public:
     size_t num_outputs() const;
 
 private:
-    std::string                         _operation;
+    OperationType                       _operation;
     TargetHint                          _target;
     std::vector<arm_compute::ITensor *> _inputs;
     std::vector<arm_compute::ITensor *> _outputs;

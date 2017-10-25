@@ -36,7 +36,7 @@ OperationRegistry &OperationRegistry::get()
     return instance;
 }
 
-IOperation *OperationRegistry::find_operation(const std::string &operation, TargetHint target)
+IOperation *OperationRegistry::find_operation(OperationType operation, TargetHint target)
 {
     ARM_COMPUTE_ERROR_ON(!contains(operation, target));
     auto it = std::find_if(_registered_ops[operation].begin(), _registered_ops[operation].end(), [&](const std::unique_ptr<IOperation> &op)
@@ -47,7 +47,7 @@ IOperation *OperationRegistry::find_operation(const std::string &operation, Targ
     return (*it).get();
 }
 
-bool OperationRegistry::contains(const std::string &operation, TargetHint target) const
+bool OperationRegistry::contains(OperationType operation, TargetHint target) const
 {
     auto it = _registered_ops.find(operation);
     if(it != _registered_ops.end())

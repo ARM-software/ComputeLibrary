@@ -23,44 +23,11 @@
  */
 #include "arm_compute/graph/nodes/NormalizationLayer.h"
 
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLNormalizationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/graph/NodeContext.h"
+#include "arm_compute/graph/OperationRegistry.h"
 #include "support/ToolchainSupport.h"
-#include "utils/TypePrinter.h"
 
 using namespace arm_compute::graph;
-
-namespace
-{
-template <typename NormalizationType, typename TensorType, TargetHint target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(arm_compute::ITensor *input, arm_compute::ITensor *output, const NormalizationLayerInfo &norm_info)
-{
-    auto norm = arm_compute::support::cpp14::make_unique<NormalizationType>();
-    norm->configure(
-        dynamic_cast<TensorType *>(input),
-        dynamic_cast<TensorType *>(output),
-        norm_info);
-
-    return std::move(norm);
-}
-
-template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(arm_compute::ITensor *input, arm_compute::ITensor *output, const NormalizationLayerInfo &norm_info);
-
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(arm_compute::ITensor *input, arm_compute::ITensor *output, const NormalizationLayerInfo &norm_info)
-{
-    return instantiate_function<arm_compute::CLNormalizationLayer, arm_compute::ICLTensor, TargetHint::OPENCL>(input, output, norm_info);
-}
-
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(arm_compute::ITensor *input, arm_compute::ITensor *output, const NormalizationLayerInfo &norm_info)
-{
-    return instantiate_function<arm_compute::NENormalizationLayer, arm_compute::ITensor, TargetHint::NEON>(input, output, norm_info);
-}
-} // namespace
 
 NormalizationLayer::NormalizationLayer(const NormalizationLayerInfo norm_info)
     : _norm_info(norm_info)
@@ -72,28 +39,17 @@ std::unique_ptr<arm_compute::IFunction> NormalizationLayer::instantiate_node(Gra
     ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
 
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
-
     arm_compute::ITensor *in  = input->tensor();
     arm_compute::ITensor *out = output->tensor();
+    _target_hint              = ctx.hints().target_hint();
 
-    if(_target_hint == TargetHint::OPENCL)
-    {
-        func = instantiate<TargetHint::OPENCL>(in, out, _norm_info);
-        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLNormalizationLayer");
-    }
-    else
-    {
-        func = instantiate<TargetHint::NEON>(in, out, _norm_info);
-        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NENormalizationLayer");
-    }
+    // Create node context
+    NodeContext node_ctx(OperationType::NormalizationLayer);
+    node_ctx.set_target(_target_hint);
+    node_ctx.add_input(in);
+    node_ctx.add_output(out);
+    node_ctx.add_parameter<NormalizationLayerInfo>("NormalizationLayerInfo", _norm_info);
 
-    ARM_COMPUTE_LOG_GRAPH_INFO(" Data Type: " << in->info()->data_type()
-                               << " Input shape: " << in->info()->tensor_shape()
-                               << " Output shape: " << out->info()->tensor_shape()
-                               << " Normalization info: " << _norm_info
-                               << std::endl);
-
-    return func;
+    // Get function
+    return OperationRegistry::get().find_operation(OperationType::NormalizationLayer, _target_hint)->configure(node_ctx);
 }

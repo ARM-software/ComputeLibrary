@@ -51,6 +51,20 @@ public:
      */
     virtual TargetHint target() const = 0;
 };
+
+#define REGISTER_SIMPLE_OPERATION(NAME, TARGET, OP)                                \
+    class NAME : public IOperation                                                 \
+    {                                                                              \
+    public:                                                                    \
+        std::unique_ptr<arm_compute::IFunction> configure(NodeContext &ctx) final; \
+        TargetHint target() const final                                            \
+        {                                                                          \
+            return TargetHint::TARGET;                                             \
+        }                                                                          \
+    };                                                                             \
+    static detail::OperationRegistrar<NAME> NAME##_registrar(OP);                  \
+    std::unique_ptr<arm_compute::IFunction> NAME::configure(NodeContext &ctx)
+
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_IOPERATION_H__ */

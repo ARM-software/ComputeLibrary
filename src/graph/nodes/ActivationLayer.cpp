@@ -25,6 +25,7 @@
 
 #include "arm_compute/graph/NodeContext.h"
 #include "arm_compute/graph/OperationRegistry.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute::graph;
 
@@ -38,20 +39,17 @@ std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphC
     ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
 
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
-
     arm_compute::ITensor *in  = input->tensor();
     arm_compute::ITensor *out = output->tensor();
+    _target_hint              = ctx.hints().target_hint();
 
     // Create node context
-    NodeContext node_ctx("ActivationLayer");
+    NodeContext node_ctx(OperationType::ActivationLayer);
+    node_ctx.set_target(_target_hint);
     node_ctx.add_input(in);
     node_ctx.add_output(out);
     node_ctx.add_parameter<ActivationLayerInfo>("ActivationLayerInfo", _activation_info);
 
     // Get function
-    func = OperationRegistry::get().find_operation("ActivationLayer", _target_hint)->configure(node_ctx);
-
-    return func;
+    return OperationRegistry::get().find_operation(OperationType::ActivationLayer, _target_hint)->configure(node_ctx);
 }

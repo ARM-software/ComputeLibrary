@@ -47,39 +47,39 @@ public:
     static OperationRegistry &get();
     /** Finds an operation in the registry
      *
-     * @param[in] operation Name of the operation to find
+     * @param[in] operation Type of the operation to find
      * @param[in] target    Target of the operation
      *
      * @return Pointer to the operation functor if found, else nullptr
      */
-    IOperation *find_operation(const std::string &operation, TargetHint target);
+    IOperation *find_operation(OperationType operation, TargetHint target);
     /** Checks if an operation for a given target exists
      *
-     * @param[in] operation Operation name
+     * @param[in] operation Operation type
      * @param[in] target    Execution target
      *
      * @return True if exists else false
      */
-    bool contains(const std::string &operation, TargetHint target) const;
-    /** Registers and operation to the registry
+    bool contains(OperationType operation, TargetHint target) const;
+    /** Registers an operation to the registry
      *
-     * @param operation_name Name of the operation to register
+     * @param operation Operation to register
      */
     template <typename T>
-    void add_operation(const std::string &operation_name);
+    void add_operation(OperationType operation);
 
 private:
     /** Default Constructor */
     OperationRegistry();
 
 private:
-    std::map<std::string, std::vector<std::unique_ptr<IOperation>>> _registered_ops;
+    std::map<OperationType, std::vector<std::unique_ptr<IOperation>>> _registered_ops;
 };
 
 template <typename T>
-inline void OperationRegistry::add_operation(const std::string &operation_name)
+inline void OperationRegistry::add_operation(OperationType operation)
 {
-    _registered_ops[operation_name].emplace_back(support::cpp14::make_unique<T>());
+    _registered_ops[operation].emplace_back(support::cpp14::make_unique<T>());
 }
 } // namespace graph
 } // namespace arm_compute

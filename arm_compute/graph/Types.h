@@ -71,6 +71,20 @@ enum class ConvolutionMethodHint
     DIRECT /**< Direct convolution */
 };
 
+/** Supported layer operations */
+enum class OperationType
+{
+    ActivationLayer,
+    BatchNormalizationLayer,
+    ConvolutionLayer,
+    FloorLayer,
+    FullyConnectedLayer,
+    L2NormalizeLayer,
+    NormalizationLayer,
+    PoolingLayer,
+    SoftmaxLayer
+};
+
 /** Branch layer merging method */
 enum class BranchMergeMethod
 {
