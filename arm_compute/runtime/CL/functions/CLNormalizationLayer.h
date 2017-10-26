@@ -37,7 +37,7 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Basic function to simulate a normalization layer. This function calls the following CL kernels:
+/** Basic function to compute a normalization layer. This function calls the following CL kernels:
  *
  * -# @ref CLFillBorderKernel
  * -# @ref CLNormalizationLayerKernel
@@ -55,7 +55,7 @@ public:
      * @param[out]     output    Destination tensor. Dimensions, data type and number of channels must match the input ones.
      * @param[in]      norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */
-    void configure(ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info);
+    void configure(ICLTensor *input, ICLTensor *output, const NormalizationLayerInfo &norm_info);
 
     // Inherited methods overridden:
     void run() override;

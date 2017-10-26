@@ -40,7 +40,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to simulate a normalization layer. This function calls the following NEON kernels:
+/** Basic function to compute a normalization layer. This function calls the following NEON kernels:
  *
  * -# @ref NEPixelWiseMultiplicationKernel
  * -# @ref NEFillBorderKernel
@@ -59,7 +59,7 @@ public:
      * @param[out] output    Destination with the same dimensions, data type and number of channels of  @p input
      * @param[in]  norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */
-    void configure(const ITensor *input, ITensor *output, NormalizationLayerInfo norm_info);
+    void configure(const ITensor *input, ITensor *output, const NormalizationLayerInfo &norm_info);
 
     // Inherited methods overridden:
     void run() override;

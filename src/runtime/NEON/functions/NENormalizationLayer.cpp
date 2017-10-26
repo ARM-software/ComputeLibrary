@@ -37,7 +37,7 @@ NENormalizationLayer::NENormalizationLayer(std::shared_ptr<IMemoryManager> memor
 {
 }
 
-void NENormalizationLayer::configure(const ITensor *input, ITensor *output, NormalizationLayerInfo norm_info)
+void NENormalizationLayer::configure(const ITensor *input, ITensor *output, const NormalizationLayerInfo &norm_info)
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
 

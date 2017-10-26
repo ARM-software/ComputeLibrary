@@ -48,6 +48,11 @@ Help(new_options.GenerateHelpText(framework_env))
 if(env['opencl']):
     framework_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
 
+if(env['gles_compute']):
+    framework_env.Append(CPPDEFINES=['ARM_COMPUTE_GC'])
+    if env['os'] != 'android':
+        framework_env.Append(CPPPATH = ["#opengles-3.1/include", "#opengles-3.1/mali_include"])
+
 framework_env.Append(CPPPATH = ["."])
 framework_env.Append(CPPFLAGS=['-Wno-overloaded-virtual'])
 

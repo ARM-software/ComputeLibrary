@@ -68,6 +68,8 @@ test_env.Append(CPPPATH = ["#3rdparty/include"])
 test_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
 test_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
 test_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
+if env['gles_compute'] and env['os'] != 'android':
+    test_env.Append(LIBPATH = ["#build/%s/opengles-3.1/stubs" % env['build_dir']])
 
 Import("arm_compute_test_framework")
 test_env.Append(LIBS = arm_compute_test_framework)
@@ -109,6 +111,27 @@ if env['neon']:
     files_validation += Glob('validation/NEON/*/' + filter_pattern)
     files_validation += Glob('validation/NEON/' + filter_pattern)
 
+if env['gles_compute']:
+    if env['os'] != 'android':
+        Import('egl')
+        Import('glesv2')
+
+        test_env.Append(CPPPATH = ["#opengles-3.1/include", "#opengles-3.1/mali_include"])
+        test_env.Append(LIBS = ["EGL", "GLESv2"])
+    else:
+        if env['arch'] != 'armv7a':
+            test_env.Append(LIBS = ["EGL", "GLESv3"])
+        else:
+            test_env.Append(LIBS = ["EGL", "GLESv2"])
+
+    test_env.Append(CPPDEFINES=['ARM_COMPUTE_GC'])
+
+    files_benchmark += Glob('benchmark/GLES_COMPUTE/*/*.cpp')
+    files_benchmark += Glob('benchmark/GLES_COMPUTE/*.cpp')
+
+    files_validation += Glob('validation/GLES_COMPUTE/*/*.cpp')
+    files_validation += Glob('validation/GLES_COMPUTE/*.cpp')
+
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
 else:
@@ -121,6 +144,9 @@ if test_env['benchmark_tests']:
 
     if env['opencl']:
         Depends(arm_compute_benchmark, opencl)
+    if env['gles_compute'] and env['os'] != 'android':
+        Depends(arm_compute_benchmark, egl)
+        Depends(arm_compute_benchmark, glesv2)
 
     Default(arm_compute_benchmark)
     Export('arm_compute_benchmark')
@@ -132,6 +158,9 @@ if test_env['validation_tests']:
 
     if env['opencl']:
         Depends(arm_compute_validation, opencl)
+    if env['gles_compute'] and env['os'] != 'android':
+        Depends(arm_compute_validation, egl)
+        Depends(arm_compute_validation, glesv2)
 
     Default(arm_compute_validation)
     Export('arm_compute_validation')

@@ -21,7 +21,7 @@ then
     exit -1
 fi
 
-grep -HnRE --exclude-dir=assembly "\buint " --exclude-dir=cl_kernels $DIRECTORIES | tee bad_style.log
+grep -HnRE --exclude-dir=assembly "\buint " --exclude-dir=cl_kernels --exclude-dir=cs_shaders $DIRECTORIES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""

@@ -37,6 +37,9 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #endif /* ARM_COMPUTE_CL */
+#ifdef ARM_COMPUTE_GC
+#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
+#endif /* ARM_COMPUTE_GC */
 
 #include <cstdlib>
 #include <cstring>
@@ -188,6 +191,27 @@ inline void unmap(CLTensor &tensor)
 }
 #endif /* ARM_COMPUTE_CL */
 
+#ifdef ARM_COMPUTE_GC
+/** Maps a tensor if needed
+ *
+ * @param[in] tensor   Tensor to be mapped
+ * @param[in] blocking Specified if map is blocking or not
+ */
+inline void map(GCTensor &tensor, bool blocking)
+{
+    tensor.map(blocking);
+}
+
+/** Unmaps a tensor if needed
+ *
+ * @param tensor  Tensor to be unmapped
+ */
+inline void unmap(GCTensor &tensor)
+{
+    tensor.unmap();
+}
+#endif /* ARM_COMPUTE_GC */
+
 /** Class to load the content of a PPM file into an Image
  */
 class PPMLoader
@@ -256,7 +280,7 @@ public:
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&image, arm_compute::Format::U8, arm_compute::Format::RGB888);
         try
         {
-            // Map buffer if creating a CLTensor
+            // Map buffer if creating a CLTensor/GCTensor
             map(image, true);
 
             // Check if the file is large enough to fill the image
@@ -319,7 +343,7 @@ public:
                     ARM_COMPUTE_ERROR("Unsupported format");
             }
 
-            // Unmap buffer if creating a CLTensor
+            // Unmap buffer if creating a CLTensor/GCTensor
             unmap(image);
         }
         catch(const std::ifstream::failure &e)
@@ -610,7 +634,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
         fs << "P6\n"
            << width << " " << height << " 255\n";
 
-        // Map buffer if creating a CLTensor
+        // Map buffer if creating a CLTensor/GCTensor
         map(tensor, true);
 
         switch(tensor.info()->format())
@@ -653,7 +677,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
                 ARM_COMPUTE_ERROR("Unsupported format");
         }
 
-        // Unmap buffer if creating a CLTensor
+        // Unmap buffer if creating a CLTensor/GCTensor
         unmap(tensor);
     }
     catch(const std::ofstream::failure &e)
@@ -762,7 +786,7 @@ void load_trained_data(T &tensor, const std::string &filename)
             throw std::runtime_error("Could not load binary data: " + filename);
         }
 
-        // Map buffer if creating a CLTensor
+        // Map buffer if creating a CLTensor/GCTensor
         map(tensor, true);
 
         Window window;
@@ -782,10 +806,8 @@ void load_trained_data(T &tensor, const std::string &filename)
         },
         in);
 
-#ifdef ARM_COMPUTE_CL
-        // Unmap buffer if creating a CLTensor
+        // Unmap buffer if creating a CLTensor/GCTensor
         unmap(tensor);
-#endif /* ARM_COMPUTE_CL */
     }
     catch(const std::ofstream::failure &e)
     {

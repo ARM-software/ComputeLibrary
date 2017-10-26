@@ -30,23 +30,29 @@
 
 using namespace arm_compute;
 
-Error arm_compute::create_error(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, ...)
+Error arm_compute::create_error_va_list(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, va_list args)
 {
-    char    out[512];
-    va_list args;
-    va_start(args, msg);
-    int offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
+    char out[512];
+    int  offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
     vsnprintf(out + offset, sizeof(out) - offset, msg, args);
-    va_end(args);
 
     return Error(error_code, std::string(out));
+}
+
+Error arm_compute::create_error(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, ...)
+{
+    va_list args;
+    va_start(args, msg);
+    auto err = create_error_va_list(error_code, function, file, line, msg, args);
+    va_end(args);
+    return err;
 }
 
 void arm_compute::error(const char *function, const char *file, const int line, const char *msg, ...)
 {
     va_list args;
     va_start(args, msg);
-    auto err = create_error(ErrorCode::RUNTIME_ERROR, function, file, line, msg, args);
+    auto err = create_error_va_list(ErrorCode::RUNTIME_ERROR, function, file, line, msg, args);
     va_end(args);
     throw std::runtime_error(err.description());
 }

@@ -30,6 +30,11 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
 
+#ifdef ARM_COMPUTE_GC
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
+#endif /* ARM_COMPUTE_GC */
+
 #include <chrono>
 #include <iostream>
 #include <sstream>
@@ -292,6 +297,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
                     CLScheduler::get().sync();
                 }
 #endif /* ARM_COMPUTE_CL */
+#ifdef ARM_COMPUTE_GC
+                if(opengles31_is_available())
+                {
+                    GCScheduler::get().sync();
+                }
+#endif /* ARM_COMPUTE_GC */
                 profiler.stop();
             }
 

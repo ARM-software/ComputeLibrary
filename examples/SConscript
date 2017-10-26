@@ -27,10 +27,17 @@ Import('env')
 if env['opencl']:
     Import('opencl')
 
+if env['gles_compute'] and env['os'] != 'android':
+    Import('egl')
+    Import('glesv2')
+
 examples_env = env.Clone()
 
 examples_env.Append(CPPPATH = ["#"])
 examples_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
+
+if env['gles_compute'] and env['os'] != 'android':
+    examples_env.Append(LIBPATH = ["#build/%s/opengles-3.1/stubs" % env['build_dir']])
 
 # Build examples
 utils = examples_env.Object("../utils/Utils.cpp")
@@ -84,5 +91,21 @@ if env['neon']:
         example = os.path.basename(os.path.splitext(str(file))[0])
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LIBS = arm_compute_libs)
         Depends(prog, arm_compute_dependency)
+        alias = examples_env.Alias(example, prog)
+        Default(alias)
+
+if env['gles_compute']:
+    for file in Glob("./gc_*.cpp"):
+        example = os.path.basename(os.path.splitext(str(file))[0])
+        if env['os'] != 'android':
+            examples_env.Append(CPPPATH = ["#opengles-3.1/include", "#opengles-3.1/mali_include"])
+            prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_GC'], LIBS = [arm_compute_libs, "EGL", "GLESv2"])
+            Depends(prog, [arm_compute_dependency, egl, glesv2])
+        else:
+            if env['arch'] != 'armv7a':
+                prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_GC'], LIBS = [arm_compute_libs, "EGL", "GLESv3"])
+            else:
+                prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_GC'], LIBS = [arm_compute_libs, "EGL", "GLESv2"])
+            Depends(prog, [arm_compute_dependency])
         alias = examples_env.Alias(example, prog)
         Default(alias)

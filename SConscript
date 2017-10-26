@@ -179,6 +179,26 @@ if env['neon']:
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
 
+if env['gles_compute']:
+    if env['os'] != 'android':
+        arm_compute_env.Append(CPPPATH = ["#opengles-3.1/include", "#opengles-3.1/mali_include"])
+
+    core_files += Glob('src/core/GLES_COMPUTE/*.cpp')
+    core_files += Glob('src/core/GLES_COMPUTE/kernels/*.cpp')
+
+    runtime_files += Glob('src/runtime/GLES_COMPUTE/*.cpp')
+    runtime_files += Glob('src/runtime/GLES_COMPUTE/functions/*.cpp')
+
+    # Generate embed files
+    if env['embed_kernels']:
+        cs_files = Glob('src/core/GLES_COMPUTE/cs_shaders/*.cs')
+        cs_files += Glob('src/core/GLES_COMPUTE/cs_shaders/*.h')
+
+        embed_files = [ f.get_path()+"embed" for f in cs_files ]
+        arm_compute_env.Append(CPPPATH =[Dir("./src/core/GLES_COMPUTE/").path] )
+
+        generate_embed.append(arm_compute_env.Command(embed_files, cs_files, action=resolve_includes))
+
 static_core_objects = [arm_compute_env.StaticObject(f) for f in core_files]
 shared_core_objects = [arm_compute_env.SharedObject(f) for f in core_files]
 

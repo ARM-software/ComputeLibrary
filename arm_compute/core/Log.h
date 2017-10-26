@@ -44,9 +44,12 @@
  * @param[in] log_level Logging level
  * @param[in] msg       Message to log
  */
-#define ARM_COMPUTE_LOG_MSG_CORE(log_level, msg) \
-    ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();    \
-    ARM_COMPUTE_LOG_MSG("CORE", log_level, msg)
+#define ARM_COMPUTE_LOG_MSG_CORE(log_level, msg)     \
+    do                                               \
+    {                                                \
+        ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();    \
+        ARM_COMPUTE_LOG_MSG("CORE", log_level, msg); \
+    } while(false)
 
 /** Log a message with format to the core system logger
  *
@@ -54,42 +57,57 @@
  * @param[in] fmt       String format (printf style)
  * @param[in] ...       Message arguments
  */
-#define ARM_COMPUTE_LOG_MSG_WITH_FORMAT_CORE(log_level, fmt, ...) \
-    ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                     \
-    ARM_COMPUTE_LOG_MSG_WITH_FORMAT("CORE", log_level, fmt, __VA_ARGS__)
+#define ARM_COMPUTE_LOG_MSG_WITH_FORMAT_CORE(log_level, fmt, ...)             \
+    do                                                                        \
+    {                                                                         \
+        ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                             \
+        ARM_COMPUTE_LOG_MSG_WITH_FORMAT("CORE", log_level, fmt, __VA_ARGS__); \
+    } while(false)
 
 /** Log a stream to the core system logger
  *
  * @param[in] log_level Logging level
  * @param[in] ss        Stream to log
  */
-#define ARM_COMPUTE_LOG_STREAM_CORE(log_level, ss) \
-    ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();      \
-    ARM_COMPUTE_LOG_STREAM("CORE", log_level, ss)
+#define ARM_COMPUTE_LOG_STREAM_CORE(log_level, ss)     \
+    do                                                 \
+    {                                                  \
+        ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();      \
+        ARM_COMPUTE_LOG_STREAM("CORE", log_level, ss); \
+    } while(false)
 
 /** Log information level message to the core system logger
  *
  * @param[in] msg Stream to log
  */
-#define ARM_COMPUTE_LOG_INFO_MSG_CORE(msg)    \
-    ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER(); \
-    ARM_COMPUTE_LOG_MSG_CORE(arm_compute::logging::LogLevel::INFO, msg)
+#define ARM_COMPUTE_LOG_INFO_MSG_CORE(msg)                                   \
+    do                                                                       \
+    {                                                                        \
+        ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                            \
+        ARM_COMPUTE_LOG_MSG_CORE(arm_compute::logging::LogLevel::INFO, msg); \
+    } while(false)
 
 /** Log information level formatted message to the core system logger
  *
  * @param[in] fmt String format (printf style)
  * @param[in] ... Message arguments
  */
-#define ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE(fmt, ...) \
-    ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();               \
-    ARM_COMPUTE_LOG_MSG_WITH_FORMAT_CORE(arm_compute::logging::LogLevel::INFO, msg)
+#define ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE(fmt, ...)                                           \
+    do                                                                                                \
+    {                                                                                                 \
+        ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                                                     \
+        ARM_COMPUTE_LOG_MSG_WITH_FORMAT_CORE(arm_compute::logging::LogLevel::INFO, fmt, __VA_ARGS__); \
+    } while(false)
 
 /** Log information level stream to the core system logger
  *
  * @param[in] ss Message to log
  */
-#define ARM_COMPUTE_LOG_INFO_STREAM_CORE(ss)  \
-    ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER(); \
-    ARM_COMPUTE_LOG_STREAM_CORE(arm_compute::logging::LogLevel::INFO, ss)
+#define ARM_COMPUTE_LOG_INFO_STREAM_CORE(ss)                                   \
+    do                                                                         \
+    {                                                                          \
+        ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                              \
+        ARM_COMPUTE_LOG_STREAM_CORE(arm_compute::logging::LogLevel::INFO, ss); \
+    } while(false)
 
 #endif /* __ARM_COMPUTE_LOGGING_MACROS_H__ */

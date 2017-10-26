@@ -151,6 +151,7 @@ public:
         add_config(TensorShape(9U, 5U, 257U, 2U, 3U), TensorShape(11565U, 2123U), TensorShape(2123U), TensorShape(2123U, 2U, 3U));
     }
 };
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

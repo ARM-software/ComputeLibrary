@@ -48,7 +48,8 @@ vars.AddVariables(
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Neon support", False),
-    BoolVariable("embed_kernels", "Embed OpenCL kernels in library binary", False),
+    BoolVariable("gles_compute", "Enable OpenGL ES Compute Shader support", False),
+    BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", False),
     BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
     BoolVariable("openmp", "Enable OpenMP backend", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
@@ -199,6 +200,7 @@ if env['opencl']:
         print("Cannot link OpenCL statically, which is required on bare metal")
         Exit(1)
 
+if env['opencl'] or env['gles_compute']:
     if env['embed_kernels']:
         env.Append(CPPDEFINES = ['EMBEDDED_KERNELS'])
 
@@ -228,6 +230,9 @@ SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate
 
 if env['opencl']:
     SConscript("./opencl-1.2-stubs/SConscript", variant_dir="build/%s/opencl-1.2-stubs" % env['build_dir'], duplicate=0)
+
+if env['gles_compute'] and env['os'] != 'android':
+    SConscript("./opengles-3.1/stubs/SConscript", variant_dir="build/%s/opengles-3.1/stubs" % env['build_dir'], duplicate=0)
 
 if env['examples'] and env['os'] != 'bare_metal':
     SConscript('./examples/SConscript', variant_dir='#build/%s/examples' % env['build_dir'], duplicate=0)

@@ -36,6 +36,9 @@
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
+#ifdef ARM_COMPUTE_GC
+#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
+#endif /* ARM_COMPUTE_GC */
 #include "arm_compute/runtime/Scheduler.h"
 
 #include <fstream>
@@ -60,6 +63,10 @@ int main(int argc, char **argv)
 {
 #ifdef ARM_COMPUTE_CL
     CLScheduler::get().default_init();
+#endif /* ARM_COMPUTE_CL */
+
+#ifdef ARM_COMPUTE_GC
+    GCScheduler::get().default_init();
 #endif /* ARM_COMPUTE_CL */
 
     framework::Framework &framework = framework::Framework::get();

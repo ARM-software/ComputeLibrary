@@ -22,7 +22,7 @@ DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./support"
 
 if [ $# -eq 0 ]
 then
-    files=$(find $DIRECTORIES -type f \( -name \*.cpp -o -iname \*.h -o -name \*.inl -o -name \*.cl \))
+    files=$(find $DIRECTORIES -type f \( -name \*.cpp -o -iname \*.h -o -name \*.inl -o -name \*.cl -o -name \*.cs \))
 else
 	files=$@
 fi

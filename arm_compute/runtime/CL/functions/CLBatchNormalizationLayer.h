@@ -54,8 +54,8 @@ public:
      * @param[out]     output  Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
      * @param[in]      mean    Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in]      var     Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      gamma   Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in]      beta    Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      gamma   Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in]      epsilon Small value to avoid division with zero.
      */
     void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon);
@@ -63,12 +63,12 @@ public:
      *
      * @param[in] input   Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result.
      *                    3 lower dimensions represent a single input with dimensions [width, height, FM].
-     * @param[in] output  Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
      *                    The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     * @param[in] output  Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
      * @param[in] mean    Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in] var     Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] gamma   Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in] beta    Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] gamma   Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in] epsilon Small value to avoid division with zero.
      *
      * @return an error status

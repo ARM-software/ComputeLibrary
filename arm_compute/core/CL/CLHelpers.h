@@ -43,7 +43,7 @@ struct enable_bitwise_ops<arm_compute::GPUTarget>
 };
 
 /** Max vector width of an OpenCL vector */
-static constexpr const unsigned int max_cl_vector_width = 16;
+static constexpr unsigned int max_cl_vector_width = 16;
 
 /** Translates a tensor data type to the appropriate OpenCL type.
  *

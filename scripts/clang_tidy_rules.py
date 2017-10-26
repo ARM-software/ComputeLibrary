@@ -6,13 +6,14 @@ import re
 import sys
 
 def get_list_includes():
-    return "include . 3rdparty/include kernels computer_vision".split()
+    return "opengles-3.1/include opengles-3.1/mali_include include . 3rdparty/include kernels computer_vision".split()
 
 def get_list_flags( filename, arch):
     assert arch in ["armv7", "aarch64"]
     flags = ["-std=c++11"]
     flags.append("-DARM_COMPUTE_CPP_SCHEDULER=1")
     flags.append("-DARM_COMPUTE_CL")
+    flags.append("-DARM_COMPUTE_GC")
     if arch == "aarch64":
         flags.append("-DARM_COMPUTE_AARCH64_V8_2")
     return flags

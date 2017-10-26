@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_ERROR_H__
 #define __ARM_COMPUTE_ERROR_H__
 
+#include <stdarg.h>
 #include <stdexcept>
 #include <string>
 
@@ -106,6 +107,16 @@ private:
     std::string _description;
 };
 
+/** Creates an error containing the error message from variable argument list
+ *
+ * @param[in] error_code Error code
+ * @param[in] function   Function in which the error occurred.
+ * @param[in] file       Name of the file where the error occurred.
+ * @param[in] line       Line on which the error occurred.
+ * @param[in] msg        Message to display before aborting.
+ * @param[in] args       Variable argument list of the message.
+ */
+Error create_error_va_list(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, va_list args);
 /** Creates an error containing the error message
  *
  * @param[in] error_code Error code
@@ -241,7 +252,7 @@ Error create_error(ErrorCode error_code, const char *function, const char *file,
  * @param[in] error Error value to check.
  */
 #define ARM_COMPUTE_ERROR_THROW_ON(error) \
-    error.throw_if_error();
+    error.throw_if_error()
 
 /** If the condition is true, the given message is printed and an exception is thrown
  *

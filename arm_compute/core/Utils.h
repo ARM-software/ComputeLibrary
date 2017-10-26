@@ -837,7 +837,16 @@ void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int
         {
             s.width(stream_width);
         }
-        s << std::right << static_cast<print_type>(ptr[i]) << element_delim;
+
+        if(std::is_same<typename std::decay<T>::type, half>::value)
+        {
+            // We use T instead of print_type here is because the std::is_floating_point<half> returns false and then the print_type becomes int.
+            s << std::right << static_cast<T>(ptr[i]) << element_delim;
+        }
+        else
+        {
+            s << std::right << static_cast<print_type>(ptr[i]) << element_delim;
+        }
     }
 }
 
@@ -859,7 +868,17 @@ int max_consecutive_elements_display_width_impl(std::ostream &s, const T *ptr, u
     {
         std::stringstream ss;
         ss.copyfmt(s);
-        ss << static_cast<print_type>(ptr[i]);
+
+        if(std::is_same<typename std::decay<T>::type, half>::value)
+        {
+            // We use T instead of print_type here is because the std::is_floating_point<half> returns false and then the print_type becomes int.
+            ss << static_cast<T>(ptr[i]);
+        }
+        else
+        {
+            ss << static_cast<print_type>(ptr[i]);
+        }
+
         max_width = std::max<int>(max_width, ss.str().size());
     }
     return max_width;

@@ -37,7 +37,7 @@ CLNormalizationLayer::CLNormalizationLayer()
 {
 }
 
-void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info)
+void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const NormalizationLayerInfo &norm_info)
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
 
