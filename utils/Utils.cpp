@@ -167,5 +167,42 @@ std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs)
 
     return std::make_tuple(width, height, max_val);
 }
+
+std::tuple<std::vector<unsigned long>, bool, std::string> parse_npy_header(std::ifstream &fs) //NOLINT
+{
+    std::vector<unsigned long> shape; // NOLINT
+
+    // Check magic bytes and version number
+    unsigned char v_major = 0;
+    unsigned char v_minor = 0;
+    npy::read_magic(fs, &v_major, &v_minor);
+
+    // Read header
+    std::string header;
+    if(v_major == 1 && v_minor == 0)
+    {
+        header = npy::read_header_1_0(fs);
+    }
+    else if(v_major == 2 && v_minor == 0)
+    {
+        header = npy::read_header_2_0(fs);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Unsupported file format version");
+    }
+
+    // Parse header
+    bool        fortran_order = false;
+    std::string typestr;
+    npy::ParseHeader(header, typestr, &fortran_order, shape);
+
+    if(!fortran_order)
+    {
+        std::reverse(shape.begin(), shape.end());
+    }
+
+    return std::make_tuple(shape, fortran_order, typestr);
+}
 } // namespace utils
 } // namespace arm_compute

@@ -32,7 +32,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
-#include "libnpy/npy.hpp"
 
 #include <algorithm>
 #include <iomanip>
