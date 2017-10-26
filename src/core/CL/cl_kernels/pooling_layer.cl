@@ -502,7 +502,6 @@ __kernel void pooling_layer_7(
 #define MIN_VAL_EXPAND(type) type##_MIN
 #define MIN_VAL(type) MIN_VAL_EXPAND(type)
 #define INITIAL_VALUE MIN_VAL(DATA_TYPE)
-#define INITIAL_VALUE 0
 #else // FIXED_POINT_POSITION
 #if FP16
 #define INITIAL_VALUE -HALF_MAX
