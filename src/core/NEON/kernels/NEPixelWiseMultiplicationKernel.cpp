@@ -38,9 +38,9 @@
 #include <cstdint>
 #include <cstdlib>
 
-#if ARM_COMPUTE_ENABLE_FP16
+#if ARM_COMPUTE_AARCH64_V8_2
 #include <arm_fp16.h> // needed for float16_t
-#endif                /* ARM_COMPUTE_ENABLE_FP16 */
+#endif                /* ARM_COMPUTE_AARCH64_V8_2 */
 
 using namespace arm_compute;
 
@@ -335,7 +335,7 @@ void mul_F32_F32_F32_n(const void *__restrict input1_ptr, const void *__restrict
 template <bool is_scale255, bool is_sat>
 void mul_F16_F16_F16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale)
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
     const auto          input1    = static_cast<const float16_t *__restrict>(input1_ptr);
     const auto          input2    = static_cast<const float16_t *__restrict>(input2_ptr);
     const auto          output    = static_cast<float16_t *__restrict>(output_ptr);
@@ -350,13 +350,13 @@ void mul_F16_F16_F16_n(const void *__restrict input1_ptr, const void *__restrict
         }
     };
     vst2q_f16(output, result);
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* ARM_COMPUTE_AARCH64_V8_2 */
     ARM_COMPUTE_UNUSED(input1_ptr);
     ARM_COMPUTE_UNUSED(input2_ptr);
     ARM_COMPUTE_UNUSED(output_ptr);
     ARM_COMPUTE_UNUSED(scale);
     ARM_COMPUTE_ERROR("Not supported. Recompile the library with arch=arm64-v8.2-a.");
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 }
 
 template <bool is_scale255, bool is_sat>

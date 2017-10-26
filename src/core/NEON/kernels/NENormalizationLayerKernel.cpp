@@ -232,7 +232,7 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
         },
         input, input_squared, output);
     }
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
     else if(dt == DataType::F16)
     {
         const float16x8_t coeff_vec    = vdupq_n_f16(_norm_info.scale_coeff());
@@ -268,7 +268,7 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
         },
         input, input_squared, output);
     }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
     else
     {
         ARM_COMPUTE_ERROR("Not supported");

@@ -41,7 +41,7 @@ namespace arm_compute
 class Coordinates;
 } // namespace arm_compute
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 namespace fp16
 {
 inline void mask_top(const float16x8_t &vc, const float16x8_t &in0, const float16x8_t &in1, uint16x8_t &mask)
@@ -224,7 +224,7 @@ void NENonMaximaSuppression3x3FP16Kernel::configure(const ITensor *input, ITenso
 
     INEKernel::configure(win);
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 namespace
 {

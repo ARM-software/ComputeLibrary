@@ -81,7 +81,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float> },
     };
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
     // Activation functions : FP16
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f16 =
     {
@@ -96,7 +96,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float16_t> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float16_t> },
     };
-#endif /* ARM_COMPUTE_ENABLE_FP16*/
+#endif /* ARM_COMPUTE_AARCH64_V8_2*/
 
     // Activation functions : QS8
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qs8 =
@@ -140,11 +140,11 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         case DataType::F32:
             _func = act_map_f32[activation_info.activation()];
             break;
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
         case DataType::F16:
             _func = act_map_f16[activation_info.activation()];
             break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
     }
@@ -174,7 +174,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     ICPPKernel::configure(win);
 }
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 template <ActivationLayerInfo::ActivationFunction F, typename T>
 typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
 {
@@ -305,7 +305,7 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
     },
     input, output);
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 template <ActivationLayerInfo::ActivationFunction F, typename T>
 typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationLayerKernel::activation(const Window &window)

@@ -26,6 +26,9 @@
 
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpAssemblyBaseKernel.h"
 
+// Enable only if compiled for AArch64-V8.2-A targets
+#ifdef ARM_COMPUTE_AARCH64_V8_2
+
 namespace arm_compute
 {
 class ITensor;
@@ -42,4 +45,5 @@ protected:
     void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output) override;
 };
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 #endif /*__ARM_COMPUTE_NEGEMMLOWPAARCH64V8P4KERNEL_H__*/

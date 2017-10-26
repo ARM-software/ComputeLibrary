@@ -173,7 +173,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
             }
             num_elems_horizontal_window = (pool_stride_x == 2) ? 4 : 8;
             break;
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
         case DataType::F16:
             switch(pool_size)
             {
@@ -192,7 +192,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
                     break;
             }
             break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
         case DataType::F32:
             switch(pool_size)
             {
@@ -536,7 +536,7 @@ void NEPoolingLayerKernel::pooling2_q16(const Window &window_input, const Window
 template <PoolingType pooling_type>
 void NEPoolingLayerKernel::pooling3_f16(const Window &window_input, const Window &window)
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
@@ -595,17 +595,17 @@ void NEPoolingLayerKernel::pooling3_f16(const Window &window_input, const Window
         *(reinterpret_cast<float16_t *>(output.ptr())) = vget_lane_f16(res, 0);
     },
     input, output);
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* ARM_COMPUTE_AARCH64_V8_2 */
     ARM_COMPUTE_UNUSED(window_input);
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_ERROR("FP16 Not supported! Recompile the library with arch=arm64-v8.2-a");
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 }
 
 template <PoolingType pooling_type>
 void NEPoolingLayerKernel::pooling2_f16(const Window &window_input, const Window &window)
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
     Iterator      input(_input, window_input);
     Iterator      output(_output, window);
     constexpr int pool_size = 2;
@@ -654,11 +654,11 @@ void NEPoolingLayerKernel::pooling2_f16(const Window &window_input, const Window
         vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), res);
     },
     input, output);
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* ARM_COMPUTE_AARCH64_V8_2 */
     ARM_COMPUTE_UNUSED(window_input);
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_ERROR("FP16 Not supported! Recompile the library with arch=arm64-v8.2-a");
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 }
 
 template <PoolingType pooling_type>

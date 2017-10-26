@@ -53,7 +53,7 @@ namespace
 template <bool multiply_alpha>
 void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info, float alpha)
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
     const auto width_matrix_b  = static_cast<int>(output->info()->dimension(0));
     const auto in_b_stride     = static_cast<int>(input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type()));
     const auto num_elems_vec_a = static_cast<int>(input0->info()->dimension(0));
@@ -186,7 +186,7 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
 
     },
     ina, inb, out);
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* ARM_COMPUTE_AARCH64_V8_2 */
     ARM_COMPUTE_UNUSED(input0);
     ARM_COMPUTE_UNUSED(input1);
     ARM_COMPUTE_UNUSED(output);
@@ -194,7 +194,7 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_ERROR("Not implemented");
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 }
 
 template <bool multiply_alpha>
@@ -915,7 +915,7 @@ void matrix_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
 template <bool multiply_alpha>
 void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, float alpha)
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
     const size_t in_b_stride          = input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type());
     const size_t out_stride           = output->info()->strides_in_bytes()[1] / data_size_from_type(output->info()->data_type());
     const int    num_elems_matrix_b_x = input1->info()->dimension(0);
@@ -1051,14 +1051,14 @@ void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
         vst1q_f16(mtx_out + 3 * out_stride, c.val[3]);
     },
     ina, inb, out);
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* ARM_COMPUTE_AARCH64_V8_2 */
     ARM_COMPUTE_UNUSED(input0);
     ARM_COMPUTE_UNUSED(input1);
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_ERROR("Not implemented");
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 }
 
 template <bool multiply_alpha>
@@ -1454,13 +1454,13 @@ void NEGEMMMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor 
                 num_elems_processed_per_iteration_x = 16;
                 break;
             }
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
             case DataType::F16:
             {
                 num_elems_processed_per_iteration_x = 32;
                 break;
             }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
             default:
             {
                 ARM_COMPUTE_ERROR("Data type not supported");
@@ -1503,13 +1503,13 @@ void NEGEMMMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor 
                 num_elems_processed_per_iteration_x = 8;
                 break;
             }
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
             case DataType::F16:
             {
                 num_elems_processed_per_iteration_x = 8;
                 break;
             }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
             default:
             {
                 ARM_COMPUTE_ERROR("Data type not supported");
@@ -1563,14 +1563,14 @@ void NEGEMMMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &inf
                 vector_matrix_multiply_qs16<false>(_input0, _input1, _output, window, info, _alpha);
                 break;
             }
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
             case DataType::F16:
             {
                 multiply_alpha ? vector_matrix_multiply_f16<true>(_input0, _input1, _output, window, info, _alpha) :
                 vector_matrix_multiply_f16<false>(_input0, _input1, _output, window, info, _alpha);
                 break;
             }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
             default:
             {
                 ARM_COMPUTE_ERROR("Data type not supported");
@@ -1600,14 +1600,14 @@ void NEGEMMMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &inf
                 matrix_matrix_multiply_qs16<false>(_input0, _input1, _output, window, _alpha);
                 break;
             }
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
             case DataType::F16:
             {
                 multiply_alpha ? matrix_matrix_multiply_f16<true>(_input0, _input1, _output, window, _alpha) :
                 matrix_matrix_multiply_f16<false>(_input0, _input1, _output, window, _alpha);
                 break;
             }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
             default:
             {
                 ARM_COMPUTE_ERROR("Data type not supported");

@@ -39,6 +39,9 @@
 #include <cstddef>
 #include <cstdint>
 
+// Enable only if compiled for AArch64-V8.2-A targets
+#ifdef ARM_COMPUTE_AARCH64_V8_2
+
 #define ASM_PREFETCH(address) "PRFM PLDL1KEEP, " address "\n"
 #define ASM_PREFETCHL2(address) "PRFM PLDL2KEEP, " address "\n"
 #define ASM_PREFETCHW(address) "PRFM PSTL1KEEP, " address "\n"
@@ -517,3 +520,4 @@ void NEGEMMLowpAArch64V8P4Kernel::run(const Window &window, const ThreadInfo &in
     }
 }
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */

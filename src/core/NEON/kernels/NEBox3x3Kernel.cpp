@@ -33,7 +33,7 @@
 
 using namespace arm_compute;
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 void NEBox3x3FP16Kernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
@@ -104,7 +104,7 @@ void NEBox3x3FP16Kernel::run(const Window &window, const ThreadInfo &info)
     },
     input, output);
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 BorderSize NEBox3x3Kernel::border_size() const
 {

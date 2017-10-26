@@ -57,15 +57,15 @@ grep -Hnir --exclude-dir=assembly "#else$\|#endif$" $DIRECTORIES | tee bad_style
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
-    echo "ERROR: #else and #endif should be followed by a comment of the guard they refer to (e.g /* ARM_COMPUTE_ENABLE_FP16 */ )"
+    echo "ERROR: #else and #endif should be followed by a comment of the guard they refer to (e.g /* ARM_COMPUTE_AARCH64_V8_2 */ )"
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly "ARM_COMPUTE_ENABLE_FP16" ./tests/validation/CL | tee bad_style.log
+grep -Hnir --exclude-dir=assembly "ARM_COMPUTE_AARCH64_V8_2" ./tests/validation/CL | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
-    echo "ERROR: Found ARM_COMPUTE_ENABLE_FP16 in CL tests though F16 is always supported for OpenCL"
+    echo "ERROR: Found ARM_COMPUTE_AARCH64_V8_2 in CL tests though armv8.2 features (FP16) are always supported for OpenCL"
     exit -1
 fi
 

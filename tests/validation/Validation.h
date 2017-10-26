@@ -27,6 +27,7 @@
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
+#include "support/ToolchainSupport.h"
 #include "tests/IAccessor.h"
 #include "tests/SimpleTensor.h"
 #include "tests/Types.h"
@@ -256,7 +257,7 @@ struct compare<AbsoluteTolerance<U>> : public compare_base<AbsoluteTolerance<U>>
 
     operator bool() const
     {
-        if(!std::isfinite(this->_target) || !std::isfinite(this->_reference))
+        if(!support::cpp11::isfinite(this->_target) || !support::cpp11::isfinite(this->_reference))
         {
             return false;
         }
@@ -286,7 +287,7 @@ struct compare<RelativeTolerance<U>> : public compare_base<RelativeTolerance<U>>
 
     operator bool() const
     {
-        if(!std::isfinite(this->_target) || !std::isfinite(this->_reference))
+        if(!support::cpp11::isfinite(this->_target) || !support::cpp11::isfinite(this->_reference))
         {
             return false;
         }

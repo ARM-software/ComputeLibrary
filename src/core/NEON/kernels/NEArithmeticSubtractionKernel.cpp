@@ -157,7 +157,7 @@ void sub_saturate_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *o
     input1, input2, output);
 }
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 inline float16x8x2_t vsub2q_f16(const float16x8x2_t &a, const float16x8x2_t &b)
 {
     const float16x8x2_t res =
@@ -170,11 +170,11 @@ inline float16x8x2_t vsub2q_f16(const float16x8x2_t &a, const float16x8x2_t &b)
 
     return res;
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 void sub_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
     Iterator input1(in1, window);
     Iterator input2(in2, window);
     Iterator output(out, window);
@@ -187,13 +187,13 @@ void sub_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const
         vst2q_f16(reinterpret_cast<float16_t *>(output.ptr()), vsub2q_f16(a, b));
     },
     input1, input2, output);
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* ARM_COMPUTE_AARCH64_V8_2 */
     ARM_COMPUTE_UNUSED(in1);
     ARM_COMPUTE_UNUSED(in2);
     ARM_COMPUTE_UNUSED(out);
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_ERROR("Not supported, recompile the library with arch=arm64-v8.2-a");
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 }
 
 void sub_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)

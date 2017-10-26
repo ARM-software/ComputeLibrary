@@ -34,6 +34,8 @@
 #include <string>
 #include <type_traits>
 
+#include "support/Half.h"
+
 namespace arm_compute
 {
 namespace support
@@ -318,6 +320,18 @@ inline void *align(std::size_t alignment, std::size_t size, void *&ptr, std::siz
     space -= padding;
 
     return ptr = reinterpret_cast<void *>(aligned);
+}
+
+// std::isfinite
+template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
+inline bool isfinite(T value)
+{
+    return std::isfinite(value);
+}
+
+inline bool isfinite(half_float::half value)
+{
+    return half_float::isfinite(value);
 }
 } // namespace cpp11
 

@@ -126,8 +126,13 @@ elif env['arch'] == 'arm64-v8a':
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
 elif env['arch'] == 'arm64-v8.2-a':
+    if os.environ.get('CXX', 'g++') == 'clang++':
+        print("Clang cannot compile armv8.2-a code")
+        Exit(1)
+
     env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16+simd'])
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
+    
     if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
     elif env['os'] == 'bare_metal':

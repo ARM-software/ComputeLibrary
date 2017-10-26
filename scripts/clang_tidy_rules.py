@@ -11,12 +11,10 @@ def get_list_includes():
 def get_list_flags( filename, arch):
     assert arch in ["armv7", "aarch64"]
     flags = ["-std=c++11"]
-    if "tests/validation_old" in filename:
-        flags.append("-DBOOST")
     flags.append("-DARM_COMPUTE_CPP_SCHEDULER=1")
     flags.append("-DARM_COMPUTE_CL")
     if arch == "aarch64":
-        flags.append("-DARM_COMPUTE_ENABLE_FP16")
+        flags.append("-DARM_COMPUTE_AARCH64_V8_2")
     return flags
 
 def filter_files( list_files ):
@@ -27,8 +25,6 @@ def filter_files( list_files ):
         if "computer_vision" in f:
             continue
         if "openvx-arm_compute" in f:
-            continue
-        if "tests/validation_old" in f:
             continue
         # Skip OMPScheduler as it causes problems in clang
         if "OMPScheduler.cpp" in f:

@@ -52,9 +52,9 @@ const auto PoolingLayerDatasetQS = combine(combine(framework::dataset::make("Poo
                                            framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) }));
 
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for float types */
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 constexpr AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for float types */
-#endif                                                   /* ARM_COMPUTE_ENABLE_FP16 */
+#endif                                                   /* ARM_COMPUTE_AARCH64_V8_2 */
 constexpr AbsoluteTolerance<float> tolerance_qs8(0);     /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
 constexpr AbsoluteTolerance<float> tolerance_qs16(0);    /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
 } // namespace
@@ -83,7 +83,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixture<float>, framework::Datase
 }
 TEST_SUITE_END()
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP,
                                                                                                    framework::dataset::make("DataType", DataType::F16))))
@@ -98,7 +98,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixture<half>, framework::Dataset
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 TEST_SUITE_END()
 
 template <typename T>

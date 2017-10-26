@@ -106,7 +106,7 @@ void logits_1d_max_qs16(const ITensor *in, ITensor *out, const Window &window)
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 void logits_1d_max_f16(const ITensor *in, ITensor *out, const Window &window)
 {
     Window in_slice = window.first_slice_window_1D();
@@ -138,7 +138,7 @@ void logits_1d_max_f16(const ITensor *in, ITensor *out, const Window &window)
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 void logits_1d_max_f32(const ITensor *in, ITensor *out, const Window &window)
 {
@@ -213,10 +213,10 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
             _func = &logits_1d_max_f32;
             break;
         case DataType::F16:
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
             _func = &logits_1d_max_f16;
             break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
     }
@@ -374,7 +374,7 @@ void logits_1d_shift_exp_sum_qs16(const ITensor *in, const ITensor *max, ITensor
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 void logits_1d_shift_exp_sum_f16(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
 {
     Window window_max(window);
@@ -434,7 +434,7 @@ void logits_1d_shift_exp_sum_f16(const ITensor *in, const ITensor *max, ITensor 
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 void logits_1d_shift_exp_sum_f32(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
 {
@@ -532,10 +532,10 @@ void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor 
             _func = &logits_1d_shift_exp_sum_f32;
             break;
         case DataType::F16:
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
             _func = &logits_1d_shift_exp_sum_f16;
             break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
             break;
@@ -637,7 +637,7 @@ void logits_1d_norm_qs16(const ITensor *in, const ITensor *sum, ITensor *out, co
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
 }
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 void logits_1d_norm_f16(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window)
 {
     Window window_sum(window);
@@ -668,7 +668,7 @@ void logits_1d_norm_f16(const ITensor *in, const ITensor *sum, ITensor *out, con
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 void logits_1d_norm_f32(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window)
 {
@@ -738,10 +738,10 @@ void NELogits1DNormKernel::configure(const ITensor *input, const ITensor *sum, I
             _func = &logits_1d_norm_f32;
             break;
         case DataType::F16:
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
             _func = &logits_1d_norm_f16;
             break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
             break;

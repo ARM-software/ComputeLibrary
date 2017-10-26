@@ -68,7 +68,7 @@ inline qint16x8_t internal_vdupq_n(qint16_t v)
     return vdupq_n_qs16(v);
 }
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 template <unsigned int stridex>
 float16x8_t internal_vld1q(const float16_t *in);
 
@@ -113,7 +113,7 @@ inline float16x8_t internal_vmlal(const float16x8_t &x, const float16x8_t &y, co
     ARM_COMPUTE_UNUSED(fixed_point_position);
     return vaddq_f16(x, vmulq_f16(y, z));
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 template <unsigned int stridex>
 float32x4_t internal_vld1q(const float *in);
@@ -427,7 +427,7 @@ public:
     }
 };
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 inline float16x8x3_t load_matrix_row(const float16_t *ptr)
 {
     /* ptr is a pointer to a row in a 3x3 matrix, the function returns 3 vectors holding exactly the same value in all lanes:
@@ -567,7 +567,7 @@ void accumulate_results<3>(float16_t *buffer, const float16x8x2_t &values)
     vst1_f16(buffer, vadd_f16(vld1_f16(buffer), vget_low_f16(values.val[0])));
 }
 
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 inline float32x4x3_t load_matrix_row(const float *ptr)
 {
@@ -1433,9 +1433,9 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
         {
             switch(input->info()->data_type())
             {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
                 case DataType::F16:
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
                 case DataType::QS8:
                 case DataType::QS16:
                     _num_elems_written_per_iteration = 8;
@@ -1468,9 +1468,9 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
                     _num_elems_read_per_iteration    = 12;
                     _num_elems_written_per_iteration = 16 >> conv_stride_x;
                     break;
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
                 case DataType::F16:
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
                 case DataType::QS8:
                 case DataType::QS16:
                     _num_weight_elems_read_per_row   = 8 + _kernel_size - 1;
@@ -1532,11 +1532,11 @@ void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo 
                 case DataType::F32:
                     convolve_1x1<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
                     break;
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
                 case DataType::F16:
                     convolve_1x1<float16_t, float16_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
                     break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
                 default:
                     ARM_COMPUTE_ERROR("Data type not supported");
                     break;
@@ -1553,11 +1553,11 @@ void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo 
                 case DataType::F32:
                     convolve_3x3<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
                     break;
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
                 case DataType::F16:
                     convolve_3x3<float16_t, float16_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
                     break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
                 default:
                     ARM_COMPUTE_ERROR("Data type not supported");
                     break;

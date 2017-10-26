@@ -58,7 +58,7 @@ void NEGEMMLowp::configure(const ITensor *a, const ITensor *b, ITensor *output)
     const int            cpu_has_dotprod = static_cast<int>(ci.CPU) & static_cast<int>(CPUTarget::DOT);
     if(cpu_has_dotprod != 0)
     {
-#if defined(__aarch64__)
+#ifdef ARM_COMPUTE_AARCH64_V8_2
         // NEGEMMLowpAArch64V8P4Kernel only compiled in AArch64 targets
         _mm_optimised_kernel    = support::cpp14::make_unique<NEGEMMLowpAArch64V8P4Kernel>();
         TensorShape shape_a_int = a->info()->tensor_shape();
@@ -83,7 +83,7 @@ void NEGEMMLowp::configure(const ITensor *a, const ITensor *b, ITensor *output)
 
         _tmp_a.allocator()->allocate();
         _tmp_b.allocator()->allocate();
-#endif /* defined(__aarch64__) */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
     }
     else
     {

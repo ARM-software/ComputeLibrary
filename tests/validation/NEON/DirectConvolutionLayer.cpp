@@ -43,9 +43,9 @@ namespace validation
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_qs(1.f); /**< Tolerance for fixed point tests */
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 constexpr AbsoluteTolerance<float> tolerance_fp16(0.01f);  /**< Tolerance for half precision floating point tests */
-#endif                                                     /* ARM_COMPUTE_ENABLE_FP16 */
+#endif                                                     /* ARM_COMPUTE_AARCH64_V8_2 */
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
 
 /** Direct convolution data set. */
@@ -97,7 +97,7 @@ template <typename T>
 using NEDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<Tensor, Accessor, NEDirectConvolutionLayer, T>;
 
 TEST_SUITE(Float)
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(data_f32, framework::dataset::make("DataType", DataType::F16)))
 {
@@ -105,7 +105,7 @@ FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<half>, framework::Da
     validate(Accessor(_target), _reference, tolerance_fp16);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(data_f32, framework::dataset::make("DataType", DataType::F32)))

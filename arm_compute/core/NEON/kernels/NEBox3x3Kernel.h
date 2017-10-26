@@ -46,7 +46,7 @@ public:
     BorderSize border_size() const override;
 };
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 /** NEON kernel to perform a Box 3x3 filter using F16 simd
  */
 class NEBox3x3FP16Kernel : public NEBox3x3Kernel
@@ -55,8 +55,8 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 };
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* ARM_COMPUTE_AARCH64_V8_2 */
 using NEBox3x3FP16Kernel = NEBox3x3Kernel;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEBOX3x3KERNEL_H__ */

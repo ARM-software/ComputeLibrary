@@ -51,7 +51,7 @@ namespace
 {
 void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info)
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
     const auto width_matrix_b  = static_cast<int>(output->info()->dimension(0));
     const auto in_b_stride     = static_cast<int>(input1->info()->strides_in_bytes()[1] / data_size_from_type(input1->info()->data_type()));
     const auto num_elems_vec_a = static_cast<int>(input0->info()->dimension(0));
@@ -160,14 +160,14 @@ void vector_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
         vst1q_f16(vec_out + 24, acc3);
     },
     ina, out);
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* ARM_COMPUTE_AARCH64_V8_2 */
     ARM_COMPUTE_UNUSED(input0);
     ARM_COMPUTE_UNUSED(input1);
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR("Not supported, recompile with -march=armv8.2-a+fp16+simd.");
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 }
 
 void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, ITensor *output, const Window &window, const ThreadInfo &info)

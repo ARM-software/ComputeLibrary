@@ -2076,7 +2076,7 @@ PREDEFINED             = DOXYGEN_SKIP_THIS \
                          LOCATE_MAX \
                          HAS_BIAS \
                          POOL_AVG \
-                         ARM_COMPUTE_ENABLE_FP16
+                         ARM_COMPUTE_AARCH64_V8_2
 
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this

@@ -51,7 +51,7 @@ constexpr int EDGE    = 255;
 constexpr int MAYBE   = 127;
 } // namespace
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 namespace fp16
 {
 inline uint8x8_t phase_quantization(const float32x4x2_t &gx, const float32x4x2_t &gy)
@@ -787,7 +787,7 @@ void NEGradientFP16Kernel::configure(const ITensor *gx, const ITensor *gy, ITens
 
     INEKernel::configure(win);
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 namespace
 {

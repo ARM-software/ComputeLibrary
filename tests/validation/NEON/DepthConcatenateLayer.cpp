@@ -48,7 +48,7 @@ template <typename T>
 using NEDepthConcatenateLayerFixture = DepthConcatenateValidationFixture<Tensor, ITensor, Accessor, NEDepthConcatenate, T>;
 
 TEST_SUITE(Float)
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
                                                                                                                   DataType::F16)))
@@ -63,7 +63,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<half>, framework
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",

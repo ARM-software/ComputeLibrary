@@ -99,7 +99,7 @@ private:
     HarrisScoreFunction *_func;
 };
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef ARM_COMPUTE_AARCH64_V8_2
 /** Interface for the accumulate Weighted kernel using F16 */
 template <int32_t block_size>
 class NEHarrisScoreFP16Kernel : public INEHarrisScoreKernel
@@ -118,9 +118,9 @@ private:
     /** Harris Score function to use for the particular image types passed to configure() */
     HarrisScoreFunction *_func;
 };
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* ARM_COMPUTE_AARCH64_V8_2 */
 template <int32_t block_size>
 using NEHarrisScoreFP16Kernel = NEHarrisScoreKernel<block_size>;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEHARRISCORNERSKERNEL_H__ */
