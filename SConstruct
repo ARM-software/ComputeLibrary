@@ -190,7 +190,7 @@ elif env['os'] == 'bare_metal':
     env.Append(CPPDEFINES = ['BARE_METAL'])
 
 if env['opencl']:
-    if env['os'] == 'bare_metal':
+    if env['os'] in ['bare_metal'] or env['standalone']:
         print("Cannot link OpenCL statically, which is required on bare metal")
         Exit(1)
 
