@@ -43,14 +43,13 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
         return;
     }
 
-    if((window.x().end() - window.x().start()) == 0 || (window.y().end() - window.y().start()) == 0)
+    cl::NDRange gws = ICLKernel::gws_from_window(window);
+
+    // Check for empty NDRange
+    if(gws.dimensions() == 0)
     {
         return;
     }
-
-    cl::NDRange gws((window.x().end() - window.x().start()) / window.x().step(),
-                    (window.y().end() - window.y().start()) / window.y().step(),
-                    (window.z().end() - window.z().start()) / window.z().step());
 
     cl::NDRange valid_lws;
     if(lws_hint[0] * lws_hint[1] * lws_hint[2] > kernel.get_max_workgroup_size())
@@ -181,4 +180,18 @@ size_t ICLKernel::get_max_workgroup_size()
         _max_workgroup_size = CLKernelLibrary::get().max_local_workgroup_size(_kernel);
     }
     return _max_workgroup_size;
+}
+
+cl::NDRange ICLKernel::gws_from_window(const Window &window)
+{
+    if((window.x().end() - window.x().start()) == 0 || (window.y().end() - window.y().start()) == 0)
+    {
+        return cl::NullRange;
+    }
+
+    cl::NDRange gws((window.x().end() - window.x().start()) / window.x().step(),
+                    (window.y().end() - window.y().start()) / window.y().step(),
+                    (window.z().end() - window.z().start()) / window.z().step());
+
+    return gws;
 }
