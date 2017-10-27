@@ -60,7 +60,6 @@ CLDepthwiseConvolution::CLDepthwiseConvolution()
 void CLDepthwiseConvolution::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const ICLTensor *biases, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != weights->info()->dimension(2));
 
@@ -78,28 +77,28 @@ void CLDepthwiseConvolution::configure(ICLTensor *input, ICLTensor *output, cons
     const size_t patch_size = weights_w * weights_h + ((has_bias) ? 1 : 0);
     const size_t conv_size  = conv_w * conv_h;
 
+    // Im2Col configuration
     TensorShape shape_im2col = input->info()->tensor_shape();
     shape_im2col.set(0, patch_size);
     shape_im2col.set(1, conv_size);
     shape_im2col.set(2, weights_z);
+    const TensorInfo info_im2col(shape_im2col, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    _input_reshaped.allocator()->init(info_im2col);
+    _im2col_kernel.configure(input, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, has_bias);
 
+    // Weights reshape configuration
     const TensorShape shape_weights_reshape(patch_size, weights_z);
-    TensorShape       shape_v2mm_out = output->info()->tensor_shape();
+    const TensorInfo  info_weights_reshape(shape_weights_reshape, 1, weights->info()->data_type(), weights->info()->fixed_point_position());
+    _weights_reshaped.allocator()->init(info_weights_reshape);
+    _weights_reshape_kernel.configure(weights, &_weights_reshaped, biases);
+
+    // GEMV configuration
+    TensorShape shape_v2mm_out = input->info()->tensor_shape();
     shape_v2mm_out.set(0, conv_size * weights_z);
     shape_v2mm_out.set(1, 1);
     shape_v2mm_out.set(2, 1);
-
-    const TensorInfo info_im2col(shape_im2col, 1, input->info()->data_type(), input->info()->fixed_point_position());
-    const TensorInfo info_weights_reshape(shape_weights_reshape, 1, weights->info()->data_type(), weights->info()->fixed_point_position());
     const TensorInfo info_v2mm_out(shape_v2mm_out, 1, input->info()->data_type(), input->info()->fixed_point_position());
-
-    _input_reshaped.allocator()->init(info_im2col);
-    _weights_reshaped.allocator()->init(info_weights_reshape);
     _v2mm_output.allocator()->init(info_v2mm_out);
-
-    // Configure kernels
-    _im2col_kernel.configure(input, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, has_bias);
-    _weights_reshape_kernel.configure(weights, &_weights_reshaped, biases);
     _v2mm_kernel.configure(&_input_reshaped, &_weights_reshaped, &_v2mm_output);
     _vector_to_tensor_kernel.configure(&_v2mm_output, output, conv_w, conv_h);
 
