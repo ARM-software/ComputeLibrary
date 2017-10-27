@@ -500,6 +500,22 @@ inline T create_tensor(const TensorShape &shape, Format format)
     return tensor;
 }
 
+/** Create and initialize a multi-image of the given type.
+ *
+ * @param[in] shape  Tensor shape.
+ * @param[in] format Format type.
+ *
+ * @return Initialized tensor of given type.
+ */
+template <typename T>
+inline T create_multi_image(const TensorShape &shape, Format format)
+{
+    T multi_image;
+    multi_image.init(shape.x(), shape.y(), format);
+
+    return multi_image;
+}
+
 /** Create and initialize a HOG (Histogram of Oriented Gradients) of the given type.
  *
  * @param[in] cell_size             Cell size in pixels
