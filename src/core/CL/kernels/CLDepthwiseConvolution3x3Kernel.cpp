@@ -37,7 +37,7 @@
 using namespace arm_compute;
 
 CLDepthwiseConvolution3x3Kernel::CLDepthwiseConvolution3x3Kernel()
-    : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_x(0), _conv_stride_y(0), _conv_pad_x(0), _conv_pad_y(0)
+    : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_x(0), _conv_stride_y(0), _conv_pad_left(0), _conv_pad_top(0)
 {
 }
 
@@ -74,9 +74,9 @@ void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, ICLTenso
     _biases        = biases;
     _conv_stride_x = conv_info.stride().first;
     _conv_stride_y = conv_info.stride().second;
-    _conv_pad_x    = conv_info.pad().first;
-    _conv_pad_y    = conv_info.pad().second;
-    _border_size   = BorderSize(_conv_pad_y, _conv_pad_x);
+    _conv_pad_left = conv_info.pad_left();
+    _conv_pad_top  = conv_info.pad_top();
+    _border_size   = BorderSize(_conv_pad_top, conv_info.pad_right(), conv_info.pad_bottom(), _conv_pad_left);
 
     // Set build options
     ARM_COMPUTE_ERROR_ON(_conv_stride_x < 1 || _conv_stride_x > 3);
@@ -116,8 +116,8 @@ void CLDepthwiseConvolution3x3Kernel::run(const Window &window, cl::CommandQueue
     Window slice_out     = window.first_slice_window_3D();
     Window slice_weights = window.first_slice_window_3D();
 
-    slice_in.adjust(Window::DimX, -_conv_pad_x, true);
-    slice_in.adjust(Window::DimY, -_conv_pad_y, true);
+    slice_in.adjust(Window::DimX, -_conv_pad_left, true);
+    slice_in.adjust(Window::DimY, -_conv_pad_top, true);
     slice_in.set_dimension_step(Window::DimX, window.x().step() * _conv_stride_x);
     slice_in.set_dimension_step(Window::DimY, window.y().step() * _conv_stride_y);
     slice_weights.set_dimension_step(Window::DimX, 0);

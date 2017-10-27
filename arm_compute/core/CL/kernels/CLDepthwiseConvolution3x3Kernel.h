@@ -68,8 +68,8 @@ private:
     const ICLTensor *_biases;
     unsigned int     _conv_stride_x;
     unsigned int     _conv_stride_y;
-    unsigned int     _conv_pad_x;
-    unsigned int     _conv_pad_y;
+    unsigned int     _conv_pad_left;
+    unsigned int     _conv_pad_top;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTIONKERNEL3x3_H__ */
