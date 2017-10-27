@@ -1082,7 +1082,7 @@ public:
                     the third thread [16,24] and the fourth thread [25,31].
 
                     The algorithm outer loop iterates over Z, P, Y, X where P is the depth/3rd dimension of each kernel. This order is not arbitrary, the main benefit of this
-                    is that we setup the neon registers containing the kernerl's values only once and then compute each XY using the preloaded registers as opposed as doing this for every XY value.
+                    is that we setup the neon registers containing the kernel's values only once and then compute each XY using the preloaded registers as opposed as doing this for every XY value.
 
                     The algorithm does not require allocating any additional memory amd computes the results directly in-place in two stages:
                         1) Convolve plane 0 with kernel 0 and initialize the corresponding output plane with these values.

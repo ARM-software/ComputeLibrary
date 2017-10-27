@@ -514,13 +514,15 @@ To cross compile the examples with the Graph API, such as graph_lenet.cpp, you n
 
 i.e. to cross compile the "graph_lenet" example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
+	arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
 
 i.e. to cross compile the "graph_lenet" example for Linux 64bit:
 
-	aarch64-linux-gnu-g++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
+	aarch64-linux-gnu-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
+
+@note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute, arm_compute_core
 
 To compile natively (i.e directly on an ARM device) for NEON for Linux 32bit:
 
@@ -541,13 +543,15 @@ To compile natively (i.e directly on an ARM device) the examples with the Graph 
 
 i.e. to cross compile the "graph_lenet" example for Linux 32bit:
 
-	g++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
+	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
 
 i.e. to cross compile the "graph_lenet" example for Linux 64bit:
 
-	g++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
+	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option)
+
+@note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute, arm_compute_core
 
 @note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L
 
@@ -574,8 +578,8 @@ Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_
 - Generate the 32 and/or 64 toolchains by running the following commands:
 
 
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-4.9 --stl gnustl
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-androideabi-4.9 --stl gnustl
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-4.9 --stl gnustl --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-androideabi-4.9 --stl gnustl --api 21
 
 @attention Due to some NDK issues make sure you use g++ & gnustl for aarch64 and clang++ & gnustl for armv7
 

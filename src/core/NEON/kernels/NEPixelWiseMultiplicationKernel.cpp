@@ -30,7 +30,6 @@
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 
 #include <arm_neon.h>
 #include <climits>
