@@ -24,7 +24,10 @@
 #ifndef ARM_COMPUTE_HELPER_H
 #define ARM_COMPUTE_HELPER_H
 
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
+
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
 #pragma OPENCL EXTENSION cl_arm_printf : enable
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED)

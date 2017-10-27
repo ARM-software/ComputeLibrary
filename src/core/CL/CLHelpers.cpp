@@ -58,6 +58,13 @@ arm_compute::GPUTarget get_midgard_target(const std::string &version)
             return arm_compute::GPUTarget::MIDGARD;
     }
 }
+
+bool extension_support(const cl::Device &device, const char *extension_name)
+{
+    std::string extensions = device.getInfo<CL_DEVICE_EXTENSIONS>();
+    auto        pos        = extensions.find(extension_name);
+    return (pos != std::string::npos);
+}
 } // namespace
 
 namespace arm_compute
@@ -206,21 +213,12 @@ GPUTarget get_arch_from_target(GPUTarget target)
 
 bool non_uniform_workgroup_support(const cl::Device &device)
 {
-    std::vector<char> extension;
-    size_t            extension_size = 0;
-    cl_int            err            = clGetDeviceInfo(device.get(), CL_DEVICE_EXTENSIONS, 0, nullptr, &extension_size);
-    ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (extension_size == 0), "clGetDeviceInfo failed to return valid information");
-    ARM_COMPUTE_UNUSED(err);
-    // Resize vector
-    extension.resize(extension_size);
-    // Query extension
-    err = clGetDeviceInfo(device.get(), CL_DEVICE_EXTENSIONS, extension_size, extension.data(), nullptr);
-    ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetDeviceInfo failed to return valid information");
-    ARM_COMPUTE_UNUSED(err);
+    return extension_support(device, "cl_arm_non_uniform_work_group_size");
+}
 
-    std::string extension_str(extension.begin(), extension.end());
-    auto        pos = extension_str.find("cl_arm_non_uniform_work_group_size");
-    return (pos != std::string::npos);
+bool fp16_support(const cl::Device &device)
+{
+    return extension_support(device, "cl_khr_fp16");
 }
 
 CLVersion get_cl_version(const cl::Device &device)
