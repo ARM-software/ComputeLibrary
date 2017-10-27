@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -416,22 +416,24 @@ void AssetsLibrary::fill_borders_with_garbage(T &&tensor, D &&distribution, std:
 template <typename T, typename D>
 void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
 {
-    Window window;
-    for(unsigned int d = 0; d < tensor.shape().num_dimensions(); ++d)
-    {
-        window.set(d, Window::Dimension(0, tensor.shape()[d], 1));
-    }
+    using ResultType = typename std::remove_reference<D>::type::result_type;
 
     std::mt19937 gen(_seed + seed_offset);
 
-    //FIXME: Replace with normal loop
-    execute_window_loop(window, [&](const Coordinates & id)
+    // Iterate over all elements
+    for(int element_idx = 0; element_idx < tensor.num_elements(); ++element_idx)
     {
-        using ResultType         = typename std::remove_reference<D>::type::result_type;
-        const ResultType value   = distribution(gen);
-        void *const      out_ptr = tensor(id);
-        store_value_with_data_type(out_ptr, value, tensor.data_type());
-    });
+        const Coordinates id = index2coord(tensor.shape(), element_idx);
+
+        // Iterate over all channels
+        for(int channel = 0; channel < tensor.num_channels(); ++channel)
+        {
+            const ResultType value        = distribution(gen);
+            ResultType      &target_value = reinterpret_cast<ResultType *const>(tensor(id))[channel];
+
+            store_value_with_data_type(&target_value, value, tensor.data_type());
+        }
+    }
 
     fill_borders_with_garbage(tensor, distribution, seed_offset);
 }

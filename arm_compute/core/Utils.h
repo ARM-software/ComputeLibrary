@@ -237,9 +237,25 @@ inline int plane_idx_from_channel(Format format, Channel channel)
 {
     switch(format)
     {
+        // Single planar formats have a single plane
+        case Format::U8:
+        case Format::U16:
+        case Format::S16:
+        case Format::U32:
+        case Format::S32:
+        case Format::F16:
+        case Format::F32:
+        case Format::UV88:
+        case Format::RGB888:
+        case Format::RGBA8888:
+        case Format::YUYV422:
+        case Format::UYVY422:
+            return 0;
+        // Multi planar formats
         case Format::NV12:
         case Format::NV21:
         {
+            // Channel U and V share the same plane of format UV88
             switch(channel)
             {
                 case Channel::Y:
@@ -263,6 +279,131 @@ inline int plane_idx_from_channel(Format format, Channel channel)
                     return 1;
                 case Channel::V:
                     return 2;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel");
+                    return 0;
+            }
+        }
+        default:
+            ARM_COMPUTE_ERROR("Not supported format");
+            return 0;
+    }
+}
+
+/** Return the channel index of a given channel given an input format.
+ *
+ * @param[in] format  Input format
+ * @param[in] channel Input channel
+ *
+ * @return The channel index of the specific channel of the specific format
+ */
+inline int channel_idx_from_format(Format format, Channel channel)
+{
+    switch(format)
+    {
+        case Format::RGB888:
+        {
+            switch(channel)
+            {
+                case Channel::R:
+                    return 0;
+                case Channel::G:
+                    return 1;
+                case Channel::B:
+                    return 2;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel");
+                    return 0;
+            }
+        }
+        case Format::RGBA8888:
+        {
+            switch(channel)
+            {
+                case Channel::R:
+                    return 0;
+                case Channel::G:
+                    return 1;
+                case Channel::B:
+                    return 2;
+                case Channel::A:
+                    return 3;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel");
+                    return 0;
+            }
+        }
+        case Format::YUYV422:
+        {
+            switch(channel)
+            {
+                case Channel::Y:
+                    return 0;
+                case Channel::U:
+                    return 1;
+                case Channel::V:
+                    return 3;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel");
+                    return 0;
+            }
+        }
+        case Format::UYVY422:
+        {
+            switch(channel)
+            {
+                case Channel::Y:
+                    return 1;
+                case Channel::U:
+                    return 0;
+                case Channel::V:
+                    return 2;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel");
+                    return 0;
+            }
+        }
+        case Format::NV12:
+        {
+            switch(channel)
+            {
+                case Channel::Y:
+                    return 0;
+                case Channel::U:
+                    return 0;
+                case Channel::V:
+                    return 1;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel");
+                    return 0;
+            }
+        }
+        case Format::NV21:
+        {
+            switch(channel)
+            {
+                case Channel::Y:
+                    return 0;
+                case Channel::U:
+                    return 1;
+                case Channel::V:
+                    return 0;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel");
+                    return 0;
+            }
+        }
+        case Format::YUV444:
+        case Format::IYUV:
+        {
+            switch(channel)
+            {
+                case Channel::Y:
+                    return 0;
+                case Channel::U:
+                    return 0;
+                case Channel::V:
+                    return 0;
                 default:
                     ARM_COMPUTE_ERROR("Not supported channel");
                     return 0;
@@ -384,6 +525,28 @@ inline DataType get_promoted_data_type(DataType dt)
     return DataType::UNKNOWN;
 }
 
+/** Return true if the given format has horizontal subsampling.
+ *
+ * @param[in] format Format to determine subsampling.
+ *
+ * @return True if the format can be subsampled horizontaly.
+ */
+inline bool has_format_horizontal_subsampling(Format format)
+{
+    return (format == Format::YUYV422 || format == Format::UYVY422 || format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
+}
+
+/** Return true if the given format has vertical subsampling.
+ *
+ * @param[in] format Format to determine subsampling.
+ *
+ * @return True if the format can be subsampled verticaly.
+ */
+inline bool has_format_vertical_subsampling(Format format)
+{
+    return (format == Format::NV12 || format == Format::NV21 || format == Format::IYUV || format == Format::UV88) ? true : false;
+}
+
 /** Separate a 2D convolution into two 1D convolutions
  *
  * @param[in]  conv     2D convolution
@@ -489,6 +652,68 @@ TensorShape calculate_depth_concatenate_shape(const std::vector<T *> &inputs_vec
     out_shape.set(2, depth);
 
     return out_shape;
+}
+
+/** Adjust tensor shape size if width or height are odd for a given multi-planar format. No modification is done for other formats.
+ *
+ * @note Adding here a few links discussing the issue of odd size and sharing the same solution:
+ *       Android Source: https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/YuvImage.java
+ *       WebM: https://groups.google.com/a/webmproject.org/forum/#!topic/webm-discuss/LaCKpqiDTXM
+ *       libYUV: https://bugs.chromium.org/p/libyuv/issues/detail?id=198&can=1&q=odd%20width
+ *       YUVPlayer: https://sourceforge.net/p/raw-yuvplayer/bugs/1/
+ *
+ * @param[in, out] shape  Tensor shape of 2D size
+ * @param[in]      format Format of the tensor
+ *
+ */
+inline TensorShape adjust_odd_shape(const TensorShape &shape, Format format)
+{
+    TensorShape output{ shape };
+
+    // Force width to be even for formats which require subsampling of the U and V channels
+    if(has_format_horizontal_subsampling(format))
+    {
+        output.set(0, output.x() & ~1U);
+    }
+
+    // Force height to be even for formats which require subsampling of the U and V channels
+    if(has_format_vertical_subsampling(format))
+    {
+        output.set(1, output.y() & ~1U);
+    }
+
+    return output;
+}
+
+/** Calculate subsampled shape for a given format and channel
+ *
+ * @param[in] shape   Shape of the tensor to calculate the extracted channel.
+ * @param[in] format  Format of the tensor.
+ * @param[in] channel Channel to create tensor shape to be extracted.
+ *
+ * @return The subsampled tensor shape.
+ */
+inline TensorShape calculate_subsampled_shape(const TensorShape &shape, Format format, Channel channel = Channel::UNKNOWN)
+{
+    TensorShape output{ shape };
+
+    // Subsample shape only for U or V channel
+    if(Channel::U == channel || Channel::V == channel || Channel::UNKNOWN == channel)
+    {
+        // Subsample width for the tensor shape when channel is U or V
+        if(has_format_horizontal_subsampling(format))
+        {
+            output.set(0, output.x() / 2U);
+        }
+
+        // Subsample height for the tensor shape when channel is U or V
+        if(has_format_vertical_subsampling(format))
+        {
+            output.set(1, output.y() / 2U);
+        }
+    }
+
+    return output;
 }
 
 /** Calculate accurary required by the horizontal and vertical convolution computations

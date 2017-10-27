@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 
 using namespace arm_compute;
@@ -51,7 +52,8 @@ void CLMultiImage::init_auto_padding(unsigned int width, unsigned int height, Fo
 
 void CLMultiImage::internal_init(unsigned int width, unsigned int height, Format format, bool auto_padding)
 {
-    TensorInfo info(width, height, Format::U8);
+    TensorShape shape = adjust_odd_shape(TensorShape{ width, height }, format);
+    TensorInfo  info(shape, Format::U8);
 
     if(auto_padding)
     {
@@ -72,7 +74,7 @@ void CLMultiImage::internal_init(unsigned int width, unsigned int height, Format
         case Format::YUYV422:
         case Format::UYVY422:
         {
-            TensorInfo info_full(width, height, format);
+            TensorInfo info_full(shape, format);
 
             if(auto_padding)
             {
@@ -85,7 +87,8 @@ void CLMultiImage::internal_init(unsigned int width, unsigned int height, Format
         case Format::NV12:
         case Format::NV21:
         {
-            TensorInfo info_uv88(width / 2, height / 2, Format::UV88);
+            const TensorShape shape_uv88 = calculate_subsampled_shape(shape, Format::UV88);
+            TensorInfo        info_uv88(shape_uv88, Format::UV88);
 
             if(auto_padding)
             {
@@ -98,7 +101,8 @@ void CLMultiImage::internal_init(unsigned int width, unsigned int height, Format
         }
         case Format::IYUV:
         {
-            TensorInfo info_sub2(width / 2, height / 2, Format::U8);
+            const TensorShape shape_sub2 = calculate_subsampled_shape(shape, Format::IYUV);
+            TensorInfo        info_sub2(shape_sub2, Format::U8);
 
             if(auto_padding)
             {
@@ -120,7 +124,7 @@ void CLMultiImage::internal_init(unsigned int width, unsigned int height, Format
             break;
     }
 
-    _info.init(width, height, format);
+    _info.init(shape.x(), shape.y(), format);
 }
 
 void CLMultiImage::allocate()
