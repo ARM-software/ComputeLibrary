@@ -47,13 +47,19 @@ using namespace arm_compute;
 
 namespace
 {
+template <bool exclude_padding>
 inline float calculate_avg_scale(const Coordinates &id, const int pool_size, const int upper_bound_w, const int upper_bound_h,
                                  const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
-    const int start_x = id.x() * stride_x - pad_x;
-    const int start_y = id.y() * stride_y - pad_y;
+    int       start_x = id.x() * stride_x - pad_x;
+    int       start_y = id.y() * stride_y - pad_y;
     const int end_x   = std::min(start_x + pool_size, upper_bound_w);
     const int end_y   = std::min(start_y + pool_size, upper_bound_h);
+    if(exclude_padding)
+    {
+        start_x = std::max(0, start_x);
+        start_y = std::max(0, start_y);
+    }
     return 1.f / ((end_y - start_y) * (end_x - start_x));
 }
 
@@ -105,6 +111,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     PoolingType         pool_type       = pool_info.pool_type();
     int                 pool_size       = pool_info.pool_size();
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
+    bool                exclude_padding = pool_info.exclude_padding();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
@@ -117,6 +124,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     ARM_COMPUTE_ERROR_ON((supported_pool_sizes.find(pool_size) == supported_pool_sizes.end()) && (input->info()->data_type() != DataType::F32));
     ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
     ARM_COMPUTE_ERROR_ON(is_data_type_fixed_point(input->info()->data_type()) && pool_stride_x > 2);
+    ARM_COMPUTE_ERROR_ON(exclude_padding && is_data_type_fixed_point(input->info()->data_type()));
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
@@ -268,13 +276,13 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
                 switch(pool_type)
                 {
                     case PoolingType::AVG:
-                        _func = &NEPoolingLayerKernel::pooling2_f16<PoolingType::AVG>;
+                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling2_f16<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling2_f16<PoolingType::AVG, false>;
                         break;
                     case PoolingType::L2:
-                        _func = &NEPoolingLayerKernel::pooling2_f16<PoolingType::L2>;
+                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling2_f16<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling2_f16<PoolingType::L2, false>;
                         break;
                     case PoolingType::MAX:
-                        _func = &NEPoolingLayerKernel::pooling2_f16<PoolingType::MAX>;
+                        _func = &NEPoolingLayerKernel::pooling2_f16<PoolingType::MAX, false>;
                         break;
                     default:
                         ARM_COMPUTE_ERROR("Unsupported pooling type!");
@@ -285,13 +293,13 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
                 switch(pool_type)
                 {
                     case PoolingType::AVG:
-                        _func = &NEPoolingLayerKernel::pooling2_f32<PoolingType::AVG>;
+                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling2_f32<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling2_f32<PoolingType::AVG, false>;
                         break;
                     case PoolingType::L2:
-                        _func = &NEPoolingLayerKernel::pooling2_f32<PoolingType::L2>;
+                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling2_f32<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling2_f32<PoolingType::L2, false>;
                         break;
                     case PoolingType::MAX:
-                        _func = &NEPoolingLayerKernel::pooling2_f32<PoolingType::MAX>;
+                        _func = &NEPoolingLayerKernel::pooling2_f32<PoolingType::MAX, false>;
                         break;
                     default:
                         ARM_COMPUTE_ERROR("Unsupported pooling type!");
@@ -332,13 +340,13 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
                 switch(pool_type)
                 {
                     case PoolingType::AVG:
-                        _func = &NEPoolingLayerKernel::pooling3_f16<PoolingType::AVG>;
+                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling3_f16<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling3_f16<PoolingType::AVG, false>;
                         break;
                     case PoolingType::L2:
-                        _func = &NEPoolingLayerKernel::pooling3_f16<PoolingType::L2>;
+                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling3_f16<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling3_f16<PoolingType::L2, false>;
                         break;
                     case PoolingType::MAX:
-                        _func = &NEPoolingLayerKernel::pooling3_f16<PoolingType::MAX>;
+                        _func = &NEPoolingLayerKernel::pooling3_f16<PoolingType::MAX, false>;
                         break;
                     default:
                         ARM_COMPUTE_ERROR("Unsupported pooling type!");
@@ -349,13 +357,13 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
                 switch(pool_type)
                 {
                     case PoolingType::AVG:
-                        _func = &NEPoolingLayerKernel::pooling3_f32<PoolingType::AVG>;
+                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling3_f32<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling3_f32<PoolingType::AVG, false>;
                         break;
                     case PoolingType::L2:
-                        _func = &NEPoolingLayerKernel::pooling3_f32<PoolingType::L2>;
+                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling3_f32<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling3_f32<PoolingType::L2, false>;
                         break;
                     case PoolingType::MAX:
-                        _func = &NEPoolingLayerKernel::pooling3_f32<PoolingType::MAX>;
+                        _func = &NEPoolingLayerKernel::pooling3_f32<PoolingType::MAX, false>;
                         break;
                     default:
                         ARM_COMPUTE_ERROR("Unsupported pooling type!");
@@ -366,13 +374,13 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
             switch(pool_type)
             {
                 case PoolingType::AVG:
-                    _func = &NEPoolingLayerKernel::pooling7_f32<PoolingType::AVG>;
+                    _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling7_f32<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling7_f32<PoolingType::AVG, false>;
                     break;
                 case PoolingType::L2:
-                    _func = &NEPoolingLayerKernel::pooling7_f32<PoolingType::L2>;
+                    _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling7_f32<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling7_f32<PoolingType::L2, false>;
                     break;
                 case PoolingType::MAX:
-                    _func = &NEPoolingLayerKernel::pooling7_f32<PoolingType::MAX>;
+                    _func = &NEPoolingLayerKernel::pooling7_f32<PoolingType::MAX, false>;
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Unsupported pooling type!");
@@ -382,13 +390,13 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
             switch(pool_type)
             {
                 case PoolingType::AVG:
-                    _func = &NEPoolingLayerKernel::poolingN_f32<PoolingType::AVG>;
+                    _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingN_f32<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingN_f32<PoolingType::AVG, false>;
                     break;
                 case PoolingType::L2:
-                    _func = &NEPoolingLayerKernel::poolingN_f32<PoolingType::L2>;
+                    _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingN_f32<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingN_f32<PoolingType::L2, false>;
                     break;
                 case PoolingType::MAX:
-                    _func = &NEPoolingLayerKernel::poolingN_f32<PoolingType::MAX>;
+                    _func = &NEPoolingLayerKernel::poolingN_f32<PoolingType::MAX, false>;
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Unsupported pooling type!");
@@ -533,7 +541,7 @@ void NEPoolingLayerKernel::pooling2_q16(const Window &window_input, const Window
     input, output);
 }
 
-template <PoolingType pooling_type>
+template <PoolingType pooling_type, bool exclude_padding>
 void NEPoolingLayerKernel::pooling3_f16(const Window &window_input, const Window &window)
 {
 #ifdef ARM_COMPUTE_AARCH64_V8_2
@@ -547,8 +555,8 @@ void NEPoolingLayerKernel::pooling3_f16(const Window &window_input, const Window
     int                 pool_stride_y = 0;
     std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
 
     const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
     const unsigned char *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
@@ -572,7 +580,7 @@ void NEPoolingLayerKernel::pooling3_f16(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            const float       scale   = calculate_avg_scale(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            const float       scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
             const float16x4_t scale_v = vdup_n_f16(scale);
             // Perform pooling
             const float16x4_t sum_data = vadd_f16(vadd_f16(top_data, bottom_data), middle_data);
@@ -602,7 +610,7 @@ void NEPoolingLayerKernel::pooling3_f16(const Window &window_input, const Window
 #endif /* ARM_COMPUTE_AARCH64_V8_2 */
 }
 
-template <PoolingType pooling_type>
+template <PoolingType pooling_type, bool exclude_padding>
 void NEPoolingLayerKernel::pooling2_f16(const Window &window_input, const Window &window)
 {
 #ifdef ARM_COMPUTE_AARCH64_V8_2
@@ -612,8 +620,8 @@ void NEPoolingLayerKernel::pooling2_f16(const Window &window_input, const Window
     int           pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y = 0;
     std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
 
     const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
     const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
@@ -635,7 +643,7 @@ void NEPoolingLayerKernel::pooling2_f16(const Window &window_input, const Window
 
         if(pooling_type != PoolingType::MAX)
         {
-            const float       scale   = calculate_avg_scale(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            const float       scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
             const float16x8_t scale_v = vdupq_n_f16(scale);
             res                       = vmulq_f16(scale_v, vaddq_f16(bottom_data.val[1], vaddq_f16(bottom_data.val[0], vaddq_f16(top_data.val[0], top_data.val[1]))));
         }
@@ -661,7 +669,7 @@ void NEPoolingLayerKernel::pooling2_f16(const Window &window_input, const Window
 #endif /* ARM_COMPUTE_AARCH64_V8_2 */
 }
 
-template <PoolingType pooling_type>
+template <PoolingType pooling_type, bool exclude_padding>
 void NEPoolingLayerKernel::pooling2_f32(const Window &window_input, const Window &window)
 {
     Iterator input(_input, window_input);
@@ -674,8 +682,8 @@ void NEPoolingLayerKernel::pooling2_f32(const Window &window_input, const Window
     int           pool_stride_y = 0;
     std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
 
     const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
     const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
@@ -697,7 +705,7 @@ void NEPoolingLayerKernel::pooling2_f32(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            float             scale   = calculate_avg_scale(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            float             scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
             const float32x2_t scale_v = vdup_n_f32(scale);
 
             // Perform pooling
@@ -868,7 +876,7 @@ void NEPoolingLayerKernel::pooling3_q16(const Window &window_input, const Window
     input, output);
 }
 
-template <PoolingType pooling_type>
+template <PoolingType pooling_type, bool exclude_padding>
 void NEPoolingLayerKernel::pooling3_f32(const Window &window_input, const Window &window)
 {
     Iterator input(_input, window_input);
@@ -881,8 +889,8 @@ void NEPoolingLayerKernel::pooling3_f32(const Window &window_input, const Window
     int                 pool_stride_y = 0;
     std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
 
     const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
     const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
@@ -907,7 +915,7 @@ void NEPoolingLayerKernel::pooling3_f32(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            float             scale   = calculate_avg_scale(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            float             scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
             const float32x2_t scale_v = vdup_n_f32(scale);
 
             // Perform pooling
@@ -935,7 +943,7 @@ void NEPoolingLayerKernel::pooling3_f32(const Window &window_input, const Window
     input, output);
 }
 
-template <PoolingType pooling_type>
+template <PoolingType pooling_type, bool exclude_padding>
 void NEPoolingLayerKernel::pooling7_f32(const Window &window_input, const Window &window)
 {
     Iterator input(_input, window_input);
@@ -948,8 +956,8 @@ void NEPoolingLayerKernel::pooling7_f32(const Window &window_input, const Window
     int                 pool_stride_y = 0;
     std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
 
     std::array<const uint8_t *, pool_size> input_ptrs{ {} };
     for(int i = 0; i < pool_size; ++i)
@@ -964,7 +972,7 @@ void NEPoolingLayerKernel::pooling7_f32(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            float             scale   = calculate_avg_scale(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            float             scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
             const float32x2_t scale_v = vdup_n_f32(scale);
 
             // Perform pooling
@@ -1017,7 +1025,7 @@ void NEPoolingLayerKernel::pooling7_f32(const Window &window_input, const Window
     input, output);
 }
 
-template <PoolingType pooling_type>
+template <PoolingType pooling_type, bool exclude_padding>
 void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window &window)
 {
     Iterator input(_input, window_input);
@@ -1030,8 +1038,8 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
     int       pool_stride_y = 0;
     std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -1040,7 +1048,7 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            const float scale = calculate_avg_scale(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            const float scale = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
 
             // Perform pooling
             float32x4_t vres = vdupq_n_f32(0.0f);

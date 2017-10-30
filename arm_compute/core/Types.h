@@ -545,9 +545,15 @@ public:
      * @param[in] pool_type       Pooling type @ref PoolingType. Defaults to @ref PoolingType::MAX
      * @param[in] pool_size       (Optional) Pooling size, in elements, across  x and y. Defaults to 2.
      * @param[in] pad_stride_info (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding (Optional) Strategy when accounting padding in calculations.
+     *                             True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                             Defaults to false;
      */
-    PoolingLayerInfo(PoolingType pool_type = PoolingType::MAX, unsigned int pool_size = 2, PadStrideInfo pad_stride_info = PadStrideInfo())
-        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info)
+    PoolingLayerInfo(PoolingType   pool_type       = PoolingType::MAX,
+                     unsigned int  pool_size       = 2,
+                     PadStrideInfo pad_stride_info = PadStrideInfo(),
+                     bool          exclude_padding = false)
+        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding)
     {
     }
     PoolingType pool_type() const
@@ -562,11 +568,16 @@ public:
     {
         return _pad_stride_info;
     }
+    bool exclude_padding() const
+    {
+        return _exclude_padding;
+    }
 
 private:
     PoolingType   _pool_type;
     unsigned int  _pool_size;
     PadStrideInfo _pad_stride_info;
+    bool          _exclude_padding;
 };
 
 /** ROI Pooling Layer Information class */

@@ -47,10 +47,10 @@ class PoolingLayerValidationFixedPointFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, DataType data_type, int fractional_bits)
+    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, int fractional_bits)
     {
         _fractional_bits = fractional_bits;
-        PoolingLayerInfo info(pool_type, pool_size, pad_stride_info);
+        PoolingLayerInfo info(pool_type, pool_size, pad_stride_info, exclude_padding);
 
         _target    = compute_target(shape, info, data_type, fractional_bits);
         _reference = compute_reference(shape, info, data_type, fractional_bits);
@@ -123,9 +123,9 @@ class PoolingLayerValidationFixture : public PoolingLayerValidationFixedPointFix
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, DataType data_type)
+    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type)
     {
-        PoolingLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, pool_size, pad_stride_info, data_type, 0);
+        PoolingLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, pool_size, pad_stride_info, exclude_padding, data_type, 0);
     }
 };
 
@@ -136,7 +136,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, DataType data_type)
     {
-        PoolingLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, shape.x(), PadStrideInfo(1, 1, 0, 0), data_type, 0);
+        PoolingLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, shape.x(), PadStrideInfo(1, 1, 0, 0), true, data_type, 0);
     }
 };
 } // namespace validation

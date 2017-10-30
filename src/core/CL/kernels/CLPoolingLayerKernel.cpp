@@ -61,6 +61,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     const PoolingType   pool_type       = pool_info.pool_type();
     const int           pool_size       = pool_info.pool_size();
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
+    bool                exclude_padding = pool_info.exclude_padding();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
@@ -109,8 +110,12 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     build_opts.emplace(("-DSTRIDE_X=" + support::cpp11::to_string(pool_stride_x)));
     if(pool_type != PoolingType::MAX)
     {
-        build_opts.emplace(("-DMAX_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0) + pool_pad_x)));
-        build_opts.emplace(("-DMAX_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1) + pool_pad_y)));
+        if(exclude_padding)
+        {
+            build_opts.emplace("-DEXCLUDE_PADDING");
+        }
+        build_opts.emplace(("-DMAX_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x))));
+        build_opts.emplace(("-DMAX_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y))));
         build_opts.emplace(("-DSTRIDE_Y=" + support::cpp11::to_string(pool_stride_y)));
         build_opts.emplace(("-DPAD_X=" + support::cpp11::to_string(pool_pad_x)));
         build_opts.emplace(("-DPAD_Y=" + support::cpp11::to_string(pool_pad_y)));

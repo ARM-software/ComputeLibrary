@@ -54,12 +54,13 @@ TensorShape calculate_output_shape(TensorShape shape, PoolingLayerInfo info)
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
 SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
 {
-    const int   pool_size     = info.pool_size();
-    PoolingType type          = info.pool_type();
-    int         pool_stride_x = info.pad_stride_info().stride().first;
-    int         pool_stride_y = info.pad_stride_info().stride().second;
-    int         pad_x         = info.pad_stride_info().pad().first;
-    int         pad_y         = info.pad_stride_info().pad().second;
+    const int   pool_size       = info.pool_size();
+    PoolingType type            = info.pool_type();
+    int         pool_stride_x   = info.pad_stride_info().stride().first;
+    int         pool_stride_y   = info.pad_stride_info().stride().second;
+    int         pad_x           = info.pad_stride_info().pad().first;
+    int         pad_y           = info.pad_stride_info().pad().second;
+    bool        exclude_padding = info.exclude_padding();
 
     const auto w_src      = static_cast<int>(src.shape()[0]);
     const auto h_src      = static_cast<int>(src.shape()[1]);
@@ -122,6 +123,11 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
                     hstart     = std::max(hstart, 0);
                     wend       = std::min(wend, w_src);
                     hend       = std::min(hend, h_src);
+                    // Exclude padding pixels from the average
+                    if(exclude_padding)
+                    {
+                        pool = (hend - hstart) * (wend - wstart);
+                    }
 
                     if(type == PoolingType::AVG)
                     {
@@ -157,12 +163,13 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type>
 SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
 {
-    const int   pool_size     = info.pool_size();
-    PoolingType type          = info.pool_type();
-    int         pool_stride_x = info.pad_stride_info().stride().first;
-    int         pool_stride_y = info.pad_stride_info().stride().second;
-    int         pad_x         = info.pad_stride_info().pad().first;
-    int         pad_y         = info.pad_stride_info().pad().second;
+    const int   pool_size       = info.pool_size();
+    PoolingType type            = info.pool_type();
+    int         pool_stride_x   = info.pad_stride_info().stride().first;
+    int         pool_stride_y   = info.pad_stride_info().stride().second;
+    int         pad_x           = info.pad_stride_info().pad().first;
+    int         pad_y           = info.pad_stride_info().pad().second;
+    bool        exclude_padding = info.exclude_padding();
 
     const auto w_src      = static_cast<int>(src.shape()[0]);
     const auto h_src      = static_cast<int>(src.shape()[1]);
@@ -224,6 +231,11 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
                     hstart     = std::max(hstart, 0);
                     wend       = std::min(wend, w_src);
                     hend       = std::min(hend, h_src);
+                    // Exclude padding pixels from the average
+                    if(exclude_padding)
+                    {
+                        pool = (hend - hstart) * (wend - wstart);
+                    }
 
                     using namespace fixed_point_arithmetic;
 

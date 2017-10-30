@@ -66,14 +66,14 @@ private:
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
-    template <PoolingType pooling_type>
+    template <PoolingType pooling_type, bool exclude_padding = false>
     void pooling2_f32(const Window &window_input, const Window &window);
     /** Function to perform 2x2 pooling for float16_t.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
-    template <PoolingType pooling_type>
+    template <PoolingType pooling_type, bool exclude_padding = false>
     void pooling2_f16(const Window &window_input, const Window &window);
 
     /** Function to perform 2x2 pooling for 8bit fixed point.
@@ -95,14 +95,14 @@ private:
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
-    template <PoolingType pooling_type>
+    template <PoolingType pooling_type, bool exclude_padding = false>
     void pooling3_f32(const Window &window_input, const Window &window);
     /** Function to perform 3x3 pooling.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
-    template <PoolingType pooling_type>
+    template <PoolingType pooling_type, bool exclude_padding = false>
     void pooling3_f16(const Window &window_input, const Window &window);
     /** Function to perform 3x3 pooling for 8bit fixed point.
      *
@@ -123,14 +123,14 @@ private:
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
-    template <PoolingType pooling_type>
+    template <PoolingType pooling_type, bool exclude_padding = false>
     void pooling7_f32(const Window &window_input, const Window &window);
     /** Function to perform NxN pooling.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
-    template <PoolingType pooling_type>
+    template <PoolingType pooling_type, bool exclude_padding = false>
     void poolingN_f32(const Window &window_input, const Window &window);
     /** Common signature for all the specialised Pooling functions
      *

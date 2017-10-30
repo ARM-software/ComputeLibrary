@@ -186,10 +186,14 @@
 DATA_TYPE calculate_avg_scale(const int pool_size, const int upper_bound_w, const int upper_bound_h,
                               const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
-    const int start_x = get_global_id(0) * stride_x - pad_x;
-    const int start_y = get_global_id(1) * stride_y - pad_y;
+    int       start_x = get_global_id(0) * stride_x - pad_x;
+    int       start_y = get_global_id(1) * stride_y - pad_y;
     const int end_x   = min(start_x + pool_size, upper_bound_w);
     const int end_y   = min(start_y + pool_size, upper_bound_h);
+#if defined(EXCLUDE_PADDING)
+    start_x = max(0, start_x);
+    start_y = max(0, start_y);
+#endif /* defined(EXCLUDE_PADDING) */
     return ((end_y - start_y) * (end_x - start_x));
 }
 
@@ -334,10 +338,14 @@ VEC_DATA_TYPE(DATA_TYPE, 4)
 calculate_avg_scale4(const int pool_size, const int upper_bound_w, const int upper_bound_h,
                      const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
-    const int4 start_x = ((int4)get_global_id(0) * 4 + (int4)(0, 1, 2, 3)) * (int4)stride_x - (int4)pad_x;
-    const int  start_y = get_global_id(1) * stride_y - pad_y;
+    int4       start_x = ((int4)get_global_id(0) * 4 + (int4)(0, 1, 2, 3)) * (int4)stride_x - (int4)pad_x;
+    int        start_y = get_global_id(1) * stride_y - pad_y;
     const int4 end_x   = min(start_x + (int4)pool_size, (int4)upper_bound_w);
     const int  end_y   = min(start_y + pool_size, upper_bound_h);
+#if defined(EXCLUDE_PADDING)
+    start_x = max((int4)0, start_x);
+    start_y = max(0, start_y);
+#endif /* defined(EXCLUDE_PADDING) */
     return (VEC_DATA_TYPE(DATA_TYPE, 4))(1.f) / CONVERT_VECTOR4(DATA_TYPE)(((int4)(end_y - start_y)) * (end_x - start_x));
 }
 
