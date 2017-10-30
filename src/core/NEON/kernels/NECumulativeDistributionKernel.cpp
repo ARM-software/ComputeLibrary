@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,7 +102,7 @@ void NECumulativeDistributionKernel::run(const Window &window, const ThreadInfo 
     }
     else
     {
-        const float diff = image_size - cd_min;
+        const float diff = image_size - 1;
 
         for(unsigned int x = 0; x < _histogram_size; ++x)
         {
