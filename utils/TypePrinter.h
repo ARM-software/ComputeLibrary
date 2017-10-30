@@ -27,6 +27,7 @@
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Strides.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 
 #include "tests/Types.h"
@@ -551,6 +552,17 @@ inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy 
     }
 
     return os;
+}
+
+/** Formatted output of the TensorInfo type. */
+inline std::string to_string(const TensorInfo &info)
+{
+    std::stringstream str;
+    str << "{Shape=" << info.tensor_shape() << ","
+        << "Type=" << info.data_type() << ","
+        << "Channels=" << info.num_channels() << ","
+        << "FixedPointPos=" << info.fixed_point_position() << "}";
+    return str.str();
 }
 
 //FIXME: Check why this doesn't work and the TensorShape and Coordinates overload are needed

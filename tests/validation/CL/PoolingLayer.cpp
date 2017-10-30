@@ -61,6 +61,38 @@ constexpr AbsoluteTolerance<float> tolerance_qs16(6);     /**< Tolerance value f
 TEST_SUITE(CL)
 TEST_SUITE(PoolingLayer)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS16, 11),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0),
+                                                       TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::QS8, 5),
+                                                       TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::QS16, 11),
+                                                       TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32, 0),
+                                                     })),
+               framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 2, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 0, 2)),
+                                                      })),
+               framework::dataset::make("Expected", { true, false, true, false, true, true})),
+               input_info, output_info, pool_info, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info, &output_info, pool_info)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using CLPoolingLayerFixture = PoolingLayerValidationFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
 

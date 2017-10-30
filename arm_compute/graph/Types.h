@@ -29,10 +29,25 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/logging/Macros.h"
 
-#define ARM_COMPUTE_LOG_GRAPH(log_level, x) \
+/** Create a default core logger
+ *
+ * @note It will eventually create all default loggers in don't exist
+ */
+#define ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER()                                  \
+    do                                                                             \
+    {                                                                              \
+        if(arm_compute::logging::LoggerRegistry::get().logger("GRAPH") == nullptr) \
+        {                                                                          \
+            arm_compute::logging::LoggerRegistry::get().create_reserved_loggers(); \
+        }                                                                          \
+    } while(false)
+
+#define ARM_COMPUTE_LOG_GRAPH(log_level, x)    \
+    ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER(); \
     ARM_COMPUTE_LOG_STREAM("GRAPH", log_level, x)
 
-#define ARM_COMPUTE_LOG_GRAPH_INFO(x) \
+#define ARM_COMPUTE_LOG_GRAPH_INFO(x)          \
+    ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER(); \
     ARM_COMPUTE_LOG_STREAM("GRAPH", arm_compute::logging::LogLevel::INFO, x)
 
 namespace arm_compute

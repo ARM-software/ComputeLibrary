@@ -26,6 +26,8 @@
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
+#include "arm_compute/core/Error.h"
+
 namespace arm_compute
 {
 class ICLTensor;
@@ -56,6 +58,15 @@ public:
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLPoolingLayerKernel
+     *
+     * @param[in] input     Input's tensor info
+     * @param[in] output    Output's tensor info
+     * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     *
+     * @return an error
+     */
+    static Error validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

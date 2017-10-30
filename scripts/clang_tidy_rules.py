@@ -60,10 +60,10 @@ def filter_clang_tidy_lines( lines ):
         elif "warning:" in line:
             if ("uninitialized record type: '__ret'" in line or
                "local variable '__bound_functor' is still referred to by the global variable '__once_callable'" in line or
-               ("Error.cpp" in line and "thrown exception type is not nothrow copy constructible" in line) or
-               ("Error.cpp" in line and "uninitialized record type: 'args'" in line) or
-               ("Error.cpp" in line and "do not call c-style vararg functions" in line) or
-               ("Error.cpp" in line and "do not define a C-style variadic function" in line) or
+               (any(f in line for f in ["Error.cpp","Error.h"]) and "thrown exception type is not nothrow copy constructible" in line) or
+               (any(f in line for f in ["Error.cpp","Error.h"]) and "uninitialized record type: 'args'" in line) or
+               (any(f in line for f in ["Error.cpp","Error.h"]) and "do not call c-style vararg functions" in line) or
+               (any(f in line for f in ["Error.cpp","Error.h"]) and "do not define a C-style variadic function" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move constructors should be marked noexcept" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move assignment operators should be marked noexcept" in line) or
                ("CLMinMaxLocationKernel.cpp" in line and "Forming reference to null pointer" in line) or
@@ -105,6 +105,7 @@ def filter_clang_tidy_lines( lines ):
                    ("BOOST_TEST" in lines[i + 1] or
                     "BOOST_FAIL" in lines[i + 1] or
                     "BOOST_CHECK_THROW" in lines[i + 1] or
+                    "ARM_COMPUTE_RETURN_ON" in lines[i + 1] or
                     "syscall" in lines[i + 1])):
                         print_context=False
                         continue

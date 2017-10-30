@@ -179,6 +179,38 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     ICLKernel::configure(win);
 }
 
+Error CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+
+    int pool_pad_x = 0;
+    int pool_pad_y = 0;
+    int pool_size  = pool_info.pool_size();
+    std::tie(pool_pad_x, pool_pad_y) = pool_info.pad_stride_info().pad();
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((pool_pad_x >= pool_size) || (pool_pad_y >= pool_size)),
+                                    "Invalid pool size and pool pad combination");
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+
+        unsigned int pooled_w = 0;
+        unsigned int pooled_h = 0;
+        std::tie(pooled_w, pooled_h) = scaled_dimensions(input->dimension(0),
+                                                         input->dimension(1),
+                                                         pool_size,
+                                                         pool_size,
+                                                         pool_info.pad_stride_info());
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((output->dimension(0) != pooled_w) != (output->dimension(1) != pooled_h),
+                                        "Invalid output pooling dimensions!");
+    }
+
+    return Error{};
+}
+
 void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);

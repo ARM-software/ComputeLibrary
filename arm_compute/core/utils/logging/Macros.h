@@ -30,32 +30,35 @@
 
 #ifdef ARM_COMPUTE_LOGGING_ENABLED
 
-#define ARM_COMPUTE_LOG_MSG(logger_name, log_level, msg)                               \
-    {                                                                                  \
-        auto logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
-        if(logger != nullptr)                                                          \
-        {                                                                              \
-            logger->log(log_level, msg);                                               \
-        }                                                                              \
-    }
+#define ARM_COMPUTE_LOG_MSG(logger_name, log_level, msg)                                 \
+    do                                                                                   \
+    {                                                                                    \
+        auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
+        if(__logger != nullptr)                                                          \
+        {                                                                                \
+            __logger->log(log_level, msg);                                               \
+        }                                                                                \
+    } while(false)
 
-#define ARM_COMPUTE_LOG_MSG_WITH_FORMAT(logger_name, log_level, fmt, ...)              \
-    {                                                                                  \
-        auto logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
-        if(logger != nullptr)                                                          \
-        {                                                                              \
-            logger->log(log_level, fmt, __VA_ARGS__);                                  \
-        }                                                                              \
-    }
+#define ARM_COMPUTE_LOG_MSG_WITH_FORMAT(logger_name, log_level, fmt, ...)                \
+    do                                                                                   \
+    {                                                                                    \
+        auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
+        if(__logger != nullptr)                                                          \
+        {                                                                                \
+            __logger->log(log_level, fmt, __VA_ARGS__);                                  \
+        }                                                                                \
+    } while(false)
 
-#define ARM_COMPUTE_LOG_STREAM(logger_name, log_level, stream)                                               \
-    {                                                                                                        \
-        auto logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name);                       \
-        if(logger != nullptr)                                                                                \
-        {                                                                                                    \
-            logger->log(log_level, static_cast<std::ostringstream &>(std::ostringstream() << stream).str()); \
-        }                                                                                                    \
-    }
+#define ARM_COMPUTE_LOG_STREAM(logger_name, log_level, stream)                                                 \
+    do                                                                                                         \
+    {                                                                                                          \
+        auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name);                       \
+        if(__logger != nullptr)                                                                                \
+        {                                                                                                      \
+            __logger->log(log_level, static_cast<std::ostringstream &>(std::ostringstream() << stream).str()); \
+        }                                                                                                      \
+    } while(false)
 
 #else /* ARM_COMPUTE_LOGGING_ENABLED */
 

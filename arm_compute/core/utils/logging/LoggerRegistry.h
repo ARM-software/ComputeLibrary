@@ -51,10 +51,11 @@ public:
      * @note Some names are reserved e.g. [CORE, RUNTIME, GRAPH]
      *
      * @param[in] name      Logger's name
-     * @param[in] log_level Logger's log level
-     * @param[in] printers  Printers to attach to the system loggers
+     * @param[in] log_level Logger's log level. Defaults to @ref LogLevel::INFO
+     * @param[in] printers  Printers to attach to the system loggers. Defaults with a @ref StdPrinter.
      */
-    void create_logger(const std::string &name, LogLevel log_level, std::vector<std::shared_ptr<Printer>> printers = {});
+    void create_logger(const std::string &name, LogLevel log_level = LogLevel::INFO,
+                       std::vector<std::shared_ptr<Printer>> printers = { std::make_shared<StdPrinter>() });
     /** Remove a logger
      *
      * @param name Logger's name
@@ -69,10 +70,11 @@ public:
     std::shared_ptr<Logger> logger(const std::string &name);
     /** Creates reserved library loggers
      *
-     * @param[in] log_level Logger's log level
-     * @param[in] printers  Printers to attach to the system loggers
+     * @param[in] log_level (Optional) Logger's log level. Defaults to @ref LogLevel::INFO
+     * @param[in] printers  (Optional) Printers to attach to the system loggers. Defaults with a @ref StdPrinter.
      */
-    void create_reserved_loggers(LogLevel log_level, std::vector<std::shared_ptr<Printer>> printers = {});
+    void create_reserved_loggers(LogLevel                              log_level = LogLevel::INFO,
+                                 std::vector<std::shared_ptr<Printer>> printers  = { std::make_shared<StdPrinter>() });
 
 private:
     /** Default constructor */

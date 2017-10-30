@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Log.h"
 #include "arm_compute/core/Types.h"
 
 #include <map>
@@ -187,7 +188,7 @@ GPUTarget get_target_from_device(cl::Device &device)
 
     if(!found_mali)
     {
-        ARM_COMPUTE_INFO("Can't find valid Mali GPU. Target is set to MIDGARD.");
+        ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Mali GPU. Target is set to MIDGARD.");
         return GPUTarget::MIDGARD;
     }
 
@@ -201,7 +202,7 @@ GPUTarget get_target_from_device(cl::Device &device)
         case 'G':
             return get_bifrost_target(version);
         default:
-            ARM_COMPUTE_INFO("Mali GPU unknown. Target is set to the default one.");
+            ARM_COMPUTE_LOG_INFO_MSG_CORE("Mali GPU unknown. Target is set to the default one.");
             return GPUTarget::MIDGARD;
     }
 }

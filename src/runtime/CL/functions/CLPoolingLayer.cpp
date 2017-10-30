@@ -39,3 +39,8 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     BorderMode border_mode = (PoolingType::MAX == pool_info.pool_type()) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(0));
 }
+
+Error CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+{
+    return CLPoolingLayerKernel::validate(input, output, pool_info);
+}

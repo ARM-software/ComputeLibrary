@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
@@ -47,6 +48,15 @@ public:
      * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLPoolingLayer
+     *
+     * @param[in] input     Input's tensor info
+     * @param[in] output    Output's tensor info
+     * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     *
+     * @return an expected value
+     */
+    static Error validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLPOOLINGLAYER_H__ */

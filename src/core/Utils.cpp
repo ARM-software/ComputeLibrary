@@ -384,4 +384,5 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
     }
+    return 0;
 }

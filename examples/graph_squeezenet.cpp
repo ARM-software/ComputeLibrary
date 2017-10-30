@@ -25,7 +25,6 @@
 #error "This example needs to be built with -DARM_COMPUTE_CL"
 #endif /* ARM_COMPUTE_CL */
 
-#include "arm_compute/core/utils/logging/LoggerRegistry.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Nodes.h"
 #include "arm_compute/graph/SubGraph.h"
@@ -125,7 +124,6 @@ void main_graph_squeezenet(int argc, const char **argv)
     }
 
     Graph graph;
-    LoggerRegistry::get().create_reserved_loggers(LogLevel::INFO, { std::make_shared<StdPrinter>() });
 
     graph << TargetHint::OPENCL
           << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, batches), 1, DataType::F32), DummyAccessor())

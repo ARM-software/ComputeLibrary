@@ -24,6 +24,202 @@
 #ifndef __ARM_COMPUTE_ERROR_H__
 #define __ARM_COMPUTE_ERROR_H__
 
+#include <stdexcept>
+#include <string>
+
+namespace arm_compute
+{
+enum class ErrorCode
+{
+    OK,           /**< No error */
+    RUNTIME_ERROR /**< Generic runtime error */
+};
+
+/** Error class */
+class Error
+{
+public:
+    /** Default Constructor **/
+    Error()
+        : _code(ErrorCode::OK), _description(" ")
+    {
+    }
+    /** Default Constructor
+     *
+     * @param error_status      Error status.
+     * @param error_description Error description if error_status is not valid.
+     */
+    explicit Error(ErrorCode error_status, std::string error_description = " ")
+        : _code(error_status), _description(error_description)
+    {
+    }
+    /** Allow instances of this class to be copy constructed */
+    Error(const Error &) = default;
+    /** Allow instances of this class to be move constructed */
+    Error(Error &&) = default;
+    /** Allow instances of this class to be copy assigned */
+    Error &operator=(const Error &) = default;
+    /** Allow instances of this class to be move assigned */
+    Error &operator=(Error &&) = default;
+    /** Explicit bool conversion operator
+     *
+     * @return True if there is a valid error else false if status is OK.
+     */
+    explicit operator bool() const noexcept
+    {
+        return _code != ErrorCode::OK;
+    }
+    /** Gets error code
+     *
+     * @return Error code.
+     */
+    ErrorCode error_code() const
+    {
+        return _code;
+    }
+    /** Gets error description if any
+     *
+     * @return Error description.
+     */
+    std::string description() const
+    {
+        return _description;
+    }
+    /** Throws a runtime exception in case it contains a valid error status */
+    void throw_if_error()
+    {
+        if(bool(*this))
+        {
+            internal_throw_on_error();
+        }
+    }
+
+private:
+    /** Internal throwing function */
+    [[noreturn]] void internal_throw_on_error()
+    {
+        throw std::runtime_error(_description);
+    }
+
+private:
+    ErrorCode   _code;
+    std::string _description;
+};
+
+/** Creates an error containing the error message
+ *
+ * @param[in] error_code Error code
+ * @param[in] function   Function in which the error occurred.
+ * @param[in] file       Name of the file where the error occurred.
+ * @param[in] line       Line on which the error occurred.
+ * @param[in] msg        Message to display before aborting.
+ * @param[in] ...        Variable number of arguments of the message.
+ */
+Error create_error(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, ...);
+/** Print an error message then throw an std::runtime_error
+ *
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] msg      Message to display before aborting.
+ * @param[in] ...      Variable number of arguments of the message.
+ */
+[[noreturn]] void error(const char *function, const char *file, const int line, const char *msg, ...);
+}
+/** To avoid unused variables warnings
+ *
+ * This is useful if for example a variable is only used
+ * in debug builds and generates a warning in release builds.
+ *
+ * @param[in] var Variable which is unused.
+ */
+#define ARM_COMPUTE_UNUSED(var) (void)(var)
+
+/** Creates an error with a given message
+ *
+ * @param[in] error_code Error code.
+ * @param[in] ...        Message to encapsulate.
+ */
+#define ARM_COMPUTE_CREATE_ERROR(error_code, ...) ::arm_compute::create_error(error_code, __func__, __FILE__, __LINE__, __VA_ARGS__) // NOLINT
+
+/** Creates an error on location with a given message
+ *
+ * @param[in] error_code Error code.
+ * @param[in] func       Function in which the error occurred.
+ * @param[in] file       File in which the error occurred.
+ * @param[in] line       Line in which the error occurred.
+ * @param[in] ...        Message to display before aborting.
+ */
+#define ARM_COMPUTE_CREATE_ERROR_LOC(error_code, func, file, line, ...) ::arm_compute::create_error(error_code, func, file, line, __VA_ARGS__) // NOLINT
+
+/** Checks if an error value is valid if not returns
+ *
+ * @param[in] error Error value to check
+ */
+#define ARM_COMPUTE_RETURN_ON_ERROR(error) \
+    do                                     \
+    {                                      \
+        if(bool(error))                    \
+        {                                  \
+            return error;                  \
+        }                                  \
+    } while(false)
+
+/** Checks if an error value is valid if not throws an exception with the error
+ *
+ * @param[in] error Error value to check.
+ */
+#define ARM_COMPUTE_THROW_ON_ERROR(error) \
+    error.throw_if_error();
+
+/** If the condition is true, an error is returned
+ *
+ * @param[in] cond Condition to evaluate.
+ * @param[in] ...  Error description message
+ */
+#define ARM_COMPUTE_RETURN_ERROR_ON_MSG(cond, ...)                                               \
+    do                                                                                           \
+    {                                                                                            \
+        if(cond)                                                                                 \
+        {                                                                                        \
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, __VA_ARGS__); \
+        }                                                                                        \
+    } while(false)
+
+/** If the condition is true, an error is thrown
+ *
+ * @param[in] cond Condition to evaluate.
+ * @param[in] func Function in which the error occurred.
+ * @param[in] file File in which the error occurred.
+ * @param[in] line Line in which the error occurred.
+ * @param[in] ...  Error description message.
+ */
+#define ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(cond, func, file, line, ...)                                               \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if(cond)                                                                                                       \
+        {                                                                                                              \
+            return ARM_COMPUTE_CREATE_ERROR_LOC(arm_compute::ErrorCode::RUNTIME_ERROR, func, file, line, __VA_ARGS__); \
+        }                                                                                                              \
+    } while(false)
+
+/** If the condition is true, an error is returned
+ *
+ * @param[in] cond Condition to evaluate
+ */
+#define ARM_COMPUTE_RETURN_ERROR_ON(cond) \
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(cond, #cond)
+
+/** If the condition is true, an error is returned
+ *
+ * @param[in] cond Condition to evaluate.
+ * @param[in] func Function in which the error occurred.
+ * @param[in] file File in which the error occurred.
+ * @param[in] line Line in which the error occurred.
+ */
+#define ARM_COMPUTE_RETURN_ERROR_ON_LOC(cond, func, file, line) \
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(cond, func, file, line, #cond)
+
 /** Print the given message then throw an std::runtime_error.
  *
  * @param[in] ... Message to display before aborting.
@@ -39,40 +235,14 @@
  */
 #define ARM_COMPUTE_ERROR_LOC(func, file, line, ...) ::arm_compute::error(func, file, line, __VA_ARGS__) // NOLINT
 
-/** To avoid unused variables warnings
- *
- * This is useful if for example a variable is only used
- * in debug builds and generates a warning in release builds.
- *
- * @param[in] var Variable which is unused
- */
-#define ARM_COMPUTE_UNUSED(var) (void)(var)
-
-#ifdef ARM_COMPUTE_DEBUG_ENABLED
-/** Print the given message
- *
- * @param[in] ... Message to display
- */
-#define ARM_COMPUTE_INFO(...) ::arm_compute::debug(__func__, __FILE__, __LINE__, __VA_ARGS__) // NOLINT
-/** If the condition is true, the given message is printed
- *
- * @param[in] cond Condition to evaluate.
- * @param[in] ...  Message to print if cond is false.
- */
-#define ARM_COMPUTE_INFO_ON_MSG(cond, ...) \
-    do                                     \
-    {                                      \
-        if(cond)                           \
-        {                                  \
-            ARM_COMPUTE_INFO(__VA_ARGS__); \
-        }                                  \
-    } while(0)
-#else /* ARM_COMPUTE_DEBUG_ENABLED */
-#define ARM_COMPUTE_INFO_ON_MSG(cond, ...)
-#define ARM_COMPUTE_INFO(...)
-#endif /* ARM_COMPUTE_DEBUG_ENABLED */
-
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
+/** Checks if an error value is valid if not throws an exception with the error
+ *
+ * @param[in] error Error value to check.
+ */
+#define ARM_COMPUTE_ERROR_THROW(error) \
+    error.throw_if_error();
+
 /** If the condition is true, the given message is printed and an exception is thrown
  *
  * @param[in] cond Condition to evaluate.
@@ -112,6 +282,7 @@
  */
 #define ARM_COMPUTE_CONST_ON_ERROR(cond, val, msg) (cond) ? throw std::logic_error(msg) : val;
 #else /* ARM_COMPUTE_ASSERTS_ENABLED */
+#define ARM_COMPUTE_ERROR_THROW(error)
 #define ARM_COMPUTE_ERROR_ON_MSG(cond, ...)
 #define ARM_COMPUTE_ERROR_ON_LOC_MSG(cond, func, file, line, ...)
 #define ARM_COMPUTE_CONST_ON_ERROR(cond, val, msg) val
@@ -119,42 +290,19 @@
 
 /** If the condition is true then an error message is printed and an exception thrown
  *
- * @param[in] cond Condition to evaluate
+ * @param[in] cond Condition to evaluate.
  */
 #define ARM_COMPUTE_ERROR_ON(cond) \
     ARM_COMPUTE_ERROR_ON_MSG(cond, #cond)
 
 /** If the condition is true then an error message is printed and an exception thrown
  *
- * @param[in] cond Condition to evaluate
+ * @param[in] cond Condition to evaluate.
  * @param[in] func Function in which the error occurred.
  * @param[in] file File in which the error occurred.
  * @param[in] line Line in which the error occurred.
  */
 #define ARM_COMPUTE_ERROR_ON_LOC(cond, func, file, line) \
     ARM_COMPUTE_ERROR_ON_LOC_MSG(cond, func, file, line, #cond)
-
-namespace arm_compute
-{
-/** Print an error message then throw an std::runtime_error
- *
- * @param[in] function Function in which the error occurred.
- * @param[in] file     Name of the file where the error occurred.
- * @param[in] line     Line on which the error occurred.
- * @param[in] msg      Message to display before aborting.
- * @param[in] ...      Variable number of arguments of the message.
- */
-[[noreturn]] void error(const char *function, const char *file, const int line, const char *msg, ...);
-
-/** Print a debug message
- *
- * @param[in] function Function in which the error occurred.
- * @param[in] file     Name of the file where the error occurred.
- * @param[in] line     Line on which the error occurred.
- * @param[in] msg      Message to display before aborting.
- * @param[in] ...      Variable number of arguments of the message.
- */
-void debug(const char *function, const char *file, const int line, const char *msg, ...);
-}
 
 #endif /* __ARM_COMPUTE_ERROR_H__ */
