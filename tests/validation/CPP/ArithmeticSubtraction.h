@@ -35,8 +35,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<T> arithmetic_subtraction(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
+template <typename T1, typename T2, typename T3>
+SimpleTensor<T3> arithmetic_subtraction(const SimpleTensor<T1> &src1, const SimpleTensor<T2> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 } // namespace reference
 } // namespace validation
 } // namespace test
