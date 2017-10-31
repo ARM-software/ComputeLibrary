@@ -107,9 +107,10 @@ public:
     bool                  call_accessor() override;
     bool                  has_accessor() const override;
     arm_compute::ITensor *set_target(TargetHint target) override;
-    arm_compute::ITensor *tensor() override;
-    TargetHint            target() const override;
-    void                  allocate() override;
+    arm_compute::ITensor       *tensor() override;
+    const arm_compute::ITensor *tensor() const override;
+    TargetHint                  target() const override;
+    void                        allocate() override;
 
 private:
     TargetHint                            _target;   /**< Target that this tensor is pinned on */

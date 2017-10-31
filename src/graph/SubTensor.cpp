@@ -88,6 +88,11 @@ arm_compute::ITensor *SubTensor::tensor()
     return _subtensor.get();
 }
 
+const arm_compute::ITensor *SubTensor::tensor() const
+{
+    return _subtensor.get();
+}
+
 TargetHint SubTensor::target() const
 {
     return _target;

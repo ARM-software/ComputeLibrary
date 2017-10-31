@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/nodes/BranchLayer.h"
 
+#include "arm_compute/graph/Error.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/SubGraph.h"
 #include "arm_compute/graph/Tensor.h"
@@ -111,8 +112,7 @@ std::unique_ptr<arm_compute::IFunction> BranchLayer::instantiate_node(GraphConte
 {
     ARM_COMPUTE_ERROR_ON(_branch_merge_method != BranchMergeMethod::DEPTH_CONCATENATE);
     ARM_COMPUTE_UNUSED(_branch_merge_method);
-    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT(input, output);
 
     // Create branch function
     auto func = arm_compute::support::cpp14::make_unique<BranchFunction>();

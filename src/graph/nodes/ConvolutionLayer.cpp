@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/nodes/ConvolutionLayer.h"
 
+#include "arm_compute/graph/Error.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -175,8 +176,7 @@ private:
 
 std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT(input, output);
 
     arm_compute::ITensor *in  = input->tensor();
     arm_compute::ITensor *out = output->tensor();

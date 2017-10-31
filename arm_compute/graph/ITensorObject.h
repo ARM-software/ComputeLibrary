@@ -61,7 +61,8 @@ public:
      *
      * @return Tensor
      */
-    virtual ITensor *tensor() = 0;
+    virtual ITensor       *tensor()       = 0;
+    virtual const ITensor *tensor() const = 0;
     /** Return the target that this tensor is pinned on
      *
      * @return Target of the tensor

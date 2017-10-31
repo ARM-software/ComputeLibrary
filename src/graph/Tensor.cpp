@@ -95,6 +95,11 @@ arm_compute::ITensor *Tensor::tensor()
     return _tensor.get();
 }
 
+const arm_compute::ITensor *Tensor::tensor() const
+{
+    return _tensor.get();
+}
+
 const TensorInfo &Tensor::info() const
 {
     return _info;

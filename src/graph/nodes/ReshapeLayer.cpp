@@ -23,6 +23,7 @@
  */
 #include "arm_compute/graph/nodes/ReshapeLayer.h"
 
+#include "arm_compute/graph/Error.h"
 #include "arm_compute/graph/NodeContext.h"
 #include "arm_compute/graph/OperationRegistry.h"
 #include "support/ToolchainSupport.h"
@@ -36,8 +37,7 @@ ReshapeLayer::ReshapeLayer(TensorShape shape)
 
 std::unique_ptr<arm_compute::IFunction> ReshapeLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr || input->tensor() == nullptr);
-    ARM_COMPUTE_ERROR_ON(output == nullptr || output->tensor() == nullptr);
+    ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT(input, output);
 
     _target_hint              = ctx.hints().target_hint();
     arm_compute::ITensor *in  = input->tensor();
