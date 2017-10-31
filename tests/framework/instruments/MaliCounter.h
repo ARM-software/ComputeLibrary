@@ -42,7 +42,7 @@ class MaliCounter : public Instrument
 {
 public:
     /** Default constructor. */
-    MaliCounter();
+    MaliCounter(ScaleFactor scale_factor);
 
     MaliCounter(const MaliCounter &) = delete;
     MaliCounter &operator=(const MaliCounter &) = delete;
@@ -95,6 +95,7 @@ private:
     std::vector<unsigned int> _core_index_remap{};
     int                       _fd{ -1 };
     int                       _hwc_fd{ -1 };
+    int                       _scale_factor{};
 };
 } // namespace framework
 } // namespace test

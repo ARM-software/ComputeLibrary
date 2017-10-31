@@ -67,16 +67,16 @@ int main(int argc, char **argv)
 
 #ifdef ARM_COMPUTE_GC
     GCScheduler::get().default_init();
-#endif /* ARM_COMPUTE_CL */
+#endif /* ARM_COMPUTE_GC */
 
     framework::Framework &framework = framework::Framework::get();
 
     framework::CommandLineParser parser;
 
-    std::set<framework::InstrumentType> allowed_instruments
+    std::set<framework::InstrumentsDescription> allowed_instruments
     {
-        framework::InstrumentType::ALL,
-        framework::InstrumentType::NONE,
+        std::pair<framework::InstrumentType, framework::ScaleFactor>(framework::InstrumentType::ALL, framework::ScaleFactor::NONE),
+        std::pair<framework::InstrumentType, framework::ScaleFactor>(framework::InstrumentType::NONE, framework::ScaleFactor::NONE),
     };
 
     for(const auto &type : framework.available_instruments())
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
     help->set_help("Show this help message");
     auto dataset_mode = parser.add_option<framework::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::PRECOMMIT);
     dataset_mode->set_help("For managed datasets select which group to use");
-    auto instruments = parser.add_option<framework::EnumListOption<framework::InstrumentType>>("instruments", allowed_instruments, std::initializer_list<framework::InstrumentType> { framework::InstrumentType::WALL_CLOCK_TIMER });
+    auto instruments = parser.add_option<framework::EnumListOption<framework::InstrumentsDescription>>("instruments", allowed_instruments, std::initializer_list<framework::InstrumentsDescription> { std::pair<framework::InstrumentType, framework::ScaleFactor>(framework::InstrumentType::WALL_CLOCK_TIMER, framework::ScaleFactor::NONE) });
     instruments->set_help("Set the profiling instruments to use");
     auto iterations = parser.add_option<framework::SimpleOption<int>>("iterations", 1);
     iterations->set_help("Number of iterations per test case");

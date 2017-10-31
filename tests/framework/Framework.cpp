@@ -48,21 +48,30 @@ namespace framework
 {
 Framework::Framework()
 {
-    _available_instruments.emplace(InstrumentType::WALL_CLOCK_TIMER, Instrument::make_instrument<WallClockTimer>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimer, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_S>);
 #ifdef PMU_ENABLED
-    _available_instruments.emplace(InstrumentType::PMU, Instrument::make_instrument<PMUCounter>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::NONE), Instrument::make_instrument<PMUCounter, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::SCALE_1K), Instrument::make_instrument<PMUCounter, ScaleFactor::SCALE_1K>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::SCALE_1M), Instrument::make_instrument<PMUCounter, ScaleFactor::SCALE_1M>);
 #endif /* PMU_ENABLED */
 #ifdef MALI_ENABLED
-    _available_instruments.emplace(InstrumentType::MALI, Instrument::make_instrument<MaliCounter>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::NONE), Instrument::make_instrument<MaliCounter, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1K), Instrument::make_instrument<MaliCounter, ScaleFactor::SCALE_1K>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1M), Instrument::make_instrument<MaliCounter, ScaleFactor::SCALE_1M>);
 #endif /* MALI_ENABLED */
 #ifdef OPENCL_TIMER_ENABLED
-    _available_instruments.emplace(InstrumentType::OPENCL_TIMER, Instrument::make_instrument<OpenCLTimer>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::NONE), Instrument::make_instrument<OpenCLTimer, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_US), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_US>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_S>);
 #endif /* OPENCL_TIMER_ENABLED */
 }
 
-std::set<InstrumentType> Framework::available_instruments() const
+std::set<InstrumentsDescription> Framework::available_instruments() const
 {
-    std::set<InstrumentType> types;
+    std::set<InstrumentsDescription> types;
 
     for(const auto &instrument : _available_instruments)
     {
@@ -90,13 +99,14 @@ Framework &Framework::get()
     return instance;
 }
 
-void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter, LogLevel log_level)
+void Framework::init(const std::vector<framework::InstrumentsDescription> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter,
+                     LogLevel log_level)
 {
     _test_filter    = TestFilter(mode, name_filter, id_filter);
     _num_iterations = num_iterations;
     _log_level      = log_level;
 
-    _instruments = std::set<InstrumentType>(instruments.begin(), instruments.end());
+    _instruments = std::set<framework::InstrumentsDescription>(instruments.begin(), instruments.end());
 }
 
 std::string Framework::current_suite_name() const
@@ -579,13 +589,13 @@ Profiler Framework::get_profiler() const
     const bool all_instruments = std::any_of(
                                      _instruments.begin(),
                                      _instruments.end(),
-                                     [](InstrumentType type) -> bool { return type == InstrumentType::ALL; });
+                                     [](InstrumentsDescription type) -> bool { return type.first == InstrumentType::ALL; });
 
-    auto is_selected = [&](InstrumentType instrument) -> bool
+    auto is_selected = [&](InstrumentsDescription instrument) -> bool
     {
-        return std::find_if(_instruments.begin(), _instruments.end(), [&](InstrumentType type) -> bool {
-            const auto group = static_cast<InstrumentType>(static_cast<uint64_t>(type) & 0xFF00);
-            return group == instrument;
+        return std::find_if(_instruments.begin(), _instruments.end(), [&](InstrumentsDescription type) -> bool {
+            const auto group = static_cast<InstrumentType>(static_cast<uint64_t>(type.first) & 0xFF00);
+            return (group == instrument.first) && (instrument.second == type.second);
         })
         != _instruments.end();
     };

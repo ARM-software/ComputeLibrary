@@ -42,7 +42,7 @@ namespace framework
 class OpenCLTimer : public Instrument
 {
 public:
-    OpenCLTimer();
+    OpenCLTimer(ScaleFactor scale_factor);
     std::string     id() const override;
     void            start() override;
     void            stop() override;
@@ -56,6 +56,9 @@ public:
     std::list<kernel_info>                          kernels{};
     std::function<decltype(clEnqueueNDRangeKernel)> real_function;
 #endif /* ARM_COMPUTE_CL */
+
+private:
+    float _scale_factor{};
 };
 } // namespace framework
 } // namespace test

@@ -57,7 +57,7 @@ struct Measurement
         {
             if(value.is_floating_point)
             {
-                os << arithmetic_to_string(value.v.floating_point);
+                os << arithmetic_to_string(value.v.floating_point, 4);
             }
             else
             {

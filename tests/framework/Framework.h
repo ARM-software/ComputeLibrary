@@ -93,7 +93,7 @@ public:
      *
      * @return Set of all available instrument types.
      */
-    std::set<InstrumentType> available_instruments() const;
+    std::set<InstrumentsDescription> available_instruments() const;
 
     /** Init the framework.
      *
@@ -106,7 +106,7 @@ public:
      * @param[in] id_filter      String to match selected test ids. Only matching tests will be executed.
      * @param[in] log_level      Verbosity of the output.
      */
-    void init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter, LogLevel log_level);
+    void init(const std::vector<framework::InstrumentsDescription> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter, LogLevel log_level);
 
     /** Add a new test suite.
      *
@@ -328,14 +328,14 @@ private:
     std::vector<Printer *> _printers{};
 
     using create_function = std::unique_ptr<Instrument>();
-    std::map<InstrumentType, create_function *> _available_instruments{};
+    std::map<InstrumentsDescription, create_function *> _available_instruments{};
 
-    std::set<InstrumentType> _instruments{ InstrumentType::NONE };
-    TestFilter               _test_filter{};
-    LogLevel                 _log_level{ LogLevel::ALL };
-    const TestInfo          *_current_test_info{ nullptr };
-    TestResult              *_current_test_result{ nullptr };
-    std::vector<std::string> _test_info{};
+    std::set<framework::InstrumentsDescription> _instruments{ std::pair<InstrumentType, ScaleFactor>(InstrumentType::NONE, ScaleFactor::NONE) };
+    TestFilter                                  _test_filter{};
+    LogLevel                                    _log_level{ LogLevel::ALL };
+    const TestInfo                             *_current_test_info{ nullptr };
+    TestResult                                 *_current_test_result{ nullptr };
+    std::vector<std::string>                    _test_info{};
 };
 
 template <typename T>

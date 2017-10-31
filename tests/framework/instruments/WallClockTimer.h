@@ -38,6 +38,27 @@ namespace framework
 class WallClockTimer : public Instrument
 {
 public:
+    WallClockTimer(ScaleFactor scale_factor)
+    {
+        switch(scale_factor)
+        {
+            case ScaleFactor::NONE:
+                _scale_factor = 1.f;
+                _unit         = "us";
+                break;
+            case ScaleFactor::TIME_MS:
+                _scale_factor = 1000.f;
+                _unit         = "ms";
+                break;
+            case ScaleFactor::TIME_S:
+                _scale_factor = 1000000.f;
+                _unit         = "s";
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Invalid scale");
+        }
+    };
+
     std::string     id() const override;
     void            start() override;
     void            stop() override;
@@ -46,6 +67,7 @@ public:
 private:
     std::chrono::high_resolution_clock::time_point _start{};
     std::chrono::high_resolution_clock::time_point _stop{};
+    float                                          _scale_factor{};
 };
 } // namespace framework
 } // namespace test

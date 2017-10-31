@@ -107,7 +107,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
 }
 } // namespace
 
-MaliCounter::MaliCounter()
+MaliCounter::MaliCounter(ScaleFactor scale_factor)
 {
     _counters =
     {
@@ -122,6 +122,24 @@ MaliCounter::MaliCounter()
         { "COMPUTE_ACTIVE", { "Compute core", std::map<int, uint64_t>(), "cycles" } },
         { "FRAG_ACTIVE", { "Fragment core", std::map<int, uint64_t>(), "cycles" } },
     };
+
+    switch(scale_factor)
+    {
+        case ScaleFactor::NONE:
+            _scale_factor = 1;
+            _unit         = "";
+            break;
+        case ScaleFactor::SCALE_1K:
+            _scale_factor = 1000;
+            _unit         = "K ";
+            break;
+        case ScaleFactor::SCALE_1M:
+            _scale_factor = 1000000;
+            _unit         = "M ";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Invalid scale");
+    }
 
     init();
 }
@@ -404,17 +422,19 @@ std::string MaliCounter::id() const
 
 Instrument::MeasurementsMap MaliCounter::measurements() const
 {
+    Measurement counters((_counters.at("GPU_ACTIVE").value() / _scale_factor).v.floating_point, _unit + _counters.at("GPU_ACTIVE").unit()); //NOLINT
+
     MeasurementsMap measurements
     {
         { "Timespan", Measurement(_stop_time - _start_time, "ns") },
-        { "GPU active", _counters.at("GPU_ACTIVE") },
+        { "GPU active", counters },
     };
 
     for(const auto &counter : _core_counters)
     {
         for(const auto &core : counter.second.values)
         {
-            measurements.emplace(counter.second.name + " #" + support::cpp11::to_string(core.first), Measurement(core.second, counter.second.unit));
+            measurements.emplace(counter.second.name + " #" + support::cpp11::to_string(core.first), Measurement(core.second / _scale_factor, _unit + counter.second.unit));
         }
     }
 

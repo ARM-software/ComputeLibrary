@@ -90,7 +90,7 @@ private:
     OpenCLTimer &_timer;
 };
 
-OpenCLTimer::OpenCLTimer()
+OpenCLTimer::OpenCLTimer(ScaleFactor scale_factor)
     : real_function(CLSymbols::get().clEnqueueNDRangeKernel_ptr)
 {
     auto                        q     = CLScheduler::get().queue();
@@ -98,6 +98,28 @@ OpenCLTimer::OpenCLTimer()
     if((props & CL_QUEUE_PROFILING_ENABLE) == 0)
     {
         CLScheduler::get().set_queue(cl::CommandQueue(CLScheduler::get().context(), props | CL_QUEUE_PROFILING_ENABLE));
+    }
+
+    switch(scale_factor)
+    {
+        case ScaleFactor::NONE:
+            _scale_factor = 1.f;
+            _unit         = "ns";
+            break;
+        case ScaleFactor::TIME_US:
+            _scale_factor = 1000.f;
+            _unit         = "us";
+            break;
+        case ScaleFactor::TIME_MS:
+            _scale_factor = 1000000.f;
+            _unit         = "ms";
+            break;
+        case ScaleFactor::TIME_S:
+            _scale_factor = 1000000000.f;
+            _unit         = "s";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Invalid scale");
     }
 }
 
@@ -133,7 +155,7 @@ Instrument::MeasurementsMap OpenCLTimer::measurements() const
             "start", support::cpp11::to_string(start),
             "end", support::cpp11::to_string(end),
         };
-        measurements.emplace(kernel.name + " #" + support::cpp11::to_string(kernel_number++), Measurement(end - start, "ns", raw_data));
+        measurements.emplace(kernel.name + " #" + support::cpp11::to_string(kernel_number++), Measurement((end - start) / _scale_factor, _unit, raw_data));
     }
 
     return measurements;
