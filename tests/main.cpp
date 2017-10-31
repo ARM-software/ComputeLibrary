@@ -120,13 +120,13 @@ int main(int argc, char **argv)
     auto threads = parser.add_option<framework::SimpleOption<int>>("threads", 1);
     threads->set_help("Number of threads to use");
     auto log_format = parser.add_option<framework::EnumOption<framework::LogFormat>>("log-format", supported_log_formats, framework::LogFormat::PRETTY);
-    log_format->set_help("Output format for measurements and failures");
+    log_format->set_help("Output format for measurements and failures (affects only log-file)");
     auto filter = parser.add_option<framework::SimpleOption<std::string>>("filter", ".*");
     filter->set_help("Regular expression to select test cases");
     auto filter_id = parser.add_option<framework::SimpleOption<std::string>>("filter-id");
     filter_id->set_help("List of test ids. ... can be used to define a range.");
     auto log_file = parser.add_option<framework::SimpleOption<std::string>>("log-file");
-    log_file->set_help("Write output to file instead of to the console");
+    log_file->set_help("Write output to file instead of to the console (affected by log-format)");
     auto log_level = parser.add_option<framework::EnumOption<framework::LogLevel>>("log-level", supported_log_levels, framework::LogLevel::ALL);
     log_level->set_help("Verbosity of the output");
     auto throw_errors = parser.add_option<framework::ToggleOption>("throw-errors");
@@ -145,6 +145,12 @@ int main(int argc, char **argv)
     error_on_missing_assets->set_help("Mark a test as failed instead of skipping it when assets are missing");
     auto assets = parser.add_positional_option<framework::SimpleOption<std::string>>("assets");
     assets->set_help("Path to the assets directory");
+    auto pretty_console = parser.add_option<framework::ToggleOption>("pretty-console", true);
+    pretty_console->set_help("Produce pretty output on the console");
+    auto json_file = parser.add_option<framework::SimpleOption<std::string>>("json-file");
+    json_file->set_help("Write output to a json file.");
+    auto pretty_file = parser.add_option<framework::SimpleOption<std::string>>("pretty-file");
+    pretty_file->set_help("Write output to a text file");
 
     try
     {
@@ -156,9 +162,17 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        std::unique_ptr<framework::Printer> printer;
-        std::ofstream                       log_stream;
+        std::vector<std::unique_ptr<framework::Printer>> printers;
+        std::vector<std::shared_ptr<std::ofstream>>      log_streams;
 
+        if(pretty_console->value() && !(log_file->is_set() || log_format->value() != framework::LogFormat::PRETTY))
+        {
+            auto pretty_printer = support::cpp14::make_unique<framework::PrettyPrinter>();
+            pretty_printer->set_color_output(color_output->value());
+            printers.push_back(std::move(pretty_printer));
+        }
+
+        std::unique_ptr<framework::Printer> printer;
         switch(log_format->value())
         {
             case framework::LogFormat::JSON:
@@ -168,43 +182,67 @@ int main(int argc, char **argv)
                 break;
             case framework::LogFormat::PRETTY:
             default:
-            {
-                auto pretty_printer = support::cpp14::make_unique<framework::PrettyPrinter>();
-                pretty_printer->set_color_output(color_output->value());
-                printer = std::move(pretty_printer);
+                printer = support::cpp14::make_unique<framework::PrettyPrinter>();
                 break;
+        }
+
+        if(log_file->is_set())
+        {
+            log_streams.push_back(std::make_shared<std::ofstream>(log_file->value()));
+            if(printer != nullptr)
+            {
+                printer->set_stream(*log_streams.back().get());
             }
         }
 
         if(printer != nullptr)
         {
-            if(log_file->is_set())
-            {
-                log_stream.open(log_file->value());
-                printer->set_stream(log_stream);
-            }
+            printers.push_back(std::move(printer));
+        }
+
+        if(json_file->is_set())
+        {
+            printers.push_back(support::cpp14::make_unique<framework::JSONPrinter>());
+            log_streams.push_back(std::make_shared<std::ofstream>(json_file->value()));
+            printers.back()->set_stream(*log_streams.back().get());
+        }
+
+        if(pretty_file->is_set())
+        {
+            printers.push_back(support::cpp14::make_unique<framework::PrettyPrinter>());
+            log_streams.push_back(std::make_shared<std::ofstream>(pretty_file->value()));
+            printers.back()->set_stream(*log_streams.back().get());
         }
 
         Scheduler::get().set_num_threads(threads->value());
 
         if(log_level->value() > framework::LogLevel::NONE)
         {
-            printer->print_global_header();
+            for(auto &p : printers)
+            {
+                p->print_global_header();
+            }
         }
 
         if(log_level->value() >= framework::LogLevel::CONFIG)
         {
-            printer->print_entry("Seed", support::cpp11::to_string(seed->value()));
-            printer->print_entry("Iterations", support::cpp11::to_string(iterations->value()));
-            printer->print_entry("Threads", support::cpp11::to_string(threads->value()));
+            for(auto &p : printers)
             {
-                using support::cpp11::to_string;
-                printer->print_entry("Dataset mode", to_string(dataset_mode->value()));
+                p->print_entry("Seed", support::cpp11::to_string(seed->value()));
+                p->print_entry("Iterations", support::cpp11::to_string(iterations->value()));
+                p->print_entry("Threads", support::cpp11::to_string(threads->value()));
+                {
+                    using support::cpp11::to_string;
+                    p->print_entry("Dataset mode", to_string(dataset_mode->value()));
+                }
             }
         }
 
         framework.init(instruments->value(), iterations->value(), dataset_mode->value(), filter->value(), filter_id->value(), log_level->value());
-        framework.add_printer(printer.get());
+        for(auto &p : printers)
+        {
+            framework.add_printer(p.get());
+        }
         framework.set_throw_errors(throw_errors->value());
         framework.set_stop_on_error(stop_on_error->value());
         framework.set_error_on_missing_assets(error_on_missing_assets->value());
@@ -226,10 +264,11 @@ int main(int argc, char **argv)
             framework::Profiler profiler = framework.get_profiler();
             profiler.start();
             profiler.stop();
-            if(printer != nullptr)
+            for(auto &p : printers)
             {
-                printer->print_measurements(profiler.measurements());
+                p->print_measurements(profiler.measurements());
             }
+
             return 0;
         }
 
@@ -244,7 +283,10 @@ int main(int argc, char **argv)
 
         if(log_level->value() > framework::LogLevel::NONE)
         {
-            printer->print_global_footer();
+            for(auto &p : printers)
+            {
+                p->print_global_footer();
+            }
         }
 
         return (success ? 0 : 1);
