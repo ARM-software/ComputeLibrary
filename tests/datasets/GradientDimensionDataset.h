@@ -21,42 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_TYPES_H__
-#define __ARM_COMPUTE_TEST_TYPES_H__
+#ifndef __ARM_COMPUTE_TEST_GRADIENT_DIMENSION_DATASET_H__
+#define __ARM_COMPUTE_TEST_GRADIENT_DIMENSION_DATASET_H__
 
-#include "arm_compute/core/Types.h"
+#include "tests/Types.h"
+#include "tests/framework/datasets/ContainerDataset.h"
 
 #include <vector>
 
 namespace arm_compute
 {
-/** Fixed point operation */
-enum class FixedPointOp
+namespace test
 {
-    ADD,       /**< Addition */
-    SUB,       /**< Subtraction */
-    MUL,       /**< Multiplication */
-    EXP,       /**< Exponential */
-    LOG,       /**< Logarithm */
-    INV_SQRT,  /**< Inverse square root */
-    RECIPROCAL /**< Reciprocal */
-};
-
-/** Gradient dimension type. */
-enum class GradientDimension
+namespace datasets
 {
-    GRAD_X,  /**< x gradient dimension */
-    GRAD_Y,  /**< y gradient dimension */
-    GRAD_XY, /**< x and y gradient dimension */
-};
-
-template <typename MinMaxType>
-struct MinMaxLocationValues
+class GradientDimensions final : public framework::dataset::ContainerDataset<std::vector<GradientDimension>>
 {
-    MinMaxType                 min{};
-    MinMaxType                 max{};
-    std::vector<Coordinates2D> min_loc{};
-    std::vector<Coordinates2D> max_loc{};
+public:
+    GradientDimensions()
+        : ContainerDataset("GradientDimension",
+    {
+        GradientDimension::GRAD_X,
+                          GradientDimension::GRAD_Y,
+                          GradientDimension::GRAD_XY
+    })
+    {
+    }
 };
+} // namespace datasets
+} // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_TYPES_H__ */
+#endif /* __ARM_COMPUTE_TEST_GRADIENT_DIMENSION_DATASET_H__ */

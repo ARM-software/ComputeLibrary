@@ -794,5 +794,33 @@ inline std::string to_string(const arm_compute::MagnitudeType &type)
     str << type;
     return str.str();
 }
+
+/** Formatted output of the GradientDimension type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const GradientDimension &dim)
+{
+    switch(dim)
+    {
+        case GradientDimension::GRAD_X:
+            os << "GRAD_X";
+            break;
+        case GradientDimension::GRAD_Y:
+            os << "GRAD_Y";
+            break;
+        case GradientDimension::GRAD_XY:
+            os << "GRAD_XY";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const arm_compute::GradientDimension &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

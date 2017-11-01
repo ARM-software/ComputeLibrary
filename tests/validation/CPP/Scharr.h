@@ -21,42 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_TYPES_H__
-#define __ARM_COMPUTE_TEST_TYPES_H__
+#ifndef __ARM_COMPUTE_TEST_SCHARR_H__
+#define __ARM_COMPUTE_TEST_SCHARR_H__
 
-#include "arm_compute/core/Types.h"
-
-#include <vector>
+#include "tests/SimpleTensor.h"
+#include "tests/Types.h"
 
 namespace arm_compute
 {
-/** Fixed point operation */
-enum class FixedPointOp
+namespace test
 {
-    ADD,       /**< Addition */
-    SUB,       /**< Subtraction */
-    MUL,       /**< Multiplication */
-    EXP,       /**< Exponential */
-    LOG,       /**< Logarithm */
-    INV_SQRT,  /**< Inverse square root */
-    RECIPROCAL /**< Reciprocal */
-};
-
-/** Gradient dimension type. */
-enum class GradientDimension
+namespace validation
 {
-    GRAD_X,  /**< x gradient dimension */
-    GRAD_Y,  /**< y gradient dimension */
-    GRAD_XY, /**< x and y gradient dimension */
-};
-
-template <typename MinMaxType>
-struct MinMaxLocationValues
+namespace reference
 {
-    MinMaxType                 min{};
-    MinMaxType                 max{};
-    std::vector<Coordinates2D> min_loc{};
-    std::vector<Coordinates2D> max_loc{};
-};
+template <typename T, typename U>
+std::pair<SimpleTensor<T>, SimpleTensor<T>> scharr(const SimpleTensor<U> &src, int filter_size, BorderMode border_mode, uint8_t constant_border_value, GradientDimension gradient_dimension);
+} // namespace reference
+} // namespace validation
+} // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_TYPES_H__ */
+#endif /* __ARM_COMPUTE_TEST_SCHARR_H__ */
