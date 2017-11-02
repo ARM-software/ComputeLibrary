@@ -35,6 +35,34 @@
 
 using namespace arm_compute;
 
+CLBuildOptions::CLBuildOptions()
+    : _build_opts()
+{
+}
+
+void CLBuildOptions::add_option(std::string option)
+{
+    _build_opts.emplace(std::move(option));
+}
+
+void CLBuildOptions::add_option_if(bool cond, std::string option)
+{
+    if(cond)
+    {
+        add_option(std::move(option));
+    }
+}
+
+void CLBuildOptions::add_option_if_else(bool cond, std::string option_true, std::string option_false)
+{
+    (cond) ? add_option(std::move(option_true)) : add_option(std::move(option_false));
+}
+
+CLBuildOptions::StringSet CLBuildOptions::options() const
+{
+    return _build_opts;
+}
+
 Program::Program()
     : _context(), _device(), _is_binary(false), _name(), _source(), _binary()
 {

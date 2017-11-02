@@ -70,7 +70,7 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     }
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
-    DataType           dt                                = input->info()->data_type();
+    const DataType     dt                                = input->info()->data_type();
     const int          fixed_point_position              = input->info()->fixed_point_position();
     float              a_const                           = act_info.a();
     float              b_const                           = act_info.b();
@@ -104,7 +104,7 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
 
         // Set scale and offset of the input and output
-        if(is_data_type_assymetric(dt))
+        if(is_data_type_quantized_assymetric(dt))
         {
             float s1 = input->info()->quantization_info().scale;
             int   o1 = input->info()->quantization_info().offset;
@@ -130,7 +130,7 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     }
 
     // Create kernel
-    std::string kernel_name = is_data_type_assymetric(dt) ? std::string("activation_layer_qa8") : std::string("activation_layer");
+    std::string kernel_name = is_data_type_quantized_assymetric(dt) ? std::string("activation_layer_qa8") : std::string("activation_layer");
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Make sure _kernel is initialized before calling the parent's configure

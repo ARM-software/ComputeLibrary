@@ -109,7 +109,6 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(max, sum, output);
-    ARM_COMPUTE_ERROR_ON(beta != 1.0f && input->info()->data_type() != DataType::F32);
 
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
@@ -125,34 +124,25 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
     _output = output;
     _sum    = sum;
 
+    const DataType dt       = input->info()->data_type();
+    auto           beta_int = static_cast<int>(lround(beta * (1 << input->info()->fixed_point_position())));
+
     // The kernel loops over all elements in steps of 16
     const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 16);
 
     // Set build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
-    }
-    else if(input->info()->data_type() == DataType::F16)
-    {
-        build_opts.emplace("-DUSE_F16");
-    }
-
+    CLBuildOptions build_opts;
+    build_opts.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
+    build_opts.add_option_if(is_data_type_fixed_point(dt),
+                             std::string("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
+    build_opts.add_option_if(dt == DataType::F16, std::string("-DUSE_F16"));
     // Tell the kernel that the width is not a multiple of 16
-    if((input->info()->dimension(0) % max_cl_vector_width) != 0)
-    {
-        build_opts.emplace("-DNON_MULTIPLE_OF_16");
-    }
-
-    if(beta != 1.0f)
-    {
-        build_opts.emplace(("-DBETA=" + float_to_string_with_full_precision(beta)));
-    }
+    build_opts.add_option_if((input->info()->dimension(0) % max_cl_vector_width) != 0, std::string("-DNON_MULTIPLE_OF_16"));
+    build_opts.add_option_if(is_data_type_fixed_point(dt) && (beta != 1.0f), std::string("-DBETA=" + support::cpp11::to_string(beta_int)));
+    build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), std::string("-DBETA=" + float_to_string_with_full_precision(beta)));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("softmax_layer_shift_exp_sum", build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("softmax_layer_shift_exp_sum", build_opts.options()));
 
     // Set fixed arguments
     unsigned int idx = 4 * num_arguments_per_3D_tensor(); //Skip the input and output parameters

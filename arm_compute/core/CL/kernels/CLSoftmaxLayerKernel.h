@@ -60,7 +60,7 @@ public:
      *
      * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
      * @param[in]  max    Max values tensor. Data types supported: same as @p input
-     * @param[in]  beta   A scaling factor for the exponent. QS8/QS16/F16 only support a beta value of 1.
+     * @param[in]  beta   A scaling factor for the exponent.
      * @param[out] output Destination tensor. Data types supported: same as @p input
      * @param[out] sum    Sum of 1D logits tensor. Data types supported: same as @p input
      */

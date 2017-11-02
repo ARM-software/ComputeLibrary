@@ -263,7 +263,7 @@ inline bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_
 
 inline bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo quantization_info)
 {
-    if(info.quantization_info().empty() && (is_data_type_assymetric(info.data_type())))
+    if(info.quantization_info().empty() && (is_data_type_quantized_assymetric(info.data_type())))
     {
         info.set_quantization_info(quantization_info);
         return true;

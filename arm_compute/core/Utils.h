@@ -755,7 +755,7 @@ inline bool is_data_type_fixed_point(DataType dt)
  *
  * @return True if data type is of symmetric quantized type, else false.
  */
-inline bool is_data_type_assymetric(DataType dt)
+inline bool is_data_type_quantized_assymetric(DataType dt)
 {
     switch(dt)
     {

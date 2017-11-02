@@ -33,6 +33,41 @@
 
 namespace arm_compute
 {
+/** Build options */
+class CLBuildOptions
+{
+    using StringSet = std::set<std::string>;
+
+public:
+    /** Default constructor. */
+    CLBuildOptions();
+    /** Adds option to the existing build option list
+     *
+     * @param[in] option Option to add
+     */
+    void add_option(std::string option);
+    /** Adds option if a given condition is true;
+     *
+     * @param[in] cond   Condition to check
+     * @param[in] option Option to add if condition is true
+     */
+    void add_option_if(bool cond, std::string option);
+    /** Adds first option if condition is true else the second one
+     *
+     * @param[in] cond         Condition to check
+     * @param[in] option_true  Option to add if condition is true
+     * @param[in] option_false Option to add if condition is false
+     */
+    void add_option_if_else(bool cond, std::string option_true, std::string option_false);
+    /** Gets the current options list set
+     *
+     * @return Build options set
+     */
+    StringSet options() const;
+
+private:
+    StringSet _build_opts; /**< Build options set */
+};
 /** Program class */
 class Program
 {
