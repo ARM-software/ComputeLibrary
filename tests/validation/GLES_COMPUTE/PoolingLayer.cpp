@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+#if 0 // FIXME(APPBROWSER-304): Add exclude padding support for OpenGL ES implementation
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensorAllocator.h"
@@ -103,3 +103,4 @@ TEST_SUITE_END()
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+#endif // 0

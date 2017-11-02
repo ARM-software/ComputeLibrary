@@ -608,8 +608,8 @@ void main(void)
         // Divide by pool region in case of average pooling
         int   start_x = int(gl_GlobalInvocationID.x) * STRIDE_X - PAD_X;
         int   start_y = int(gl_GlobalInvocationID.y) * STRIDE_Y - PAD_Y;
-        int   end_x   = int(min(STRIDE_X + POOL_SIZE, MAX_WIDTH));
-        int   end_y   = int(min(STRIDE_Y + POOL_SIZE, MAX_HEIGHT));
+        int   end_x   = int(min(start_x + POOL_SIZE, MAX_WIDTH));
+        int   end_y   = int(min(start_y + POOL_SIZE, MAX_HEIGHT));
         float res1    = float((end_y - start_y) * (end_x - start_x));
         res           = DIV_OP(res, res1);
     }
