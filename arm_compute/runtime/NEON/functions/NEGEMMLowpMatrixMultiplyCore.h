@@ -78,6 +78,7 @@ private:
     std::unique_ptr<INEKernel> _mtx_b_reshape_kernel;
     Tensor                     _tmp_a;
     Tensor                     _tmp_b;
+    Tensor                     _workspace;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H__ */

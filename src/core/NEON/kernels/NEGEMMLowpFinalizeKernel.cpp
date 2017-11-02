@@ -145,7 +145,7 @@ void NEGEMMLowpFinalizeKernel::finalize(const Window &window)
             in_s32.val[3] = vshlq_s32(in_s32.val[3], shift_s32);
 
             // Convert S32 to U16
-            const int16x8x2_t in_u16 =
+            const int16x8x2_t in_s16 =
             {
                 {
                     vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
@@ -153,10 +153,10 @@ void NEGEMMLowpFinalizeKernel::finalize(const Window &window)
                 }
             };
 
-            // Convert U16 to U8
-            const uint8x16_t out_u8 = vcombine_u8(vqmovun_s16(in_u16.val[0]), vqmovun_s16(in_u16.val[1]));
+            // Convert S16 to S8
+            const int8x16_t out_s8 = vcombine_s8(vqmovn_s16(in_s16.val[0]), vqmovn_s16(in_s16.val[1]));
 
-            vst1q_u8(out.ptr(), out_u8);
+            vst1q_s8(reinterpret_cast<int8_t *>(out.ptr()), out_s8);
         },
         vector_sum_col, vector_sum_row, mm_result, out);
     }
@@ -209,7 +209,7 @@ void NEGEMMLowpFinalizeKernel::finalize(const Window &window)
             in_s32.val[3] = vshlq_s32(in_s32.val[3], shift_s32);
 
             // Convert S32 to U16
-            const int16x8x2_t in_u16 =
+            const int16x8x2_t in_s16 =
             {
                 {
                     vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
@@ -217,10 +217,10 @@ void NEGEMMLowpFinalizeKernel::finalize(const Window &window)
                 }
             };
 
-            // Convert U16 to U8
-            const uint8x16_t out_u8 = vcombine_u8(vqmovun_s16(in_u16.val[0]), vqmovun_s16(in_u16.val[1]));
+            // Convert S16 to S8
+            const int8x16_t out_s8 = vcombine_s8(vqmovn_s16(in_s16.val[0]), vqmovn_s16(in_s16.val[1]));
 
-            vst1q_u8(out.ptr(), out_u8);
+            vst1q_s8(reinterpret_cast<int8_t *>(out.ptr()), out_s8);
         },
         vector_sum_row, mm_result, out);
     }
@@ -295,8 +295,8 @@ void NEGEMMLowpFinalizeKernel::finalize(const Window &window)
             in_s32.val[2] = vshlq_s32(in_s32.val[2], shift_s32);
             in_s32.val[3] = vshlq_s32(in_s32.val[3], shift_s32);
 
-            // Convert S32 to U16
-            const int16x8x2_t in_u16 =
+            // Convert S32 to S16
+            const int16x8x2_t in_s16 =
             {
                 {
                     vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
@@ -304,10 +304,10 @@ void NEGEMMLowpFinalizeKernel::finalize(const Window &window)
                 }
             };
 
-            // Convert U16 to U8
-            const uint8x16_t out_u8 = vcombine_u8(vqmovun_s16(in_u16.val[0]), vqmovun_s16(in_u16.val[1]));
+            // Convert S16 to S8
+            const int8x16_t out_s8 = vcombine_s8(vqmovn_s16(in_s16.val[0]), vqmovn_s16(in_s16.val[1]));
 
-            vst1q_u8(out.ptr(), out_u8);
+            vst1q_s8(reinterpret_cast<int8_t *>(out.ptr()), out_s8);
         },
         vector_sum_col, mm_result, out);
     }
@@ -346,8 +346,8 @@ void NEGEMMLowpFinalizeKernel::finalize(const Window &window)
             in_s32.val[2] = vshlq_s32(in_s32.val[2], shift_s32);
             in_s32.val[3] = vshlq_s32(in_s32.val[3], shift_s32);
 
-            // Convert S32 to U16
-            const int16x8x2_t in_u16 =
+            // Convert S32 to S16
+            const int16x8x2_t in_s16 =
             {
                 {
                     vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
@@ -355,10 +355,10 @@ void NEGEMMLowpFinalizeKernel::finalize(const Window &window)
                 }
             };
 
-            // Convert U16 to U8
-            const uint8x16_t out_u8 = vcombine_u8(vqmovun_s16(in_u16.val[0]), vqmovun_s16(in_u16.val[1]));
+            // Convert U16 to S8
+            const int8x16_t out_s8 = vcombine_s8(vqmovn_s16(in_s16.val[0]), vqmovn_s16(in_s16.val[1]));
 
-            vst1q_u8(out.ptr(), out_u8);
+            vst1q_s8(reinterpret_cast<int8_t *>(out.ptr()), out_s8);
         },
         mm_result, out);
     }
@@ -375,7 +375,7 @@ void NEGEMMLowpFinalizeKernel::configure(const ITensor *vector_sum_col, const IT
                                          int32_t c_offset, int32_t c_mult_int, int32_t shift)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S8);
 
     TensorShape mm_result_shape = mm_result->info()->tensor_shape();
     TensorShape output_shape    = output->info()->tensor_shape();

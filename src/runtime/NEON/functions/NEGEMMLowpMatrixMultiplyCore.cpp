@@ -26,9 +26,8 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64V8P4Kernel.h"
@@ -39,16 +38,22 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "support/ToolchainSupport.h"
 
+namespace arm_compute
+{
+#include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_s8_12x8.hpp"
+} // namespace arm_compute
+
 using namespace arm_compute;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(), _tmp_b()
+    : _memory_group(std::move(memory_manager)), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(), _tmp_b(), _workspace()
 {
 }
 
 void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::S8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
     ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(0) != (b)->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
@@ -62,42 +67,22 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
 
     if(cpu_has_dotprod != 0)
     {
-        TensorShape shape_a_int = a->info()->tensor_shape();
-        shape_a_int.set(0, a->info()->dimension(0) * 8.f);
-        shape_a_int.set(1, std::ceil(a->info()->dimension(1) / 8.f));
-
-        TensorShape shape_b_int = b->info()->tensor_shape();
-        shape_b_int.set(0, b->info()->dimension(0) * 12.f);
-        shape_b_int.set(1, std::ceil(b->info()->dimension(1) / 12.f));
-
-        TensorInfo info_a_int(shape_a_int, 1, a->info()->data_type());
-        TensorInfo info_b_int(shape_b_int, 1, b->info()->data_type());
-        _tmp_a.allocator()->init(info_a_int);
-        _tmp_b.allocator()->init(info_b_int);
-        _memory_group.manage(&_tmp_a);
-        _memory_group.manage(&_tmp_b);
-
-        // Configure interleave blocked kernel for matrix A
-        {
-            auto k = arm_compute::support::cpp14::make_unique<NEGEMMInterleaveBlockedKernel>();
-            k->configure(a, &_tmp_a, 8, 4, false);
-            _mtx_a_reshape_kernel = std::move(k);
-        }
-
-        // Configure interleave blocked kernel for matrix B
-        {
-            auto k = arm_compute::support::cpp14::make_unique<NEGEMMInterleaveBlockedKernel>();
-            k->configure(b, &_tmp_b, 12, 4, true);
-            _mtx_b_reshape_kernel = std::move(k);
-        }
-
         // Configure matrix multiply kernel
-        {
-            // NEGEMMLowpAArch64V8P4Kernel only compiled in AArch64 targets
-            auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpAArch64V8P4Kernel>();
-            k->configure(&_tmp_a, &_tmp_b, output);
-            _mm_kernel = std::move(k);
-        }
+        struct CPUInfo ci = NEScheduler::get().cpu_info();
+        const int      M  = output->info()->tensor_shape().y();
+        const int      N  = output->info()->tensor_shape().x();
+        const int      K  = a->info()->tensor_shape().x();
+
+        GemmInterleaved<gemm_s8_12x8, int8_t, int32_t> gemm(&ci, M, N, K, false, false);
+        constexpr size_t alignment = 4096;
+        _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
+        _memory_group.manage(&_workspace);
+        // Configure matrix multiplication kernel
+        auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpAArch64V8P4Kernel>();
+        k->configure(a, b, output, &_workspace, 1.f, 1.f);
+        _mm_kernel = std::move(k);
+
+        _workspace.allocator()->allocate();
     }
     else
 #endif /* ARM_COMPUTE_AARCH64_V8_2 */
@@ -139,24 +124,27 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             k->configure(&_tmp_a, &_tmp_b, output);
             _mm_kernel = std::move(k);
         }
-    }
 
-    // Allocate tensors
-    _tmp_a.allocator()->allocate();
-    _tmp_b.allocator()->allocate();
+        // Allocate tensors
+        _tmp_a.allocator()->allocate();
+        _tmp_b.allocator()->allocate();
+    }
 }
 
 void NEGEMMLowpMatrixMultiplyCore::run()
 {
     _memory_group.acquire();
 
-    // Run reshape matrix A
-    NEScheduler::get().schedule(_mtx_a_reshape_kernel.get(), Window::DimY);
+    if(_mtx_a_reshape_kernel)
+    {
+        NEScheduler::get().schedule(_mtx_a_reshape_kernel.get(), Window::DimY);
+    }
 
-    // Run reshape matrix B
-    NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
+    if(_mtx_b_reshape_kernel)
+    {
+        NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
+    }
 
-    // Run matrix multiply kernel
     NEScheduler::get().schedule(_mm_kernel.get(), Window::DimY);
 
     _memory_group.release();

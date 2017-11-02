@@ -114,7 +114,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 #endif /* defined(__arm__) || defined(__aarch64__) */
 
             constexpr size_t alignment = 4096;
-            _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
+            _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::S8));
             _memory_group.manage(&_workspace);
 
             // Configure matrix multiplication kernel

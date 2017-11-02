@@ -57,7 +57,7 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        ARM_COMPUTE_ERROR_ON(tensor.data_type() != DataType::U8);
+        ARM_COMPUTE_ERROR_ON(tensor.data_type() != DataType::S8);
         std::uniform_int_distribution<> distribution(0, 3);
         library->fill(tensor, distribution, i);
     }
@@ -97,28 +97,28 @@ protected:
         return c;
     }
 
-    SimpleTensor<uint8_t> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c,
-                                            int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift, DataType data_type)
+    SimpleTensor<int8_t> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c,
+                                           int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift, DataType data_type)
     {
         // Create reference
-        SimpleTensor<uint8_t> a{ shape_a, data_type, 1 };
-        SimpleTensor<uint8_t> b{ shape_b, data_type, 1 };
-        SimpleTensor<uint8_t> c{ shape_c, data_type, 1 };
+        SimpleTensor<int8_t> a{ shape_a, data_type, 1 };
+        SimpleTensor<int8_t> b{ shape_b, data_type, 1 };
+        SimpleTensor<int8_t> c{ shape_c, data_type, 1 };
 
         // Fill reference
         fill(a, 0);
         fill(b, 1);
         fill(c, 2);
 
-        return reference::gemmlowp<uint8_t>(a, b, c, a_offset, b_offset, c_offset, c_mult_int, out_shift);
+        return reference::gemmlowp<int8_t>(a, b, c, a_offset, b_offset, c_offset, c_mult_int, out_shift);
     }
 
-    TensorType            _target{};
-    SimpleTensor<uint8_t> _reference{};
+    TensorType           _target{};
+    SimpleTensor<int8_t> _reference{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType>
-class GEMMLowpValidationFixture : public framework::Fixture
+class GEMMLowpMatrixMultiplyValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -142,9 +142,9 @@ protected:
     TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c)
     {
         // Create tensors
-        TensorType a = create_tensor<TensorType>(shape_a, DataType::U8, 1);
-        TensorType b = create_tensor<TensorType>(shape_b, DataType::U8, 1);
-        TensorType c = create_tensor<TensorType>(shape_c, DataType::U32, 1);
+        TensorType a = create_tensor<TensorType>(shape_a, DataType::S8, 1);
+        TensorType b = create_tensor<TensorType>(shape_b, DataType::S8, 1);
+        TensorType c = create_tensor<TensorType>(shape_c, DataType::S32, 1);
 
         // Create and configure function
         FunctionType gemmlowp;
@@ -164,8 +164,8 @@ protected:
         ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(AccessorType(a), 0, 0, 3);
-        fill(AccessorType(b), 1, 0, 3);
+        fill(AccessorType(a), 0, -128, 127);
+        fill(AccessorType(b), 1, -128, 127);
         fill(AccessorType(c), 2, 0, 0);
 
         // Compute GEMM function
@@ -173,23 +173,23 @@ protected:
         return c;
     }
 
-    SimpleTensor<uint32_t> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c)
+    SimpleTensor<int32_t> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c)
     {
         // Create reference
-        SimpleTensor<uint8_t>  a{ shape_a, DataType::U8, 1 };
-        SimpleTensor<uint8_t>  b{ shape_b, DataType::U8, 1 };
-        SimpleTensor<uint32_t> c{ shape_c, DataType::U32, 1 };
+        SimpleTensor<int8_t>  a{ shape_a, DataType::S8, 1 };
+        SimpleTensor<int8_t>  b{ shape_b, DataType::S8, 1 };
+        SimpleTensor<int32_t> c{ shape_c, DataType::S32, 1 };
 
         // Fill reference
-        fill(a, 0, 0, 3);
-        fill(b, 1, 0, 3);
+        fill(a, 0, -128, 127);
+        fill(b, 1, -128, 127);
         fill(c, 2, 0, 0);
 
         return reference::gemmlowp(a, b, c);
     }
 
-    TensorType             _target{};
-    SimpleTensor<uint32_t> _reference{};
+    TensorType            _target{};
+    SimpleTensor<int32_t> _reference{};
 };
 
 } // namespace validation

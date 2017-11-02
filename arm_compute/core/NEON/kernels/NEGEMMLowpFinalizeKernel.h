@@ -62,7 +62,7 @@ public:
      * @param[in]  vector_sum_row Input row-vector of sums of all the entries in each row of input0.
      *                            Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p vector_sum_col
      * @param[in]  mm_result      Input tensor containing the result of @ref NEGEMMLowpMatrixMultiplyKernel. Data type supported: same as @p vector_sum_col
-     * @param[out] output         Output tensor containing the result of GEMMLowP. Data type supported: U8
+     * @param[out] output         Output tensor containing the result of GEMMLowP. Data type supported: S8
      * @param[in]  num_mtx_a_cols Number of matrix A columns
      * @param[in]  a_offset       Offset to be added to each element of the matrix A.
      * @param[in]  b_offset       Offset to be added to each element of the matrix B.

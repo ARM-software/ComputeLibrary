@@ -45,7 +45,7 @@ NEGEMMLowp::NEGEMMLowp(std::shared_ptr<IMemoryManager> memory_manager)
 
 void NEGEMMLowp::configure(const ITensor *a, const ITensor *b, ITensor *output, int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t output_mult_int, int32_t shift)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN((a), 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN((a), 1, DataType::S8);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, output);
     ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(0) != (b)->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(1) != (output)->info()->dimension(1), "The output matrix must have the same number of rows as the matrix A");

@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NEGEMMLOWPAARCH64V8P4KERNEL_H__
 #define __ARM_COMPUTE_NEGEMMLOWPAARCH64V8P4KERNEL_H__
 
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpAssemblyBaseKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 
 // Enable only if compiled for AArch64-V8.2-A targets
 #ifdef ARM_COMPUTE_AARCH64_V8_2
@@ -34,7 +34,7 @@ namespace arm_compute
 class ITensor;
 
 /** AArch64 NEON kernel to multiply two input matrices "A" and "B". */
-class NEGEMMLowpAArch64V8P4Kernel : public NEGEMMLowpAssemblyBaseKernel
+class NEGEMMLowpAArch64V8P4Kernel : public NEGEMMAssemblyBaseKernel
 {
 public:
     // Inherited methods overridden:
@@ -42,7 +42,7 @@ public:
     bool is_parallelisable() const override;
 
 protected:
-    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output) override;
+    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_AARCH64_V8_2 */

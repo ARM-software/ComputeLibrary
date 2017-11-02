@@ -57,14 +57,14 @@ public:
     * @note GEMM_LOWP:  low precision GEMM kernel
     *  This kernel performs the following computations:
     *
-    *  -# Convert a values from uint8 to int32 and add a_offset to each of them.
-    *  -# Convert b values from uint8 to int32 and add b_offset to each of them.
+    *  -# Convert a values from int8 to int32 and add a_offset to each of them.
+    *  -# Convert b values from int8 to int32 and add b_offset to each of them.
     *  -# Compute the int32 matrix product of the resulting a * b.
     *  -# Add output_offset to each entry of the result.
     *  -# Multiply each entry of the result and round to the nearest integer
-    *  -# Clamp the resulting int32 values to the [0..255] range and cast to uint8.
+    *  -# Clamp the resulting int32 values to the [0..255] range and cast to int8.
     *
-    * @param[in]  a               First input tensor  (Matrix A). Data type supported: U8.
+    * @param[in]  a               First input tensor  (Matrix A). Data type supported: S8.
     * @param[in]  b               Second input tensor (Matrix B). Data type supported: same as @p a
     * @param[out] output          Output tensor. Data type supported: same as @p a.
     * @param[in]  a_offset        Offset to be added to each element of the matrix A.

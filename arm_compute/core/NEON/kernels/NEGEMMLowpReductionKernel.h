@@ -48,7 +48,7 @@ public:
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input       Input tensor containing the interleaved or transposed matrix. Data type supported: U8
+     * @param[in]  input       Input tensor containing the interleaved or transposed matrix. Data type supported: S8
      * @param[out] output      Output row-vector of sums of all the entries in each row/col of input tensor. Data type supported: S32
      * @param[in]  k           Number of matrix A columns (or matrix B rows)
      * @param[in]  is_reshaped True if the input tensor has been reshaped

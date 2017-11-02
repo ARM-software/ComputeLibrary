@@ -61,7 +61,6 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpFinalizeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"

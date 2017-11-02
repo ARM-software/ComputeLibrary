@@ -34,7 +34,7 @@ namespace validation
 {
 namespace reference
 {
-SimpleTensor<uint32_t> gemmlowp(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, SimpleTensor<uint32_t> &c)
+SimpleTensor<int32_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, SimpleTensor<int32_t> &c)
 {
     ARM_COMPUTE_UNUSED(a);
     ARM_COMPUTE_UNUSED(b);
@@ -99,15 +99,15 @@ SimpleTensor<T> gemmlowp(const SimpleTensor<T> &a, const SimpleTensor<T> &b, Sim
         for(int j = 0; j < cols; ++j)
         {
             const int32_t result = ((c_offset + acc[j]) * c_mult_int) >> out_shift;
-            c[j + i * cols]      = static_cast<uint8_t>(std::min(255, std::max(0, result)));
+            c[j + i * cols]      = static_cast<int8_t>(std::min(127, std::max(-128, result)));
         }
     }
 
     return c;
 }
 
-template SimpleTensor<uint8_t> gemmlowp(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, SimpleTensor<uint8_t> &c,
-                                        int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift);
+template SimpleTensor<int8_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, SimpleTensor<int8_t> &c,
+                                       int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift);
 } // namespace reference
 } // namespace validation
 } // namespace test

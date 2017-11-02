@@ -35,8 +35,8 @@ class ITensor;
  * @note @ref NEGEMMLowpMatrixMultiplyKernel low precision matrix product kernel
  *  This kernel performs the following computation:
  *
- *  -# Convert a values from uint8 to int32
- *  -# Convert b values from uint8 to int32
+ *  -# Convert a values from int8 to int32
+ *  -# Convert b values from int8 to int32
  *  -# Compute the int32 matrix product of the resulting a * b and store the result as int32
  *
  */
@@ -58,7 +58,7 @@ public:
      * The input matrices @p input0 and @p input1 must be the output of the kernels: @ref NEGEMMInterleave4x4Kernel and @ref NEGEMMTranspose1xWKernel. These two
      * kernels change the layout of the original matrices to be more cache-friendly.
      *
-     * @param[in]  input0 Input tensor containing the interleaved Matrix A. Data type supported: U8
+     * @param[in]  input0 Input tensor containing the interleaved Matrix A. Data type supported: S8
      * @param[in]  input1 Input tensor containing the transposed Matrix B. Data type supported: same as @p input0
      * @param[out] output Output tensor to store the result of matrix multiplication. Data type supported: S32
      */
