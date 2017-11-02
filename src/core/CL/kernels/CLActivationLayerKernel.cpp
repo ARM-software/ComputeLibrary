@@ -51,18 +51,18 @@ CLActivationLayerKernel::CLActivationLayerKernel()
 void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32, DataType::QASYMM8);
-
-    // For QA8 only lower/upper bounded relu is supported
-    if(input->info()->data_type() == DataType::QASYMM8)
-    {
-        ARM_COMPUTE_ERROR_ON_MSG(act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
-                                 "For QASYMM8 only lower/upper bounded relu is supported");
-    }
+    ARM_COMPUTE_ERROR_ON_MSG((input->info()->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
+                             "For QASYMM8 only lower/upper bounded relu is supported");
 
     if(output != nullptr)
     {
         // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+        auto_init_if_empty(*output->info(),
+                           input->info()->tensor_shape(),
+                           1,
+                           input->info()->data_type(),
+                           input->info()->fixed_point_position(),
+                           input->info()->quantization_info());
 
         ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -70,63 +70,70 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     }
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
+    DataType           dt                                = input->info()->data_type();
     const int          fixed_point_position              = input->info()->fixed_point_position();
     float              a_const                           = act_info.a();
     float              b_const                           = act_info.b();
-    if(is_data_type_fixed_point(input->info()->data_type()))
+    int                a_const_int                       = 0;
+    int                b_const_int                       = 0;
+
+    // Create quantized version of constants a, b if needed
+    if(is_data_type_quantized(dt))
     {
-        a_const = static_cast<int>(lround(a_const * (1 << fixed_point_position)));
-        b_const = static_cast<int>(lround(b_const * (1 << fixed_point_position)));
+        if(is_data_type_fixed_point(dt))
+        {
+            a_const_int = static_cast<int>(lround(a_const * (1 << fixed_point_position)));
+            b_const_int = static_cast<int>(lround(b_const * (1 << fixed_point_position)));
+        }
+        else
+        {
+            a_const_int = input->info()->quantization_info().quantize(a_const);
+            b_const_int = input->info()->quantization_info().quantize(b_const);
+        }
     }
 
     // Set build options
     std::set<std::string> build_opts;
     build_opts.emplace(("-DACT=" + lower_string(string_from_activation_func(act_info.activation()))));
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
     build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
 
-    if(input->info()->data_type() == DataType::QASYMM8)
+    if(is_data_type_quantized(dt))
     {
-        // For lower/upper bounded relu make sure that the min/max values are in the quantized input space
-        int a_const_u8 = input->info()->quantization_info().quantize(a_const);
-        int b_const_u8 = input->info()->quantization_info().quantize(b_const);
+        build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
+        build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
 
-        build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const_u8)));
-        build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const_u8)));
+        // Set scale and offset of the input and output
+        if(is_data_type_assymetric(dt))
+        {
+            float s1 = input->info()->quantization_info().scale;
+            int   o1 = input->info()->quantization_info().offset;
+            // If output is nullptr, assume same quantization scale/offset as input
+            float s2 = output != nullptr ? output->info()->quantization_info().scale : s1;
+            int   o2 = output != nullptr ? output->info()->quantization_info().offset : o1;
+            build_opts.emplace(("-DS1_VAL=" + float_to_string_with_full_precision(s1)));
+            build_opts.emplace(("-DS2_VAL=" + float_to_string_with_full_precision(s2)));
+            build_opts.emplace(("-DO1_VAL=" + support::cpp11::to_string(o1)));
+            build_opts.emplace(("-DO2_VAL=" + support::cpp11::to_string(o2)));
+        }
     }
     else
     {
-        build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const)));
-        build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const)));
+        build_opts.emplace(("-DA_VAL=" + float_to_string_with_full_precision(a_const)));
+        build_opts.emplace(("-DB_VAL=" + float_to_string_with_full_precision(b_const)));
     }
 
     build_opts.emplace(output == nullptr ? "-DIN_PLACE" : "");
-    if(is_data_type_fixed_point(input->info()->data_type()))
+    if(is_data_type_fixed_point(dt))
     {
         build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(fixed_point_position)));
     }
 
     // Create kernel
-    if(input->info()->data_type() == DataType::QASYMM8)
-    {
-        float s1 = input->info()->quantization_info().scale;
-        float o1 = input->info()->quantization_info().offset;
-        // If output is nullptr, assume same quantization scale/offset as input
-        float s2 = output != nullptr ? output->info()->quantization_info().scale : s1;
-        float o2 = output != nullptr ? output->info()->quantization_info().offset : o1;
-        build_opts.emplace(("-DS1_VAL=" + support::cpp11::to_string(s1)));
-        build_opts.emplace(("-DS2_VAL=" + support::cpp11::to_string(s2)));
-        build_opts.emplace(("-DO1_VAL=" + support::cpp11::to_string(o1)));
-        build_opts.emplace(("-DO2_VAL=" + support::cpp11::to_string(o2)));
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("activation_layer_qa8", build_opts));
-    }
-    else
-    {
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("activation_layer", build_opts));
-    }
+    std::string kernel_name = is_data_type_assymetric(dt) ? std::string("activation_layer_qa8") : std::string("activation_layer");
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Make sure _kernel is initialized before calling the parent's configure
-
     _input  = input;
     _output = output;
 

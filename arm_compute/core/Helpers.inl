@@ -197,7 +197,12 @@ inline void Iterator::reset(const size_t dimension)
     }
 }
 
-inline bool auto_init_if_empty(ITensorInfo &info, const TensorShape &shape, int num_channels, DataType data_type, int fixed_point_position)
+inline bool auto_init_if_empty(ITensorInfo       &info,
+                               const TensorShape &shape,
+                               int                num_channels,
+                               DataType           data_type,
+                               int                fixed_point_position,
+                               QuantizationInfo   quantization_info)
 {
     if(info.tensor_shape().total_size() == 0)
     {
@@ -205,6 +210,7 @@ inline bool auto_init_if_empty(ITensorInfo &info, const TensorShape &shape, int 
         info.set_num_channels(num_channels);
         info.set_tensor_shape(shape);
         info.set_fixed_point_position(fixed_point_position);
+        info.set_quantization_info(quantization_info);
         return true;
     }
 
@@ -249,6 +255,17 @@ inline bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_
     if(info.fixed_point_position() == 0 && (info.data_type() == DataType::QS8 || info.data_type() == DataType::QS16))
     {
         info.set_fixed_point_position(fixed_point_position);
+        return true;
+    }
+
+    return false;
+}
+
+inline bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo quantization_info)
+{
+    if(info.quantization_info().empty() && (is_data_type_assymetric(info.data_type())))
+    {
+        info.set_quantization_info(quantization_info);
         return true;
     }
 

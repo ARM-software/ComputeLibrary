@@ -708,6 +708,28 @@ inline bool is_data_type_float(DataType dt)
     }
 }
 
+/** Check if a given data type is of quantized type
+ *
+ * @note Quantized is considered a super-set of fixed-point and asymmetric data types.
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of quantized type, else false.
+ */
+inline bool is_data_type_quantized(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QS8:
+        case DataType::QASYMM8:
+        case DataType::QS16:
+        case DataType::QS32:
+            return true;
+        default:
+            return false;
+    }
+}
+
 /** Check if a given data type is of fixed point type
  *
  * @param[in] dt Input data type.
@@ -721,6 +743,23 @@ inline bool is_data_type_fixed_point(DataType dt)
         case DataType::QS8:
         case DataType::QS16:
         case DataType::QS32:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/** Check if a given data type is of asymmetric quantized type
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of symmetric quantized type, else false.
+ */
+inline bool is_data_type_assymetric(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QASYMM8:
             return true;
         default:
             return false;
