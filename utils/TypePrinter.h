@@ -151,6 +151,21 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo 
     return os;
 }
 
+/** Formatted output of the QuantizationInfo type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &quantization_info)
+{
+    os << "Scale:" << quantization_info.scale << "~"
+       << "Offset:" << quantization_info.offset;
+    return os;
+}
+
+inline std::string to_string(const QuantizationInfo &quantization_info)
+{
+    std::stringstream str;
+    str << quantization_info;
+    return str.str();
+}
+
 inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
 {
     switch(op)
@@ -332,6 +347,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
             break;
         case DataType::QS8:
             os << "QS8";
+            break;
+        case DataType::QASYMM8:
+            os << "QASYMM8";
             break;
         case DataType::S8:
             os << "S8";

@@ -122,6 +122,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
         switch(dt)
         {
             case DataType::U8:
+            case DataType::QASYMM8:
                 set_constant_border<uint8_t>(idx, constant_border_value);
                 break;
             case DataType::QS8:

@@ -34,6 +34,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
@@ -50,7 +51,7 @@ BorderSize CLDirectConvolutionLayerKernel::border_size() const
 
 void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != weights->info()->dimension(1),
                              "Weights should have same width as length");
@@ -70,6 +71,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     }
 
     const unsigned int kernel_size = weights->info()->dimension(0);
+    const DataType     data_type   = input->info()->data_type();
 
     // Get convolved dimensions
     unsigned int output_width  = 0;
@@ -99,21 +101,20 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     _biases      = biases;
     _border_size = BorderSize(_conv_pad_y, _conv_pad_x);
 
-    std::set<std::string> options;
-
     const GPUTarget gpu_target = get_arch_from_target(get_target());
 
-    if(_biases != nullptr)
-    {
-        options.emplace("-DHAS_BIAS");
-    }
+    std::stringstream kernel_name;
+    kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
 
-    if((gpu_target == GPUTarget::BIFROST) && (kernel_size <= 5) && (_conv_stride_x == 1) && (_conv_stride_y == 1) && (input->info()->data_type() == DataType::F32))
-    {
-        options.emplace("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2)));
+    CLBuildOptions build_options;
+    build_options.add_option_if(_biases != nullptr, std::string("-DHAS_BIAS"));
 
-        std::string kernel_name = "direct_convolution" + support::cpp11::to_string(kernel_size) + "x" + support::cpp11::to_string(kernel_size) + "_f32_bifrost";
-        _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, options));
+    if((gpu_target == GPUTarget::BIFROST) && (kernel_size <= 5) && (_conv_stride_x == 1) && (_conv_stride_y == 1) && (data_type == DataType::F32))
+    {
+        build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));
+
+        kernel_name << "_f32_bifrost";
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), build_options.options()));
 
         // Configure kernel window
         Window win = calculate_max_window(*output->info());
@@ -174,35 +175,22 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     }
     else
     {
-        std::stringstream kernel_name;
-        kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
-        DataType promoted_type = input->info()->data_type();
+        bool     is_quantized_fixed_point = is_data_type_fixed_point(data_type);
+        bool     is_quantized_asymm       = is_data_type_quantized_assymetric(data_type);
+        DataType promoted_type            = (is_quantized_fixed_point) ? get_promoted_data_type(data_type) : data_type;
 
-        options.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-        options.emplace("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
-        options.emplace("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2)));
-        options.emplace("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
+        build_options.add_option_if(is_quantized_asymm, std::string("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size)));
+        build_options.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
+        build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));
+        build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));
+        build_options.add_option(std::string("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x)));
+        build_options.add_option_if(is_quantized_fixed_point,
+                                    std::string("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
+        build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(promoted_type)));
 
-        if(is_data_type_fixed_point(input->info()->data_type()))
-        {
-            options.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
-
-            switch(input->info()->data_type())
-            {
-                case DataType::QS8:
-                    promoted_type = DataType::QS16;
-                    break;
-                case DataType::QS16:
-                    promoted_type = DataType::QS32;
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Datatype not supported");
-            }
-        }
-
-        options.emplace("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(promoted_type));
-
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), options));
+        // Create kernel
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(is_quantized_asymm ? "direct_convolution_1x1_3x3_5x5_quantized" : kernel_name.str(),
+                                                                               build_options.options()));
 
         // Configure kernel window
 
@@ -231,9 +219,26 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         ICLKernel::configure(win);
     }
 
+    // Set static kernel arguments
+    if(is_data_type_quantized_assymetric(data_type))
+    {
+        int output_multiplier = 0;
+        int output_shift      = 0;
+
+        float multiplier = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
+        ARM_COMPUTE_THROW_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
+
+        unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0) + 1;
+        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
+        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
+        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
+        _kernel.setArg(idx++, output_multiplier);
+        _kernel.setArg(idx++, output_shift);
+    }
+
     // Set config_id for enabling LWS tuning
     _config_id = "direct_convolution_";
-    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += lower_string(string_from_data_type(data_type));
     _config_id += "_";
     _config_id += support::cpp11::to_string(kernel_size);
     _config_id += "_";

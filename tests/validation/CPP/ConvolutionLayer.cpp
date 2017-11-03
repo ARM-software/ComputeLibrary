@@ -23,10 +23,14 @@
  */
 #include "ConvolutionLayer.h"
 
+#include "tests/validation/CPP/Utils.h"
+#include "tests/validation/CPP/UtilsQuantizedAsymm.h"
 #include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
 #include "tests/framework/Asserts.h"
+
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 namespace arm_compute
 {
@@ -45,9 +49,14 @@ inline bool is_valid_pixel(int i, int min, int max)
 
 // 3D convolution for floating point type
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-void convolution3d(const T *in, const T *weights, const T *bias, T *out, int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int fixed_point_position)
+void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, SimpleTensor<T> &out,
+                   int i_offset, int w_offset, int b_offset, int o_offset,
+                   int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights)
 {
-    ARM_COMPUTE_UNUSED(fixed_point_position);
+    const T *in_ptr  = in.data() + i_offset;
+    const T *w_ptr   = weights.data() + w_offset;
+    const T *b_ptr   = bias.data() + b_offset;
+    T       *out_ptr = out.data() + o_offset;
 
     const int half_width_weights  = width_weights / 2;
     const int half_height_weights = height_weights / 2;
@@ -72,8 +81,8 @@ void convolution3d(const T *in, const T *weights, const T *bias, T *out, int xi,
                     const int idx = xk + half_width_weights;
                     const int idy = yk + half_height_weights;
 
-                    const T i_value = in[offset_slice_in + xk + yk * width_in];
-                    const T w_value = weights[idx + idy * width_weights + ifm * width_weights * height_weights];
+                    const T i_value = in_ptr[offset_slice_in + xk + yk * width_in];
+                    const T w_value = w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights];
 
                     acc += i_value * w_value;
                 }
@@ -82,14 +91,21 @@ void convolution3d(const T *in, const T *weights, const T *bias, T *out, int xi,
     }
 
     // Accumulate the bias and store the result
-    *out = acc + (*bias);
+    *out_ptr = acc + (*b_ptr);
 }
 
 // 3D convolution for fixed point type
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-void convolution3d(const T *in, const T *weights, const T *bias, T *out, int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights,
-                   int fixed_point_position)
+void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, SimpleTensor<T> &out,
+                   int i_offset, int w_offset, int b_offset, int o_offset,
+                   int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights)
 {
+    const T *in_ptr               = in.data() + i_offset;
+    const T *w_ptr                = weights.data() + w_offset;
+    const T *b_ptr                = bias.data() + b_offset;
+    T       *out_ptr              = out.data() + o_offset;
+    int      fixed_point_position = in.fixed_point_position();
+
     const int half_width_weights  = width_weights / 2;
     const int half_height_weights = height_weights / 2;
 
@@ -116,8 +132,8 @@ void convolution3d(const T *in, const T *weights, const T *bias, T *out, int xi,
                     const int idx = xk + half_width_weights;
                     const int idy = yk + half_height_weights;
 
-                    const fixed_point<promoted_type> i_value(in[offset_slice_in + xk + yk * width_in], fixed_point_position, true);
-                    const fixed_point<promoted_type> w_value(weights[idx + idy * width_weights + ifm * width_weights * height_weights], fixed_point_position, true);
+                    const fixed_point<promoted_type> i_value(in_ptr[offset_slice_in + xk + yk * width_in], fixed_point_position, true);
+                    const fixed_point<promoted_type> w_value(w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights], fixed_point_position, true);
                     const fixed_point<promoted_type> iw = i_value * w_value;
                     acc                                 = iw + acc;
                 }
@@ -126,12 +142,79 @@ void convolution3d(const T *in, const T *weights, const T *bias, T *out, int xi,
     }
 
     // Get the bias
-    const fixed_point<promoted_type> b(*bias, fixed_point_position, true);
+    const fixed_point<promoted_type> b(*b_ptr, fixed_point_position, true);
 
     // Accumulate the bias and covert back
     acc = acc + b;
     fixed_point<T> res(acc);
-    *out = res.raw();
+    *out_ptr = res.raw();
+}
+
+// 3D convolution for QASYMM8 type
+template <>
+void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<uint8_t> &weights, const SimpleTensor<uint8_t> &bias, SimpleTensor<uint8_t> &out,
+                   int i_offset, int w_offset, int b_offset, int o_offset,
+                   int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights)
+{
+    const uint8_t *in_ptr  = in.data() + i_offset;
+    const uint8_t *w_ptr   = weights.data() + w_offset;
+    const uint8_t *b_ptr   = bias.data() + b_offset;
+    uint8_t       *out_ptr = out.data() + o_offset;
+
+    const int   input_offset   = -in.quantization_info().offset;
+    const float input_scale    = in.quantization_info().scale;
+    const int   weights_offset = -weights.quantization_info().offset;
+    const float weights_scale  = weights.quantization_info().scale;
+    const int   output_offset  = out.quantization_info().offset;
+    const float output_scale   = out.quantization_info().scale;
+
+    int         output_multiplier = 0;
+    int         output_shift      = 0;
+    const float multiplier        = input_scale * weights_scale / output_scale;
+    arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+    const int half_width_weights  = width_weights / 2;
+    const int half_height_weights = height_weights / 2;
+
+    // Reset accumulator
+    int32_t acc(0);
+
+    // Compute a 2D convolution for each IFM and accumulate the result
+    for(int ifm = 0; ifm < depth_in; ++ifm)
+    {
+        // Compute the offset for the input slice
+        const int offset_slice_in = xi + yi * width_in + ifm * width_in * height_in;
+
+        // Compute 2D convolution
+        for(int yk = -half_height_weights; yk <= half_height_weights; ++yk)
+        {
+            for(int xk = -half_width_weights; xk <= half_width_weights; ++xk)
+            {
+                // Check if the pixel is out-of-bound
+                if(is_valid_pixel(xi + xk, 0, width_in) && is_valid_pixel(yi + yk, 0, height_in))
+                {
+                    const int idx = xk + half_width_weights;
+                    const int idy = yk + half_height_weights;
+
+                    const uint8_t i_value = in_ptr[offset_slice_in + xk + yk * width_in];
+                    const uint8_t w_value = w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights];
+
+                    acc += (i_value + input_offset) * (w_value + weights_offset);
+                }
+            }
+        }
+    }
+
+    // Accumulate the bias
+    acc += (*b_ptr);
+
+    acc = asymm_rounding_divide_by_pow2(asymm_int_mult(acc, output_multiplier), output_shift);
+    acc += output_offset;
+    acc = std::max<int32_t>(acc, 0);
+    acc = std::min<int32_t>(acc, 255);
+
+    // Store the result
+    *out_ptr = acc;
 }
 } // namespace
 
@@ -139,7 +222,7 @@ template <typename T>
 SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, const TensorShape &output_shape, const PadStrideInfo &info)
 {
     // Create reference
-    SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
 
     // Compute reference
     const int width_in       = src.shape().x();
@@ -182,14 +265,11 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
                     ARM_COMPUTE_ASSERT(yo < height_out);
 
                     // Compute 3D convolution
-                    convolution3d(src.data() + offset_in,
-                                  weights.data() + ofm * width_weights * height_weights * depth_weights,
-                                  bias.data() + ofm,
-                                  dst.data() + offset_out,
+                    convolution3d(src, weights, bias, dst,
+                                  offset_in, ofm * width_weights * height_weights * depth_weights, ofm, offset_out,
                                   xi, yi,
                                   width_in, height_in, depth_in,
-                                  width_weights, height_weights,
-                                  src.fixed_point_position());
+                                  width_weights, height_weights);
                 }
             }
         }
@@ -206,6 +286,8 @@ template SimpleTensor<qint8_t> convolution_layer(const SimpleTensor<qint8_t> &sr
                                                  const PadStrideInfo &info);
 template SimpleTensor<qint16_t> convolution_layer(const SimpleTensor<qint16_t> &src, const SimpleTensor<qint16_t> &weights, const SimpleTensor<qint16_t> &bias, const TensorShape &output_shape,
                                                   const PadStrideInfo &info);
+template SimpleTensor<uint8_t> convolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<uint8_t> &bias, const TensorShape &output_shape,
+                                                 const PadStrideInfo &info);
 } // namespace reference
 } // namespace validation
 } // namespace test

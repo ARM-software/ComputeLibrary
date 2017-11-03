@@ -63,7 +63,7 @@ public:
      *
      * @return Build options set
      */
-    StringSet options() const;
+    const StringSet &options() const;
 
 private:
     StringSet _build_opts; /**< Build options set */

@@ -58,7 +58,7 @@ void CLBuildOptions::add_option_if_else(bool cond, std::string option_true, std:
     (cond) ? add_option(std::move(option_true)) : add_option(std::move(option_false));
 }
 
-CLBuildOptions::StringSet CLBuildOptions::options() const
+const CLBuildOptions::StringSet &CLBuildOptions::options() const
 {
     return _build_opts;
 }
@@ -186,6 +186,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "direct_convolution3x3_f32_bifrost", "direct_convolution3x3.cl" },
     { "direct_convolution5x5", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_f32_bifrost", "direct_convolution5x5.cl" },
+    { "direct_convolution_1x1_3x3_5x5_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
     { "erode", "erode.cl" },
     { "fast_corners", "fast_corners.cl" },
     { "fill_image_borders_constant", "fill_border.cl" },
@@ -423,6 +424,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/direct_convolution5x5.clembed"
     },
     {
+        "direct_convolution_1x1_3x3_5x5_quantized.cl",
+#include "./cl_kernels/direct_convolution_1x1_3x3_5x5_quantized.clembed"
+    },
+    {
         "erode.cl",
 #include "./cl_kernels/erode.clembed"
     },
@@ -461,6 +466,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "helpers.h",
 #include "./cl_kernels/helpers.hembed"
+    },
+    {
+        "helpers_asymm.h",
+#include "./cl_kernels/helpers_asymm.hembed"
     },
     {
         "histogram.cl",

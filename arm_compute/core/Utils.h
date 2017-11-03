@@ -346,6 +346,43 @@ inline size_t num_channels_from_format(Format format)
     }
 }
 
+/** Return the promoted data type of a given data type.
+ *
+ * @note If promoted data type is not supported an error will be thrown
+ *
+ * @param[in] dt Data type to get the promoted type of.
+ *
+ * @return Promoted data type
+ */
+inline DataType get_promoted_data_type(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+            return DataType::U16;
+        case DataType::S8:
+            return DataType::S16;
+        case DataType::QS8:
+            return DataType::QS16;
+        case DataType::U16:
+            return DataType::U32;
+        case DataType::S16:
+            return DataType::S32;
+        case DataType::QS16:
+            return DataType::QS32;
+        case DataType::QASYMM8:
+        case DataType::F16:
+        case DataType::U32:
+        case DataType::S32:
+        case DataType::F32:
+        case DataType::QS32:
+            ARM_COMPUTE_ERROR("Unsupported data type promotions!");
+        default:
+            ARM_COMPUTE_ERROR("Undefined data type!");
+    }
+    return DataType::UNKNOWN;
+}
+
 /** Separate a 2D convolution into two 1D convolutions
 *
 * @param[in]  conv     2D convolution

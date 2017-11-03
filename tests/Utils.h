@@ -230,6 +230,7 @@ void store_value_with_data_type(void *ptr, T value, DataType data_type)
     switch(data_type)
     {
         case DataType::U8:
+        case DataType::QASYMM8:
             *reinterpret_cast<uint8_t *>(ptr) = value;
             break;
         case DataType::S8:
@@ -385,14 +386,18 @@ inline bool is_in_valid_region(const ValidRegion &valid_region, Coordinates coor
  * @param[in] data_type            Data type.
  * @param[in] num_channels         (Optional) Number of channels.
  * @param[in] fixed_point_position (Optional) Number of fractional bits.
+ * @param[in] quantization_info    (Optional) Quantization info for asymmetric quantized types.
  *
  * @return Initialized tensor of given type.
  */
 template <typename T>
-inline T create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1, int fixed_point_position = 0)
+inline T create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1,
+                       int fixed_point_position = 0, QuantizationInfo quantization_info = QuantizationInfo())
 {
-    T tensor;
-    tensor.allocator()->init(TensorInfo(shape, num_channels, data_type, fixed_point_position));
+    T          tensor;
+    TensorInfo info(shape, num_channels, data_type, fixed_point_position);
+    info.set_quantization_info(quantization_info);
+    tensor.allocator()->init(info);
 
     return tensor;
 }
