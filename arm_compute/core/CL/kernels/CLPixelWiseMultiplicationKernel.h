@@ -59,6 +59,20 @@ public:
      */
     void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
                    ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLPixelWiseMultiplicationKernel
+     *
+     * @param[in] input1          An input tensor info. Data types supported: U8/QS8/QS16/S16/F16/F32.
+     * @param[in] input2          An input tensor info. Data types supported: same as @p input1.
+     * @param[in] output          The output tensor info, Data types supported: same as @p input1. Note: U8 (QS8, QS16) requires both inputs to be U8 (QS8, QS16).
+     * @param[in] scale           Scale to apply after multiplication.
+     *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15. For QS8 and QS16 scale must be 1.
+     * @param[in] overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate
+     * @param[in] rounding_policy Rounding policy. Supported rounding modes: to zero, to nearest even.
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
+                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -35,3 +35,8 @@ void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, Activatio
     k->configure(input, output, act_info);
     _kernel = std::move(k);
 }
+
+Error CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+{
+    return CLActivationLayerKernel::validate(input, output, act_info);
+}

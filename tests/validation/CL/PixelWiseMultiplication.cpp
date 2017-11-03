@@ -90,6 +90,46 @@ using CLFixedPointPixelWiseMultiplicationFixture = FixedPointPixelWiseMultiplica
 TEST_SUITE(CL)
 TEST_SUITE(PixelWiseMultiplication)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Invalid scale
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),  // Mismatching data type
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),  // Mismatching fixed point
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),  // Invalid scale
+                                                      }),
+               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::S16),
+                                                       TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS16, 2),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),
+                                                     })),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::S16),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),
+                                                     })),
+               framework::dataset::make("Scale",{  2.f, 2.f, -1.f, 1.f, 1.f, 1.f, 1.f, 3.f})),
+               framework::dataset::make("Expected", { false, false, true, true, true, true, true, true })),
+               input1_info, input2_info, output_info, scale, expected)
+{
+    bool has_error = bool(CLPixelWiseMultiplication::validate(&input1_info, &input2_info, &output_info, scale, ConvertPolicy::WRAP, RoundingPolicy::TO_ZERO));
+    ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 TEST_SUITE(F16toF16)
 
 TEST_SUITE(Scale255)

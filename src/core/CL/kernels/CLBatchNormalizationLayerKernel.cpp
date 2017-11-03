@@ -45,7 +45,7 @@ CLBatchNormalizationLayerKernel::CLBatchNormalizationLayerKernel()
 void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma,
                                                 float epsilon)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, mean, var, beta, gamma);
 
     _input   = input;
     _output  = output;
@@ -57,21 +57,13 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
 
     if(output != nullptr)
     {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), output->info());
         // Output tensor auto initialization if not yet initialized
         auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
-
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, mean, var, beta, gamma);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, mean, var, beta, gamma);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var, beta, gamma);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var, beta, gamma);
     }
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != mean->info()->dimension(0));
+    ARM_COMPUTE_ERROR_THROW_ON(CLBatchNormalizationLayerKernel::validate(input->info(), (output != nullptr) ? output->info() : nullptr,
+                                                                         mean->info(), var->info(), beta->info(), gamma->info(), epsilon));
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
 
@@ -106,6 +98,28 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
         update_window_and_padding(win, input_access);
     }
     ICLKernel::configure(win);
+}
+
+Error CLBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output,
+                                                const ITensorInfo *mean, const ITensorInfo *var,
+                                                const ITensorInfo *beta, const ITensorInfo *gamma,
+                                                float epsilon)
+{
+    ARM_COMPUTE_UNUSED(epsilon);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var, beta, gamma);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var, beta, gamma);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != mean->dimension(0));
+
+    if(output != nullptr && output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Error{};
 }
 
 void CLBatchNormalizationLayerKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -240,7 +240,7 @@ Error create_error(ErrorCode error_code, const char *function, const char *file,
  *
  * @param[in] error Error value to check.
  */
-#define ARM_COMPUTE_ERROR_THROW(error) \
+#define ARM_COMPUTE_ERROR_THROW_ON(error) \
     error.throw_if_error();
 
 /** If the condition is true, the given message is printed and an exception is thrown
@@ -282,7 +282,7 @@ Error create_error(ErrorCode error_code, const char *function, const char *file,
  */
 #define ARM_COMPUTE_CONST_ON_ERROR(cond, val, msg) (cond) ? throw std::logic_error(msg) : val;
 #else /* ARM_COMPUTE_ASSERTS_ENABLED */
-#define ARM_COMPUTE_ERROR_THROW(error)
+#define ARM_COMPUTE_ERROR_THROW_ON(error)
 #define ARM_COMPUTE_ERROR_ON_MSG(cond, ...)
 #define ARM_COMPUTE_ERROR_ON_LOC_MSG(cond, func, file, line, ...)
 #define ARM_COMPUTE_CONST_ON_ERROR(cond, val, msg) val

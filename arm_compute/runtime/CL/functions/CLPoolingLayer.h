@@ -50,11 +50,11 @@ public:
     void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPoolingLayer
      *
-     * @param[in] input     Input's tensor info
-     * @param[in] output    Output's tensor info
+     * @param[in] input     Source tensor info. Data types supported: QS8/QS16/F16/F32.
+     * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      *
-     * @return an expected value
+     * @return an error status
      */
     static Error validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
 };

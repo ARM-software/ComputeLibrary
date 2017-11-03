@@ -142,7 +142,7 @@ inline arm_compute::Error error_on_nullptr(const char *function, const char *fil
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_NULLPTR(...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_nullptr(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_nullptr(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
@@ -164,7 +164,7 @@ inline arm_compute::Error error_on_nullptr(const char *function, const char *fil
 arm_compute::Error error_on_mismatching_windows(const char *function, const char *file, const int line,
                                                 const Window &full, const Window &win);
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(f, w) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_mismatching_windows(__func__, __FILE__, __LINE__, f, w))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_windows(__func__, __FILE__, __LINE__, f, w))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_WINDOWS(f, w) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_windows(__func__, __FILE__, __LINE__, f, w))
 
@@ -186,7 +186,7 @@ arm_compute::Error error_on_mismatching_windows(const char *function, const char
 arm_compute::Error error_on_invalid_subwindow(const char *function, const char *file, const int line,
                                               const Window &full, const Window &sub);
 #define ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(f, s) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_invalid_subwindow(__func__, __FILE__, __LINE__, f, s))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_invalid_subwindow(__func__, __FILE__, __LINE__, f, s))
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_SUBWINDOW(f, s) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_invalid_subwindow(__func__, __FILE__, __LINE__, f, s))
 
@@ -206,7 +206,7 @@ arm_compute::Error error_on_invalid_subwindow(const char *function, const char *
 arm_compute::Error error_on_window_not_collapsable_at_dimension(const char *function, const char *file, const int line,
                                                                 const Window &full, const Window &window, const int dim);
 #define ARM_COMPUTE_ERROR_ON_WINDOW_NOT_COLLAPSABLE_AT_DIMENSION(f, w, d) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_window_not_collapsable_at_dimension(__func__, __FILE__, __LINE__, f, w, d))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_window_not_collapsable_at_dimension(__func__, __FILE__, __LINE__, f, w, d))
 #define ARM_COMPUTE_RETURN_ERROR_ON_WINDOW_NOT_COLLAPSABLE_AT_DIMENSION(f, w, d) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_window_not_collapsable_at_dimension(__func__, __FILE__, __LINE__, f, w, d))
 
@@ -225,7 +225,7 @@ arm_compute::Error error_on_window_not_collapsable_at_dimension(const char *func
 arm_compute::Error error_on_coordinates_dimensions_gte(const char *function, const char *file, const int line,
                                                        const Coordinates &pos, unsigned int max_dim);
 #define ARM_COMPUTE_ERROR_ON_COORDINATES_DIMENSIONS_GTE(p, md) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_coordinates_dimensions_gte(__func__, __FILE__, __LINE__, p, md))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_coordinates_dimensions_gte(__func__, __FILE__, __LINE__, p, md))
 #define ARM_COMPUTE_RETURN_ERROR_ON_COORDINATES_DIMENSIONS_GTE(p, md) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_coordinates_dimensions_gte(__func__, __FILE__, __LINE__, p, md))
 
@@ -244,7 +244,7 @@ arm_compute::Error error_on_coordinates_dimensions_gte(const char *function, con
 arm_compute::Error error_on_window_dimensions_gte(const char *function, const char *file, const int line,
                                                   const Window &win, unsigned int max_dim);
 #define ARM_COMPUTE_ERROR_ON_WINDOW_DIMENSIONS_GTE(w, md) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_window_dimensions_gte(__func__, __FILE__, __LINE__, w, md))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_window_dimensions_gte(__func__, __FILE__, __LINE__, w, md))
 #define ARM_COMPUTE_RETURN_ERROR_ON_WINDOW_DIMENSIONS_GTE(w, md) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_window_dimensions_gte(__func__, __FILE__, __LINE__, w, md))
 
@@ -267,7 +267,7 @@ arm_compute::Error error_on_mismatching_dimensions(const char *function, const c
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_dimensions(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
@@ -357,7 +357,7 @@ inline arm_compute::Error error_on_mismatching_shapes(const char *function, cons
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_mismatching_shapes(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_shapes(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_shapes(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
@@ -408,7 +408,7 @@ inline arm_compute::Error error_on_mismatching_data_types(const char *function, 
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_mismatching_data_types(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_data_types(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_types(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
@@ -432,7 +432,7 @@ inline arm_compute::Error error_on_mismatching_fixed_point(const char *function,
     DataType &&first_data_type            = tensor_info_1->data_type();
     const int  first_fixed_point_position = tensor_info_1->fixed_point_position();
 
-    if((first_data_type != DataType::QS8) && (first_data_type != DataType::QS16))
+    if(!is_data_type_fixed_point(first_data_type))
     {
         return arm_compute::Error{};
     }
@@ -473,7 +473,7 @@ inline arm_compute::Error error_on_mismatching_fixed_point(const char *function,
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_mismatching_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
@@ -556,7 +556,7 @@ inline arm_compute::Error error_on_data_type_not_in(const char *function, const 
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(t, ...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_data_type_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_data_type_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(t, ...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__))
 
@@ -602,7 +602,7 @@ inline arm_compute::Error error_on_data_type_channel_not_in(const char *function
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(t, c, ...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(t, c, ...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__))
 
@@ -618,7 +618,7 @@ inline arm_compute::Error error_on_data_type_channel_not_in(const char *function
 arm_compute::Error error_on_tensor_not_2d(const char *function, const char *file, const int line,
                                           const ITensor *tensor);
 #define ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(t) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_tensor_not_2d(__func__, __FILE__, __LINE__, t))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_tensor_not_2d(__func__, __FILE__, __LINE__, t))
 #define ARM_COMPUTE_RETURN_ERROR_ON_TENSOR_NOT_2D(t) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_tensor_not_2d(__func__, __FILE__, __LINE__, t))
 
@@ -648,7 +648,7 @@ inline arm_compute::Error error_on_channel_not_in(const char *function, const ch
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_CHANNEL_NOT_IN(c, ...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_channel_not_in(__func__, __FILE__, __LINE__, c, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_channel_not_in(__func__, __FILE__, __LINE__, c, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_CHANNEL_NOT_IN(c, ...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_channel_not_in(__func__, __FILE__, __LINE__, c, __VA_ARGS__))
 
@@ -665,7 +665,7 @@ inline arm_compute::Error error_on_channel_not_in(const char *function, const ch
 arm_compute::Error error_on_channel_not_in_known_format(const char *function, const char *file, const int line,
                                                         Format fmt, Channel cn);
 #define ARM_COMPUTE_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(f, c) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_channel_not_in_known_format(__func__, __FILE__, __LINE__, f, c))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_channel_not_in_known_format(__func__, __FILE__, __LINE__, f, c))
 #define ARM_COMPUTE_RETURN_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(f, c) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_channel_not_in_known_format(__func__, __FILE__, __LINE__, f, c))
 
@@ -687,7 +687,7 @@ arm_compute::Error error_on_channel_not_in_known_format(const char *function, co
 arm_compute::Error error_on_invalid_multi_hog(const char *function, const char *file, const int line,
                                               const IMultiHOG *multi_hog);
 #define ARM_COMPUTE_ERROR_ON_INVALID_MULTI_HOG(m) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_invalid_multi_hog(__func__, __FILE__, __LINE__, m))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_invalid_multi_hog(__func__, __FILE__, __LINE__, m))
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_MULTI_HOG(m) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_invalid_multi_hog(__func__, __FILE__, __LINE__, m))
 
@@ -701,7 +701,7 @@ arm_compute::Error error_on_invalid_multi_hog(const char *function, const char *
 arm_compute::Error error_on_unconfigured_kernel(const char *function, const char *file, const int line,
                                                 const IKernel *kernel);
 #define ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(k) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_unconfigured_kernel(__func__, __FILE__, __LINE__, k))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_unconfigured_kernel(__func__, __FILE__, __LINE__, k))
 #define ARM_COMPUTE_RETURN_ERROR_ON_UNCONFIGURED_KERNEL(k) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unconfigured_kernel(__func__, __FILE__, __LINE__, k))
 
@@ -719,7 +719,7 @@ arm_compute::Error error_on_unconfigured_kernel(const char *function, const char
 arm_compute::Error error_on_invalid_subtensor(const char *function, const char *file, const int line,
                                               const TensorShape &parent_shape, const Coordinates &coords, const TensorShape &shape);
 #define ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(p, c, s) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_invalid_subtensor(__func__, __FILE__, __LINE__, p, c, s))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_invalid_subtensor(__func__, __FILE__, __LINE__, p, c, s))
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_SUBTENSOR(p, c, s) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_invalid_subtensor(__func__, __FILE__, __LINE__, p, c, s))
 
@@ -736,7 +736,7 @@ arm_compute::Error error_on_invalid_subtensor(const char *function, const char *
 arm_compute::Error error_on_invalid_subtensor_valid_region(const char *function, const char *file, const int line,
                                                            const ValidRegion &parent_valid_region, const ValidRegion &valid_region);
 #define ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(pv, sv) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(pv, sv) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
 
@@ -783,7 +783,7 @@ inline arm_compute::Error error_on_mismatching_fixed_point_position(const char *
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_mismatching_fixed_point_position(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_fixed_point_position(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_fixed_point_position(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
@@ -827,7 +827,7 @@ inline arm_compute::Error error_on_value_not_representable_in_fixed_point(const 
     return arm_compute::Error{};
 }
 #define ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(...) \
-    ARM_COMPUTE_ERROR_THROW(::arm_compute::error_on_value_not_representable_in_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_value_not_representable_in_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_value_not_representable_in_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
 }

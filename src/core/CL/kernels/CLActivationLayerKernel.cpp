@@ -50,12 +50,11 @@ CLActivationLayerKernel::CLActivationLayerKernel()
 
 void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32, DataType::QASYMM8);
-    ARM_COMPUTE_ERROR_ON_MSG((input->info()->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
-                             "For QASYMM8 only lower/upper bounded relu is supported");
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
     if(output != nullptr)
     {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), output->info());
         // Output auto inizialitation if not yet initialized
         auto_init_if_empty(*output->info(),
                            input->info()->tensor_shape(),
@@ -63,11 +62,9 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
                            input->info()->data_type(),
                            input->info()->fixed_point_position(),
                            input->info()->quantization_info());
-
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
+
+    ARM_COMPUTE_ERROR_THROW_ON(CLActivationLayerKernel::validate(input->info(), (output != nullptr) ? output->info() : nullptr, act_info));
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
     const DataType     dt                                = input->info()->data_type();
@@ -154,6 +151,23 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     }
 
     ICLKernel::configure(win);
+}
+
+Error CLActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
+                                    "For QASYMM8 only lower/upper bounded relu is supported");
+
+    // Checks performed when output is configured
+    if((output != nullptr) && (output->total_size() != 0))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Error{};
 }
 
 void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)

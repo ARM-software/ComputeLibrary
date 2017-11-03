@@ -156,6 +156,41 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
     }
 }
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8), // Unsupported activation
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),  // Mismatching fixed point
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),
+                                                     })),
+               framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                          })),
+               framework::dataset::make("Expected", { true, false, false, true, true, true, false })),
+               input_info, output_info, act_info, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(CLActivationLayer::validate(&input_info, &output_info, act_info)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using CLActivationLayerFixture = ActivationValidationFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
 
