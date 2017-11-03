@@ -181,7 +181,7 @@ REGISTER_SIMPLE_OPERATION(CLFlattenLayerOperation, OPENCL, OperationType::Flatte
     flatten->configure(in, out);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEFlattenLayer"
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLFlattenLayer"
                                << " Data Type: " << in->info()->data_type()
                                << " Input shape: " << in->info()->tensor_shape()
                                << " Output shape: " << out->info()->tensor_shape()
@@ -237,7 +237,7 @@ REGISTER_SIMPLE_OPERATION(CLFullyConnectedLayer, OPENCL, OperationType::FullyCon
     fc->configure(in, weights, biases, out);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEFullyConnectedLayer"
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLFullyConnectedLayer"
                                << " Data Type: " << in->info()->data_type()
                                << " Input shape: " << in->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
@@ -351,7 +351,7 @@ REGISTER_SIMPLE_OPERATION(CLQuantizationLayerOperation, OPENCL, OperationType::Q
     quantization->configure(in, out);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEQuantizationLayer"
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLQuantizationLayer"
                                << " Data Type: " << in->info()->data_type()
                                << " Input shape: " << in->info()->tensor_shape()
                                << " Output shape: " << out->info()->tensor_shape()
@@ -377,7 +377,7 @@ REGISTER_SIMPLE_OPERATION(CLReshapeLayerOperation, OPENCL, OperationType::Reshap
     reshape->configure(in, out);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEReshapeLayer"
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLReshapeLayer"
                                << " Data Type: " << in->info()->data_type()
                                << " Input shape: " << in->info()->tensor_shape()
                                << " Output shape: " << out->info()->tensor_shape()
