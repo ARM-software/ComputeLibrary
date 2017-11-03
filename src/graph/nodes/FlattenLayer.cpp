@@ -39,7 +39,9 @@ std::unique_ptr<arm_compute::IFunction> FlattenLayer::instantiate_node(GraphCont
     arm_compute::ITensor *out = output->tensor();
 
     // Auto configure output
-    arm_compute::auto_init_if_empty(*out->info(), in->info()->tensor_shape(), 1, in->info()->data_type(), in->info()->fixed_point_position());
+    TensorShape tensor_shape = in->info()->tensor_shape();
+    tensor_shape.collapse(in->info()->num_dimensions());
+    arm_compute::auto_init_if_empty(*out->info(), tensor_shape, 1, in->info()->data_type(), in->info()->fixed_point_position());
 
     // Create node context
     NodeContext node_ctx(OperationType::FlattenLayer);
