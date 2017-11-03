@@ -175,6 +175,72 @@ public:
 private:
     const std::string _filename;
 };
+
+/** Generates appropriate weights accessor according to the specified path
+ *
+ * @note If path is empty will generate a DummyAccessor else will generate a NumPyBinLoader
+ *
+ * @param[in] path      Path to the data files
+ * @param[in] data_file Relative path to the data files from path
+ *
+ * @return An appropriate tensor accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor> get_weights_accessor(const std::string &path, const std::string &data_file)
+{
+    if(path.empty())
+    {
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>();
+    }
+    else
+    {
+        return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(path + data_file);
+    }
+}
+
+/** Generates appropriate input accessor according to the specified ppm_path
+ *
+ * @note If ppm_path is empty will generate a DummyAccessor else will generate a PPMAccessor
+ *
+ * @param[in] ppm_path Path to PPM file
+ * @param[in] mean_r   Red mean value to be subtracted from red channel
+ * @param[in] mean_g   Green mean value to be subtracted from green channel
+ * @param[in] mean_b   Blue mean value to be subtracted from blue channel
+ *
+ * @return An appropriate tensor accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::string &ppm_path, float mean_r, float mean_g, float mean_b)
+{
+    if(ppm_path.empty())
+    {
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>();
+    }
+    else
+    {
+        return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, true, mean_r, mean_g, mean_b);
+    }
+}
+
+/** Generates appropriate output accessor according to the specified labels_path
+ *
+ * @note If labels_path is empty will generate a DummyAccessor else will generate a TopNPredictionsAccessor
+ *
+ * @param[in]  labels_path   Path to labels text file
+ * @param[in]  top_n         (Optional) Number of output classes to print
+ * @param[out] output_stream (Optional) Output stream
+ *
+ * @return An appropriate tensor accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const std::string &labels_path, size_t top_n = 5, std::ostream &output_stream = std::cout)
+{
+    if(labels_path.empty())
+    {
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>();
+    }
+    else
+    {
+        return arm_compute::support::cpp14::make_unique<TopNPredictionsAccessor>(labels_path, top_n, output_stream);
+    }
+}
 } // namespace graph_utils
 } // namespace arm_compute
 

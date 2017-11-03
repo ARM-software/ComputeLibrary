@@ -98,6 +98,9 @@ bool PPMAccessor::access_tensor(ITensor &tensor)
     // Open PPM file
     ppm.open(_ppm_path);
 
+    ARM_COMPUTE_ERROR_ON_MSG(ppm.width() != tensor.info()->dimension(0) || ppm.height() != tensor.info()->dimension(1),
+                             "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].", ppm.width(), ppm.height(), tensor.info()->dimension(0), tensor.info()->dimension(1));
+
     // Fill the tensor with the PPM content (BGR)
     ppm.fill_planar_tensor(tensor, _bgr);
 

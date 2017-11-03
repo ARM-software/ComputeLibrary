@@ -410,6 +410,20 @@ public:
         }
     }
 
+    /** Return the width of the currently open PPM file.
+     */
+    unsigned int width() const
+    {
+        return _width;
+    }
+
+    /** Return the height of the currently open PPM file.
+     */
+    unsigned int height() const
+    {
+        return _height;
+    }
+
 private:
     std::ifstream _fs;
     unsigned int  _width, _height;
