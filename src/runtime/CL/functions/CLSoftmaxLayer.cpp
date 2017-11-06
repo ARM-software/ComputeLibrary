@@ -23,15 +23,19 @@
  */
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
 
+#include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 using namespace arm_compute;
 
 CLSoftmaxLayer::CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _max_kernel(), _shift_exp_sum_kernel(), _norm_kernel(), _max(), _sum(), _tmp()
+    : _memory_group(std::move(memory_manager)), _max_kernel(), _shift_exp_sum_kernel(), _max_shift_exp_sum_kernel(), _norm_kernel(), _max(), _sum(), _tmp(), _run_legacy_path(false)
 {
 }
 
@@ -48,14 +52,26 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
     _max.allocator()->init(tensor_info_max_sum);
     _sum.allocator()->init(tensor_info_max_sum);
 
+    // Set GPU target to kernels
+    _max_shift_exp_sum_kernel.set_target(CLScheduler::get().target());
+
     // Manage intermediate buffers
     _memory_group.manage(&_tmp);
     _memory_group.manage(&_max);
     _memory_group.manage(&_sum);
 
-    // Configure Kernels
-    _max_kernel.configure(input, &_max);
-    _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum, beta);
+    // Configure kernels
+    // TODO (COMPMID-661): Remove legacy path once the new one is properly validated
+    _run_legacy_path = is_data_type_quantized_assymetric(input->info()->data_type());
+    if(_run_legacy_path)
+    {
+        _max_kernel.configure(input, &_max);
+        _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum, beta);
+    }
+    else
+    {
+        _max_shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum, beta);
+    }
     _norm_kernel.configure(&_tmp, &_sum, output);
 
     // Allocate intermediate buffers
@@ -68,8 +84,16 @@ void CLSoftmaxLayer::run()
 {
     _memory_group.acquire();
 
-    CLScheduler::get().enqueue(_max_kernel, false);
-    CLScheduler::get().enqueue(_shift_exp_sum_kernel, false);
+    // Force to use the new fused kernel
+    if(_run_legacy_path)
+    {
+        CLScheduler::get().enqueue(_max_kernel, false);
+        CLScheduler::get().enqueue(_shift_exp_sum_kernel, false);
+    }
+    else
+    {
+        CLScheduler::get().enqueue(_max_shift_exp_sum_kernel, false);
+    }
     CLScheduler::get().enqueue(_norm_kernel);
 
     _memory_group.release();

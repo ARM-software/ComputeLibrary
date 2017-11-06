@@ -54,8 +54,8 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
-     * @param[in]  beta   A scaling factor for the exponent.
      * @param[out] output Destination tensor. Data types supported: same as @p input
+     * @param[in]  beta   (Optional) A scaling factor for the exponent. Defaults to 1.f
      */
     void configure(const ICLTensor *input, ICLTensor *output, float beta = 1.0f);
 
@@ -63,13 +63,15 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup               _memory_group;
-    CLLogits1DMaxKernel         _max_kernel;
-    CLLogits1DShiftExpSumKernel _shift_exp_sum_kernel;
-    CLLogits1DNormKernel        _norm_kernel;
-    CLTensor                    _max;
-    CLTensor                    _sum;
-    CLTensor                    _tmp;
+    CLMemoryGroup                  _memory_group;
+    CLLogits1DMaxKernel            _max_kernel;
+    CLLogits1DShiftExpSumKernel    _shift_exp_sum_kernel;
+    CLLogits1DMaxShiftExpSumKernel _max_shift_exp_sum_kernel;
+    CLLogits1DNormKernel           _norm_kernel;
+    CLTensor                       _max;
+    CLTensor                       _sum;
+    CLTensor                       _tmp;
+    bool                           _run_legacy_path;
 };
 }
 #endif /* __ARM_COMPUTE_CLSOFTMAXLAYER_H__ */

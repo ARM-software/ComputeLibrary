@@ -359,7 +359,12 @@ DIVQ_SAT_IMPL(qs16, qs16, qs32)
         return select((type)stype##_MAX, select(sum << dec_m, sum >> -dec_m, dec_m < (type)0), clz(sum) > dec_m); /* Saturate result if needed */ \
     }
 
+EXPQ_IMPL(qs8, qs8x2, 2)
+EXPQ_IMPL(qs8, qs8x4, 4)
+EXPQ_IMPL(qs8, qs8x8, 8)
 EXPQ_IMPL(qs8, qs8x16, 16)
+EXPQ_IMPL(qs16, qs16x2, 2)
+EXPQ_IMPL(qs16, qs16x4, 4)
 EXPQ_IMPL(qs16, qs16x8, 8)
 EXPQ_IMPL(qs16, qs16x16, 16)
 

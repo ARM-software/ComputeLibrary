@@ -269,6 +269,40 @@ public:
     }
 };
 
+/** Data set containing small softmax layer shapes. */
+class SoftmaxLayerSmallShapes final : public ShapeDataset
+{
+public:
+    SoftmaxLayerSmallShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 9U, 9U },
+                     TensorShape{ 256U, 10U, 2U },
+                     TensorShape{ 353U, 8U, 2U, 2U },
+                     TensorShape{ 512U, 7U, 2U, 2U },
+                     TensorShape{ 633U, 10U, 1U, 2U },
+                     TensorShape{ 781U, 5U, 2U },
+    })
+    {
+    }
+};
+
+/** Data set containing large softmax layer shapes. */
+class SoftmaxLayerLargeShapes final : public ShapeDataset
+{
+public:
+    SoftmaxLayerLargeShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1000U, 10U },
+                     TensorShape{ 3989U, 10U, 2U },
+                     TensorShape{ 4098U, 8U, 1U, 2U },
+                     TensorShape{ 7339U, 11U },
+    })
+    {
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

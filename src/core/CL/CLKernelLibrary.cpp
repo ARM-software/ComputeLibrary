@@ -300,6 +300,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "softmax_layer_max", "softmax_layer.cl" },
     { "softmax_layer_shift_exp_sum", "softmax_layer.cl" },
     { "softmax_layer_norm", "softmax_layer.cl" },
+    { "softmax_layer_max_shift_exp_sum_serial", "softmax_layer.cl" },
+    { "softmax_layer_max_shift_exp_sum_parallel", "softmax_layer.cl" },
     { "suppress_non_maximum", "canny.cl" },
     { "tablelookup_U8", "tablelookup.cl" },
     { "tablelookup_S16", "tablelookup.cl" },

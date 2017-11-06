@@ -185,6 +185,137 @@ void CLLogits1DShiftExpSumKernel::run(const Window &window, cl::CommandQueue &qu
     while(window_collapsed.slide_window_slice_3D(slice));
 }
 
+/**< Grid size (obtained through auto-tuning) */
+const unsigned int CLLogits1DMaxShiftExpSumKernel::_grid_size = 64;
+/**< Vector size in the serial case (obtained through auto-tuning) */
+const unsigned int CLLogits1DMaxShiftExpSumKernel::_serial_vector_size = 8;
+/**< Vector size in the parallel case (obtained through auto-tuning, enables the best memory access pattern for Bifrost) .*/
+const unsigned int CLLogits1DMaxShiftExpSumKernel::_parallel_vector_size = 4;
+
+CLLogits1DMaxShiftExpSumKernel::CLLogits1DMaxShiftExpSumKernel()
+    : _input(nullptr), _max(nullptr), _output(nullptr), _sum(nullptr)
+{
+}
+
+void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, float beta)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(max, sum, output);
+    ARM_COMPUTE_ERROR_ON(beta != 1.0f && input->info()->data_type() != DataType::F32);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, max, sum);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output, max, sum);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(max, sum);
+
+    _input  = input;
+    _max    = max;
+    _output = output;
+    _sum    = sum;
+
+    const DataType dt                 = input->info()->data_type();
+    const size_t   reduction_dim_size = input->info()->dimension(0);
+    auto           beta_int           = static_cast<int>(lround(beta * (1 << input->info()->fixed_point_position())));
+
+    // Set build options
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
+    build_opts.add_option_if(is_data_type_fixed_point(dt),
+                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    build_opts.add_option_if(dt == DataType::F16, "-DUSE_F16");
+    build_opts.add_option_if(is_data_type_fixed_point(dt) && (beta != 1.0f), "-DBETA=" + support::cpp11::to_string(beta_int));
+    build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), "-DBETA=" + float_to_string_with_full_precision(beta));
+
+    // Setting _lws_hint in this way can also communicate grid_size to CLLogits1DMaxShiftExpSumKernel::run().
+    // A single workgroup performs reduction in dimension 0 in the parallel case, hence lws[0]==gws[0].
+    _lws_hint                                     = cl::NullRange;
+    std::string           kernel_name             = std::string("softmax_layer_max_shift_exp_sum_serial");
+    ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(reduction_dim_size);
+    unsigned int          vector_size             = std::get<1>(parallel_reduction_info);
+
+    build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
+    build_opts.add_option("-DLOG_VECTOR_SIZE=" + support::cpp11::to_string(lround(log2(vector_size))));
+    build_opts.add_option_if((reduction_dim_size % vector_size) != 0, "-DNON_MULTIPLE_OF_VECTOR_SIZE");
+
+    // Configure parallel kernel if needed
+    if(std::get<0>(parallel_reduction_info))
+    {
+        kernel_name            = std::string("softmax_layer_max_shift_exp_sum_parallel");
+        bool is_grid_size_pow2 = (_grid_size != 0) && ((_grid_size & (_grid_size - 1)) == 0);
+        build_opts.add_option_if(is_grid_size_pow2 && _grid_size <= 256, "-DGRID_SIZE=" + support::cpp11::to_string(_grid_size));
+
+        // Handle boundary conditions.
+        const unsigned int multiple_grid_size = (reduction_dim_size / vector_size) % _grid_size;
+        build_opts.add_option_if((multiple_grid_size != 0) || ((reduction_dim_size % vector_size) != 0), "-DNON_MULTIPLE_OF_GRID_SIZE");
+    }
+
+    // Create kernel.
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+
+    // Set static arguments. Both the kernels use the same arguments
+    unsigned int idx = 4 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
+    _kernel.setArg<cl_uint>(idx++, reduction_dim_size);
+
+    // Configure window
+    const unsigned int num_elems_x = ceil_to_multiple(input->info()->tensor_shape().x(), vector_size);
+    Window             win         = calculate_max_window(*input->info(), Steps(num_elems_x));
+
+    AccessWindowHorizontal input_access(input->info(), 0, num_elems_x);
+    AccessWindowHorizontal max_access(max->info(), 0, 1);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_x);
+    AccessWindowHorizontal sum_access(sum->info(), 0, 1);
+
+    update_window_and_padding(win, input_access, max_access, output_access, sum_access);
+
+    output_access.set_valid_region(win, input->info()->valid_region());
+    sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->info()->tensor_shape()));
+
+    ICLKernel::configure(win);
+}
+
+CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(size_t size)
+{
+    bool         is_parallel_reduction = (size >= (_grid_size * _serial_vector_size)) && (_grid_size > 1);
+    unsigned int vector_size           = is_parallel_reduction ? _parallel_vector_size : _serial_vector_size;
+    return std::make_tuple(is_parallel_reduction, vector_size);
+}
+
+void CLLogits1DMaxShiftExpSumKernel::run(const Window &window, cl::CommandQueue &queue)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
+
+    // Collapse window in Z dimension
+    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+
+    // Reconfigure window in case of parallel reduction
+    ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(_input->info()->dimension(0));
+    if(std::get<0>(parallel_reduction_info))
+    {
+        // To launch grid_size parallel workitems, steps.x should be modified as follows.
+        const unsigned int step = std::get<1>(parallel_reduction_info);
+        window_collapsed.set(Window::DimX, Window::Dimension(0, _grid_size * step, step));
+    }
+
+    // Get slices
+    Window slice = window_collapsed.first_slice_window_3D();
+    do
+    {
+        unsigned int idx = 0;
+        // Set inputs
+        add_3D_tensor_argument(idx, _input, slice);
+        add_3D_tensor_argument(idx, _max, slice);
+        add_3D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, _sum, slice);
+        enqueue(queue, *this, slice, _lws_hint);
+    }
+    while(window_collapsed.slide_window_slice_3D(slice));
+}
+
 CLLogits1DNormKernel::CLLogits1DNormKernel()
     : _input(nullptr), _sum(nullptr), _output(nullptr)
 {
