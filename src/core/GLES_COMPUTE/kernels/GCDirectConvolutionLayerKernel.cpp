@@ -211,6 +211,7 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
         switch(input->info()->data_type())
         {
             case DataType::F16:
+                options.emplace("#define PROCESS_4X_1Y_1Z");
                 num_elems_read_per_iteration_x    = 8;
                 num_elems_written_per_iteration_x = 4;
 
