@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_TENSORALLOCATOR_H__
 
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "arm_compute/runtime/Memory.h"
 
 #include <cstdint>
 #include <memory>
@@ -86,6 +87,19 @@ public:
      *
      */
     void free() override;
+    /** Import an existing memory as a tensor's backing memory
+     *
+     * @warning If the tensor is flagged to be managed by a memory manager,
+     *          this call will lead to an error.
+     * @warning Ownership of memory depends on the way the @ref Memory object was constructed
+     * @note    Calling free on a tensor with imported memory will just clear
+     *          the internal pointer value.
+     *
+     * @param[in] memory Memory to import
+     *
+     * @return error status
+     */
+    arm_compute::Error import_memory(Memory memory);
     /** Associates the tensor with a memory group
      *
      * @param[in] associated_memory_group Memory group to associate the tensor with
@@ -104,7 +118,7 @@ protected:
 
 private:
     MemoryGroup *_associated_memory_group; /**< Registered memory manager */
-    uint8_t     *_buffer;                  /**< CPU memory allocation. */
+    Memory       _memory;                  /**< CPU memory */
     Tensor      *_owner;                   /**< Owner of the allocator */
 };
 }

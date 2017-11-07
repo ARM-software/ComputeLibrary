@@ -65,6 +65,7 @@ def filter_clang_tidy_lines( lines ):
                (any(f in line for f in ["Error.cpp","Error.h"]) and "uninitialized record type: 'args'" in line) or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "do not call c-style vararg functions" in line) or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "do not define a C-style variadic function" in line) or
+               ("TensorAllocator.cpp" in line and "warning: pointer parameter 'ptr' can be pointer to const" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move constructors should be marked noexcept" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move assignment operators should be marked noexcept" in line) or
                ("CLMinMaxLocationKernel.cpp" in line and "Forming reference to null pointer" in line) or

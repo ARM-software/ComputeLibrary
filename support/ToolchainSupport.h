@@ -337,9 +337,7 @@ inline bool isfinite(half_float::half value)
 
 namespace cpp14
 {
-/** make_unqiue is missing in CPP11. Reimplement it according to the standard
- * proposal.
- */
+/** make_unique is missing in CPP11. Re-implement it according to the standard proposal. */
 template <class T>
 struct _Unique_if
 {
