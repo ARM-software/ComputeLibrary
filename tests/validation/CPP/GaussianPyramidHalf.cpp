@@ -21,10 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_SCALE_H__
-#define __ARM_COMPUTE_TEST_SCALE_H__
+#include "GaussianPyramidHalf.h"
 
-#include "tests/SimpleTensor.h"
+#include "arm_compute/core/Helpers.h"
+
+#include "Gaussian5x5.h"
+#include "Scale.h"
+#include "Utils.h"
 
 namespace arm_compute
 {
@@ -35,9 +38,29 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, T constant_border_value = 0, bool ceil_policy_scale = false);
+std::vector<SimpleTensor<T>> gaussian_pyramid_half(const SimpleTensor<T> &src, BorderMode border_mode, uint8_t constant_border_value, size_t num_levels)
+{
+    std::vector<SimpleTensor<T>> dst;
+
+    // Level0 is equal to src
+    dst.push_back(src);
+
+    for(size_t i = 1; i < num_levels; ++i)
+    {
+        // Gaussian Filter
+        const SimpleTensor<T> out_gaus5x5 = reference::gaussian5x5(dst[i - 1], border_mode, constant_border_value);
+
+        // Scale down by 2 with nearest interpolation
+        const SimpleTensor<T> out = reference::scale(out_gaus5x5, SCALE_PYRAMID_HALF, SCALE_PYRAMID_HALF, InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, constant_border_value, true);
+
+        dst.push_back(out);
+    }
+
+    return dst;
+}
+
+template std::vector<SimpleTensor<uint8_t>> gaussian_pyramid_half(const SimpleTensor<uint8_t> &src, BorderMode border_mode, uint8_t constant_border_value, size_t num_levels);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_SCALE_H__ */

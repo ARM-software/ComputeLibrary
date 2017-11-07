@@ -135,6 +135,22 @@ public:
     }
 };
 
+/** Data set containing medium 2D tensor shapes. */
+class Medium2DShapes final : public ShapeDataset
+{
+public:
+    Medium2DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 42U, 37U },
+                     TensorShape{ 57U, 60U },
+                     TensorShape{ 128U, 64U },
+                     TensorShape{ 83U, 72U }
+    })
+    {
+    }
+};
+
 /** Data set containing large tensor shapes. */
 class LargeShapes final : public ShapeDataset
 {

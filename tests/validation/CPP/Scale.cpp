@@ -36,11 +36,13 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, T constant_border_value)
+SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, T constant_border_value, bool ceil_policy_scale)
 {
-    TensorShape shape_scaled(in.shape());
-    shape_scaled.set(0, in.shape()[0] * scale_x);
-    shape_scaled.set(1, in.shape()[1] * scale_y);
+    // Add 1 if ceil_policy_scale is true
+    const size_t round_value = ceil_policy_scale ? 1U : 0U;
+    TensorShape  shape_scaled(in.shape());
+    shape_scaled.set(0, (in.shape()[0] + round_value) * scale_x);
+    shape_scaled.set(1, (in.shape()[1] + round_value) * scale_y);
     SimpleTensor<T> out(shape_scaled, in.data_type());
 
     // Compute the ratio between source width/height and destination width/height
@@ -149,10 +151,13 @@ SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, I
     return out;
 }
 
-template SimpleTensor<uint8_t> scale(const SimpleTensor<uint8_t> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value);
-template SimpleTensor<int16_t> scale(const SimpleTensor<int16_t> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, int16_t constant_border_value);
-template SimpleTensor<half> scale(const SimpleTensor<half> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, half constant_border_value);
-template SimpleTensor<float> scale(const SimpleTensor<float> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, float constant_border_value);
+template SimpleTensor<uint8_t> scale(const SimpleTensor<uint8_t> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value,
+                                     bool ceil_policy_scale);
+template SimpleTensor<int16_t> scale(const SimpleTensor<int16_t> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, int16_t constant_border_value,
+                                     bool ceil_policy_scale);
+template SimpleTensor<half> scale(const SimpleTensor<half> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, half constant_border_value, bool ceil_policy_scale);
+template SimpleTensor<float> scale(const SimpleTensor<float> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, float constant_border_value,
+                                   bool ceil_policy_scale);
 } // namespace reference
 } // namespace validation
 } // namespace test

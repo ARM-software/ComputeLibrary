@@ -91,7 +91,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<NEFillBorderKernel[]>          _border_handler;
+    std::unique_ptr<NEFillBorderKernel[]>          _horizontal_border_handler;
+    std::unique_ptr<NEFillBorderKernel[]>          _vertical_border_handler;
     std::unique_ptr<NEGaussianPyramidHorKernel[]>  _horizontal_reduction;
     std::unique_ptr<NEGaussianPyramidVertKernel[]> _vertical_reduction;
 };

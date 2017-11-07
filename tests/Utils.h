@@ -216,6 +216,67 @@ inline ValidRegion shape_to_valid_region(TensorShape shape, bool border_undefine
     return ValidRegion(std::move(anchor), std::move(shape));
 }
 
+/** Create a valid region for Gaussian Pyramid Half based on tensor shape and valid region at level "i - 1" and border mode
+ *
+ * @note The border size is 2 in case of Gaussian Pyramid Half
+ *
+ * @param[in] shape            Shape used at level "i - 1" of Gaussian Pyramid Half
+ * @param[in] valid_region     Valid region used at level "i - 1" of Gaussian Pyramid Half
+ * @param[in] border_undefined (Optional) Boolean indicating if the border mode is undefined.
+ *
+ *  return The valid region for the level "i" of Gaussian Pyramid Half
+ */
+inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(TensorShape shape, ValidRegion valid_region, bool border_undefined = false)
+{
+    constexpr int border_size = 2;
+    Coordinates   anchor;
+    anchor.set_num_dimensions(shape.num_dimensions());
+
+    // Compute tensor shape for level "i" of Gaussian Pyramid Half
+    // dst_width  = (src_width + 1) * 0.5f
+    // dst_height = (src_height + 1) * 0.5f
+    TensorShape dst_shape = shape;
+    dst_shape.set(0, (shape[0] + 1) * 0.5f);
+    dst_shape.set(1, (shape[1] + 1) * 0.5f);
+
+    if(border_undefined)
+    {
+        ARM_COMPUTE_ERROR_ON(shape.num_dimensions() < 2);
+
+        // Compute the left and top invalid borders
+        float invalid_border_left = static_cast<float>(valid_region.anchor.x() + border_size) / 2.0f;
+        float invalid_border_top  = static_cast<float>(valid_region.anchor.y() + border_size) / 2.0f;
+
+        // For the new anchor point we can have 2 cases:
+        // 1) If the width/height of the tensor shape is odd, we have to take the ceil value of (valid_region.anchor.x() + border_size) / 2.0f or (valid_region.anchor.y() + border_size / 2.0f
+        // 2) If the width/height of the tensor shape is even, we have to take the floor value of (valid_region.anchor.x() + border_size) / 2.0f or (valid_region.anchor.y() + border_size) / 2.0f
+        // In this manner we should be able to propagate correctly the valid region along all levels of the pyramid
+        invalid_border_left = (shape[0] % 2) ? std::ceil(invalid_border_left) : std::floor(invalid_border_left);
+        invalid_border_top  = (shape[1] % 2) ? std::ceil(invalid_border_top) : std::floor(invalid_border_top);
+
+        // Set the anchor point
+        anchor.set(0, static_cast<int>(invalid_border_left));
+        anchor.set(1, static_cast<int>(invalid_border_top));
+
+        // Compute shape
+        // Calculate the right and bottom invalid borders at the previous level of the pyramid
+        const float prev_invalid_border_right  = static_cast<float>(shape[0] - (valid_region.anchor.x() + valid_region.shape[0]));
+        const float prev_invalid_border_bottom = static_cast<float>(shape[1] - (valid_region.anchor.y() + valid_region.shape[1]));
+
+        // Calculate the right and bottom invalid borders at the current level of the pyramid
+        const float invalid_border_right  = std::ceil((prev_invalid_border_right + static_cast<float>(border_size)) / 2.0f);
+        const float invalid_border_bottom = std::ceil((prev_invalid_border_bottom + static_cast<float>(border_size)) / 2.0f);
+
+        const int valid_shape_x = std::max(0, static_cast<int>(dst_shape.x()) - static_cast<int>(invalid_border_left) - static_cast<int>(invalid_border_right));
+        const int valid_shape_y = std::max(0, static_cast<int>(dst_shape.y()) - static_cast<int>(invalid_border_top) - static_cast<int>(invalid_border_bottom));
+
+        dst_shape.set(0, valid_shape_x);
+        dst_shape.set(1, valid_shape_y);
+    }
+
+    return ValidRegion(std::move(anchor), std::move(dst_shape));
+}
+
 /** Write the value after casting the pointer according to @p data_type.
  *
  * @warning The type of the value must match the specified data type.

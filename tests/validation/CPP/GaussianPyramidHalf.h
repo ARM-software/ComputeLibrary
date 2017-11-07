@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_SCALE_H__
-#define __ARM_COMPUTE_TEST_SCALE_H__
+#ifndef __ARM_COMPUTE_TEST_GAUSSIAN_PYRAMID_HALF_H__
+#define __ARM_COMPUTE_TEST_GAUSSIAN_PYRAMID_HALF_H__
 
 #include "tests/SimpleTensor.h"
 
@@ -35,9 +35,9 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, T constant_border_value = 0, bool ceil_policy_scale = false);
+std::vector<SimpleTensor<T>> gaussian_pyramid_half(const SimpleTensor<T> &src, BorderMode border_mode, uint8_t constant_border_value, size_t num_levels);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_SCALE_H__ */
+#endif /* __ARM_COMPUTE_TEST_GAUSSIAN_PYRAMID_HALF_H__ */
