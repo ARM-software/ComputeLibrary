@@ -29,6 +29,8 @@
 
 using namespace arm_compute::quantization;
 
+constexpr int64_t fixed_point_one_Q0 = (1ll << 31);
+
 arm_compute::Error arm_compute::quantization::calculate_quantized_multiplier_less_than_one(double multiplier,
                                                                                            int   *quant_multiplier,
                                                                                            int   *right_shift)
@@ -45,16 +47,38 @@ arm_compute::Error arm_compute::quantization::calculate_quantized_multiplier_les
     }
     const double q = std::frexp(multiplier, right_shift);
     *right_shift *= -1;
-    auto q_fixed = static_cast<int64_t>(round(q * (1ll << 31)));
-    ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > (1ll << 31));
-    if(q_fixed == (1ll << 31))
+    auto q_fixed = static_cast<int64_t>(round(q * fixed_point_one_Q0));
+    ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > fixed_point_one_Q0);
+    if(q_fixed == fixed_point_one_Q0)
     {
         q_fixed /= 2;
         --*right_shift;
     }
     ARM_COMPUTE_RETURN_ERROR_ON(*right_shift < 0);
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > std::numeric_limits<int32_t>::max());
-    *quant_multiplier = static_cast<int>(q_fixed);
+    *quant_multiplier = static_cast<int32_t>(q_fixed);
+
+    return arm_compute::Error{};
+}
+
+arm_compute::Error arm_compute::quantization::calculate_quantized_multiplier_greater_than_one(double multiplier,
+                                                                                              int   *quantized_multiplier,
+                                                                                              int   *left_shift)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON(quantized_multiplier == nullptr);
+    ARM_COMPUTE_RETURN_ERROR_ON(left_shift == nullptr);
+    ARM_COMPUTE_RETURN_ERROR_ON(multiplier < 1.f);
+    const double q       = std::frexp(multiplier, left_shift);
+    auto         q_fixed = static_cast<int64_t>(round(q * fixed_point_one_Q0));
+    ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > fixed_point_one_Q0);
+    if(q_fixed == fixed_point_one_Q0)
+    {
+        q_fixed /= 2;
+        ++*left_shift;
+    }
+    ARM_COMPUTE_RETURN_ERROR_ON(*left_shift < 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > std::numeric_limits<int32_t>::max());
+    *quantized_multiplier = static_cast<int32_t>(q_fixed);
 
     return arm_compute::Error{};
 }

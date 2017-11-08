@@ -38,7 +38,7 @@ class CLLogits1DMaxKernel : public ICLSimple3DKernel
 public:
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  input  Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
@@ -60,11 +60,11 @@ public:
     CLLogits1DShiftExpSumKernel &operator=(CLLogits1DShiftExpSumKernel &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  input  Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32
      * @param[in]  max    Max values tensor. Data types supported: same as @p input
-     * @param[out] output Destination tensor. Data types supported: same as @p input
-     * @param[out] sum    Sum of 1D logits tensor. Data types supported: same as @p input
-     * @param[in]  beta   (Optional) A scaling factor for the exponent. Defaults to 1.f
+     * @param[out] output Destination tensor. Data types supported: S32 for QASYMM8 @p input, or same as @p input
+     * @param[out] sum    Sum of 1D logits tensor. Data types supported: S32 for QASYMM8 @p input, or same as @p input
+     * @param[in]  beta   (Optional) A scaling factor for the exponent. Defaults to 1.0
      */
     void configure(const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum, float beta = 1.0f);
 
@@ -146,11 +146,12 @@ public:
     CLLogits1DNormKernel &operator=(CLLogits1DNormKernel &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/S32/F16/F32
      * @param[in]  sum    Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
-     * @param[out] output Destination tensor. Data types supported: same as @p input
+     * @param[out] output Destination tensor. Data types supported: QASYMM8 for S32 @p input, or same as @p input
+     * @param[in]  beta   (Optional) A scaling factor for the exponent. (Default = 1.0)
      */
-    void configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output);
+    void configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, float beta = 1.0f);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

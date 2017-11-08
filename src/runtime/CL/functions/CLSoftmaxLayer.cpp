@@ -41,16 +41,20 @@ CLSoftmaxLayer::CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
 
 void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
 
     // Create intermediate tensors shapes
-    _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+    DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->info()->data_type()) ? DataType::S32 : input->info()->data_type();
+    TensorInfo tensor_info_tmp(input->info()->tensor_shape(), input->info()->num_channels(), tmp_data_type, input->info()->fixed_point_position());
+    tensor_info_tmp.set_quantization_info(input->info()->quantization_info());
+    _tmp.allocator()->init(tensor_info_tmp);
 
-    TensorShape shape = input->info()->tensor_shape();
-    shape.set(0, 1);
-    TensorInfo tensor_info_max_sum(shape, input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
-    _max.allocator()->init(tensor_info_max_sum);
-    _sum.allocator()->init(tensor_info_max_sum);
+    TensorShape max_sum_shape = input->info()->tensor_shape();
+    max_sum_shape.set(0, 1);
+    TensorInfo tensor_info_max(max_sum_shape, input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
+    tensor_info_max.set_quantization_info(input->info()->quantization_info());
+    _max.allocator()->init(tensor_info_max);
+    _sum.allocator()->init(TensorInfo(max_sum_shape, input->info()->num_channels(), tmp_data_type, input->info()->fixed_point_position()));
 
     // Set GPU target to kernels
     _max_shift_exp_sum_kernel.set_target(CLScheduler::get().target());
@@ -72,7 +76,7 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
     {
         _max_shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum, beta);
     }
-    _norm_kernel.configure(&_tmp, &_sum, output);
+    _norm_kernel.configure(&_tmp, &_sum, output, beta);
 
     // Allocate intermediate buffers
     _tmp.allocator()->allocate();

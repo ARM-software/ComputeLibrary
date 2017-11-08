@@ -58,6 +58,19 @@ void CLBuildOptions::add_option_if_else(bool cond, std::string option_true, std:
     (cond) ? add_option(std::move(option_true)) : add_option(std::move(option_false));
 }
 
+void CLBuildOptions::add_options(const StringSet &options)
+{
+    _build_opts.insert(options.begin(), options.end());
+}
+
+void CLBuildOptions::add_options_if(bool cond, const StringSet &options)
+{
+    if(cond)
+    {
+        add_options(options);
+    }
+}
+
 const CLBuildOptions::StringSet &CLBuildOptions::options() const
 {
     return _build_opts;
@@ -299,8 +312,11 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "sobel_separable7x1", "sobel_filter.cl" },
     { "sobel_separable1x7", "sobel_filter.cl" },
     { "softmax_layer_max", "softmax_layer.cl" },
+    { "softmax_layer_max_quantized", "softmax_layer_quantized.cl" },
     { "softmax_layer_shift_exp_sum", "softmax_layer.cl" },
+    { "softmax_layer_shift_exp_sum_quantized", "softmax_layer_quantized.cl" },
     { "softmax_layer_norm", "softmax_layer.cl" },
+    { "softmax_layer_norm_quantized", "softmax_layer_quantized.cl" },
     { "softmax_layer_max_shift_exp_sum_serial", "softmax_layer.cl" },
     { "softmax_layer_max_shift_exp_sum_parallel", "softmax_layer.cl" },
     { "suppress_non_maximum", "canny.cl" },
@@ -585,6 +601,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "softmax_layer.cl",
 #include "./cl_kernels/softmax_layer.clembed"
+    },
+    {
+        "softmax_layer_quantized.cl",
+#include "./cl_kernels/softmax_layer_quantized.clembed"
     },
     {
         "tablelookup.cl",

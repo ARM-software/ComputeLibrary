@@ -50,9 +50,13 @@ RelativeTolerance<float> tolerance_f32(0.001f);
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int16_t> tolerance_fixed_point(2);
 
+/** Tolerance for quantized operations */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
+    DataType::QASYMM8,
     DataType::F16,
     DataType::F32,
     DataType::QS8,
@@ -65,12 +69,13 @@ TEST_SUITE(SoftmaxLayer)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SoftmaxLayerSmallShapes(), datasets::SoftmaxLayerLargeShapes()), CNNDataTypes), shape, data_type)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
+    // Set fixed point position and quantization info if is allowed
+    const int              fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
+    const QuantizationInfo quantization_info    = is_data_type_quantized_asymmetric(data_type) ? QuantizationInfo(1.f / 255.f, 0) : QuantizationInfo();
 
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1, fixed_point_position, quantization_info);
+    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1, fixed_point_position, QuantizationInfo(1.f / 256.f, 0));
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -88,8 +93,17 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo reduction_info = CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(shape.x());
 
     // Validate src padding
-    const PaddingSize padding_src = PaddingCalculator(shape.x(), std::get<1>(reduction_info)).required_padding();
-    validate(src.info()->padding(), padding_src);
+    // Legacy path used only by quantized asymmetric data type TODO(COMPMID-661) : Remove when port to new path
+    if(is_data_type_quantized_asymmetric(data_type))
+    {
+        const PaddingSize padding_src = PaddingCalculator(shape.x(), 16).required_padding();
+        validate(src.info()->padding(), padding_src);
+    }
+    else
+    {
+        const PaddingSize padding_src = PaddingCalculator(shape.x(), std::get<1>(reduction_info)).required_padding();
+        validate(src.info()->padding(), padding_src);
+    }
 
     // Validate dst padding
     const PaddingSize padding_dst = PaddingCalculator(shape.x(), 16).required_padding();
@@ -101,7 +115,7 @@ using CLSoftmaxLayerFixture = SoftmaxValidationFixture<CLTensor, CLAccessor, CLS
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -114,7 +128,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<half>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -130,12 +144,12 @@ TEST_SUITE_END()
 template <typename T>
 using CLSoftmaxLayerFixedPointFixture = SoftmaxValidationFixedPointFixture<CLTensor, CLAccessor, CLSoftmaxLayer, T>;
 
-TEST_SUITE(Quantized)
+TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType",
-                                                                                                                     DataType::QS8)),
-                                                                                                                     framework::dataset::make("FractionalBits", 1, 6)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType",
+                                                                                                                       DataType::QS8)),
+                                                                                                               framework::dataset::make("FractionalBits", 1, 6)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed_point);
@@ -151,10 +165,10 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 // Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                              DataType::QS16)),
-                                                                                                                      framework::dataset::make("FractionalBits", 1, 14)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::QS16)),
+                                                                                                                framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed_point);
@@ -166,6 +180,30 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixedPointFixture<int16_t>, frame
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed_point);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using CLSoftmaxLayerQuantizedFixture = SoftmaxValidationQuantizedFixture<CLTensor, CLAccessor, CLSoftmaxLayer, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::QASYMM8)),
+                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::QASYMM8)),
+                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

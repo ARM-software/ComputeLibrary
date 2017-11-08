@@ -59,6 +59,17 @@ public:
      * @param[in] option_false Option to add if condition is false
      */
     void add_option_if_else(bool cond, std::string option_true, std::string option_false);
+    /** Appends given build options to the current's objects options.
+     *
+     * @param[in] options Build options to append
+     */
+    void add_options(const StringSet &options);
+    /** Appends given build options to the current's objects options if a given condition is true.
+     *
+     * @param[in] cond    Condition to check
+     * @param[in] options Option to add if condition is true
+     */
+    void add_options_if(bool cond, const StringSet &options);
     /** Gets the current options list set
      *
      * @return Build options set

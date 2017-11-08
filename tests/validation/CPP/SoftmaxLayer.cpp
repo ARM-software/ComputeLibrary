@@ -112,6 +112,18 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src)
     return dst;
 }
 
+template <>
+SimpleTensor<uint8_t> softmax_layer<uint8_t>(const SimpleTensor<uint8_t> &src)
+{
+    // Note: Output quantization info should always have scale = 1/256 and offset = 0
+    const QuantizationInfo output_quantization_info = QuantizationInfo(1.f / 256, 0);
+
+    SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
+    SimpleTensor<float>   dst_tmp = softmax_layer<float>(src_tmp);
+    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, output_quantization_info);
+    return dst;
+}
+
 template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src);
 template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src);
 template SimpleTensor<qint8_t> softmax_layer(const SimpleTensor<qint8_t> &src);
