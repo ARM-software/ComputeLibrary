@@ -35,11 +35,11 @@ namespace validation
 {
 namespace reference
 {
-SimpleTensor<int32_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, SimpleTensor<int32_t> &c);
+template <typename T>
+SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<T> &a, const SimpleTensor<T> &b, int32_t a_offset, int32_t b_offset);
 
 template <typename T>
-SimpleTensor<T> gemmlowp(const SimpleTensor<T> &a, const SimpleTensor<T> &b, SimpleTensor<T> &c,
-                         int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift);
+SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, int32_t result_mult_int, int32_t result_shift);
 } // namespace reference
 } // namespace validation
 } // namespace test

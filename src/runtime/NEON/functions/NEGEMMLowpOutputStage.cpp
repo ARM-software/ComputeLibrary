@@ -21,36 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SMALL_GEMMLOWP_DATASET
-#define ARM_COMPUTE_TEST_SMALL_GEMMLOWP_DATASET
+#include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 
-#include "tests/datasets/GEMMLowpDataset.h"
+#include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
+#include "support/ToolchainSupport.h"
 
-#include "utils/TypePrinter.h"
+using namespace arm_compute;
 
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
-
-namespace arm_compute
+void NEGEMMLowpQuantizeDownInt32ToUint8Scale::configure(const ITensor *input, ITensor *output, int result_offset, int result_mult_int, int result_shift)
 {
-namespace test
-{
-namespace datasets
-{
-class SmallGEMMLowpDataset final : public GEMMLowpDataset
-{
-public:
-    SmallGEMMLowpDataset()
-    {
-        add_config(TensorShape(21U, 13U), TensorShape(33U, 21U), TensorShape(33U, 13U), 0, 0);
-        add_config(TensorShape(52U, 13U), TensorShape(33U, 52U), TensorShape(33U, 13U), 0, 4);
-        add_config(TensorShape(52U, 26U), TensorShape(33U, 52U), TensorShape(33U, 26U), -2, 0);
-        add_config(TensorShape(31U, 27U), TensorShape(23U, 31U), TensorShape(23U, 27U), 5, 13);
-        add_config(TensorShape(38U, 12U), TensorShape(21U, 38U), TensorShape(21U, 12U), -3, -2);
-        add_config(TensorShape(32U, 72U), TensorShape(17U, 32U), TensorShape(17U, 72U), -9, 1);
-    }
-};
-} // namespace datasets
-} // namespace test
-} // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SMALL_GEMMLOWP_DATASET */
+    auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel>();
+    k->configure(input, output, result_offset, result_mult_int, result_shift);
+    _kernel = std::move(k);
+}

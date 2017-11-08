@@ -37,7 +37,7 @@ namespace datasets
 class GEMMLowpDataset
 {
 public:
-    using type = std::tuple<TensorShape, TensorShape, TensorShape, int32_t, int32_t, int32_t, int32_t, int32_t>;
+    using type = std::tuple<TensorShape, TensorShape, TensorShape, int32_t, int32_t>;
 
     struct iterator
     {
@@ -45,18 +45,12 @@ public:
                  std::vector<TensorShape>::const_iterator b_it,
                  std::vector<TensorShape>::const_iterator c_it,
                  std::vector<int32_t>::const_iterator     a_offset_it,
-                 std::vector<int32_t>::const_iterator     b_offset_it,
-                 std::vector<int32_t>::const_iterator     c_offset_it,
-                 std::vector<int32_t>::const_iterator     c_mult_int_it,
-                 std::vector<int32_t>::const_iterator     out_shift_it)
+                 std::vector<int32_t>::const_iterator     b_offset_it)
             : _a_it{ std::move(a_it) },
               _b_it{ std::move(b_it) },
               _c_it{ std::move(c_it) },
               _a_offset_it{ std::move(a_offset_it) },
-              _b_offset_it{ std::move(b_offset_it) },
-              _c_offset_it{ std::move(c_offset_it) },
-              _c_mult_int_it{ std::move(c_mult_int_it) },
-              _out_shift_it{ std::move(out_shift_it) }
+              _b_offset_it{ std::move(b_offset_it) }
         {
         }
 
@@ -68,15 +62,12 @@ public:
             description << "C=" << *_c_it << ":";
             description << "a_offset=" << *_a_offset_it << ":";
             description << "b_offset=" << *_b_offset_it << ":";
-            description << "c_offset=" << *_c_offset_it << ":";
-            description << "c_mult_int=" << *_c_mult_int_it << ":";
-            description << "out_shift=" << *_out_shift_it << ":";
             return description.str();
         }
 
         GEMMLowpDataset::type operator*() const
         {
-            return std::make_tuple(*_a_it, *_b_it, *_c_it, *_a_offset_it, *_b_offset_it, *_c_offset_it, *_c_mult_int_it, *_out_shift_it);
+            return std::make_tuple(*_a_it, *_b_it, *_c_it, *_a_offset_it, *_b_offset_it);
         }
 
         iterator &operator++()
@@ -86,9 +77,6 @@ public:
             ++_c_it;
             ++_a_offset_it;
             ++_b_offset_it;
-            ++_c_offset_it;
-            ++_c_mult_int_it;
-            ++_out_shift_it;
 
             return *this;
         }
@@ -99,32 +87,25 @@ public:
         std::vector<TensorShape>::const_iterator _c_it;
         std::vector<int32_t>::const_iterator     _a_offset_it;
         std::vector<int32_t>::const_iterator     _b_offset_it;
-        std::vector<int32_t>::const_iterator     _c_offset_it;
-        std::vector<int32_t>::const_iterator     _c_mult_int_it;
-        std::vector<int32_t>::const_iterator     _out_shift_it;
     };
 
     iterator begin() const
     {
-        return iterator(_a_shapes.begin(), _b_shapes.begin(), _c_shapes.begin(), _a_offset.begin(), _b_offset.begin(), _c_offset.begin(), _c_mult_int.begin(), _out_shift.begin());
+        return iterator(_a_shapes.begin(), _b_shapes.begin(), _c_shapes.begin(), _a_offset.begin(), _b_offset.begin());
     }
 
     int size() const
     {
-        return std::min(_a_shapes.size(), std::min(_b_shapes.size(), std::min(_c_shapes.size(), std::min(_a_offset.size(), std::min(_b_offset.size(), std::min(_c_offset.size(), std::min(_c_mult_int.size(),
-                                                                                                         _out_shift.size())))))));
+        return std::min(_a_shapes.size(), std::min(_b_shapes.size(), std::min(_c_shapes.size(), std::min(_a_offset.size(), _b_offset.size()))));
     }
 
-    void add_config(TensorShape a, TensorShape b, TensorShape c, int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift)
+    void add_config(TensorShape a, TensorShape b, TensorShape c, int32_t a_offset, int32_t b_offset)
     {
         _a_shapes.emplace_back(std::move(a));
         _b_shapes.emplace_back(std::move(b));
         _c_shapes.emplace_back(std::move(c));
         _a_offset.emplace_back(std::move(a_offset));
         _b_offset.emplace_back(std::move(b_offset));
-        _c_offset.emplace_back(std::move(c_offset));
-        _c_mult_int.emplace_back(std::move(c_mult_int));
-        _out_shift.emplace_back(std::move(out_shift));
     }
 
 protected:
@@ -137,9 +118,6 @@ private:
     std::vector<TensorShape> _c_shapes{};
     std::vector<int32_t>     _a_offset{};
     std::vector<int32_t>     _b_offset{};
-    std::vector<int32_t>     _c_offset{};
-    std::vector<int32_t>     _c_mult_int{};
-    std::vector<int32_t>     _out_shift{};
 };
 } // namespace datasets
 } // namespace test

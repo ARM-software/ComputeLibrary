@@ -45,10 +45,9 @@ public:
     /** Allow instances of this class to be moved */
     INEGEMMLowpReductionKernel &operator=(INEGEMMLowpReductionKernel &&) = default;
 
-public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input       Input tensor containing the interleaved or transposed matrix. Data type supported: S8
+     * @param[in]  input       Input tensor. Data type supported: S8
      * @param[out] output      Output row-vector of sums of all the entries in each row/col of input tensor. Data type supported: S32
      * @param[in]  k           Number of matrix A columns (or matrix B rows)
      * @param[in]  is_reshaped True if the input tensor has been reshaped
@@ -72,14 +71,12 @@ class NEGEMMLowpMatrixAReductionKernel : public INEGEMMLowpReductionKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @note The input matrix @p mtx_a_interleaved4x4 must be the output of @ref NEGEMMInterleave4x4Kernel.
-     *
-     * @param[in]  mtx_a_interleaved4x4 Input tensor containing the interleaved Matrix A. Data type supported: U8
-     * @param[out] vector_sum_row       Output row-vector of sums of all the entries in each row of mtx_a_interleaved4x4. Data type supported: S32
-     * @param[in]  num_mtx_a_cols       Number of matrix A columns
-     * @param[in]  is_interleaved4x4    True if the input tensor is interleaved4x4
+     * @param[in]  mtx_a             Input tensor. Data type supported: QASYMM8
+     * @param[out] vector_sum_row    Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
+     * @param[in]  num_mtx_a_cols    Number of matrix A columns
+     * @param[in]  is_interleaved4x4 True if the matrix A has been interleaved4x4
      */
-    void configure(const ITensor *mtx_a_interleaved4x4, ITensor *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4) override;
+    void configure(const ITensor *mtx_a, ITensor *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4) override;
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -95,14 +92,12 @@ class NEGEMMLowpMatrixBReductionKernel : public INEGEMMLowpReductionKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @note The input matrix @p mtx_b_transposed1xW must be the output of @ref NEGEMMTranspose1xWKernel kernel.
-     *
-     * @param[in]  mtx_b_transposed1xW Input tensor containing the transposed Matrix B. Data type supported: Data type supported: U8
-     * @param[out] vector_sum_col      Output row-vector of sums of all the entries in each column of mtx_b_transposed1xW. Data type supported: S32
-     * @param[in]  num_mtx_b_rows      Number of matrix B rows
-     * @param[in]  is_transposed1xW    True if the input tensor is transposed 1xW
+     * @param[in]  mtx_b            Input tensor. Data type supported: Data type supported: QASYMM8
+     * @param[out] vector_sum_col   Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
+     * @param[in]  num_mtx_b_rows   Number of matrix B rows
+     * @param[in]  is_transposed1xW True if the input tensor is transposed 1xW
      */
-    void configure(const ITensor *mtx_b_transposed1xW, ITensor *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW) override;
+    void configure(const ITensor *mtx_b, ITensor *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW) override;
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

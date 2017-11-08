@@ -47,18 +47,24 @@ namespace arm_compute
 using namespace arm_compute;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(), _tmp_b(), _workspace()
+    : _memory_group(std::move(memory_manager)), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(),
+      _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _workspace(), _a_offset(0), _b_offset(0)
 {
 }
 
 void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::S8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
     ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(0) != (b)->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(1) != (output)->info()->dimension(1), "The output matrix must have the same number of rows as the matrix A");
     ARM_COMPUTE_ERROR_ON_MSG((b)->info()->dimension(0) != (output)->info()->dimension(0), "The output matrix must have the same number of columns as the matrix B");
+
+    bool dot_product_path = false;
+
+    _a_offset = a->info()->quantization_info().offset;
+    _b_offset = b->info()->quantization_info().offset;
 
 #ifdef ARM_COMPUTE_AARCH64_V8_2
     // Check for DOT product instruction
@@ -67,6 +73,13 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
 
     if(cpu_has_dotprod != 0)
     {
+        dot_product_path = true;
+
+        // If the DOT product instruction is available, the computation will be performed in int8_t
+        // In order to take into account this, we need to subtract -128 from a_offset and b_offset
+        _a_offset -= 128;
+        _b_offset -= 128;
+
         // Configure matrix multiply kernel
         struct CPUInfo ci = NEScheduler::get().cpu_info();
         const int      M  = output->info()->tensor_shape().y();
@@ -77,12 +90,11 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         constexpr size_t alignment = 4096;
         _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
         _memory_group.manage(&_workspace);
+
         // Configure matrix multiplication kernel
         auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpAArch64V8P4Kernel>();
         k->configure(a, b, output, &_workspace, 1.f, 1.f);
         _mm_kernel = std::move(k);
-
-        _workspace.allocator()->allocate();
     }
     else
 #endif /* ARM_COMPUTE_AARCH64_V8_2 */
@@ -124,10 +136,57 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             k->configure(&_tmp_a, &_tmp_b, output);
             _mm_kernel = std::move(k);
         }
+    }
 
-        // Allocate tensors
+    // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
+    if(_a_offset != 0)
+    {
+        TensorShape shape_vector_sum_col = b->info()->tensor_shape();
+        shape_vector_sum_col.remove_dimension(1);
+        TensorInfo info_vector_sum_col(shape_vector_sum_col, 1, DataType::S32);
+        _vector_sum_col.allocator()->init(info_vector_sum_col);
+        _memory_group.manage(&_vector_sum_col);
+
+        // Configure Matrix B reduction kernel
+        _mtx_b_reduction_kernel.configure(b, &_vector_sum_col, a->info()->dimension(0), false);
+    }
+
+    // Initialize Matrix A reduction kernel only if _b_offset is not equal to 0
+    if(_b_offset != 0)
+    {
+        TensorShape shape_vector_sum_row = a->info()->tensor_shape();
+        shape_vector_sum_row.set(Window::DimX, a->info()->dimension(1));
+        shape_vector_sum_row.remove_dimension(1);
+        TensorInfo info_vector_sum_row(shape_vector_sum_row, 1, DataType::S32);
+        _vector_sum_row.allocator()->init(info_vector_sum_row);
+        _memory_group.manage(&_vector_sum_row);
+
+        // Configure matrix A reduction kernel
+        _mtx_a_reduction_kernel.configure(a, &_vector_sum_row, a->info()->dimension(0), false);
+    }
+
+    // Configure offset contribution kernel
+    _offset_contribution_kernel.configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a->info()->dimension(0), _a_offset, _b_offset);
+
+    // Allocate tensors
+    if(!dot_product_path)
+    {
         _tmp_a.allocator()->allocate();
         _tmp_b.allocator()->allocate();
+    }
+    else
+    {
+        _workspace.allocator()->allocate();
+    }
+
+    if(_a_offset != 0)
+    {
+        _vector_sum_col.allocator()->allocate();
+    }
+
+    if(_b_offset != 0)
+    {
+        _vector_sum_row.allocator()->allocate();
     }
 }
 
@@ -146,6 +205,21 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     }
 
     NEScheduler::get().schedule(_mm_kernel.get(), Window::DimY);
+
+    // Run matrix A reduction kernel only if _b_offset is not equal to 0
+    if(_b_offset != 0)
+    {
+        NEScheduler::get().schedule(&_mtx_a_reduction_kernel, Window::DimX);
+    }
+
+    // Run matrix B reduction kernel only if _a_offset is not equal to 0
+    if(_a_offset != 0)
+    {
+        NEScheduler::get().schedule(&_mtx_b_reduction_kernel, Window::DimX);
+    }
+
+    // Run offset contribution kernel
+    NEScheduler::get().schedule(&_offset_contribution_kernel, Window::DimY);
 
     _memory_group.release();
 }

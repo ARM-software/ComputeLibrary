@@ -49,12 +49,12 @@ INEGEMMLowpReductionKernel::INEGEMMLowpReductionKernel()
 {
 }
 
-void NEGEMMLowpMatrixAReductionKernel::configure(const ITensor *mtx_a_interleaved4x4, ITensor *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4)
+void NEGEMMLowpMatrixAReductionKernel::configure(const ITensor *mtx_a, ITensor *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mtx_a_interleaved4x4, 1, DataType::S8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mtx_a, 1, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
 
-    _input       = mtx_a_interleaved4x4;
+    _input       = mtx_a;
     _output      = vector_sum_row;
     _k           = num_mtx_a_cols;
     _is_reshaped = is_interleaved4x4;
@@ -97,9 +97,9 @@ void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInf
         execute_window_loop(collapsed_window, [&](const Coordinates & id)
         {
             // Note: Since the input is unsigned char, we can safely use unsigned int for the accumulation
-            int32x4_t sum_row = vdupq_n_s32(0);
+            uint32x4_t sum_row = vdupq_n_u32(0);
 
-            auto matrix_a = reinterpret_cast<const int8_t *>(in.ptr() + (id.x() / 4) * _input->info()->strides_in_bytes()[1] + id.y() * _input->info()->strides_in_bytes()[2]);
+            const uint8_t *matrix_a = (in.ptr() + (id.x() / 4) * _input->info()->strides_in_bytes()[1] + id.y() * _input->info()->strides_in_bytes()[2]);
 
 #if __arm__
             asm volatile("PLD [%0, #128*4]" ::"r"(matrix_a));
@@ -109,43 +109,43 @@ void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInf
             // This for loop performs 4 accumulations
             for(; i <= (_k - 4); i += 4)
             {
-                const int8x16_t a0_s8 = vld1q_s8(matrix_a + i * 4);
+                const uint8x16_t a0_u8 = vld1q_u8(matrix_a + i * 4);
 
                 // Convert U8 to U16
-                int16x4x4_t a0_s16 =
+                uint16x4x4_t a0_u16 =
                 {
                     {
-                        vget_low_s16(vmovl_s8(vget_low_s8(a0_s8))),
-                        vget_high_s16(vmovl_s8(vget_low_s8(a0_s8))),
-                        vget_low_s16(vmovl_s8(vget_high_s8(a0_s8))),
-                        vget_high_s16(vmovl_s8(vget_high_s8(a0_s8)))
+                        vget_low_u16(vmovl_u8(vget_low_u8(a0_u8))),
+                        vget_high_u16(vmovl_u8(vget_low_u8(a0_u8))),
+                        vget_low_u16(vmovl_u8(vget_high_u8(a0_u8))),
+                        vget_high_u16(vmovl_u8(vget_high_u8(a0_u8)))
                     }
                 };
 
                 // Accumulate to U16
-                a0_s16.val[0] = vadd_s16(a0_s16.val[0], a0_s16.val[1]);
-                a0_s16.val[0] = vadd_s16(a0_s16.val[0], a0_s16.val[2]);
-                a0_s16.val[0] = vadd_s16(a0_s16.val[0], a0_s16.val[3]);
+                a0_u16.val[0] = vadd_u16(a0_u16.val[0], a0_u16.val[1]);
+                a0_u16.val[0] = vadd_u16(a0_u16.val[0], a0_u16.val[2]);
+                a0_u16.val[0] = vadd_u16(a0_u16.val[0], a0_u16.val[3]);
 
                 // Accumulate to U32
-                sum_row = vaddw_s16(sum_row, a0_s16.val[0]);
+                sum_row = vaddw_u16(sum_row, a0_u16.val[0]);
             }
 
             // This for loop performs the leftover accumulations
             for(; i < _k; ++i)
             {
-                const int8x8_t a0_s8 = vld1_s8(matrix_a + i * 4);
+                const uint8x8_t a0_u8 = vld1_u8(matrix_a + i * 4);
 
                 // Convert U8 to U16
-                const int16x4_t a0_s16 = vget_low_s16(vmovl_s8(a0_s8));
+                const uint16x4_t a0_u16 = vget_low_u16(vmovl_u8(a0_u8));
 
                 // Accumulate to U32
-                sum_row = vaddw_s16(sum_row, a0_s16);
+                sum_row = vaddw_u16(sum_row, a0_u16);
             }
 
             auto vector_sum_row = reinterpret_cast<int32_t *>(out.ptr());
 
-            vst1q_s32(vector_sum_row, sum_row);
+            vst1q_s32(vector_sum_row, vreinterpretq_s32_u32(sum_row));
         },
         in, out);
     }
@@ -154,10 +154,10 @@ void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInf
         execute_window_loop(collapsed_window, [&](const Coordinates & id)
         {
             // Note: Since the input is unsigned char, we can safely use unsigned int for the accumulation
-            int32x4_t sum_row_s32 = vdupq_n_s32(0);
-            int32_t   sum_row     = 0;
+            uint32x4_t sum_row_u32 = vdupq_n_u32(0);
+            uint32_t   sum_row     = 0;
 
-            auto matrix_a = reinterpret_cast<const int8_t *>(in.ptr() + id.x() * _input->info()->strides_in_bytes()[1] + +id.y() * _input->info()->strides_in_bytes()[2]);
+            const uint8_t *matrix_a = (in.ptr() + id.x() * _input->info()->strides_in_bytes()[1] + +id.y() * _input->info()->strides_in_bytes()[2]);
 
 #if __arm__
             asm volatile("PLD [%0, #128*4]" ::"r"(matrix_a));
@@ -167,29 +167,29 @@ void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInf
             // This for loop performs 16 accumulations
             for(; i <= (_k - 16); i += 16)
             {
-                const int8x16_t a0_s8 = vld1q_s8(matrix_a + i);
+                const uint8x16_t a0_u8 = vld1q_u8(matrix_a + i);
 
                 // Partial accumulations in U16
-                const int16x8_t tmp_sum0 = vaddl_s8(vget_low_s8(a0_s8), vget_high_s8(a0_s8));
+                const uint16x8_t tmp_sum0 = vaddl_u8(vget_low_u8(a0_u8), vget_high_u8(a0_u8));
 
                 // Accumulate to U32
-                sum_row_s32 = vaddq_s32(sum_row_s32, vpaddlq_s16(tmp_sum0));
+                sum_row_u32 = vaddq_u32(sum_row_u32, vpaddlq_u16(tmp_sum0));
             }
 
             // This for loop performs the leftover accumulations
             for(; i < _k; ++i)
             {
-                sum_row += static_cast<int32_t>(matrix_a[i]);
+                sum_row += static_cast<uint32_t>(matrix_a[i]);
             }
 
 #if defined(__aarch64__)
             // Reduction operation available on 64 bit architectures only
-            sum_row += vaddvq_s32(sum_row_s32);
+            sum_row += vaddvq_u32(sum_row_u32);
 #else  // __aarch64__
-            int32x2_t tmp = vpadd_s32(vget_high_s32(sum_row_s32), vget_low_s32(sum_row_s32));
-            tmp            = vpadd_s32(tmp, tmp);
+            uint32x2_t tmp = vpadd_u32(vget_high_u32(sum_row_u32), vget_low_u32(sum_row_u32));
+            tmp            = vpadd_u32(tmp, tmp);
 
-            sum_row += vget_lane_s32(tmp, 0);
+            sum_row += vget_lane_u32(tmp, 0);
 #endif // __aarch64__
 
             *(reinterpret_cast<int *>(out.ptr())) = static_cast<int>(sum_row);
@@ -198,12 +198,12 @@ void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInf
     }
 }
 
-void NEGEMMLowpMatrixBReductionKernel::configure(const ITensor *mtx_b_transposed1xW, ITensor *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW)
+void NEGEMMLowpMatrixBReductionKernel::configure(const ITensor *mtx_b, ITensor *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mtx_b_transposed1xW, 1, DataType::S8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mtx_b, 1, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
 
-    _input       = mtx_b_transposed1xW;
+    _input       = mtx_b;
     _output      = vector_sum_col;
     _k           = num_mtx_b_rows;
     _is_reshaped = is_transposed1xW;
@@ -246,17 +246,17 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
         execute_window_loop(collapsed_window, [&](const Coordinates & id)
         {
             // Note: Since the input is unsigned char, we can safely use unsigned int for the accumulation
-            int32x4x4_t sum_col =
+            uint32x4x4_t sum_col =
             {
                 {
-                    vdupq_n_s32(0),
-                    vdupq_n_s32(0),
-                    vdupq_n_s32(0),
-                    vdupq_n_s32(0)
+                    vdupq_n_u32(0),
+                    vdupq_n_u32(0),
+                    vdupq_n_u32(0),
+                    vdupq_n_u32(0)
                 }
             };
 
-            auto matrix_b = reinterpret_cast<const int8_t *>(in.ptr() + (id.x() / 16) * _input->info()->strides_in_bytes()[1] + id.y() * _input->info()->strides_in_bytes()[2]);
+            const uint8_t *matrix_b = in.ptr() + (id.x() / 16) * _input->info()->strides_in_bytes()[1] + id.y() * _input->info()->strides_in_bytes()[2];
 
 #if __arm__
             asm volatile("PLD [%0, #128*4]" ::"r"(matrix_b));
@@ -265,14 +265,14 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
             int i = 0;
             for(; i < _k; ++i)
             {
-                const int8x16_t b0_s8 = vld1q_s8(matrix_b + i * 16);
+                const uint8x16_t b0_u8 = vld1q_u8(matrix_b + i * 16);
 
                 // Convert S8 to U16
-                const int16x8x2_t b0_s16 =
+                const uint16x8x2_t b0_u16 =
                 {
                     {
-                        vmovl_s8(vget_low_s8(b0_s8)),
-                        vmovl_s8(vget_high_s8(b0_s8))
+                        vmovl_u8(vget_low_u8(b0_u8)),
+                        vmovl_u8(vget_high_u8(b0_u8))
                     }
                 };
 
@@ -280,20 +280,20 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
                 sum_col =
                 {
                     {
-                        vaddw_s16(sum_col.val[0], vget_low_s16(b0_s16.val[0])),
-                        vaddw_s16(sum_col.val[1], vget_high_s16(b0_s16.val[0])),
-                        vaddw_s16(sum_col.val[2], vget_low_s16(b0_s16.val[1])),
-                        vaddw_s16(sum_col.val[3], vget_high_s16(b0_s16.val[1]))
+                        vaddw_u16(sum_col.val[0], vget_low_u16(b0_u16.val[0])),
+                        vaddw_u16(sum_col.val[1], vget_high_u16(b0_u16.val[0])),
+                        vaddw_u16(sum_col.val[2], vget_low_u16(b0_u16.val[1])),
+                        vaddw_u16(sum_col.val[3], vget_high_u16(b0_u16.val[1]))
                     }
                 };
             }
 
             auto vector_sum_col = reinterpret_cast<int32_t *>(out.ptr());
 
-            vst1q_s32(vector_sum_col + 0, sum_col.val[0]);
-            vst1q_s32(vector_sum_col + 4, sum_col.val[1]);
-            vst1q_s32(vector_sum_col + 8, sum_col.val[2]);
-            vst1q_s32(vector_sum_col + 12, sum_col.val[3]);
+            vst1q_s32(vector_sum_col + 0, vreinterpretq_s32_u32(sum_col.val[0]));
+            vst1q_s32(vector_sum_col + 4, vreinterpretq_s32_u32(sum_col.val[1]));
+            vst1q_s32(vector_sum_col + 8, vreinterpretq_s32_u32(sum_col.val[2]));
+            vst1q_s32(vector_sum_col + 12, vreinterpretq_s32_u32(sum_col.val[3]));
         },
         in, out);
     }
@@ -326,17 +326,17 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
             }
 
             // Note: Since the input is unsigned char, we can safely use unsigned int for the accumulation
-            int32x4x4_t sum_col =
+            uint32x4x4_t sum_col =
             {
                 {
-                    vdupq_n_s32(0),
-                    vdupq_n_s32(0),
-                    vdupq_n_s32(0),
-                    vdupq_n_s32(0)
+                    vdupq_n_u32(0),
+                    vdupq_n_u32(0),
+                    vdupq_n_u32(0),
+                    vdupq_n_u32(0)
                 }
             };
 
-            auto matrix_b = reinterpret_cast<const int8_t *>(inb.ptr() + id.y() * _input->info()->strides_in_bytes()[2]);
+            const uint8_t *matrix_b = inb.ptr() + id.y() * _input->info()->strides_in_bytes()[2];
 
 #if __arm__
             asm volatile("PLD [%0, #128*4]" ::"r"(matrix_b));
@@ -347,10 +347,10 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
             // This for loop performs 4 accumulations
             for(; i <= (_k - 4); i += 4)
             {
-                const int8x16_t b0_s8 = vld1q_s8(matrix_b + 0 * in_b_stride);
-                const int8x16_t b1_s8 = vld1q_s8(matrix_b + 1 * in_b_stride);
-                const int8x16_t b2_s8 = vld1q_s8(matrix_b + 2 * in_b_stride);
-                const int8x16_t b3_s8 = vld1q_s8(matrix_b + 3 * in_b_stride);
+                const uint8x16_t b0_u8 = vld1q_u8(matrix_b + 0 * in_b_stride);
+                const uint8x16_t b1_u8 = vld1q_u8(matrix_b + 1 * in_b_stride);
+                const uint8x16_t b2_u8 = vld1q_u8(matrix_b + 2 * in_b_stride);
+                const uint8x16_t b3_u8 = vld1q_u8(matrix_b + 3 * in_b_stride);
 
 #if __arm__
                 asm volatile("PLD [%0, #128*1]" ::"r"(matrix_b + 1 * in_b_stride));
@@ -360,31 +360,31 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
 #endif /* __arm__ */
 
                 // Partial accumulation in u16
-                int16x8x2_t tmp_sum =
+                uint16x8x2_t tmp_sum =
                 {
                     {
-                        vdupq_n_s16(0),
-                        vdupq_n_s16(0)
+                        vdupq_n_u16(0),
+                        vdupq_n_u16(0)
                     }
                 };
 
-                tmp_sum.val[0] = vaddw_s8(tmp_sum.val[0], vget_low_s8(b0_s8));
-                tmp_sum.val[0] = vaddw_s8(tmp_sum.val[0], vget_low_s8(b1_s8));
-                tmp_sum.val[0] = vaddw_s8(tmp_sum.val[0], vget_low_s8(b2_s8));
-                tmp_sum.val[0] = vaddw_s8(tmp_sum.val[0], vget_low_s8(b3_s8));
-                tmp_sum.val[1] = vaddw_s8(tmp_sum.val[1], vget_high_s8(b0_s8));
-                tmp_sum.val[1] = vaddw_s8(tmp_sum.val[1], vget_high_s8(b1_s8));
-                tmp_sum.val[1] = vaddw_s8(tmp_sum.val[1], vget_high_s8(b2_s8));
-                tmp_sum.val[1] = vaddw_s8(tmp_sum.val[1], vget_high_s8(b3_s8));
+                tmp_sum.val[0] = vaddw_u8(tmp_sum.val[0], vget_low_u8(b0_u8));
+                tmp_sum.val[0] = vaddw_u8(tmp_sum.val[0], vget_low_u8(b1_u8));
+                tmp_sum.val[0] = vaddw_u8(tmp_sum.val[0], vget_low_u8(b2_u8));
+                tmp_sum.val[0] = vaddw_u8(tmp_sum.val[0], vget_low_u8(b3_u8));
+                tmp_sum.val[1] = vaddw_u8(tmp_sum.val[1], vget_high_u8(b0_u8));
+                tmp_sum.val[1] = vaddw_u8(tmp_sum.val[1], vget_high_u8(b1_u8));
+                tmp_sum.val[1] = vaddw_u8(tmp_sum.val[1], vget_high_u8(b2_u8));
+                tmp_sum.val[1] = vaddw_u8(tmp_sum.val[1], vget_high_u8(b3_u8));
 
                 // Accumulate to U32
                 sum_col =
                 {
                     {
-                        vaddw_s16(sum_col.val[0], vget_low_s16(tmp_sum.val[0])),
-                        vaddw_s16(sum_col.val[1], vget_high_s16(tmp_sum.val[0])),
-                        vaddw_s16(sum_col.val[2], vget_low_s16(tmp_sum.val[1])),
-                        vaddw_s16(sum_col.val[3], vget_high_s16(tmp_sum.val[1]))
+                        vaddw_u16(sum_col.val[0], vget_low_u16(tmp_sum.val[0])),
+                        vaddw_u16(sum_col.val[1], vget_high_u16(tmp_sum.val[0])),
+                        vaddw_u16(sum_col.val[2], vget_low_u16(tmp_sum.val[1])),
+                        vaddw_u16(sum_col.val[3], vget_high_u16(tmp_sum.val[1]))
                     }
                 };
 
@@ -394,14 +394,14 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
             // This for loop perfoms the leftover accumulations
             for(; i < _k; ++i)
             {
-                const int8x16_t b0_s8 = vld1q_s8(matrix_b + 0 * in_b_stride);
+                const uint8x16_t b0_u8 = vld1q_u8(matrix_b + 0 * in_b_stride);
 
                 // Convert S8 to S16
-                const int16x8x2_t b0_s16 =
+                const uint16x8x2_t b0_u16 =
                 {
                     {
-                        vmovl_s8(vget_low_s8(b0_s8)),
-                        vmovl_s8(vget_high_s8(b0_s8))
+                        vmovl_u8(vget_low_u8(b0_u8)),
+                        vmovl_u8(vget_high_u8(b0_u8))
                     }
                 };
 
@@ -409,10 +409,10 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
                 sum_col =
                 {
                     {
-                        vaddw_s16(sum_col.val[0], vget_low_s16(b0_s16.val[0])),
-                        vaddw_s16(sum_col.val[1], vget_high_s16(b0_s16.val[0])),
-                        vaddw_s16(sum_col.val[2], vget_low_s16(b0_s16.val[1])),
-                        vaddw_s16(sum_col.val[3], vget_high_s16(b0_s16.val[1]))
+                        vaddw_u16(sum_col.val[0], vget_low_u16(b0_u16.val[0])),
+                        vaddw_u16(sum_col.val[1], vget_high_u16(b0_u16.val[0])),
+                        vaddw_u16(sum_col.val[2], vget_low_u16(b0_u16.val[1])),
+                        vaddw_u16(sum_col.val[3], vget_high_u16(b0_u16.val[1]))
                     }
                 };
 
@@ -421,10 +421,10 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
 
             auto vector_sum_col = reinterpret_cast<int32_t *>(out.ptr());
 
-            vst1q_s32(vector_sum_col + 0, sum_col.val[0]);
-            vst1q_s32(vector_sum_col + 4, sum_col.val[1]);
-            vst1q_s32(vector_sum_col + 8, sum_col.val[2]);
-            vst1q_s32(vector_sum_col + 12, sum_col.val[3]);
+            vst1q_s32(vector_sum_col + 0, vreinterpretq_s32_u32(sum_col.val[0]));
+            vst1q_s32(vector_sum_col + 4, vreinterpretq_s32_u32(sum_col.val[1]));
+            vst1q_s32(vector_sum_col + 8, vreinterpretq_s32_u32(sum_col.val[2]));
+            vst1q_s32(vector_sum_col + 12, vreinterpretq_s32_u32(sum_col.val[3]));
         },
         inb, out);
     }

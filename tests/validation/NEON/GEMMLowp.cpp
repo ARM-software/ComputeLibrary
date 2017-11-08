@@ -23,12 +23,15 @@
  */
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMLowp.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeGEMMLowpDataset.h"
+#include "tests/datasets/ShapeDatasets.h"
 #include "tests/datasets/SmallGEMMLowpDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -45,15 +48,12 @@ namespace validation
 {
 namespace
 {
-const auto data_int_blk         = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12) * framework::dataset::make("by", 8, 13) * framework::dataset::make("block", 4, 9);
-const auto data_int_blk_tr      = framework::dataset::make("M", 8, 17) * framework::dataset::make("N", 8, 14) * framework::dataset::make("by", 12) * framework::dataset::make("block", 4);
-const auto data_matrix_multiply = framework::dataset::make("M", 12, 20) * framework::dataset::make("N", 12, 20) * framework::dataset::make("K", 16);
+const auto data_int_blk    = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12) * framework::dataset::make("by", 8, 13) * framework::dataset::make("block", 4, 9);
+const auto data_int_blk_tr = framework::dataset::make("M", 8, 17) * framework::dataset::make("N", 8, 14) * framework::dataset::make("by", 12) * framework::dataset::make("block", 4);
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(GEMMLowp)
-
-TEST_SUITE(S8)
 
 TEST_SUITE(INTERLEAVE_BLOCKED)
 
@@ -77,50 +77,95 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleaveBlockedTransposedFixture, frame
 
 TEST_SUITE_END()
 
-using NEGEMMLowpOffsetFixture = GEMMLowpOffsetValidationFixture<Tensor, Accessor, NEGEMMLowp>;
+TEST_SUITE(MatrixMultiplyCore)
+using NEGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()), framework::dataset::make("DataType",
-                                                                   DataType::S8)),
-               shape_a, shape_b, shape_c, a_offset, b_offset, c_offset, c_mult_int, out_shift, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
+               shape_a, shape_b, shape_c, a_offset, b_offset)
 {
     // Create tensors
-    Tensor a = create_tensor<Tensor>(shape_a, data_type);
-    Tensor b = create_tensor<Tensor>(shape_b, data_type);
-    Tensor c = create_tensor<Tensor>(shape_c, data_type);
+    Tensor a = create_tensor<Tensor>(shape_a, DataType::QASYMM8);
+    Tensor b = create_tensor<Tensor>(shape_b, DataType::QASYMM8);
+    Tensor c = create_tensor<Tensor>(shape_c, DataType::S32);
+
+    a.info()->set_quantization_info(QuantizationInfo(1.0f / 255, a_offset));
+    b.info()->set_quantization_info(QuantizationInfo(1.0f / 255, b_offset));
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
-    NEGEMMLowp gemmlowp;
-    gemmlowp.configure(&a, &b, &c, a_offset, b_offset, c_offset, c_mult_int, out_shift);
+    NEGEMMLowpMatrixMultiplyCore gemmlowp_mm;
+    gemmlowp_mm.configure(&a, &b, &c);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpOffsetFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), framework::dataset::make("DataType", DataType::S8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpOffsetFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMLowpDataset(), framework::dataset::make("DataType", DataType::S8)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFixture, framework::DatasetMode::NIGHTLY, datasets::LargeGEMMLowpDataset())
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END() // U8
 
-TEST_SUITE(S32)
-using NEGEMMLowpMatrixMultiplyFixture = GEMMLowpMatrixMultiplyValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
-FIXTURE_DATA_TEST_CASE(MatrixMultiply, NEGEMMLowpMatrixMultiplyFixture, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)
+TEST_SUITE_END() // MatrixMultiplyCore
+
+TEST_SUITE(OutputStage)
+
+TEST_SUITE(QuantizeDownInt32ToUint8Scale)
+
+using NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture = GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture<Tensor, Accessor, NEGEMMLowpQuantizeDownInt32ToUint8Scale>;
+
+const auto quantize_down_int32_to_uint8_scale_cases = framework::dataset::make("result_offset", -4, 4) * framework::dataset::make("result_mult_int", 1, 3) * framework::dataset::make("result_shift", 2,
+                                                      4);
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), quantize_down_int32_to_uint8_scale_cases),
+               shape, result_offset, result_mult_int, result_shift)
+{
+    // Create tensors
+    Tensor in  = create_tensor<Tensor>(shape, DataType::S32);
+    Tensor out = create_tensor<Tensor>(shape, DataType::QASYMM8);
+
+    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(out.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    NEGEMMLowpQuantizeDownInt32ToUint8Scale output_stage;
+    output_stage.configure(&in, &out, result_offset, result_mult_int, result_shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(in.info()->valid_region(), valid_region);
+    validate(out.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(in.info()->padding(), padding);
+    validate(out.info()->padding(), padding);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_uint8_scale_cases))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), quantize_down_int32_to_uint8_scale_cases))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+TEST_SUITE_END() // QuantizeDownInt32ToUint8Scale
+
+TEST_SUITE_END() // OutputStage
+
+TEST_SUITE_END() // GEMMLowp
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

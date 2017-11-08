@@ -132,7 +132,8 @@ NEGEMMInterleave4x4Kernel::NEGEMMInterleave4x4Kernel()
 
 void NEGEMMInterleave4x4Kernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16,
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::U8, DataType::S8, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
+                                                  DataType::F16,
                                                   DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 

@@ -23,7 +23,6 @@
  */
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMLowp.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"

@@ -52,7 +52,7 @@ NEGEMMLowpMatrixMultiplyKernel::NEGEMMLowpMatrixMultiplyKernel()
 
 void NEGEMMLowpMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor *input1, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::S8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
 
@@ -127,115 +127,115 @@ void NEGEMMLowpMatrixMultiplyKernel::run(const Window &window, const ThreadInfo 
     // All the values needed for computing a single 4x4 block will be read from consecutive memory positions
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        auto *mtx_a0 = reinterpret_cast<const int8_t *>(ina.ptr());
-        auto *mtx_b0 = reinterpret_cast<const int8_t *>(inb.ptr());
+        const uint8_t *mtx_a0 = ina.ptr();
+        const uint8_t *mtx_b0 = inb.ptr();
 
         // Note: Since the input are all positives, we can use uint32_t
         // Accumulators for the block 0
-        int32x4x4_t c0 =
+        uint32x4x4_t c0 =
         {
             {
-                vdupq_n_s32(0),
-                vdupq_n_s32(0),
-                vdupq_n_s32(0),
-                vdupq_n_s32(0)
+                vdupq_n_u32(0),
+                vdupq_n_u32(0),
+                vdupq_n_u32(0),
+                vdupq_n_u32(0)
             }
         };
 
         // Accumulators for the block 1
-        int32x4x4_t c1 =
+        uint32x4x4_t c1 =
         {
             {
-                vdupq_n_s32(0),
-                vdupq_n_s32(0),
-                vdupq_n_s32(0),
-                vdupq_n_s32(0)
+                vdupq_n_u32(0),
+                vdupq_n_u32(0),
+                vdupq_n_u32(0),
+                vdupq_n_u32(0)
             }
         };
 
         // Accumulators for the block 2
-        int32x4x4_t c2 =
+        uint32x4x4_t c2 =
         {
             {
-                vdupq_n_s32(0),
-                vdupq_n_s32(0),
-                vdupq_n_s32(0),
-                vdupq_n_s32(0)
+                vdupq_n_u32(0),
+                vdupq_n_u32(0),
+                vdupq_n_u32(0),
+                vdupq_n_u32(0)
             }
         };
 
         // Accumulators for the block 3
-        int32x4x4_t c3 =
+        uint32x4x4_t c3 =
         {
             {
-                vdupq_n_s32(0),
-                vdupq_n_s32(0),
-                vdupq_n_s32(0),
-                vdupq_n_s32(0)
+                vdupq_n_u32(0),
+                vdupq_n_u32(0),
+                vdupq_n_u32(0),
+                vdupq_n_u32(0)
             }
         };
 
         for(int k = 0; k < width_b; k += 16, mtx_a0 += 4, mtx_b0 += 16)
         {
-            const int8x8_t  a00_s8 = vld1_s8(mtx_a0);
-            const int8x16_t b00_s8 = vld1q_s8(mtx_b0);
+            const uint8x8_t  a00_u8 = vld1_u8(mtx_a0);
+            const uint8x16_t b00_u8 = vld1q_u8(mtx_b0);
 
             // Convert a00_s8 to uint16_t and get the lower part
-            const int16x4_t a00_s16 = vget_low_s16(vmovl_s8(a00_s8));
+            const uint16x4_t a00_u16 = vget_low_u16(vmovl_u8(a00_u8));
 
-            // Convert b00_s8 to int16_t
-            const int16x4x4_t b00_s16 =
+            // Convert b00_s8 to uint16_t
+            const uint16x4x4_t b00_u16 =
             {
                 {
-                    vget_low_s16(vmovl_s8(vget_low_s8(b00_s8))),
-                    vget_high_s16(vmovl_s8(vget_low_s8(b00_s8))),
-                    vget_low_s16(vmovl_s8(vget_high_s8(b00_s8))),
-                    vget_high_s16(vmovl_s8(vget_high_s8(b00_s8)))
+                    vget_low_u16(vmovl_u8(vget_low_u8(b00_u8))),
+                    vget_high_u16(vmovl_u8(vget_low_u8(b00_u8))),
+                    vget_low_u16(vmovl_u8(vget_high_u8(b00_u8))),
+                    vget_high_u16(vmovl_u8(vget_high_u8(b00_u8)))
                 }
             };
 
             // 4x4 block 0
-            c0.val[0] = vmlal_lane_s16(c0.val[0], b00_s16.val[0], a00_s16, 0);
-            c0.val[1] = vmlal_lane_s16(c0.val[1], b00_s16.val[1], a00_s16, 0);
-            c0.val[2] = vmlal_lane_s16(c0.val[2], b00_s16.val[2], a00_s16, 0);
-            c0.val[3] = vmlal_lane_s16(c0.val[3], b00_s16.val[3], a00_s16, 0);
+            c0.val[0] = vmlal_lane_u16(c0.val[0], b00_u16.val[0], a00_u16, 0);
+            c0.val[1] = vmlal_lane_u16(c0.val[1], b00_u16.val[1], a00_u16, 0);
+            c0.val[2] = vmlal_lane_u16(c0.val[2], b00_u16.val[2], a00_u16, 0);
+            c0.val[3] = vmlal_lane_u16(c0.val[3], b00_u16.val[3], a00_u16, 0);
 
             // 4x4 block 1
-            c1.val[0] = vmlal_lane_s16(c1.val[0], b00_s16.val[0], a00_s16, 1);
-            c1.val[1] = vmlal_lane_s16(c1.val[1], b00_s16.val[1], a00_s16, 1);
-            c1.val[2] = vmlal_lane_s16(c1.val[2], b00_s16.val[2], a00_s16, 1);
-            c1.val[3] = vmlal_lane_s16(c1.val[3], b00_s16.val[3], a00_s16, 1);
+            c1.val[0] = vmlal_lane_u16(c1.val[0], b00_u16.val[0], a00_u16, 1);
+            c1.val[1] = vmlal_lane_u16(c1.val[1], b00_u16.val[1], a00_u16, 1);
+            c1.val[2] = vmlal_lane_u16(c1.val[2], b00_u16.val[2], a00_u16, 1);
+            c1.val[3] = vmlal_lane_u16(c1.val[3], b00_u16.val[3], a00_u16, 1);
 
             // 4x4 block 2
-            c2.val[0] = vmlal_lane_s16(c2.val[0], b00_s16.val[0], a00_s16, 2);
-            c2.val[1] = vmlal_lane_s16(c2.val[1], b00_s16.val[1], a00_s16, 2);
-            c2.val[2] = vmlal_lane_s16(c2.val[2], b00_s16.val[2], a00_s16, 2);
-            c2.val[3] = vmlal_lane_s16(c2.val[3], b00_s16.val[3], a00_s16, 2);
+            c2.val[0] = vmlal_lane_u16(c2.val[0], b00_u16.val[0], a00_u16, 2);
+            c2.val[1] = vmlal_lane_u16(c2.val[1], b00_u16.val[1], a00_u16, 2);
+            c2.val[2] = vmlal_lane_u16(c2.val[2], b00_u16.val[2], a00_u16, 2);
+            c2.val[3] = vmlal_lane_u16(c2.val[3], b00_u16.val[3], a00_u16, 2);
 
             // 4x4 block 3
-            c3.val[0] = vmlal_lane_s16(c3.val[0], b00_s16.val[0], a00_s16, 3);
-            c3.val[1] = vmlal_lane_s16(c3.val[1], b00_s16.val[1], a00_s16, 3);
-            c3.val[2] = vmlal_lane_s16(c3.val[2], b00_s16.val[2], a00_s16, 3);
-            c3.val[3] = vmlal_lane_s16(c3.val[3], b00_s16.val[3], a00_s16, 3);
+            c3.val[0] = vmlal_lane_u16(c3.val[0], b00_u16.val[0], a00_u16, 3);
+            c3.val[1] = vmlal_lane_u16(c3.val[1], b00_u16.val[1], a00_u16, 3);
+            c3.val[2] = vmlal_lane_u16(c3.val[2], b00_u16.val[2], a00_u16, 3);
+            c3.val[3] = vmlal_lane_u16(c3.val[3], b00_u16.val[3], a00_u16, 3);
         }
 
         auto mtx_out = reinterpret_cast<int32_t *>(out.ptr());
-        vst1q_s32(mtx_out + 0 * out_stride + 0, c0.val[0]);
-        vst1q_s32(mtx_out + 0 * out_stride + 4, c0.val[1]);
-        vst1q_s32(mtx_out + 0 * out_stride + 8, c0.val[2]);
-        vst1q_s32(mtx_out + 0 * out_stride + 12, c0.val[3]);
-        vst1q_s32(mtx_out + 1 * out_stride + 0, c1.val[0]);
-        vst1q_s32(mtx_out + 1 * out_stride + 4, c1.val[1]);
-        vst1q_s32(mtx_out + 1 * out_stride + 8, c1.val[2]);
-        vst1q_s32(mtx_out + 1 * out_stride + 12, c1.val[3]);
-        vst1q_s32(mtx_out + 2 * out_stride + 0, c2.val[0]);
-        vst1q_s32(mtx_out + 2 * out_stride + 4, c2.val[1]);
-        vst1q_s32(mtx_out + 2 * out_stride + 8, c2.val[2]);
-        vst1q_s32(mtx_out + 2 * out_stride + 12, c2.val[3]);
-        vst1q_s32(mtx_out + 3 * out_stride + 0, c3.val[0]);
-        vst1q_s32(mtx_out + 3 * out_stride + 4, c3.val[1]);
-        vst1q_s32(mtx_out + 3 * out_stride + 8, c3.val[2]);
-        vst1q_s32(mtx_out + 3 * out_stride + 12, c3.val[3]);
+        vst1q_s32(mtx_out + 0 * out_stride + 0, vreinterpretq_s32_u32(c0.val[0]));
+        vst1q_s32(mtx_out + 0 * out_stride + 4, vreinterpretq_s32_u32(c0.val[1]));
+        vst1q_s32(mtx_out + 0 * out_stride + 8, vreinterpretq_s32_u32(c0.val[2]));
+        vst1q_s32(mtx_out + 0 * out_stride + 12, vreinterpretq_s32_u32(c0.val[3]));
+        vst1q_s32(mtx_out + 1 * out_stride + 0, vreinterpretq_s32_u32(c1.val[0]));
+        vst1q_s32(mtx_out + 1 * out_stride + 4, vreinterpretq_s32_u32(c1.val[1]));
+        vst1q_s32(mtx_out + 1 * out_stride + 8, vreinterpretq_s32_u32(c1.val[2]));
+        vst1q_s32(mtx_out + 1 * out_stride + 12, vreinterpretq_s32_u32(c1.val[3]));
+        vst1q_s32(mtx_out + 2 * out_stride + 0, vreinterpretq_s32_u32(c2.val[0]));
+        vst1q_s32(mtx_out + 2 * out_stride + 4, vreinterpretq_s32_u32(c2.val[1]));
+        vst1q_s32(mtx_out + 2 * out_stride + 8, vreinterpretq_s32_u32(c2.val[2]));
+        vst1q_s32(mtx_out + 2 * out_stride + 12, vreinterpretq_s32_u32(c2.val[3]));
+        vst1q_s32(mtx_out + 3 * out_stride + 0, vreinterpretq_s32_u32(c3.val[0]));
+        vst1q_s32(mtx_out + 3 * out_stride + 4, vreinterpretq_s32_u32(c3.val[1]));
+        vst1q_s32(mtx_out + 3 * out_stride + 8, vreinterpretq_s32_u32(c3.val[2]));
+        vst1q_s32(mtx_out + 3 * out_stride + 12, vreinterpretq_s32_u32(c3.val[3]));
     },
     ina, inb, out);
 }
