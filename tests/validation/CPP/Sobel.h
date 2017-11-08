@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "tests/SimpleTensor.h"
+#include "tests/Types.h"
 
 namespace arm_compute
 {
@@ -36,7 +37,7 @@ namespace validation
 namespace reference
 {
 template <typename T, typename U>
-std::pair<SimpleTensor<T>, SimpleTensor<T>> sobel(const SimpleTensor<U> &src, int filter_size, BorderMode border_mode, uint8_t constant_border_value = 0);
+std::pair<SimpleTensor<T>, SimpleTensor<T>> sobel(const SimpleTensor<U> &src, int filter_size, BorderMode border_mode, uint8_t constant_border_value, GradientDimension gradient_dimension);
 } // namespace reference
 } // namespace validation
 } // namespace test

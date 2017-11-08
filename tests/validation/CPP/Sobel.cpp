@@ -103,7 +103,7 @@ struct data_type<int>
 } // namespace
 
 template <typename T, typename U>
-std::pair<SimpleTensor<T>, SimpleTensor<T>> sobel(const SimpleTensor<U> &src, int filter_size, BorderMode border_mode, uint8_t constant_border_value)
+std::pair<SimpleTensor<T>, SimpleTensor<T>> sobel(const SimpleTensor<U> &src, int filter_size, BorderMode border_mode, uint8_t constant_border_value, GradientDimension gradient_dimension)
 {
     SimpleTensor<T> dst_x(src.shape(), data_type<T>::value, src.num_channels());
     SimpleTensor<T> dst_y(src.shape(), data_type<T>::value, src.num_channels());
@@ -118,18 +118,34 @@ std::pair<SimpleTensor<T>, SimpleTensor<T>> sobel(const SimpleTensor<U> &src, in
         {
             continue;
         }
-
-        apply_2d_spatial_filter(coord, src, dst_x, TensorShape{ static_cast<unsigned int>(filter_size), static_cast<unsigned int>(filter_size) }, masks.at(filter_size).first, 1.f, border_mode,
-                                constant_border_value);
-        apply_2d_spatial_filter(coord, src, dst_y, TensorShape{ static_cast<unsigned int>(filter_size), static_cast<unsigned int>(filter_size) }, masks.at(filter_size).second, 1.f, border_mode,
-                                constant_border_value);
+        switch(gradient_dimension)
+        {
+            case GradientDimension::GRAD_X:
+                apply_2d_spatial_filter(coord, src, dst_x, TensorShape{ static_cast<unsigned int>(filter_size), static_cast<unsigned int>(filter_size) }, masks.at(filter_size).first, 1.f, border_mode,
+                                        constant_border_value);
+                break;
+            case GradientDimension::GRAD_Y:
+                apply_2d_spatial_filter(coord, src, dst_y, TensorShape{ static_cast<unsigned int>(filter_size), static_cast<unsigned int>(filter_size) }, masks.at(filter_size).second, 1.f, border_mode,
+                                        constant_border_value);
+                break;
+            case GradientDimension::GRAD_XY:
+                apply_2d_spatial_filter(coord, src, dst_x, TensorShape{ static_cast<unsigned int>(filter_size), static_cast<unsigned int>(filter_size) }, masks.at(filter_size).first, 1.f, border_mode,
+                                        constant_border_value);
+                apply_2d_spatial_filter(coord, src, dst_y, TensorShape{ static_cast<unsigned int>(filter_size), static_cast<unsigned int>(filter_size) }, masks.at(filter_size).second, 1.f, border_mode,
+                                        constant_border_value);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Gradient dimension not supported");
+        }
     }
 
     return std::make_pair(dst_x, dst_y);
 }
 
-template std::pair<SimpleTensor<int16_t>, SimpleTensor<int16_t>> sobel(const SimpleTensor<uint8_t> &src, int filter_size, BorderMode border_mode, uint8_t constant_border_value);
-template std::pair<SimpleTensor<int>, SimpleTensor<int>> sobel(const SimpleTensor<uint8_t> &src, int filter_size, BorderMode border_mode, uint8_t constant_border_value);
+template std::pair<SimpleTensor<int16_t>, SimpleTensor<int16_t>> sobel(const SimpleTensor<uint8_t> &src, int filter_size, BorderMode border_mode, uint8_t constant_border_value,
+                                                                       GradientDimension gradient_dimension);
+template std::pair<SimpleTensor<int>, SimpleTensor<int>> sobel(const SimpleTensor<uint8_t> &src, int filter_size, BorderMode border_mode, uint8_t constant_border_value,
+                                                               GradientDimension gradient_dimension);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -45,7 +45,7 @@ std::tuple<SimpleTensor<T>, SimpleTensor<T>, float> compute_sobel(const SimpleTe
     SimpleTensor<T> grad_y;
     float           norm_factor = 0.f;
 
-    std::tie(grad_x, grad_y) = sobel<T>(src, gradient_size, border_mode, constant_border_value);
+    std::tie(grad_x, grad_y) = sobel<T>(src, gradient_size, border_mode, constant_border_value, GradientDimension::GRAD_XY);
 
     switch(gradient_size)
     {
