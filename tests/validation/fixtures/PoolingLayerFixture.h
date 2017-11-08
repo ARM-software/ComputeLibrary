@@ -43,27 +43,33 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class PoolingLayerValidationFixedPointFixture : public framework::Fixture
+class PoolingLayerValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, int fractional_bits)
+    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding,
+               DataType data_type, int fractional_bits, QuantizationInfo quantization_info)
     {
-        _fractional_bits = fractional_bits;
+        _fractional_bits   = fractional_bits;
+        _quantization_info = quantization_info;
         PoolingLayerInfo info(pool_type, pool_size, pad_stride_info, exclude_padding);
 
-        _target    = compute_target(shape, info, data_type, fractional_bits);
-        _reference = compute_reference(shape, info, data_type, fractional_bits);
+        _target    = compute_target(shape, info, data_type, fractional_bits, quantization_info);
+        _reference = compute_reference(shape, info, data_type, fractional_bits, quantization_info);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(_fractional_bits == 0)
+        if(!is_data_type_quantized(tensor.data_type()))
         {
             std::uniform_real_distribution<> distribution(-1.f, 1.f);
             library->fill(tensor, distribution, 0);
+        }
+        else if(is_data_type_quantized_asymmetric(tensor.data_type()))
+        {
+            library->fill_tensor_uniform(tensor, 0);
         }
         else
         {
@@ -73,10 +79,11 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &shape, PoolingLayerInfo info, DataType data_type, int fixed_point_position = 0)
+    TensorType compute_target(const TensorShape &shape, PoolingLayerInfo info,
+                              DataType data_type, int fixed_point_position, QuantizationInfo quantization_info)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position);
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, quantization_info);
         TensorType dst;
 
         // Create and configure function
@@ -102,10 +109,11 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, PoolingLayerInfo info, DataType data_type, int fixed_point_position = 0)
+    SimpleTensor<T> compute_reference(const TensorShape &shape, PoolingLayerInfo info,
+                                      DataType data_type, int fixed_point_position, QuantizationInfo quantization_info)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position };
+        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position, quantization_info };
 
         // Fill reference
         fill(src);
@@ -113,30 +121,56 @@ protected:
         return reference::pooling_layer<T>(src, info);
     }
 
-    TensorType      _target{};
-    SimpleTensor<T> _reference{};
-    int             _fractional_bits{};
+    TensorType       _target{};
+    SimpleTensor<T>  _reference{};
+    int              _fractional_bits{};
+    QuantizationInfo _quantization_info{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class PoolingLayerValidationFixture : public PoolingLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
+class PoolingLayerValidationFixture : public PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type)
     {
-        PoolingLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, pool_size, pad_stride_info, exclude_padding, data_type, 0);
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, pool_size, pad_stride_info, exclude_padding,
+                                                                                               data_type, 0, QuantizationInfo());
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class GlobalPoolingLayerValidationFixture : public PoolingLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
+class PoolingLayerValidationFixedPointFixture : public PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, int fractional_bits)
+    {
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, pool_size, pad_stride_info, exclude_padding,
+                                                                                               data_type, fractional_bits, QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class PoolingLayerValidationQuantizedFixture : public PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, QuantizationInfo quantization_info)
+    {
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, pool_size, pad_stride_info, exclude_padding,
+                                                                                               data_type, 0, quantization_info);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class GlobalPoolingLayerValidationFixture : public PoolingLayerValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, DataType data_type)
     {
-        PoolingLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, shape.x(), PadStrideInfo(1, 1, 0, 0), true, data_type, 0);
+        PoolingLayerValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, pool_type, shape.x(), PadStrideInfo(1, 1, 0, 0), true, data_type);
     }
 };
 } // namespace validation

@@ -120,7 +120,7 @@ struct QuantizationInfo
     float dequantize(uint8_t value) const
     {
         ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::dequantize: scale == 0");
-        float dequantized = (value - offset) * scale;
+        float dequantized = (static_cast<int>(value) - offset) * scale;
         return dequantized;
     }
 

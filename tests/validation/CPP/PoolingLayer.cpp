@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "tests/validation/FixedPoint.h"
+#include "tests/validation/Helpers.h"
 
 namespace arm_compute
 {
@@ -274,6 +275,15 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
         }
     }
 
+    return dst;
+}
+
+template <>
+SimpleTensor<uint8_t> pooling_layer<uint8_t>(const SimpleTensor<uint8_t> &src, PoolingLayerInfo info)
+{
+    SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
+    SimpleTensor<float>   dst_tmp = pooling_layer<float>(src_tmp, info);
+    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, src.quantization_info());
     return dst;
 }
 

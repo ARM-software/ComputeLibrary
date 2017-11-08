@@ -62,7 +62,7 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
 
     // Configure kernels
     // TODO (COMPMID-661): Remove legacy path once the new one is properly validated
-    _run_legacy_path = is_data_type_quantized_assymetric(input->info()->data_type());
+    _run_legacy_path = is_data_type_quantized_asymmetric(input->info()->data_type());
     if(_run_legacy_path)
     {
         _max_kernel.configure(input, &_max);

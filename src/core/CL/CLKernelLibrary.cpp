@@ -271,9 +271,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "pixelwise_mul_int", "pixelwise_mul_int.cl" },
     { "pooling_layer_2", "pooling_layer.cl" },
     { "pooling_layer_3", "pooling_layer.cl" },
-    { "pooling_layer_3_optimized", "pooling_layer.cl" },
+    { "pooling_layer_optimized_3", "pooling_layer.cl" },
     { "pooling_layer_7", "pooling_layer.cl" },
     { "pooling_layer_N", "pooling_layer.cl" },
+    { "pooling_layer_N_quantized", "pooling_layer_quantized.cl" },
     { "quantization_layer", "quantization_layer.cl" },
     { "reduction_operation", "reduction_operation.cl" },
     { "remap_nearest_neighbour", "remap.cl" },
@@ -544,6 +545,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "pooling_layer.cl",
 #include "./cl_kernels/pooling_layer.clembed"
+    },
+    {
+        "pooling_layer_quantized.cl",
+#include "./cl_kernels/pooling_layer_quantized.clembed"
     },
     {
         "quantization_layer.cl",

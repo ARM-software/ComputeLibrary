@@ -477,6 +477,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
     switch(tensor.data_type())
     {
         case DataType::U8:
+        case DataType::QASYMM8:
         {
             std::uniform_int_distribution<uint8_t> distribution_u8(std::numeric_limits<uint8_t>::lowest(), std::numeric_limits<uint8_t>::max());
             fill(tensor, distribution_u8, seed_offset);
@@ -564,6 +565,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
     switch(tensor.data_type())
     {
         case DataType::U8:
+        case DataType::QASYMM8:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<uint8_t, D>::value));
             std::uniform_int_distribution<uint8_t> distribution_u8(low, high);

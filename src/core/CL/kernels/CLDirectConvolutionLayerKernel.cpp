@@ -84,7 +84,12 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     output_shape.set(2, weights->info()->dimension(3));
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(),
+                       output_shape,
+                       1,
+                       input->info()->data_type(),
+                       input->info()->fixed_point_position(),
+                       input->info()->quantization_info());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -176,7 +181,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     else
     {
         bool     is_quantized_fixed_point = is_data_type_fixed_point(data_type);
-        bool     is_quantized_asymm       = is_data_type_quantized_assymetric(data_type);
+        bool     is_quantized_asymm       = is_data_type_quantized_asymmetric(data_type);
         DataType promoted_type            = (is_quantized_fixed_point) ? get_promoted_data_type(data_type) : data_type;
 
         build_options.add_option_if(is_quantized_asymm, std::string("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size)));
@@ -220,7 +225,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     }
 
     // Set static kernel arguments
-    if(is_data_type_quantized_assymetric(data_type))
+    if(is_data_type_quantized_asymmetric(data_type))
     {
         int output_multiplier = 0;
         int output_shift      = 0;
