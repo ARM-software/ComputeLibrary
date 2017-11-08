@@ -51,10 +51,10 @@ public:
         std::mt19937                           gen(library->seed());
         std::uniform_int_distribution<uint8_t> distribution(0, 255);
         const uint8_t                          constant_border_value = distribution(gen);
-        _border_mode                                                 = border_mode;
 
-        _target    = compute_target(shape, data_type, border_mode, constant_border_value);
-        _reference = compute_reference(shape, data_type, border_mode, constant_border_value);
+        _border_mode = border_mode;
+        _target      = compute_target(shape, data_type, border_mode, constant_border_value);
+        _reference   = compute_reference(shape, data_type, border_mode, constant_border_value);
     }
 
 protected:
