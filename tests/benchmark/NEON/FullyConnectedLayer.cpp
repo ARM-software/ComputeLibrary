@@ -93,7 +93,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5FullyConnectedLayer, NEFullyConnectedLayer
 REGISTER_FIXTURE_DATA_TEST_CASE(VGG16FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::VGG16FullyConnectedLayerDataset(),
                                                                                         data_types),
-                                                            framework::dataset::make("Batches", { 4, 8 })));
+                                                            framework::dataset::make("Batches", { 2 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1FullyConnectedLayer, NEFullyConnectedLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1FullyConnectedLayerDataset(),

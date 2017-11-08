@@ -94,7 +94,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, NEPoolingLayerFixture, f
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(VGG16PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 2 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));

@@ -100,7 +100,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetConvolutionLayer, NEConvolutionLayerFi
 // 8 batches use about 2GB of memory which is too much for most devices!
 REGISTER_FIXTURE_DATA_TEST_CASE(VGG16ConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::VGG16ConvolutionLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 1, 4 })));
+                                                            framework::dataset::make("Batches", { 1, 2 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ConvolutionLayerDataset(), data_types),

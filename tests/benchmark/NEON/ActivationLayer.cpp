@@ -107,7 +107,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetActivationLayer, NEActivationLayerFixt
 
 REGISTER_FIXTURE_DATA_TEST_CASE(VGG16ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::VGG16ActivationLayerDataset(), data_types),
-                                                            framework::dataset::make("Batches", { 4, 8 })));
+                                                            framework::dataset::make("Batches", { 2 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ActivationLayerDataset(), data_types),
