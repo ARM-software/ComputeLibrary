@@ -87,12 +87,12 @@ bool EnumListOption<T>::parse(std::string value)
     _values.clear();
     _is_set = true;
 
-    try
-    {
-        std::stringstream stream{ value };
-        std::string       item;
+    std::stringstream stream{ value };
+    std::string       item;
 
-        while(!std::getline(stream, item, ',').fail())
+    while(!std::getline(stream, item, ',').fail())
+    {
+        try
         {
             std::stringstream item_stream(item);
             T                 typed_value{};
@@ -103,8 +103,8 @@ bool EnumListOption<T>::parse(std::string value)
             {
                 if(_allowed_values.count(typed_value) == 0)
                 {
-                    _values.clear();
-                    return false;
+                    _is_set = false;
+                    continue;
                 }
 
                 _values.emplace_back(typed_value);
@@ -112,13 +112,13 @@ bool EnumListOption<T>::parse(std::string value)
 
             _is_set = _is_set && !item_stream.fail();
         }
+        catch(const std::invalid_argument &)
+        {
+            _is_set = false;
+        }
+    }
 
-        return _is_set;
-    }
-    catch(const std::invalid_argument &)
-    {
-        return false;
-    }
+    return _is_set;
 }
 
 template <typename T>
