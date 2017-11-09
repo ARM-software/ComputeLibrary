@@ -28,6 +28,7 @@
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/graph/ITensorObject.h"
 #include "arm_compute/graph/Tensor.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "support/ToolchainSupport.h"
@@ -75,6 +76,11 @@ Graph::~Graph() //NOLINT
 Graph::Graph()
     : _pimpl{ new Private() }
 {
+    // Check if OpenCL is available and initialize the scheduler
+    if(opencl_is_available())
+    {
+        arm_compute::CLScheduler::get().default_init();
+    }
 }
 
 void Graph::run()
@@ -208,6 +214,10 @@ void Graph::add_tensor_object(std::unique_ptr<ITensorObject> tensor)
         _pimpl->configure(_pimpl->_current_hints); // Ignore _next_hint as this is the last node, and just use the same hint as before this node.
         _pimpl->_graph_output->allocate();
     }
+}
+bool Graph::opencl_is_available()
+{
+    return arm_compute::opencl_is_available();
 }
 
 void Graph::set_temp(TensorInfo &&tmp)

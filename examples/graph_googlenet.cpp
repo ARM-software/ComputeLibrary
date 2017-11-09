@@ -21,22 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL /* Needed by Utils.cpp to handle OpenCL exceptions properly */
-#error "This example needs to be built with -DARM_COMPUTE_CL"
-#endif /* ARM_COMPUTE_CL */
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Nodes.h"
 #include "arm_compute/graph/SubGraph.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/Scheduler.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
 
 #include <cstdlib>
-#include <iostream>
-#include <memory>
 #include <tuple>
 
 using namespace arm_compute::graph;
@@ -141,14 +134,15 @@ void main_graph_googlenet(int argc, const char **argv)
     }
 
     // Check if OpenCL is available and initialize the scheduler
-    if(arm_compute::opencl_is_available())
+    TargetHint hint = TargetHint::NEON;
+    if(Graph::opencl_is_available())
     {
-        arm_compute::CLScheduler::get().default_init();
+        hint = TargetHint::OPENCL;
     }
 
     Graph graph;
 
-    graph << TargetHint::OPENCL
+    graph << hint
           << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
                     get_input_accessor(image, mean_r, mean_g, mean_b))
           << ConvolutionLayer(

@@ -85,6 +85,7 @@ env.Append(CXXFLAGS = ['-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
          '-fpermissive','-std=gnu++11','-Wno-vla','-Woverloaded-virtual',
          '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow'])
+
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
 if os.environ.get('CXX', 'g++') == 'clang++':
@@ -185,7 +186,7 @@ if env['Werror']:
 
 if env['os'] == 'android':
     env.Append(CPPDEFINES = ['ANDROID'])
-    env.Append(LINKFLAGS = ['-pie', '-static-libstdc++'])
+    env.Append(LINKFLAGS = ['-pie'])
 elif env['os'] == 'bare_metal':
     env.Append(LINKFLAGS = ['-static'])
     env.Append(LINKFLAGS = ['-specs=rdimon.specs'])

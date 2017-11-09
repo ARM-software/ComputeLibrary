@@ -21,15 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CL /* Needed by Utils.cpp to handle OpenCL exceptions properly */
-#error "This example needs to be built with -DARM_COMPUTE_CL"
-#endif /* ARM_COMPUTE_CL */
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Nodes.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CPP/CPPScheduler.h"
-#include "arm_compute/runtime/Scheduler.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
@@ -40,7 +34,6 @@
 
 using namespace arm_compute::graph;
 using namespace arm_compute::graph_utils;
-using namespace arm_compute::logging;
 
 /** Example demonstrating how to implement AlexNet's network using the Compute Library's graph API
  *
@@ -86,9 +79,8 @@ void main_graph_alexnet(int argc, const char **argv)
 
     // Check if OpenCL is available and initialize the scheduler
     TargetHint hint = TargetHint::NEON;
-    if(arm_compute::opencl_is_available())
+    if(Graph::opencl_is_available())
     {
-        arm_compute::CLScheduler::get().default_init();
         hint = TargetHint::OPENCL;
     }
 

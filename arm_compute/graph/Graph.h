@@ -67,6 +67,9 @@ public:
      * @param[in] tensor Tensor to add
      */
     void add_tensor_object(std::unique_ptr<ITensorObject> tensor);
+    /** Finalizes the current node's configuration
+     */
+    static bool opencl_is_available();
     /** Manually sets the output of the current node
      *
      * @param[in] tmp Output info to set

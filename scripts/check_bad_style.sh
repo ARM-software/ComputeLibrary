@@ -45,7 +45,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly "#.*defined[^(]" $DIRECTORIES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly "#.*if.*defined[^(]" $DIRECTORIES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
