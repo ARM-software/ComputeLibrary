@@ -30,7 +30,8 @@ SConscript('./framework/SConscript', duplicate=0)
 # vars is imported from arm_compute:
 variables = [
     BoolVariable("validation_tests", "Build validation test programs", True),
-    BoolVariable("benchmark_tests", "Build benchmark test programs", True)
+    BoolVariable("benchmark_tests", "Build benchmark test programs", True),
+    ("test_filter", "Pattern to specify the tests' filenames to be compiled", "*.cpp")
 ]
 
 # We need a separate set of Variables for the Help message (Otherwise the global variables will get displayed twice)
@@ -89,22 +90,24 @@ files_validation += Glob('validation/UNIT/*.cpp')
 
 if env['opencl']:
     Import('opencl')
+    filter_pattern = test_env['test_filter']
 
     test_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
     test_env.Append(LIBS = ["OpenCL"])
 
-    files_benchmark += Glob('benchmark/CL/*/*.cpp')
-    files_benchmark += Glob('benchmark/CL/*.cpp')
+    files_benchmark += Glob('benchmark/CL/*/' + filter_pattern)
+    files_benchmark += Glob('benchmark/CL/' + filter_pattern)
 
-    files_validation += Glob('validation/CL/*/*.cpp')
-    files_validation += Glob('validation/CL/*.cpp')
+    files_validation += Glob('validation/CL/*/' + filter_pattern)
+    files_validation += Glob('validation/CL/' + filter_pattern)
 
 if env['neon']:
-    files_benchmark += Glob('benchmark/NEON/*/*.cpp')
-    files_benchmark += Glob('benchmark/NEON/*.cpp')
+    filter_pattern = test_env['test_filter']
+    files_benchmark += Glob('benchmark/NEON/*/' + filter_pattern)
+    files_benchmark += Glob('benchmark/NEON/' + filter_pattern)
 
-    files_validation += Glob('validation/NEON/*/*.cpp')
-    files_validation += Glob('validation/NEON/*.cpp')
+    files_validation += Glob('validation/NEON/*/' + filter_pattern)
+    files_validation += Glob('validation/NEON/' + filter_pattern)
 
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
