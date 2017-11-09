@@ -104,6 +104,16 @@ struct QuantizationInfo
     {
     }
 
+    bool operator==(const QuantizationInfo &other)
+    {
+        return scale == other.scale && offset == other.offset;
+    }
+
+    bool operator!=(const QuantizationInfo &other)
+    {
+        return !(*this == other);
+    }
+
     float scale;  /**< scale */
     int   offset; /**< offset */
 

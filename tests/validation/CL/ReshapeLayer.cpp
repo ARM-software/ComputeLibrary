@@ -67,6 +67,14 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(Integer)
+TEST_SUITE(U8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", { DataType::U8, DataType::QASYMM8 })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+
 TEST_SUITE(S8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S8)))
 {
