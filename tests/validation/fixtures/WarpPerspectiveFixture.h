@@ -70,9 +70,9 @@ public:
 
 protected:
     template <typename U>
-    void fill(U &&tensor, int i = 0)
+    void fill(U &&tensor)
     {
-        library->fill_tensor_uniform(tensor, i);
+        library->fill_tensor_uniform(tensor, 0);
     }
 
     TensorType compute_target(const TensorShape &shape, const TensorShape &vmask_shape, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value,
@@ -112,19 +112,21 @@ protected:
 
         // Create reference
         SimpleTensor<T> src{ shape, data_type };
-        SimpleTensor<T> valid_mask{ vmask_shape, data_type };
+
+        // Create the valid mask Tensor
+        _valid_mask = SimpleTensor<T>(shape, data_type);
 
         // Fill reference
-        fill(src, 0);
-        fill(valid_mask, 1);
+        fill(src);
 
         // Compute reference
-        return reference::warp_perspective<T>(src, valid_mask, matrix, policy, border_mode, constant_border_value);
+        return reference::warp_perspective<T>(src, _valid_mask, matrix, policy, border_mode, constant_border_value);
     }
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
     BorderMode      _border_mode{};
+    SimpleTensor<T> _valid_mask{};
 };
 } // namespace validation
 } // namespace test
