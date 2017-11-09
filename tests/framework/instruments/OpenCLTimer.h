@@ -21,12 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "Instruments.h"
+#ifndef ARM_COMPUTE_TEST_OPENCL_TIMER
+#define ARM_COMPUTE_TEST_OPENCL_TIMER
 
-#include "../Utils.h"
+#include "Instrument.h"
 
-#include <map>
-#include <stdexcept>
+#ifdef ARM_COMPUTE_CL
+#include "arm_compute/core/CL/OpenCL.h"
+#endif /* ARM_COMPUTE_CL */
+
+#include <list>
 
 namespace arm_compute
 {
@@ -34,29 +38,26 @@ namespace test
 {
 namespace framework
 {
-InstrumentType instrument_type_from_name(const std::string &name)
+/** Instrument creating measurements based on the information returned by clGetEventProfilingInfo for each OpenCL kernel executed*/
+class OpenCLTimer : public Instrument
 {
-    static const std::map<std::string, InstrumentType> types =
+public:
+    OpenCLTimer();
+    std::string     id() const override;
+    void            start() override;
+    void            stop() override;
+    MeasurementsMap measurements() const override;
+#ifdef ARM_COMPUTE_CL
+    struct kernel_info
     {
-        { "all", InstrumentType::ALL },
-        { "none", InstrumentType::NONE },
-        { "wall_clock", InstrumentType::WALL_CLOCK_TIMER },
-        { "pmu", InstrumentType::PMU },
-        { "pmu_cycles", InstrumentType::PMU_CYCLE_COUNTER },
-        { "pmu_instructions", InstrumentType::PMU_INSTRUCTION_COUNTER },
-        { "mali", InstrumentType::MALI },
-        { "opencl_timer", InstrumentType::OPENCL_TIMER },
+        cl::Event   event{}; /**< OpenCL event associated to the kernel enqueue */
+        std::string name{};  /**< OpenCL Kernel name */
     };
-
-    try
-    {
-        return types.at(tolower(name));
-    }
-    catch(const std::out_of_range &)
-    {
-        throw std::invalid_argument(name);
-    }
-}
+    std::list<kernel_info>                          kernels{};
+    std::function<decltype(clEnqueueNDRangeKernel)> real_function;
+#endif /* ARM_COMPUTE_CL */
+};
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_TEST_OPENCL_TIMER */

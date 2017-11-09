@@ -50,6 +50,9 @@ Framework::Framework()
 #ifdef MALI_ENABLED
     _available_instruments.emplace(InstrumentType::MALI, Instrument::make_instrument<MaliCounter>);
 #endif /* MALI_ENABLED */
+#ifdef OPENCL_TIMER_ENABLED
+    _available_instruments.emplace(InstrumentType::OPENCL_TIMER, Instrument::make_instrument<OpenCLTimer>);
+#endif /* OPENCL_TIMER_ENABLED */
 }
 
 std::set<InstrumentType> Framework::available_instruments() const

@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_TEST_INSTRUMENTS
 
 #include "MaliCounter.h"
+#include "OpenCLTimer.h"
 #include "PMUCounter.h"
 #include "WallClockTimer.h"
 
@@ -46,6 +47,7 @@ enum class InstrumentType : unsigned int
     PMU_CYCLE_COUNTER       = 0x0201,
     PMU_INSTRUCTION_COUNTER = 0x0202,
     MALI                    = 0x0300,
+    OPENCL_TIMER            = 0x0400,
 };
 
 InstrumentType instrument_type_from_name(const std::string &name);
@@ -76,6 +78,9 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentTy
             break;
         case InstrumentType::MALI:
             stream << "MALI";
+            break;
+        case InstrumentType::OPENCL_TIMER:
+            stream << "OPENCL_TIMER";
             break;
         case InstrumentType::ALL:
             stream << "ALL";

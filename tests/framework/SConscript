@@ -28,7 +28,8 @@ Import('vars')
 # vars is imported from arm_compute:
 variables = [
     BoolVariable("pmu", "Enable PMU counters", False),
-    BoolVariable("mali", "Enable Mali hardware counters", False)
+    BoolVariable("mali", "Enable Mali hardware counters", False),
+    BoolVariable("opencl_timer", "Enable OpenCL timers", False)
 ]
 
 # We need a separate set of Variables for the Help message (Otherwise the global variables will get displayed twice)
@@ -61,6 +62,15 @@ if not framework_env['pmu']:
     files = [f for f in files if "PMU" not in os.path.basename(str(f))]
 else:
     framework_env.Append(CPPDEFINES = ['PMU_ENABLED'])
+
+if not framework_env['opencl_timer']:
+    # Remove OpenCLTimer files
+    files = [f for f in files if "OpenCLTimer" not in os.path.basename(str(f))]
+else:
+    if not framework_env["opencl"]:
+        print("ERROR: You need opencl=1 to be able to use opencl_timer=1")
+        Exit(1)
+    framework_env.Append(CPPDEFINES = ['OPENCL_TIMER_ENABLED'])
 
 if not framework_env['mali']:
     # Remove MALI files
