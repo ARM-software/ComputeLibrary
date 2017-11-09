@@ -114,32 +114,34 @@ void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurem
     {
         *_stream << begin_color("3") << "  " << instrument.first << ":";
 
-        auto add_measurements = [](double a, const Measurement & b)
+        auto add_measurements = [](Measurement::Value a, const Measurement & b)
         {
-            return a + b.value;
+            return a + b.value();
         };
 
         auto cmp_measurements = [](const Measurement & a, const Measurement & b)
         {
-            return a.value < b.value;
+            return a.value() < b.value();
         };
 
-        double     sum_values    = std::accumulate(instrument.second.begin(), instrument.second.end(), 0., add_measurements);
-        int        num_values    = instrument.second.size();
-        const auto minmax_values = std::minmax_element(instrument.second.begin(), instrument.second.end(), cmp_measurements);
+        int                num_values    = instrument.second.size();
+        const auto         minmax_values = std::minmax_element(instrument.second.begin(), instrument.second.end(), cmp_measurements);
+        Measurement::Value sum_values    = std::accumulate(instrument.second.begin(), instrument.second.end(), Measurement::Value(minmax_values.first->value().is_floating_point), add_measurements);
 
         if(num_values > 2)
         {
-            sum_values -= minmax_values.first->value + minmax_values.second->value;
+            sum_values -= minmax_values.first->value() + minmax_values.second->value();
             num_values -= 2;
         }
 
-        Measurement avg{ sum_values / num_values, minmax_values.first->unit };
-
         *_stream << "    ";
-        *_stream << "AVG=" << avg << ", ";
-        *_stream << "MIN=" << *minmax_values.first << ", ";
-        *_stream << "MAX=" << *minmax_values.second << end_color() << "\n";
+        *_stream << "AVG=" << (sum_values / num_values) << " " << minmax_values.second->unit() << ",";
+        if(num_values > 1)
+        {
+            *_stream << "MIN=" << *minmax_values.first << ", ";
+            *_stream << "MAX=" << *minmax_values.second;
+        }
+        *_stream << end_color() << "\n";
     }
 }
 } // namespace framework

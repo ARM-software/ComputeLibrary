@@ -164,36 +164,49 @@ void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measuremen
     {
         *_stream << R"(")" << i_it->first << R"(" : {)";
 
-        auto add_measurements = [](double a, const Measurement & b)
+        auto add_measurements = [](Measurement::Value a, const Measurement & b)
         {
-            return a + b.value;
+            return a + b.value();
         };
 
         auto cmp_measurements = [](const Measurement & a, const Measurement & b)
         {
-            return a.value < b.value;
+            return a.value() < b.value();
         };
 
-        double     sum_values    = std::accumulate(i_it->second.cbegin(), i_it->second.cend(), 0., add_measurements);
         int        num_values    = i_it->second.size();
         const auto minmax_values = std::minmax_element(i_it->second.begin(), i_it->second.end(), cmp_measurements);
 
+        Measurement::Value sum_values = std::accumulate(i_it->second.cbegin(), i_it->second.cend(), Measurement::Value(minmax_values.first->value().is_floating_point), add_measurements);
         if(num_values > 2)
         {
-            sum_values -= minmax_values.first->value + minmax_values.second->value;
+            sum_values -= minmax_values.first->value() + minmax_values.second->value();
             num_values -= 2;
         }
 
         auto measurement_to_string = [](const Measurement & measurement)
         {
-            return support::cpp11::to_string(measurement.value);
+            if(measurement.raw_data().size() == 1)
+            {
+                return measurement.raw_data().front();
+            }
+            else
+            {
+                std::stringstream str;
+                str << "[";
+                str << join(measurement.raw_data().begin(), measurement.raw_data().end(), ",");
+                str << "]";
+                return str.str();
+            }
         };
-
         *_stream << R"("avg" : )" << (sum_values / num_values) << ",";
-        *_stream << R"("min" : )" << minmax_values.first->value << ",";
-        *_stream << R"("max" : )" << minmax_values.second->value << ",";
+        if(num_values > 1)
+        {
+            *_stream << R"("min" : )" << minmax_values.first->value() << ",";
+            *_stream << R"("max" : )" << minmax_values.second->value() << ",";
+        }
         *_stream << R"("raw" : [)" << join(i_it->second.begin(), i_it->second.end(), ",", measurement_to_string) << "],";
-        *_stream << R"("unit" : ")" << minmax_values.first->unit << R"(")";
+        *_stream << R"("unit" : ")" << minmax_values.first->unit() << R"(")";
         *_stream << "}";
 
         if(++i_it != i_end)

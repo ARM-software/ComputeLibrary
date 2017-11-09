@@ -111,7 +111,7 @@ MaliCounter::MaliCounter()
 {
     _counters =
     {
-        { "GPU_ACTIVE", TypedMeasurement<uint64_t>(0, "cycles") },
+        { "GPU_ACTIVE", Measurement(0, "cycles") },
     };
 
     _core_counters =
@@ -373,8 +373,8 @@ void MaliCounter::stop()
     sample_counters();
     wait_next_event();
 
-    const auto counter               = get_counters(mali_userspace::MALI_NAME_BLOCK_JM);
-    _counters.at("GPU_ACTIVE").value = counter[find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_JM, "GPU_ACTIVE")];
+    const uint32_t *counter    = get_counters(mali_userspace::MALI_NAME_BLOCK_JM);
+    _counters.at("GPU_ACTIVE") = Measurement(counter[find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_JM, "GPU_ACTIVE")], _counters.at("GPU_ACTIVE").unit());
 
     const int arith_index   = find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_SHADER, "ARITH_WORDS");
     const int ls_index      = find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_SHADER, "LS_ISSUE");
@@ -385,7 +385,7 @@ void MaliCounter::stop()
     // Shader core counters can be averaged if desired, but here we don't.
     for(int core = 0; core < _num_cores; ++core)
     {
-        const auto sc_counter = get_counters(mali_userspace::MALI_NAME_BLOCK_SHADER, core);
+        const uint32_t *sc_counter = get_counters(mali_userspace::MALI_NAME_BLOCK_SHADER, core);
 
         _core_counters.at("ARITH_WORDS").values[core]    = sc_counter[arith_index];
         _core_counters.at("LS_ISSUE").values[core]       = sc_counter[ls_index];
@@ -406,7 +406,7 @@ Instrument::MeasurementsMap MaliCounter::measurements() const
 {
     MeasurementsMap measurements
     {
-        { "Timespan", TypedMeasurement<uint64_t>(_stop_time - _start_time, "ns") },
+        { "Timespan", Measurement(_stop_time - _start_time, "ns") },
         { "GPU active", _counters.at("GPU_ACTIVE") },
     };
 
@@ -414,7 +414,7 @@ Instrument::MeasurementsMap MaliCounter::measurements() const
     {
         for(const auto &core : counter.second.values)
         {
-            measurements.emplace(counter.second.name + " #" + support::cpp11::to_string(core.first), TypedMeasurement<uint64_t>(core.second, counter.second.unit));
+            measurements.emplace(counter.second.name + " #" + support::cpp11::to_string(core.first), Measurement(core.second, counter.second.unit));
         }
     }
 
