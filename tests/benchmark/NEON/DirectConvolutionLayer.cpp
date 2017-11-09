@@ -48,7 +48,9 @@ namespace
 #ifdef ARM_COMPUTE_ENABLE_F16
 const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F16, DataType::F32 });
 #else  /* ARM_COMPUTE_ENABLE_F16 */
-const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
+// Special data types for AlexNet as 5x5 direct convolution is not supported for Fixed Point
+const auto data_types_alexnet = framework::dataset::make("DataType", { DataType::F32 });
+const auto data_types         = framework::dataset::make("DataType", { DataType::QS8, DataType::F32 });
 #endif /* ARM_COMPUTE_ENABLE_F16 */
 } // namespace
 
@@ -57,7 +59,7 @@ using NEConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvol
 TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), data_types),
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), data_types_alexnet),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1DirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::ALL,
@@ -74,7 +76,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetDirectConvolutionLayer, NEConvolutionL
 
 TEST_SUITE(NIGHTLY)
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetDirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), data_types),
+                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetDirectConvolutionLayerDataset(), data_types_alexnet),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1DirectConvolutionLayer, NEConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
