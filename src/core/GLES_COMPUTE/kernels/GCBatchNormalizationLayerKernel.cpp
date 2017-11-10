@@ -91,10 +91,6 @@ void GCBatchNormalizationLayerKernel::configure(const IGCTensor *input, IGCTenso
     update_window_and_padding(win, input_access, output_access, mean_access, var_access, beta_access, gamma_access);
     output_access.set_valid_region(win, input->info()->valid_region());
 
-    _kernel.clear_params();
-
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 

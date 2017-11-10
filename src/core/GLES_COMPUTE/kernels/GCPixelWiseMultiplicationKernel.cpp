@@ -80,8 +80,6 @@ void GCPixelWiseMultiplicationKernel::configure(const IGCTensor *input1, const I
     // Create kernel
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("pixelwise_mul_float", build_opts));
 
-    _kernel.clear_params();
-
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 1;
 
@@ -96,9 +94,6 @@ void GCPixelWiseMultiplicationKernel::configure(const IGCTensor *input1, const I
     ValidRegion valid_region = intersect_valid_regions(input1->info()->valid_region(),
                                                        input2->info()->valid_region());
     output_access.set_valid_region(win, valid_region);
-
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
 
     IGCKernel::configure(win);
 }

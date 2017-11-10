@@ -53,7 +53,6 @@ void GCDropoutKernel::configure(const IGCTensor *input, IGCTensor *mask, IGCTens
     _input  = input;
     _mask   = mask;
     _output = output;
-    _kernel.clear_params();
 
     std::set<std::string>                 build_opts;
     std::string                           dt_name = (input->info()->data_type() == DataType::F32) ? "DATA_TYPE_FP32" : "DATA_TYPE_FP16";
@@ -81,8 +80,6 @@ void GCDropoutKernel::configure(const IGCTensor *input, IGCTensor *mask, IGCTens
 
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
     IGCKernel::configure(win);
 }
 

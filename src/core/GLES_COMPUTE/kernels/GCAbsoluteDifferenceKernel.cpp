@@ -80,11 +80,6 @@ void GCAbsoluteDifferenceKernel::configure(const IGCTensor *input1, const IGCTen
 
     output_access.set_valid_region(win, valid_region);
 
-    _kernel.clear_params();
-
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 

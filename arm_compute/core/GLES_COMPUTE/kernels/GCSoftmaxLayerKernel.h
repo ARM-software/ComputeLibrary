@@ -40,9 +40,6 @@ public:
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const IGCTensor *input, IGCTensor *output);
-
-    // Inherited methods overridden:
-    void run(const Window &window) override;
 };
 
 /** Interface for shifting the logits values around the max value and exponentiating the result */

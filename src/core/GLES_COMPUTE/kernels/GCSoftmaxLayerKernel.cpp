@@ -75,11 +75,9 @@ void GCLogits1DMaxKernel::configure(const IGCTensor *input, IGCTensor *output)
     // Create kernel
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("softmax_layer_max", build_opts));
 
-    _kernel.clear_params();
-
     // Set fixed arguments
     unsigned int idx = 2 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
-    _kernel.set_params(idx++, input->info()->dimension(0));
+    _kernel.set_argument(idx++, input->info()->dimension(0));
 
     // Configure kernel window
     // The kernel loops over all elements in steps of 4
@@ -98,44 +96,7 @@ void GCLogits1DMaxKernel::configure(const IGCTensor *input, IGCTensor *output)
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
-}
-
-void GCLogits1DMaxKernel::run(const Window &window)
-{
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
-
-    Window slice = window.first_slice_window_3D();
-
-    _kernel.use();
-
-    do
-    {
-        unsigned int idx1 = 0;
-        switch(_input->info()->data_type())
-        {
-            case DataType::F16:
-                add_3D_tensor_argument(idx1, _input, BufferParam(1, 2), slice);
-                add_3D_tensor_argument(idx1, _output, BufferParam(2, 2), slice);
-                break;
-
-            case DataType::F32:
-                add_3D_tensor_argument(idx1, _input, BufferParam(1, 2), slice);
-                add_3D_tensor_argument(idx1, _output, BufferParam(2, 2), slice);
-                break;
-
-            default:
-                ARM_COMPUTE_ERROR("Current data type is mot supported");
-                break;
-        }
-
-        _kernel.update_shader_params();
-        enqueue(*this, slice);
-    }
-    while(window.slide_window_slice_3D(slice));
 }
 
 GCLogits1DShiftExpSumKernel::GCLogits1DShiftExpSumKernel()
@@ -179,11 +140,9 @@ void GCLogits1DShiftExpSumKernel::configure(const IGCTensor *input, const IGCTen
     // Create kernel
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("softmax_layer_shift_exp_sum", build_opts));
 
-    _kernel.clear_params();
-
     // Set fixed arguments
     unsigned int idx = 4 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
-    _kernel.set_params(idx++, input->info()->dimension(0));
+    _kernel.set_argument(idx++, input->info()->dimension(0));
 
     // Configure window
     // The kernel loops over all elements in steps of 4
@@ -206,9 +165,6 @@ void GCLogits1DShiftExpSumKernel::configure(const IGCTensor *input, const IGCTen
     output_access.set_valid_region(win, input->info()->valid_region());
     sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->info()->tensor_shape()));
 
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 
@@ -224,28 +180,13 @@ void GCLogits1DShiftExpSumKernel::run(const Window &window)
 
     do
     {
-        unsigned int idx = 0;
-        switch(_input->info()->data_type())
-        {
-            case DataType::F16:
-                add_3D_tensor_argument(idx, _input, BufferParam(1, 2), slice);
-                add_3D_tensor_argument(idx, _max, BufferParam(2, 2), slice);
-                add_3D_tensor_argument(idx, _output, BufferParam(3, 2), slice);
-                add_3D_tensor_argument(idx, _sum, BufferParam(4, 2), slice);
-                break;
-
-            case DataType::F32:
-                add_3D_tensor_argument(idx, _input, BufferParam(1, 2), slice);
-                add_3D_tensor_argument(idx, _max, BufferParam(2, 2), slice);
-                add_3D_tensor_argument(idx, _output, BufferParam(3, 2), slice);
-                add_3D_tensor_argument(idx, _sum, BufferParam(4, 2), slice);
-                break;
-
-            default:
-                ARM_COMPUTE_ERROR("Current data type is mot supported");
-                break;
-        }
-
+        unsigned int idx     = 0;
+        unsigned int binding = 1; // SSBO binding starts from 1.
+        // Set inputs
+        add_3D_tensor_argument(idx, _input, binding++, slice);
+        add_3D_tensor_argument(idx, _max, binding++, slice);
+        add_3D_tensor_argument(idx, _output, binding++, slice);
+        add_3D_tensor_argument(idx, _sum, binding++, slice);
         _kernel.update_shader_params();
         enqueue(*this, slice);
     }
@@ -303,11 +244,6 @@ void GCLogits1DNormKernel::configure(const IGCTensor *input, const IGCTensor *su
 
     output_access.set_valid_region(win, input->info()->valid_region());
 
-    _kernel.clear_params();
-
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 
@@ -326,25 +262,12 @@ void GCLogits1DNormKernel::run(const Window &window)
         Window sum_slice = slice;
         sum_slice.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-        unsigned int idx1 = 0;
-        switch(_input->info()->data_type())
-        {
-            case DataType::F16:
-                add_3D_tensor_argument(idx1, _input, BufferParam(1, 2), slice);
-                add_3D_tensor_argument(idx1, _sum, BufferParam(2, 2), slice);
-                add_3D_tensor_argument(idx1, _output, BufferParam(3, 2), slice);
-                break;
-
-            case DataType::F32:
-                add_3D_tensor_argument(idx1, _input, BufferParam(1, 2), slice);
-                add_3D_tensor_argument(idx1, _sum, BufferParam(2, 2), slice);
-                add_3D_tensor_argument(idx1, _output, BufferParam(3, 2), slice);
-                break;
-
-            default:
-                ARM_COMPUTE_ERROR("Current data type is mot supported");
-                break;
-        }
+        unsigned int idx     = 0;
+        unsigned int binding = 1; // SSBO binding starts from 1.
+        // Set inputs
+        add_3D_tensor_argument(idx, _input, binding++, slice);
+        add_3D_tensor_argument(idx, _sum, binding++, slice);
+        add_3D_tensor_argument(idx, _output, binding++, slice);
 
         _kernel.update_shader_params();
         enqueue(*this, slice);

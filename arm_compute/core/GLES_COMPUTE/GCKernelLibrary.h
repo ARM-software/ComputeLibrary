@@ -129,28 +129,28 @@ public:
      * @return program id.
      */
     void unuse();
-    /** Set value at uniform idx.
+    /** Set argument value at index of shader params.
      *
-     * @param[in] idx   Index in vector.
-     * @param[in] value Set value.
+     * @param[in] idx   Index in shader params.
+     * @param[in] value Argument value to be set.
      */
     template <class T>
-    void set_params(unsigned int idx, T value)
+    void set_argument(unsigned int idx, T value)
     {
-        if(idx >= _params.size())
+        if(idx >= _shader_arguments.size())
         {
-            _params.resize(idx + 1, 0);
+            _shader_arguments.resize(idx + 1, 0);
         }
 
-        unsigned int *p = reinterpret_cast<unsigned int *>(&value);
-        _params[idx]    = *p;
+        unsigned int *p        = reinterpret_cast<unsigned int *>(&value);
+        _shader_arguments[idx] = *p;
     }
-    /** Clear params.
+    /** Clear shader arguments.
      *
      */
-    void clear_params()
+    void clear_arguments()
     {
-        _params.clear();
+        _shader_arguments.clear();
     }
     /** Set shader params binding point.
      *
@@ -172,8 +172,8 @@ public:
 private:
     std::string                  _name;                                 /**< Kernel name */
     GLuint                       _program;                              /**< Linked program id */
-    std::vector<unsigned int>    _params;                               /**< Store all the values of the shader parameters */
-    GLuint                       _shader_params;                        /**< Uniform buffer object name for shader parameters */
+    std::vector<unsigned int>    _shader_arguments;                     /**< Store all the values of the shader arguments */
+    GLuint                       _shader_params_ubo_name;               /**< Uniform buffer object name for shader parameters */
     GLuint                       _shader_params_binding_point;          /**< The binding point of the uniform block for shader parameters */
     GLuint                       _shader_params_index;                  /**< The index of the uniform block */
     GLint                        _shader_params_size;                   /**< The uniform block data size in the shader */

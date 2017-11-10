@@ -228,8 +228,6 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
 
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel(kernel_name.str(), options));
 
-    _kernel.clear_params();
-
     unsigned int idx = (_bias == nullptr) ? 3 * num_arguments_per_3D_tensor() : (num_arguments_per_1D_tensor() + 3 * num_arguments_per_3D_tensor());
 
     // Calculate output right and bottom border
@@ -290,11 +288,8 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    _kernel.set_params(idx++, _weights->info()->strides_in_bytes()[3]); // weights_stride_w
-    _kernel.set_params(idx++, _weights->info()->dimension(2));          // weights_depth
-
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
+    _kernel.set_argument(idx++, _weights->info()->strides_in_bytes()[3]); // weights_stride_w
+    _kernel.set_argument(idx++, _weights->info()->dimension(2));          // weights_depth
 
     IGCKernel::configure(win);
 }

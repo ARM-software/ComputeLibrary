@@ -84,11 +84,6 @@ void GCGEMMInterleave4x4Kernel::configure(const IGCTensor *input, IGCTensor *out
 
     output_access.set_valid_region(win, input->info()->valid_region());
 
-    _kernel.clear_params();
-
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 

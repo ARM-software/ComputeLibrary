@@ -52,7 +52,6 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, std::p
 
     _input  = input;
     _output = output;
-    _kernel.clear_params();
 
     std::set<std::string> build_opts;
     std::string           dt_name = (input->info()->data_type() == DataType::F32) ? "DATA_TYPE_FP32" : "DATA_TYPE_FP16";
@@ -141,8 +140,6 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, std::p
         win.set_dimension_step(Window::DimZ, win[Window::DimZ].end() - win[Window::DimZ].start());
     }
 
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
     IGCKernel::configure(win);
 }
 
@@ -189,9 +186,9 @@ void GCIm2ColKernel::run_generic(const Window &window)
         add_3D_tensor_argument(idx, _input, 1, slice_in);
         add_2D_tensor_argument(idx, _output, 2, slice_out);
 
-        _kernel.set_params(idx++, static_cast<unsigned int>(_input->info()->dimension(2)));
-        _kernel.set_params(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
-        _kernel.set_params(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
+        _kernel.set_argument(idx++, static_cast<unsigned int>(_input->info()->dimension(2)));
+        _kernel.set_argument(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
+        _kernel.set_argument(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
         _kernel.update_shader_params();
 
         enqueue(*this, slice);
@@ -220,8 +217,8 @@ void GCIm2ColKernel::run_reduced(const Window &window)
 
         add_3D_tensor_argument(idx, _input, 1, in_slice);
         add_1D_tensor_argument(idx, _output, 2, out_slice);
-        _kernel.set_params(idx++, _input->info()->dimension(0));
-        _kernel.set_params(idx++, _input->info()->dimension(1));
+        _kernel.set_argument(idx++, _input->info()->dimension(0));
+        _kernel.set_argument(idx++, _input->info()->dimension(1));
         _kernel.update_shader_params();
 
         enqueue(*this, in_slice);

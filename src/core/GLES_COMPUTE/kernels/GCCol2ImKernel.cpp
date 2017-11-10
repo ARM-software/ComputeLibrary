@@ -46,8 +46,6 @@ void GCCol2ImKernel::configure(const IGCTensor *input, IGCTensor    *output,
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
-    _kernel.clear_params();
-
     _input          = input;
     _output         = output;
     _convolved_dims = convolved_dims;
@@ -63,16 +61,13 @@ void GCCol2ImKernel::configure(const IGCTensor *input, IGCTensor    *output,
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor() + num_arguments_per_3D_tensor();
-    _kernel.set_params(idx++, _convolved_dims.first);
+    _kernel.set_argument(idx++, _convolved_dims.first);
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());
 
     // The GCCol2ImKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
 
     IGCKernel::configure(win);
 }

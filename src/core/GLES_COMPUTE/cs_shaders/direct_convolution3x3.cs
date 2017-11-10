@@ -82,7 +82,7 @@ BUFFER_DECLARATION(biases, 4, float, readonly);
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -230,7 +230,7 @@ vec4[2] convolve1x3_stride2(uint offset, vec3 w)
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -376,7 +376,7 @@ vec4 convolve1x3_stride2(uint offset, vec3 w)
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -481,7 +481,7 @@ vec4 convolve1x3_stride1(vec4 left, vec4 middle, vec4 right, vec3 w)
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -647,7 +647,7 @@ vec4[3] load_and_unpack(uint offset)
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -903,7 +903,7 @@ vec4[3] load_and_unpack_stride2(uint offset)
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -1063,7 +1063,7 @@ vec4[2] load_and_unpack(uint offset)
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -1248,7 +1248,7 @@ vec4[2] load_and_unpack(uint offset)
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -1444,7 +1444,7 @@ vec4[2] load_and_unpack(uint offset)
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)

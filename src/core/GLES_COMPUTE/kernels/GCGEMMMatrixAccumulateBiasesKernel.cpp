@@ -80,10 +80,6 @@ void GCGEMMMatrixAccumulateBiasesKernel::configure(IGCTensor *accum, const IGCTe
 
     update_window_and_padding(win, biases_access, accum_access);
 
-    _kernel.clear_params();
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 

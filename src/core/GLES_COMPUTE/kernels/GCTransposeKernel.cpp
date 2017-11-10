@@ -67,8 +67,6 @@ void GCTransposeKernel::configure(const IGCTensor *input, IGCTensor *output)
     // Create kernel
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("transpose", build_opts));
 
-    _kernel.clear_params();
-
     // Configure kernel window
     const unsigned int num_elems_processed_per_iteration = 4;
 
@@ -79,9 +77,6 @@ void GCTransposeKernel::configure(const IGCTensor *input, IGCTensor *output)
     update_window_and_padding(win, input_access, output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region());
-
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
 
     IGCKernel::configure(win);
 }

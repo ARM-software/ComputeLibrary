@@ -92,10 +92,6 @@ void GCGEMMTranspose1xWKernel::configure(const IGCTensor *input, IGCTensor *outp
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->info()->tensor_shape()));
 
-    _kernel.clear_params();
-    // set shader params binding point
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 

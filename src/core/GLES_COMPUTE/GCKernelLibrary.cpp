@@ -116,7 +116,8 @@ GLuint GCProgram::compile_shader(const std::string &build_options)
             output_stream << std::setw(6) << line_num << ": " << line << std::endl;
             line_num++;
         }
-        ARM_COMPUTE_LOG_INFO_STREAM_CORE("GLES Shader source code:" << output_stream.rdbuf());
+        ARM_COMPUTE_LOG_INFO_STREAM_CORE("GLES Shader source code:\n"
+                                         << output_stream.rdbuf());
 #endif /* ARM_COMPUTE_DEBUG_ENABLED */
 
         ARM_COMPUTE_ERROR("Error: Compiler log:\n%s\n", log.data());
@@ -128,22 +129,22 @@ GLuint GCProgram::compile_shader(const std::string &build_options)
 }
 
 GCKernel::GCKernel()
-    : _name(), _program(), _params(), _shader_params(), _shader_params_binding_point(), _shader_params_index(), _shader_params_size()
+    : _name(), _program(), _shader_arguments(), _shader_params_ubo_name(), _shader_params_binding_point(), _shader_params_index(), _shader_params_size()
 {
 }
 
 GCKernel::GCKernel(std::string name, GLuint program)
     : _name(std::move(name)),
       _program(program),
-      _params(),
-      _shader_params(0),
+      _shader_arguments(),
+      _shader_params_ubo_name(0),
       _shader_params_binding_point(0),
       _shader_params_index(0),
       _shader_params_size(0)
 {
-    _params.clear();
+    _shader_arguments.clear();
 
-    ARM_COMPUTE_GL_CHECK(glGenBuffers(1, &_shader_params));
+    ARM_COMPUTE_GL_CHECK(glGenBuffers(1, &_shader_params_ubo_name));
 
     _shader_params_index = ARM_COMPUTE_GL_CHECK(glGetUniformBlockIndex(_program, _shader_params_name));
     ARM_COMPUTE_ERROR_ON_MSG((_shader_params_index == GL_INVALID_INDEX), "Failed to get index of %s", _shader_params_name);
@@ -153,7 +154,7 @@ GCKernel::GCKernel(std::string name, GLuint program)
 
 void GCKernel::cleanup()
 {
-    ARM_COMPUTE_GL_CHECK(glDeleteBuffers(1, &_shader_params));
+    ARM_COMPUTE_GL_CHECK(glDeleteBuffers(1, &_shader_params_ubo_name));
     ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_UNIFORM_BUFFER, 0));
     ARM_COMPUTE_GL_CHECK(glDeleteProgram(_program));
     ARM_COMPUTE_GL_CHECK(glUseProgram(0));
@@ -171,13 +172,13 @@ void GCKernel::unuse()
 
 void GCKernel::update_shader_params()
 {
-    ARM_COMPUTE_ERROR_ON_MSG((_shader_params_size != (int)(_params.size() * sizeof(_params[0]))), "Params size (%d) is not equal to shader params block size (%d)", _params.size() * sizeof(_params[0]),
-                             _shader_params_size);
+    ARM_COMPUTE_ERROR_ON_MSG((_shader_params_size != (int)(_shader_arguments.size() * sizeof(_shader_arguments[0]))), "Arguments size (%d) is not equal to shader params block size (%d)",
+                             _shader_arguments.size() * sizeof(_shader_arguments[0]), _shader_params_size);
 
     ARM_COMPUTE_GL_CHECK(glUniformBlockBinding(_program, _shader_params_index, _shader_params_binding_point));
-    ARM_COMPUTE_GL_CHECK(glBindBufferBase(GL_UNIFORM_BUFFER, _shader_params_binding_point, _shader_params));
-    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_UNIFORM_BUFFER, _shader_params));
-    ARM_COMPUTE_GL_CHECK(glBufferData(GL_UNIFORM_BUFFER, _shader_params_size, _params.data(), GL_DYNAMIC_DRAW));
+    ARM_COMPUTE_GL_CHECK(glBindBufferBase(GL_UNIFORM_BUFFER, _shader_params_binding_point, _shader_params_ubo_name));
+    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_UNIFORM_BUFFER, _shader_params_ubo_name));
+    ARM_COMPUTE_GL_CHECK(glBufferData(GL_UNIFORM_BUFFER, _shader_params_size, _shader_arguments.data(), GL_DYNAMIC_DRAW));
     ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_UNIFORM_BUFFER, 0));
 }
 
@@ -319,7 +320,6 @@ GCKernel GCKernelLibrary::create_kernel(const std::string &shader_name, const St
     {
         // If program has been built, retrieve to create kernel from it
         kernel = built_program_it->second;
-        kernel.use();
     }
     else
     {
@@ -339,6 +339,11 @@ GCKernel GCKernelLibrary::create_kernel(const std::string &shader_name, const St
         // Add built program to internal map
         _built_programs_map.emplace(built_program_name, kernel);
     }
+
+    kernel.use();
+    kernel.clear_arguments();
+    // set shader params binding point
+    kernel.set_shader_params_binding_point(0);
 
     return kernel;
 }

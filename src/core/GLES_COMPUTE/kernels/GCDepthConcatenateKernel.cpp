@@ -108,8 +108,6 @@ void GCDepthConcatenateKernel::configure(const IGCTensor *input, unsigned int de
     update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
 
-    _kernel.clear_params();
-    _kernel.set_shader_params_binding_point(0);
     IGCKernel::configure(win);
 }
 

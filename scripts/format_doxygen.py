@@ -84,6 +84,7 @@ if __name__ == "__main__":
     for path in paths:
         if (path[-3:] not in ("cpp", "inl") and
             path[-2:] not in ("cl") and
+            path[-2:] not in ("cs") and
             path[-1] not in ("h")):
             continue
 

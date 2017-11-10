@@ -74,7 +74,8 @@ GCKernel &IGCKernel::kernel()
 template <unsigned int dimension_size>
 unsigned int           IGCKernel::num_arguments_per_tensor() const
 {
-    return 2 + 2 * dimension_size;
+    // Rounding up the tensor attributes structure in compute shader to a multiple of a vec4
+    return ceil_to_multiple(1 + 2 * dimension_size, 4);
 }
 
 template <unsigned int dimension_size>
@@ -97,12 +98,20 @@ void IGCKernel::add_tensor_argument(unsigned int &idx, const IGCTensor *tensor, 
 
     for(unsigned int dimension = 0; dimension < dimension_size; dimension++)
     {
-        _kernel.set_params(idx++, strides[dimension]);
-        _kernel.set_params(idx++, strides[dimension] * window[dimension].step());
+        _kernel.set_argument(idx++, strides[dimension]);
+        _kernel.set_argument(idx++, strides[dimension] * window[dimension].step());
     }
 
-    _kernel.set_params(idx++, offset_first_element);
-    _kernel.set_params(idx++, param.buffer_data_type_shift);
+    _kernel.set_argument(idx++, offset_first_element);
+    _kernel.set_argument(idx++, param.buffer_data_type_shift);
+
+    // Rounding up the tensor attributes structure in compute shader to a multiple of a vec4
+    unsigned int idx_end = ceil_to_multiple(idx, 4);
+    for(unsigned int i = idx; i < idx_end; ++i)
+    {
+        _kernel.set_argument(i, 0);
+    }
+    idx = idx_end;
 
     ARM_COMPUTE_GL_CHECK(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, param.binding_point, tensor->gc_buffer()));
 

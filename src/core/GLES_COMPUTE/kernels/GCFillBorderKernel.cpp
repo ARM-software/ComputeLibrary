@@ -54,7 +54,7 @@ void GCFillBorderKernel::set_constant_border(unsigned int idx, const PixelValue 
 {
     T value;
     constant_border_value.get(value);
-    _kernel.set_params(idx, static_cast<T>(value));
+    _kernel.set_argument(idx, static_cast<T>(value));
 }
 
 void GCFillBorderKernel::configure(const IGCTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
@@ -112,8 +112,6 @@ void GCFillBorderKernel::configure(const IGCTensor *tensor, BorderSize border_si
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel(kernel_name, build_opts));
     _tensor = tensor;
 
-    _kernel.clear_params();
-
     // Create static kernel arguments
     const unsigned int valid_width       = tensor->info()->valid_region().shape[0];
     const unsigned int valid_height      = tensor->info()->valid_region().shape[1];
@@ -121,10 +119,10 @@ void GCFillBorderKernel::configure(const IGCTensor *tensor, BorderSize border_si
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_3D_tensor(); //Skip the tensor parameters
-    _kernel.set_params(idx++, valid_width);
-    _kernel.set_params(idx++, valid_height);
-    _kernel.set_params(idx++, tensor->info()->valid_region().anchor[0]);
-    _kernel.set_params(idx++, tensor->info()->valid_region().anchor[1]);
+    _kernel.set_argument(idx++, valid_width);
+    _kernel.set_argument(idx++, valid_height);
+    _kernel.set_argument(idx++, tensor->info()->valid_region().anchor[0]);
+    _kernel.set_argument(idx++, tensor->info()->valid_region().anchor[1]);
 
     if(BorderMode::CONSTANT == border_mode)
     {
@@ -136,8 +134,6 @@ void GCFillBorderKernel::configure(const IGCTensor *tensor, BorderSize border_si
     win.set(Window::DimX, Window::Dimension(0, total_valid_width + valid_height));
     win.set(Window::DimY, Window::Dimension(0, 1, 1));
     win.use_tensor_dimensions(tensor->info()->tensor_shape(), Window::DimZ);
-
-    _kernel.set_shader_params_binding_point(0);
 
     IGCKernel::configure(win);
 }

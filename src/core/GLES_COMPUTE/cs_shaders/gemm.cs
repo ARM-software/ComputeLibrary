@@ -618,6 +618,6 @@ void main(void)
     GC_STORE1_2D_OFFSET(packed_s[0], accum, 0, 0);
 }
 #endif /* GEMM_ACCUMULATE_BIASES */
-#else  /* DATA_TYPE_F32 */
+#else  /* DATA_TYPE_FP32 */
 #error Data type not supported
-#endif /* DATA_TYPE_F32 */
+#endif /* DATA_TYPE_FP32 */

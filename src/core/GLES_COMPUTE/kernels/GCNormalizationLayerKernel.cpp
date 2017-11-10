@@ -92,10 +92,6 @@ void GCNormalizationLayerKernel::configure(const IGCTensor *input, const IGCTens
 
     output_access.set_valid_region(win, input->info()->valid_region());
 
-    _kernel.clear_params();
-
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 

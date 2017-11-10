@@ -56,7 +56,9 @@
     uint name##_stride_y;                      \
     uint name##_step_y;                        \
     uint name##_offset_first_element_in_bytes; \
-    uint name##_buffer_data_type_size
+    uint name##_buffer_data_type_size;         \
+    uint name##_padding1;                      \
+    uint name##_padding2
 
 #define TENSOR3D_PARAM_DECLARATION(name)       \
     uint name##_stride_x;                      \

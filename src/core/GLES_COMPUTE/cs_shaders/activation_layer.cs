@@ -129,22 +129,22 @@ BUFFER_DECLARATION(dst, 2, float, writeonly);
  * @note Activation function should be given as a preprocessor argument using "#define act_name". e.g. "#define TANH"
  * @note A, B variables required by some activation functions are set using A_VAL= and B_VAL= respectively.
  *
- * @param[in]  src_ptr                              Pointer to the source image. Supported data types: F32
- * @param[in]  src_stride_x                         Stride of the source image in X dimension (in bytes)
- * @param[in]  src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                         Stride of the source image in Y dimension (in bytes)
- * @param[in]  src_step_y                           src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                         Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                           src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes    The offset of the first element in the source image
- * @param[out] dst_ptr                              Pointer to the destination image. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                         Stride of the destination image in X dimension (in bytes)
- * @param[in]  dst_step_x                           dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                         ride of the destination image in Y dimension (in bytes)
- * @param[in]  dst_step_y                           dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                         Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                           dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes    The offset of the first element in the destination image
+ * @param[in]  src_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination image in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      ride of the destination image in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination image
  */
 void main(void)
 {
@@ -193,22 +193,22 @@ BUFFER_DECLARATION(dst, 2, uint, writeonly);
  * @note Activation function should be given as a preprocessor argument using "#define act_name". e.g. "#define TANH"
  * @note A, B variables required by some activation functions are set using A_VAL= and B_VAL= respectively.
  *
- * @param[in]  src_ptr                              Pointer to the source image. Supported data types: F16
- * @param[in]  src_stride_x                         Stride of the source image in X dimension (in bytes)
- * @param[in]  src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                         Stride of the source image in Y dimension (in bytes)
- * @param[in]  src_step_y                           src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                         Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                           src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes    The offset of the first element in the source image
- * @param[out] dst_ptr                              Pointer to the destination image. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                         Stride of the destination image in X dimension (in bytes)
- * @param[in]  dst_step_x                           dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                         ride of the destination image in Y dimension (in bytes)
- * @param[in]  dst_step_y                           dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                         Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                           dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes    The offset of the first element in the destination image
+ * @param[in]  src_ptr                           Pointer to the source image. Supported data types: F16
+ * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination image in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      ride of the destination image in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination image
  */
 void main(void)
 {

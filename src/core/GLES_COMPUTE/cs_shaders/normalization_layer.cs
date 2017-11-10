@@ -45,30 +45,30 @@ BUFFER_DECLARATION(dst, 3, float, writeonly);
  * @note KAPPA parameter in the normalization equation should be given as a preprocessor argument using "#define KAPPA x"
  * @note Number of elements on the right or left side to normalize across should be given as a preprocessor argument using "#define RADIUS x"
  *
- * @param[in]  src1_ptr                                    Pointer to the first source tensor. Supported data types: F32
- * @param[in]  src1_stride_x                               Stride of the first source tensor in X dimension (in bytes)
- * @param[in]  src1_step_x                                 src1_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                               Stride of the first source tensor in Y dimension (in bytes)
- * @param[in]  src1_step_y                                 src1_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_stride_z                               Stride of the first source tensor in Z dimension (in bytes)
- * @param[in]  src1_step_z                                 src1_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes          The offset of the first element in the first source tensor
- * @param[in]  src2_ptr                                    Pointer to the second source tensor. Supported data types: Same as @p src1_ptr
- * @param[in]  src2_stride_x                               Stride of the second source tensor in X dimension (in bytes)
- * @param[in]  src2_step_x                                 src2_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src2_stride_y                               Stride of the second source tensor in Y dimension (in bytes)
- * @param[in]  src2_step_y                                 src2_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src2_stride_z                               Stride of the second source tensor in Z dimension (in bytes)
- * @param[in]  src2_step_z                                 src2_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src2_offset_first_element_in_bytes          The offset of the second element in the second source tensor
- * @param[out] dst_ptr                                     Pointer to the destination tensor. Supported data types: Same as @p src1_ptr
- * @param[in]  dst_stride_x                                Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                                  dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                                Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                                  dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                                Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                                  dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes           The offset of the first element in the destination tensor
+ * @param[in]  src1_ptr                           Pointer to the first source tensor. Supported data types: F32
+ * @param[in]  src1_stride_x                      Stride of the first source tensor in X dimension (in bytes)
+ * @param[in]  src1_step_x                        src1_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src1_stride_y                      Stride of the first source tensor in Y dimension (in bytes)
+ * @param[in]  src1_step_y                        src1_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src1_stride_z                      Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  src1_step_z                        src1_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the first source tensor
+ * @param[in]  src2_ptr                           Pointer to the second source tensor. Supported data types: Same as @p src1_ptr
+ * @param[in]  src2_stride_x                      Stride of the second source tensor in X dimension (in bytes)
+ * @param[in]  src2_step_x                        src2_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_stride_y                      Stride of the second source tensor in Y dimension (in bytes)
+ * @param[in]  src2_step_y                        src2_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src2_stride_z                      Stride of the second source tensor in Z dimension (in bytes)
+ * @param[in]  src2_step_z                        src2_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes The offset of the second element in the second source tensor
+ * @param[out] dst_ptr                            Pointer to the destination tensor. Supported data types: Same as @p src1_ptr
+ * @param[in]  dst_stride_x                       Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                       Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                         dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
  */
 void main(void)
 {
@@ -104,30 +104,30 @@ void main(void)
  * @note KAPPA parameter in the normalization equation should be given as a preprocessor argument using "#define KAPPA x"
  * @note Number of elements on the right or left side to normalize across should be given as a preprocessor argument using "#define RADIUS x"
  *
- * @param[in]  src1_ptr                                    Pointer to the first source tensor. Supported data types: F32
- * @param[in]  src1_stride_x                               Stride of the first source tensor in X dimension (in bytes)
- * @param[in]  src1_step_x                                 src1_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                               Stride of the first source tensor in Y dimension (in bytes)
- * @param[in]  src1_step_y                                 src1_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_stride_z                               Stride of the first source tensor in Z dimension (in bytes)
- * @param[in]  src1_step_z                                 src1_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes          The offset of the first element in the first source tensor
- * @param[in]  src2_ptr                                    Pointer to the second source tensor. Supported data types: Same as @p src1_ptr
- * @param[in]  src2_stride_x                               Stride of the second source tensor in X dimension (in bytes)
- * @param[in]  src2_step_x                                 src2_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src2_stride_y                               Stride of the second source tensor in Y dimension (in bytes)
- * @param[in]  src2_step_y                                 src2_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src2_stride_z                               Stride of the second source tensor in Z dimension (in bytes)
- * @param[in]  src2_step_z                                 src2_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src2_offset_first_element_in_bytes          The offset of the second element in the second source tensor
- * @param[out] dst_ptr                                     Pointer to the destination tensor. Supported data types: Same as @p src1_ptr
- * @param[in]  dst_stride_x                                Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                                  dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                                Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                                  dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                                Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                                  dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes           The offset of the first element in the destination tensor
+ * @param[in]  src1_ptr                           Pointer to the first source tensor. Supported data types: F32
+ * @param[in]  src1_stride_x                      Stride of the first source tensor in X dimension (in bytes)
+ * @param[in]  src1_step_x                        src1_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src1_stride_y                      Stride of the first source tensor in Y dimension (in bytes)
+ * @param[in]  src1_step_y                        src1_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src1_stride_z                      Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  src1_step_z                        src1_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the first source tensor
+ * @param[in]  src2_ptr                           Pointer to the second source tensor. Supported data types: Same as @p src1_ptr
+ * @param[in]  src2_stride_x                      Stride of the second source tensor in X dimension (in bytes)
+ * @param[in]  src2_step_x                        src2_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_stride_y                      Stride of the second source tensor in Y dimension (in bytes)
+ * @param[in]  src2_step_y                        src2_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src2_stride_z                      Stride of the second source tensor in Z dimension (in bytes)
+ * @param[in]  src2_step_z                        src2_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes The offset of the second element in the second source tensor
+ * @param[out] dst_ptr                            Pointer to the destination tensor. Supported data types: Same as @p src1_ptr
+ * @param[in]  dst_stride_x                       Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                       Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                         dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
  */
 void main(void)
 {

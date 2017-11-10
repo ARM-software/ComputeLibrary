@@ -77,7 +77,7 @@ BUFFER_DECLARATION(biases, 4, float, readonly);
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -249,7 +249,7 @@ vec4 convolve1x5_stride2(vec4 tmp[3], vec2 w[3])
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)

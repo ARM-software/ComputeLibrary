@@ -60,38 +60,38 @@ BUFFER_DECLARATION(gamma, 6, float, readonly);
  *
  * @note Epsilon parameter in the batch normalization equation should be given as a preprocessor argument using "#define EPSILON". e.g. "#define EPSILON 0.1"
  *
- * @param[in]  src_ptr                              Pointer to the first source tensor. Supported data types: F32
- * @param[in]  src_stride_x                         Stride of the first source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                         Stride of the first source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                           src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                         Stride of the first source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                           src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes    The offset of the first element in the first source tensor
- * @param[out] dst_ptr                              Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                         Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                           dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                         Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                           dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                         Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                           dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes    The offset of the first element in the destination tensor
- * @param[in]  mean_ptr                             Pointer to the mean source tensor. Supported data types: same as @p src_ptr
- * @param[in]  mean_stride_x                        Stride of the mean source tensor in X dimension (in bytes)
- * @param[in]  mean_step_x                          mean_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  mean_offset_first_element_in_bytes   The offset of the first element in the mean source tensor
- * @param[in]  var_ptr                              Pointer to the var tensor. Supported data types: same as @p src_ptr
- * @param[in]  var_stride_x                         Stride of the var tensor in X dimension (in bytes)
- * @param[in]  var_step_x                           var_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  var_offset_first_element_in_bytes    The offset of the first element in the var source tensor
- * @param[in]  beta_ptr                             Pointer to the beta source tensor. Supported data types: same as @p src_ptr
- * @param[in]  beta_stride_x                        Stride of the beta source tensor in X dimension (in bytes)
- * @param[in]  beta_step_x                          beta_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  beta_offset_first_element_in_bytes   The offset of the first element in the beta source tensor
- * @param[in]  gamma_ptr                            Pointer to the gamma source tensor. Supported data types: same as @p src_ptr
- * @param[in]  gamma_stride_x                       Stride of the gamma source tensor in X dimension (in bytes)
- * @param[in]  gamma_step_x                         gamma_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  gamma_offset_first_element_in_bytes  The offset of the first element in the gamma source tensor
+ * @param[in]  src_ptr                             Pointer to the first source tensor. Supported data types: F32
+ * @param[in]  src_stride_x                        Stride of the first source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                          src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                        Stride of the first source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                          src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                        Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                          src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes   The offset of the first element in the first source tensor
+ * @param[out] dst_ptr                             Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                        Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                          dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                        Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                          dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                        Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                          dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes   The offset of the first element in the destination tensor
+ * @param[in]  mean_ptr                            Pointer to the mean source tensor. Supported data types: same as @p src_ptr
+ * @param[in]  mean_stride_x                       Stride of the mean source tensor in X dimension (in bytes)
+ * @param[in]  mean_step_x                         mean_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  mean_offset_first_element_in_bytes  The offset of the first element in the mean source tensor
+ * @param[in]  var_ptr                             Pointer to the var tensor. Supported data types: same as @p src_ptr
+ * @param[in]  var_stride_x                        Stride of the var tensor in X dimension (in bytes)
+ * @param[in]  var_step_x                          var_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  var_offset_first_element_in_bytes   The offset of the first element in the var source tensor
+ * @param[in]  beta_ptr                            Pointer to the beta source tensor. Supported data types: same as @p src_ptr
+ * @param[in]  beta_stride_x                       Stride of the beta source tensor in X dimension (in bytes)
+ * @param[in]  beta_step_x                         beta_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  beta_offset_first_element_in_bytes  The offset of the first element in the beta source tensor
+ * @param[in]  gamma_ptr                           Pointer to the gamma source tensor. Supported data types: same as @p src_ptr
+ * @param[in]  gamma_stride_x                      Stride of the gamma source tensor in X dimension (in bytes)
+ * @param[in]  gamma_step_x                        gamma_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  gamma_offset_first_element_in_bytes The offset of the first element in the gamma source tensor
  */
 void main(void)
 {
@@ -138,38 +138,38 @@ BUFFER_DECLARATION(gamma, 6, uint, );
  *
  * @note Epsilon parameter in the batch normalization equation should be given as a preprocessor argument using "#define EPSILON". e.g. "#define EPSILON 0.1"
  *
- * @param[in]  src_ptr                              Pointer to the first source tensor. Supported data types: F16
- * @param[in]  src_stride_x                         Stride of the first source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                         Stride of the first source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                           src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                         Stride of the first source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                           src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes    The offset of the first element in the first source tensor
- * @param[out] dst_ptr                              Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                         Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                           dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                         Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                           dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                         Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                           dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes    The offset of the first element in the destination tensor
- * @param[in]  mean_ptr                             Pointer to the mean source tensor. Supported data types: same as @p src_ptr
- * @param[in]  mean_stride_x                        Stride of the mean source tensor in X dimension (in bytes)
- * @param[in]  mean_step_x                          mean_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  mean_offset_first_element_in_bytes   The offset of the first element in the mean source tensor
- * @param[in]  var_ptr                              Pointer to the var tensor. Supported data types: same as @p src_ptr
- * @param[in]  var_stride_x                         Stride of the var tensor in X dimension (in bytes)
- * @param[in]  var_step_x                           var_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  var_offset_first_element_in_bytes    The offset of the first element in the var source tensor
- * @param[in]  beta_ptr                             Pointer to the beta source tensor. Supported data types: same as @p src_ptr
- * @param[in]  beta_stride_x                        Stride of the beta source tensor in X dimension (in bytes)
- * @param[in]  beta_step_x                          beta_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  beta_offset_first_element_in_bytes   The offset of the first element in the beta source tensor
- * @param[in]  gamma_ptr                            Pointer to the gamma source tensor. Supported data types: same as @p src_ptr
- * @param[in]  gamma_stride_x                       Stride of the gamma source tensor in X dimension (in bytes)
- * @param[in]  gamma_step_x                         gamma_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  gamma_offset_first_element_in_bytes  The offset of the first element in the gamma source tensor
+ * @param[in]  src_ptr                             Pointer to the first source tensor. Supported data types: F16
+ * @param[in]  src_stride_x                        Stride of the first source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                          src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                        Stride of the first source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                          src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                        Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                          src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes   The offset of the first element in the first source tensor
+ * @param[out] dst_ptr                             Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                        Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                          dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                        Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                          dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                        Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                          dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes   The offset of the first element in the destination tensor
+ * @param[in]  mean_ptr                            Pointer to the mean source tensor. Supported data types: same as @p src_ptr
+ * @param[in]  mean_stride_x                       Stride of the mean source tensor in X dimension (in bytes)
+ * @param[in]  mean_step_x                         mean_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  mean_offset_first_element_in_bytes  The offset of the first element in the mean source tensor
+ * @param[in]  var_ptr                             Pointer to the var tensor. Supported data types: same as @p src_ptr
+ * @param[in]  var_stride_x                        Stride of the var tensor in X dimension (in bytes)
+ * @param[in]  var_step_x                          var_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  var_offset_first_element_in_bytes   The offset of the first element in the var source tensor
+ * @param[in]  beta_ptr                            Pointer to the beta source tensor. Supported data types: same as @p src_ptr
+ * @param[in]  beta_stride_x                       Stride of the beta source tensor in X dimension (in bytes)
+ * @param[in]  beta_step_x                         beta_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  beta_offset_first_element_in_bytes  The offset of the first element in the beta source tensor
+ * @param[in]  gamma_ptr                           Pointer to the gamma source tensor. Supported data types: same as @p src_ptr
+ * @param[in]  gamma_stride_x                      Stride of the gamma source tensor in X dimension (in bytes)
+ * @param[in]  gamma_step_x                        gamma_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  gamma_offset_first_element_in_bytes The offset of the first element in the gamma source tensor
  */
 void main(void)
 {

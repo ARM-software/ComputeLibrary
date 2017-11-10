@@ -99,10 +99,6 @@ void GCActivationLayerKernel::configure(IGCTensor *input, IGCTensor *output, Act
                                   AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
     }
 
-    _kernel.clear_params();
-
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 

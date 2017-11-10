@@ -219,9 +219,6 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
         output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
     }
 
-    _kernel.clear_params();
-    _kernel.set_shader_params_binding_point(0);
-
     IGCKernel::configure(win);
 }
 
