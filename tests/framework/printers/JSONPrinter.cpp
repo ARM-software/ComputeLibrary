@@ -193,9 +193,9 @@ void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measuremen
             else
             {
                 std::stringstream str;
-                str << "[";
-                str << join(measurement.raw_data().begin(), measurement.raw_data().end(), ",");
-                str << "]";
+                str << R"([")";
+                str << join(measurement.raw_data().begin(), measurement.raw_data().end(), R"(",")");
+                str << R"("])";
                 return str.str();
             }
         };
