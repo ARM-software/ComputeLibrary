@@ -221,6 +221,7 @@ if env['os'] != 'bare_metal' and not env['standalone']:
     Export('arm_compute_so')
 
 if env['neon'] and env['opencl']:
+    Import('opencl')
     graph_files = Glob('src/graph/*.cpp')
     graph_files += Glob('src/graph/nodes/*.cpp')
     graph_files += Glob('src/graph/operations/*.cpp')
@@ -234,8 +235,10 @@ if env['neon'] and env['opencl']:
     arm_compute_graph_a = build_library('arm_compute_graph-static', static_graph_objects, static=True, libs = [ arm_compute_a ])
     Export('arm_compute_graph_a')
 
-    arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core" ])
-    Depends( arm_compute_graph_so, arm_compute_so)
+    arm_compute_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
+    arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core", "OpenCL" ])
+    Depends(arm_compute_graph_so, arm_compute_so)
+    Depends(arm_compute_graph_so, opencl)
     Export('arm_compute_graph_so')
 
     graph_alias = arm_compute_env.Alias("arm_compute_graph", [arm_compute_graph_a, arm_compute_graph_so])

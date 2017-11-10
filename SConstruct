@@ -224,13 +224,13 @@ Export('vars')
 Export('env')
 Export('version_at_least')
 
-SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
-
 if env['opencl']:
     SConscript("./opencl-1.2-stubs/SConscript", variant_dir="build/%s/opencl-1.2-stubs" % env['build_dir'], duplicate=0)
 
 if env['gles_compute'] and env['os'] != 'android':
     SConscript("./opengles-3.1/stubs/SConscript", variant_dir="build/%s/opengles-3.1/stubs" % env['build_dir'], duplicate=0)
+
+SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
 
 if env['examples'] and env['os'] != 'bare_metal':
     SConscript('./examples/SConscript', variant_dir='#build/%s/examples' % env['build_dir'], duplicate=0)
