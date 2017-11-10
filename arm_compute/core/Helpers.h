@@ -476,6 +476,15 @@ bool auto_init_if_empty(ITensorInfo       &info,
                         int              fixed_point_position,
                         QuantizationInfo quantization_info = QuantizationInfo());
 
+/** Auto initialize the tensor info using another tensor info.
+ *
+ * @param info_sink   Tensor info used to check and assign
+ * @param info_source Tensor info used to assign
+ *
+ * @return True if the tensor info has been initialized
+ */
+bool auto_init_if_empty(ITensorInfo &info_sink, ITensorInfo &info_source);
+
 /* Set the shape to the specified value if the current assignment is empty.
  *
  * @param[in,out] info  Tensor info used to check and assign.

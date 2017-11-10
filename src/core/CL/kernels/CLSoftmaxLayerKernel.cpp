@@ -386,11 +386,7 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
 
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*output->info(),
-                       input->info()->tensor_shape(),
-                       1,
-                       output_data_type,
-                       input->info()->fixed_point_position(),
-                       allowed_quantization_info);
+                       input->info()->clone()->set_data_type(output_data_type).set_quantization_info(allowed_quantization_info));
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
     if(!is_quantized_asymmetric)

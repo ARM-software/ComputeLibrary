@@ -34,6 +34,7 @@
 #include "arm_compute/core/Utils.h"
 
 #include <cstddef>
+#include <memory>
 
 namespace arm_compute
 {
@@ -212,11 +213,13 @@ public:
     size_t init_auto_padding(const HOGInfo &hog_info, unsigned int width, unsigned int height);
 
     // Inherited methods overridden:
-    void set_data_type(DataType data_type) override;
-    void set_num_channels(int num_channels) override;
-    void set_format(Format format) override;
-    void set_tensor_shape(TensorShape shape) override;
-    void set_fixed_point_position(int fixed_point_position) override;
+    std::unique_ptr<ITensorInfo> clone() const override;
+    ITensorInfo &set_data_type(DataType data_type) override;
+    ITensorInfo &set_num_channels(int num_channels) override;
+    ITensorInfo &set_format(Format format) override;
+    ITensorInfo &set_tensor_shape(TensorShape shape) override;
+    ITensorInfo &set_fixed_point_position(int fixed_point_position) override;
+    ITensorInfo &set_quantization_info(QuantizationInfo quantization_info) override;
     bool auto_padding() override;
     bool extend_padding(const PaddingSize &padding) override;
     size_t dimension(size_t index) const override
@@ -291,10 +294,6 @@ public:
     QuantizationInfo quantization_info() const override
     {
         return _quantization_info;
-    }
-    void set_quantization_info(QuantizationInfo quantization_info) override
-    {
-        _quantization_info = quantization_info;
     }
 
 private:

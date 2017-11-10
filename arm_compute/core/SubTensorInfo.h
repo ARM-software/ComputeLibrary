@@ -34,6 +34,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include <cstddef>
+#include <memory>
 
 namespace arm_compute
 {
@@ -50,7 +51,7 @@ public:
      *                         X and Y dimensions must match the parent's ones.
      * @param[in] coords       Coordinates of starting element inside parent tensor.
      */
-    SubTensorInfo(ITensorInfo *parent, const TensorShape &tensor_shape, const Coordinates &coords);
+    SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coordinates coords);
     /** Default destructor */
     ~SubTensorInfo() = default;
     /** Allow instances of this class to be copy constructed */
@@ -71,27 +72,38 @@ public:
     }
 
     // Inherited methods overridden:
-    void set_data_type(DataType data_type) override
+    std::unique_ptr<ITensorInfo> clone() const override;
+    ITensorInfo &set_data_type(DataType data_type) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         _parent->set_data_type(data_type);
+        return *this;
     };
-    void set_num_channels(int num_channels) override
+    ITensorInfo &set_num_channels(int num_channels) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         _parent->set_num_channels(num_channels);
+        return *this;
     };
-    void set_format(Format format) override
+    ITensorInfo &set_format(Format format) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         _parent->set_format(format);
+        return *this;
     };
-    void set_fixed_point_position(int fixed_point_position) override
+    ITensorInfo &set_fixed_point_position(int fixed_point_position) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         _parent->set_fixed_point_position(fixed_point_position);
+        return *this;
     };
-    void set_tensor_shape(TensorShape shape) override;
+    ITensorInfo &set_tensor_shape(TensorShape shape) override;
+    ITensorInfo &set_quantization_info(QuantizationInfo quantization_info) override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        _parent->set_quantization_info(quantization_info);
+        return *this;
+    }
     bool auto_padding() override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
@@ -190,11 +202,6 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->quantization_info();
-    }
-    void set_quantization_info(QuantizationInfo quantization_info) override
-    {
-        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
-        _parent->set_quantization_info(quantization_info);
     }
 
 private:

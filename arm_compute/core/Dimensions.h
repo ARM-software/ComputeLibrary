@@ -179,5 +179,16 @@ protected:
     std::array<T, num_max_dimensions> _id;
     size_t _num_dimensions{ 0 };
 };
+
+template <typename T>
+inline bool operator==(const Dimensions<T> &lhs, const Dimensions<T> &rhs)
+{
+    return ((lhs.num_dimensions() == rhs.num_dimensions()) && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin()));
+}
+template <typename T>
+inline bool operator!=(const Dimensions<T> &lhs, const Dimensions<T> &rhs)
+{
+    return !(lhs == rhs);
+}
 }
 #endif /*__ARM_COMPUTE_DIMENSIONS_H__*/

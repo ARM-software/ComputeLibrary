@@ -26,6 +26,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -34,7 +35,7 @@ SubTensorInfo::SubTensorInfo()
 {
 }
 
-SubTensorInfo::SubTensorInfo(ITensorInfo *parent, const TensorShape &tensor_shape, const Coordinates &coords)
+SubTensorInfo::SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coordinates coords)
     : _parent(parent), _tensor_shape(tensor_shape), _coords(coords), _valid_region{ Coordinates(), _tensor_shape }
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
@@ -50,7 +51,12 @@ SubTensorInfo::SubTensorInfo(ITensorInfo *parent, const TensorShape &tensor_shap
     _valid_region = ValidRegion{ coordinates, _tensor_shape };
 }
 
-void SubTensorInfo::set_tensor_shape(TensorShape shape)
+std::unique_ptr<ITensorInfo> SubTensorInfo::clone() const
+{
+    return support::cpp14::make_unique<SubTensorInfo>(*this);
+}
+
+ITensorInfo &SubTensorInfo::set_tensor_shape(TensorShape shape)
 {
     ARM_COMPUTE_ERROR_ON(_parent == nullptr);
     // Check if subtensor is valid if parent is configured
@@ -59,6 +65,7 @@ void SubTensorInfo::set_tensor_shape(TensorShape shape)
         ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(_parent->tensor_shape(), _coords, shape);
     }
     _tensor_shape = shape;
+    return *this;
 }
 
 bool SubTensorInfo::extend_padding(const PaddingSize &padding)

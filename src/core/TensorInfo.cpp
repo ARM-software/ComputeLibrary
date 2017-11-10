@@ -28,6 +28,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -314,19 +315,26 @@ bool TensorInfo::extend_padding(const PaddingSize &padding)
     return updated;
 }
 
-void TensorInfo::set_data_type(DataType data_type)
+std::unique_ptr<ITensorInfo> TensorInfo::clone() const
+{
+    return support::cpp14::make_unique<TensorInfo>(*this);
+}
+
+ITensorInfo &TensorInfo::set_data_type(DataType data_type)
 {
     _data_type = data_type;
     _format    = Format::UNKNOWN;
+    return *this;
 }
 
-void TensorInfo::set_num_channels(int num_channels)
+ITensorInfo &TensorInfo::set_num_channels(int num_channels)
 {
     _num_channels = num_channels;
     _format       = Format::UNKNOWN;
+    return *this;
 }
 
-void TensorInfo::set_format(Format format)
+ITensorInfo &TensorInfo::set_format(Format format)
 {
     _format = format;
 
@@ -340,9 +348,10 @@ void TensorInfo::set_format(Format format)
         ARM_COMPUTE_ERROR_ON(num_channels_from_format(format) != _num_channels);
         ARM_COMPUTE_ERROR_ON(data_type_from_format(format) != _data_type);
     }
+    return *this;
 }
 
-void TensorInfo::set_tensor_shape(TensorShape shape)
+ITensorInfo &TensorInfo::set_tensor_shape(TensorShape shape)
 {
     _tensor_shape                  = shape;
     _offset_first_element_in_bytes = 0;
@@ -361,13 +370,21 @@ void TensorInfo::set_tensor_shape(TensorShape shape)
     Coordinates coordinates;
     coordinates.set_num_dimensions(_tensor_shape.num_dimensions());
     _valid_region = ValidRegion{ coordinates, _tensor_shape };
+    return *this;
 }
 
-void TensorInfo::set_fixed_point_position(int fixed_point_position)
+ITensorInfo &TensorInfo::set_fixed_point_position(int fixed_point_position)
 {
     ARM_COMPUTE_ERROR_ON(_data_type == DataType::QS8 && (fixed_point_position < 1 || fixed_point_position > 6));
     ARM_COMPUTE_ERROR_ON(_data_type == DataType::QS16 && (fixed_point_position < 1 || fixed_point_position > 14));
     _fixed_point_position = fixed_point_position;
+    return *this;
+}
+
+ITensorInfo &TensorInfo::set_quantization_info(QuantizationInfo quantization_info)
+{
+    _quantization_info = quantization_info;
+    return *this;
 }
 
 size_t TensorInfo::offset_element_in_bytes(const Coordinates &pos) const

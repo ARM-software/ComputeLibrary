@@ -217,6 +217,21 @@ inline bool auto_init_if_empty(ITensorInfo       &info,
     return false;
 }
 
+inline bool auto_init_if_empty(ITensorInfo &info_sink, ITensorInfo &info_source)
+{
+    if(info_sink.tensor_shape().total_size() == 0)
+    {
+        info_sink.set_data_type(info_source.data_type());
+        info_sink.set_num_channels(info_source.num_channels());
+        info_sink.set_tensor_shape(info_source.tensor_shape());
+        info_sink.set_fixed_point_position(info_source.fixed_point_position());
+        info_sink.set_quantization_info(info_source.quantization_info());
+        return true;
+    }
+
+    return false;
+}
+
 inline bool set_shape_if_empty(ITensorInfo &info, const TensorShape &shape)
 {
     if(info.tensor_shape().total_size() == 0)
