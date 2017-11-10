@@ -111,5 +111,6 @@
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64V8P4Kernel.h"
+#include "arm_compute/core/NEON/kernels/arm64/NEHGEMMAArch64FP16Kernel.h"
 
 #endif /* __ARM_COMPUTE_NEKERNELS_H__ */
