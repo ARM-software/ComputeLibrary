@@ -363,7 +363,7 @@ __kernel void softmax_layer_max_shift_exp_sum_serial(
 #ifdef BETA
     // Initialize beta
     VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
-    beta = (VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE))BETA_VAL;
+    beta = (VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE))BETA;
 #endif /* BETA */
 
     // Initialize local maximum
