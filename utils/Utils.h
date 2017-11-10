@@ -709,9 +709,9 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
         fs.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
         fs.open(npy_filename, std::ios::out | std::ios::binary);
 
-        const unsigned int width  = tensor.info()->tensor_shape()[0];
-        const unsigned int height = tensor.info()->tensor_shape()[1];
-        unsigned long      shape[2];
+        const unsigned int              width  = tensor.info()->tensor_shape()[0];
+        const unsigned int              height = tensor.info()->tensor_shape()[1];
+        std::vector<npy::ndarray_len_t> shape(2);
 
         if(!fortran_order)
         {
@@ -734,7 +734,7 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
                 std::string        typestring = typestring_o.str();
 
                 std::ofstream stream(npy_filename, std::ofstream::binary);
-                npy::WriteHeader(stream, typestring, fortran_order, 2, shape);
+                npy::write_header(stream, typestring, fortran_order, shape);
 
                 arm_compute::Window window;
                 window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, width, 1));

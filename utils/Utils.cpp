@@ -172,30 +172,13 @@ std::tuple<std::vector<unsigned long>, bool, std::string> parse_npy_header(std::
 {
     std::vector<unsigned long> shape; // NOLINT
 
-    // Check magic bytes and version number
-    unsigned char v_major = 0;
-    unsigned char v_minor = 0;
-    npy::read_magic(fs, &v_major, &v_minor);
-
     // Read header
-    std::string header;
-    if(v_major == 1 && v_minor == 0)
-    {
-        header = npy::read_header_1_0(fs);
-    }
-    else if(v_major == 2 && v_minor == 0)
-    {
-        header = npy::read_header_2_0(fs);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Unsupported file format version");
-    }
+    std::string header = npy::read_header(fs);
 
     // Parse header
     bool        fortran_order = false;
     std::string typestr;
-    npy::ParseHeader(header, typestr, &fortran_order, shape);
+    npy::parse_header(header, typestr, fortran_order, shape);
 
     if(!fortran_order)
     {

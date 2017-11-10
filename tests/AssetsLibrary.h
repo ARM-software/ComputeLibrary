@@ -673,30 +673,12 @@ void AssetsLibrary::fill_layer_data(T &&tensor, std::string name) const
     {
         throw framework::FileNotFound("Could not load npy file: " + path);
     }
-    // Check magic bytes and version number
-    unsigned char v_major = 0;
-    unsigned char v_minor = 0;
-    npy::read_magic(stream, &v_major, &v_minor);
-
-    // Read header
-    std::string header;
-    if(v_major == 1 && v_minor == 0)
-    {
-        header = npy::read_header_1_0(stream);
-    }
-    else if(v_major == 2 && v_minor == 0)
-    {
-        header = npy::read_header_2_0(stream);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Unsupported file format version");
-    }
+    std::string header = npy::read_header(stream);
 
     // Parse header
     bool        fortran_order = false;
     std::string typestr;
-    npy::ParseHeader(header, typestr, &fortran_order, shape);
+    npy::parse_header(header, typestr, fortran_order, shape);
 
     // Check if the typestring matches the given one
     std::string expect_typestr = get_typestring(tensor.data_type());
