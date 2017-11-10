@@ -113,7 +113,7 @@ __kernel void pooling_layer_N_quantized(
     res          = POOL_OP(res, sdata);
 
 #if defined(POOL_AVG)
-    res = DIV_OP(res, calculate_avg_scale(POOL_SIZE, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
+    res = round(DIV_OP(res, calculate_avg_scale(POOL_SIZE, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y)));
 #endif /* defined(POOL_AVG) */
 
     // Store result
