@@ -53,20 +53,24 @@ BorderSize CLPoolingLayerKernel::border_size() const
 
 void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info)
 {
-    int                 pool_pad_x      = 0;
-    int                 pool_pad_y      = 0;
-    int                 pool_stride_x   = 0;
-    int                 pool_stride_y   = 0;
-    unsigned int        pooled_w        = 0;
-    unsigned int        pooled_h        = 0;
-    const PoolingType   pool_type       = pool_info.pool_type();
-    const int           pool_size       = pool_info.pool_size();
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
-    bool                exclude_padding = pool_info.exclude_padding();
+    int                 pool_pad_x        = 0;
+    int                 pool_pad_y        = 0;
+    int                 pool_stride_x     = 0;
+    int                 pool_stride_y     = 0;
+    unsigned int        pooled_w          = 0;
+    unsigned int        pooled_h          = 0;
+    const PoolingType   pool_type         = pool_info.pool_type();
+    int                 pool_size         = pool_info.pool_size();
+    const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
+    const bool          exclude_padding   = pool_info.exclude_padding();
+    const bool          is_global_pooling = pool_info.is_global_pooling();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    // Update pool size in case of global pooling
+    pool_size = is_global_pooling ? input->info()->dimension(0) : pool_size;
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
@@ -188,11 +192,12 @@ Error CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type() == PoolingType::L2),
                                     "Unsupported combination of parameters!");
 
-    int pool_pad_x = 0;
-    int pool_pad_y = 0;
-    int pool_size  = pool_info.pool_size();
-    std::tie(pool_pad_x, pool_pad_y) = pool_info.pad_stride_info().pad();
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((pool_pad_x >= pool_size) || (pool_pad_y >= pool_size)),
+    const bool         is_global_pooling = pool_info.is_global_pooling();
+    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size();
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()),
+                                    "Global pooling is supported only with rectangular inputs!");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_global_pooling && ((pool_info.pad_stride_info().pad().first >= pool_size) || (pool_info.pad_stride_info().pad().second >= pool_size)),
                                     "Invalid pool size and pool pad combination!");
 
     // Checks performed when output is configured
@@ -208,7 +213,7 @@ Error CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo
                                                          pool_size,
                                                          pool_size,
                                                          pool_info.pad_stride_info());
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((output->dimension(0) != pooled_w) != (output->dimension(1) != pooled_h),
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((output->dimension(0) != pooled_w) || (output->dimension(1) != pooled_h),
                                         "Invalid output pooling dimensions!");
     }
 

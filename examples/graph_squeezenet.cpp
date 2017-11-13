@@ -190,7 +190,7 @@ void main_graph_squeezenet(int argc, const char **argv)
               get_weights_accessor(data_path, "/cnn_data/squeezenet_v1.0_model/conv10_b.npy"),
               PadStrideInfo(1, 1, 0, 0))
           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-          << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 13, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)))
+          << PoolingLayer(PoolingLayerInfo(PoolingType::AVG))
           << FlattenLayer()
           << SoftmaxLayer()
           << Tensor(get_output_accessor(label, 5));

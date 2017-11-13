@@ -102,16 +102,17 @@ BorderSize NEPoolingLayerKernel::border_size() const
 
 void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
 {
-    int                 pool_pad_x      = 0;
-    int                 pool_pad_y      = 0;
-    int                 pool_stride_x   = 0;
-    int                 pool_stride_y   = 0;
-    unsigned int        pooled_w        = 0;
-    unsigned int        pooled_h        = 0;
-    PoolingType         pool_type       = pool_info.pool_type();
-    int                 pool_size       = pool_info.pool_size();
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
-    bool                exclude_padding = pool_info.exclude_padding();
+    int                 pool_pad_x        = 0;
+    int                 pool_pad_y        = 0;
+    int                 pool_stride_x     = 0;
+    int                 pool_stride_y     = 0;
+    unsigned int        pooled_w          = 0;
+    unsigned int        pooled_h          = 0;
+    PoolingType         pool_type         = pool_info.pool_type();
+    int                 pool_size         = pool_info.pool_size();
+    const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
+    const bool          exclude_padding   = pool_info.exclude_padding();
+    const bool          is_global_pooling = pool_info.is_global_pooling();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
@@ -122,13 +123,20 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_fixed_point(input->info()->data_type()));
     ARM_COMPUTE_ERROR_ON((supported_pool_sizes.find(pool_size) == supported_pool_sizes.end()) && (input->info()->data_type() != DataType::F32));
-    ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
+    ARM_COMPUTE_ERROR_ON(!is_global_pooling && (pool_pad_x >= pool_size || pool_pad_y >= pool_size));
+    ARM_COMPUTE_ERROR_ON(is_global_pooling && (input->info()->tensor_shape().x() != input->info()->tensor_shape().y()));
     ARM_COMPUTE_ERROR_ON(is_data_type_fixed_point(input->info()->data_type()) && pool_stride_x > 2);
     ARM_COMPUTE_ERROR_ON(exclude_padding && is_data_type_fixed_point(input->info()->data_type()));
 
+    // Update pool size in case of global pooling
+    pool_size = is_global_pooling ? input->info()->dimension(0) : pool_size;
+
     // Check output dimensions
-    std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
-                                                     pool_size, pool_size, pool_info.pad_stride_info());
+    std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
+                                                     input->info()->dimension(1),
+                                                     pool_size,
+                                                     pool_size,
+                                                     pool_info.pad_stride_info());
 
     // Output auto initialization if not yet initialized
     {
@@ -1031,7 +1039,7 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size     = _pool_info.pool_size();
+    const int pool_size     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size();
     int       pool_pad_x    = 0;
     int       pool_pad_y    = 0;
     int       pool_stride_x = 0;

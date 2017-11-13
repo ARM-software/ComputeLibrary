@@ -550,20 +550,35 @@ private:
 class PoolingLayerInfo
 {
 public:
+    /** Default Constructor */
+    PoolingLayerInfo()
+        : _pool_type(PoolingType::MAX), _pool_size(0), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false)
+    {
+    }
     /** Default Constructor
      *
-     * @param[in] pool_type       Pooling type @ref PoolingType. Defaults to @ref PoolingType::MAX
-     * @param[in] pool_size       (Optional) Pooling size, in elements, across  x and y. Defaults to 2.
+     * @param[in] pool_type       Pooling type @ref PoolingType.
+     * @param[in] pool_size       Pooling size, in elements, across  x and y.
      * @param[in] pad_stride_info (Optional) Padding and stride information @ref PadStrideInfo
      * @param[in] exclude_padding (Optional) Strategy when accounting padding in calculations.
      *                             True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
      *                             Defaults to false;
      */
-    PoolingLayerInfo(PoolingType   pool_type       = PoolingType::MAX,
-                     unsigned int  pool_size       = 2,
-                     PadStrideInfo pad_stride_info = PadStrideInfo(),
-                     bool          exclude_padding = false)
-        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding)
+    explicit PoolingLayerInfo(PoolingType   pool_type,
+                              unsigned int  pool_size,
+                              PadStrideInfo pad_stride_info = PadStrideInfo(),
+                              bool          exclude_padding = false)
+        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false)
+    {
+    }
+    /** Default Constructor
+     *
+     * @note This constructor is used for global pooling
+     *
+     * @param[in] pool_type Pooling type @ref PoolingType.
+     */
+    explicit PoolingLayerInfo(PoolingType pool_type)
+        : _pool_type(pool_type), _pool_size(0), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true)
     {
     }
     PoolingType pool_type() const
@@ -582,12 +597,17 @@ public:
     {
         return _exclude_padding;
     }
+    bool is_global_pooling() const
+    {
+        return _is_global_pooling;
+    }
 
 private:
     PoolingType   _pool_type;
     unsigned int  _pool_size;
     PadStrideInfo _pad_stride_info;
     bool          _exclude_padding;
+    bool          _is_global_pooling;
 };
 
 /** ROI Pooling Layer Information class */

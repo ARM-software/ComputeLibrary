@@ -52,22 +52,26 @@ BorderSize GCPoolingLayerKernel::border_size() const
 
 void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info)
 {
-    int                 pool_pad_x      = 0;
-    int                 pool_pad_y      = 0;
-    int                 pool_stride_x   = 0;
-    int                 pool_stride_y   = 0;
-    unsigned int        pooled_w        = 0;
-    unsigned int        pooled_h        = 0;
-    const PoolingType   pool_type       = pool_info.pool_type();
-    const int           pool_size       = pool_info.pool_size();
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
+    int                 pool_pad_x        = 0;
+    int                 pool_pad_y        = 0;
+    int                 pool_stride_x     = 0;
+    int                 pool_stride_y     = 0;
+    unsigned int        pooled_w          = 0;
+    unsigned int        pooled_h          = 0;
+    const PoolingType   pool_type         = pool_info.pool_type();
+    int                 pool_size         = pool_info.pool_size();
+    const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
+    const bool          is_global_pooling = pool_info.is_global_pooling();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
-    ARM_COMPUTE_ERROR_ON(pool_size > 7 && is_data_type_fixed_point(input->info()->data_type()));
+    ARM_COMPUTE_ERROR_ON(!is_global_pooling && (pool_pad_x >= pool_size || pool_pad_y >= pool_size));
+    ARM_COMPUTE_ERROR_ON(is_global_pooling && (input->info()->tensor_shape().x() != input->info()->tensor_shape().y()));
+
+    // Update pool size in case of global pooling
+    pool_size = is_global_pooling ? input->info()->dimension(0) : pool_size;
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),

@@ -78,6 +78,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8, 0), // Invalid parameters
+                                                       TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32, 0),     // Non-rectangular Global Pooling
+                                                       TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0),     // Invalid output Global Pooling
+                                                       TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0),
                                                        TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 0),
@@ -86,6 +89,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8, 0),
+                                                       TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(2U, 2U, 5U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32, 0),
                                                      })),
                framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
                                                        PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
@@ -94,8 +100,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 2, 0)),
                                                        PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 0, 2)),
                                                        PoolingLayerInfo(PoolingType::L2, 3, PadStrideInfo(1, 1, 0, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG),
+                                                       PoolingLayerInfo(PoolingType::MAX),
+                                                       PoolingLayerInfo(PoolingType::AVG),
                                                       })),
-               framework::dataset::make("Expected", { true, false, true, false, true, true, true })),
+               framework::dataset::make("Expected", { true, false, true, false, true, true, true, true, true, false })),
                input_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info, &output_info, pool_info)) == expected, framework::LogLevel::ERRORS);
