@@ -21,28 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEGEMMLOWPAARCH64V8P4KERNEL_H__
-#define __ARM_COMPUTE_NEGEMMLOWPAARCH64V8P4KERNEL_H__
+#pragma once
 
-#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
+#ifdef __aarch64__
 
-// Enable only if compiled for AArch64-V8.2-A targets
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+// Load the actual kernel
+#include "a64_gemm_u8_12x8/generic.hpp"
 
-namespace arm_compute
-{
-class ITensor;
-
-/** AArch64 NEON kernel to multiply two input matrices "A" and "B". */
-class NEGEMMLowpAArch64V8P4Kernel : public NEGEMMAssemblyBaseKernel
-{
+class gemm_u8_12x8 {
 public:
-    // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    typedef uint8_t operand_type;
+    typedef uint32_t result_type;
 
-protected:
-    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;
+    typedef void (*kern_type)(const uint8_t *, const uint8_t *, uint32_t *, int, int, int);
+
+    /* Describes the data layout for A input */
+    static const int A_interleave = 8;
+    static const int A_block = 4;
+    static const bool A_transpose = false;
+
+    /* Same for B input */
+    static const int B_interleave = 12;
+    static const int B_block = 4;
+    static const bool B_transpose = true;
+
+    /* Kernel blocking parameters */
+    static const int out_width = 12;
+    static const int out_height = 8;
+    static const int k_unroll = 4;
+
+    kern_type kernel = nullptr;
+
+    gemm_u8_12x8(const CPUInfo *ci) {
+        kernel = a64_gemm_u8_12x8;
+    }
 };
-} // namespace arm_compute
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
-#endif /*__ARM_COMPUTE_NEGEMMLOWPAARCH64V8P4KERNEL_H__*/
+
+#endif // __aarch64__
+

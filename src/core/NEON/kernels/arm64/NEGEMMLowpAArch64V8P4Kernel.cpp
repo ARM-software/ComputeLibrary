@@ -38,7 +38,7 @@
 namespace arm_compute
 {
 #include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_s8_12x8.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_u8_12x8.hpp"
 } // namespace arm_compute
 
 #include <arm_neon.h>
@@ -52,7 +52,7 @@ namespace arm_compute
 {
 void NEGEMMLowpAArch64V8P4Kernel::internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::S8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
 
@@ -81,11 +81,6 @@ void NEGEMMLowpAArch64V8P4Kernel::internal_configure(const ITensor *input0, cons
     INEKernel::configure(win);
 }
 
-bool NEGEMMLowpAArch64V8P4Kernel::is_parallelisable() const
-{
-    return false;
-}
-
 void NEGEMMLowpAArch64V8P4Kernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -93,9 +88,9 @@ void NEGEMMLowpAArch64V8P4Kernel::run(const Window &window, const ThreadInfo &in
 
     const int lda = _input0->info()->strides_in_bytes().y();
     const int ldb = _input1->info()->strides_in_bytes().y();
-    const int ldc = _output->info()->strides_in_bytes().y() / sizeof(int32_t);
+    const int ldc = _output->info()->strides_in_bytes().y() / sizeof(uint32_t);
 
-    const auto in1_ptr = reinterpret_cast<const int8_t *>(_input1->buffer());
+    const auto in1_ptr = reinterpret_cast<const gemm_u8_12x8::operand_type *>(_input1->buffer());
 
     const int M = std::min(_output->info()->tensor_shape().y(), static_cast<size_t>(window.y().end())) - window.y().start();
     const int N = _output->info()->tensor_shape().x();
@@ -109,7 +104,7 @@ void NEGEMMLowpAArch64V8P4Kernel::run(const Window &window, const ThreadInfo &in
     Iterator in0(_input0, window);
     Iterator out(_output, window);
 
-    GemmInterleaved<gemm_s8_12x8, int8_t, int32_t> gemm(&info.cpu_info, M, N, K, !_transform_1, !_transform_1);
+    GemmInterleaved<gemm_u8_12x8, gemm_u8_12x8::operand_type, gemm_u8_12x8::result_type> gemm(&info.cpu_info, M, N, K, !_transform_1, !_transform_1);
 
     constexpr size_t alignment      = 4096;
     const size_t     offset         = (gemm.get_working_size() + alignment - 1) * info.thread_id;
@@ -123,9 +118,9 @@ void NEGEMMLowpAArch64V8P4Kernel::run(const Window &window, const ThreadInfo &in
 
     execute_window_loop(win, [&](const Coordinates & id)
     {
-        gemm.execute(reinterpret_cast<const int8_t *>(in0.ptr()), lda,
-                     reinterpret_cast<const int8_t *>(in1_ptr), ldb,
-                     reinterpret_cast<int32_t *>(out.ptr()), ldc,
+        gemm.execute(reinterpret_cast<const gemm_u8_12x8::operand_type *>(in0.ptr()), lda,
+                     reinterpret_cast<const gemm_u8_12x8::operand_type *>(in1_ptr), ldb,
+                     reinterpret_cast<gemm_u8_12x8::result_type *>(out.ptr()), ldc,
                      _alpha, _beta, workspace);
     },
     in0, out);

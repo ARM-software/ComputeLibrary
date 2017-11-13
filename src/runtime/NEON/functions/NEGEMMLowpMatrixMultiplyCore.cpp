@@ -41,7 +41,7 @@
 namespace arm_compute
 {
 #include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_s8_12x8.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_u8_12x8.hpp"
 } // namespace arm_compute
 
 using namespace arm_compute;
@@ -75,20 +75,15 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     {
         dot_product_path = true;
 
-        // If the DOT product instruction is available, the computation will be performed in int8_t
-        // In order to take into account this, we need to subtract -128 from a_offset and b_offset
-        _a_offset -= 128;
-        _b_offset -= 128;
-
         // Configure matrix multiply kernel
         struct CPUInfo ci = NEScheduler::get().cpu_info();
         const int      M  = output->info()->tensor_shape().y();
         const int      N  = output->info()->tensor_shape().x();
         const int      K  = a->info()->tensor_shape().x();
 
-        GemmInterleaved<gemm_s8_12x8, int8_t, int32_t> gemm(&ci, M, N, K, false, false);
-        constexpr size_t alignment = 4096;
-        _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
+        const size_t     workbench_size = GemmInterleaved<gemm_u8_12x8, gemm_u8_12x8::operand_type, gemm_u8_12x8::result_type>(&ci, M, N, K, false, false).get_working_size();
+        constexpr size_t alignment      = 4096;
+        _workspace.allocator()->init(TensorInfo(TensorShape{ (workbench_size + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
         _memory_group.manage(&_workspace);
 
         // Configure matrix multiplication kernel
