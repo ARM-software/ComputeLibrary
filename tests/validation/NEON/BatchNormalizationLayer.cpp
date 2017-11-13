@@ -44,9 +44,9 @@ namespace validation
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif                                                   /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif                                                   /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 constexpr AbsoluteTolerance<float> tolerance_qs8(3.0f);  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
 constexpr AbsoluteTolerance<float> tolerance_qs16(6.0f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS16 */
 } // namespace
@@ -89,7 +89,7 @@ FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<float>, framewor
 }
 TEST_SUITE_END()
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(Float16)
 FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomBatchNormalizationLayerDataset(),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)))
@@ -98,7 +98,7 @@ FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework
     validate(Accessor(_target), _reference, tolerance_f16, 0);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(Quantized)
 template <typename T>

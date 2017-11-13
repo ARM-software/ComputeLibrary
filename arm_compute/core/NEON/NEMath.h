@@ -116,7 +116,7 @@ float32x4_t vtanhq_f32(float32x4_t val);
  */
 float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Calculate hyperbolic tangent.
  *
  * tanh(x) = (e^2x - 1)/(e^2x + 1)
@@ -179,7 +179,7 @@ float16x8_t vexpq_f16(float16x8_t x);
  * @return The calculated power.
  */
 float16x8_t vpowq_f16(float16x8_t val, float16x8_t n);
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
 #include "arm_compute/core/NEON/NEMath.inl"
 #endif /* __ARM_COMPUTE_NEMATH_H__ */

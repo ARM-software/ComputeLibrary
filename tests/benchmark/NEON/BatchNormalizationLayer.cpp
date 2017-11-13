@@ -41,11 +41,11 @@ namespace test
 {
 namespace
 {
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8 });
-#else  /* ARM_COMPUTE_AARCH64_V8_2 */
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 const auto data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8 });
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 
 using NEBatchNormalizationLayerFixture = BatchNormalizationLayerFixture<Tensor, NEBatchNormalizationLayer, Accessor>;

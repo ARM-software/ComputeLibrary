@@ -124,7 +124,7 @@ inline qint32x4_t internal_vqaddq(const qint32x4_t &x, const qint32x4_t &y)
     return vqaddq_qs32(x, y);
 }
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 inline float16x8_t internal_vld1q(const float16_t *in)
 {
     return vld1q_f16(in);
@@ -141,7 +141,7 @@ inline float16x8_t internal_vqaddq(const float16x8_t &x, const float16x8_t &y)
 {
     return vaddq_f16(x, y);
 }
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 template <typename T1, typename T2, bool in_place>
 void accumulate_bias(ITensor *input, const ITensor *bias, const Window window, ITensor *output)
@@ -246,13 +246,13 @@ void NEDirectConvolutionLayerBiasAccumulateKernel::configure(ITensor *input, con
             _func = (output == nullptr) ? &accumulate_bias<qint32_t, qint16_t, true> : &accumulate_bias<qint32_t, qint16_t, false>;
             break;
         }
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {
             _func = (output == nullptr) ? &accumulate_bias<float16_t, float16_t, true> : &accumulate_bias<float16_t, float16_t, false>;
             break;
         }
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::F32:
         {
             _func = (output == nullptr) ? &accumulate_bias<float, float, true> : &accumulate_bias<float, float, false>;

@@ -45,13 +45,13 @@ AbsoluteTolerance<T> tolerance(MagnitudeType magnitude_type)
     return AbsoluteTolerance<T>((MagnitudeType::L1NORM == magnitude_type) ? 0 : 1);
 }
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 template <>
 AbsoluteTolerance<half_float::half> tolerance(MagnitudeType magnitude_type)
 {
     return AbsoluteTolerance<half_float::half>((MagnitudeType::L1NORM == magnitude_type) ? half(0.0) : half(1.0));
 }
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 } // namespace
 
@@ -105,7 +105,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEMagnitudeFixture<int16_t>, framework::Dataset
 }
 TEST_SUITE_END() // S16
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format",
                                                                                                                   Format::S16)),
@@ -116,7 +116,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture<half_float::half>, framework
     validate(Accessor(_target), _reference, tolerance<half_float::half>(_magnitude_type));
 }
 TEST_SUITE_END() // F16
-#endif           /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE_END()
 TEST_SUITE_END()

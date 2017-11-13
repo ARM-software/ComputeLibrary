@@ -66,7 +66,7 @@ void matrix_addition_f32(const ITensor *input, ITensor *output, const Window &wi
     in, out);
 }
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 void matrix_addition_f16(const ITensor *input, ITensor *output, const Window &window, float beta)
 {
     const float16x8_t beta_f16 = vdupq_n_f16(beta);
@@ -89,7 +89,7 @@ void matrix_addition_f16(const ITensor *input, ITensor *output, const Window &wi
     },
     in, out);
 }
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 void matrix_addition_qs8(const ITensor *input, ITensor *output, const Window &window, float beta)
 {
@@ -167,10 +167,10 @@ void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output
             _func = &matrix_addition_qs16;
             break;
         case DataType::F16:
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             _func = &matrix_addition_f16;
             break;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
             break;

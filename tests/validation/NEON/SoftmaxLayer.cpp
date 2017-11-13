@@ -44,18 +44,18 @@ namespace
 {
 /** Tolerance for float operations */
 constexpr AbsoluteTolerance<float> tolerance_f32(0.000001f);
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.0001f);
-#endif /* ARM_COMPUTE_AARCH64_V8_2*/
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int16_t> tolerance_fixed_point(2);
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     DataType::F16,
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     DataType::F32,
     DataType::QS8,
     DataType::QS16,
@@ -97,7 +97,7 @@ template <typename T>
 using NESoftmaxLayerFixture = SoftmaxValidationFixture<Tensor, Accessor, NESoftmaxLayer, T>;
 
 TEST_SUITE(Float)
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)))
 {
@@ -110,7 +110,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<half>, framework::Dataset
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)))

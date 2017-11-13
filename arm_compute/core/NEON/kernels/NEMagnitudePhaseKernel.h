@@ -94,7 +94,7 @@ private:
     ITensor                  *_phase;     /**< Output - Phase */
 };
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Template interface for the kernel to compute magnitude and phase */
 template <MagnitudeType mag_type, PhaseType phase_type>
 class NEMagnitudePhaseFP16Kernel : public INEKernel
@@ -156,9 +156,9 @@ private:
     ITensor                  *_magnitude; /**< Output - Magnitude */
     ITensor                  *_phase;     /**< Output - Phase */
 };
-#else  /* ARM_COMPUTE_AARCH64_V8_2 */
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 template <MagnitudeType mag_type, PhaseType phase_type>
 using NEMagnitudePhaseFP16Kernel = NEMagnitudePhaseKernel<mag_type, phase_type>;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEMAGNITUDEPHASEKERNEL_H__ */

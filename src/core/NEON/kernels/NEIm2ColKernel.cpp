@@ -311,11 +311,11 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
             case DataType::F32:
                 _func = &NEIm2ColKernel::run_reduced<float>;
                 break;
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
                 _func = &NEIm2ColKernel::run_reduced<float16_t>;
                 break;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::QS8:
                 _func = &NEIm2ColKernel::run_reduced<qint8_t>;
                 break;
@@ -334,11 +334,11 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
             case DataType::F32:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<float, false> : &NEIm2ColKernel::run_generic<float, true>;
                 break;
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<float16_t, false> : &NEIm2ColKernel::run_generic<float16_t, true>;
                 break;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::QS8:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<qint8_t, false> : &NEIm2ColKernel::run_generic<qint8_t, true>;
                 break;

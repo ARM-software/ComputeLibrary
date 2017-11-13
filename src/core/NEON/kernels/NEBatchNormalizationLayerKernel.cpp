@@ -169,7 +169,7 @@ void batch_normalization_fp32(ITensor *in, ITensor *out, const ITensor *mean, co
     input, output);
 }
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 void batch_normalization_fp16(ITensor *in, ITensor *out, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon, const Window &window)
 {
     Iterator input(in, window);
@@ -212,7 +212,7 @@ void batch_normalization_fp16(ITensor *in, ITensor *out, const ITensor *mean, co
     },
     input, output);
 }
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 void NEBatchNormalizationLayerKernel::configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon)
 {
@@ -258,11 +258,11 @@ void NEBatchNormalizationLayerKernel::configure(ITensor *input, ITensor *output,
             num_elems_processed_per_iteration = 4;
             break;
         case DataType::F16:
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             _func                             = &batch_normalization_fp16;
             num_elems_processed_per_iteration = 8;
             break;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
             ARM_COMPUTE_ERROR("Element size not supported");
             break;

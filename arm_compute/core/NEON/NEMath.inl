@@ -168,7 +168,7 @@ inline float32x4_t vpowq_f32(float32x4_t val, float32x4_t n)
 {
     return vexpq_f32(vmulq_f32(n, vlogq_f32(val)));
 }
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /* Exponent polynomial coefficients */
 const std::array<float16x8_t, 8> exp_tab_f16 =
 {
@@ -301,5 +301,5 @@ inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
 {
     return vexpq_f16(vmulq_f16(n, vlogq_f16(val)));
 }
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute

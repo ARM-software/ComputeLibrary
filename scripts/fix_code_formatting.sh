@@ -24,7 +24,7 @@ if [ $# -eq 0 ]
 then
     files=$(find $DIRECTORIES -type f \( -name \*.cpp -o -iname \*.h -o -name \*.inl -o -name \*.cl -o -name \*.cs \))
 else
-	files=$@
+    files=$@
 fi
 for f in $files
 do
@@ -33,7 +33,7 @@ do
         continue
     fi
 
-	sed -i 's/\t/    /g' $f
-	clang-format -i -style=file $f
-	astyle -n -q $ASTYLE_PARAMETERS $f
+    sed -i 's/\t/    /g' $f
+    clang-format -i -style=file $f
+    astyle -n -q $ASTYLE_PARAMETERS $f
 done

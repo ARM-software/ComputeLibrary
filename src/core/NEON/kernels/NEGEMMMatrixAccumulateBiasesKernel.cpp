@@ -108,7 +108,7 @@ void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window, const ThreadI
             in0_out, in1);
             break;
         }
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {
             execute_window_loop(window, [&](const Coordinates & id)
@@ -128,7 +128,7 @@ void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window, const ThreadI
             in0_out, in1);
             break;
         }
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::QS8:
         {
             execute_window_loop(window, [&](const Coordinates & id)

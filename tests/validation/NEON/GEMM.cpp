@@ -49,9 +49,9 @@ constexpr AbsoluteTolerance<float> tolerance_q(1.0f);   /**< Tolerance value for
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     DataType::F16,
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     DataType::F32,
     DataType::QS8,
     DataType::QS16,
@@ -89,7 +89,7 @@ template <typename T>
 using NEGEMMFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T>;
 
 TEST_SUITE(Float)
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(), framework::dataset::make("DataType", DataType::F16)))
 {
@@ -103,7 +103,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<half>, framework::DatasetMode::NI
     validate(Accessor(_target), _reference, tolerance_f);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(), framework::dataset::make("DataType", DataType::F32)))

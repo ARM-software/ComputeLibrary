@@ -39,7 +39,7 @@
 
 using namespace arm_compute;
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 template class arm_compute::NEHarrisScoreFP16Kernel<3>;
 template class arm_compute::NEHarrisScoreFP16Kernel<5>;
@@ -361,7 +361,7 @@ void NEHarrisScoreFP16Kernel<block_size>::configure(const IImage *input1, const 
     INEKernel::configure(win);
 }
 
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 template class arm_compute::NEHarrisScoreKernel<3>;
 template class arm_compute::NEHarrisScoreKernel<5>;

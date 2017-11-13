@@ -46,9 +46,9 @@ namespace
 {
 const auto use_fp16 = framework::dataset::make("UseFP16",
 {
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     true,
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     false
 });
 

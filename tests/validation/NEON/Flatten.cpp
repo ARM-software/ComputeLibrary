@@ -62,7 +62,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<float>, framework::Datase
 }
 TEST_SUITE_END()
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<half>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
                                                                                                    framework::dataset::make("DataType", DataType::F16)))
@@ -77,7 +77,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<half>, framework::Dataset
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END()
 
 TEST_SUITE(Quantized)

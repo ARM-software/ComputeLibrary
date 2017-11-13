@@ -51,7 +51,7 @@ constexpr float COEFF1       = 0.0663f;
 constexpr float COEFF2       = 0.2447f;
 } // namespace
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 namespace fp16
 {
 inline float16x8_t inv(float16x8_t x)
@@ -429,7 +429,7 @@ template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L1NORM, Ph
 template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L2NORM, PhaseType::SIGNED>;
 template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L1NORM, PhaseType::UNSIGNED>;
 template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L2NORM, PhaseType::UNSIGNED>;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 namespace
 {

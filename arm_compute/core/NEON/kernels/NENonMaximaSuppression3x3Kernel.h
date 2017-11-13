@@ -78,7 +78,7 @@ protected:
     ITensor                *_output; /**< Destination tensor */
 };
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** NEON kernel to perform Non-Maxima suppression 3x3 with intermediate results in F16 if the input data type is F32
  */
 class NENonMaximaSuppression3x3FP16Kernel : public NENonMaximaSuppression3x3Kernel
@@ -92,8 +92,8 @@ public:
      */
     void configure(const ITensor *input, ITensor *output, bool border_undefined);
 };
-#else  /* ARM_COMPUTE_AARCH64_V8_2 */
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 using NENonMaximaSuppression3x3FP16Kernel = NENonMaximaSuppression3x3Kernel;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
 #endif /* _ARM_COMPUTE_NENONMAXIMASUPPRESSION3x3KERNEL_H__ */

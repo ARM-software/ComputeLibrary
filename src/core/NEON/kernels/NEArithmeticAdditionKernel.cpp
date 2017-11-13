@@ -145,7 +145,7 @@ inline int16x8x2_t vqadd2q_s16(const int16x8x2_t &a, const int16x8x2_t &b)
     return res;
 }
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 inline float16x8x2_t vadd2q_f16(const float16x8x2_t &a, const float16x8x2_t &b)
 {
     const float16x8x2_t res =
@@ -158,11 +158,11 @@ inline float16x8x2_t vadd2q_f16(const float16x8x2_t &a, const float16x8x2_t &b)
 
     return res;
 }
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 void add_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     Iterator input1(in1, window);
     Iterator input2(in2, window);
     Iterator output(out, window);
@@ -175,13 +175,13 @@ void add_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const
         vst2q_f16(reinterpret_cast<float16_t *>(output.ptr()), vadd2q_f16(a, b));
     },
     input1, input2, output);
-#else  /* ARM_COMPUTE_AARCH64_V8_2 */
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     ARM_COMPUTE_UNUSED(in1);
     ARM_COMPUTE_UNUSED(in2);
     ARM_COMPUTE_UNUSED(out);
     ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_ERROR("Not supported, recompile the library with arch=arm64-v8.2-a");
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 }
 
 void add_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)

@@ -44,9 +44,9 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.001f);
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
@@ -66,7 +66,7 @@ template <typename T>
 using NENormalizationLayerFixture = NormalizationValidationFixture<Tensor, Accessor, NENormalizationLayer, T>;
 
 TEST_SUITE(Float)
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
 {
@@ -79,7 +79,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<half>, framework::D
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F32)))

@@ -315,7 +315,7 @@ inline void store_results<3>(qint16_t *buffer, const qint16x8x2_t &values)
     vst1_qs16(buffer, vget_low_s16(values.val[0]));
 }
 
-#ifdef ARM_COMPUTE_AARCH64_V8_2
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Loads a 3x3 matrix as a row (float16_t).
  *
  * @param[in] ptr Pointer to a float 3x3 matrix.
@@ -455,7 +455,7 @@ inline void store_results<3>(float16_t *buffer, const float16x8x2_t &values)
 {
     vst1_f16(buffer, vget_low_f16(values.val[0]));
 }
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 /** Get the number of elements processed on 3x3 convolution.
  *
