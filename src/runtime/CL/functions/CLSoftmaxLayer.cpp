@@ -45,16 +45,13 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
 
     // Create intermediate tensors shapes
     DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->info()->data_type()) ? DataType::S32 : input->info()->data_type();
-    TensorInfo tensor_info_tmp(input->info()->tensor_shape(), input->info()->num_channels(), tmp_data_type, input->info()->fixed_point_position());
-    tensor_info_tmp.set_quantization_info(input->info()->quantization_info());
+    TensorInfo tensor_info_tmp(input->info()->clone()->set_data_type(tmp_data_type).reset_padding());
     _tmp.allocator()->init(tensor_info_tmp);
 
     TensorShape max_sum_shape = input->info()->tensor_shape();
     max_sum_shape.set(0, 1);
-    TensorInfo tensor_info_max(max_sum_shape, input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
-    tensor_info_max.set_quantization_info(input->info()->quantization_info());
-    _max.allocator()->init(tensor_info_max);
-    _sum.allocator()->init(TensorInfo(max_sum_shape, input->info()->num_channels(), tmp_data_type, input->info()->fixed_point_position()));
+    _max.allocator()->init(input->info()->clone()->set_tensor_shape(max_sum_shape).reset_padding());
+    _sum.allocator()->init(input->info()->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).reset_padding());
 
     // Set GPU target to kernels
     _max_shift_exp_sum_kernel.set_target(CLScheduler::get().target());
@@ -82,6 +79,34 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
     _tmp.allocator()->allocate();
     _max.allocator()->allocate();
     _sum.allocator()->allocate();
+}
+
+Error CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+
+    // Create intermediate tensor info
+    DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->data_type()) ? DataType::S32 : input->data_type();
+    TensorInfo tensor_info_tmp(input->clone()->set_data_type(tmp_data_type));
+
+    TensorShape max_sum_shape = input->tensor_shape();
+    max_sum_shape.set(0, 1);
+    TensorInfo tensor_info_max(input->clone()->set_tensor_shape(max_sum_shape));
+    TensorInfo tensor_info_sum(input->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).set_quantization_info(QuantizationInfo()));
+
+    bool run_legacy_path = is_data_type_quantized_asymmetric(input->data_type());
+    if(run_legacy_path)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DMaxKernel::validate(input, &tensor_info_max));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DShiftExpSumKernel::validate(input, &tensor_info_max, &tensor_info_tmp, &tensor_info_sum));
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DMaxShiftExpSumKernel::validate(input, &tensor_info_max, &tensor_info_tmp, &tensor_info_sum));
+    }
+    ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DNormKernel::validate(&tensor_info_tmp, &tensor_info_sum, output));
+
+    return Error{};
 }
 
 void CLSoftmaxLayer::run()

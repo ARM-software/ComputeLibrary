@@ -39,6 +39,29 @@
 
 using namespace arm_compute;
 
+namespace
+{
+/** Calculates expected output shape dimension
+ *
+ * @param[in] Input shape
+ *
+ * @return Expected output shape
+ */
+TensorShape get_output_shape(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info)
+{
+    unsigned int output_width  = 0;
+    unsigned int output_height = 0;
+    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(), weights_shape.x(), weights_shape.y(), conv_info);
+
+    TensorShape output_shape = input_shape;
+    output_shape.set(0, output_width);
+    output_shape.set(1, output_height);
+    output_shape.set(2, weights_shape[3]);
+
+    return output_shape;
+}
+} // namespace
+
 CLDirectConvolutionLayerKernel::CLDirectConvolutionLayerKernel()
     : _input(nullptr), _biases(nullptr), _weights(nullptr), _output(nullptr), _border_size(0), _conv_pad_x(0), _conv_pad_y(0), _conv_stride_x(0), _conv_stride_y(0)
 {
@@ -51,44 +74,13 @@ BorderSize CLDirectConvolutionLayerKernel::border_size() const
 
 void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != weights->info()->dimension(1),
-                             "Weights should have same width as length");
-    ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != 1 && weights->info()->dimension(0) != 3 && weights->info()->dimension(0) != 5,
-                             "Kernel sizes other than 1x1, 3x3 or 5x5 are not supported");
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(2) != input->info()->dimension(2));
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != weights->info()->dimension(1));
-    ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
-    ARM_COMPUTE_ERROR_ON_MSG((weights->info()->dimension(0) == 1) && std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported for 1x1 convolution.");
-    ARM_COMPUTE_ERROR_ON_MSG((weights->info()->dimension(0) == 3 || weights->info()->dimension(0) == 5) && std::get<0>(conv_info.stride()) > 2, "Strides larger than 2 not supported for 3x3 convolution.");
-
-    if(biases != nullptr)
-    {
-        if(is_data_type_quantized_asymmetric(input->info()->data_type()))
-        {
-            ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
-        }
-        else
-        {
-            ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
-        }
-        ARM_COMPUTE_ERROR_ON(biases->info()->dimension(0) != weights->info()->dimension(3));
-        ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
-    }
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     const unsigned int kernel_size = weights->info()->dimension(0);
     const DataType     data_type   = input->info()->data_type();
 
     // Get convolved dimensions
-    unsigned int output_width  = 0;
-    unsigned int output_height = 0;
-    std::tie(output_width, output_height) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_size, kernel_size, conv_info);
-
-    TensorShape output_shape = input->info()->tensor_shape();
-    output_shape.set(0, output_width);
-    output_shape.set(1, output_height);
-    output_shape.set(2, weights->info()->dimension(3));
+    TensorShape output_shape = get_output_shape(input->info()->tensor_shape(), weights->info()->tensor_shape(), conv_info);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(),
@@ -98,9 +90,12 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
                        input->info()->fixed_point_position(),
                        input->info()->quantization_info());
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(CLDirectConvolutionLayerKernel::validate(input->info(),
+                                                                        weights->info(),
+                                                                        (biases != nullptr) ? biases->info() : nullptr,
+                                                                        output->info(),
+                                                                        conv_info));
 
     _conv_stride_x = std::get<0>(conv_info.stride());
     _conv_stride_y = std::get<1>(conv_info.stride());
@@ -265,6 +260,53 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
+}
+
+Error CLDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) != weights->dimension(1),
+                                    "Weights should have same width as length");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) != 1 && weights->dimension(0) != 3 && weights->dimension(0) != 5,
+                                    "Kernel sizes other than 1x1, 3x3 or 5x5 are not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(2) != input->dimension(2),
+                                    "Weights feature map dimension should match the respective input's one");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) != weights->dimension(1),
+                                    "Only rectangular weights are supported!");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->num_dimensions() > 4,
+                                    "Weights can be at most 4 dimensional");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(0) == 1) && std::get<0>(conv_info.stride()) > 3,
+                                    "Strides larger than 3 not supported for 1x1 convolution.");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(0) == 3 || weights->dimension(0) == 5) && std::get<0>(conv_info.stride()) > 2,
+                                    "Strides larger than 2 not supported for 3x3 convolution.");
+
+    if(biases != nullptr)
+    {
+        if(is_data_type_quantized_asymmetric(input->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        }
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->dimension(0) != weights->dimension(3),
+                                        "Biases size and number of input feature maps should match");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->num_dimensions() > 1,
+                                        "Biases should be one dimensional");
+    }
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(),
+                                                           get_output_shape(input->tensor_shape(), weights->tensor_shape(), conv_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Error{};
 }
 
 void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue &queue)

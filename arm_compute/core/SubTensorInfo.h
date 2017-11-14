@@ -104,6 +104,12 @@ public:
         _parent->set_quantization_info(quantization_info);
         return *this;
     }
+    ITensorInfo &reset_padding() override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        _parent->reset_padding();
+        return *this;
+    }
     bool auto_padding() override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);

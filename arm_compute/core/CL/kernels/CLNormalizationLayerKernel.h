@@ -45,7 +45,6 @@ public:
     CLNormalizationLayerKernel(CLNormalizationLayerKernel &&) = default;
     /** Default move assignment operator. */
     CLNormalizationLayerKernel &operator=(CLNormalizationLayerKernel &&) = default;
-
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
@@ -54,6 +53,16 @@ public:
      * @param[in]  norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */
     void configure(const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizationLayerKernel
+     *
+     * @param[in] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
+     *                      and an optional 4th dimension for batch of inputs. Data types supported: QS8/QS16/F16/F32.
+     * @param[in] output    Destination tensor. Output will have the same number of dimensions as input. Data types supported: same as @p input.
+     * @param[in] norm_info Normalization layer information like the normalization type, normalization size and other parameters.
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

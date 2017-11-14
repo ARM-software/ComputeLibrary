@@ -110,6 +110,37 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     validate(dst.info()->padding(), padding_dst);
 }
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching shapes
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2), // Mismatching fixed point
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8, // Invalid output quantization info
+                                                                  QuantizationInfo(1.f/256, 12)),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8,
+                                                                  QuantizationInfo(1.f/256, 12)),
+                                                      }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8,
+                                                                  QuantizationInfo(1.f/256, 12)),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8,
+                                                                  QuantizationInfo(1.f/256, 0)),
+                                                     })),
+               framework::dataset::make("Expected", { true, true, true, true, false, false, false })),
+               input_info, output_info, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(CLSoftmaxLayer::validate(&input_info, &output_info)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using CLSoftmaxLayerFixture = SoftmaxValidationFixture<CLTensor, CLAccessor, CLSoftmaxLayer, T>;
 

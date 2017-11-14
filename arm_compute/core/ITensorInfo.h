@@ -96,6 +96,11 @@ public:
     * @return Reference to this ITensorInfo object
     */
     virtual ITensorInfo &set_quantization_info(QuantizationInfo quantization_info) = 0;
+    /** Resets the padding settings of the tensor.
+    *
+    * @return Reference to this ITensorInfo object
+    */
+    virtual ITensorInfo &reset_padding() = 0;
     /** Update the offset to the first element and the strides to automatically computed values.
      *
      * @note The padding used by this method is really conservative so that the tensor can be used for most functions.

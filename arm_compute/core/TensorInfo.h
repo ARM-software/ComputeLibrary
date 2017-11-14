@@ -220,7 +220,8 @@ public:
     ITensorInfo &set_tensor_shape(TensorShape shape) override;
     ITensorInfo &set_fixed_point_position(int fixed_point_position) override;
     ITensorInfo &set_quantization_info(QuantizationInfo quantization_info) override;
-    bool auto_padding() override;
+    ITensorInfo &reset_padding() override;
+    bool         auto_padding() override;
     bool extend_padding(const PaddingSize &padding) override;
     size_t dimension(size_t index) const override
     {

@@ -67,6 +67,38 @@ TEST_SUITE(NormalizationLayer)
 
 //TODO(COMPMID-415): Missing configuration?
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching data type input/output
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching shapes
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Even normalization
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Non implemented IN_MAP_2D
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4), // Mismatching fixed point position
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16, 0),
+                                                       TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                     })),
+               framework::dataset::make("NormInfo",  { NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
+                                                       NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
+                                                       NormalizationLayerInfo(NormType::IN_MAP_1D, 4),
+                                                       NormalizationLayerInfo(NormType::IN_MAP_2D, 5),
+                                                       NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
+                                                       NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
+                                                      })),
+               framework::dataset::make("Expected", { true, true, true, true, true, false })),
+               input_info, output_info, norm_info, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(CLNormalizationLayer::validate(&input_info, &output_info, norm_info)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using CLNormalizationLayerFixture = NormalizationValidationFixture<CLTensor, CLAccessor, CLNormalizationLayer, T>;
 

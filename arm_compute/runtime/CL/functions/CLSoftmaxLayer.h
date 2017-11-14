@@ -58,6 +58,14 @@ public:
      * @param[in]  beta   (Optional) A scaling factor for the exponent. Defaults to 1.f
      */
     void configure(const ICLTensor *input, ICLTensor *output, float beta = 1.0f);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLSoftmaxLayer
+     *
+     * @param[in] input  Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32
+     * @param[in] output Destination tensor. Data types supported: same as @p input
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;

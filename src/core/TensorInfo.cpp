@@ -52,6 +52,7 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _is_resizable                  = info.is_resizable();
     _valid_region                  = info.valid_region();
     _padding                       = info.padding();
+    _quantization_info             = info.quantization_info();
 }
 
 TensorInfo::TensorInfo(Format format)
@@ -384,6 +385,16 @@ ITensorInfo &TensorInfo::set_fixed_point_position(int fixed_point_position)
 ITensorInfo &TensorInfo::set_quantization_info(QuantizationInfo quantization_info)
 {
     _quantization_info = quantization_info;
+    return *this;
+}
+
+ITensorInfo &TensorInfo::reset_padding()
+{
+    _padding = PaddingSize();
+    if(((_format != Format::UNKNOWN) || (_data_type != DataType::UNKNOWN)) && _total_size != 0)
+    {
+        std::tie(_strides_in_bytes, _offset_first_element_in_bytes, _total_size) = calculate_padding_requirements(_padding);
+    }
     return *this;
 }
 
