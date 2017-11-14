@@ -92,16 +92,18 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     CLScale clscale;
     clscale.configure(&src, &dst, policy, border_mode, constant_border_value);
 
-    // Validate valid region
-    const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, BorderSize(1), (border_mode == BorderMode::UNDEFINED));
+    // Get border size depending on border mode
+    const BorderSize border_size(border_mode == BorderMode::UNDEFINED ? 0 : 1);
 
+    // Validate valid region
+    const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, border_size, (border_mode == BorderMode::UNDEFINED));
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
     PaddingCalculator calculator(shape_scaled.x(), 4);
     calculator.set_border_mode(border_mode);
 
-    const PaddingSize read_padding(1);
+    const PaddingSize read_padding(border_size);
     const PaddingSize write_padding = calculator.required_padding(PaddingCalculator::Option::EXCLUDE_BORDER);
     validate(src.info()->padding(), read_padding);
     validate(dst.info()->padding(), write_padding);

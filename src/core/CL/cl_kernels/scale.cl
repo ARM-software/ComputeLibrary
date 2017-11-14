@@ -84,7 +84,7 @@ __kernel void scale_nearest_neighbour(
     Image        in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
     Image        out = CONVERT_TO_IMAGE_STRUCT(out);
     const float2 r   = (float2)(scale_x, scale_y);
-    const float8 tc  = clamp_to_border(transform_nearest(get_current_coords(), r), input_width, input_height);
+    const float8 tc  = clamp_to_border_with_size(transform_nearest(get_current_coords(), r), input_width, input_height, BORDER_SIZE);
     vstore4(read_texels4(&in, convert_int8(tc)), 0, (__global DATA_TYPE *)out.ptr);
 }
 
@@ -119,5 +119,5 @@ __kernel void scale_bilinear(
     Image        out = CONVERT_TO_IMAGE_STRUCT(out);
     const float2 r   = (float2)(scale_x, scale_y);
     const float8 tc  = transform_bilinear(get_current_coords(), r);
-    vstore4(bilinear_interpolate(&in, tc, input_width, input_height), 0, (__global DATA_TYPE *)out.ptr);
+    vstore4(bilinear_interpolate_with_border(&in, tc, input_width, input_height, BORDER_SIZE), 0, (__global DATA_TYPE *)out.ptr);
 }

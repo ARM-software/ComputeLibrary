@@ -23,6 +23,22 @@
  */
 #include "helpers.h"
 
+/** Clamps the given coordinates to the borders according to the border size.
+ *
+ * @param[in] coords      Vector of 2D coordinates to clamp. Even positions are X coords, odd positions are Y coords.
+ * @param[in] width       Width of the image
+ * @param[in] height      Height of the image
+ * @param[in] border_size Border size of the image
+ *
+ */
+inline const float8 clamp_to_border_with_size(float8 coords, const float width, const float height, const float border_size)
+{
+    const float4 clamped_x = clamp(coords.even, 0.0f - border_size, width - 1 + border_size);
+    const float4 clamped_y = clamp(coords.odd, 0.0f - border_size, height - 1 + border_size);
+    return (float8)(clamped_x.s0, clamped_y.s0, clamped_x.s1, clamped_y.s1, clamped_x.s2, clamped_y.s2, clamped_x.s3, clamped_y.s3);
+}
+
+/* FIXME(COMPMID-682): Clamp border properly in UNDEFINED border mode in Warp, Scale, Remap */
 /** Clamps the given coordinates to the borders.
  *
  * @param[in] coords Vector of 2D coordinates to clamp. Even positions are X coords, odd positions are Y coords.
@@ -32,9 +48,7 @@
  */
 inline const float8 clamp_to_border(float8 coords, const float width, const float height)
 {
-    const float4 clamped_x = clamp(coords.even, -1.0f, width);
-    const float4 clamped_y = clamp(coords.odd, -1.0f, height);
-    return (float8)(clamped_x.s0, clamped_y.s0, clamped_x.s1, clamped_y.s1, clamped_x.s2, clamped_y.s2, clamped_x.s3, clamped_y.s3);
+    return clamp_to_border_with_size(coords, width, height, 1);
 }
 
 /** Reads four texels from the input image. The coords vector is used to determine which texels to be read.
@@ -72,23 +86,25 @@ inline const float8 get_neighbour_coords(const float2 coord)
 
 /** Computes the bilinear interpolation for each set of coordinates in the vector coords and returns the values
  *
- * @param[in] in     Pointer to the source image.
- * @param[in] coords Vector of four 2D coordinates. Even pos is x and odd y.
- * @param[in] width  Width of the image
- * @param[in] height Height of the image
+ * @param[in] in          Pointer to the source image.
+ * @param[in] coords      Vector of four 2D coordinates. Even pos is x and odd y.
+ * @param[in] width       Width of the image
+ * @param[in] height      Height of the image
+ * @param[in] border_size Border size
 */
-inline const VEC_DATA_TYPE(DATA_TYPE, 4) bilinear_interpolate(const Image *in, const float8 coords, const float width, const float height)
+inline const VEC_DATA_TYPE(DATA_TYPE, 4) bilinear_interpolate_with_border(const Image *in, const float8 coords, const float width, const float height, const float border_size)
 {
     // If any of the 4 texels is out of the image's boundaries we use the border value (REPLICATE or CONSTANT) for any texel out of the image.
 
     // Sets the 4x4 coordinates for each of the four input texels
     const float8  fc = floor(coords);
     const float16 c1 = (float16)(
-                           clamp_to_border(get_neighbour_coords((float2)(fc.s0, fc.s1)), width, height),
-                           clamp_to_border(get_neighbour_coords((float2)(fc.s2, fc.s3)), width, height));
+                           clamp_to_border_with_size(get_neighbour_coords((float2)(fc.s0, fc.s1)), width, height, border_size),
+                           clamp_to_border_with_size(get_neighbour_coords((float2)(fc.s2, fc.s3)), width, height, border_size));
     const float16 c2 = (float16)(
-                           clamp_to_border(get_neighbour_coords((float2)(fc.s4, fc.s5)), width, height),
-                           clamp_to_border(get_neighbour_coords((float2)(fc.s6, fc.s7)), width, height));
+                           clamp_to_border_with_size(get_neighbour_coords((float2)(fc.s4, fc.s5)), width, height, border_size),
+                           clamp_to_border_with_size(get_neighbour_coords((float2)(fc.s6, fc.s7)), width, height, border_size));
+
     // Loads the values from the input image
     const float16 t = (float16)(
                           /* tl, tr, bl, br */
@@ -108,4 +124,17 @@ inline const VEC_DATA_TYPE(DATA_TYPE, 4) bilinear_interpolate(const Image *in, c
                           ((t.s8 * b.s4 * b.s5) + (t.s9 * a.s4 * b.s5) + (t.sa * b.s4 * a.s5) + (t.sb * a.s4 * a.s5)),
                           ((t.sc * b.s6 * b.s7) + (t.sd * a.s6 * b.s7) + (t.se * b.s6 * a.s7) + (t.sf * a.s6 * a.s7)));
     return CONVERT(fr, VEC_DATA_TYPE(DATA_TYPE, 4));
+}
+
+/* FIXME(COMPMID-682): Clamp border properly in UNDEFINED border mode in Warp, Scale, Remap */
+/** Computes the bilinear interpolation for each set of coordinates in the vector coords and returns the values
+ *
+ * @param[in] in     Pointer to the source image.
+ * @param[in] coords Vector of four 2D coordinates. Even pos is x and odd y.
+ * @param[in] width  Width of the image
+ * @param[in] height Height of the image
+*/
+inline const VEC_DATA_TYPE(DATA_TYPE, 4) bilinear_interpolate(const Image *in, const float8 coords, const float width, const float height)
+{
+    return bilinear_interpolate_with_border(in, coords, width, height, 1);
 }

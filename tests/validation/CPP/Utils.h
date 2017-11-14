@@ -41,6 +41,21 @@ namespace test
 {
 namespace validation
 {
+/** Checks if a pixel has valid coordinates
+ *
+ * @param x            X coordinate
+ * @param y            Y coordinate
+ * @param width        Width of the image
+ * @param height       Height of the image
+ * @param border_size  Border size
+ *
+ * @return True if pixel is valid else false
+ */
+inline bool is_valid_pixel_index(int x, int y, int width, int height, int border_size)
+{
+    return ((x >= -border_size) && (y >= -border_size) && (x < (width + border_size)) && (y < height + border_size));
+}
+
 // Return a tensor element at a specified coordinate with different border modes
 template <typename T>
 T tensor_elem_at(const SimpleTensor<T> &src, Coordinates coord, BorderMode border_mode, T constant_border_value)

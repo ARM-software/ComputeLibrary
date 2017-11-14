@@ -50,6 +50,9 @@ SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, I
     const auto width  = static_cast<int>(in.shape().x());
     const auto height = static_cast<int>(in.shape().y());
 
+    // Determine border size
+    const int border_size = (border_mode == BorderMode::UNDEFINED) ? 0 : 1;
+
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
     if(policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
     {
@@ -75,22 +78,9 @@ SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, I
                 id.set(1, y_src);
 
                 // If coordinates in range of tensor's width or height
-                if(x_src >= -1 || y_src >= -1 || x_src <= width || y_src <= height)
+                if(is_valid_pixel_index(x_src, y_src, width, height, border_size))
                 {
                     out[element_idx] = tensor_elem_at(in, id, border_mode, constant_border_value);
-                }
-                else
-                {
-                    if(border_mode == BorderMode::CONSTANT)
-                    {
-                        out[element_idx] = constant_border_value;
-                    }
-                    else if(border_mode == BorderMode::REPLICATE)
-                    {
-                        id.set(0, clamp(static_cast<int>(x_src), 0, width - 1));
-                        id.set(1, clamp(static_cast<int>(y_src), 0, height - 1));
-                        out[element_idx] = in[coord2index(in.shape(), id)];
-                    }
                 }
                 break;
             }
@@ -98,7 +88,7 @@ SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, I
             {
                 id.set(0, std::floor(x_src));
                 id.set(1, std::floor(y_src));
-                if(x_src >= -1 || y_src >= -1 || x_src <= width || y_src <= height)
+                if(is_valid_pixel_index(x_src, y_src, width, height, border_size))
                 {
                     out[element_idx] = bilinear_policy(in, id, x_src, y_src, border_mode, constant_border_value);
                 }
@@ -127,14 +117,14 @@ SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, I
                 const int yi     = std::floor(y_src);
 
                 // Clamp position to borders
-                x_src = std::max(-1.f, std::min(x_src, static_cast<float>(width)));
-                y_src = std::max(-1.f, std::min(y_src, static_cast<float>(height)));
+                x_src = std::max(-static_cast<float>(border_size), std::min(x_src, static_cast<float>(width - 1 + border_size)));
+                y_src = std::max(-static_cast<float>(border_size), std::min(y_src, static_cast<float>(height - 1 + border_size)));
 
                 // Clamp bounding box offsets to borders
-                x_from = ((x_src + x_from) < -1) ? -1 : x_from;
-                y_from = ((y_src + y_from) < -1) ? -1 : y_from;
-                x_to   = ((x_src + x_to) > width) ? (width - x_src) : x_to;
-                y_to   = ((y_src + y_to) > height) ? (height - y_src) : y_to;
+                x_from = ((x_src + x_from) < -border_size) ? -border_size : x_from;
+                y_from = ((y_src + y_from) < -border_size) ? -border_size : y_from;
+                x_to   = ((x_src + x_to) >= (width + border_size)) ? (width - 1 + border_size) : x_to;
+                y_to   = ((y_src + y_to) >= (height + border_size)) ? (height - 1 + border_size) : y_to;
                 ARM_COMPUTE_ERROR_ON((x_to - x_from + 1) == 0 || (y_to - y_from + 1) == 0);
 
                 float sum = 0;
