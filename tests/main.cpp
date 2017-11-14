@@ -165,7 +165,7 @@ int main(int argc, char **argv)
         std::vector<std::unique_ptr<framework::Printer>> printers;
         std::vector<std::shared_ptr<std::ofstream>>      log_streams;
 
-        if(pretty_console->value() && !(log_file->is_set() || log_format->value() != framework::LogFormat::PRETTY))
+        if(pretty_console->value() && (log_file->is_set() || log_format->value() != framework::LogFormat::PRETTY))
         {
             auto pretty_printer = support::cpp14::make_unique<framework::PrettyPrinter>();
             pretty_printer->set_color_output(color_output->value());
