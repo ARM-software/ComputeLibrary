@@ -259,7 +259,7 @@ layout(std140) uniform shader_params
     POOL_OP(data001.xyzw, data001.xyzw, data201.xyzw);                                                 \
     POOL_OP(data010.xyzw, data010.xyzw, data21.xyzw);                                                  \
     POOL_OP(res.xyzw, vec4(data000.xw, data001.z, data010.y), vec4(data000.y, data001.xw, data010.z)); \
-    POOL_OP(res.xyzw, res.xyzw, vec4(data000.z, data001.y data010.xw))
+    POOL_OP(res.xyzw, res.xyzw, vec4(data000.z, data001.y, data010.xw))
 
 float calculate_max(const int pool_size, Tensor3D src, const int upper_bound_w, const int upper_bound_h, const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
@@ -271,11 +271,11 @@ float calculate_max(const int pool_size, Tensor3D src, const int upper_bound_w, 
     float data_max;
     data_max = LOAD4(src, tensor3D_offset(src, 0, 0, 0));
 
-    for(int i = 0; (start_x + i) < end_x; ++i)
+    for(int i = 0; (start_y + i) < end_y; ++i)
     {
-        for(int j = 0; (start_y + j) < end_y; ++j)
+        for(int j = 0; (start_x + j) < end_x; ++j)
         {
-            float data = LOAD4(src, tensor3D_offset(src, i, j, 0));
+            float data = LOAD4(src, tensor3D_offset(src, j, i, 0));
             POOL_OP_float(data_max, data_max, data);
         }
     }
@@ -307,6 +307,11 @@ float calculate_avg(const int pool_size, Tensor3D src, const int upper_bound_w, 
             data_total = data_total + data;
         }
     }
+
+#if defined(EXCLUDE_PADDING)
+    start_x = max(0, start_x);
+    start_y = max(0, start_y);
+#endif /* defined(EXCLUDE_PADDING) */
 
     return data_total / float((end_y - start_y) * (end_x - start_x));
 }
@@ -460,6 +465,10 @@ void main(void)
     int   start_y = int(gl_GlobalInvocationID.y) * STRIDE_Y - PAD_Y;
     ivec4 end_x   = min((start_x + (ivec4(3))), (ivec4(MAX_WIDTH)));
     int   end_y   = min((start_y + 3), MAX_HEIGHT);
+#if defined(EXCLUDE_PADDING)
+    start_x       = max(ivec4(0), start_x);
+    start_y       = max(0, start_y);
+#endif /* defined(EXCLUDE_PADDING) */
     res *= (vec4((1.f)) / vec4((ivec4(end_y - start_y)) * (end_x - start_x)));
 #endif /*POOL_AVG*/
 
@@ -606,12 +615,16 @@ void main(void)
 #if defined(POOL_AVG) || defined(POOL_L2)
     {
         // Divide by pool region in case of average pooling
-        int   start_x = int(gl_GlobalInvocationID.x) * STRIDE_X - PAD_X;
-        int   start_y = int(gl_GlobalInvocationID.y) * STRIDE_Y - PAD_Y;
-        int   end_x   = int(min(start_x + POOL_SIZE, MAX_WIDTH));
-        int   end_y   = int(min(start_y + POOL_SIZE, MAX_HEIGHT));
-        float res1    = float((end_y - start_y) * (end_x - start_x));
-        res           = DIV_OP(res, res1);
+        int start_x = int(gl_GlobalInvocationID.x) * STRIDE_X - PAD_X;
+        int start_y = int(gl_GlobalInvocationID.y) * STRIDE_Y - PAD_Y;
+        int end_x   = int(min(start_x + POOL_SIZE, MAX_WIDTH));
+        int end_y   = int(min(start_y + POOL_SIZE, MAX_HEIGHT));
+#if defined(EXCLUDE_PADDING)
+        start_x     = max(0, start_x);
+        start_y     = max(0, start_y);
+#endif /* defined(EXCLUDE_PADDING) */
+        float res1  = float((end_y - start_y) * (end_x - start_x));
+        res         = DIV_OP(res, res1);
     }
 #endif /* defined(POOL_AVG) || defined(POOL_L2) */
 
@@ -867,7 +880,7 @@ layout(std140) uniform shader_params
     POOL_OP(data001.xyzw, data001.xyzw, data201.xyzw);                                                 \
     POOL_OP(data010.xyzw, data010.xyzw, data21.xyzw);                                                  \
     POOL_OP(res.xyzw, vec4(data000.xw, data001.z, data010.y), vec4(data000.y, data001.xw, data010.z)); \
-    POOL_OP(res.xyzw, res.xyzw, vec4(data000.z, data001.y data010.xw))
+    POOL_OP(res.xyzw, res.xyzw, vec4(data000.z, data001.y, data010.xw))
 
 vec2 load_and_unpack(Tensor3D src, uint offset)
 {
@@ -970,7 +983,7 @@ vec2 calculate_max(const int pool_size, Tensor3D src, const int upper_bound_w, c
 
 vec2 calculate_avg(const int pool_size, Tensor3D src, const int upper_bound_w, const int upper_bound_h, const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
-    int start_x1 = int(gl_GlobalInvocationID.x) * stride_x - pad_x;
+    int start_x1 = (2 * int(gl_GlobalInvocationID.x)) * stride_x - pad_x;
     int start_y1 = int(gl_GlobalInvocationID.y) * stride_y - pad_y;
     int end_x1   = int(min(start_x1 + pool_size, upper_bound_w));
     int end_y1   = int(min(start_y1 + pool_size, upper_bound_h));
@@ -1002,11 +1015,11 @@ vec2 calculate_avg(const int pool_size, Tensor3D src, const int upper_bound_w, c
             }
 
             //Calculate sum2
-            if((start_x2 + j) < end_x2 && end_x1 < upper_bound_w)
+            if((start_x2 + j) < end_x2 && end_x1 <= upper_bound_w)
             {
                 if((stride_x % 2) == 0)
                 {
-                    vec2 data2 = load_and_unpack(src, (tensor3D_offset_fp16(src, (j + stride_x + 1), i, 0) >> uint(2)));
+                    vec2 data2 = load_and_unpack(src, (tensor3D_offset_fp16(src, (j + stride_x), i, 0) >> uint(2)));
 #if defined(POOL_L2)
                     // Raise to power of 2 for L2 Pooling
                     data2 = POW2_OP(data2, 2);
@@ -1040,6 +1053,13 @@ vec2 calculate_avg(const int pool_size, Tensor3D src, const int upper_bound_w, c
                 }
             }
         }
+#if defined(EXCLUDE_PADDING)
+    start_x1 = max(0, start_x1);
+    start_y1 = max(0, start_y1);
+    start_x2 = max(0, start_x2);
+    start_y2 = max(0, start_y2);
+#endif /* defined(EXCLUDE_PADDING) */
+
     //Calculate average
     vec2 data_avg;
     data_avg.x = data_total1 / float((end_y1 - start_y1) * (end_x1 - start_x1));
@@ -1203,6 +1223,10 @@ void main(void)
     int   start_y = int(gl_GlobalInvocationID.y) * STRIDE_Y - PAD_Y;
     ivec4 end_x   = min((start_x + (ivec4(3))), (ivec4(MAX_WIDTH)));
     int   end_y   = min((start_y + 3), MAX_HEIGHT);
+#if defined(EXCLUDE_PADDING)
+    start_x       = max(ivec4(0), start_x);
+    start_y       = max(0, start_y);
+#endif /* defined(EXCLUDE_PADDING) */
     res *= (vec4((1.f)) / vec4((ivec4(end_y - start_y)) * (end_x - start_x)));
 #endif /*POOL_AVG*/
 
@@ -1354,44 +1378,96 @@ void main(void)
         }
     }
 
-    for(int y = STRIDE_X; y < int(POOL_SIZE + STRIDE_X); y++)
+    for(int y = 0; y < int(POOL_SIZE); y++)
     {
-        int x1 = STRIDE_X;
-        for(; x1 <= (int(POOL_SIZE + STRIDE_X) - 8); x1 += 8)
+        if((STRIDE_X % 2) == 0)
         {
-            vec4 data2;
-            vec4 data3;
-            LOAD4_fp16(data2, src, (tensor3D_offset_fp16(src, x1, y, 0) >> uint(2)));
-            LOAD4_fp16(data3, src, (tensor3D_offset_fp16(src, x1, y, 0) >> uint(2)) + uint(2));
-
-#if defined(POOL_L2)
-            // Raise to power of 2 for L2 Pooling
-            data2 *= data2;
-            data3 *= data3;
-#endif /* defined(POOL_L2) */
-
-            POOL_OP(vdata01, vdata01, data2);
-            POOL_OP(vdata11, vdata11, data3);
-        }
-
-        // Leftover
-        for(; x1 < int(POOL_SIZE + STRIDE_X); x1 = x1 + 2)
-        {
-            vec2 data4middle;
-            data4middle = load_and_unpack(src, (tensor3D_offset_fp16(src, x1, y, 0) >> uint(2)));
-#if defined(POOL_L2)
-            // Raise to power of 2 for L2 Pooling
-            data4middle *= data4middle;
-#endif /* defined(POOL_L2) */
-            if((x1 + 1) >= int(POOL_SIZE + STRIDE_X))
+            int x1 = STRIDE_X;
+            for(; x1 <= (int(POOL_SIZE + STRIDE_X) - 8); x1 += 8)
             {
-                POOL_OP_float(sdata.y, sdata.y, data4middle.x);
+                vec4 data2;
+                vec4 data3;
+                LOAD4_fp16(data2, src, (tensor3D_offset_fp16(src, x1, y, 0) >> uint(2)));
+                LOAD4_fp16(data3, src, (tensor3D_offset_fp16(src, x1, y, 0) >> uint(2)) + uint(2));
+
+#if defined(POOL_L2)
+                // Raise to power of 2 for L2 Pooling
+                data2 *= data2;
+                data3 *= data3;
+#endif /* defined(POOL_L2) */
+
+                POOL_OP(vdata01, vdata01, data2);
+                POOL_OP(vdata11, vdata11, data3);
             }
-            else
+
+            // Leftover
+            for(; x1 < int(POOL_SIZE + STRIDE_X); x1 = x1 + 2)
             {
-                float data4;
-                POOL_OP_float(data4, data4middle.x, data4middle.y);
-                POOL_OP_float(sdata.y, sdata.y, data4);
+                vec2 data4middle;
+                data4middle = load_and_unpack(src, (tensor3D_offset_fp16(src, x1, y, 0) >> uint(2)));
+#if defined(POOL_L2)
+                // Raise to power of 2 for L2 Pooling
+                data4middle *= data4middle;
+#endif /* defined(POOL_L2) */
+                if((x1 + 1) >= int(POOL_SIZE + STRIDE_X))
+                {
+                    POOL_OP_float(sdata.y, sdata.y, data4middle.x);
+                }
+                else
+                {
+                    float data4;
+                    POOL_OP_float(data4, data4middle.x, data4middle.y);
+                    POOL_OP_float(sdata.y, sdata.y, data4);
+                }
+            }
+        }
+        else
+        {
+            vec2 dataorigin2;
+            dataorigin2 = load_and_unpack(src, (tensor3D_offset_fp16(src, (STRIDE_X - 1), y, 0) >> uint(2)));
+#if defined(POOL_L2)
+            // Raise to power of 2 for L2 Pooling
+            dataorigin2.y *= dataorigin2.y;
+#endif /* defined(POOL_L2) */
+            POOL_OP_float(sdata.y, sdata.y, dataorigin2.y);
+
+            int x1 = STRIDE_X + 1;
+            for(; x1 <= (int(POOL_SIZE + STRIDE_X) - 8); x1 += 8)
+            {
+                vec4 data2;
+                vec4 data3;
+                LOAD4_fp16(data2, src, (tensor3D_offset_fp16(src, x1, y, 0) >> uint(2)));
+                LOAD4_fp16(data3, src, (tensor3D_offset_fp16(src, x1, y, 0) >> uint(2)) + uint(2));
+
+#if defined(POOL_L2)
+                // Raise to power of 2 for L2 Pooling
+                data2 *= data2;
+                data3 *= data3;
+#endif /* defined(POOL_L2) */
+
+                POOL_OP(vdata01, vdata01, data2);
+                POOL_OP(vdata11, vdata11, data3);
+            }
+
+            // Leftover
+            for(; x1 < int(POOL_SIZE + STRIDE_X); x1 = x1 + 2)
+            {
+                vec2 data4middle;
+                data4middle = load_and_unpack(src, (tensor3D_offset_fp16(src, x1, y, 0) >> uint(2)));
+#if defined(POOL_L2)
+                // Raise to power of 2 for L2 Pooling
+                data4middle *= data4middle;
+#endif /* defined(POOL_L2) */
+                if((x1 + 1) >= int(POOL_SIZE + STRIDE_X))
+                {
+                    POOL_OP_float(sdata.y, sdata.y, data4middle.x);
+                }
+                else
+                {
+                    float data4;
+                    POOL_OP_float(data4, data4middle.x, data4middle.y);
+                    POOL_OP_float(sdata.y, sdata.y, data4);
+                }
             }
         }
     }
@@ -1414,14 +1490,20 @@ void main(void)
 #if defined(POOL_AVG) || defined(POOL_L2)
     {
         // Divide by pool region in case of average pooling
-        int  start_x1 = int(gl_GlobalInvocationID.x) * STRIDE_X - PAD_X;
-        int  start_y1 = int(gl_GlobalInvocationID.y) * STRIDE_Y - PAD_Y;
-        int  end_x1   = int(min(start_x1 + POOL_SIZE, MAX_WIDTH));
-        int  end_y1   = int(min(start_y1 + POOL_SIZE, MAX_HEIGHT));
-        int  start_x2 = start_x1 + STRIDE_X;
-        int  start_y2 = start_y1;
-        int  end_x2   = int(min(start_x2 + POOL_SIZE, MAX_WIDTH));
-        int  end_y2   = int(min(start_y2 + POOL_SIZE, MAX_HEIGHT));
+        int start_x1 = (2 * int(gl_GlobalInvocationID.x)) * STRIDE_X - PAD_X;
+        int start_y1 = int(gl_GlobalInvocationID.y) * STRIDE_Y - PAD_Y;
+        int end_x1   = int(min(start_x1 + POOL_SIZE, MAX_WIDTH));
+        int end_y1   = int(min(start_y1 + POOL_SIZE, MAX_HEIGHT));
+        int start_x2 = start_x1 + STRIDE_X;
+        int start_y2 = start_y1;
+        int end_x2   = int(min(start_x2 + POOL_SIZE, MAX_WIDTH));
+        int end_y2   = int(min(start_y2 + POOL_SIZE, MAX_HEIGHT));
+#if defined(EXCLUDE_PADDING)
+        start_x1     = max(0, start_x1);
+        start_y1     = max(0, start_y1);
+        start_x2     = max(0, start_x2);
+        start_y2     = max(0, start_y2);
+#endif /* defined(EXCLUDE_PADDING) */
         vec2 res1;
         res1.x = float((end_y1 - start_y1) * (end_x1 - start_x1));
         res1.y = float((end_y2 - start_y2) * (end_x2 - start_x2));

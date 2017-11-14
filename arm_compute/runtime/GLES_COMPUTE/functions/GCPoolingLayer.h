@@ -24,10 +24,10 @@
 #ifndef __ARM_COMPUTE_GCPOOLINGLAYER_H__
 #define __ARM_COMPUTE_GCPOOLINGLAYER_H__
 
-#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
 
-#include <memory>
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
@@ -48,6 +48,15 @@ public:
      * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref GCPoolingLayer
+     *
+     * @param[in] input     Source tensor info. Data types supported: F16/F32.
+     * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
+     * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCPOOLINGLAYER_H__ */
