@@ -73,6 +73,12 @@ SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<T> &a, co
     return c;
 }
 
+// used to validate assembly kernels which don't know anything about offsets
+SimpleTensor<int32_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b)
+{
+    return gemmlowp_matrix_multiply_core(a, b, 0, 0);
+}
+
 template <typename T>
 SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, int32_t result_mult_int, int32_t result_shift)
 {

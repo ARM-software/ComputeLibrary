@@ -21,30 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_GEMMLOWP_H__
-#define __ARM_COMPUTE_TEST_GEMMLOWP_H__
+#pragma once
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#ifdef __aarch64__
 
-namespace arm_compute
-{
-namespace test
-{
-namespace validation
-{
-namespace reference
-{
-template <typename T>
-SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<T> &a, const SimpleTensor<T> &b, int32_t a_offset, int32_t b_offset);
+// Load the actual kernel
+#include "a64_gemm_s8_4x4/generic.hpp"
 
-template <typename T>
-SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, int32_t result_mult_int, int32_t result_shift);
+class gemm_s8_4x4 {
+public:
+    typedef int8_t operand_type;
+    typedef int32_t result_type;
 
-SimpleTensor<int32_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b);
+    typedef void (*kern_type)(const int8_t *, const int8_t *, int32_t *, int, int, int);
 
-} // namespace reference
-} // namespace validation
-} // namespace test
-} // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_GEMMLOWP_H__ */
+    /* Describes the data layout for A input */
+    static const int A_interleave = 4;
+    static const int A_block = 16;
+    static const bool A_transpose = false;
+
+    /* Same for B input */
+    static const int B_interleave = 4;
+    static const int B_block = 16;
+    static const bool B_transpose = true;
+
+    /* Kernel blocking parameters */
+    static const int out_width = 4;
+    static const int out_height = 4;
+    static const int k_unroll = 16;
+
+    kern_type kernel = nullptr;
+
+    gemm_s8_4x4(const CPUInfo *ci) {
+        kernel = a64_gemm_s8_4x4;
+    }
+};
+
+#endif // __aarch64__
+

@@ -22,7 +22,9 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h"
+#include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64Kernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMLowpAssemblyMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -38,6 +40,7 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/GEMMInterleaveBlockedFixture.h"
+#include "tests/validation/fixtures/GEMMLowpAssemblyFixture.h"
 #include "tests/validation/fixtures/GEMMLowpFixture.h"
 
 namespace arm_compute
@@ -48,11 +51,21 @@ namespace validation
 {
 namespace
 {
-const auto data_int_blk    = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12) * framework::dataset::make("by", 8, 13) * framework::dataset::make("block", 4, 9);
-const auto data_int_blk_tr = framework::dataset::make("M", 8, 17) * framework::dataset::make("N", 8, 14) * framework::dataset::make("by", 12) * framework::dataset::make("block", 4);
+const auto data_int_blk         = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12) * framework::dataset::make("by", 8, 13) * framework::dataset::make("block", 4, 9);
+const auto data_int_blk_tr      = framework::dataset::make("M", 8, 17) * framework::dataset::make("N", 8, 14) * framework::dataset::make("by", 12) * framework::dataset::make("block", 4);
+const auto data_matrix_multiply = framework::dataset::make("M", 12, 20) * framework::dataset::make("N", 12, 20) * framework::dataset::make("K", 16);
 } // namespace
 
 TEST_SUITE(NEON)
+TEST_SUITE(ASSEMBLY_MATRIX_MULTIPLY)
+using NEGEMMAssemblyFixture = GEMMLowpAssemblyFixture<Tensor, Accessor, NEGEMMLowpAssemblyMatrixMultiplyCore>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMAssemblyFixture, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+
 TEST_SUITE(GEMMLowp)
 
 TEST_SUITE(INTERLEAVE_BLOCKED)

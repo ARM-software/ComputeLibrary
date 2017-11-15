@@ -21,30 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_GEMMLOWP_H__
-#define __ARM_COMPUTE_TEST_GEMMLOWP_H__
+#ifndef __ARM_COMPUTE_NEGEMMLOWPAARCH64KERNEL_H__
+#define __ARM_COMPUTE_NEGEMMLOWPAARCH64KERNEL_H__
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
+
+// Enable only if compiled for AArch64-V8A targets
+#ifdef ARM_COMPUTE_AARCH64_V8A
 
 namespace arm_compute
 {
-namespace test
-{
-namespace validation
-{
-namespace reference
-{
-template <typename T>
-SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<T> &a, const SimpleTensor<T> &b, int32_t a_offset, int32_t b_offset);
+class ITensor;
 
-template <typename T>
-SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, int32_t result_mult_int, int32_t result_shift);
+/** AArch64 NEON kernel to multiply two input matrices "A" and "B". */
+class NEGEMMLowpAArch64Kernel : public NEGEMMAssemblyBaseKernel
+{
+public:
+    // Inherited methods overridden:
+    void run(const Window &window, const ThreadInfo &info) override;
 
-SimpleTensor<int32_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b);
-
-} // namespace reference
-} // namespace validation
-} // namespace test
+protected:
+    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;
+};
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_GEMMLOWP_H__ */
+#endif /* ARM_COMPUTE_AARCH64_V8A */
+#endif /*__ARM_COMPUTE_NEGEMMLOWPAARCH64KERNEL_H__*/
