@@ -61,6 +61,12 @@ std::unique_ptr<arm_compute::IFunction> BatchNormalizationLayer::instantiate_nod
     bool gamma_is_loaded = _gamma.tensor() != nullptr;
     bool beta_is_loaded  = _beta.tensor() != nullptr;
 
+    // Set mean, var, gamma and beta target
+    _mean.set_target(_target_hint);
+    _var.set_target(_target_hint);
+    _gamma.set_target(_target_hint);
+    _beta.set_target(_target_hint);
+
     // Create node context
     NodeContext node_ctx(OperationType::BatchNormalizationLayer);
     node_ctx.set_target(_target_hint);
