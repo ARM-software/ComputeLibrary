@@ -29,7 +29,7 @@
 #include "dot_toolchain_support.h"
 #include <cassert>
 
-inline void a64_gemm_u8_12x8(const uint8_t *Apanel, const uint8_t *Bpanel, uint32_t *Cpanel, int ablocks, int bblocks, int K) {
+inline void a64_gemm_u8_12x8_a55r1(const uint8_t *Apanel, const uint8_t *Bpanel, uint32_t *Cpanel, int ablocks, int bblocks, int K) {
     assert(Apanel);
     assert(Bpanel);
     assert(Cpanel);
@@ -47,24 +47,22 @@ inline void a64_gemm_u8_12x8(const uint8_t *Apanel, const uint8_t *Bpanel, uint3
         for (int xb=0; xb<bblocks; xb++) {
             a_ptr = a_ptr0;
             int k = init_value_k;
-            register uint32x4_t a0  asm("v0");
-            register uint32x4_t a1  asm("v1");
-            register uint32x4_t b0  asm("v2");
-            register uint32x4_t b1  asm("v3");
-            register uint32x4_t b2  asm("v4");
-            register uint32x4_t a0a asm("v5");
-            register uint32x4_t a1a asm("v6");
+            register int32x4_t a0  asm("v0");
+            register int32x4_t a1  asm("v1");
+            register int32x4_t b0  asm("v2");
+            register int32x4_t b1  asm("v3");
+            register int32x4_t b2  asm("v4");
+            register int32x4_t a0a asm("v5");
+            register int32x4_t a1a asm("v6");
             __asm __volatile (
                 _DECLARE_UDOT
                 // Initialize result registers, load initial operands, prime prefetches.
                 "movi	v8.4s, #0x0\n"
-                "ldr	%q[a0], [%[a_ptr]]\n"
+                "ldp	%q[a0], %q[a1], [%[a_ptr]]\n"
                 "movi	v9.4s, #0x0\n"
-                "ldr	%q[b0], [%[b_ptr]]\n"
+                "ldp	%q[b0], %q[b1], [%[b_ptr]]\n"
                 "movi	v10.4s, #0x0\n"
-                "ldr	%q[a1], [%[a_ptr], #16]\n"
                 "movi	v11.4s, #0x0\n"
-                "ldr	%q[b1], [%[b_ptr], #16]\n"
                 "movi	v12.4s, #0x0\n"
                 ASM_PREFETCH("[%[b_ptr], #64]")
                 "movi	v13.4s, #0x0\n"
@@ -99,78 +97,108 @@ inline void a64_gemm_u8_12x8(const uint8_t *Apanel, const uint8_t *Bpanel, uint3
                 // Skip loop if we are doing zero iterations of it.
                 "cbz	%w[k], 4f\n"
 
+
                 // Loop proper
                 "1:\n"
                 "udot	v8.4s , %[b0].16b, %[a0].4b[0]\n"
-                "udot  	v9.4s , %[b0].16b, %[a0].4b[1]\n"
+                "ldr	%d[b2], [%[b_ptr], #32]\n"
 
-                "ldr	%q[b2], [%[b_ptr], #32]\n"
+                "udot  	v9.4s , %[b0].16b, %[a0].4b[1]\n"
+                "ldr	x20, [%[b_ptr], #40]\n"
                 "udot	v10.4s, %[b0].16b, %[a0].4b[2]\n"
                 "udot	v11.4s, %[b0].16b, %[a0].4b[3]\n"
-                "ldr	%q[a0a], [%[a_ptr], #32]\n"
+                "ldr	%d[a0a], [%[a_ptr], #32]\n"
+
                 "udot 	v12.4s, %[b0].16b, %[a1].4b[0]\n"
+                "ins    %[b2].d[1], x20\n"
                 "udot	v13.4s, %[b0].16b, %[a1].4b[1]\n"
-                "ldr	%q[a1a], [%[a_ptr], #48]\n"
+                "ldr    x20, [%[a_ptr], #40]\n"
                 "udot	v14.4s, %[b0].16b, %[a1].4b[2]\n"
                 "udot	v15.4s, %[b0].16b, %[a1].4b[3]\n"
-                "ldr	%q[b0], [%[b_ptr], #48]\n"
+                "ldr	%d[a1a], [%[a_ptr], #48]\n"
+
 
                 "udot	v16.4s, %[b1].16b, %[a0].4b[0]\n"
-                "udot	v17.4s, %[b1].16b, %[a0].4b[1]\n"
+                "ins    %[a0a].d[1], x20\n"
                 ASM_PREFETCH("[%[a_ptr], #320]")
+                "udot	v17.4s, %[b1].16b, %[a0].4b[1]\n"
+                "ldr    x20, [%[a_ptr], #56]\n"
                 "udot	v18.4s, %[b1].16b, %[a0].4b[2]\n"
                 "udot	v19.4s, %[b1].16b, %[a0].4b[3]\n"
+                "ldr	%d[b0], [%[b_ptr], #48]\n"
+
                 "udot	v20.4s, %[b1].16b, %[a1].4b[0]\n"
+                "ins    %[a1a].d[1], x20\n"
+                ASM_PREFETCH("[%[b_ptr], #448]")
                 "udot	v21.4s, %[b1].16b, %[a1].4b[1]\n"
+                "ldr    x20, [%[b_ptr], #56]\n"
                 "udot	v22.4s, %[b1].16b, %[a1].4b[2]\n"
                 "udot	v23.4s, %[b1].16b, %[a1].4b[3]\n"
-                "ldr	%q[b1], [%[b_ptr], #64]\n"
+                "ldr	%d[b1], [%[b_ptr], #64]\n"
 
                 "udot	v24.4s, %[b2].16b, %[a0].4b[0]\n"
+                "ins    %[b0].d[1], x20\n"
                 "udot	v25.4s, %[b2].16b, %[a0].4b[1]\n"
-                ASM_PREFETCH("[%[b_ptr], #448]")
+                "ldr    x20, [%[b_ptr], #72]\n"
                 "udot	v26.4s, %[b2].16b, %[a0].4b[2]\n"
                 "udot	v27.4s, %[b2].16b, %[a0].4b[3]\n"
+
                 "udot	v28.4s, %[b2].16b, %[a1].4b[0]\n"
                 "udot	v29.4s, %[b2].16b, %[a1].4b[1]\n"
                 "udot	v30.4s, %[b2].16b, %[a1].4b[2]\n"
                 "udot	v31.4s, %[b2].16b, %[a1].4b[3]\n"
-                "ldr	%q[b2], [%[b_ptr], #80]\n"
+
+                "ldr	%d[b2], [%[b_ptr], #80]\n"
 
                 "udot	v8.4s , %[b0].16b, %[a0a].4b[0]\n"
+                "ins    %[b1].d[1], x20\n"
                 "udot	v9.4s , %[b0].16b, %[a0a].4b[1]\n"
-                "ldr	%q[a0], [%[a_ptr], #64]\n"
+                "ldr    x20, [%[b_ptr], #88]\n"
                 "udot	v10.4s, %[b0].16b, %[a0a].4b[2]\n"
                 "udot	v11.4s, %[b0].16b, %[a0a].4b[3]\n"
+                "ldr	%d[a0], [%[a_ptr], #64]\n"
+
                 "udot 	v12.4s, %[b0].16b, %[a1a].4b[0]\n"
-                "ldr	%q[a1], [%[a_ptr], #80]\n"
+                "ins    %[b2].d[1], x20\n"
                 "udot   v13.4s, %[b0].16b, %[a1a].4b[1]\n"
+                "ldr    x20, [%[a_ptr], #72]\n"
                 "udot	v14.4s, %[b0].16b, %[a1a].4b[2]\n"
                 "udot	v15.4s, %[b0].16b, %[a1a].4b[3]\n"
-                "ldr	%q[b0], [%[b_ptr], #96]\n"
+                "ldr	%d[a1], [%[a_ptr], #80]\n"
 
                 "udot	v16.4s, %[b1].16b, %[a0a].4b[0]\n"
-                "udot	v17.4s, %[b1].16b, %[a0a].4b[1]\n"
+                "ins    %[a0].d[1], x20\n"
                 ASM_PREFETCH("[%[b_ptr], #512]")
+                "udot	v17.4s, %[b1].16b, %[a0a].4b[1]\n"
+                "ldr    x20, [%[a_ptr], #88]\n"
                 "udot	v18.4s, %[b1].16b, %[a0a].4b[2]\n"
                 "udot	v19.4s, %[b1].16b, %[a0a].4b[3]\n"
+                "ldr	%d[b0], [%[b_ptr], #96]\n"
+
                 "udot	v20.4s, %[b1].16b, %[a1a].4b[0]\n"
+                "ins    %[a1].d[1], x20\n"
                 "udot	v21.4s, %[b1].16b, %[a1a].4b[1]\n"
+                "ldr    x20, [%[b_ptr], #104]\n"
                 "udot	v22.4s, %[b1].16b, %[a1a].4b[2]\n"
                 "udot	v23.4s, %[b1].16b, %[a1a].4b[3]\n"
-                "ldr	%q[b1], [%[b_ptr], #112]\n"
+                "ldr	%d[b1], [%[b_ptr], #112]\n"
 
                 "udot	v24.4s, %[b2].16b, %[a0a].4b[0]\n"
+                "ins    %[b0].d[1], x20\n"
                 "udot	v25.4s, %[b2].16b, %[a0a].4b[1]\n"
+                "ldr    x20, [%[b_ptr], #120]\n"
                 "add	%[a_ptr], %[a_ptr], #64\n"
                 "udot	v26.4s, %[b2].16b, %[a0a].4b[2]\n"
                 "udot	v27.4s, %[b2].16b, %[a0a].4b[3]\n"
-                "add	%[b_ptr], %[b_ptr], #96\n"
+
                 "udot	v28.4s, %[b2].16b, %[a1a].4b[0]\n"
                 "udot	v29.4s, %[b2].16b, %[a1a].4b[1]\n"
-                "subs	%w[k], %w[k], #1\n"
+                "add	%[b_ptr], %[b_ptr], #96\n"
                 "udot	v30.4s, %[b2].16b, %[a1a].4b[2]\n"
+                "subs	%w[k], %w[k], #1\n"
+                "ins    %[b1].d[1], x20\n"
                 "udot	v31.4s, %[b2].16b, %[a1a].4b[3]\n"
+                "ldr    %d[b2], [%[b_ptr], #32]\n"
                 "bne	1b\n"
 
                 // Target to use when K is 1 or 2 (i.e. zero iterations of main loop)
@@ -182,90 +210,100 @@ inline void a64_gemm_u8_12x8(const uint8_t *Apanel, const uint8_t *Bpanel, uint3
                 // Detached final iteration (even K)
                 "udot	v8.4s , %[b0].16b, %[a0].4b[0]\n"
                 "udot   v9.4s , %[b0].16b, %[a0].4b[1]\n"
-                "ldr	%q[b2], [%[b_ptr], #32]\n"
+                "ldr    x20, [%[b_ptr], #40]\n"
                 "udot	v10.4s, %[b0].16b, %[a0].4b[2]\n"
                 "udot	v11.4s, %[b0].16b, %[a0].4b[3]\n"
-                "ldr	%q[a0a], [%[a_ptr], #32]\n"
+                "ldr	%d[a0a], [%[a_ptr], #32]\n"
+
                 "udot 	v12.4s, %[b0].16b, %[a1].4b[0]\n"
+                "ldr	%d[b2], [%[b_ptr], #32]\n"
                 "udot   v13.4s, %[b0].16b, %[a1].4b[1]\n"
-                "ldr	%q[a1a], [%[a_ptr], #48]\n"
+                "ldr    x20, [%[a_ptr], #40]\n"
                 "udot	v14.4s, %[b0].16b, %[a1].4b[2]\n"
                 "udot	v15.4s, %[b0].16b, %[a1].4b[3]\n"
-                "ldr	%q[b0], [%[b_ptr], #48]\n"
+                "ldr	%d[a1a], [%[a_ptr], #48]\n"
+
 
                 "udot	v16.4s, %[b1].16b, %[a0].4b[0]\n"
+                "ins    %[a0a].d[1], x20\n"
                 "udot	v17.4s, %[b1].16b, %[a0].4b[1]\n"
+                "ldr    x20, [%[a_ptr], #56]\n"
                 "udot	v18.4s, %[b1].16b, %[a0].4b[2]\n"
                 "udot	v19.4s, %[b1].16b, %[a0].4b[3]\n"
+                "ldr	%d[b0], [%[b_ptr], #48]\n"
+
                 "udot	v20.4s, %[b1].16b, %[a1].4b[0]\n"
+                "ins    %[a1a].d[1], x20\n"
                 "udot	v21.4s, %[b1].16b, %[a1].4b[1]\n"
+                "ldr    x20, [%[b_ptr], #56]\n"
                 "udot	v22.4s, %[b1].16b, %[a1].4b[2]\n"
                 "udot	v23.4s, %[b1].16b, %[a1].4b[3]\n"
-                "ldr	%q[b1], [%[b_ptr], #64]\n"
 
                 "udot	v24.4s, %[b2].16b, %[a0].4b[0]\n"
                 "udot	v25.4s, %[b2].16b, %[a0].4b[1]\n"
                 "add	%[a_ptr], %[a_ptr], #64\n"
                 "udot	v26.4s, %[b2].16b, %[a0].4b[2]\n"
                 "udot	v27.4s, %[b2].16b, %[a0].4b[3]\n"
+                "ldr	%d[b1], [%[b_ptr], #64]\n"
+
                 "udot	v28.4s, %[b2].16b, %[a1].4b[0]\n"
+                "ins    %[b0].d[1], x20\n"
                 "udot	v29.4s, %[b2].16b, %[a1].4b[1]\n"
+                "ldr    x20, [%[b_ptr], #72]\n"
                 "udot	v30.4s, %[b2].16b, %[a1].4b[2]\n"
                 "udot	v31.4s, %[b2].16b, %[a1].4b[3]\n"
-                "ldr	%q[b2], [%[b_ptr], #80]\n"
+                "ldr	%d[b2], [%[b_ptr], #80]\n"
 
                 "udot	v8.4s , %[b0].16b, %[a0a].4b[0]\n"
+                "ins    %[b1].d[1], x20\n"
+                "udot   v9.4s , %[b0].16b, %[a0a].4b[1]\n"
+                "ldr    x20, [%[b_ptr], #88]\n"
+                "udot	v10.4s, %[b0].16b, %[a0a].4b[2]\n"
+                "ins    %[b2].d[1], x20\n"
 
                 "udot	v16.4s, %[b1].16b, %[a0a].4b[0]\n"
-                "add	%[b_ptr], %[b_ptr], #96\n"
-                "udot   v9.4s , %[b0].16b, %[a0a].4b[1]\n"
-                "str	q8, [%[c_ptr], #0]\n"
-                "udot	v17.4s, %[b1].16b, %[a0a].4b[1]\n"
-                "str	q16, [%[c_ptr], #16]\n"
                 "udot	v24.4s, %[b2].16b, %[a0a].4b[0]\n"
+                "add	%[b_ptr], %[b_ptr], #96\n"
+                "str	q8, [%[c_ptr], #0]\n"
+                "str	q16, [%[c_ptr], #16]\n"
                 "str	q24, [%[c_ptr], #32]\n"
+                "udot	v17.4s, %[b1].16b, %[a0a].4b[1]\n"
 
                 "udot	v25.4s, %[b2].16b, %[a0a].4b[1]\n"
                 "str	q9, [%[c_ptr], #48]\n"
-                "udot	v10.4s, %[b0].16b, %[a0a].4b[2]\n"
                 "str	q17, [%[c_ptr], #64]\n"
-                "udot	v18.4s, %[b1].16b, %[a0a].4b[2]\n"
                 "str	q25, [%[c_ptr], #80]\n"
+                "udot	v18.4s, %[b1].16b, %[a0a].4b[2]\n"
                 "udot	v26.4s, %[b2].16b, %[a0a].4b[2]\n"
                 "str	q10, [%[c_ptr], #96]\n"
-
-                "udot	v11.4s, %[b0].16b, %[a0a].4b[3]\n"
                 "str	q18, [%[c_ptr], #112]\n"
-                "udot	v19.4s, %[b1].16b, %[a0a].4b[3]\n"
                 "str	q26, [%[c_ptr], #128]\n"
+                "udot	v11.4s, %[b0].16b, %[a0a].4b[3]\n"
+                "udot	v19.4s, %[b1].16b, %[a0a].4b[3]\n"
                 "udot	v27.4s, %[b2].16b, %[a0a].4b[3]\n"
                 "str	q11, [%[c_ptr], #144]\n"
-
-                "udot 	v12.4s, %[b0].16b, %[a1a].4b[0]\n"
                 "str	q19, [%[c_ptr], #160]\n"
-                "udot	v20.4s, %[b1].16b, %[a1a].4b[0]\n"
                 "str	q27, [%[c_ptr], #176]\n"
+                "udot 	v12.4s, %[b0].16b, %[a1a].4b[0]\n"
+                "udot	v20.4s, %[b1].16b, %[a1a].4b[0]\n"
                 "udot	v28.4s, %[b2].16b, %[a1a].4b[0]\n"
                 "str	q12, [%[c_ptr], #192]\n"
-
-                "udot   v13.4s, %[b0].16b, %[a1a].4b[1]\n"
                 "str	q20, [%[c_ptr], #208]\n"
-                "udot	v21.4s, %[b1].16b, %[a1a].4b[1]\n"
                 "str	q28, [%[c_ptr], #224]\n"
+                "udot   v13.4s, %[b0].16b, %[a1a].4b[1]\n"
+                "udot	v21.4s, %[b1].16b, %[a1a].4b[1]\n"
                 "udot	v29.4s, %[b2].16b, %[a1a].4b[1]\n"
                 "str	q13, [%[c_ptr], #240]\n"
-
-                "udot	v14.4s, %[b0].16b, %[a1a].4b[2]\n"
                 "str	q21, [%[c_ptr], #256]\n"
-                "udot	v22.4s, %[b1].16b, %[a1a].4b[2]\n"
                 "str	q29, [%[c_ptr], #272]\n"
+                "udot	v14.4s, %[b0].16b, %[a1a].4b[2]\n"
+                "udot	v22.4s, %[b1].16b, %[a1a].4b[2]\n"
                 "udot	v30.4s, %[b2].16b, %[a1a].4b[2]\n"
                 "str	q14, [%[c_ptr], #288]\n"
-
-                "udot	v15.4s, %[b0].16b, %[a1a].4b[3]\n"
                 "str	q22, [%[c_ptr], #304]\n"
-                "udot	v23.4s, %[b1].16b, %[a1a].4b[3]\n"
                 "str	q30, [%[c_ptr], #320]\n"
+                "udot	v15.4s, %[b0].16b, %[a1a].4b[3]\n"
+                "udot	v23.4s, %[b1].16b, %[a1a].4b[3]\n"
                 "udot	v31.4s, %[b2].16b, %[a1a].4b[3]\n"
                 "str	q15, [%[c_ptr], #336]\n"
 
@@ -274,12 +312,15 @@ inline void a64_gemm_u8_12x8(const uint8_t *Apanel, const uint8_t *Bpanel, uint3
                 // Detached final iteration (odd K)
                 "2:\n"
                 "udot	v8.4s , %[b0].16b, %[a0].4b[0]\n"
-                "ldr	%q[b2], [%[b_ptr], #32]\n"
+                "ldr	%d[b2], [%[b_ptr], #32]\n"
+                "ldr	x20, [%[b_ptr], #40]\n"
+
                 "udot	v16.4s, %[b1].16b, %[a0].4b[0]\n"
                 "udot   v9.4s , %[b0].16b, %[a0].4b[1]\n"
                 "str	q8, [%[c_ptr], #0]\n"
                 "udot	v17.4s, %[b1].16b, %[a0].4b[1]\n"
                 "str	q16, [%[c_ptr], #16]\n"
+                "ins    %[b2].d[1], x20\n"
                 "udot	v24.4s, %[b2].16b, %[a0].4b[0]\n"
                 "add	%[b_ptr], %[b_ptr], #48\n"
                 "add	%[a_ptr], %[a_ptr], #32\n"
@@ -336,6 +377,8 @@ inline void a64_gemm_u8_12x8(const uint8_t *Apanel, const uint8_t *Bpanel, uint3
                 "str	q31, [%[c_ptr], #368]\n"
                 "add	%[c_ptr], %[c_ptr], #384\n"
 
+
+
                 ".purgem udot\n"
             :
               [a_ptr] "+r" (a_ptr), [b_ptr] "+r" (b_ptr), [c_ptr] "+r" (c_ptr),
@@ -343,12 +386,10 @@ inline void a64_gemm_u8_12x8(const uint8_t *Apanel, const uint8_t *Bpanel, uint3
               [b0] "+w" (b0), [b1] "+w" (b1), [b2] "+w" (b2), [k] "+r" (k)
             : [oddk] "r" (oddk)
             : "x20", "x21", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18",
-              "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "cc"
+              "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "cc", "memory"
             );
- 
         }
     }
-
-
 }
-#endif 
+#endif
+

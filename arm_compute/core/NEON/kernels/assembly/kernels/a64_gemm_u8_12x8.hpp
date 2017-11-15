@@ -27,6 +27,7 @@
 
 // Load the actual kernel
 #include "a64_gemm_u8_12x8/generic.hpp"
+#include "a64_gemm_u8_12x8/a55r1.hpp"
 
 class gemm_u8_12x8 {
 public:
@@ -54,6 +55,9 @@ public:
 
     gemm_u8_12x8(const CPUInfo *ci) {
         kernel = a64_gemm_u8_12x8;
+        if (ci->CPU == CPUTarget::A55_DOT) {
+            kernel = a64_gemm_u8_12x8_a55r1;
+        }
     }
 };
 
