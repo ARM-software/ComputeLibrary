@@ -151,6 +151,14 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     }
 
     ICLKernel::configure(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "activation_layer_";
+    _config_id += lower_string(string_from_data_type(dt));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
 Error CLActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)

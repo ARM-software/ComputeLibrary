@@ -104,6 +104,18 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     output_access.set_valid_region(win, input->info()->valid_region());
 
     ICLKernel::configure(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "normalization_layer_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(static_cast<std::underlying_type<NormType>::type>(norm_info.type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(norm_info.norm_size());
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
 void CLNormalizationLayerKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -81,6 +81,18 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "col2im_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)

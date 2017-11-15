@@ -136,6 +136,14 @@ void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "softmax_layer_";
+    _config_id += lower_string(string_from_data_type(data_type));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
 CLLogits1DShiftExpSumKernel::CLLogits1DShiftExpSumKernel()

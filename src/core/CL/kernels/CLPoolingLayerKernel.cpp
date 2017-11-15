@@ -183,6 +183,14 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
     ICLKernel::configure(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "pooling_layer_";
+    _config_id += lower_string(string_from_data_type(data_type));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 Error CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
