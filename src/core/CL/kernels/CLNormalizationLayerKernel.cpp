@@ -73,7 +73,7 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     _border_size                    = BorderSize(0, border_width);
 
     const unsigned int num_elems_processed_per_iteration = (is_data_type_fixed_point(input->info()->data_type())) ? 16 : 4;
-    const unsigned int num_elems_read_per_iteration      = num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2);
+    const unsigned int num_elems_read_per_iteration      = _is_in_map ? (num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2)) : num_elems_processed_per_iteration;
 
     // Set build options
     std::set<std::string> build_opts;

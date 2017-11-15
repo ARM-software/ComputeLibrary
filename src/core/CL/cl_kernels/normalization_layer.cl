@@ -93,13 +93,13 @@ __kernel void normalization_layer_cross_map(TENSOR3D_DECLARATION(input),
 
     const int current_slice = get_global_id(2);
 
-    const int left_slice  = max(current_slice - (int)RADIUS, (int)0);
-    const int right_slice = min(current_slice + (int)RADIUS, (int)(NUM_SLICES - 1));
+    const int left_slice  = max(-(int)RADIUS, -current_slice);
+    const int right_slice = min((int)RADIUS, (int)NUM_SLICES - 1 - current_slice);
 
     for(int i = left_slice; i <= right_slice; i++)
     {
         VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-        values = LOAD_OP(0, (__global DATA_TYPE *)tensor3D_offset(&in, 0, 0, i - current_slice));
+        values = LOAD_OP(0, (__global DATA_TYPE *)tensor3D_offset(&in, 0, 0, i));
         acc    = ADD_OP(acc, MUL_OP(values, values));
     }
 
