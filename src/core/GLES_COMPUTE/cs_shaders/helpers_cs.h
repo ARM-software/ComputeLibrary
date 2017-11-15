@@ -361,7 +361,7 @@ mediump vec4[2] unpack8_half(highp uvec4 packed_data)
 }
 
 // For half-precision (16-bits) floating point packed into a "uint" element
-#define LOAD_UNPACK2_HALF(tensor_ptr, offset) unpackHalf2x16(LOAD(tensor_ptr, offset))
+#define LOAD_UNPACK2_HALF(tensor_ptr, offset) unpackHalf2x16(uint(LOAD(tensor_ptr, offset)))
 #define STORE_PACK2_HALF(tensor_ptr, offset, data) STORE(tensor_ptr, offset, packHalf2x16(data))
 #define LOAD_UNPACK2_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter) LOAD_UNPACK2_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
 #define STORE_PACK2_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter, data) STORE_PACK2_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
@@ -377,7 +377,7 @@ mediump vec4[2] unpack8_half(highp uvec4 packed_data)
 #define VSTORE4_PACK8_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter, data) VSTORE4_PACK8_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
 
 // For half-precision (16-bits) floating point packed into a "uvec2" element
-#define LOAD_UNPACK4_HALF(tensor_ptr, offset) unpack4_half(LOAD(tensor_ptr, offset))
+#define LOAD_UNPACK4_HALF(tensor_ptr, offset) unpack4_half(uvec2(LOAD(tensor_ptr, offset)))
 #define STORE_PACK4_HALF(tensor_ptr, offset, data) STORE(tensor_ptr, offset, pack4_half(data))
 #define LOAD_UNPACK4_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter) LOAD_UNPACK4_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
 #define STORE_PACK4_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter, data) STORE_PACK4_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
@@ -388,7 +388,7 @@ mediump vec4[2] unpack8_half(highp uvec4 packed_data)
 #define VSTORE2_PACK8_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter, data) VSTORE2_PACK8_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
 
 // For half-precision (16-bits) floating point packed into a "uvec4" element
-#define LOAD_UNPACK8_HALF(tensor_ptr, offset) unpack8_half(LOAD(tensor_ptr, offset))
+#define LOAD_UNPACK8_HALF(tensor_ptr, offset) unpack8_half(uvec4(LOAD(tensor_ptr, offset)))
 #define STORE_PACK8_HALF(tensor_ptr, offset, data) STORE(tensor_ptr, offset, pack8_half(data))
 #define LOAD_UNPACK8_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter) LOAD_UNPACK8_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
 #define STORE_PACK8_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter, data) STORE_PACK8_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
