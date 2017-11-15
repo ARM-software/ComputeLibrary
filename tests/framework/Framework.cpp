@@ -289,7 +289,10 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 
             for(int i = 0; i < _num_iterations; ++i)
             {
-                profiler.start();
+                if(_num_iterations > 1 && i != 0)
+                {
+                    profiler.start();
+                }
                 test_case->do_run();
 #ifdef ARM_COMPUTE_CL
                 if(opencl_is_available())
@@ -303,7 +306,10 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
                     GCScheduler::get().sync();
                 }
 #endif /* ARM_COMPUTE_GC */
-                profiler.stop();
+                if(_num_iterations > 1 && i != 0)
+                {
+                    profiler.stop();
+                }
             }
 
             test_case->do_teardown();
