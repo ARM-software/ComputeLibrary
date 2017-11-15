@@ -54,7 +54,7 @@ public:
         dst     = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
 
         // Create and configure function
-        depth_conv.configure(&src, &dst, &weights, &biases, info);
+        depth_conv.configure(&src, &weights, &biases, &dst, info);
 
         // Allocate tensors
         src.allocator()->allocate();

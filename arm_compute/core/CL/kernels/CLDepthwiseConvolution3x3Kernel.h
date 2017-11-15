@@ -48,13 +48,13 @@ public:
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in]  input     Source tensor. DataType supported: F32.
-     * @param[out] output    Destination tensor. Data type supported: Same as @p input.
      * @param[in]  weights   Weights tensor. A 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
      * @param[in]  biases    (Optional) Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
      *                       Data type supported: Same as @p input.
+     * @param[out] output    Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info Padding and stride information to use for the convolution.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const ICLTensor *biases, const PadStrideInfo &conv_info);
+    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

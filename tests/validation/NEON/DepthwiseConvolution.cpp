@@ -65,7 +65,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
 
     // Create and configure function
     NEDepthwiseConvolution3x3 depthwise_layer;
-    depthwise_layer.configure(&src, &dst, &weights, &bias, info);
+    depthwise_layer.configure(&src, &weights, &bias, &dst, info);
 
     // Validate valid region
     const ValidRegion input_valid_region   = shape_to_valid_region(input_shape);

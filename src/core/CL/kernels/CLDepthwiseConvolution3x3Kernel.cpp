@@ -46,7 +46,7 @@ BorderSize CLDepthwiseConvolution3x3Kernel::border_size() const
     return _border_size;
 }
 
-void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const ICLTensor *biases, const PadStrideInfo &conv_info)
+void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);

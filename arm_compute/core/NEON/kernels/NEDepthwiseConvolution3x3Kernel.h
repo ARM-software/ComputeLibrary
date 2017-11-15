@@ -48,11 +48,11 @@ public:
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in]  input     Source tensor. DataType supported: F32.
-     * @param[out] output    Destination tensor. Data type supported: Same as @p input.
      * @param[in]  weights   Weights tensor. This is a 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
+     * @param[out] output    Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info Padding and stride information to use for the convolution.
      */
-    void configure(const ITensor *input, ITensor *output, const ITensor *weights, const PadStrideInfo &conv_info);
+    void configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

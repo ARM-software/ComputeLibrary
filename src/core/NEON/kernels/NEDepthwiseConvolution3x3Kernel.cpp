@@ -50,7 +50,7 @@ BorderSize NEDepthwiseConvolution3x3Kernel::border_size() const
     return _border_size;
 }
 
-void NEDepthwiseConvolution3x3Kernel::configure(const ITensor *input, ITensor *output, const ITensor *weights, const PadStrideInfo &conv_info)
+void NEDepthwiseConvolution3x3Kernel::configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, weights);

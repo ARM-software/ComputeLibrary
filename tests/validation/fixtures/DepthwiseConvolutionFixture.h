@@ -80,7 +80,7 @@ protected:
 
         // Create Depthwise Convolution configure function
         FunctionType depthwise_convolution;
-        depthwise_convolution.configure(&src, &dst, &weights, &biases, pad_stride_info);
+        depthwise_convolution.configure(&src, &weights, &biases, &dst, pad_stride_info);
 
         // Allocate tensors
         src.allocator()->allocate();

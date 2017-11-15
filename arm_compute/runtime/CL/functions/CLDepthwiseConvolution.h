@@ -52,13 +52,13 @@ public:
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in, out] input     Source tensor. Data type supported: F32. (Written to only for border filling).
-     * @param[out]     output    Destination tensor. Data type supported: same as @p input.
      * @param[in]      weights   Weights tensor. A 3D tensor with shape [3, 3, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                           Data type supported: Same as @p input.
+     * @param[out]     output    Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info Padding and stride information to use for the convolution.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const ICLTensor *biases, const PadStrideInfo &conv_info);
+    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overriden:
     void run() override;
@@ -84,13 +84,13 @@ public:
     /** Initialize the function's source, destination, weights and convolution information.
      *
      * @param[in, out] input     Source tensor. Data type supported: F32. (Written to only for border filling).
-     * @param[out]     output    Destination tensor. Data type supported: same as @p input.
      * @param[in]      weights   Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                           Data type supported: Same as @p input.
+     * @param[out]     output    Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info Padding and stride information to use for the convolution.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *weights, const ICLTensor *biases, const PadStrideInfo &conv_info);
+    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overriden:
     void run() override;
