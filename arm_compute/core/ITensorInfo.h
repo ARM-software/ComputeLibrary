@@ -201,8 +201,10 @@ public:
     /** Set the flag whether the tensor size can be changed.
      *
      * @param[in] is_resizable Flag that marks the tensor if it can be changed or not.
+     *
+     * @return Reference to this ITensorInfo object
      */
-    virtual void set_is_resizable(bool is_resizable) = 0;
+    virtual ITensorInfo &set_is_resizable(bool is_resizable) = 0;
     /** Valid region of the tensor. All elements in the valid region have defined values, i.e. are not undefined.
      *
      * @return The valid region.

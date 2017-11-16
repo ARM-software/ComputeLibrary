@@ -45,6 +45,48 @@ namespace arm_compute
 class Coordinates;
 } // namespace arm_compute
 
+namespace
+{
+Error validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::S8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+
+    TensorShape in0_shape = input0->tensor_shape();
+    TensorShape in1_shape = input1->tensor_shape();
+    TensorShape out_shape = output->tensor_shape();
+
+    in0_shape.collapse(2);
+    in1_shape.collapse(2);
+    out_shape.collapse(2);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(in0_shape[2] != out_shape[2], "Output tensor must have the same number of batches of input0 tensor");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(in1_shape[2] != 1 && in0_shape[2] != in1_shape[2], "Input1 tensor must have the same number of batches of input0 or the number of batches must be set to 1");
+
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
+{
+    constexpr unsigned int num_elems_processed_per_iteration_x = 16;
+    constexpr unsigned int num_elems_processed_per_iteration_y = 4;
+
+    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+
+    AccessWindowStatic     in0_access(input0, 0, 0, ceil_to_multiple(input0->dimension(0), 8), input0->dimension(1));
+    AccessWindowHorizontal in1_access(input1, 0, num_elems_processed_per_iteration_x);
+    AccessWindowRectangle  output_access(output, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+
+    bool window_changed = update_window_and_padding(win, in0_access, in1_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 NEGEMMLowpMatrixMultiplyKernel::NEGEMMLowpMatrixMultiplyKernel()
     : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true)
 {
@@ -52,42 +94,29 @@ NEGEMMLowpMatrixMultiplyKernel::NEGEMMLowpMatrixMultiplyKernel()
 
 void NEGEMMLowpMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor *input1, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::S8);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));
 
-    // Check if matrix B should be slidden or not
-    // Don't slide matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
-    // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-    TensorShape in0_shape = input0->info()->tensor_shape();
     TensorShape in1_shape = input1->info()->tensor_shape();
-    TensorShape out_shape = output->info()->tensor_shape();
-
-    in0_shape.collapse(2);
     in1_shape.collapse(2);
-    out_shape.collapse(2);
-
-    ARM_COMPUTE_ERROR_ON_MSG(in0_shape[2] != out_shape[2], "Output tensor must have the same number of batches of input0 tensor");
-    ARM_COMPUTE_ERROR_ON_MSG(in1_shape[2] != 1 && in0_shape[2] != in1_shape[2], "Input1 tensor must have the same number of batches of input0 or the number of batches must be set to 1");
 
     _input0         = input0;
     _input1         = input1;
     _output         = output;
     _slide_matrix_b = in1_shape[2] != 1;
 
-    constexpr unsigned int num_elems_processed_per_iteration_x = 16;
-    constexpr unsigned int num_elems_processed_per_iteration_y = 4;
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+Error NEGEMMLowpMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(), input1->clone().get(), output->clone().get()).first);
 
-    AccessWindowStatic     in0_access(input0->info(), 0, 0, ceil_to_multiple(input0->info()->dimension(0), 8), input0->info()->dimension(1));
-    AccessWindowHorizontal in1_access(input1->info(), 0, num_elems_processed_per_iteration_x);
-    AccessWindowRectangle  output_access(output->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
-
-    update_window_and_padding(win, in0_access, in1_access, output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
-    INEKernel::configure(win);
+    return Error{};
 }
 
 void inline matrix_multiply_u8(Iterator &ina, Iterator &inb, Iterator &out, int width_b, size_t out_stride, const Window &window)

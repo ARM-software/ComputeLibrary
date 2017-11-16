@@ -44,6 +44,78 @@ namespace arm_compute
 class Coordinates;
 } // namespace arm_compute
 
+namespace
+{
+Error validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
+                         int32_t a_offset, int32_t b_offset)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
+
+    // If a_offset == 0, vector_sum_col can be a nullptr
+    if(a_offset != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_col->dimension(0) != mm_result->dimension(0));
+    }
+
+    // If b_offset == 0, vector_sum_row can be a nullptr
+    if(b_offset != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_row->dimension(0) != mm_result->dimension(1));
+
+        TensorShape output_shape         = mm_result->tensor_shape();
+        TensorShape vector_sum_row_shape = vector_sum_row->tensor_shape();
+        vector_sum_row_shape.collapse(1);
+        output_shape.collapse(2);
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[2],
+                                        "mm_result tensor must have the same number of batches of output tensor");
+
+        if(a_offset != 0)
+        {
+            TensorShape vector_sum_col_shape = vector_sum_col->tensor_shape();
+            vector_sum_col_shape.collapse(1);
+
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_col_shape[1] != 1 && vector_sum_col_shape[1] != vector_sum_row_shape[1],
+                                            "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
+        }
+    }
+
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row,
+                                                       int32_t a_offset, int32_t b_offset)
+{
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    bool                   window_changed                    = false;
+
+    // Configure kernel window
+    Window win = calculate_max_window(*mm_result, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal mm_result_access(mm_result, 0, num_elems_processed_per_iteration);
+    window_changed = window_changed || update_window_and_padding(win,
+                                                                 mm_result_access);
+
+    if(a_offset != 0)
+    {
+        AccessWindowHorizontal vector_sum_col_access(vector_sum_col, 0, num_elems_processed_per_iteration);
+        window_changed = window_changed || update_window_and_padding(win,
+                                                                     vector_sum_col_access);
+    }
+    if(b_offset != 0)
+    {
+        AccessWindowStatic vector_sum_row_access(vector_sum_row, 0, 0, vector_sum_row->dimension(0), 0); // NOLINT
+        window_changed = window_changed || update_window_and_padding(win,
+                                                                     vector_sum_row_access);
+    }
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 NEGEMMLowpOffsetContributionKernel::NEGEMMLowpOffsetContributionKernel()
     : _vector_sum_col(nullptr), _vector_sum_row(nullptr), _mm_result(nullptr), _a_offset(0), _b_offset(0), _k_offset(0), _slide_vector_sum_col(true)
 {
@@ -51,46 +123,12 @@ NEGEMMLowpOffsetContributionKernel::NEGEMMLowpOffsetContributionKernel()
 
 void NEGEMMLowpOffsetContributionKernel::configure(ITensor *mm_result, const ITensor *vector_sum_col, const ITensor *vector_sum_row, int32_t k, int32_t a_offset, int32_t b_offset)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
-
-    // If a_offset == 0, vector_sum_col can be a nullptr
-    if(a_offset != 0)
-    {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
-        ARM_COMPUTE_ERROR_ON(vector_sum_col->info()->dimension(0) != mm_result->info()->dimension(0));
-
-        TensorShape vector_sum_col_shape = vector_sum_col->info()->tensor_shape();
-        vector_sum_col_shape.collapse(1);
-
-        // Check if vector_sum_col_shape should be slidden or not
-        // Don't slide vector_sum_col_shape along the y dimension if vector_sum_col_shape has just 1 dimension and vector_sum_row_shape more than 1
-        // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-        _slide_vector_sum_col = vector_sum_col_shape[1] != 1;
-    }
-
-    // If b_offset == 0, vector_sum_row can be a nullptr
-    if(b_offset != 0)
-    {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
-        ARM_COMPUTE_ERROR_ON(vector_sum_row->info()->dimension(0) != mm_result->info()->dimension(1));
-
-        TensorShape output_shape         = mm_result->info()->tensor_shape();
-        TensorShape vector_sum_row_shape = vector_sum_row->info()->tensor_shape();
-        vector_sum_row_shape.collapse(1);
-        output_shape.collapse(2);
-
-        ARM_COMPUTE_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[2], "mm_result tensor must have the same number of batches of output tensor");
-
-        if(a_offset != 0)
-        {
-            TensorShape vector_sum_col_shape = vector_sum_col->info()->tensor_shape();
-            vector_sum_col_shape.collapse(1);
-
-            ARM_COMPUTE_ERROR_ON_MSG(vector_sum_col_shape[1] != 1
-                                     && vector_sum_col_shape[1] != vector_sum_row_shape[1],
-                                     "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
-        }
-    }
+    // Perform validate step
+    ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result->info(),
+                                                  vector_sum_col != nullptr ? vector_sum_col->info() : nullptr, // NOLINT
+                                                  vector_sum_row != nullptr ? vector_sum_row->info() : nullptr, // NOLINT
+                                                  a_offset, b_offset));                                         // NOLINT
 
     _vector_sum_col = vector_sum_col;
     _vector_sum_row = vector_sum_row;
@@ -99,51 +137,38 @@ void NEGEMMLowpOffsetContributionKernel::configure(ITensor *mm_result, const ITe
     _b_offset       = b_offset;
     _k_offset       = a_offset * b_offset * k;
 
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    // If a_offset == 0, vector_sum_col can be a nullptr
+    if(a_offset != 0)
+    {
+        TensorShape vector_sum_col_shape = vector_sum_col->info()->tensor_shape(); // NOLINT
+        vector_sum_col_shape.collapse(1);
+
+        // Check if vector_sum_col_shape should be slidden or not
+        // Don't slide vector_sum_col_shape along the y dimension if vector_sum_col_shape has just 1 dimension and vector_sum_row_shape more than 1
+        // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
+        _slide_vector_sum_col = vector_sum_col_shape[1] != 1;
+    }
 
     // Configure kernel window
-    Window win = calculate_max_window(*mm_result->info(), Steps(num_elems_processed_per_iteration));
+    auto win_config = validate_and_configure_window(mm_result->info(),
+                                                    vector_sum_col != nullptr ? vector_sum_col->info() : nullptr, // NOLINT
+                                                    vector_sum_row != nullptr ? vector_sum_row->info() : nullptr, // NOLINT
+                                                    a_offset, b_offset);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    AccessWindowHorizontal mm_result_access(mm_result->info(), 0, num_elems_processed_per_iteration);
+Error NEGEMMLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
+                                                   int32_t a_offset, int32_t b_offset)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, a_offset, b_offset));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(mm_result->clone().get(),
+                                                              vector_sum_col != nullptr ? vector_sum_col->clone().get() : nullptr,
+                                                              vector_sum_row != nullptr ? vector_sum_row->clone().get() : nullptr,
+                                                              a_offset, b_offset)
+                                .first); // NOLINT
 
-    // Accordingly with a_offset and b_offset, we can have 4 cases:
-    // a_offset != 0 && b_offset != 0
-    // a_offset  = 0 && b_offset != 0
-    // a_offset != 0 && b_offset  = 0
-    // a_offset  = 0 && b_offset  = 0
-    if(a_offset != 0 && b_offset != 0)
-    {
-        AccessWindowStatic     vector_sum_row_access(vector_sum_row->info(), 0, 0, vector_sum_row->info()->dimension(0), 0);
-        AccessWindowHorizontal vector_sum_col_access(vector_sum_col->info(), 0, num_elems_processed_per_iteration);
-
-        update_window_and_padding(win,
-                                  vector_sum_col_access,
-                                  vector_sum_row_access,
-                                  mm_result_access);
-    }
-    else if(a_offset == 0 && b_offset != 0)
-    {
-        AccessWindowStatic vector_sum_row_access(vector_sum_row->info(), 0, 0, vector_sum_row->info()->dimension(0), 0);
-
-        update_window_and_padding(win,
-                                  vector_sum_row_access,
-                                  mm_result_access);
-    }
-    else if(a_offset != 0 && b_offset == 0)
-    {
-        AccessWindowHorizontal vector_sum_col_access(vector_sum_col->info(), 0, num_elems_processed_per_iteration);
-
-        update_window_and_padding(win,
-                                  vector_sum_col_access,
-                                  mm_result_access);
-    }
-    else
-    {
-        update_window_and_padding(win,
-                                  mm_result_access);
-    }
-
-    INEKernel::configure(win);
+    return Error{};
 }
 
 void NEGEMMLowpOffsetContributionKernel::run(const Window &window, const ThreadInfo &info)

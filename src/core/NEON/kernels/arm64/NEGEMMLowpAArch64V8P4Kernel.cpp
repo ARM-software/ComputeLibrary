@@ -48,13 +48,47 @@ namespace arm_compute
 // Enable only if compiled for AArch64-V8.2-A targets
 #ifdef ARM_COMPUTE_AARCH64_V8_2
 
+namespace
+{
+using namespace arm_compute;
+
+Error validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
+{
+    // Configure kernel window
+    Window win = calculate_max_window(*output);
+
+    AccessWindowRectangle output_access(output, 0, 0, 12, 8);
+
+    const int input0_access_end = ceil_to_multiple(input0->tensor_shape().x(), 8);
+    const int input1_access_end = ceil_to_multiple(input1->tensor_shape().x(), 12);
+
+    bool window_changed = update_window_and_padding(win,
+                                                    AccessWindowStatic(input0, 0, 0, input0_access_end, input0->tensor_shape().y()),
+                                                    AccessWindowStatic(input1, 0, 0, input1_access_end, input1->tensor_shape().y()),
+                                                    output_access);
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 namespace arm_compute
 {
 void NEGEMMLowpAArch64V8P4Kernel::internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+    // Perform validate step
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));
 
     _input0      = input0;
     _input1      = input1;
@@ -66,19 +100,17 @@ void NEGEMMLowpAArch64V8P4Kernel::internal_configure(const ITensor *input0, cons
     _transform_1 = transform_1;
 
     // Configure kernel window
-    Window win = calculate_max_window(*output->info());
+    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    AccessWindowRectangle output_access(output->info(), 0, 0, 12, 8);
+Error NEGEMMLowpAArch64V8P4Kernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(), input1->clone().get(), output->clone().get()).first);
 
-    const int input0_access_end = ceil_to_multiple(input0->info()->tensor_shape().x(), 8);
-    const int input1_access_end = ceil_to_multiple(input1->info()->tensor_shape().x(), 12);
-
-    update_window_and_padding(win,
-                              AccessWindowStatic(input0->info(), 0, 0, input0_access_end, input0->info()->tensor_shape().y()),
-                              AccessWindowStatic(input1->info(), 0, 0, input1_access_end, input1->info()->tensor_shape().y()),
-                              output_access);
-
-    INEKernel::configure(win);
+    return Error{};
 }
 
 void NEGEMMLowpAArch64V8P4Kernel::run(const Window &window, const ThreadInfo &info)

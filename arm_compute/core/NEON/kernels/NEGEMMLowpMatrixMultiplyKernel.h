@@ -58,11 +58,20 @@ public:
      * The input matrices @p input0 and @p input1 must be the output of the kernels: @ref NEGEMMInterleave4x4Kernel and @ref NEGEMMTranspose1xWKernel. These two
      * kernels change the layout of the original matrices to be more cache-friendly.
      *
-     * @param[in]  input0 Input tensor containing the interleaved Matrix A. Data type supported: ASYMM8
+     * @param[in]  input0 Input tensor containing the interleaved Matrix A. Data type supported: QASYMM8
      * @param[in]  input1 Input tensor containing the transposed1xW Matrix B. Data type supported: same as @p input0
      * @param[out] output Output tensor to store the result of matrix multiplication. Data type supported: S32
      */
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixMultiplyKernel
+     *
+     * @param[in] input0 Input tensor info containing the interleaved Matrix A. Data type supported: QASYMM8
+     * @param[in] input1 Input tensor info containing the transposed Matrix B. Data type supported: same as @p input0
+     * @param[in] output Output tensor info to store the result of matrix multiplication. Data type supported: S32
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

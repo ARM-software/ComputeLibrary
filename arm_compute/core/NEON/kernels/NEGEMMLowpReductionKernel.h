@@ -77,6 +77,16 @@ public:
      * @param[in]  is_interleaved4x4 True if the matrix A has been interleaved4x4
      */
     void configure(const ITensor *mtx_a, ITensor *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4) override;
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixAReductionKernel
+     *
+     * @param[in] mtx_a             Input tensor. Data type supported: QASYMM8
+     * @param[in] vector_sum_row    Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
+     * @param[in] num_mtx_a_cols    Number of matrix A columns
+     * @param[in] is_interleaved4x4 True if the matrix A has been interleaved4x4
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -98,6 +108,16 @@ public:
      * @param[in]  is_transposed1xW True if the input tensor is transposed 1xW
      */
     void configure(const ITensor *mtx_b, ITensor *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW) override;
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixBReductionKernel
+     *
+     * @param[in] mtx_b            Input tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in] vector_sum_col   Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
+     * @param[in] num_mtx_b_rows   Number of matrix B rows
+     * @param[in] is_transposed1xW True if the input tensor is transposed 1xW
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

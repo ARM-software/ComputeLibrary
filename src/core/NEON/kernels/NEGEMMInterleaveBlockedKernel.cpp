@@ -40,6 +40,60 @@ using namespace arm_compute;
 
 namespace
 {
+TensorShape get_output_shape(const ITensorInfo *input, unsigned int block_height)
+{
+    TensorShape output_shape      = input->tensor_shape();
+    const float interleave_by_f32 = block_height;
+    output_shape.set(0, input->dimension(0) * interleave_by_f32);
+    output_shape.set(1, std::ceil(static_cast<float>(input->dimension(1)) / interleave_by_f32));
+    return output_shape;
+}
+
+Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, unsigned int block_width, unsigned int block_height)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(block_height < 1, "Block height must be greater than 0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(block_width < 1, "Block window must be greater than 0");
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), get_output_shape(input, block_height));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int block_width, unsigned int block_height)
+{
+    const unsigned int num_elems_processed_per_iteration_x = block_width;
+    const unsigned int num_elems_processed_per_iteration_y = block_height;
+    bool               window_changed                      = false;
+
+    // Configure kernel window
+    Window      win           = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    const float scaley_factor = 1.f / block_height;
+
+    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+    window_changed = window_changed || update_window_and_padding(win, input_access);
+
+    // Configure window in case of configured output
+    if(output->total_size() != 0)
+    {
+        AccessWindowRectangle output_access(output,
+                                            0, 0,
+                                            num_elems_processed_per_iteration_x * num_elems_processed_per_iteration_y,
+                                            1, num_elems_processed_per_iteration_y, scaley_factor);
+        window_changed = window_changed || update_window_and_padding(win, output_access);
+        output_access.set_valid_region(win, input->valid_region());
+    }
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+
 inline void gemm_interleave_blocked_transposed_8bit(const ITensor *input, ITensor *output, const Window &window, unsigned int block_width, unsigned int block_height)
 {
     const size_t in_stride = input->info()->strides_in_bytes()[1];
@@ -122,20 +176,13 @@ NEGEMMInterleaveBlockedKernel::NEGEMMInterleaveBlockedKernel()
 
 void NEGEMMInterleaveBlockedKernel::configure(const ITensor *input, ITensor *output, unsigned int block_height, unsigned int block_width, bool transpose)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON_MSG(block_height < 1, "Block height must be greater than 0");
-    ARM_COMPUTE_ERROR_ON_MSG(block_width < 1, "Block window must be greater than 0");
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    TensorShape output_shape      = input->info()->tensor_shape();
-    const float interleave_by_f32 = block_height;
-    output_shape.set(0, input->info()->dimension(0) * interleave_by_f32);
-    output_shape.set(1, std::ceil(static_cast<float>(input->info()->dimension(1)) / interleave_by_f32));
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    auto_init_if_empty(*output->info(), get_output_shape(input->info(), block_height), 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), block_width, block_height));
 
     _input        = input;
     _output       = output;
@@ -143,20 +190,19 @@ void NEGEMMInterleaveBlockedKernel::configure(const ITensor *input, ITensor *out
     _block_width  = block_width;
     _transpose    = transpose;
 
-    const unsigned int num_elems_processed_per_iteration_x = block_width;
-    const unsigned int num_elems_processed_per_iteration_y = block_height;
-
     // Configure kernel window
-    Window      win           = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-    const float scaley_factor = 1.f / interleave_by_f32;
+    auto win_config = validate_and_configure_window(input->info(), output->info(), block_width, block_height);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_processed_per_iteration_x * num_elems_processed_per_iteration_y, 1, num_elems_processed_per_iteration_y, scaley_factor);
-    AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
-    update_window_and_padding(win, output_access, input_access);
+Error NEGEMMInterleaveBlockedKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int block_height, unsigned int block_width, bool transpose)
+{
+    ARM_COMPUTE_UNUSED(transpose);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, block_width, block_height));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), block_width, block_height).first);
 
-    output_access.set_valid_region(win, input->info()->valid_region());
-
-    INEKernel::configure(win);
+    return Error{};
 }
 
 void NEGEMMInterleaveBlockedKernel::run(const Window &window, const ThreadInfo &info)

@@ -40,6 +40,50 @@ using namespace arm_compute;
 
 namespace
 {
+Error validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(max > 255);
+    ARM_COMPUTE_RETURN_ERROR_ON(min < 0 || min > max);
+
+    // Check biases if exist
+    if(bias != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
+        ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
+        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != bias->dimension(0));
+    }
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
+{
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+    // Configure kernel window
+    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
+
+    bool window_changed = update_window_and_padding(win,
+                                                    input_access,
+                                                    output_result_access);
+
+    if(bias != nullptr)
+    {
+        AccessWindowStatic bias_access(bias, 0, 0, ceil_to_multiple(bias->dimension(0), num_elems_processed_per_iteration), bias->tensor_shape()[1]);
+        window_changed = window_changed || update_window_and_padding(win, bias_access);
+    }
+
+    output_result_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+
 inline void scale_input(int32x4x4_t &in_s32, int32x4_t result_offset_s32, int32_t result_mult_int)
 {
     // Add the offset terms to GEMM's result
@@ -185,17 +229,13 @@ NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::NEGEMMLowpQuantizeDownInt32ToUint
 
 void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_offset, int result_mult_int, int result_shift, int min, int max)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
-    ARM_COMPUTE_ERROR_ON(max > 255);
-    ARM_COMPUTE_ERROR_ON(min < 0 || min > max);
-
-    if(bias != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
-        ARM_COMPUTE_ERROR_ON(bias->info()->num_dimensions() > 1);
-        ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != bias->info()->dimension(0));
-    }
+    // Perform validate step
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
+                                                  (bias != nullptr) ? bias->info() : nullptr,
+                                                  output->info(),
+                                                  min,
+                                                  max));
 
     _input           = input;
     _bias            = bias;
@@ -206,34 +246,25 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ITensor *inp
     _min             = min;
     _max             = max;
 
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
     // Configure kernel window
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_result_access(output->info(), 0, num_elems_processed_per_iteration);
-
-    update_window_and_padding(win,
-                              input_access,
-                              output_result_access);
-
-    if(bias != nullptr)
-    {
-        AccessWindowStatic bias_access(bias->info(), 0, 0, ceil_to_multiple(bias->info()->dimension(0), num_elems_processed_per_iteration), bias->info()->tensor_shape()[1]);
-
-        update_window_and_padding(win,
-                                  bias_access);
-    }
-
-    output_result_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
-
-    INEKernel::configure(win);
-
-    const bool is_bounded_relu = ((min != max) && !(min == 0 && max == 255));
+    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
 
     // Check if we need to clamp the result using min and max
-    _func = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run<false>;
+    const bool is_bounded_relu = ((min != max) && !(min == 0 && max == 255));
+    _func                      = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run<false>;
+}
+
+Error NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
+                                                              (bias != nullptr) ? bias->clone().get() : nullptr,
+                                                              output->clone().get())
+                                .first);
+
+    return Error{};
 }
 
 void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window, const ThreadInfo &info)

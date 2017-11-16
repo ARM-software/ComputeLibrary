@@ -280,9 +280,10 @@ public:
     {
         return _is_resizable;
     }
-    void set_is_resizable(bool is_resizable) override
+    ITensorInfo &set_is_resizable(bool is_resizable) override
     {
         _is_resizable = is_resizable;
+        return *this;
     }
     ValidRegion valid_region() const override
     {

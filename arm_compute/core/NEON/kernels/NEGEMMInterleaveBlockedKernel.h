@@ -50,6 +50,17 @@ public:
      * @param[in]  transpose    True if transpose operation must be performed, false otherwise.
      */
     void configure(const ITensor *input, ITensor *output, unsigned int block_height, unsigned int block_width, bool transpose);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMInterleaveBlockedKernel
+     *
+     * @param[in] input        Input tensor. Data types supported: U8
+     * @param[in] output       Output tensor which stores the interleaved matrix. Data type supported: same as @p input.
+     * @param[in] block_height The height of the blocks to be interleaved.
+     * @param[in] block_width  The width of the blocks to be interleaved.
+     * @param[in] transpose    True if transpose operation must be performed, false otherwise.
+     *
+     * @return an error status
+     */
+    Error validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int block_height, unsigned int block_width, bool transpose);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

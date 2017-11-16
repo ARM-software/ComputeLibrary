@@ -54,12 +54,8 @@ NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemo
 
 void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
-    ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(0) != (b)->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
-    ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(1) != (output)->info()->dimension(1), "The output matrix must have the same number of rows as the matrix A");
-    ARM_COMPUTE_ERROR_ON_MSG((b)->info()->dimension(0) != (output)->info()->dimension(0), "The output matrix must have the same number of columns as the matrix B");
+    ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
+    ARM_COMPUTE_ERROR_THROW_ON(NEGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), output->info()));
 
     bool dot_product_path = false;
 
@@ -183,6 +179,86 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     {
         _vector_sum_row.allocator()->allocate();
     }
+}
+
+Error NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((a)->dimension(0) != (b)->dimension(1),
+                                    "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((a)->dimension(1) != (output)->dimension(1),
+                                    "The output matrix must have the same number of rows as the matrix A");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((b)->dimension(0) != (output)->dimension(0),
+                                    "The output matrix must have the same number of columns as the matrix B");
+
+    int32_t a_offset = a->quantization_info().offset;
+    int32_t b_offset = b->quantization_info().offset;
+
+#ifdef ARM_COMPUTE_AARCH64_V8_2
+    // Check for DOT product instruction
+    const struct CPUInfo ci              = NEScheduler::get().cpu_info();
+    const int            cpu_has_dotprod = static_cast<int>(ci.CPU) & static_cast<int>(CPUTarget::DOT);
+
+    if(cpu_has_dotprod != 0)
+    {
+        // Validate matrix multiply kernel
+        ARM_COMPUTE_RETURN_ERROR_ON(NEGEMMLowpAArch64V8P4Kernel::validate(a, b, output));
+    }
+    else
+#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+    {
+        // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
+        TensorShape shape_tmp_a = a->tensor_shape();
+        shape_tmp_a.set(0, a->dimension(0) * 4);
+        shape_tmp_a.set(1, std::ceil(a->dimension(1) / 4.f));
+
+        // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
+        TensorShape shape_tmp_b = b->tensor_shape();
+        shape_tmp_b.set(0, b->dimension(1) * 16);
+        shape_tmp_b.set(1, std::ceil(b->dimension(0) / 16.f));
+
+        TensorInfo info_a(shape_tmp_a, 1, a->data_type());
+        TensorInfo info_b(shape_tmp_b, 1, b->data_type());
+
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a, &info_a));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(b, &info_b));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(&info_a, &info_b, output));
+    }
+
+    TensorInfo info_vector_sum_col, info_vector_sum_row;
+
+    // Validate matrix B reduction kernel only if _a_offset is not equal to 0
+    if(a_offset != 0)
+    {
+        TensorShape shape_vector_sum_col = b->tensor_shape();
+        shape_vector_sum_col.remove_dimension(1);
+        info_vector_sum_col = TensorInfo(shape_vector_sum_col, 1, DataType::S32);
+
+        // Configure Matrix B reduction kernel
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixBReductionKernel::validate(b, &info_vector_sum_col, a->dimension(0), false));
+    }
+
+    // Validate Matrix A reduction kernel only if _b_offset is not equal to 0
+    if(b_offset != 0)
+    {
+        TensorShape shape_vector_sum_row = a->tensor_shape();
+        shape_vector_sum_row.set(Window::DimX, a->dimension(1));
+        shape_vector_sum_row.remove_dimension(1);
+        info_vector_sum_row = TensorInfo(shape_vector_sum_row, 1, DataType::S32);
+
+        // Configure matrix A reduction kernel
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(a, &info_vector_sum_row, a->dimension(0), false));
+    }
+
+    // Validate offset contribution kernel
+    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOffsetContributionKernel::validate(output,
+                                                                             a_offset == 0 ? nullptr : &info_vector_sum_col,
+                                                                             b_offset == 0 ? nullptr : &info_vector_sum_row,
+                                                                             a_offset, b_offset));
+
+    return Error{};
 }
 
 void NEGEMMLowpMatrixMultiplyCore::run()

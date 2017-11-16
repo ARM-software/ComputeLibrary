@@ -185,10 +185,11 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->is_resizable();
     }
-    void set_is_resizable(bool is_resizable) override
+    ITensorInfo &set_is_resizable(bool is_resizable) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         _parent->set_is_resizable(is_resizable);
+        return *this;
     }
     ValidRegion valid_region() const override
     {

@@ -113,6 +113,39 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::c
     gemmlowp_mm.configure(&a, &b, &c);
 }
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+    framework::dataset::make("InputAInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), // Input not a multiple of 4
+                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::QS8, 2),                                 // Mismatching data type
+                                             TensorInfo(TensorShape(20U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), // Invalid dimensions
+                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), // Invalid dimensions
+                                             TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)),
+                                          }),
+    framework::dataset::make("InputBInfo",{ TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
+                                            TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
+                                            TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
+                                            TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
+                                            TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),
+                                          })),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(33U, 13U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(33U, 13U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(33U, 13U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(8U, 11U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(64U, 32U), 1, DataType::S32),
+                                           })),
+    framework::dataset::make("Expected", { true, true, true, true, false })),
+    a_info, b_info, output_info, expected)
+{
+    // Lock tensors
+    Error error =  NEGEMMLowpMatrixMultiplyCore::validate(&a_info.clone()->set_is_resizable(false),
+                                                          &b_info.clone()->set_is_resizable(false),
+                                                          &output_info.clone()->set_is_resizable(false));
+    ARM_COMPUTE_EXPECT(bool(error) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
 {
     // Validate output

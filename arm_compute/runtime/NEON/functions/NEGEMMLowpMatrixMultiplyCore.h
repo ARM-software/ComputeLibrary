@@ -71,6 +71,15 @@ public:
     * @param[out] output Output tensor. Data type supported: Data type supported: S32
     */
     void configure(const ITensor *a, const ITensor *b, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixMultiplyCore
+     *
+     * @param[in]  a      First input tensor  (Matrix A). Data type supported: QASYMM8.
+     * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[out] output Output tensor. Data type supported: Data type supported: S32
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;
