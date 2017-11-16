@@ -47,9 +47,10 @@ namespace
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 
 /** Input data set. */
-const auto NormalizationDataset = combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
-                                                  framework::dataset::make("NormalizationSize", 3, 9, 2)),
-                                          framework::dataset::make("Beta", { 0.5f, 1.f, 2.f }));
+const auto NormalizationDataset = combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
+                                                          framework::dataset::make("NormalizationSize", 3, 9, 2)),
+                                                  framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
+                                          framework::dataset::make("IsScaled", { true, false }));
 } // namespace
 
 TEST_SUITE(GC)
@@ -74,9 +75,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCNormalizationLayerFixture<float>, framework::
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
-
-template <typename T>
-using GCNormalizationLayerFixedPointFixture = NormalizationValidationFixedPointFixture<GCTensor, GCAccessor, GCNormalizationLayer, T>;
 
 TEST_SUITE_END()
 TEST_SUITE_END()

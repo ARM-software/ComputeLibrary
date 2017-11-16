@@ -52,9 +52,14 @@ constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
 constexpr AbsoluteTolerance<int16_t> tolerance_qs16(3);
 
 /** Input data set. */
-const auto NormalizationDataset = combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
-                                                  framework::dataset::make("NormalizationSize", 3, 9, 2)),
-                                          framework::dataset::make("Beta", { 0.5f, 1.f, 2.f }));
+const auto NormalizationDataset = combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
+                                                          framework::dataset::make("NormalizationSize", 3, 9, 2)),
+                                                  framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
+                                          framework::dataset::make("IsScaled", { true }));
+const auto NormalizationDatasetFP32 = combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
+                                                              framework::dataset::make("NormalizationSize", 3, 9, 2)),
+                                                      framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
+                                              framework::dataset::make("IsScaled", { true, false }));
 } // namespace
 
 TEST_SUITE(CL)
@@ -80,12 +85,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixture<half>, framework::D
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDatasetFP32, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(NormalizationDatasetFP32, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);

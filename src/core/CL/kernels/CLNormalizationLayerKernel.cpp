@@ -68,7 +68,7 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     _input  = input;
     _output = output;
 
-    _is_in_map                      = (norm_info.type() != NormType::CROSS_MAP);
+    _is_in_map                      = norm_info.is_in_map();
     const unsigned int border_width = _is_in_map ? std::min(norm_info.norm_size() / 2, 3U) : 0;
     _border_size                    = BorderSize(0, border_width);
 

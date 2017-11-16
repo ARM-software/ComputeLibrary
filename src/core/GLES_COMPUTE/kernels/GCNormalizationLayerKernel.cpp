@@ -60,7 +60,7 @@ void GCNormalizationLayerKernel::configure(const IGCTensor *input, const IGCTens
     _squared_input = squared_input;
     _output        = output;
 
-    const bool         is_in_map    = (norm_info.type() == NormType::IN_MAP_1D);
+    const bool         is_in_map    = norm_info.is_in_map();
     const unsigned int border_width = is_in_map ? std::min(norm_info.norm_size() / 2, 3U) : 0;
     _border_size                    = BorderSize(0, border_width);
 

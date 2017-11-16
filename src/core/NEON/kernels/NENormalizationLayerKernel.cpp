@@ -61,7 +61,7 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
         ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.scale_coeff(), input);
     }
 
-    const unsigned int border_width = (norm_info.type() == NormType::CROSS_MAP) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
+    const unsigned int border_width = (norm_info.is_cross_map()) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
 
     _input         = input;
     _input_squared = input_squared;

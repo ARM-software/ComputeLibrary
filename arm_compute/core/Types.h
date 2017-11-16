@@ -701,12 +701,14 @@ public:
      *
      * @param[in] type      The normalization type. Can be @ref NormType::IN_MAP_1D, @ref NormType::IN_MAP_2D or @ref NORM_TYPE::CROSS_MAP
      * @param[in] norm_size The normalization size is the number of elements to normalize across. Defaults to 5.
-     * @param[in] alpha     Alpha parameter used by normalization equation. Defaults to 0.0001.
-     * @param[in] beta      Beta parameter used by normalization equation. Defaults to 0.5.
-     * @param[in] kappa     Kappa parameter used by [Krichevksy 2012] Across Channel Local Brightness Normalization equation.
+     * @param[in] alpha     (Optional) Alpha parameter used by normalization equation. Defaults to 0.0001.
+     * @param[in] beta      (Optional) Beta parameter used by normalization equation. Defaults to 0.5.
+     * @param[in] kappa     (Optional) Kappa parameter used by [Krichevksy 2012] Across Channel Local Brightness Normalization equation.
+     * @param[in] is_scaled (Optional) Boolean that specifies if alpha will be scaled by the normalization size or not.
+     *                      Should be false to follow [Krichevksy 2012].
      */
-    NormalizationLayerInfo(NormType type, uint32_t norm_size = 5, float alpha = 0.0001f, float beta = 0.5f, float kappa = 1.f)
-        : _type(type), _norm_size(norm_size), _alpha(alpha), _beta(beta), _kappa(kappa)
+    NormalizationLayerInfo(NormType type, uint32_t norm_size = 5, float alpha = 0.0001f, float beta = 0.5f, float kappa = 1.f, bool is_scaled = true)
+        : _type(type), _norm_size(norm_size), _alpha(alpha), _beta(beta), _kappa(kappa), _is_scaled(is_scaled)
     {
     }
     NormType type() const
@@ -729,17 +731,25 @@ public:
     {
         return _kappa;
     }
-    /** Return the scaling factor of the normalization function. If kappa is not
-     * 1 then [Krichevksy 2012] normalization scaling is specified. Scaling
-     * factor takes into account the total number of elements used for the
-     * normalization, so in case of 2 dimensions this is _norm_size^2.
+    bool is_cross_map() const
+    {
+        return _type == NormType::CROSS_MAP;
+    }
+    bool is_in_map() const
+    {
+        return !is_cross_map();
+    }
+    /** Return the scaling factor of the normalization function.
+     *
+     * If is_scaled is set to false then [Krichevksy 2012] normalization scaling is performed,
+     * where alpha is returned plainly, else alpha is scaled by the total number of elements used for the normalization.
      *
      * @return The normalization scaling factor.
      */
     float scale_coeff() const
     {
         const uint32_t size = (_type == NormType::IN_MAP_2D) ? _norm_size * _norm_size : _norm_size;
-        return (_kappa == 1.f) ? (_alpha / size) : _alpha;
+        return (_is_scaled) ? (_alpha / size) : _alpha;
     }
 
 private:
@@ -748,6 +758,7 @@ private:
     float    _alpha;
     float    _beta;
     float    _kappa;
+    bool     _is_scaled;
 };
 
 /** Convolution Layer Weights Information class. This class stores the necessary information to compute convolution layer when the weights are already reshaped */
