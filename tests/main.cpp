@@ -145,7 +145,7 @@ int main(int argc, char **argv)
     error_on_missing_assets->set_help("Mark a test as failed instead of skipping it when assets are missing");
     auto assets = parser.add_positional_option<framework::SimpleOption<std::string>>("assets");
     assets->set_help("Path to the assets directory");
-    auto pretty_console = parser.add_option<framework::ToggleOption>("pretty-console", true);
+    auto pretty_console = parser.add_option<framework::ToggleOption>("pretty-console", false);
     pretty_console->set_help("Produce pretty output on the console");
     auto json_file = parser.add_option<framework::SimpleOption<std::string>>("json-file");
     json_file->set_help("Write output to a json file.");
