@@ -320,6 +320,39 @@ arm_compute::Status error_on_tensors_not_even(const char *function, const char *
 #define ARM_COMPUTE_RETURN_ERROR_ON_TENSORS_NOT_EVEN(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_tensors_not_even(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
+/** Return an error if the passed tensor objects are not sub-sampled.
+ *
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] format   Format to check if sub-sampling allowed.
+ * @param[in] shape    The tensor shape to calculate sub-sampling from.
+ * @param[in] tensor1  The first object to be compared.
+ * @param[in] tensors  (Optional) Further allowed objects.
+ *
+ * @return Status
+ */
+template <typename... Ts>
+arm_compute::Status error_on_tensors_not_subsampled(const char *function, const char *file, int line,
+                                                    const Format &format, const TensorShape &shape, const ITensor *tensor1, Ts... tensors)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor1 == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
+    const TensorShape sub2_shape = calculate_subsampled_shape(shape, format);
+    const std::array < const ITensor *, 1 + sizeof...(Ts) > tensors_info_array{ { tensor1, std::forward<Ts>(tensors)... } };
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_info_array.cbegin(), tensors_info_array.cend(), [&](const ITensor * tensor)
+    {
+        return detail::have_different_dimensions(tensor->info()->tensor_shape(), sub2_shape, 2);
+    }),
+    function, file, line, "Tensor shape has mismatch dimensions for sub-sampling");
+    return arm_compute::Status{};
+}
+
+#define ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(...) \
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_tensors_not_subsampled(__func__, __FILE__, __LINE__, __VA_ARGS__))
+#define ARM_COMPUTE_RETURN_ERROR_ON_TENSORS_NOT_SUBSAMPLED(...) \
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_tensors_not_subsampled(__func__, __FILE__, __LINE__, __VA_ARGS__))
+
 /** Return an error if the passed two tensor infos have different shapes from the given dimension
  *
  * @param[in] function      Function in which the error occurred.

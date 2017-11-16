@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,47 +56,58 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
     ARM_COMPUTE_ERROR_ON(plane1 == output);
     ARM_COMPUTE_ERROR_ON(plane2 == output);
 
-    set_format_if_unknown(*plane0->info(), Format::U8);
-    set_format_if_unknown(*plane1->info(), Format::U8);
-    set_format_if_unknown(*plane2->info(), Format::U8);
-
-    if(plane3 != nullptr)
-    {
-        set_format_if_unknown(*plane3->info(), Format::U8);
-    }
-
-    set_shape_if_empty(*output->info(), plane0->info()->tensor_shape());
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane0, Format::U8);
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane1, Format::U8);
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane2, Format::U8);
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::RGB888, Format::RGBA8888, Format::UYVY422, Format::YUYV422);
 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane0, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane1, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane2, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::RGB888, Format::RGBA8888, Format::UYVY422, Format::YUYV422);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(plane0, plane1, plane2);
 
-    if(plane3 != nullptr)
+    const Format output_format = output->info()->format();
+
+    // Check if horizontal dimension of Y plane is even and validate horizontal sub-sampling dimensions for U and V planes
+    if(Format::YUYV422 == output_format || Format::UYVY422 == output_format)
     {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(plane0, plane3);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(plane0, plane3);
+        // Validate Y plane of input and output
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_EVEN(output_format, plane0, output);
+
+        // Validate U and V plane of the input
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(output_format, plane0->info()->tensor_shape(), plane1, plane2);
     }
 
-    const Format &output_format = output->info()->format();
+    _planes[0] = plane0;
+    _planes[1] = plane1;
+    _planes[2] = plane2;
+    _planes[3] = nullptr;
 
-    if(output_format == Format::RGBA8888)
+    // Validate the last input tensor only for RGBA format
+    if(Format::RGBA8888 == output_format)
     {
-        ARM_COMPUTE_ERROR_ON(plane3 == output);
+        ARM_COMPUTE_ERROR_ON_NULLPTR(plane3);
+        ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane3);
+
+        ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane3, Format::U8);
         ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane3, 1, DataType::U8);
+
+        _planes[3] = plane3;
     }
 
-    _planes[0]    = plane0;
-    _planes[1]    = plane1;
-    _planes[2]    = plane2;
-    _planes[3]    = plane3;
     _output       = output;
     _output_multi = nullptr;
+
+    // Half the processed elements for U and V channels due to horizontal sub-sampling of 2
+    if(Format::YUYV422 == output_format || Format::UYVY422 == output_format)
+    {
+        _x_subsampling[1] = 2;
+        _x_subsampling[2] = 2;
+    }
 
     _num_elems_processed_per_iteration = 8;
     _is_parallelizable                 = true;
 
+    // Select function and number of elements to process given the output format
     switch(output_format)
     {
         case Format::RGB888:
@@ -106,14 +117,10 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
             _func = &NEChannelCombineKernel::combine_4C;
             break;
         case Format::UYVY422:
-            _x_subsampling[1]                  = 2;
-            _x_subsampling[2]                  = 2;
             _num_elems_processed_per_iteration = 16;
             _func                              = &NEChannelCombineKernel::combine_YUV_1p<true>;
             break;
         case Format::YUYV422:
-            _x_subsampling[1]                  = 2;
-            _x_subsampling[2]                  = 2;
             _num_elems_processed_per_iteration = 16;
             _func                              = &NEChannelCombineKernel::combine_YUV_1p<false>;
             break;
@@ -121,14 +128,6 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
             ARM_COMPUTE_ERROR("Not supported format.");
             break;
     }
-
-    TensorShape subsampled_shape_plane1{ plane0->info()->tensor_shape() };
-    subsampled_shape_plane1.set(0, subsampled_shape_plane1[0] / _x_subsampling[1]);
-    TensorShape subsampled_shape_plane2{ plane0->info()->tensor_shape() };
-    subsampled_shape_plane2.set(0, subsampled_shape_plane2[0] / _x_subsampling[2]);
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(plane1->info()->tensor_shape(), subsampled_shape_plane1);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(plane2->info()->tensor_shape(), subsampled_shape_plane2);
 
     Window win = calculate_max_window(*plane0->info(), Steps(_num_elems_processed_per_iteration));
 
@@ -167,64 +166,51 @@ void NEChannelCombineKernel::configure(const IImage *plane0, const IImage *plane
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane1);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane2);
 
-    set_format_if_unknown(*plane0->info(), Format::U8);
-    set_format_if_unknown(*plane1->info(), Format::U8);
-    set_format_if_unknown(*plane2->info(), Format::U8);
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane0, Format::U8);
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane1, Format::U8);
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane2, Format::U8);
+    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::NV12, Format::NV21, Format::IYUV, Format::YUV444);
 
-    set_shape_if_empty(*output->plane(0)->info(), plane0->info()->tensor_shape());
-
-    switch(output->info()->format())
-    {
-        case Format::NV12:
-        case Format::NV21:
-        case Format::IYUV:
-        {
-            TensorShape subsampled_shape = plane0->info()->tensor_shape();
-            subsampled_shape.set(0, subsampled_shape[0] / 2);
-            subsampled_shape.set(1, subsampled_shape[1] / 2);
-
-            set_shape_if_empty(*output->plane(1)->info(), subsampled_shape);
-
-            ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->plane(1)->info()->tensor_shape(), subsampled_shape);
-
-            if(output->info()->format() == Format::IYUV)
-            {
-                set_shape_if_empty(*output->plane(2)->info(), subsampled_shape);
-
-                ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->plane(2)->info()->tensor_shape(), subsampled_shape);
-            }
-            break;
-        }
-        case Format::YUV444:
-            set_shape_if_empty(*output->plane(1)->info(), plane0->info()->tensor_shape());
-            set_shape_if_empty(*output->plane(2)->info(), plane0->info()->tensor_shape());
-
-            ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(plane1, plane2, output->plane(1), output->plane(2));
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Unsupported format");
-    }
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(plane0, output->plane(0));
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane0, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane1, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane2, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::NV12, Format::NV21, Format::IYUV, Format::YUV444);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(plane0, plane1, plane2);
 
-    _planes[0]                            = plane0;
-    _planes[1]                            = plane1;
-    _planes[2]                            = plane2;
-    _planes[3]                            = nullptr;
-    _output                               = nullptr;
-    _output_multi                         = output;
+    const Format output_format = output->info()->format();
+
+    // Validate shape of Y plane to be even and shape of sub-sampling dimensions for U and V planes
+    // Perform validation only for formats which require sub-sampling.
+    if(Format::YUV444 != output_format)
+    {
+        // Validate Y plane of input and output
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_EVEN(output_format, plane0, output->plane(0));
+
+        // Validate U and V plane of the input
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(output_format, plane0->info()->tensor_shape(), plane1, plane2);
+
+        // Validate second plane U (NV12 and NV21 have a UV88 combined plane while IYUV has only the U plane)
+        // MultiImage generates the correct tensor shape but also check in case the tensor shape of planes was changed to a wrong size
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(output_format, plane0->info()->tensor_shape(), output->plane(1));
+
+        // Validate the last plane V of format IYUV
+        if(Format::IYUV == output_format)
+        {
+            // Validate Y plane of the output
+            ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(output_format, plane0->info()->tensor_shape(), output->plane(2));
+        }
+    }
+
+    _planes[0]    = plane0;
+    _planes[1]    = plane1;
+    _planes[2]    = plane2;
+    _planes[3]    = nullptr;
+    _output       = nullptr;
+    _output_multi = output;
+
     bool         has_two_planes           = false;
     unsigned int num_elems_written_plane1 = 8;
 
     _num_elems_processed_per_iteration = 8;
     _is_parallelizable                 = true;
-
-    const Format &output_format = output->info()->format();
 
     switch(output_format)
     {
@@ -268,8 +254,7 @@ void NEChannelCombineKernel::configure(const IImage *plane0, const IImage *plane
                               output_plane1_access,
                               output_plane2_access);
 
-    ValidRegion plane0_valid_region = plane0->info()->valid_region();
-
+    ValidRegion plane0_valid_region  = plane0->info()->valid_region();
     ValidRegion output_plane1_region = has_two_planes ? intersect_valid_regions(plane1->info()->valid_region(), plane2->info()->valid_region()) : plane2->info()->valid_region();
 
     output_plane0_access.set_valid_region(win, ValidRegion(plane0_valid_region.anchor, output->plane(0)->info()->tensor_shape()));
@@ -358,7 +343,7 @@ void NEChannelCombineKernel::combine_YUV_1p(const Window &win)
 {
     // Create sub-sampled uv window and init uv planes
     Window win_uv(win);
-    win_uv.set_dimension_step(0, win.x().step() / _x_subsampling[1]);
+    win_uv.set_dimension_step(Window::DimX, win.x().step() / _x_subsampling[1]);
     win_uv.validate();
 
     Iterator p0(_planes[0], win);
@@ -405,13 +390,13 @@ void NEChannelCombineKernel::combine_YUV_2p(const Window &win)
 
     // Update UV window
     Window uv_win(win);
-    uv_win.set(Window::DimX, Window::Dimension(uv_win.x().start() / _x_subsampling[1], uv_win.x().end() / _x_subsampling[1], _num_elems_processed_per_iteration));
+    uv_win.set(Window::DimX, Window::Dimension(uv_win.x().start() / _x_subsampling[1], uv_win.x().end() / _x_subsampling[1], uv_win.x().step() / _x_subsampling[1]));
     uv_win.set(Window::DimY, Window::Dimension(uv_win.y().start() / _y_subsampling[1], uv_win.y().end() / _y_subsampling[1], 1));
     uv_win.validate();
 
     // Update output win
     Window out_win(win);
-    out_win.set(Window::DimX, Window::Dimension(out_win.x().start(), out_win.x().end(), out_win.x().step() * 2));
+    out_win.set(Window::DimX, Window::Dimension(out_win.x().start(), out_win.x().end(), out_win.x().step() / _x_subsampling[1]));
     out_win.set(Window::DimY, Window::Dimension(out_win.y().start() / _y_subsampling[1], out_win.y().end() / _y_subsampling[1], 1));
     out_win.validate();
 
@@ -420,6 +405,9 @@ void NEChannelCombineKernel::combine_YUV_2p(const Window &win)
     Iterator  p1(_planes[1 + shift], uv_win);
     Iterator  p2(_planes[2 - shift], uv_win);
     Iterator  out(_output_multi->plane(1), out_win);
+
+    // Increase step size after iterator is created to calculate stride correctly for multi channel format
+    out_win.set_dimension_step(Window::DimX, out_win.x().step() * _x_subsampling[1]);
 
     execute_window_loop(out_win, [&](const Coordinates & id)
     {
@@ -450,19 +438,17 @@ void NEChannelCombineKernel::copy_plane(const Window &win, uint32_t plane_id)
 
     // Update window
     Window tmp_win(win);
-    tmp_win.set(Window::DimX, Window::Dimension(tmp_win.x().start() / _x_subsampling[plane_id], tmp_win.x().end() / _x_subsampling[plane_id], _num_elems_processed_per_iteration));
+    tmp_win.set(Window::DimX, Window::Dimension(tmp_win.x().start() / _x_subsampling[plane_id], tmp_win.x().end() / _x_subsampling[plane_id], tmp_win.x().step() / _x_subsampling[plane_id]));
     tmp_win.set(Window::DimY, Window::Dimension(tmp_win.y().start() / _y_subsampling[plane_id], tmp_win.y().end() / _y_subsampling[plane_id], 1));
-    tmp_win.validate();
 
     Iterator in(_planes[plane_id], tmp_win);
     Iterator out(_output_multi->plane(plane_id), tmp_win);
 
     execute_window_loop(tmp_win, [&](const Coordinates & id)
     {
-        const auto in_ptr  = static_cast<uint8_t *>(in.ptr());
-        const auto out_ptr = static_cast<uint8_t *>(out.ptr());
+        const uint8x8_t pixels = vld1_u8(in.ptr());
 
-        vst1_u8(out_ptr, vld1_u8(in_ptr));
+        vst1_u8(out.ptr(), pixels);
     },
     in, out);
 }

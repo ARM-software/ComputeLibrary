@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -338,9 +338,9 @@ __kernel void channel_combine_NV(
     uchar8 data2 = vload8(0, src_plane2.ptr);
 
 #ifdef NV12
-    vstore16(shuffle2(data1, data2, (uchar16)(0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15)), 0, dst_plane1.ptr);
+    vstore16(shuffle2(data1, data2, (uchar16)(0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15)), 0, dst_plane1.ptr);
 #elif defined(NV21)
-    vstore16(shuffle2(data2, data1, (uchar16)(0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15)), 0, dst_plane1.ptr);
+    vstore16(shuffle2(data2, data1, (uchar16)(0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15)), 0, dst_plane1.ptr);
 #endif /* NV12 or NV21 */
 }
 
