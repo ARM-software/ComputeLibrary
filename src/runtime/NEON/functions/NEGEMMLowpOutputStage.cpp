@@ -29,9 +29,9 @@
 
 using namespace arm_compute;
 
-void NEGEMMLowpQuantizeDownInt32ToUint8Scale::configure(const ITensor *input, ITensor *output, int result_offset, int result_mult_int, int result_shift)
+void NEGEMMLowpQuantizeDownInt32ToUint8Scale::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_offset, int result_mult_int, int result_shift, int min, int max)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel>();
-    k->configure(input, output, result_offset, result_mult_int, result_shift);
+    k->configure(input, bias, output, result_offset, result_mult_int, result_shift, min, max);
     _kernel = std::move(k);
 }

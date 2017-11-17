@@ -36,7 +36,10 @@ class ITensor;
  * The following computations will be performed by the kernel:
  *
  *  -# Add offset terms to final result
- *  -# Multiply each entry of result and round to nearest integer
+ *  -# Multiply each entry of result by result_mult_int
+ *  -# Add bias to final result if bias tensor is not a nullptr
+ *  -# Shift the int32 accumulator by result_shift
+ *  -# Clamp the value between the specified min and max bounds
  *  -# Clamp the resulting int32 values to the [0..255] range and cast to QASYMM8.
  *
  */
@@ -56,22 +59,44 @@ public:
     /** Initialise the kernel's input and output.
      *
     * @param[in]  input           Input tensor. Data type supported: S32
+    * @param[in]  bias            Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
+    *                             Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
     * @param[out] output          Output tensor. Data type supported: Data type supported: QASYMM8
     * @param[in]  result_offset   Offset to be added to each element of the input matrix
     * @param[in]  result_mult_int Value to be multiplied to each element of the input matrix when once the result_offset has been add
     * @param[in]  result_shift    Number of bits to shift right the result before converting back to QASYMM8
+    * @param[in]  min             (Optional) Min value used to saturate down the output result before converting back to QASYMM8
+    * @param[in]  max             (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
+    *                             Along with @p min, this value can be used to implement "rectified linear unit" activation functions
      */
-    void configure(const ITensor *input, ITensor *output, int result_offset, int result_mult_int, int result_shift);
+    void configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_offset, int result_mult_int, int result_shift, int min = 0, int max = 0);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    const ITensor *_input;
-    ITensor       *_output;
-    int32_t        _result_offset;
-    int32_t        _result_mult_int;
-    int32_t        _result_shift;
+    /** Template function to run the NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <bool is_bounded_relu>
+    void run(const Window &window);
+
+    /** Common signature for all the specialised NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel functions
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    using QuantizeDownFunctionPtr = void (NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::*)(const Window &window);
+
+    QuantizeDownFunctionPtr _func;
+    const ITensor          *_input;
+    const ITensor          *_bias;
+    ITensor                *_output;
+    int                     _result_offset;
+    int                     _result_mult_int;
+    int                     _result_shift;
+    int                     _min;
+    int                     _max;
 };
 } // namespace arm_compute
 

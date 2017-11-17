@@ -122,10 +122,10 @@ class GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture : public framework:
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, int32_t result_offset, int32_t result_mult_int, int32_t result_shift)
+    void setup(TensorShape shape, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min, int32_t max, bool add_bias)
     {
-        _target    = compute_target(shape, result_offset, result_mult_int, result_shift);
-        _reference = compute_reference(shape, result_offset, result_mult_int, result_shift);
+        _target    = compute_target(shape, result_offset, result_mult_int, result_shift, min, max, add_bias);
+        _reference = compute_reference(shape, result_offset, result_mult_int, result_shift, min, max, add_bias);
     }
 
 protected:
@@ -136,43 +136,72 @@ protected:
         library->fill(tensor, distribution, i);
     }
 
-    TensorType compute_target(const TensorShape &shape, int32_t result_offset, int32_t result_mult_int, int32_t result_shift)
+    TensorType compute_target(const TensorShape &shape, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min, int32_t max, bool add_bias)
     {
+        TensorShape shape_bias(shape[0]);
+
         // Create tensors
         TensorType a = create_tensor<TensorType>(shape, DataType::S32, 1);
-        TensorType b = create_tensor<TensorType>(shape, DataType::QASYMM8, 1);
+        TensorType b = create_tensor<TensorType>(shape_bias, DataType::S32, 1);
+        TensorType c = create_tensor<TensorType>(shape, DataType::QASYMM8, 1);
 
         // Create and configure function
         FunctionType output_stage;
-        output_stage.configure(&a, &b, result_offset, result_mult_int, result_shift);
+        output_stage.configure(&a, add_bias ? &b : nullptr, &c, result_offset, result_mult_int, result_shift, min, max);
 
         ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Allocate tensors
         a.allocator()->allocate();
-        b.allocator()->allocate();
+        c.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        // Fill tensors
+        // Fill tensor
         fill(AccessorType(a), 0);
+
+        if(add_bias)
+        {
+            ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+            // Allocate bias tensor
+            b.allocator()->allocate();
+
+            ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+            // Fill tensor
+            fill(AccessorType(b), 1);
+        }
 
         // Compute GEMM function
         output_stage.run();
-        return b;
+        return c;
     }
 
-    SimpleTensor<uint8_t> compute_reference(const TensorShape &shape, int32_t result_offset, int32_t result_mult_int, int32_t result_shift)
+    SimpleTensor<uint8_t> compute_reference(const TensorShape &shape, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min, int32_t max, bool add_bias)
     {
         // Create reference
+        TensorShape shape_bias(shape[0]);
+
         SimpleTensor<int32_t> a{ shape, DataType::S32, 1 };
+        SimpleTensor<int32_t> b{ shape_bias, DataType::S32, 1 };
 
         // Fill reference
         fill(a, 0);
 
-        return reference::gemmlowp_quantize_down_int32_to_uint8_scale<int32_t>(a, result_offset, result_mult_int, result_shift);
+        if(add_bias)
+        {
+            // Fill bias
+            fill(b, 1);
+
+            return reference::gemmlowp_quantize_down_int32_to_uint8_scale<int32_t>(a, b, result_offset, result_mult_int, result_shift, min, max);
+        }
+        else
+        {
+            return reference::gemmlowp_quantize_down_int32_to_uint8_scale<int32_t>(a, result_offset, result_mult_int, result_shift, min, max);
+        }
     }
 
     TensorType            _target{};

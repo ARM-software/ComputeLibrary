@@ -33,6 +33,36 @@ namespace validation
 {
 namespace reference
 {
+namespace
+{
+template <typename T>
+void quantize_down_int32_to_uint8_scale(const SimpleTensor<T> *in, const SimpleTensor<T> *bias, SimpleTensor<uint8_t> *dst, int32_t result_offset, int32_t result_mult_int, int32_t result_shift,
+                                        int32_t min, int32_t max)
+{
+    const int cols_in = in->shape().x();
+
+    for(int i = 0; i < in->num_elements(); ++i)
+    {
+        int32_t result = ((*in)[i] + result_offset) * result_mult_int;
+
+        if(bias != nullptr)
+        {
+            result += (*bias)[i % cols_in];
+        }
+
+        result >>= result_shift;
+
+        // Bounded ReLu
+        if(min != max)
+        {
+            result = std::max(min, std::min(max, result));
+        }
+
+        (*dst)[i] = static_cast<uint8_t>(std::max(0, std::min(255, result)));
+    }
+}
+} // namespace
+
 template <typename T>
 SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<T> &a, const SimpleTensor<T> &b, int32_t a_offset, int32_t b_offset)
 {
@@ -80,21 +110,31 @@ SimpleTensor<int32_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor
 }
 
 template <typename T>
-SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, int32_t result_mult_int, int32_t result_shift)
+SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min, int32_t max)
 {
     SimpleTensor<uint8_t> dst(in.shape(), DataType::QASYMM8);
 
-    for(int i = 0; i < in.num_elements(); ++i)
-    {
-        const int32_t result = ((in[i] + result_offset) * result_mult_int) >> result_shift;
-        dst[i]               = static_cast<uint8_t>(std::max(0, std::min(255, result)));
-    }
+    quantize_down_int32_to_uint8_scale<T>(&in, nullptr, &dst, result_offset, result_mult_int, result_shift, min, max);
+
+    return dst;
+}
+
+template <typename T>
+SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, const SimpleTensor<T> &bias, int32_t result_offset, int32_t result_mult_int, int32_t result_shift,
+                                                                  int32_t min, int32_t max)
+{
+    SimpleTensor<uint8_t> dst(in.shape(), DataType::QASYMM8);
+
+    quantize_down_int32_to_uint8_scale<T>(&in, &bias, &dst, result_offset, result_mult_int, result_shift, min, max);
 
     return dst;
 }
 
 template SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, int32_t a_offset, int32_t b_offset);
-template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, int32_t result_offset, int32_t result_mult_int, int32_t result_shift);
+template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min,
+                                                                           int32_t max);
+template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b, int32_t result_offset, int32_t result_mult_int,
+                                                                           int32_t result_shift, int32_t min, int32_t max);
 } // namespace reference
 } // namespace validation
 } // namespace test

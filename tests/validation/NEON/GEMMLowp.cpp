@@ -131,34 +131,55 @@ TEST_SUITE(OutputStage)
 
 TEST_SUITE(QuantizeDownInt32ToUint8Scale)
 
+const auto quantize_down_int32_to_uint8_scale_cases = framework::dataset::make("result_offset", -2, 2) * framework::dataset::make("result_mult_int", 1, 2) * framework::dataset::make("result_shift", 2,
+                                                      3)
+                                                      * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+
+const auto quantize_down_int32_to_uint8_scale_relu_cases = framework::dataset::make("result_offset", -2, 2) * framework::dataset::make("result_mult_int", 1,
+                                                           2)
+                                                           * framework::dataset::make("result_shift", 2, 3) * framework::dataset::make("min", 0, 2) * framework::dataset::make("max", 171, 174) * framework::dataset::make("addBias", { false, true });
+
 using NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture = GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture<Tensor, Accessor, NEGEMMLowpQuantizeDownInt32ToUint8Scale>;
 
-const auto quantize_down_int32_to_uint8_scale_cases = framework::dataset::make("result_offset", -4, 4) * framework::dataset::make("result_mult_int", 1, 3) * framework::dataset::make("result_shift", 2,
-                                                      4);
-
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), quantize_down_int32_to_uint8_scale_cases),
-               shape, result_offset, result_mult_int, result_shift)
+               shape, result_offset, result_mult_int, result_shift, min, max, add_bias)
 {
+    TensorShape shape_bias(shape[0]);
+
     // Create tensors
-    Tensor in  = create_tensor<Tensor>(shape, DataType::S32);
-    Tensor out = create_tensor<Tensor>(shape, DataType::QASYMM8);
+    Tensor in   = create_tensor<Tensor>(shape, DataType::S32);
+    Tensor bias = create_tensor<Tensor>(shape_bias, DataType::S32);
+    Tensor out  = create_tensor<Tensor>(shape, DataType::QASYMM8);
 
     ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(out.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEGEMMLowpQuantizeDownInt32ToUint8Scale output_stage;
-    output_stage.configure(&in, &out, result_offset, result_mult_int, result_shift);
+    output_stage.configure(&in, add_bias ? &bias : nullptr, &out, result_offset, result_mult_int, result_shift, min, max);
 
-    // Validate valid region
+    // Validate valid region input and output
     const ValidRegion valid_region = shape_to_valid_region(shape);
     validate(in.info()->valid_region(), valid_region);
     validate(out.info()->valid_region(), valid_region);
+
+    // Validate valid region bias
+    if(add_bias)
+    {
+        const ValidRegion valid_region_bias = shape_to_valid_region(shape_bias);
+        validate(bias.info()->valid_region(), valid_region_bias);
+    }
 
     // Validate padding
     const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
     validate(in.info()->padding(), padding);
     validate(out.info()->padding(), padding);
+
+    if(add_bias)
+    {
+        validate(bias.info()->padding(), padding);
+    }
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_uint8_scale_cases))
@@ -173,8 +194,35 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture,
     validate(Accessor(_target), _reference);
 }
 
-TEST_SUITE_END() // QuantizeDownInt32ToUint8Scale
+TEST_SUITE(BoundedReLu)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_uint8_scale_relu_cases))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
 
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), quantize_down_int32_to_uint8_scale_relu_cases))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // BoundedReLu
+
+TEST_SUITE(AddBias)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_uint8_scale_relu_cases))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), quantize_down_int32_to_uint8_scale_relu_cases))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // AddBias
+
+TEST_SUITE_END() // QuantizeDownInt32ToUint8Scale
 TEST_SUITE_END() // OutputStage
 
 TEST_SUITE_END() // GEMMLowp

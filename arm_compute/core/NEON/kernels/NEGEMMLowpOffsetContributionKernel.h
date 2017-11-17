@@ -35,6 +35,13 @@ class ITensor;
  * This kernel takes a final int32 accumulator value (the output of @NEGEMMLowpMatrixMultiplyKernel),
  * and adds to it the offset contribution of matrix A and matrix B in-place.
  *
+ * The final result is:
+ *
+ * mm_result[i][k] = mm_result[i][k] +
+ *                   (vector_sum_col[k] * a_offset) +
+ *                   (vector_sum_row[i] * b_offset) +
+ *                   (a_offset * b_offset * k)
+ *
  */
 class NEGEMMLowpOffsetContributionKernel : public INEKernel
 {

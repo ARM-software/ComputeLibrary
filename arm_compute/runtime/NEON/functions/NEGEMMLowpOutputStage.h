@@ -43,14 +43,18 @@ class ITensor;
  *  NEGEMMLowpQuantizeDownInt32ToUint8Scale depends on 3 parameters: result_offset, result_mult_int, result_shift
  *  The final result is:
  *
- *  ((input[i][k] + result_offset) * result_mult_int + rounding) >> result_shift
+ *  ((input[i][k] + result_offset) * result_mult_int) >> result_shift
  *
- *  where rounding = (result_shift < 1) ? 0 : (1 << (result_shift - 1))
+ * In case the bias tensor is provided, the final result is:
+ *
+ *  ((input[i][k] + result_offset) * result_mult_int + bias[k]) >> result_shift
  *
  *  This function calls the following NEON kernels:
  *
  * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel
  *
+ * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
+ *       before the result is shifted right by result_shift
 */
 class NEGEMMLowpQuantizeDownInt32ToUint8Scale : public INESimpleFunction
 {
@@ -58,12 +62,17 @@ public:
     /** Initialise the kernel's inputs, output
     *
     * @param[in]  input           Input tensor. It is the output of @ref NEGEMMLowpMatrixMultiplyCore function. Data type supported: S32
+    * @param[in]  bias            Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
+    *                             Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
     * @param[out] output          Output tensor. Data type supported: Data type supported: QASYMM8
     * @param[in]  result_offset   Offset to be added to each element of the input matrix
     * @param[in]  result_mult_int Value to be multiplied to each element of the input matrix when once the result_offset has been add
     * @param[in]  result_shift    Number of bits to shift right the result before converting back to QASYMM8
+    * @param[in]  min             (Optional) Min value used to saturate down the output result before converting back to QASYMM8
+    * @param[in]  max             (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
+    *                             Along with @p min, this value can be used to implement "rectified linear unit" activation functions
     */
-    void configure(const ITensor *input, ITensor *output, int result_offset, int result_mult_int, int result_shift);
+    void configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_offset, int result_mult_int, int result_shift, int min = 0, int max = 0);
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWPOUTPUTSTAGE_H__ */
