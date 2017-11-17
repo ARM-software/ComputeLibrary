@@ -61,6 +61,8 @@ void GCSoftmaxLayer::configure(const IGCTensor *input, IGCTensor *output)
 void GCSoftmaxLayer::run()
 {
     GCScheduler::get().enqueue(_max_kernel, false);
+    GCScheduler::get().sync();
     GCScheduler::get().enqueue(_shift_exp_sum_kernel, false);
+    GCScheduler::get().sync();
     GCScheduler::get().enqueue(_norm_kernel);
 }

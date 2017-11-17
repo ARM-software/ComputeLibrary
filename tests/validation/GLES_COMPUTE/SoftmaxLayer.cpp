@@ -79,7 +79,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 4).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), 8).required_padding();
     validate(src.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
 }

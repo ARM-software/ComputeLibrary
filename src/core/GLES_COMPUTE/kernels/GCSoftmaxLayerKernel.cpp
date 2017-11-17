@@ -66,10 +66,10 @@ void GCLogits1DMaxKernel::configure(const IGCTensor *input, IGCTensor *output)
     build_opts.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(1));
     build_opts.insert("#define SOFTMAX_LAYER_MAX");
 
-    // Tell the kernel that the width is not a multiple of 4
-    if((input->info()->dimension(0) % 4) != 0)
+    // Tell the kernel that the width is not a multiple of 8
+    if((input->info()->dimension(0) % 8) != 0)
     {
-        build_opts.insert("#define NON_MULTIPLE_OF_4");
+        build_opts.insert("#define NON_MULTIPLE_OF_8");
     }
 
     // Create kernel
@@ -80,8 +80,8 @@ void GCLogits1DMaxKernel::configure(const IGCTensor *input, IGCTensor *output)
     _kernel.set_argument(idx++, input->info()->dimension(0));
 
     // Configure kernel window
-    // The kernel loops over all elements in steps of 4
-    const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 4);
+    // The kernel loops over all elements in steps of 8
+    const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 8);
     unsigned int       num_elems_written_per_iteration   = 1;
     if(input->info()->data_type() == DataType::F16)
     {
@@ -131,10 +131,10 @@ void GCLogits1DShiftExpSumKernel::configure(const IGCTensor *input, const IGCTen
     build_opts.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(1));
     build_opts.insert("#define SOFTMAX_LAYER_SHIFT_EXP_SUM");
 
-    // Tell the kernel that the width is not a multiple of 4
-    if((input->info()->dimension(0) % 4) != 0)
+    // Tell the kernel that the width is not a multiple of 8
+    if((input->info()->dimension(0) % 8) != 0)
     {
-        build_opts.insert("#define NON_MULTIPLE_OF_4");
+        build_opts.insert("#define NON_MULTIPLE_OF_8");
     }
 
     // Create kernel
@@ -145,8 +145,8 @@ void GCLogits1DShiftExpSumKernel::configure(const IGCTensor *input, const IGCTen
     _kernel.set_argument(idx++, input->info()->dimension(0));
 
     // Configure window
-    // The kernel loops over all elements in steps of 4
-    const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 4);
+    // The kernel loops over all elements in steps of 8
+    const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 8);
     unsigned int       num_elems_written_per_iteration   = 1;
     if(input->info()->data_type() == DataType::F16)
     {
@@ -227,7 +227,7 @@ void GCLogits1DNormKernel::configure(const IGCTensor *input, const IGCTensor *su
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("softmax_layer_norm", build_opts));
 
     // Configure window
-    constexpr unsigned int num_elems_processed_per_iteration = 4;
+    constexpr unsigned int num_elems_processed_per_iteration = 8;
     unsigned int           num_elems_written_per_iteration   = 1;
     if(input->info()->data_type() == DataType::F16)
     {

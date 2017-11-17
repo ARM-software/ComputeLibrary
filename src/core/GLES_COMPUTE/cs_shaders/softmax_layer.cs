@@ -45,7 +45,7 @@ const vec4  vec4_min  = vec4(float_min);
 /** Identifies the maximum value across the 1st dimension.
  *
  * @note The data type must be passed at compile time using "#define DATA_TYPE_NAME". e.g. "#define DATA_TYPE_FP32"
- * @note In case the input is not multiple of 4 NON_MULTIPLE_OF_4 must be passed.
+ * @note In case the input is not multiple of 8 NON_MULTIPLE_OF_8 must be passed.
  *
  * @param[in]  src_ptr   Pointer to the source tensor slice. Supported data types: F16/F32
  * @param[in]  src_attrs The attributes of the source tensor
@@ -74,21 +74,24 @@ void main(void)
     vec4 max_val = vec4_min;
 
     // Calculate max of row
-    uint width2 = width >> 2;
-    for(int i = 0; i < int(width2); i++)
+    uint width3 = width >> 3;
+    for(int i = 0; i < int(width3); i++)
     {
-        vec4 data = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, i << 2, 0));
-        max_val   = MAX_OP(data, max_val);
+        vec4 data[2];
+        data[0] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
+        data[1] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, (i << 3) + 4, 0));
+        max_val = MAX_OP(data[0], max_val);
+        max_val = MAX_OP(data[1], max_val);
     }
 
-#ifdef NON_MULTIPLE_OF_4
-    // Handle non multiple of 4
-    for(int i = int(width2 << 2); i < int(width); i++)
+#ifdef NON_MULTIPLE_OF_8
+    // Handle non multiple of 8
+    for(int i = int(width3 << 3); i < int(width); i++)
     {
         float data = LOAD(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
         max_val.x  = MAX_OP(data, max_val.x);
     }
-#endif /* NON_MULTIPLE_OF_4 */
+#endif /* NON_MULTIPLE_OF_8 */
 
     // Perform max reduction
     max_val.xy = MAX_OP(max_val.xy, max_val.zw);
@@ -111,25 +114,29 @@ void main(void)
     vec4 max_val = vec4_min;
 
     // Calculate max of row
-    uint width2 = width >> 2;
-    for(int i = 0; i < int(width2); i++)
+    uint width3 = width >> 3;
+    for(int i = 0; i < int(width3); i++)
     {
-        vec4 data = VLOAD2_UNPACK4_HALF(src_ptr, IMAGE_OFFSET(src_iter, i << 2, 0));
-        max_val   = MAX_OP(data, max_val);
+        vec4 data[2];
+        data    = VLOAD4_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
+        max_val = MAX_OP(data[0], max_val);
+        max_val = MAX_OP(data[1], max_val);
     }
 
-#ifdef NON_MULTIPLE_OF_4
-    // Handle non multiple of 4
-    for(int i = int(width2 << 2); i < int(width); i = i + 2)
+#ifdef NON_MULTIPLE_OF_8
+    // Handle non multiple of 8
+    uint width1 = width >> 1 << 1;
+    for(int i = int(width3 << 3); i < int(width1); i = i + 2)
     {
-        vec2 data = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
-        max_val.x = MAX_OP(data.x, max_val.x);
-        if((i + 1) < int(width))
-        {
-            max_val.x = MAX_OP(data.y, max_val.x);
-        }
+        vec2 data  = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
+        max_val.xy = MAX_OP(data, max_val.xy);
     }
-#endif /* NON_MULTIPLE_OF_4 */
+    if(width != width1)
+    {
+        vec2 data = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, width1, 0));
+        max_val.x = MAX_OP(data.x, max_val.x);
+    }
+#endif /* NON_MULTIPLE_OF_8 */
 
     // Perform max reduction
     max_val.xy = MAX_OP(max_val.xy, max_val.zw);
@@ -146,7 +153,7 @@ void main(void)
  * then gets the exponent of each element as sums all elements across each row.
  *
  * @note The data type must be passed at compile time using "#define DATA_TYPE_NAME". e.g. "#define DATA_TYPE_FP32"
- * @note In case the input is not multiple of 4 NON_MULTIPLE_OF_4 must be passed.
+ * @note In case the input is not multiple of 8 NON_MULTIPLE_OF_8 must be passed.
  *
  * @param[in]  src_ptr   Pointer to the source tensor slice. Supported data types: F16/F32
  * @param[in]  src_attrs The attributes of the source tensor
@@ -187,19 +194,25 @@ void main(void)
     vec4 sum1D = vec4(0);
 
     // Shift values, exp and sum
-    uint width2 = width >> 2;
-    for(int i = 0; i < int(width2); i++)
+    uint width3 = width >> 3;
+    for(int i = 0; i < int(width3); i++)
     {
-        vec4 data = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, i << 2, 0));
-        data      = SUB_OP(data, max_val);
-        data      = EXP_OP(data);
-        VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, i << 2, 0), data);
-        sum1D = ADD_OP(sum1D, data);
+        vec4 data[2];
+        data[0] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
+        data[1] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, (i << 3) + 4, 0));
+        data[0] = SUB_OP(data[0], max_val);
+        data[1] = SUB_OP(data[1], max_val);
+        data[0] = EXP_OP(data[0]);
+        data[1] = EXP_OP(data[1]);
+        VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, i << 3, 0), data[0]);
+        VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, (i << 3) + 4, 0), data[1]);
+        sum1D = ADD_OP(sum1D, data[0]);
+        sum1D = ADD_OP(sum1D, data[1]);
     }
 
-#ifdef NON_MULTIPLE_OF_4
-    // Handle non multiple of 4
-    for(int i = int(width2 << 2); i < int(width); i++)
+#ifdef NON_MULTIPLE_OF_8
+    // Handle non multiple of 8
+    for(int i = int(width3 << 3); i < int(width); i++)
     {
         float data = LOAD(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
         data       = SUB_OP(data, max_val.x);
@@ -207,7 +220,7 @@ void main(void)
         STORE(dst_ptr, IMAGE_OFFSET(dst_iter, i, 0), data);
         sum1D.x = ADD_OP(sum1D.x, data);
     }
-#endif /* NON_MULTIPLE_OF_4 */
+#endif /* NON_MULTIPLE_OF_8 */
 
     // Perform min/max reduction
     sum1D.xy = ADD_OP(sum1D.xy, sum1D.zw);
@@ -238,44 +251,40 @@ void main(void)
     vec4 sum1D = vec4(0.f);
 
     // Shift values, exp and sum
-    uint width2 = width >> 2;
-    for(int i = 0; i < int(width2); i++)
+    uint width3 = width >> 3;
+    for(int i = 0; i < int(width3); i++)
     {
-        vec4 data = VLOAD2_UNPACK4_HALF(src_ptr, IMAGE_OFFSET(src_iter, i << 2, 0));
-        data      = SUB_OP(data, max_val);
-        data      = EXP_OP(data);
-        VSTORE2_PACK4_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, i << 2, 0), data);
-        sum1D = ADD_OP(sum1D, data);
+        vec4 data[2];
+        data    = VLOAD4_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
+        data[0] = SUB_OP(data[0], max_val);
+        data[1] = SUB_OP(data[1], max_val);
+        data[0] = EXP_OP(data[0]);
+        data[1] = EXP_OP(data[1]);
+        VSTORE4_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, i << 3, 0), data);
+        sum1D = ADD_OP(sum1D, data[0]);
+        sum1D = ADD_OP(sum1D, data[1]);
     }
 
-#ifdef NON_MULTIPLE_OF_4
-    // Handle non multiple of 4
-    for(int i = int(width2 << 2); i < int(width); i = i + 2)
+#ifdef NON_MULTIPLE_OF_8
+    // Handle non multiple of 8
+    uint width1 = width >> 1 << 1;
+    for(int i = int(width3 << 3); i < int(width1); i = i + 2)
     {
-        float data;
-        vec2  datamiddle = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
-        data             = SUB_OP(datamiddle.x, max_val.x);
-        data             = EXP_OP(data);
-        vec2 datares;
-        if((i + 1) < int(width))
-        {
-            float data2;
-            data2   = SUB_OP(datamiddle.y, max_val.x);
-            data2   = EXP_OP(data2);
-            datares = vec2(data, data2);
-            data    = ADD_OP(data2, data);
-        }
-        else
-        {
-            datares = vec2(data, 0.f);
-        }
-
-        STORE_PACK2_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, i, 0), datares);
-
+        vec2 data = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
+        data      = SUB_OP(data, max_val.xy);
+        data      = EXP_OP(data);
+        STORE_PACK2_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, i, 0), data);
+        sum1D.xy = ADD_OP(sum1D.xy, data);
+    }
+    if(width != width1)
+    {
+        float data = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, width1, 0)).x;
+        data       = SUB_OP(data, max_val.x);
+        data       = EXP_OP(data);
+        STORE_PACK2_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, width1, 0), vec2(data, 0.0));
         sum1D.x = ADD_OP(sum1D.x, data);
     }
-#endif /* NON_MULTIPLE_OF_4 */
-
+#endif /* NON_MULTIPLE_OF_8 */
     // Perform min/max reduction
     sum1D.xy = ADD_OP(sum1D.xy, sum1D.zw);
     sum1D.x  = ADD_OP(sum1D.x, sum1D.y);
@@ -317,8 +326,12 @@ void main(void)
 
     // Load max value of 1D logits vector (row)
     vec4 sum_val = vec4(LOAD(sum_ptr, IMAGE_OFFSET(sum_iter, 0, gl_GlobalInvocationID.y)));
-    vec4 data    = VLOAD4_CURRENT_ITEM(vec4, src_ptr, src_iter);
-    VSTORE4_CURRENT_ITEM(dst_ptr, dst_iter, DIV_OP(data, sum_val));
+
+    vec4 data[2];
+    data[0] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, 0, 0));
+    data[1] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, 4, 0));
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 0), DIV_OP(data[0], sum_val));
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 4, 0), DIV_OP(data[1], sum_val));
 }
 #elif defined(DATA_TYPE_FP16)
 TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
@@ -332,8 +345,13 @@ void main(void)
 
     // Load max value of 1D logits vector (row)
     vec4 sum_val = vec4(LOAD_UNPACK2_HALF(sum_ptr, IMAGE_OFFSET(sum_iter, 0, gl_GlobalInvocationID.y)).x);
-    vec4 data    = VLOAD2_UNPACK4_CURRENT_ITEM_HALF(src_ptr, src_iter);
-    VSTORE2_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, DIV_OP(data, sum_val));
+
+    vec4 data[2];
+    data = VLOAD4_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 0));
+    vec4 ret[2];
+    ret[0] = DIV_OP(data[0], sum_val);
+    ret[1] = DIV_OP(data[1], sum_val);
+    VSTORE4_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 0), ret);
 }
 #else // DATA_TYPE_FP32
 #error Data type not supported
