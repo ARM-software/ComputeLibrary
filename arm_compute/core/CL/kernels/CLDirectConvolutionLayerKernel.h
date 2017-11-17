@@ -60,7 +60,8 @@ public:
      * @param[in]  weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
      *                       The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                       Data type supported:Same as @p input.
-     * @param[in]  biases    Biases tensor. Biases are 1D tensor with dimension [OFM]. Data type supported: Same as @p input.
+     * @param[in]  biases    Biases tensor. Biases are 1D tensor with dimension [OFM].
+     *                       Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type
      * @param[out] output    Output tensor.
      *                       The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.

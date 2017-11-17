@@ -176,7 +176,7 @@ inline uchar8 extract_input_stride3(__global const uchar *input_pixel)
  * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
  * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
+ * @param[in]  biases_ptr                            Pointer to the biases tensor. Supported data types: S32
  * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
  * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
@@ -236,10 +236,9 @@ __kernel void direct_convolution_1x1_3x3_5x5_quantized(
     }
 
 #ifdef HAS_BIAS
-    Vector   biases           = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
-    __global uchar *bias_addr = ((__global uchar *)(vector_offset(&biases, kernel_index)));
-    uchar8 bias_data          = *bias_addr;
-    pixels0 += convert_int8(bias_data);
+    Vector        biases    = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+    __global int *bias_addr = ((__global int *)(vector_offset(&biases, kernel_index)));
+    pixels0 += (int8)(*bias_addr);
 #endif /* defined(HAS_BIAS) */
 
     pixels0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(pixels0, output_multiplier, output_shift, 8);

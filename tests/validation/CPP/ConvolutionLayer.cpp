@@ -48,8 +48,8 @@ inline bool is_valid_pixel(int i, int min, int max)
 }
 
 // 3D convolution for floating point type
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, SimpleTensor<T> &out,
+template < typename T, typename TB, typename std::enable_if < is_floating_point<T>::value &&is_floating_point<TB>::value, int >::type = 0 >
+void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &out,
                    int i_offset, int w_offset, int b_offset, int o_offset,
                    int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights)
 {
@@ -95,8 +95,8 @@ void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, co
 }
 
 // 3D convolution for fixed point type
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, SimpleTensor<T> &out,
+template < typename T, typename TB, typename std::enable_if < std::is_integral<T>::value &&std::is_integral<TB>::value, int >::type = 0 >
+void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &out,
                    int i_offset, int w_offset, int b_offset, int o_offset,
                    int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights)
 {
@@ -152,13 +152,13 @@ void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, co
 
 // 3D convolution for QASYMM8 type
 template <>
-void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<uint8_t> &weights, const SimpleTensor<uint8_t> &bias, SimpleTensor<uint8_t> &out,
+void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, SimpleTensor<uint8_t> &out,
                    int i_offset, int w_offset, int b_offset, int o_offset,
                    int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights)
 {
     const uint8_t *in_ptr  = in.data() + i_offset;
     const uint8_t *w_ptr   = weights.data() + w_offset;
-    const uint8_t *b_ptr   = bias.data() + b_offset;
+    const int32_t *b_ptr   = bias.data() + b_offset;
     uint8_t       *out_ptr = out.data() + o_offset;
 
     const int   input_offset   = -in.quantization_info().offset;
@@ -218,8 +218,8 @@ void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<uint8_t> 
 }
 } // namespace
 
-template <typename T>
-SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, const TensorShape &output_shape, const PadStrideInfo &info)
+template <typename T, typename TB>
+SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info)
 {
     // Create reference
     SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
@@ -286,7 +286,7 @@ template SimpleTensor<qint8_t> convolution_layer(const SimpleTensor<qint8_t> &sr
                                                  const PadStrideInfo &info);
 template SimpleTensor<qint16_t> convolution_layer(const SimpleTensor<qint16_t> &src, const SimpleTensor<qint16_t> &weights, const SimpleTensor<qint16_t> &bias, const TensorShape &output_shape,
                                                   const PadStrideInfo &info);
-template SimpleTensor<uint8_t> convolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<uint8_t> &bias, const TensorShape &output_shape,
+template SimpleTensor<uint8_t> convolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
                                                  const PadStrideInfo &info);
 } // namespace reference
 } // namespace validation

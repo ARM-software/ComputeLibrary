@@ -65,7 +65,14 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 
     if(biases != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        if(is_data_type_quantized_asymmetric(input->info()->data_type()))
+        {
+            ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        }
         ARM_COMPUTE_ERROR_ON(biases->info()->dimension(0) != weights->info()->dimension(3));
         ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
     }
