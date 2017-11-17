@@ -186,7 +186,7 @@ void fill_lookuptable(T &&table)
 template <typename T>
 std::pair<T, T> get_batchnormalization_layer_test_bounds(int fixed_point_position = 1)
 {
-    bool is_float = std::is_floating_point<T>::value;
+    const bool is_float = std::is_floating_point<T>::value;
     std::pair<T, T> bounds;
 
     // Set initial values

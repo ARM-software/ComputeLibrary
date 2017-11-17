@@ -44,7 +44,7 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
     const auto cols       = static_cast<int>(src.shape()[0]);
     const auto rows       = static_cast<int>(src.shape()[1]);
     const auto depth      = static_cast<int>(src.shape()[2]);
-    int        upper_dims = src.shape().total_size() / (cols * rows * depth);
+    const int  upper_dims = src.shape().total_size() / (cols * rows * depth);
 
     for(int r = 0; r < upper_dims; ++r)
     {
@@ -88,7 +88,7 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
     const auto cols       = static_cast<int>(src.shape()[0]);
     const auto rows       = static_cast<int>(src.shape()[1]);
     const auto depth      = static_cast<int>(src.shape()[2]);
-    int        upper_dims = src.shape().total_size() / (cols * rows * depth);
+    const int  upper_dims = src.shape().total_size() / (cols * rows * depth);
 
     for(int r = 0; r < upper_dims; ++r)
     {

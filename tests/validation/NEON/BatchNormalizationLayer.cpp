@@ -61,7 +61,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Ran
                shape0, shape1, epsilon, dt)
 {
     // Set fixed point position data type allowed
-    int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
+    const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
     Tensor src   = create_tensor<Tensor>(shape0, dt, 1, fixed_point_position);
