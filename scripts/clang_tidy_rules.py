@@ -42,6 +42,9 @@ def filter_clang_tidy_lines( lines ):
         if "/assembly/" in line:
             continue
 
+        if "/winograd/" in line:
+            continue
+
         if "error:" in line:
             if (("Utils.cpp" in line and "'arm_compute_version.embed' file not found" in line) or
                 ("cl2.hpp" in line and "cast from pointer to smaller type 'cl_context_properties' (aka 'int') loses information" in line) or

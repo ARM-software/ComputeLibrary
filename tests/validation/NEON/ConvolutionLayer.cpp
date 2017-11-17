@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEWinogradLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
@@ -34,6 +35,7 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ConvolutionLayerFixture.h"
+#include "tests/validation/fixtures/WinogradLayerFixture.h"
 
 namespace arm_compute
 {
@@ -62,6 +64,23 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 } // namespace
 
 TEST_SUITE(NEON)
+
+#if defined(__aarch64__)
+TEST_SUITE(WinogradLayer)
+template <typename T>
+using NEWinogradLayerFixture = WinogradLayerValidationFixture<Tensor, Accessor, NEWinogradLayer, T>;
+
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradLayerFixture<float>, framework::DatasetMode::PRECOMMIT, datasets::SmallWinogradLayerDataset())
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+#endif /* __aarch64__ */
+
 TEST_SUITE(ConvolutionLayer)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()), CNNDataTypes),

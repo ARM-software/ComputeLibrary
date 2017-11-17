@@ -180,6 +180,8 @@ if not GetOption("help"):
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
+    if env['cppthreads']:
+        env.Append(LINKFLAGS = ['-lpthread'])
 
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])

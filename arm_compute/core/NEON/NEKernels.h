@@ -111,6 +111,7 @@
 #include "arm_compute/core/NEON/kernels/NETransposeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWarpKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
+#include "arm_compute/core/NEON/kernels/NEWinogradLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/arm32/NEGEMMAArch32Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64A53Kernel.h"
