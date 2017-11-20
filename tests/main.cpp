@@ -182,7 +182,10 @@ int main(int argc, char **argv)
                 break;
             case framework::LogFormat::PRETTY:
             default:
-                printer = support::cpp14::make_unique<framework::PrettyPrinter>();
+                auto pretty_printer = support::cpp14::make_unique<framework::PrettyPrinter>();
+                // Don't use colours if we print to a file:
+                pretty_printer->set_color_output((!log_file->is_set()) && color_output->value());
+                printer = std::move(pretty_printer);
                 break;
         }
 
