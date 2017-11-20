@@ -9,6 +9,7 @@ Related projects:
 
 Documentation available here:
 
+- [v17.10](https://arm-software.github.io/ComputeLibrary/v17.10/)
 - [v17.09](https://arm-software.github.io/ComputeLibrary/v17.09/)
 - [v17.06](https://arm-software.github.io/ComputeLibrary/v17.06/)
 - [v17.05](https://arm-software.github.io/ComputeLibrary/v17.05/)
@@ -17,6 +18,7 @@ Documentation available here:
 
 Binaries available here:
 
+- [v17.10](https://github.com/ARM-software/ComputeLibrary/releases/download/v17.10/arm_compute-v17.10-bin.tar.gz)
 - [v17.09](https://github.com/ARM-software/ComputeLibrary/releases/download/v17.09/arm_compute-v17.09-bin.tar.gz)
 - [v17.06](https://github.com/ARM-software/ComputeLibrary/releases/download/v17.06/arm_compute-v17.06-bin.tar.gz)
 - [v17.05](https://github.com/ARM-software/ComputeLibrary/releases/download/v17.05/arm_compute-v17.05-bin.tar.gz)

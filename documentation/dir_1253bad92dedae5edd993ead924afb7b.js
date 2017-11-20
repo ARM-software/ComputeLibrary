@@ -2,7 +2,9 @@ var dir_1253bad92dedae5edd993ead924afb7b =
 [
     [ "cl_convolution.cpp", "cl__convolution_8cpp.xhtml", "cl__convolution_8cpp" ],
     [ "cl_events.cpp", "cl__events_8cpp.xhtml", "cl__events_8cpp" ],
+    [ "graph_alexnet.cpp", "graph__alexnet_8cpp.xhtml", "graph__alexnet_8cpp" ],
     [ "graph_lenet.cpp", "graph__lenet_8cpp.xhtml", "graph__lenet_8cpp" ],
+    [ "neon_cartoon_effect.cpp", "neon__cartoon__effect_8cpp.xhtml", "neon__cartoon__effect_8cpp" ],
     [ "neon_cnn.cpp", "neon__cnn_8cpp.xhtml", "neon__cnn_8cpp" ],
     [ "neon_convolution.cpp", "neon__convolution_8cpp.xhtml", "neon__convolution_8cpp" ],
     [ "neon_copy_objects.cpp", "neon__copy__objects_8cpp.xhtml", "neon__copy__objects_8cpp" ],

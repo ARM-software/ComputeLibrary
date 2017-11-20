@@ -25,6 +25,7 @@
 #error "This example needs to be built with -DARM_COMPUTE_CL"
 #endif /* ARM_COMPUTE_CL */
 
+#include "arm_compute/core/Logger.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Nodes.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -93,16 +94,18 @@ void main_graph_lenet(int argc, const char **argv)
     }
 
     // Check if OpenCL is available and initialize the scheduler
+    TargetHint hint = TargetHint::NEON;
     if(arm_compute::opencl_is_available())
     {
         arm_compute::CLScheduler::get().default_init();
+        hint = TargetHint::OPENCL;
     }
 
     Graph graph;
-    graph.set_info_enablement(true);
+    arm_compute::Logger::get().set_logger(std::cout, arm_compute::LoggerVerbosity::INFO);
 
     //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
-    graph << Hint::OPENCL
+    graph << hint
           << Tensor(TensorInfo(TensorShape(28U, 28U, 1U, batches), 1, DataType::F32), DummyAccessor())
           << ConvolutionLayer(
               5U, 5U, 20U,

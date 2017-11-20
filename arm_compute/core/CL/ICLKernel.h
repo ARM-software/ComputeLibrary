@@ -175,6 +175,12 @@ public:
      */
     GPUTarget get_target() const;
 
+    /** Get the maximum workgroup size for the device the CLKernelLibrary uses.
+     *
+     * @return The maximum workgroup size value.
+     */
+    size_t get_max_workgroup_size();
+
 private:
     /** Add the passed array's parameters to the object's kernel's arguments starting from the index idx.
      *
@@ -208,10 +214,11 @@ private:
     unsigned int           num_arguments_per_tensor() const;
 
 protected:
-    cl::Kernel  _kernel;    /**< OpenCL kernel to run */
-    cl::NDRange _lws_hint;  /**< Local workgroup size hint for the OpenCL kernel */
-    GPUTarget   _target;    /**< The targeted GPU */
-    std::string _config_id; /**< Configuration ID */
+    cl::Kernel  _kernel;             /**< OpenCL kernel to run */
+    cl::NDRange _lws_hint;           /**< Local workgroup size hint for the OpenCL kernel */
+    GPUTarget   _target;             /**< The targeted GPU */
+    std::string _config_id;          /**< Configuration ID */
+    size_t      _max_workgroup_size; /**< The maximum workgroup size for this kernel */
 };
 
 /** Add the kernel to the command queue with the given window.
@@ -223,7 +230,7 @@ protected:
  * @param[in,out] queue    OpenCL command queue.
  * @param[in]     kernel   Kernel to enqueue
  * @param[in]     window   Window the kernel has to process.
- * @param[in]     lws_hint Local workgroup size requested, by default (128,1)
+ * @param[in]     lws_hint Local workgroup size requested, by default (128,1).
  *
  * @note If any dimension of the lws is greater than the global workgroup size then no lws will be passed.
  */

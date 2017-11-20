@@ -86,8 +86,10 @@ T PMU::get_value() const
     T             value{};
     const ssize_t result = read(_fd, &value, sizeof(T));
 
-    ARM_COMPUTE_ERROR_ON_MSG(result == -1, "Can't get PMU counter value: %d", errno);
-    ARM_COMPUTE_UNUSED(result);
+    if(result == -1)
+    {
+        ARM_COMPUTE_ERROR("Can't get PMU counter value: %d", errno);
+    }
 
     return value;
 }

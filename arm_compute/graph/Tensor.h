@@ -49,7 +49,7 @@ public:
      */
     template <typename AccessorType>
     Tensor(std::unique_ptr<AccessorType> accessor)
-        : _target(Hint::DONT_CARE), _info(), _accessor(std::move(accessor)), _tensor(nullptr)
+        : _target(TargetHint::DONT_CARE), _info(), _accessor(std::move(accessor)), _tensor(nullptr)
     {
     }
     /** Constructor
@@ -58,7 +58,17 @@ public:
      */
     template <typename AccessorType>
     Tensor(AccessorType &&accessor)
-        : _target(Hint::DONT_CARE), _info(), _accessor(arm_compute::support::cpp14::make_unique<AccessorType>(std::forward<AccessorType>(accessor))), _tensor(nullptr)
+        : _target(TargetHint::DONT_CARE), _info(), _accessor(arm_compute::support::cpp14::make_unique<AccessorType>(std::forward<AccessorType>(accessor))), _tensor(nullptr)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] info     Tensor info to use
+     * @param[in] accessor Tensor accessor
+     */
+    template <typename AccessorType>
+    Tensor(TensorInfo &&info, std::unique_ptr<AccessorType> &&accessor)
+        : _target(TargetHint::DONT_CARE), _info(info), _accessor(std::move(accessor)), _tensor(nullptr)
     {
     }
     /** Constructor
@@ -68,7 +78,7 @@ public:
      */
     template <typename AccessorType>
     Tensor(TensorInfo &&info, AccessorType &&accessor)
-        : _target(Hint::DONT_CARE), _info(info), _accessor(arm_compute::support::cpp14::make_unique<AccessorType>(std::forward<AccessorType>(accessor))), _tensor(nullptr)
+        : _target(TargetHint::DONT_CARE), _info(info), _accessor(arm_compute::support::cpp14::make_unique<AccessorType>(std::forward<AccessorType>(accessor))), _tensor(nullptr)
     {
     }
     /** Default Destructor */
@@ -95,7 +105,7 @@ public:
      *
      * @return
      */
-    ITensor *set_target(Hint target);
+    ITensor *set_target(TargetHint target);
     /** Returns tensor's TensorInfo
      *
      * @return TensorInfo of the tensor
@@ -114,10 +124,10 @@ public:
      *
      * @return Target of the tensor
      */
-    Hint target() const;
+    TargetHint target() const;
 
 private:
-    Hint                             _target;   /**< Target that this tensor is pinned on */
+    TargetHint                       _target;   /**< Target that this tensor is pinned on */
     TensorInfo                       _info;     /**< Tensor metadata */
     std::unique_ptr<ITensorAccessor> _accessor; /**< Tensor Accessor */
     std::unique_ptr<ITensor>         _tensor;   /**< Tensor */

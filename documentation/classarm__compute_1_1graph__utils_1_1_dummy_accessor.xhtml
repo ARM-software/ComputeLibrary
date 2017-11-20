@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1graph__utils_1_1_
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a>  </div>
   <div class="headertitle">
-<div class="title">DummyAccessor Class Reference</div>  </div>
+<div class="title">DummyAccessor Class Reference<span class="mlabels"><span class="mlabel">final</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
 
@@ -150,7 +150,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Dummy accessor class. </p>
 
-<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00057">57</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
+<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00060">60</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="ac5ae9597ba20e5581726743fe7c154b5"></a>
 <div class="memitem">
@@ -174,10 +174,10 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00068">68</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    : _iterator(0), _maximum(maximum)</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;{</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;}</div>
+<p>Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00070">70</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    : _iterator(0), _maximum(maximum)</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;{</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -241,22 +241,22 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml#a497873c25847d7b4f60f37a1a3aa7665">ITensorAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00073">73</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00075">75</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
 
 <p>References <a class="el" href="_error_8h_source.xhtml#l00049">ARM_COMPUTE_UNUSED</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00254">ret</a>.</p>
-<div class="fragment"><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;{</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <a class="code" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(tensor);</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="hwc_8hpp.xhtml#a4fef07ab304fc672e0407e7598fb1870">ret</a> = _maximum == 0 || _iterator &lt; _maximum;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <span class="keywordflow">if</span>(_iterator == _maximum)</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    {</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        _iterator = 0;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    }</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keywordflow">else</span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    {</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        _iterator++;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    }</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="hwc_8hpp.xhtml#a4fef07ab304fc672e0407e7598fb1870">ret</a>;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;}</div>
+<div class="fragment"><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;{</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <a class="code" href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a>(tensor);</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="hwc_8hpp.xhtml#a4fef07ab304fc672e0407e7598fb1870">ret</a> = _maximum == 0 || _iterator &lt; _maximum;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordflow">if</span>(_iterator == _maximum)</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    {</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        _iterator = 0;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    }</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    {</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        _iterator++;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    }</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="hwc_8hpp.xhtml#a4fef07ab304fc672e0407e7598fb1870">ret</a>;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;}</div>
 <div class="ttc" id="_error_8h_xhtml_a4103adbb45806b2f2002d44b91d0d206"><div class="ttname"><a href="_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(var)</div><div class="ttdoc">To avoid unused variables warnings. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00049">Error.h:49</a></div></div>
 <div class="ttc" id="hwc_8hpp_xhtml_a4fef07ab304fc672e0407e7598fb1870"><div class="ttname"><a href="hwc_8hpp.xhtml#a4fef07ab304fc672e0407e7598fb1870">ret</a></div><div class="ttdeci">uint32_t ret</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00254">hwc.hpp:254</a></div></div>
 </div><!-- fragment -->
@@ -272,7 +272,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml">graph_utils</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml">DummyAccessor</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:58 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

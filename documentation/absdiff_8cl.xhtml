@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -277,7 +277,7 @@ e.g. -DDATA_TYPE_IN1=uchar -DDATA_TYPE_IN2=uchar -DDATA_TYPE_OUT=short</dd></dl>
 
 <p>Definition at line <a class="el" href="absdiff_8cl_source.xhtml#l00050">50</a> of file <a class="el" href="absdiff_8cl_source.xhtml">absdiff.cl</a>.</p>
 
-<p>References <a class="el" href="fixed__point_8h_source.xhtml#l00098">CONVERT</a>, <a class="el" href="direct__convolution1x1_8cl_source.xhtml#l00040">CONVERT_SAT</a>, <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00031">DATA_TYPE_OUT</a>, <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
+<p>References <a class="el" href="fixed__point_8h_source.xhtml#l00098">CONVERT</a>, <a class="el" href="direct__convolution1x1_8cl_source.xhtml#l00040">CONVERT_SAT</a>, <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00031">DATA_TYPE_OUT</a>, <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
 <div class="fragment"><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;{</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in1 = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(in1);</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> in2 = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(in2);</div>
@@ -292,8 +292,8 @@ e.g. -DDATA_TYPE_IN1=uchar -DDATA_TYPE_IN2=uchar -DDATA_TYPE_OUT=short</dd></dl>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;}</div>
 <div class="ttc" id="fixed__point_8h_xhtml_aa8d95ba04fc73845abc6045952cae5be"><div class="ttname"><a href="fixed__point_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be">CONVERT</a></div><div class="ttdeci">#define CONVERT(x, type)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00098">fixed_point.h:98</a></div></div>
 <div class="ttc" id="direct__convolution1x1_8cl_xhtml_a1f15728672380ade7a238f5e783d54d2"><div class="ttname"><a href="direct__convolution1x1_8cl.xhtml#a1f15728672380ade7a238f5e783d54d2">CONVERT_SAT</a></div><div class="ttdeci">#define CONVERT_SAT(a, b)</div><div class="ttdef"><b>Definition:</b> <a href="direct__convolution1x1_8cl_source.xhtml#l00040">direct_convolution1x1.cl:40</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
 <div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
 <div class="ttc" id="convolution3x3_8cl_xhtml_ac06f3e24d3fffd3c465d8b2a6e7c985e"><div class="ttname"><a href="convolution3x3_8cl.xhtml#ac06f3e24d3fffd3c465d8b2a6e7c985e">DATA_TYPE_OUT</a></div><div class="ttdeci">#define DATA_TYPE_OUT</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00031">convolution3x3.cl:31</a></div></div>
 </div><!-- fragment -->
@@ -305,7 +305,7 @@ e.g. -DDATA_TYPE_IN1=uchar -DDATA_TYPE_IN2=uchar -DDATA_TYPE_OUT=short</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_55b5a5006e943fb664ff8cff3cfe7768.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_f6c3ae42d7e27145d0a3c3e38ca1c000.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1b7ae9123c88e650426d50d95c19d414.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_b7c3d80b0dadb2139bc73b7161751c12.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="absdiff_8cl.xhtml">absdiff.cl</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:53 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

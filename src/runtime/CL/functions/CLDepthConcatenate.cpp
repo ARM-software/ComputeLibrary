@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -50,6 +51,11 @@ void CLDepthConcatenate::configure(std::vector<ICLTensor *> inputs_vector, ICLTe
 
     _concat_kernels_vector  = arm_compute::support::cpp14::make_unique<CLDepthConcatenateKernel[]>(_num_inputs);
     _border_handlers_vector = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(_num_inputs);
+
+    TensorShape output_shape = calculate_depth_concatenate_shape(inputs_vector);
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type(), inputs_vector[0]->info()->fixed_point_position());
 
     for(unsigned int i = 0; i < _num_inputs; i++)
     {

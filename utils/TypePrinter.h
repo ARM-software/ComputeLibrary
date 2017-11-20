@@ -26,7 +26,10 @@
 
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Strides.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/Types.h"
 
 #include <ostream>
 #include <sstream>
@@ -147,6 +150,45 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo 
     return os;
 }
 
+inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
+{
+    switch(op)
+    {
+        case FixedPointOp::ADD:
+            os << "ADD";
+            break;
+        case FixedPointOp::SUB:
+            os << "SUB";
+            break;
+        case FixedPointOp::MUL:
+            os << "MUL";
+            break;
+        case FixedPointOp::EXP:
+            os << "EXP";
+            break;
+        case FixedPointOp::LOG:
+            os << "LOG";
+            break;
+        case FixedPointOp::INV_SQRT:
+            os << "INV_SQRT";
+            break;
+        case FixedPointOp::RECIPROCAL:
+            os << "RECIPROCAL";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const FixedPointOp &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
+}
+
 /** Formatted output of the activation function type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo::ActivationFunction &act_function)
 {
@@ -231,6 +273,13 @@ inline std::string to_string(const arm_compute::NormalizationLayerInfo &info)
     std::stringstream str;
     str << info.type();
     return str.str();
+}
+
+/** Formatted output of @ref NormalizationLayerInfo. */
+inline ::std::ostream &operator<<(::std::ostream &os, const NormalizationLayerInfo &info)
+{
+    os << info.type();
+    return os;
 }
 
 /** Formatted output of the PoolingType type. */
@@ -505,11 +554,26 @@ inline std::string to_string(const Dimensions<T> &dimensions)
     return str.str();
 }
 
+inline std::string to_string(const Strides &stride)
+{
+    std::stringstream str;
+    str << stride;
+    return str.str();
+}
+
 /** Formatted output of the TensorShape type. */
 inline std::string to_string(const TensorShape &shape)
 {
     std::stringstream str;
     str << shape;
+    return str.str();
+}
+
+/** Formatted output of the Coordinates type. */
+inline std::string to_string(const Coordinates &coord)
+{
+    std::stringstream str;
+    str << coord;
     return str.str();
 }
 
@@ -543,6 +607,13 @@ inline std::string to_string(const BorderMode &mode)
 {
     std::stringstream str;
     str << mode;
+    return str.str();
+}
+
+inline std::string to_string(const BorderSize &border)
+{
+    std::stringstream str;
+    str << border;
     return str.str();
 }
 

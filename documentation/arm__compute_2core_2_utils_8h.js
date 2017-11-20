@@ -1,6 +1,7 @@
 var arm__compute_2core_2_utils_8h =
 [
     [ "build_information", "arm__compute_2core_2_utils_8h.xhtml#a64c17a5a42d2499a1626222ff9753b4d", null ],
+    [ "calculate_depth_concatenate_shape", "arm__compute_2core_2_utils_8h.xhtml#a075313545533c34978309ed57d18333f", null ],
     [ "calculate_matrix_scale", "arm__compute_2core_2_utils_8h.xhtml#a0101a40c4a6acc2af3b55afa7632f16a", null ],
     [ "ceil_to_multiple", "arm__compute_2core_2_utils_8h.xhtml#adf0c6059174045f80af46a0f1fb57bc6", null ],
     [ "data_size_from_type", "arm__compute_2core_2_utils_8h.xhtml#abb7e0f23a4f2e63f39433f158dad47ab", null ],

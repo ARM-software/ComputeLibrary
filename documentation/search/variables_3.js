@@ -14,6 +14,8 @@ var searchData=
   ['clflush',['clFlush',['../classarm__compute_1_1_c_l_symbols.xhtml#acf6ea30fe76b4d9cbd9e05aa3ed19fa2',1,'arm_compute::CLSymbols']]],
   ['clgetdeviceids',['clGetDeviceIDs',['../classarm__compute_1_1_c_l_symbols.xhtml#ad5eb58b9de4d1eadd2a284c1e5ff5989',1,'arm_compute::CLSymbols']]],
   ['clgetdeviceinfo',['clGetDeviceInfo',['../classarm__compute_1_1_c_l_symbols.xhtml#ac1ff03bcea6c5bcd4b7b2127bb5c9255',1,'arm_compute::CLSymbols']]],
+  ['clgetkernelworkgroupinfo',['clGetKernelWorkGroupInfo',['../classarm__compute_1_1_c_l_symbols.xhtml#ac66111dc81c1ef589e401e216b4bf785',1,'arm_compute::CLSymbols']]],
+  ['clgetplatformids',['clGetPlatformIDs',['../classarm__compute_1_1_c_l_symbols.xhtml#a87dea8ff3748019f0e87f16d5a40b809',1,'arm_compute::CLSymbols']]],
   ['clgetprogrambuildinfo',['clGetProgramBuildInfo',['../classarm__compute_1_1_c_l_symbols.xhtml#ac171e267d7bcd9ed42903c93069af0e6',1,'arm_compute::CLSymbols']]],
   ['clgetprograminfo',['clGetProgramInfo',['../classarm__compute_1_1_c_l_symbols.xhtml#a1386327ce94e26321be56f52d4ffbb7e',1,'arm_compute::CLSymbols']]],
   ['clreleasecommandqueue',['clReleaseCommandQueue',['../classarm__compute_1_1_c_l_symbols.xhtml#a0cde68c2d70e4ddbc06997a593a4c5d4',1,'arm_compute::CLSymbols']]],

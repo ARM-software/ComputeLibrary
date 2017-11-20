@@ -52,6 +52,7 @@
 #include "arm_compute/runtime/NEON/functions/NEErode.h"
 #include "arm_compute/runtime/NEON/functions/NEFastCorners.h"
 #include "arm_compute/runtime/NEON/functions/NEFillBorder.h"
+#include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"

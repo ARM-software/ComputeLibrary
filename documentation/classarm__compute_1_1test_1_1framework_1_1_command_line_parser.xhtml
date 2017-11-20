@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -225,7 +225,7 @@ Public Member Functions</h2></td></tr>
 
 <p>References <a class="el" href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor::args</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;{</div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keyword">auto</span> result = _options.emplace(name, support::cpp14::make_unique&lt;T&gt;(name, std::forward&lt;As&gt;(<a class="code" href="namespacecaffe__data__extractor.xhtml#aad3cdfd6574de97bf37448087aaff11d">args</a>)...));</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>T *<span class="keyword">&gt;</span>(result.first-&gt;second.get());</div>
@@ -269,7 +269,7 @@ Public Member Functions</h2></td></tr>
 
 <p>References <a class="el" href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor::args</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;{</div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    _positional_options.emplace_back(support::cpp14::make_unique&lt;T&gt;(std::forward&lt;As&gt;(<a class="code" href="namespacecaffe__data__extractor.xhtml#aad3cdfd6574de97bf37448087aaff11d">args</a>)...));</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>T *<span class="keyword">&gt;</span>(_positional_options.back().get());</div>
@@ -315,7 +315,7 @@ Public Member Functions</h2></td></tr>
 
 <p>References <a class="el" href="hwc_8hpp_source.xhtml#l00269">value</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;{</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">const</span> std::regex option_regex{ <span class="stringliteral">&quot;--((?:no-)?)([^=]+)(?:=(.*))?&quot;</span> };</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
@@ -404,7 +404,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_command_line_parser_8cpp_source.xhtml#l00132">132</a> of file <a class="el" href="_command_line_parser_8cpp_source.xhtml">CommandLineParser.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;{</div>
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    std::cout &lt;&lt; <span class="stringliteral">&quot;usage: &quot;</span> &lt;&lt; program_name &lt;&lt; <span class="stringliteral">&quot; \n&quot;</span>;</div>
 <div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;</div>
@@ -440,7 +440,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_command_line_parser_8cpp_source.xhtml#l00097">97</a> of file <a class="el" href="_command_line_parser_8cpp_source.xhtml">CommandLineParser.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00058">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00059">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;{</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keywordtype">bool</span> is_valid = <span class="keyword">true</span>;</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;</div>
@@ -487,7 +487,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1_command_line_parser.xhtml">CommandLineParser</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:59 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

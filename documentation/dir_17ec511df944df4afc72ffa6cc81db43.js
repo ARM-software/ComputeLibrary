@@ -1,5 +1,6 @@
 var dir_17ec511df944df4afc72ffa6cc81db43 =
 [
+    [ "FixedPoint", "dir_f674e0460e5f1d2467b3c90061901b3d.xhtml", "dir_f674e0460e5f1d2467b3c90061901b3d" ],
     [ "SYSTEM", "dir_a0865fca29da8fda98c27396ec3c82cf.xhtml", "dir_a0865fca29da8fda98c27396ec3c82cf" ],
     [ "ActivationLayer.cpp", "validation_2_n_e_o_n_2_activation_layer_8cpp.xhtml", "validation_2_n_e_o_n_2_activation_layer_8cpp" ],
     [ "ArithmeticAddition.cpp", "_n_e_o_n_2_arithmetic_addition_8cpp.xhtml", "_n_e_o_n_2_arithmetic_addition_8cpp" ],
@@ -15,11 +16,15 @@ var dir_17ec511df944df4afc72ffa6cc81db43 =
     [ "DepthConvert.cpp", "_n_e_o_n_2_depth_convert_8cpp.xhtml", "_n_e_o_n_2_depth_convert_8cpp" ],
     [ "DequantizationLayer.cpp", "_n_e_o_n_2_dequantization_layer_8cpp.xhtml", "_n_e_o_n_2_dequantization_layer_8cpp" ],
     [ "DirectConvolutionLayer.cpp", "validation_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml", "validation_2_n_e_o_n_2_direct_convolution_layer_8cpp" ],
+    [ "FillBorder.cpp", "_n_e_o_n_2_fill_border_8cpp.xhtml", "_n_e_o_n_2_fill_border_8cpp" ],
+    [ "Flatten.cpp", "_n_e_o_n_2_flatten_8cpp.xhtml", "_n_e_o_n_2_flatten_8cpp" ],
     [ "Floor.cpp", "validation_2_n_e_o_n_2_floor_8cpp.xhtml", "validation_2_n_e_o_n_2_floor_8cpp" ],
     [ "FullyConnectedLayer.cpp", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp" ],
     [ "Gaussian3x3.cpp", "_n_e_o_n_2_gaussian3x3_8cpp.xhtml", "_n_e_o_n_2_gaussian3x3_8cpp" ],
     [ "Gaussian5x5.cpp", "_n_e_o_n_2_gaussian5x5_8cpp.xhtml", "_n_e_o_n_2_gaussian5x5_8cpp" ],
     [ "GEMM.cpp", "validation_2_n_e_o_n_2_g_e_m_m_8cpp.xhtml", "validation_2_n_e_o_n_2_g_e_m_m_8cpp" ],
+    [ "GEMMLowp.cpp", "_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml", "_n_e_o_n_2_g_e_m_m_lowp_8cpp" ],
+    [ "GlobalPoolingLayer.cpp", "_n_e_o_n_2_global_pooling_layer_8cpp.xhtml", "_n_e_o_n_2_global_pooling_layer_8cpp" ],
     [ "HarrisCorners.cpp", "_n_e_o_n_2_harris_corners_8cpp.xhtml", "_n_e_o_n_2_harris_corners_8cpp" ],
     [ "IntegralImage.cpp", "_n_e_o_n_2_integral_image_8cpp.xhtml", "_n_e_o_n_2_integral_image_8cpp" ],
     [ "L2Normalize.cpp", "_n_e_o_n_2_l2_normalize_8cpp.xhtml", "_n_e_o_n_2_l2_normalize_8cpp" ],
@@ -35,5 +40,7 @@ var dir_17ec511df944df4afc72ffa6cc81db43 =
     [ "Sobel.cpp", "_n_e_o_n_2_sobel_8cpp.xhtml", "_n_e_o_n_2_sobel_8cpp" ],
     [ "SoftmaxLayer.cpp", "_n_e_o_n_2_softmax_layer_8cpp.xhtml", "_n_e_o_n_2_softmax_layer_8cpp" ],
     [ "TableLookup.cpp", "_n_e_o_n_2_table_lookup_8cpp.xhtml", "_n_e_o_n_2_table_lookup_8cpp" ],
-    [ "Threshold.cpp", "_n_e_o_n_2_threshold_8cpp.xhtml", "_n_e_o_n_2_threshold_8cpp" ]
+    [ "Threshold.cpp", "_n_e_o_n_2_threshold_8cpp.xhtml", "_n_e_o_n_2_threshold_8cpp" ],
+    [ "WarpAffine.cpp", "_n_e_o_n_2_warp_affine_8cpp.xhtml", "_n_e_o_n_2_warp_affine_8cpp" ],
+    [ "WarpPerspective.cpp", "_n_e_o_n_2_warp_perspective_8cpp.xhtml", "_n_e_o_n_2_warp_perspective_8cpp" ]
 ];

@@ -51,6 +51,7 @@ var searchData=
   ['arm_5fcompute_5fexpect_5fnot_5fequal',['ARM_COMPUTE_EXPECT_NOT_EQUAL',['../_asserts_8h.xhtml#a375312dd537df40cc86ffdbe7e024385',1,'Asserts.h']]],
   ['arm_5fcompute_5finfo',['ARM_COMPUTE_INFO',['../_error_8h.xhtml#ae0ebdb75cd00c490fadb20f25b67ec90',1,'Error.h']]],
   ['arm_5fcompute_5finfo_5fon_5fmsg',['ARM_COMPUTE_INFO_ON_MSG',['../_error_8h.xhtml#a8a89ba1af4a8a70df25753e354d41641',1,'Error.h']]],
+  ['arm_5fcompute_5flog',['ARM_COMPUTE_LOG',['../_logger_8h.xhtml#aab2f8ce60fc5f90d699eda264b318fd2',1,'Logger.h']]],
   ['arm_5fcompute_5ftest_5fcomp_5ffactory',['ARM_COMPUTE_TEST_COMP_FACTORY',['../_asserts_8h.xhtml#a9b1013d9828dd87c5ea4a43c31db18cc',1,'Asserts.h']]],
   ['arm_5fcompute_5ftest_5finfo',['ARM_COMPUTE_TEST_INFO',['../_asserts_8h.xhtml#ac498e3dc31f8819519a9497b2d5789c1',1,'Asserts.h']]],
   ['arm_5fcompute_5funused',['ARM_COMPUTE_UNUSED',['../_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206',1,'Error.h']]],

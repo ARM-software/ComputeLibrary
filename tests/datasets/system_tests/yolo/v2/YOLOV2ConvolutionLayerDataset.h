@@ -67,7 +67,7 @@ public:
         // conv21
         add_config(TensorShape(13U, 13U, 3072U), TensorShape(3U, 3U, 3072U, 1024U), TensorShape(1024U), TensorShape(13U, 13U, 1024U), PadStrideInfo(1, 1, 1, 1));
         // conv22
-        add_config(TensorShape(13U, 13U, 1024U), TensorShape(1U, 1U, 1024U, 425U), TensorShape(425U), TensorShape(15U, 15U, 425U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 1024U), TensorShape(1U, 1U, 1024U, 425U), TensorShape(425U), TensorShape(13U, 13U, 425U), PadStrideInfo(1, 1, 0, 0));
     }
 };
 } // namespace datasets

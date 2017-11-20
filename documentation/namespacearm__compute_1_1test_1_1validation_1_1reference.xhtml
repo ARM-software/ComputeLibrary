@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -244,6 +244,13 @@ Functions</h2></td></tr>
 <tr class="separator:ab77dd3bd732636010753d8080608cd3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6633ef7fc0852265b2f158a5ef7ae900"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6633ef7fc0852265b2f158a5ef7ae900">dequantization_layer</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt; &amp;src, const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; float &gt; &amp;min_max)</td></tr>
 <tr class="separator:a6633ef7fc0852265b2f158a5ef7ae900"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a745ca5afa4399233e2e967238a614648"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a745ca5afa4399233e2e967238a614648"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a745ca5afa4399233e2e967238a614648">fixed_point_operation</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;src, <a class="el" href="namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dc">FixedPointOp</a> op)</td></tr>
+<tr class="separator:a745ca5afa4399233e2e967238a614648"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98070661bf8ba9b1f4566354956a66ce"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; int8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a98070661bf8ba9b1f4566354956a66ce">fixed_point_operation</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; int8_t &gt; &amp;src, <a class="el" href="namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dc">FixedPointOp</a> op)</td></tr>
+<tr class="separator:a98070661bf8ba9b1f4566354956a66ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4d1af4ea557e17c82d189de96f41619"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; int16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ac4d1af4ea557e17c82d189de96f41619">fixed_point_operation</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; int16_t &gt; &amp;src, <a class="el" href="namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dc">FixedPointOp</a> op)</td></tr>
+<tr class="separator:ac4d1af4ea557e17c82d189de96f41619"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a33d228262e4f4d071d5d188ffddcc8ac"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a33d228262e4f4d071d5d188ffddcc8ac"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a33d228262e4f4d071d5d188ffddcc8ac">flatten_layer</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;src)</td></tr>
 <tr class="separator:a33d228262e4f4d071d5d188ffddcc8ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -292,6 +299,11 @@ Functions</h2></td></tr>
 <tr class="separator:a37ab0d11ac78c506c87200005ea33b43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acebd35396a1f8b1eddab16a509ae0a29"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; <a class="el" href="namespacearm__compute.xhtml#a1521eea74b97de8f2df9304e44179400">qint16_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#acebd35396a1f8b1eddab16a509ae0a29">gemm</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; <a class="el" href="namespacearm__compute.xhtml#a1521eea74b97de8f2df9304e44179400">qint16_t</a> &gt; &amp;a, const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; <a class="el" href="namespacearm__compute.xhtml#a1521eea74b97de8f2df9304e44179400">qint16_t</a> &gt; &amp;b, const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; <a class="el" href="namespacearm__compute.xhtml#a1521eea74b97de8f2df9304e44179400">qint16_t</a> &gt; &amp;c, float alpha, float beta)</td></tr>
 <tr class="separator:acebd35396a1f8b1eddab16a509ae0a29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1313eff6c71b0b3cd56cb6a1592c25a7"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a1313eff6c71b0b3cd56cb6a1592c25a7"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a1313eff6c71b0b3cd56cb6a1592c25a7">gemmlowp</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;a, const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;b, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;c, int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift)</td></tr>
+<tr class="separator:a1313eff6c71b0b3cd56cb6a1592c25a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae8ba97f3019d90146956ebc8c138999"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#aae8ba97f3019d90146956ebc8c138999">gemmlowp</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt; &amp;a, const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt; &amp;b, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt; &amp;c, int32_t a_offset, int32_t b_offset, int32_t c_offset, int32_t c_mult_int, int32_t out_shift)</td></tr>
+<tr class="separator:aae8ba97f3019d90146956ebc8c138999"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc64cfa88bef3958e1603bfca23db47a"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:adc64cfa88bef3958e1603bfca23db47a"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structarm__compute_1_1_key_point.xhtml">KeyPoint</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#adc64cfa88bef3958e1603bfca23db47a">harris_corner_detector</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;src, float <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6cae310822a46019ba25a00ddb0f7e62">threshold</a>, float min_dist, float sensitivity, int gradient_size, int block_size, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, T constant_border_value)</td></tr>
 <tr class="separator:adc64cfa88bef3958e1603bfca23db47a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -430,6 +442,18 @@ Functions</h2></td></tr>
 <tr class="separator:a6cae310822a46019ba25a00ddb0f7e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a56f5d40af92249b49b8fabc89cfcd3"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a8a56f5d40af92249b49b8fabc89cfcd3">threshold</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt; &amp;src, uint8_t threshold, uint8_t false_value, uint8_t true_value, <a class="el" href="namespacearm__compute.xhtml#a3e6b23e675649b83240691abbc42a649">ThresholdType</a> type, uint8_t upper)</td></tr>
 <tr class="separator:a8a56f5d40af92249b49b8fabc89cfcd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3064cbee60ab97935e8d1df617f82b5c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a3064cbee60ab97935e8d1df617f82b5c">valid_bilinear_policy</a> (float xn, float yn, int width, int height, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode)</td></tr>
+<tr class="separator:a3064cbee60ab97935e8d1df617f82b5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97fb6802b7b8641c51fcc29aa03248ed"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a97fb6802b7b8641c51fcc29aa03248ed"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a97fb6802b7b8641c51fcc29aa03248ed">warp_affine</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;src, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;valid_mask, const float *matrix, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value)</td></tr>
+<tr class="separator:a97fb6802b7b8641c51fcc29aa03248ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acec59b1e80034018a6a0880bf29a130d"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#acec59b1e80034018a6a0880bf29a130d">warp_affine</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt; &amp;src, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt; &amp;valid_mask, const float *matrix, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value)</td></tr>
+<tr class="separator:acec59b1e80034018a6a0880bf29a130d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36be7020a6004680d96138fa8c300de7"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a36be7020a6004680d96138fa8c300de7"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a36be7020a6004680d96138fa8c300de7">warp_perspective</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;src, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; &amp;valid_mask, const float *matrix, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value)</td></tr>
+<tr class="separator:a36be7020a6004680d96138fa8c300de7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29ddb612c916a0cd4c57ec03ceffd9b9"><td class="memItemLeft" align="right" valign="top">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a29ddb612c916a0cd4c57ec03ceffd9b9">warp_perspective</a> (const <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt; &amp;src, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; uint8_t &gt; &amp;valid_mask, const float *matrix, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value)</td></tr>
+<tr class="separator:a29ddb612c916a0cd4c57ec03ceffd9b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="ad1a73ce85cd5a4a689c605ade2bc8780"></a>
@@ -2384,7 +2408,7 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    }</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <a class="code" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">DataType</a>        dst_type  = srcs.empty() ? DataType::UNKNOWN : srcs[0].data_type();</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    TensorShape     dst_shape = <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#adb95f9d6a10468f65e49ee944ce727d7">calculate_depth_concatenate_shape</a>(shapes);</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    TensorShape     dst_shape = <a class="code" href="namespacearm__compute.xhtml#a075313545533c34978309ed57d18333f">calculate_depth_concatenate_shape</a>(shapes);</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    SimpleTensor&lt;T&gt; dst(dst_shape, dst_type);</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="comment">// Compute reference</span></div>
@@ -2430,8 +2454,8 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;</div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="keywordflow">return</span> dst;</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;}</div>
+<div class="ttc" id="namespacearm__compute_xhtml_a075313545533c34978309ed57d18333f"><div class="ttname"><a href="namespacearm__compute.xhtml#a075313545533c34978309ed57d18333f">arm_compute::calculate_depth_concatenate_shape</a></div><div class="ttdeci">TensorShape calculate_depth_concatenate_shape(const std::vector&lt; T * &gt; &amp;inputs_vector)</div><div class="ttdoc">Calculate the output shapes of the depth concatenate function. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_utils_8h_source.xhtml#l00430">Utils.h:430</a></div></div>
 <div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00124">Error.h:124</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_adb95f9d6a10468f65e49ee944ce727d7"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#adb95f9d6a10468f65e49ee944ce727d7">arm_compute::test::validation::calculate_depth_concatenate_shape</a></div><div class="ttdeci">TensorShape calculate_depth_concatenate_shape(const std::vector&lt; TensorShape &gt; &amp;input_shapes)</div><div class="ttdoc">Calculate output tensor shape give a vector of input tensor to concatenate. </div><div class="ttdef"><b>Definition:</b> <a href="_helpers_8cpp_source.xhtml#l00074">Helpers.cpp:74</a></div></div>
 <div class="ttc" id="namespacearm__compute_xhtml_ad8ed01ff3ff33333d8e19db4d2818bb6"><div class="ttname"><a href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">arm_compute::DataType</a></div><div class="ttdeci">DataType</div><div class="ttdoc">Available data types. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00064">Types.h:64</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -2858,6 +2882,130 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype">const SimpleTensor&lt; float &gt; &amp;&#160;</td>
           <td class="paramname"><em>min_max</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a745ca5afa4399233e2e967238a614648"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; fixed_point_operation </td>
+          <td>(</td>
+          <td class="paramtype">const SimpleTensor&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">FixedPointOp&#160;</td>
+          <td class="paramname"><em>op</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_p_p_2_fixed_point_8cpp_source.xhtml#l00039">39</a> of file <a class="el" href="_c_p_p_2_fixed_point_8cpp_source.xhtml">FixedPoint.cpp</a>.</p>
+
+<p>References <a class="el" href="_error_8h_source.xhtml#l00031">ARM_COMPUTE_ERROR</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00265">SimpleTensor&lt; T &gt;::data_type()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00909">arm_compute::test::fixed_point_arithmetic::detail::div()</a>, <a class="el" href="namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dca8c670f8c37b95e1ed14a0ce414b049c7">arm_compute::EXP</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00924">arm_compute::test::fixed_point_arithmetic::detail::exp()</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00246">SimpleTensor&lt; T &gt;::fixed_point_position()</a>, <a class="el" href="namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dca59c58364795af22cad54630be156712b">arm_compute::INV_SQRT</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00934">arm_compute::test::fixed_point_arithmetic::detail::inv_sqrt()</a>, <a class="el" href="namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dca4b5ffcdaf38ce4d463171f5c977c5ab3">arm_compute::LOG</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00929">arm_compute::test::fixed_point_arithmetic::detail::log()</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00299">SimpleTensor&lt; T &gt;::num_elements()</a>, <a class="el" href="namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dca4d98346f3d5cc5fa5666f0715abf25b1">arm_compute::RECIPROCAL</a>, and <a class="el" href="_simple_tensor_8h_source.xhtml#l00234">SimpleTensor&lt; T &gt;::shape()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;{</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    SimpleTensor&lt;T&gt; result(src.shape(), src.data_type());</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> p = src.fixed_point_position();</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordflow">switch</span>(op)</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    {</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keywordflow">case</span> FixedPointOp::EXP:</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; src.num_elements(); ++i)</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            {</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                result[i] = <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aa4e01e9be9adcc40a69a4da48fa83a43">fixed_point_arithmetic::exp</a>(fixed_point_arithmetic::fixed_point&lt;T&gt;(src[i], p, <span class="keyword">true</span>)).raw();</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;            }</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="keywordflow">case</span> FixedPointOp::LOG:</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; src.num_elements(); ++i)</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            {</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                result[i] = <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a8c8ce35c61b4f71cccec28d18161eaa1">fixed_point_arithmetic::log</a>(fixed_point_arithmetic::fixed_point&lt;T&gt;(src[i], p, <span class="keyword">true</span>)).raw();</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            }</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keywordflow">case</span> FixedPointOp::INV_SQRT:</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; src.num_elements(); ++i)</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            {</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                result[i] = <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a2b7623d9dd3fde1d0a3bbe034967cff5">fixed_point_arithmetic::inv_sqrt</a>(fixed_point_arithmetic::fixed_point&lt;T&gt;(src[i], p, <span class="keyword">true</span>)).raw();</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            }</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;            <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keywordflow">case</span> FixedPointOp::RECIPROCAL:</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;            <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; src.num_elements(); ++i)</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;            {</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                result[i] = <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a9d53af9692ab2f7ae6fc0017faeb46f0">fixed_point_arithmetic::div</a>(fixed_point_arithmetic::fixed_point&lt;T&gt;(1, p), fixed_point_arithmetic::fixed_point&lt;T&gt;(src[i], p, <span class="keyword">true</span>)).raw();</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;            }</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;            <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keywordflow">default</span>:</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;            <a class="code" href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a>(<span class="stringliteral">&quot;Fixed point operation not supported&quot;</span>);</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;            <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    }</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <span class="keywordflow">return</span> result;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;}</div>
+<div class="ttc" id="_error_8h_xhtml_a05b19c75afe9c24200a62b9724734bbd"><div class="ttname"><a href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR(...)</div><div class="ttdoc">Print the given message then throw an std::runtime_error. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00031">Error.h:31</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aa4e01e9be9adcc40a69a4da48fa83a43"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aa4e01e9be9adcc40a69a4da48fa83a43">arm_compute::test::fixed_point_arithmetic::detail::exp</a></div><div class="ttdeci">fixed_point&lt; T &gt; exp(fixed_point&lt; T &gt; x)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00924">FixedPoint.h:924</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_a8c8ce35c61b4f71cccec28d18161eaa1"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a8c8ce35c61b4f71cccec28d18161eaa1">arm_compute::test::fixed_point_arithmetic::detail::log</a></div><div class="ttdeci">fixed_point&lt; T &gt; log(fixed_point&lt; T &gt; x)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00929">FixedPoint.h:929</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_a2b7623d9dd3fde1d0a3bbe034967cff5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a2b7623d9dd3fde1d0a3bbe034967cff5">arm_compute::test::fixed_point_arithmetic::detail::inv_sqrt</a></div><div class="ttdeci">fixed_point&lt; T &gt; inv_sqrt(fixed_point&lt; T &gt; x)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00934">FixedPoint.h:934</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_a9d53af9692ab2f7ae6fc0017faeb46f0"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a9d53af9692ab2f7ae6fc0017faeb46f0">arm_compute::test::fixed_point_arithmetic::detail::div</a></div><div class="ttdeci">fixed_point&lt; T &gt; div(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00909">FixedPoint.h:909</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="a98070661bf8ba9b1f4566354956a66ce"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt;int8_t&gt; arm_compute::test::validation::reference::fixed_point_operation </td>
+          <td>(</td>
+          <td class="paramtype">const SimpleTensor&lt; int8_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">FixedPointOp&#160;</td>
+          <td class="paramname"><em>op</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ac4d1af4ea557e17c82d189de96f41619"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt;int16_t&gt; arm_compute::test::validation::reference::fixed_point_operation </td>
+          <td>(</td>
+          <td class="paramtype">const SimpleTensor&lt; int16_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">FixedPointOp&#160;</td>
+          <td class="paramname"><em>op</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -3667,6 +3815,168 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a1313eff6c71b0b3cd56cb6a1592c25a7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; gemmlowp </td>
+          <td>(</td>
+          <td class="paramtype">const SimpleTensor&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const SimpleTensor&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">SimpleTensor&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>c</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>a_offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>b_offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>c_offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>c_mult_int</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>out_shift</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_p_p_2_g_e_m_m_lowp_8cpp_source.xhtml#l00038">38</a> of file <a class="el" href="_c_p_p_2_g_e_m_m_lowp_8cpp_source.xhtml">GEMMLowp.cpp</a>.</p>
+
+<p>References <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, and <a class="el" href="_simple_tensor_8h_source.xhtml#l00234">SimpleTensor&lt; T &gt;::shape()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;{</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span>            K       = a.shape().x();</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span>            b_width = b.shape().x();</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span>            rows    = c.shape().y(); <span class="comment">//M</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span>            cols    = c.shape().x(); <span class="comment">//N</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    std::vector&lt;int32_t&gt; acc;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    acc.resize(cols);</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; rows; ++i)</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    {</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j = 0; j &lt; cols; ++j)</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        {</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            acc[j] = 0;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        }</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> k = 0; k &lt; K; ++k)</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        {</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            <span class="keyword">const</span> int32_t tmp_a = a_offset + <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(a[k + i * K]);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j = 0; j &lt; b_width; ++j)</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            {</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                <span class="keyword">const</span> int32_t tmp_b       = b_offset + <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(b[j + k * b_width]);</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                <span class="keyword">const</span> int32_t mult_as_int = tmp_a * tmp_b;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                acc[j] += mult_as_int;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            }</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        }</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j = 0; j &lt; cols; ++j)</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        {</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;            <span class="keyword">const</span> int32_t result = ((c_offset + acc[j]) * c_mult_int) &gt;&gt; out_shift;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;            c[j + i * cols]      = <span class="keyword">static_cast&lt;</span>uint8_t<span class="keyword">&gt;</span>(<a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">std::min</a>(255, <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">std::max</a>(0, result)));</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        }</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    }</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordflow">return</span> c;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;}</div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="aae8ba97f3019d90146956ebc8c138999"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt;uint8_t&gt; arm_compute::test::validation::reference::gemmlowp </td>
+          <td>(</td>
+          <td class="paramtype">const SimpleTensor&lt; uint8_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const SimpleTensor&lt; uint8_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">SimpleTensor&lt; uint8_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>c</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>a_offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>b_offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>c_offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>c_mult_int</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>out_shift</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="adc64cfa88bef3958e1603bfca23db47a"></a>
 <div class="memitem">
 <div class="memproto">
@@ -4059,7 +4369,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_c_p_p_2_min_max_location_8cpp_source.xhtml#l00058">58</a> of file <a class="el" href="_c_p_p_2_min_max_location_8cpp_source.xhtml">MinMaxLocation.cpp</a>.</p>
 
-<p>References <a class="el" href="tests_2_types_8h_source.xhtml#l00046">MinMaxLocationValues&lt; MinMaxType &gt;::max</a>, <a class="el" href="tests_2_types_8h_source.xhtml#l00048">MinMaxLocationValues&lt; MinMaxType &gt;::max_loc</a>, <a class="el" href="tests_2_types_8h_source.xhtml#l00045">MinMaxLocationValues&lt; MinMaxType &gt;::min</a>, <a class="el" href="tests_2_types_8h_source.xhtml#l00047">MinMaxLocationValues&lt; MinMaxType &gt;::min_loc</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00234">SimpleTensor&lt; T &gt;::shape()</a>, and <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00296">Coordinates2D::x</a>.</p>
+<p>References <a class="el" href="tests_2_types_8h_source.xhtml#l00049">MinMaxLocationValues&lt; MinMaxType &gt;::max</a>, <a class="el" href="tests_2_types_8h_source.xhtml#l00051">MinMaxLocationValues&lt; MinMaxType &gt;::max_loc</a>, <a class="el" href="tests_2_types_8h_source.xhtml#l00048">MinMaxLocationValues&lt; MinMaxType &gt;::min</a>, <a class="el" href="tests_2_types_8h_source.xhtml#l00050">MinMaxLocationValues&lt; MinMaxType &gt;::min_loc</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00234">SimpleTensor&lt; T &gt;::shape()</a>, and <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00296">Coordinates2D::x</a>.</p>
 <div class="fragment"><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;{</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    MinMaxLocationValues&lt;T&gt; dst;</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
@@ -6206,13 +6516,467 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a3064cbee60ab97935e8d1df617f82b5c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool arm_compute::test::validation::reference::valid_bilinear_policy </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>xn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>yn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BorderMode&#160;</td>
+          <td class="paramname"><em>border_mode</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_p_p_2_warp_affine_8cpp_source.xhtml#l00036">36</a> of file <a class="el" href="_c_p_p_2_warp_affine_8cpp_source.xhtml">WarpAffine.cpp</a>.</p>
+
+<p>References <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a0db45d2a4141101bdfe48e3314cfbca3">arm_compute::UNDEFINED</a>.</p>
+
+<p>Referenced by <a class="el" href="_c_p_p_2_warp_affine_8cpp_source.xhtml#l00050">warp_affine()</a>, and <a class="el" href="_c_p_p_2_warp_perspective_8cpp_source.xhtml#l00038">warp_perspective()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;{</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordflow">if</span>(border_mode != BorderMode::UNDEFINED)</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    {</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    }</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordflow">if</span>((0 &lt;= yn + 1) &amp;&amp; (yn + 1 &lt; height) &amp;&amp; (0 &lt;= xn + 1) &amp;&amp; (xn + 1 &lt; width))</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    {</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    }</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="a97fb6802b7b8641c51fcc29aa03248ed"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; warp_affine </td>
+          <td>(</td>
+          <td class="paramtype">const SimpleTensor&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">SimpleTensor&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>valid_mask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>matrix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">InterpolationPolicy&#160;</td>
+          <td class="paramname"><em>policy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BorderMode&#160;</td>
+          <td class="paramname"><em>border_mode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>constant_border_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_p_p_2_warp_affine_8cpp_source.xhtml#l00050">50</a> of file <a class="el" href="_c_p_p_2_warp_affine_8cpp_source.xhtml">WarpAffine.cpp</a>.</p>
+
+<p>References <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9a639aaa22a784d5e5cb03a522267e79c4">arm_compute::AREA</a>, <a class="el" href="_error_8h_source.xhtml#l00031">ARM_COMPUTE_ERROR</a>, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9aad6fddf718ad19b063e02fdd7e8e3e65">arm_compute::BILINEAR</a>, <a class="el" href="tests_2validation_2_c_p_p_2_utils_8cpp_source.xhtml#l00036">arm_compute::test::validation::bilinear_policy()</a>, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92">arm_compute::CONSTANT</a>, <a class="el" href="tests_2_utils_8h_source.xhtml#l00337">arm_compute::test::coord2index()</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00265">SimpleTensor&lt; T &gt;::data_type()</a>, <a class="el" href="hwc_8hpp_source.xhtml#l00252">id</a>, <a class="el" href="tests_2_utils_8h_source.xhtml#l00308">arm_compute::test::index2coord()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9a7f5ccbc3d30c2cd3fd04d567946cbde2">arm_compute::NEAREST_NEIGHBOR</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00299">SimpleTensor&lt; T &gt;::num_elements()</a>, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a4ef59320fbe90fe47d40f1f71e4c5daa">arm_compute::REPLICATE</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00234">SimpleTensor&lt; T &gt;::shape()</a>, <a class="el" href="tests_2validation_2_c_p_p_2_utils_8h_source.xhtml#l00046">arm_compute::test::validation::tensor_elem_at()</a>, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a0db45d2a4141101bdfe48e3314cfbca3">arm_compute::UNDEFINED</a>, <a class="el" href="_c_p_p_2_warp_affine_8cpp_source.xhtml#l00036">valid_bilinear_policy()</a>, and <a class="el" href="_dimensions_8h_source.xhtml#l00081">Dimensions&lt; T &gt;::x()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;{</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    SimpleTensor&lt;T&gt; dst(src.shape(), src.data_type());</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="comment">// x0 = M00 * x + M01 * y + M02</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="comment">// y0 = M10 * x + M11 * y + M12</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M00 = matrix[0];</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M10 = matrix[1];</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M01 = matrix[0 + 1 * 2];</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M11 = matrix[1 + 1 * 2];</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M02 = matrix[0 + 2 * 2];</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M12 = matrix[1 + 2 * 2];</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> width  = src.shape().x();</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> height = src.shape().y();</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> element_idx = 0; element_idx &lt; src.num_elements(); ++element_idx)</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    {</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        valid_mask[element_idx] = 1;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        Coordinates <span class="keywordtype">id</span>          = <a class="code" href="namespacearm__compute_1_1test.xhtml#a24d8c0391cfa38e78969b6ad97c0ff09">index2coord</a>(src.shape(), element_idx);</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keywordtype">int</span>         idx         = <span class="keywordtype">id</span>.<a class="code" href="classarm__compute_1_1_dimensions.xhtml#afb5cd37bb08f1029691590372e6330f0">x</a>();</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keywordtype">int</span>         idy         = <span class="keywordtype">id</span>.y();</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <span class="keywordtype">float</span> x0 = M00 * idx + M01 * idy + M02;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="keywordtype">float</span> y0 = M10 * idx + M11 * idy + M12;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        <span class="keywordtype">id</span>.set(0, static_cast&lt;int&gt;(std::floor(x0)));</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        <span class="keywordtype">id</span>.set(1, static_cast&lt;int&gt;(std::floor(y0)));</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        <span class="keywordflow">if</span>((0 &lt;= y0) &amp;&amp; (y0 &lt; height) &amp;&amp; (0 &lt;= x0) &amp;&amp; (x0 &lt; width))</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        {</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;            <span class="keywordflow">switch</span>(policy)</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;            {</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                <span class="keywordflow">case</span> InterpolationPolicy::NEAREST_NEIGHBOR:</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                    dst[element_idx] = <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f489943d8618d47b1ad4611f0b9b7ff">tensor_elem_at</a>(src, <span class="keywordtype">id</span>, border_mode, constant_border_value);</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                <span class="keywordflow">case</span> InterpolationPolicy::BILINEAR:</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                    (<a class="code" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a3064cbee60ab97935e8d1df617f82b5c">valid_bilinear_policy</a>(x0, y0, width, height, border_mode)) ? dst[element_idx] = <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a92fd4059750cbbeecd8ad03f279200e1">bilinear_policy</a>(src, <span class="keywordtype">id</span>, x0, y0, border_mode, constant_border_value) :</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                                                                                                     valid_mask[element_idx] = 0;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                <span class="keywordflow">case</span> InterpolationPolicy::AREA:</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                <span class="keywordflow">default</span>:</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                    <a class="code" href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a>(<span class="stringliteral">&quot;Interpolation not supported&quot;</span>);</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;            }</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        }</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        {</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="keywordflow">if</span>(border_mode == BorderMode::UNDEFINED)</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            {</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                valid_mask[element_idx] = 0;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            }</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;            <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;            {</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                <span class="keywordflow">switch</span>(policy)</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                {</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                    <span class="keywordflow">case</span> InterpolationPolicy::NEAREST_NEIGHBOR:</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                        <span class="keywordflow">if</span>(border_mode == BorderMode::CONSTANT)</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                        {</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                            dst[element_idx] = constant_border_value;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                        }</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                        <span class="keywordflow">else</span> <span class="keywordflow">if</span>(border_mode == BorderMode::REPLICATE)</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                        {</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;                            <span class="keywordtype">id</span>.set(0, <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">std::max</a>(0, <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">std::min</a>(static_cast&lt;int&gt;(x0), width - 1)));</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;                            <span class="keywordtype">id</span>.set(1, <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">std::max</a>(0, <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">std::min</a>(static_cast&lt;int&gt;(y0), height - 1)));</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                            dst[element_idx] = src[<a class="code" href="namespacearm__compute_1_1test.xhtml#a9be4cb7e6ee20063a4a10bc3abb750b9">coord2index</a>(src.shape(), <a class="code" href="hwc_8hpp.xhtml#abaabdc509cdaba7df9f56c6c76f3ae19">id</a>)];</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                        }</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                    <span class="keywordflow">case</span> InterpolationPolicy::BILINEAR:</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                        dst[element_idx] = <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a92fd4059750cbbeecd8ad03f279200e1">bilinear_policy</a>(src, <span class="keywordtype">id</span>, x0, y0, border_mode, constant_border_value);</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;                        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                    <span class="keywordflow">case</span> InterpolationPolicy::AREA:</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                    <span class="keywordflow">default</span>:</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                        <a class="code" href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a>(<span class="stringliteral">&quot;Interpolation not supported&quot;</span>);</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;                }</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;            }</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        }</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    }</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    <span class="keywordflow">return</span> dst;</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;}</div>
+<div class="ttc" id="_error_8h_xhtml_a05b19c75afe9c24200a62b9724734bbd"><div class="ttname"><a href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR(...)</div><div class="ttdoc">Print the given message then throw an std::runtime_error. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00031">Error.h:31</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a4f489943d8618d47b1ad4611f0b9b7ff"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f489943d8618d47b1ad4611f0b9b7ff">arm_compute::test::validation::tensor_elem_at</a></div><div class="ttdeci">T tensor_elem_at(const SimpleTensor&lt; T &gt; &amp;src, Coordinates coord, BorderMode border_mode, T constant_border_value)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_c_p_p_2_utils_8h_source.xhtml#l00046">Utils.h:46</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
+<div class="ttc" id="hwc_8hpp_xhtml_abaabdc509cdaba7df9f56c6c76f3ae19"><div class="ttname"><a href="hwc_8hpp.xhtml#abaabdc509cdaba7df9f56c6c76f3ae19">id</a></div><div class="ttdeci">uint32_t id</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00252">hwc.hpp:252</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_xhtml_a9be4cb7e6ee20063a4a10bc3abb750b9"><div class="ttname"><a href="namespacearm__compute_1_1test.xhtml#a9be4cb7e6ee20063a4a10bc3abb750b9">arm_compute::test::coord2index</a></div><div class="ttdeci">int coord2index(const TensorShape &amp;shape, const Coordinates &amp;coord)</div><div class="ttdoc">Linearise the given coordinate. </div><div class="ttdef"><b>Definition:</b> <a href="tests_2_utils_8h_source.xhtml#l00337">Utils.h:337</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_dimensions_xhtml_afb5cd37bb08f1029691590372e6330f0"><div class="ttname"><a href="classarm__compute_1_1_dimensions.xhtml#afb5cd37bb08f1029691590372e6330f0">arm_compute::Dimensions::x</a></div><div class="ttdeci">T x() const </div><div class="ttdoc">Alias to access the size of the first dimension. </div><div class="ttdef"><b>Definition:</b> <a href="_dimensions_8h_source.xhtml#l00081">Dimensions.h:81</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a92fd4059750cbbeecd8ad03f279200e1"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a92fd4059750cbbeecd8ad03f279200e1">arm_compute::test::validation::bilinear_policy</a></div><div class="ttdeci">T bilinear_policy(const SimpleTensor&lt; T &gt; &amp;in, Coordinates id, float xn, float yn, BorderMode border_mode, T constant_border_value)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_c_p_p_2_utils_8cpp_source.xhtml#l00036">Utils.cpp:36</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_xhtml_a24d8c0391cfa38e78969b6ad97c0ff09"><div class="ttname"><a href="namespacearm__compute_1_1test.xhtml#a24d8c0391cfa38e78969b6ad97c0ff09">arm_compute::test::index2coord</a></div><div class="ttdeci">Coordinates index2coord(const TensorShape &amp;shape, int index)</div><div class="ttdoc">Convert a linear index into n-dimensional coordinates. </div><div class="ttdef"><b>Definition:</b> <a href="tests_2_utils_8h_source.xhtml#l00308">Utils.h:308</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_1_1reference_xhtml_a3064cbee60ab97935e8d1df617f82b5c"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a3064cbee60ab97935e8d1df617f82b5c">arm_compute::test::validation::reference::valid_bilinear_policy</a></div><div class="ttdeci">bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode border_mode)</div><div class="ttdef"><b>Definition:</b> <a href="_c_p_p_2_warp_affine_8cpp_source.xhtml#l00036">WarpAffine.cpp:36</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="acec59b1e80034018a6a0880bf29a130d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt;uint8_t&gt; arm_compute::test::validation::reference::warp_affine </td>
+          <td>(</td>
+          <td class="paramtype">const SimpleTensor&lt; uint8_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">SimpleTensor&lt; uint8_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>valid_mask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>matrix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">InterpolationPolicy&#160;</td>
+          <td class="paramname"><em>policy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BorderMode&#160;</td>
+          <td class="paramname"><em>border_mode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>constant_border_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a36be7020a6004680d96138fa8c300de7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt; T &gt; warp_perspective </td>
+          <td>(</td>
+          <td class="paramtype">const SimpleTensor&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">SimpleTensor&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>valid_mask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>matrix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">InterpolationPolicy&#160;</td>
+          <td class="paramname"><em>policy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BorderMode&#160;</td>
+          <td class="paramname"><em>border_mode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>constant_border_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_p_p_2_warp_perspective_8cpp_source.xhtml#l00038">38</a> of file <a class="el" href="_c_p_p_2_warp_perspective_8cpp_source.xhtml">WarpPerspective.cpp</a>.</p>
+
+<p>References <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9a639aaa22a784d5e5cb03a522267e79c4">arm_compute::AREA</a>, <a class="el" href="_error_8h_source.xhtml#l00031">ARM_COMPUTE_ERROR</a>, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9aad6fddf718ad19b063e02fdd7e8e3e65">arm_compute::BILINEAR</a>, <a class="el" href="tests_2validation_2_c_p_p_2_utils_8cpp_source.xhtml#l00036">arm_compute::test::validation::bilinear_policy()</a>, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92">arm_compute::CONSTANT</a>, <a class="el" href="tests_2_utils_8h_source.xhtml#l00337">arm_compute::test::coord2index()</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00265">SimpleTensor&lt; T &gt;::data_type()</a>, <a class="el" href="hwc_8hpp_source.xhtml#l00252">id</a>, <a class="el" href="tests_2_utils_8h_source.xhtml#l00308">arm_compute::test::index2coord()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9a7f5ccbc3d30c2cd3fd04d567946cbde2">arm_compute::NEAREST_NEIGHBOR</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00299">SimpleTensor&lt; T &gt;::num_elements()</a>, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a4ef59320fbe90fe47d40f1f71e4c5daa">arm_compute::REPLICATE</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00234">SimpleTensor&lt; T &gt;::shape()</a>, <a class="el" href="tests_2validation_2_c_p_p_2_utils_8h_source.xhtml#l00046">arm_compute::test::validation::tensor_elem_at()</a>, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a0db45d2a4141101bdfe48e3314cfbca3">arm_compute::UNDEFINED</a>, <a class="el" href="_c_p_p_2_warp_affine_8cpp_source.xhtml#l00036">valid_bilinear_policy()</a>, and <a class="el" href="_dimensions_8h_source.xhtml#l00081">Dimensions&lt; T &gt;::x()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    SimpleTensor&lt;T&gt; dst(src.shape(), src.data_type());</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="comment">// x0 = M00 * x + M01 * y + M02</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="comment">// y0 = M10 * x + M11 * y + M12</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="comment">// z0 = M20 * x + M21 * y + M22</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="comment">// xn = x0 / z0</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="comment">// yn = y0 / z0</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M00 = matrix[0];</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M10 = matrix[1];</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M20 = matrix[2];</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M01 = matrix[0 + 1 * 3];</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M11 = matrix[1 + 1 * 3];</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M21 = matrix[2 + 1 * 3];</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M02 = matrix[0 + 2 * 3];</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M12 = matrix[1 + 2 * 3];</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">float</span> M22 = matrix[2 + 2 * 3];</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> width  = src.shape().x();</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> height = src.shape().y();</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> element_idx = 0; element_idx &lt; src.num_elements(); ++element_idx)</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    {</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        valid_mask[element_idx] = 1;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        Coordinates <span class="keywordtype">id</span>          = <a class="code" href="namespacearm__compute_1_1test.xhtml#a24d8c0391cfa38e78969b6ad97c0ff09">index2coord</a>(src.shape(), element_idx);</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">int</span>   idx         = <span class="keywordtype">id</span>.<a class="code" href="classarm__compute_1_1_dimensions.xhtml#afb5cd37bb08f1029691590372e6330f0">x</a>();</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">int</span>   idy         = <span class="keywordtype">id</span>.y();</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">float</span> z0          = M20 * idx + M21 * idy + M22;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">float</span> x0 = (M00 * idx + M01 * idy + M02);</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">float</span> y0 = (M10 * idx + M11 * idy + M12);</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">float</span> xn = x0 / z0;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">float</span> yn = y0 / z0;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <span class="keywordtype">id</span>.set(0, static_cast&lt;int&gt;(std::floor(xn)));</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="keywordtype">id</span>.set(1, static_cast&lt;int&gt;(std::floor(yn)));</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keywordflow">if</span>((0 &lt;= yn) &amp;&amp; (yn &lt; height) &amp;&amp; (0 &lt;= xn) &amp;&amp; (xn &lt; width))</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        {</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;            <span class="keywordflow">switch</span>(policy)</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;            {</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                <span class="keywordflow">case</span> InterpolationPolicy::NEAREST_NEIGHBOR:</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                    dst[element_idx] = <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f489943d8618d47b1ad4611f0b9b7ff">tensor_elem_at</a>(src, <span class="keywordtype">id</span>, border_mode, constant_border_value);</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                <span class="keywordflow">case</span> InterpolationPolicy::BILINEAR:</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                    (<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a997c20c740c2cf8dd5676ad55ad8a1a6">valid_bilinear_policy</a>(xn, yn, width, height, border_mode)) ? dst[element_idx] = <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a92fd4059750cbbeecd8ad03f279200e1">bilinear_policy</a>(src, <span class="keywordtype">id</span>, xn, yn, border_mode, constant_border_value) : valid_mask[element_idx] = 0;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                <span class="keywordflow">case</span> InterpolationPolicy::AREA:</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                <span class="keywordflow">default</span>:</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                    <a class="code" href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a>(<span class="stringliteral">&quot;Interpolation not supported&quot;</span>);</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;            }</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        }</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        {</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            <span class="keywordflow">if</span>(border_mode == BorderMode::UNDEFINED)</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;            {</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                valid_mask[element_idx] = 0;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            }</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            {</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                <span class="keywordflow">switch</span>(policy)</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                {</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                    <span class="keywordflow">case</span> InterpolationPolicy::NEAREST_NEIGHBOR:</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                        <span class="keywordflow">if</span>(border_mode == BorderMode::CONSTANT)</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                        {</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                            dst[element_idx] = constant_border_value;</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                        }</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                        <span class="keywordflow">else</span> <span class="keywordflow">if</span>(border_mode == BorderMode::REPLICATE)</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                        {</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                            <span class="keywordtype">id</span>.set(0, <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">std::max</a>(0, <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">std::min</a>(static_cast&lt;int&gt;(xn), width - 1)));</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                            <span class="keywordtype">id</span>.set(1, <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">std::max</a>(0, <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">std::min</a>(static_cast&lt;int&gt;(yn), height - 1)));</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                            dst[element_idx] = src[<a class="code" href="namespacearm__compute_1_1test.xhtml#a9be4cb7e6ee20063a4a10bc3abb750b9">coord2index</a>(src.shape(), <a class="code" href="hwc_8hpp.xhtml#abaabdc509cdaba7df9f56c6c76f3ae19">id</a>)];</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;                        }</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;                        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                    <span class="keywordflow">case</span> InterpolationPolicy::BILINEAR:</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                        dst[element_idx] = <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a92fd4059750cbbeecd8ad03f279200e1">bilinear_policy</a>(src, <span class="keywordtype">id</span>, xn, yn, border_mode, constant_border_value);</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                    <span class="keywordflow">case</span> InterpolationPolicy::AREA:</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                    <span class="keywordflow">default</span>:</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;                        <a class="code" href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a>(<span class="stringliteral">&quot;Interpolation not supported&quot;</span>);</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                        <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                }</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;            }</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        }</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    }</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    <span class="keywordflow">return</span> dst;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;}</div>
+<div class="ttc" id="_error_8h_xhtml_a05b19c75afe9c24200a62b9724734bbd"><div class="ttname"><a href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR(...)</div><div class="ttdoc">Print the given message then throw an std::runtime_error. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00031">Error.h:31</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a4f489943d8618d47b1ad4611f0b9b7ff"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f489943d8618d47b1ad4611f0b9b7ff">arm_compute::test::validation::tensor_elem_at</a></div><div class="ttdeci">T tensor_elem_at(const SimpleTensor&lt; T &gt; &amp;src, Coordinates coord, BorderMode border_mode, T constant_border_value)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_c_p_p_2_utils_8h_source.xhtml#l00046">Utils.h:46</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
+<div class="ttc" id="hwc_8hpp_xhtml_abaabdc509cdaba7df9f56c6c76f3ae19"><div class="ttname"><a href="hwc_8hpp.xhtml#abaabdc509cdaba7df9f56c6c76f3ae19">id</a></div><div class="ttdeci">uint32_t id</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00252">hwc.hpp:252</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_xhtml_a9be4cb7e6ee20063a4a10bc3abb750b9"><div class="ttname"><a href="namespacearm__compute_1_1test.xhtml#a9be4cb7e6ee20063a4a10bc3abb750b9">arm_compute::test::coord2index</a></div><div class="ttdeci">int coord2index(const TensorShape &amp;shape, const Coordinates &amp;coord)</div><div class="ttdoc">Linearise the given coordinate. </div><div class="ttdef"><b>Definition:</b> <a href="tests_2_utils_8h_source.xhtml#l00337">Utils.h:337</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_dimensions_xhtml_afb5cd37bb08f1029691590372e6330f0"><div class="ttname"><a href="classarm__compute_1_1_dimensions.xhtml#afb5cd37bb08f1029691590372e6330f0">arm_compute::Dimensions::x</a></div><div class="ttdeci">T x() const </div><div class="ttdoc">Alias to access the size of the first dimension. </div><div class="ttdef"><b>Definition:</b> <a href="_dimensions_8h_source.xhtml#l00081">Dimensions.h:81</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a92fd4059750cbbeecd8ad03f279200e1"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a92fd4059750cbbeecd8ad03f279200e1">arm_compute::test::validation::bilinear_policy</a></div><div class="ttdeci">T bilinear_policy(const SimpleTensor&lt; T &gt; &amp;in, Coordinates id, float xn, float yn, BorderMode border_mode, T constant_border_value)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_c_p_p_2_utils_8cpp_source.xhtml#l00036">Utils.cpp:36</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_xhtml_a24d8c0391cfa38e78969b6ad97c0ff09"><div class="ttname"><a href="namespacearm__compute_1_1test.xhtml#a24d8c0391cfa38e78969b6ad97c0ff09">arm_compute::test::index2coord</a></div><div class="ttdeci">Coordinates index2coord(const TensorShape &amp;shape, int index)</div><div class="ttdoc">Convert a linear index into n-dimensional coordinates. </div><div class="ttdef"><b>Definition:</b> <a href="tests_2_utils_8h_source.xhtml#l00308">Utils.h:308</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a997c20c740c2cf8dd5676ad55ad8a1a6"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a997c20c740c2cf8dd5676ad55ad8a1a6">arm_compute::test::validation::valid_bilinear_policy</a></div><div class="ttdeci">bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode border_mode)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_c_p_p_2_utils_8cpp_source.xhtml#l00098">Utils.cpp:98</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="a29ddb612c916a0cd4c57ec03ceffd9b9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">template <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml">SimpleTensor</a>&lt;uint8_t&gt; arm_compute::test::validation::reference::warp_perspective </td>
+          <td>(</td>
+          <td class="paramtype">const SimpleTensor&lt; uint8_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">SimpleTensor&lt; uint8_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>valid_mask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>matrix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">InterpolationPolicy&#160;</td>
+          <td class="paramname"><em>policy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BorderMode&#160;</td>
+          <td class="paramname"><em>border_mode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>constant_border_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml">validation</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml">reference</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:38:00 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

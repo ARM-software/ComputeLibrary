@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -130,20 +130,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1356f0d04912be3ec8d8ce7a2b0cddd2"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a1356f0d04912be3ec8d8ce7a2b0cddd2">~INode</a> ()=default</td></tr>
 <tr class="memdesc:a1356f0d04912be3ec8d8ce7a2b0cddd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Virtual Destructor.  <a href="#a1356f0d04912be3ec8d8ce7a2b0cddd2">More...</a><br/></td></tr>
 <tr class="separator:a1356f0d04912be3ec8d8ce7a2b0cddd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85b761476c2895adc8849c50e9a150aa"><td class="memItemLeft" align="right" valign="top">virtual std::unique_ptr<br class="typebreak"/>
-&lt; <a class="el" href="classarm__compute_1_1_i_function.xhtml">arm_compute::IFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a85b761476c2895adc8849c50e9a150aa">instantiate_node</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">Hint</a> hint, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output)=0</td></tr>
-<tr class="memdesc:a85b761476c2895adc8849c50e9a150aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented that instantiates the node.  <a href="#a85b761476c2895adc8849c50e9a150aa">More...</a><br/></td></tr>
-<tr class="separator:a85b761476c2895adc8849c50e9a150aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae679e943401cc87945a8847ccb61b80b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">Hint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#ae679e943401cc87945a8847ccb61b80b">override_hint</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">Hint</a> hint) const </td></tr>
-<tr class="memdesc:ae679e943401cc87945a8847ccb61b80b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Override the existing hint.  <a href="#ae679e943401cc87945a8847ccb61b80b">More...</a><br/></td></tr>
-<tr class="separator:ae679e943401cc87945a8847ccb61b80b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0edc24eb6746005c180249b5130ca62d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a0edc24eb6746005c180249b5130ca62d">print_info</a> ()=0</td></tr>
-<tr class="separator:a0edc24eb6746005c180249b5130ca62d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f783ed63208c75dc6be8af01c956419"><td class="memItemLeft" align="right" valign="top">virtual std::unique_ptr<br class="typebreak"/>
+&lt; <a class="el" href="classarm__compute_1_1_i_function.xhtml">arm_compute::IFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a7f783ed63208c75dc6be8af01c956419">instantiate_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;ctx, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output)=0</td></tr>
+<tr class="memdesc:a7f783ed63208c75dc6be8af01c956419"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented that instantiates the node.  <a href="#a7f783ed63208c75dc6be8af01c956419">More...</a><br/></td></tr>
+<tr class="separator:a7f783ed63208c75dc6be8af01c956419"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f94409d100ac0a28961a82a5cc31d30"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">TargetHint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a4f94409d100ac0a28961a82a5cc31d30">override_target_hint</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">TargetHint</a> target_hint) const </td></tr>
+<tr class="memdesc:a4f94409d100ac0a28961a82a5cc31d30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Override the existing target hint.  <a href="#a4f94409d100ac0a28961a82a5cc31d30">More...</a><br/></td></tr>
+<tr class="separator:a4f94409d100ac0a28961a82a5cc31d30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Node interface. </p>
 
-<p>Definition at line <a class="el" href="_i_node_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_i_node_8h_source.xhtml">INode.h</a>.</p>
+<p>Definition at line <a class="el" href="_i_node_8h_source.xhtml#l00038">38</a> of file <a class="el" href="_i_node_8h_source.xhtml">INode.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a1356f0d04912be3ec8d8ce7a2b0cddd2"></a>
 <div class="memitem">
@@ -171,7 +169,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a85b761476c2895adc8849c50e9a150aa"></a>
+<a class="anchor" id="a7f783ed63208c75dc6be8af01c956419"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -181,8 +179,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual std::unique_ptr&lt;<a class="el" href="classarm__compute_1_1_i_function.xhtml">arm_compute::IFunction</a>&gt; instantiate_node </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">Hint</a>&#160;</td>
-          <td class="paramname"><em>hint</em>, </td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -212,65 +210,40 @@ Public Member Functions</h2></td></tr>
 <p>Interface to be implemented that instantiates the node. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hint</td><td>Hint to where the node should be executed </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> context to be used </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor of the node </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor of the node </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer.xhtml#aaa115a53f16316ee0a38398e90415968">ConvolutionLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_fully_connected_layer.xhtml#aaa115a53f16316ee0a38398e90415968">FullyConnectedLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_activation_layer.xhtml#aaa115a53f16316ee0a38398e90415968">ActivationLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer.xhtml#aaa115a53f16316ee0a38398e90415968">PoolingLayer</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_softmax_layer.xhtml#aaa115a53f16316ee0a38398e90415968">SoftmaxLayer</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer.xhtml#a6715346967f76b53aea4e31cacbe75de">ConvolutionLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer.xhtml#a6715346967f76b53aea4e31cacbe75de">BatchNormalizationLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_fully_connected_layer.xhtml#a6715346967f76b53aea4e31cacbe75de">FullyConnectedLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_l2_normalize_layer.xhtml#a6715346967f76b53aea4e31cacbe75de">L2NormalizeLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_activation_layer.xhtml#a6715346967f76b53aea4e31cacbe75de">ActivationLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer.xhtml#a6715346967f76b53aea4e31cacbe75de">PoolingLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_normalization_layer.xhtml#a6715346967f76b53aea4e31cacbe75de">NormalizationLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_floor_layer.xhtml#a6715346967f76b53aea4e31cacbe75de">FloorLayer</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_softmax_layer.xhtml#a6715346967f76b53aea4e31cacbe75de">SoftmaxLayer</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ae679e943401cc87945a8847ccb61b80b"></a>
+<a class="anchor" id="a4f94409d100ac0a28961a82a5cc31d30"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">Hint</a> override_hint </td>
+          <td class="memname"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">TargetHint</a> override_target_hint </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a0e3ca6c9bf8d16363c1be8fddd2cfcae">Hint</a>&#160;</td>
-          <td class="paramname"><em>hint</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">TargetHint</a>&#160;</td>
+          <td class="paramname"><em>target_hint</em></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Override the existing hint. </p>
+<p>Override the existing target hint. </p>
 <dl class="section note"><dt>Note</dt><dd>If the input is DONT_CARE then the method has to pick a technology, else it can accept the hint or override it (But not with DONT_CARE)</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hint</td><td>Hint to be considered</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">target_hint</td><td>Target hint to be considered</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The updated hint </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a0edc24eb6746005c180249b5130ca62d"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void print_info </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer.xhtml#ab9acab91b0e030ef0c969aa9c2fe7529">ConvolutionLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_fully_connected_layer.xhtml#ab9acab91b0e030ef0c969aa9c2fe7529">FullyConnectedLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_activation_layer.xhtml#ab9acab91b0e030ef0c969aa9c2fe7529">ActivationLayer</a>, <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer.xhtml#ab9acab91b0e030ef0c969aa9c2fe7529">PoolingLayer</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_softmax_layer.xhtml#ab9acab91b0e030ef0c969aa9c2fe7529">SoftmaxLayer</a>.</p>
+<dl class="section return"><dt>Returns</dt><dd>The updated target hint </dd></dl>
 
 </div>
 </div>
@@ -283,7 +256,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml">INode</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:58 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

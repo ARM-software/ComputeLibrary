@@ -82,6 +82,9 @@ var dir_35f65bf11a4f103b6aa0588a205e65e2 =
     [ "NEFillBorder.h", "_n_e_fill_border_8h.xhtml", [
       [ "NEFillBorder", "classarm__compute_1_1_n_e_fill_border.xhtml", "classarm__compute_1_1_n_e_fill_border" ]
     ] ],
+    [ "NEFlattenLayer.h", "_n_e_flatten_layer_8h.xhtml", [
+      [ "NEFlattenLayer", "classarm__compute_1_1_n_e_flatten_layer.xhtml", "classarm__compute_1_1_n_e_flatten_layer" ]
+    ] ],
     [ "NEFloor.h", "_n_e_floor_8h.xhtml", [
       [ "NEFloor", "classarm__compute_1_1_n_e_floor.xhtml", "classarm__compute_1_1_n_e_floor" ]
     ] ],

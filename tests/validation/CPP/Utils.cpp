@@ -35,8 +35,8 @@ namespace validation
 template <typename T>
 T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, T constant_border_value)
 {
-    int idx = std::floor(xn);
-    int idy = std::floor(yn);
+    const int idx = std::floor(xn);
+    const int idy = std::floor(yn);
 
     const float dx   = xn - idx;
     const float dy   = yn - idy;
@@ -93,6 +93,19 @@ RawTensor transpose(const RawTensor &src, int chunk_width)
     }
 
     return dst;
+}
+
+bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode border_mode)
+{
+    if(border_mode != BorderMode::UNDEFINED)
+    {
+        return true;
+    }
+    if((0 <= yn + 1) && (yn + 1 < height) && (0 <= xn + 1) && (xn + 1 < width))
+    {
+        return true;
+    }
+    return false;
 }
 } // namespace validation
 } // namespace test

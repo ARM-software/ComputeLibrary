@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -265,7 +265,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="floor_8cl_source.xhtml#l00049">49</a> of file <a class="el" href="floor_8cl_source.xhtml">floor.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00108">CONVERT_TO_TENSOR3D_STRUCT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, <a class="el" href="helpers_8h_source.xhtml#l00142">Tensor3D::ptr</a>, <a class="el" href="helpers_8h_source.xhtml#l00034">VLOAD</a>, and <a class="el" href="helpers_8h_source.xhtml#l00037">VSTORE</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00111">CONVERT_TO_TENSOR3D_STRUCT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, <a class="el" href="helpers_8h_source.xhtml#l00145">Tensor3D::ptr</a>, <a class="el" href="helpers_8h_source.xhtml#l00037">VLOAD</a>, and <a class="el" href="helpers_8h_source.xhtml#l00040">VSTORE</a>.</p>
 <div class="fragment"><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;{</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <a class="code" href="struct_tensor3_d.xhtml">Tensor3D</a> input  = <a class="code" href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a>(input);</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <a class="code" href="struct_tensor3_d.xhtml">Tensor3D</a> output = <a class="code" href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a>(output);</div>
@@ -273,12 +273,12 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <a class="code" href="helpers_8h.xhtml#acb282042d1edeeaa3cc979a206f78b54">VSTORE</a>(VEC_SIZE)</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    (floor(<a class="code" href="helpers_8h.xhtml#a287e2fc366c312b468382c95bb90f91f">VLOAD</a>(VEC_SIZE)(0, (__global <a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a> *)input.<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>)), 0, (__global <a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a> *)output.<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_a287e2fc366c312b468382c95bb90f91f"><div class="ttname"><a href="helpers_8h.xhtml#a287e2fc366c312b468382c95bb90f91f">VLOAD</a></div><div class="ttdeci">#define VLOAD(size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00034">helpers.h:34</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_a31c8c760f08fb1a331b16b7c204321dc"><div class="ttname"><a href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_TENSOR3D_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00108">helpers.h:108</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a287e2fc366c312b468382c95bb90f91f"><div class="ttname"><a href="helpers_8h.xhtml#a287e2fc366c312b468382c95bb90f91f">VLOAD</a></div><div class="ttdeci">#define VLOAD(size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00037">helpers.h:37</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a31c8c760f08fb1a331b16b7c204321dc"><div class="ttname"><a href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_TENSOR3D_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00111">helpers.h:111</a></div></div>
 <div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml"><div class="ttname"><a href="struct_tensor3_d.xhtml">Tensor3D</a></div><div class="ttdoc">Structure to hold 3D tensor information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00140">helpers.h:140</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_acb282042d1edeeaa3cc979a206f78b54"><div class="ttname"><a href="helpers_8h.xhtml#acb282042d1edeeaa3cc979a206f78b54">VSTORE</a></div><div class="ttdeci">#define VSTORE(size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00037">helpers.h:37</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor3D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00142">helpers.h:142</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml"><div class="ttname"><a href="struct_tensor3_d.xhtml">Tensor3D</a></div><div class="ttdoc">Structure to hold 3D tensor information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00143">helpers.h:143</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_acb282042d1edeeaa3cc979a206f78b54"><div class="ttname"><a href="helpers_8h.xhtml#acb282042d1edeeaa3cc979a206f78b54">VSTORE</a></div><div class="ttdeci">#define VSTORE(size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00040">helpers.h:40</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor3D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00145">helpers.h:145</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -288,7 +288,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_55b5a5006e943fb664ff8cff3cfe7768.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_f6c3ae42d7e27145d0a3c3e38ca1c000.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1b7ae9123c88e650426d50d95c19d414.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_b7c3d80b0dadb2139bc73b7161751c12.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="floor_8cl.xhtml">floor.cl</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:53 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

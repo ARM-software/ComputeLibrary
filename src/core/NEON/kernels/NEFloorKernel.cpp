@@ -39,10 +39,8 @@ void NEFloorKernel::configure(const ITensor *input, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    set_shape_if_empty(*output->info(), input->info()->tensor_shape());
-
-    set_data_type_if_unknown(*input->info(), DataType::F32);
-    set_data_type_if_unknown(*output->info(), DataType::F32);
+    // Auto initialize output
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);

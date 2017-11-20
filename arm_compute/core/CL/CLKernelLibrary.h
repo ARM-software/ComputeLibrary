@@ -162,11 +162,9 @@ public:
      */
     void init(std::string kernel_path = ".", cl::Context context = cl::Context::getDefault(), cl::Device device = cl::Device::getDefault())
     {
-        _kernel_path        = std::move(kernel_path);
-        _context            = std::move(context);
-        _device             = std::move(device);
-        _max_workgroup_size = 0;
-        max_local_workgroup_size();
+        _kernel_path = std::move(kernel_path);
+        _context     = std::move(context);
+        _device      = std::move(device);
     }
     /** Sets the path that the kernels reside in.
      *
@@ -208,20 +206,15 @@ public:
         {
             _device = cl_devices[0];
         }
-
-        _max_workgroup_size = 0;
-        max_local_workgroup_size();
-    };
+    }
     /** Sets the CL device for which the programs are created.
      *
      * @param[in] device A CL device.
      */
     void set_device(cl::Device device)
     {
-        _device             = std::move(device);
-        _max_workgroup_size = 0;
-        max_local_workgroup_size();
-    };
+        _device = std::move(device);
+    }
     /** Creates a kernel from the kernel library.
      *
      * @param[in] kernel_name       Kernel name.
@@ -238,15 +231,14 @@ public:
      *
      */
     void load_binary();
-    /** Find the maximum number of local work items in a workgroup can be supported by the device
+    /** Find the maximum number of local work items in a workgroup can be supported for the kernel.
      *
      */
-    size_t max_local_workgroup_size();
-
-    /** Return the default NDRange that is suitable for the device.
+    size_t max_local_workgroup_size(const cl::Kernel &kernel) const;
+    /** Return the default NDRange for the device.
      *
      */
-    cl::NDRange default_ndrange();
+    cl::NDRange default_ndrange() const;
 
 private:
     /** Load program and its dependencies.
@@ -270,7 +262,6 @@ private:
     static const std::map<std::string, std::string> _kernel_program_map; /**< Map that associates kernel names with programs. */
     static const std::map<std::string, std::string> _program_source_map; /**< Contains sources for all programs.
                                                                               Used for compile-time kernel inclusion. >*/
-    size_t _max_workgroup_size;                                          /** Maximum local workgroup size supported on the device */
 };
 }
 #endif /* __ARM_COMPUTE_CLKERNELLIBRARY_H__ */

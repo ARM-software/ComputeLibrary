@@ -2,9 +2,11 @@ var searchData=
 [
   ['filenotfound',['FileNotFound',['../classarm__compute_1_1test_1_1framework_1_1_file_not_found.xhtml',1,'arm_compute::test::framework']]],
   ['fixed_5fpoint',['fixed_point',['../classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml',1,'arm_compute::test::fixed_point_arithmetic']]],
+  ['fixedpointvalidationfixture',['FixedPointValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_fixed_point_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['fixture',['Fixture',['../classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml',1,'arm_compute::test::framework']]],
   ['flattenlayervalidationfixture',['FlattenLayerValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_flatten_layer_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['floorfixture',['FloorFixture',['../classarm__compute_1_1test_1_1_floor_fixture.xhtml',1,'arm_compute::test']]],
+  ['floorlayer',['FloorLayer',['../classarm__compute_1_1graph_1_1_floor_layer.xhtml',1,'arm_compute::graph']]],
   ['floorvalidationfixture',['FloorValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_floor_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['framework',['Framework',['../classarm__compute_1_1test_1_1framework_1_1_framework.xhtml',1,'arm_compute::test::framework']]],
   ['fullyconnectedlayer',['FullyConnectedLayer',['../classarm__compute_1_1graph_1_1_fully_connected_layer.xhtml',1,'arm_compute::graph']]],

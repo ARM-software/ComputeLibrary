@@ -82,7 +82,7 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
     }
 
     // Add zero padding XY
-    _input_border_handler.configure(input, _conv_kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
+    _input_border_handler.configure(input, _conv_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
 }
 
 void NEDirectConvolutionLayer::run()

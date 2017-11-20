@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -125,11 +125,15 @@ $(document).ready(function(){initNavTree('index.xhtml','');});
 <li class="level3"><a href="#S3_3_2_examples">How to manually build the examples ?</a></li>
 </ul>
 </li>
-<li class="level2"><a href="#S3_4_windows_host">Building on a Windows host system</a><ul><li class="level3"><a href="#S3_4_1_ubuntu_on_windows">Bash on Ubuntu on Windows</a></li>
-<li class="level3"><a href="#S3_4_2_cygwin">Cygwin</a></li>
+<li class="level2"><a href="#S3_4_bare_metal">Building for bare metal</a><ul><li class="level3"><a href="#S3_4_1_library">How to build the library ?</a></li>
+<li class="level3"><a href="#S3_4_2_examples">How to manually build the examples ?</a></li>
 </ul>
 </li>
-<li class="level2"><a href="#S3_5_cl_stub_library">The OpenCL stub library</a></li>
+<li class="level2"><a href="#S3_5_windows_host">Building on a Windows host system</a><ul><li class="level3"><a href="#S3_5_1_ubuntu_on_windows">Bash on Ubuntu on Windows</a></li>
+<li class="level3"><a href="#S3_5_2_cygwin">Cygwin</a></li>
+</ul>
+</li>
+<li class="level2"><a href="#S3_6_cl_stub_library">The OpenCL stub library</a></li>
 </ul>
 </li>
 </ul>
@@ -278,6 +282,20 @@ v17.04 (First release of April 2017)
 </pre><dl class="section note"><dt>Note</dt><dd>We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.</dd></dl>
 <h2><a class="anchor" id="S2_2_changelog"></a>
 Changelog</h2>
+<p>v17.10 Public maintenance release</p>
+<ul>
+<li>Bug fixes:<ul>
+<li>Check the maximum local workgroup size supported by OpenCL devices</li>
+<li>Minor documentation updates (Fixed instructions to build the examples)</li>
+<li>Introduced a <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml" title="Graph context. ">arm_compute::graph::GraphContext</a></li>
+<li>Added a few new Graph nodes and support for grouping.</li>
+<li>Automatically enable cl_printf in debug builds</li>
+<li>Fixed bare metal builds for armv7a</li>
+<li>Added AlexNet and cartoon effect examples</li>
+<li>Fixed library builds: libraries are no longer built as supersets of each other.(It means application using the Runtime part of the library now need to link against both libarm_compute_core and libarm_compute)</li>
+</ul>
+</li>
+</ul>
 <p>v17.09 Public major release</p>
 <ul>
 <li>Experimental Graph support: initial implementation of a simple stream API to easily chain machine learning layers.</li>
@@ -591,23 +609,35 @@ How to manually build the examples ?</h3>
 <p>The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.</p>
 <dl class="section note"><dt>Note</dt><dd>The following command lines assume the <a class="el" href="namespacearm__compute.xhtml">arm_compute</a> and libOpenCL binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.</dd></dl>
 <p>To cross compile a NEON example for Linux 32bit: </p>
-<pre class="fragment">arm-linux-gnueabihf-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -std=c++11 -mfpu=neon -L. -larm_compute -o neon_convolution
+<pre class="fragment">arm-linux-gnueabihf-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>To cross compile a NEON example for Linux 64bit: </p>
-<pre class="fragment">aarch64-linux-gnu-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -std=c++11 -L. -larm_compute -o neon_convolution
+<pre class="fragment">aarch64-linux-gnu-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)</p>
 <p>To cross compile an OpenCL example for Linux 32bit: </p>
-<pre class="fragment">arm-linux-gnueabihf-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
+<pre class="fragment">arm-linux-gnueabihf-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -larm_compute_core -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
 </pre><p>To cross compile an OpenCL example for Linux 64bit: </p>
-<pre class="fragment">aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
+<pre class="fragment">aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -larm_compute_core -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
+</pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)</p>
+<p>To cross compile the examples with the Graph API, such as <a class="el" href="graph__lenet_8cpp.xhtml">graph_lenet.cpp</a>, you need to link the library arm_compute_graph.so also. (notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1)</p>
+<p>i.e. to cross compile the "graph_lenet" example for Linux 32bit: </p>
+<pre class="fragment">arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
+</pre><p>i.e. to cross compile the "graph_lenet" example for Linux 64bit: </p>
+<pre class="fragment">aarch64-linux-gnu-g++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)</p>
 <p>To compile natively (i.e directly on an ARM device) for NEON for Linux 32bit: </p>
-<pre class="fragment">g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -std=c++11 -mfpu=neon -larm_compute -o neon_convolution
+<pre class="fragment">g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>To compile natively (i.e directly on an ARM device) for NEON for Linux 64bit: </p>
-<pre class="fragment">g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -std=c++11 -larm_compute -o neon_convolution
+<pre class="fragment">g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option)</p>
 <p>To compile natively (i.e directly on an ARM device) for OpenCL for Linux 32bit or Linux 64bit: </p>
-<pre class="fragment">g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
-</pre><dl class="section note"><dt>Note</dt><dd>These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L</dd></dl>
+<pre class="fragment">g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
+</pre><p>To compile natively (i.e directly on an ARM device) the examples with the Graph API, such as <a class="el" href="graph__lenet_8cpp.xhtml">graph_lenet.cpp</a>, you need to link the library arm_compute_graph.so also. (notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1)</p>
+<p>i.e. to cross compile the "graph_lenet" example for Linux 32bit: </p>
+<pre class="fragment">g++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
+</pre><p>i.e. to cross compile the "graph_lenet" example for Linux 64bit: </p>
+<pre class="fragment">g++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -lOpenCL -o graph_lenet -DARM_COMPUTE_CL
+</pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option)</p>
+<dl class="section note"><dt>Note</dt><dd>These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L</dd></dl>
 <p>To run the built executable simply run: </p>
 <pre class="fragment">LD_LIBRARY_PATH=build ./neon_convolution
 </pre><p>or </p>
@@ -644,14 +674,19 @@ How to manually build the examples ?</h3>
 <p>Once you've got your Android standalone toolchain built and added to your path you can do the following:</p>
 <p>To cross compile a NEON example: </p>
 <pre class="fragment">#32 bit:
-arm-linux-androideabi-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o neon_convolution_arm -static-libstdc++ -pie
+arm-linux-androideabi-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o neon_convolution_arm -static-libstdc++ -pie
 #64 bit:
-aarch64-linux-android-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o neon_convolution_aarch64 -static-libstdc++ -pie
+aarch64-linux-android-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o neon_convolution_aarch64 -static-libstdc++ -pie
 </pre><p>To cross compile an OpenCL example: </p>
 <pre class="fragment">#32 bit:
-arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 #64 bit:
-aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+</pre><p>To cross compile the examples with the Graph API, such as <a class="el" href="graph__lenet_8cpp.xhtml">graph_lenet.cpp</a>, you need to link the library arm_compute_graph also. (notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1) </p>
+<pre class="fragment">#32 bit:
+arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute_graph-static -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+#64 bit:
+aarch64-linux-android-g++ examples/graph_lenet.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute_graph-static -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 </pre><dl class="section note"><dt>Note</dt><dd>Due to some issues in older versions of the Mali OpenCL DDK (&lt;= r13p0), we recommend to link <a class="el" href="namespacearm__compute.xhtml">arm_compute</a> statically on Android.</dd></dl>
 <p>Then you need to do is upload the executable and the shared library to the device using ADB: </p>
 <pre class="fragment">adb push neon_convolution_arm /data/local/tmp/
@@ -667,16 +702,32 @@ adb shell chmod 777 -R /data/local/tmp/
 </pre><p>And finally to run the example: </p>
 <pre class="fragment">adb shell /data/local/tmp/neon_convolution_aarch64
 adb shell /data/local/tmp/cl_convolution_aarch64
-</pre><h2><a class="anchor" id="S3_4_windows_host"></a>
+</pre><h2><a class="anchor" id="S3_4_bare_metal"></a>
+Building for bare metal</h2>
+<p>For bare metal, the library was successfully built using linaros's latest (gcc-linaro-6.3.1-2017.05) bare metal toolchains:</p>
+<ul>
+<li>arm-eabi for armv7a</li>
+<li>aarch64-elf for arm64-v8a</li>
+</ul>
+<p>Download linaro for <a href="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/arm-eabi/">armv7a</a> and <a href="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/aarch64-elf/">arm64-v8a</a>.</p>
+<dl class="section note"><dt>Note</dt><dd>Make sure to add the toolchains to your PATH: export PATH=$PATH:$MY_TOOLCHAINS/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-elf/bin:$MY_TOOLCHAINS/gcc-linaro-6.3.1-2017.05-x86_64_arm-eabi/bin</dd></dl>
+<h3><a class="anchor" id="S3_4_1_library"></a>
+How to build the library ?</h3>
+<p>To cross-compile the library with NEON support for baremetal arm64-v8a: </p>
+<pre class="fragment">scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=bare_metal arch=arm64-v8a build=cross_compile cppthreads=0 openmp=0 standalone=1
+</pre><h3><a class="anchor" id="S3_4_2_examples"></a>
+How to manually build the examples ?</h3>
+<p>Examples are disabled when building for bare metal. If you want to build the examples you need to provide a custom bootcode depending on the target architecture and link against the compute library. More information about bare metal bootcode can be found <a href="http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dai0527a/index.html">here</a>.</p>
+<h2><a class="anchor" id="S3_5_windows_host"></a>
 Building on a Windows host system</h2>
 <p>Using <code>scons</code> directly from the Windows command line is known to cause problems. The reason seems to be that if <code>scons</code> is setup for cross-compilation it gets confused about Windows style paths (using backslashes). Thus it is recommended to follow one of the options outlined below.</p>
-<h3><a class="anchor" id="S3_4_1_ubuntu_on_windows"></a>
+<h3><a class="anchor" id="S3_5_1_ubuntu_on_windows"></a>
 Bash on Ubuntu on Windows</h3>
 <p>The best and easiest option is to use <a href="https://msdn.microsoft.com/en-gb/commandline/wsl/about">Ubuntu on Windows</a>. This feature is still marked as <em>beta</em> and thus might not be available. However, if it is building the library is as simple as opening a <em>Bash on Ubuntu on Windows</em> shell and following the general guidelines given above.</p>
-<h3><a class="anchor" id="S3_4_2_cygwin"></a>
+<h3><a class="anchor" id="S3_5_2_cygwin"></a>
 Cygwin</h3>
 <p>If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a> can be used to install and run <code>scons</code>. In addition to the default packages installed by Cygwin <code>scons</code> has to be selected in the installer. (<code>git</code> might also be useful but is not strictly required if you already have got the source code of the library.) Linaro provides pre-built versions of <a href="http://releases.linaro.org/components/toolchain/binaries/">GCC cross-compilers</a> that can be used from the Cygwin terminal. When building for Android the compiler is included in the Android standalone toolchain. After everything has been set up in the Cygwin terminal the general guide on building the library can be followed.</p>
-<h2><a class="anchor" id="S3_5_cl_stub_library"></a>
+<h2><a class="anchor" id="S3_6_cl_stub_library"></a>
 The OpenCL stub library</h2>
 <p>In the opencl-1.2-stubs folder you will find the sources to build a stub OpenCL library which then can be used to link your application or <a class="el" href="namespacearm__compute.xhtml">arm_compute</a> against.</p>
 <p>If you preferred you could retrieve the OpenCL library from your device and link against this one but often this library will have dependencies on a range of system libraries forcing you to link your application against those too even though it is not using them.</p>
@@ -697,7 +748,7 @@ aarch64-linux-android-gcc -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/ope
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Sep 28 2017 14:38:01 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

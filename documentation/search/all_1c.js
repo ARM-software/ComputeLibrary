@@ -161,7 +161,7 @@ var searchData=
   ['_7esqueezenetactivationlayerdataset',['~SqueezeNetActivationLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_squeeze_net_activation_layer_dataset.xhtml#adcfe238a56d7c8c0d34044695406efa0',1,'arm_compute::test::datasets::SqueezeNetActivationLayerDataset']]],
   ['_7esteps',['~Steps',['../classarm__compute_1_1_steps.xhtml#a48c1f75c6cf7bdb28eeec6a795c5cf0d',1,'arm_compute::Steps']]],
   ['_7estrides',['~Strides',['../classarm__compute_1_1_strides.xhtml#a64d502a8edb06439f9e095f92f99c227',1,'arm_compute::Strides']]],
-  ['_7esubtensor',['~SubTensor',['../classarm__compute_1_1_sub_tensor.xhtml#af1fc5900259cbc0bc26c9e6e28bb49b6',1,'arm_compute::SubTensor']]],
+  ['_7esubtensor',['~SubTensor',['../classarm__compute_1_1graph_1_1_sub_tensor.xhtml#af1fc5900259cbc0bc26c9e6e28bb49b6',1,'arm_compute::graph::SubTensor::~SubTensor()'],['../classarm__compute_1_1_sub_tensor.xhtml#af1fc5900259cbc0bc26c9e6e28bb49b6',1,'arm_compute::SubTensor::~SubTensor()']]],
   ['_7esubtensorinfo',['~SubTensorInfo',['../classarm__compute_1_1_sub_tensor_info.xhtml#ad86e6a6af47f1b493eac9873f88b843f',1,'arm_compute::SubTensorInfo']]],
   ['_7etensor',['~Tensor',['../classarm__compute_1_1graph_1_1_tensor.xhtml#ae55ef806b29ad70cd952e2c1508715ae',1,'arm_compute::graph::Tensor::~Tensor()'],['../classarm__compute_1_1_tensor.xhtml#ae55ef806b29ad70cd952e2c1508715ae',1,'arm_compute::Tensor::~Tensor()']]],
   ['_7etensorallocator',['~TensorAllocator',['../classarm__compute_1_1_tensor_allocator.xhtml#a27f8b115e4571d52d83419aaea4eeee1',1,'arm_compute::TensorAllocator']]],

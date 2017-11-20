@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_scheduler.xhtml" title="Configurable scheduler which supports multiple multithreading APIs and choosing between different sch..." alt="" coords="5,5,85,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1datasets_1_1_r_o_i_pooling_layer_dataset.xhtml" title="ROIPoolingLayerDataset" alt="" coords="5,5,172,32"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1datasets_1_1_small_r_o_i_pooling_layer_dataset.xhtml" title="SmallROIPoolingLayerDataset" alt="" coords="220,5,420,32"/>
 </map>

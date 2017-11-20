@@ -56,6 +56,7 @@ var dir_62e76289bb143101bef0ade0babfd908 =
     [ "ITensorInfo.h", "_i_tensor_info_8h.xhtml", [
       [ "ITensorInfo", "classarm__compute_1_1_i_tensor_info.xhtml", "classarm__compute_1_1_i_tensor_info" ]
     ] ],
+    [ "Logger.h", "_logger_8h.xhtml", "_logger_8h" ],
     [ "MultiImageInfo.h", "_multi_image_info_8h.xhtml", [
       [ "MultiImageInfo", "classarm__compute_1_1_multi_image_info.xhtml", "classarm__compute_1_1_multi_image_info" ]
     ] ],

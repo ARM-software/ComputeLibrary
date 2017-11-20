@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -289,7 +289,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="quantization__layer_8cl_source.xhtml#l00049">49</a> of file <a class="el" href="quantization__layer_8cl_source.xhtml">quantization_layer.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00108">CONVERT_TO_TENSOR3D_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00142">Tensor3D::ptr</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00111">CONVERT_TO_TENSOR3D_STRUCT</a>, and <a class="el" href="helpers_8h_source.xhtml#l00145">Tensor3D::ptr</a>.</p>
 <div class="fragment"><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;{</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="comment">// Get pixels pointer</span></div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <a class="code" href="struct_tensor3_d.xhtml">Tensor3D</a> input  = <a class="code" href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a>(input);</div>
@@ -313,9 +313,9 @@ Functions</h2></td></tr>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <span class="comment">// Store result</span></div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    vstore4(res, 0, (__global uchar *)output.<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;}</div>
-<div class="ttc" id="helpers_8h_xhtml_a31c8c760f08fb1a331b16b7c204321dc"><div class="ttname"><a href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_TENSOR3D_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00108">helpers.h:108</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml"><div class="ttname"><a href="struct_tensor3_d.xhtml">Tensor3D</a></div><div class="ttdoc">Structure to hold 3D tensor information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00140">helpers.h:140</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor3D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00142">helpers.h:142</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a31c8c760f08fb1a331b16b7c204321dc"><div class="ttname"><a href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_TENSOR3D_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00111">helpers.h:111</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml"><div class="ttname"><a href="struct_tensor3_d.xhtml">Tensor3D</a></div><div class="ttdoc">Structure to hold 3D tensor information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00143">helpers.h:143</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor3D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00145">helpers.h:145</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -325,7 +325,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_55b5a5006e943fb664ff8cff3cfe7768.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_f6c3ae42d7e27145d0a3c3e38ca1c000.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1b7ae9123c88e650426d50d95c19d414.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_b7c3d80b0dadb2139bc73b7161751c12.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="quantization__layer_8cl.xhtml">quantization_layer.cl</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:54 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -455,7 +455,7 @@ The data_type of the intermediate result of the multiplication should passed as 
 
 <p>Definition at line <a class="el" href="pixelwise__mul__int_8cl_source.xhtml#l00083">83</a> of file <a class="el" href="pixelwise__mul__int_8cl_source.xhtml">pixelwise_mul_int.cl</a>.</p>
 
-<p>References <a class="el" href="fixed__point_8h_source.xhtml#l00098">CONVERT</a>, <a class="el" href="helpers_8h_source.xhtml#l00108">CONVERT_TO_TENSOR3D_STRUCT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00031">DATA_TYPE_OUT</a>, <a class="el" href="pixelwise__mul__int_8cl_source.xhtml#l00045">MUL_OP</a>, <a class="el" href="helpers_8h_source.xhtml#l00142">Tensor3D::ptr</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
+<p>References <a class="el" href="fixed__point_8h_source.xhtml#l00098">CONVERT</a>, <a class="el" href="helpers_8h_source.xhtml#l00111">CONVERT_TO_TENSOR3D_STRUCT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00031">DATA_TYPE_OUT</a>, <a class="el" href="pixelwise__mul__int_8cl_source.xhtml#l00045">MUL_OP</a>, <a class="el" href="helpers_8h_source.xhtml#l00145">Tensor3D::ptr</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
 <div class="fragment"><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;{</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="comment">// Get pixels pointer</span></div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <a class="code" href="struct_tensor3_d.xhtml">Tensor3D</a> in1 = <a class="code" href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a>(in1);</div>
@@ -472,8 +472,8 @@ The data_type of the intermediate result of the multiplication should passed as 
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    vstore16(<a class="code" href="pixelwise__mul__int_8cl.xhtml#a34c938068213444e52940e73d6d585cc">MUL_OP</a>(in1_data, in2_data, <a class="code" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a2c08fc82f2e4b9733cd0dacd6eabe579">scale</a>, <a class="code" href="convolution3x3_8cl.xhtml#ac06f3e24d3fffd3c465d8b2a6e7c985e">DATA_TYPE_OUT</a>, 16), 0, (__global DATA_TYPE_OUT *)out.ptr);</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;}</div>
 <div class="ttc" id="fixed__point_8h_xhtml_aa8d95ba04fc73845abc6045952cae5be"><div class="ttname"><a href="fixed__point_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be">CONVERT</a></div><div class="ttdeci">#define CONVERT(x, type)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00098">fixed_point.h:98</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_a31c8c760f08fb1a331b16b7c204321dc"><div class="ttname"><a href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_TENSOR3D_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00108">helpers.h:108</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml"><div class="ttname"><a href="struct_tensor3_d.xhtml">Tensor3D</a></div><div class="ttdoc">Structure to hold 3D tensor information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00140">helpers.h:140</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a31c8c760f08fb1a331b16b7c204321dc"><div class="ttname"><a href="helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_TENSOR3D_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00111">helpers.h:111</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml"><div class="ttname"><a href="struct_tensor3_d.xhtml">Tensor3D</a></div><div class="ttdoc">Structure to hold 3D tensor information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00143">helpers.h:143</a></div></div>
 <div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
 <div class="ttc" id="pixelwise__mul__int_8cl_xhtml_a34c938068213444e52940e73d6d585cc"><div class="ttname"><a href="pixelwise__mul__int_8cl.xhtml#a34c938068213444e52940e73d6d585cc">MUL_OP</a></div><div class="ttdeci">#define MUL_OP(x, y, scale, type, size)</div><div class="ttdef"><b>Definition:</b> <a href="pixelwise__mul__int_8cl_source.xhtml#l00045">pixelwise_mul_int.cl:45</a></div></div>
 <div class="ttc" id="convolution3x3_8cl_xhtml_ac06f3e24d3fffd3c465d8b2a6e7c985e"><div class="ttname"><a href="convolution3x3_8cl.xhtml#ac06f3e24d3fffd3c465d8b2a6e7c985e">DATA_TYPE_OUT</a></div><div class="ttdeci">#define DATA_TYPE_OUT</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00031">convolution3x3.cl:31</a></div></div>
@@ -487,7 +487,7 @@ The data_type of the intermediate result of the multiplication should passed as 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_55b5a5006e943fb664ff8cff3cfe7768.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_f6c3ae42d7e27145d0a3c3e38ca1c000.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1b7ae9123c88e650426d50d95c19d414.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_b7c3d80b0dadb2139bc73b7161751c12.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="pixelwise__mul__int_8cl.xhtml">pixelwise_mul_int.cl</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:54 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

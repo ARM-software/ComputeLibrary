@@ -11,7 +11,7 @@ var classarm__compute_1_1graph_1_1_tensor =
     [ "call_accessor", "classarm__compute_1_1graph_1_1_tensor.xhtml#a88d65b04d950e6aba147624fcd308b34", null ],
     [ "info", "classarm__compute_1_1graph_1_1_tensor.xhtml#ad129de4883c35830834987e9b68314e1", null ],
     [ "set_info", "classarm__compute_1_1graph_1_1_tensor.xhtml#a8a47fb3f9c4a913a82e7a0b3cbd9df9e", null ],
-    [ "set_target", "classarm__compute_1_1graph_1_1_tensor.xhtml#a0193e95d4f31d17d4a46d396c2f31453", null ],
-    [ "target", "classarm__compute_1_1graph_1_1_tensor.xhtml#a7b445cb08a74ca03b5b3f0a14693ce16", null ],
+    [ "set_target", "classarm__compute_1_1graph_1_1_tensor.xhtml#aa1cadaf6294a53ceeba961d6bc673e33", null ],
+    [ "target", "classarm__compute_1_1graph_1_1_tensor.xhtml#a86940a4c06b29e89197d29e3febda499", null ],
     [ "tensor", "classarm__compute_1_1graph_1_1_tensor.xhtml#a4dc50b3838970ccfae9c960425ba847f", null ]
 ];

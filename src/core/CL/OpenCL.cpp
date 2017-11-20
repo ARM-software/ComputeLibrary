@@ -100,6 +100,8 @@ bool CLSymbols::load(const std::string &library)
     clGetDeviceInfo           = reinterpret_cast<clGetDeviceInfo_func>(dlsym(handle, "clGetDeviceInfo"));
     clGetDeviceIDs            = reinterpret_cast<clGetDeviceIDs_func>(dlsym(handle, "clGetDeviceIDs"));
     clRetainEvent             = reinterpret_cast<clRetainEvent_func>(dlsym(handle, "clRetainEvent"));
+    clGetPlatformIDs          = reinterpret_cast<clGetPlatformIDs_func>(dlsym(handle, "clGetPlatformIDs"));
+    clGetKernelWorkGroupInfo  = reinterpret_cast<clGetKernelWorkGroupInfo_func>(dlsym(handle, "clGetKernelWorkGroupInfo"));
 
     dlclose(handle);
 
@@ -626,6 +628,40 @@ cl_int clRetainEvent(cl_event event)
     if(func != nullptr)
     {
         return func(event);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clGetPlatformIDs(cl_uint num_entries, cl_platform_id *platforms, cl_uint *num_platforms)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clGetPlatformIDs;
+    if(func != nullptr)
+    {
+        return func(num_entries, platforms, num_platforms);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int
+clGetKernelWorkGroupInfo(cl_kernel                 kernel,
+                         cl_device_id              device,
+                         cl_kernel_work_group_info param_name,
+                         size_t                    param_value_size,
+                         void                     *param_value,
+                         size_t                   *param_value_size_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clGetKernelWorkGroupInfo;
+    if(func != nullptr)
+    {
+        return func(kernel, device, param_name, param_value_size, param_value, param_value_size_ret);
     }
     else
     {

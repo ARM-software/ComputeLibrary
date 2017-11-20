@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['randomaccessor',['RandomAccessor',['../classarm__compute_1_1graph__utils_1_1_random_accessor.xhtml',1,'arm_compute::graph_utils']]],
   ['randombatchnormalizationlayerdataset',['RandomBatchNormalizationLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_random_batch_normalization_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['rangedataset',['RangeDataset',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset.xhtml',1,'arm_compute::test::framework::dataset']]],
   ['rawlutaccessor',['RawLutAccessor',['../classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml',1,'arm_compute::test']]],

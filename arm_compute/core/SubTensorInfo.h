@@ -27,6 +27,7 @@
 #include "arm_compute/core/ITensorInfo.h"
 
 #include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"

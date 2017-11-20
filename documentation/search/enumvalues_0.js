@@ -12,6 +12,7 @@ var searchData=
   ['a7x',['A7x',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da2e661c06783635c6781ed83ba9091a0e',1,'arm_compute']]],
   ['abs',['ABS',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa7d8a220d2262f9d6c658d549ee12cf2c',1,'arm_compute::ActivationLayerInfo']]],
   ['active',['ACTIVE',['../classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70ba18ff74f43da410c5529f7d6fca84f115',1,'arm_compute::test::framework::TestCaseFactory']]],
+  ['add',['ADD',['../namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dca9eeb52badb613229884838847294b90d',1,'arm_compute']]],
   ['all',['ALL',['../namespacearm__compute_1_1test_1_1framework.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfa5fb1f955b45e38e31789286a1790398d',1,'arm_compute::test::framework::ALL()'],['../namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9a5fb1f955b45e38e31789286a1790398d',1,'arm_compute::test::framework::ALL()'],['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005a5fb1f955b45e38e31789286a1790398d',1,'arm_compute::test::framework::ALL()']]],
   ['arch_5fmask',['ARCH_MASK',['../namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853da7bb4605304408687bbcfe83a1c85c5d2',1,'arm_compute']]],
   ['area',['AREA',['../namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9a639aaa22a784d5e5cb03a522267e79c4',1,'arm_compute']]],

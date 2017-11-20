@@ -108,14 +108,13 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
-    static const std::set<int> supported_pool_sizes = { 2, 3, 7 };
+    static const std::set<int> supported_pool_sizes = { 2, 3 };
     ARM_COMPUTE_UNUSED(supported_pool_sizes);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_fixed_point(input->info()->data_type()));
-    ARM_COMPUTE_ERROR_ON(supported_pool_sizes.find(pool_size) == supported_pool_sizes.end());
-    ARM_COMPUTE_ERROR_ON(7 == pool_size && input->info()->data_type() != DataType::F32);
+    ARM_COMPUTE_ERROR_ON((supported_pool_sizes.find(pool_size) == supported_pool_sizes.end()) && (input->info()->data_type() != DataType::F32));
     ARM_COMPUTE_ERROR_ON(pool_pad_x >= pool_size || pool_pad_y >= pool_size);
     ARM_COMPUTE_ERROR_ON(is_data_type_fixed_point(input->info()->data_type()) && pool_stride_x > 2);
 
@@ -207,7 +206,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
                     num_elems_read_per_iteration = 8; // We use vload8 for pooling7
                     break;
                 default:
-                    ARM_COMPUTE_ERROR("Pooling size not supported");
+                    num_elems_read_per_iteration = 1; // We use vload4 for poolingN but with a leftover for loop
                     break;
             }
             num_elems_processed_per_iteration = 1;
@@ -380,7 +379,20 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
             }
             break;
         default:
-            ARM_COMPUTE_ERROR("Unsupported pooling size");
+            switch(pool_type)
+            {
+                case PoolingType::AVG:
+                    _func = &NEPoolingLayerKernel::poolingN_f32<PoolingType::AVG>;
+                    break;
+                case PoolingType::L2:
+                    _func = &NEPoolingLayerKernel::poolingN_f32<PoolingType::L2>;
+                    break;
+                case PoolingType::MAX:
+                    _func = &NEPoolingLayerKernel::poolingN_f32<PoolingType::MAX>;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Unsupported pooling type!");
+            }
             break;
     }
 
@@ -1001,6 +1013,127 @@ void NEPoolingLayerKernel::pooling7_f32(const Window &window_input, const Window
 
         // Store result
         *(reinterpret_cast<float *>(output.ptr())) = final_res;
+    },
+    input, output);
+}
+
+template <PoolingType pooling_type>
+void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window &window)
+{
+    Iterator input(_input, window_input);
+    Iterator output(_output, window);
+
+    const int pool_size     = _pool_info.pool_size();
+    int       pool_pad_x    = 0;
+    int       pool_pad_y    = 0;
+    int       pool_stride_x = 0;
+    int       pool_stride_y = 0;
+    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
+    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        float res = 0.0f;
+
+        if(pooling_type != PoolingType::MAX)
+        {
+            // Calculate scale
+            const float scale = calculate_avg_scale(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+
+            // Perform pooling
+            float32x4_t vres = vdupq_n_f32(0.0f);
+
+            for(int y = 0; y < pool_size; ++y)
+            {
+                int x = 0;
+                for(; x <= (pool_size - 4); x += 4)
+                {
+                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() +
+                                                                                       (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+
+                    // Get power of 2 in case of l2 pooling and accumulate
+                    if(pooling_type == PoolingType::L2)
+                    {
+                        vres = vmlaq_f32(vres, data, data);
+                    }
+                    else
+                    {
+                        vres = vaddq_f32(vres, data);
+                    }
+                }
+
+                // Leftover for loop
+                for(; x < pool_size; ++x)
+                {
+                    float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() + (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+
+                    // Get power of 2 in case of l2 pooling
+                    if(pooling_type == PoolingType::L2)
+                    {
+                        data *= data;
+                    }
+
+                    res += data;
+                }
+            }
+
+#if defined(__aarch64__)
+            // Reduction operation available on 64 bit architectures only
+            res += vaddvq_f32(vres);
+#else  // __aarch64__
+            // Reduction
+            float32x2_t tmp = vpadd_f32(vget_high_f32(vres), vget_low_f32(vres));
+            tmp             = vpadd_f32(tmp, tmp);
+
+            res += vget_lane_f32(tmp, 0);
+#endif // __aarch64__
+            // Divide by scale
+            res *= scale;
+        }
+        else
+        {
+            float32x4_t vres = vdupq_n_f32(std::numeric_limits<float>::min());
+            res              = std::numeric_limits<float>::min();
+
+            for(int y = 0; y < pool_size; ++y)
+            {
+                int x = 0;
+                for(; x <= (pool_size - 4); x += 4)
+                {
+                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() +
+                                                                                       (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    vres                   = vmaxq_f32(vres, data);
+                }
+
+                // Leftover for loop
+                for(; x < pool_size; ++x)
+                {
+                    const float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() + (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    res              = std::max(res, data);
+                }
+            }
+
+#if defined(__aarch64__)
+            // Reduction operation available on 64 bit architectures only
+            res = std::max(vmaxvq_f32(vres), res);
+#else  // __aarch64__
+            float32x2_t tmp = vpmax_f32(vget_high_f32(vres), vget_low_f32(vres));
+            tmp             = vpmax_f32(tmp, tmp);
+
+            res = std::max(res, vget_lane_f32(tmp, 0));
+#endif // __aarch64__
+        }
+
+        // Calculate square-root in case of l2 pooling
+        if(pooling_type == PoolingType::L2)
+        {
+            res = std::sqrt(res);
+        }
+
+        // Store result
+        *(reinterpret_cast<float *>(output.ptr())) = res;
     },
     input, output);
 }

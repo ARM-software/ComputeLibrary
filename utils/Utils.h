@@ -86,7 +86,7 @@ std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs);
  * @param[in] blocking Specified if map is blocking or not
  */
 template <typename T>
-void map(T &tensor, bool blocking)
+inline void map(T &tensor, bool blocking)
 {
     ARM_COMPUTE_UNUSED(tensor);
     ARM_COMPUTE_UNUSED(blocking);
@@ -97,7 +97,7 @@ void map(T &tensor, bool blocking)
  * @param tensor  Tensor to be unmapped
  */
 template <typename T>
-void unmap(T &tensor)
+inline void unmap(T &tensor)
 {
     ARM_COMPUTE_UNUSED(tensor);
 }
@@ -108,7 +108,7 @@ void unmap(T &tensor)
  * @param[in] tensor   Tensor to be mapped
  * @param[in] blocking Specified if map is blocking or not
  */
-void map(CLTensor &tensor, bool blocking)
+inline void map(CLTensor &tensor, bool blocking)
 {
     tensor.map(blocking);
 }
@@ -117,7 +117,7 @@ void map(CLTensor &tensor, bool blocking)
  *
  * @param tensor  Tensor to be unmapped
  */
-void unmap(CLTensor &tensor)
+inline void unmap(CLTensor &tensor)
 {
     tensor.unmap();
 }
@@ -269,6 +269,88 @@ public:
             ARM_COMPUTE_ERROR("Loading PPM file: %s", e.what());
         }
 #endif // ARM_NO_EXCEPTIONS
+    }
+
+    /** Fill a tensor with 3 planes (one for each channel) with the content of the currently open PPM file.
+     *
+     * @note If the image is a CLImage, the function maps and unmaps the image
+     *
+     * @param[in,out] tensor Tensor with 3 planes to fill (Must be allocated, and of matching dimensions with the opened PPM). Data types supported: U8/F32
+     * @param[in]     bgr    (Optional) Fill the first plane with blue channel (default = false)
+     */
+    template <typename T>
+    void fill_planar_tensor(T &tensor, bool bgr = false)
+    {
+        ARM_COMPUTE_ERROR_ON(!is_open());
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::U8, DataType::F32);
+        ARM_COMPUTE_ERROR_ON(tensor.info()->dimension(0) != _width || tensor.info()->dimension(1) != _height || tensor.info()->dimension(2) != 3);
+
+        try
+        {
+            // Map buffer if creating a CLTensor
+            map(tensor, true);
+
+            // Check if the file is large enough to fill the image
+            const size_t current_position = _fs.tellg();
+            _fs.seekg(0, std::ios_base::end);
+            const size_t end_position = _fs.tellg();
+            _fs.seekg(current_position, std::ios_base::beg);
+
+            ARM_COMPUTE_ERROR_ON_MSG((end_position - current_position) < tensor.info()->tensor_shape().total_size(),
+                                     "Not enough data in file");
+            ARM_COMPUTE_UNUSED(end_position);
+
+            // Iterate through every pixel of the image
+            arm_compute::Window window;
+            window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, _width, 1));
+            window.set(arm_compute::Window::DimY, arm_compute::Window::Dimension(0, _height, 1));
+            window.set(arm_compute::Window::DimZ, arm_compute::Window::Dimension(0, 1, 1));
+
+            arm_compute::Iterator out(&tensor, window);
+
+            unsigned char red   = 0;
+            unsigned char green = 0;
+            unsigned char blue  = 0;
+
+            size_t stride_z = tensor.info()->strides_in_bytes()[2];
+
+            arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
+            {
+                red   = _fs.get();
+                green = _fs.get();
+                blue  = _fs.get();
+
+                switch(tensor.info()->data_type())
+                {
+                    case arm_compute::DataType::U8:
+                    {
+                        *(out.ptr() + 0 * stride_z) = bgr ? blue : red;
+                        *(out.ptr() + 1 * stride_z) = green;
+                        *(out.ptr() + 2 * stride_z) = bgr ? red : blue;
+                        break;
+                    }
+                    case arm_compute::DataType::F32:
+                    {
+                        *reinterpret_cast<float *>(out.ptr() + 0 * stride_z) = static_cast<float>(bgr ? blue : red);
+                        *reinterpret_cast<float *>(out.ptr() + 1 * stride_z) = static_cast<float>(green);
+                        *reinterpret_cast<float *>(out.ptr() + 2 * stride_z) = static_cast<float>(bgr ? red : blue);
+                        break;
+                    }
+                    default:
+                    {
+                        ARM_COMPUTE_ERROR("Unsupported data type");
+                    }
+                }
+            },
+            out);
+
+            // Unmap buffer if creating a CLTensor
+            unmap(tensor);
+        }
+        catch(const std::ifstream::failure &e)
+        {
+            ARM_COMPUTE_ERROR("Loading PPM file: %s", e.what());
+        }
     }
 
 private:

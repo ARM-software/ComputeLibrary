@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -298,7 +298,7 @@ In case image width is not a multiple of 16 then -DNON_MULTIPLE_OF_16 must be pa
 
 <p>Definition at line <a class="el" href="minmaxloc_8cl_source.xhtml#l00065">65</a> of file <a class="el" href="minmaxloc_8cl_source.xhtml">minmaxloc.cl</a>.</p>
 
-<p>References <a class="el" href="fixed__point_8h_source.xhtml#l00098">CONVERT</a>, <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00035">FloatFlip()</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00048">idx16</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, <a class="el" href="helpers_8h_source.xhtml#l00292">offset()</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00047">type_max</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00046">type_min</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
+<p>References <a class="el" href="fixed__point_8h_source.xhtml#l00098">CONVERT</a>, <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00035">FloatFlip()</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00048">idx16</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>, <a class="el" href="helpers_8h_source.xhtml#l00295">offset()</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00047">type_max</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00046">type_min</a>, and <a class="el" href="fixed__point_8h_source.xhtml#l00093">VEC_DATA_TYPE</a>.</p>
 <div class="fragment"><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;{</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> src = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(src);</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
@@ -358,9 +358,9 @@ In case image width is not a multiple of 16 then -DNON_MULTIPLE_OF_16 must be pa
 <div class="ttc" id="fixed__point_8h_xhtml_aa8d95ba04fc73845abc6045952cae5be"><div class="ttname"><a href="fixed__point_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be">CONVERT</a></div><div class="ttdeci">#define CONVERT(x, type)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00098">fixed_point.h:98</a></div></div>
 <div class="ttc" id="minmaxloc_8cl_xhtml_a5a67e1e00d711339bef1e10f0984227c"><div class="ttname"><a href="minmaxloc_8cl.xhtml#a5a67e1e00d711339bef1e10f0984227c">idx16</a></div><div class="ttdeci">__constant int16 idx16</div><div class="ttdef"><b>Definition:</b> <a href="minmaxloc_8cl_source.xhtml#l00048">minmaxloc.cl:48</a></div></div>
 <div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00292">helpers.h:292</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00295">helpers.h:295</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
 <div class="ttc" id="minmaxloc_8cl_xhtml_a538b4b63f40e7b12891774e03a4f0dec"><div class="ttname"><a href="minmaxloc_8cl.xhtml#a538b4b63f40e7b12891774e03a4f0dec">type_min</a></div><div class="ttdeci">__constant DATA_TYPE16 type_min</div><div class="ttdef"><b>Definition:</b> <a href="minmaxloc_8cl_source.xhtml#l00046">minmaxloc.cl:46</a></div></div>
 <div class="ttc" id="minmaxloc_8cl_xhtml_a061903419fb2aff60da86e674c76b96e"><div class="ttname"><a href="minmaxloc_8cl.xhtml#a061903419fb2aff60da86e674c76b96e">FloatFlip</a></div><div class="ttdeci">int FloatFlip(float val)</div><div class="ttdef"><b>Definition:</b> <a href="minmaxloc_8cl_source.xhtml#l00035">minmaxloc.cl:35</a></div></div>
 <div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
@@ -477,7 +477,7 @@ In case image width is not a multiple of 16 then -DNON_MULTIPLE_OF_16 must be pa
 
 <p>Definition at line <a class="el" href="minmaxloc_8cl_source.xhtml#l00143">143</a> of file <a class="el" href="minmaxloc_8cl_source.xhtml">minmaxloc.cl</a>.</p>
 
-<p>References <a class="el" href="helpers_8h_source.xhtml#l00093">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, <a class="el" href="helpers_8h_source.xhtml#l00133">Image::ptr</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00269">value</a>.</p>
+<p>References <a class="el" href="helpers_8h_source.xhtml#l00096">CONVERT_TO_IMAGE_STRUCT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, <a class="el" href="helpers_8h_source.xhtml#l00136">Image::ptr</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00269">value</a>.</p>
 <div class="fragment"><div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;{</div>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> src = <a class="code" href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a>(src);</div>
 <div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;</div>
@@ -517,10 +517,10 @@ In case image width is not a multiple of 16 then -DNON_MULTIPLE_OF_16 must be pa
 <div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* COUNT_MIN_MAX */</span><span class="preprocessor"></span></div>
 <div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="preprocessor"></span>}</div>
 <div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00093">helpers.h:93</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00131">helpers.h:131</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_aebe814363556c244be043b13e7969197"><div class="ttname"><a href="helpers_8h.xhtml#aebe814363556c244be043b13e7969197">CONVERT_TO_IMAGE_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_IMAGE_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00096">helpers.h:96</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00134">helpers.h:134</a></div></div>
 <div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00269">hwc.hpp:269</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00133">helpers.h:133</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00136">helpers.h:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -579,7 +579,7 @@ In case image width is not a multiple of 16 then -DNON_MULTIPLE_OF_16 must be pa
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_55b5a5006e943fb664ff8cff3cfe7768.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_f6c3ae42d7e27145d0a3c3e38ca1c000.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1b7ae9123c88e650426d50d95c19d414.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_b7c3d80b0dadb2139bc73b7161751c12.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="minmaxloc_8cl.xhtml">minmaxloc.cl</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:53 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

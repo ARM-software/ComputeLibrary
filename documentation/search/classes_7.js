@@ -6,6 +6,7 @@ var searchData=
   ['gemmdataset',['GEMMDataset',['../classarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['gemmfixture',['GEMMFixture',['../classarm__compute_1_1test_1_1_g_e_m_m_fixture.xhtml',1,'arm_compute::test']]],
   ['gemminterleaved',['GemmInterleaved',['../class_gemm_interleaved.xhtml',1,'']]],
+  ['gemmlowpoffsetvalidationfixture',['GEMMLowpOffsetValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_offset_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['gemmvalidationfixedpointfixture',['GEMMValidationFixedPointFixture',['../classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixed_point_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['gemmvalidationfixture',['GEMMValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['globalpoolinglayervalidationfixture',['GlobalPoolingLayerValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_global_pooling_layer_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
@@ -26,5 +27,7 @@ var searchData=
   ['googlenetinceptionv4poolinglayerdataset',['GoogLeNetInceptionV4PoolingLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_pooling_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['gpu_5fprops',['gpu_props',['../structmali__userspace_1_1gpu__props.xhtml',1,'mali_userspace']]],
   ['gpu_5fraw_5fgpu_5fprops',['gpu_raw_gpu_props',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml',1,'mali_userspace']]],
-  ['graph',['Graph',['../classarm__compute_1_1graph_1_1_graph.xhtml',1,'arm_compute::graph']]]
+  ['graph',['Graph',['../classarm__compute_1_1graph_1_1_graph.xhtml',1,'arm_compute::graph']]],
+  ['graphcontext',['GraphContext',['../classarm__compute_1_1graph_1_1_graph_context.xhtml',1,'arm_compute::graph']]],
+  ['graphhints',['GraphHints',['../classarm__compute_1_1graph_1_1_graph_hints.xhtml',1,'arm_compute::graph']]]
 ];

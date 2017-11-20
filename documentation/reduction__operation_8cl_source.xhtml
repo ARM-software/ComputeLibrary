@@ -38,7 +38,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.09</span>
+   &#160;<span id="projectnumber">17.10</span>
    </div>
   </td>
  </tr>
@@ -195,13 +195,13 @@ $(document).ready(function(){initNavTree('reduction__operation_8cl_source.xhtml'
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        ((__global <a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a> *)partial_sum.<a class="code" href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + get_group_id(0))[0] = local_sums[0];</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    }</div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;}</div>
-<div class="ttc" id="struct_vector_xhtml"><div class="ttname"><a href="struct_vector.xhtml">Vector</a></div><div class="ttdoc">Structure to hold Vector information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00123">helpers.h:123</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_a527bfdf5eeb306f1cf01c4a8e29f38e0"><div class="ttname"><a href="helpers_8h.xhtml#a527bfdf5eeb306f1cf01c4a8e29f38e0">CONVERT_TO_VECTOR_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_VECTOR_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00087">helpers.h:87</a></div></div>
+<div class="ttc" id="struct_vector_xhtml"><div class="ttname"><a href="struct_vector.xhtml">Vector</a></div><div class="ttdoc">Structure to hold Vector information. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00126">helpers.h:126</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a527bfdf5eeb306f1cf01c4a8e29f38e0"><div class="ttname"><a href="helpers_8h.xhtml#a527bfdf5eeb306f1cf01c4a8e29f38e0">CONVERT_TO_VECTOR_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_VECTOR_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00090">helpers.h:90</a></div></div>
 <div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
 <div class="ttc" id="reduction__operation_8cl_xhtml_ab0df00f5333da51860deb93deb44a782"><div class="ttname"><a href="reduction__operation_8cl.xhtml#ab0df00f5333da51860deb93deb44a782">sum</a></div><div class="ttdeci">DATA_TYPE sum(__global const DATA_TYPE *input)</div><div class="ttdoc">Calculate sum of a vector. </div><div class="ttdef"><b>Definition:</b> <a href="reduction__operation_8cl_source.xhtml#l00052">reduction_operation.cl:52</a></div></div>
 <div class="ttc" id="helpers_8h_xhtml"><div class="ttname"><a href="helpers_8h.xhtml">helpers.h</a></div></div>
-<div class="ttc" id="struct_vector_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">Vector::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00125">helpers.h:125</a></div></div>
-<div class="ttc" id="helpers_8h_xhtml_a40a6eb9f2a7712f08d6bb8ff6c9e6ca7"><div class="ttname"><a href="helpers_8h.xhtml#a40a6eb9f2a7712f08d6bb8ff6c9e6ca7">VECTOR_DECLARATION</a></div><div class="ttdeci">#define VECTOR_DECLARATION(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00051">helpers.h:51</a></div></div>
+<div class="ttc" id="struct_vector_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">Vector::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer. </div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00128">helpers.h:128</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a40a6eb9f2a7712f08d6bb8ff6c9e6ca7"><div class="ttname"><a href="helpers_8h.xhtml#a40a6eb9f2a7712f08d6bb8ff6c9e6ca7">VECTOR_DECLARATION</a></div><div class="ttdeci">#define VECTOR_DECLARATION(name)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00054">helpers.h:54</a></div></div>
 <div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
 <div class="ttc" id="reduction__operation_8cl_xhtml_af8f01aa7a1c524a2a9e2674f2cbae54d"><div class="ttname"><a href="reduction__operation_8cl.xhtml#af8f01aa7a1c524a2a9e2674f2cbae54d">reduction_operation</a></div><div class="ttdeci">__kernel void reduction_operation(__global uchar *src_ptr, uint src_stride_x, uint src_step_x, uint src_offset_first_element_in_bytes, __global uchar *partial_sum_ptr, uint partial_sum_stride_x, uint partial_sum_step_x, uint partial_sum_offset_first_element_in_bytes, __local DATA_TYPE *local_sums)</div><div class="ttdoc">This kernel performs reduction given an operation. </div><div class="ttdef"><b>Definition:</b> <a href="reduction__operation_8cl_source.xhtml#l00080">reduction_operation.cl:80</a></div></div>
 <div class="ttc" id="reduction__operation_8cl_xhtml_a48cc0583beba45dfba6d94fb6dc3c59a"><div class="ttname"><a href="reduction__operation_8cl.xhtml#a48cc0583beba45dfba6d94fb6dc3c59a">square_sum</a></div><div class="ttdeci">DATA_TYPE square_sum(__global const DATA_TYPE *input)</div><div class="ttdoc">Calculate square sum of a vector. </div><div class="ttdef"><b>Definition:</b> <a href="reduction__operation_8cl_source.xhtml#l00032">reduction_operation.cl:32</a></div></div>
@@ -211,7 +211,7 @@ $(document).ready(function(){initNavTree('reduction__operation_8cl_source.xhtml'
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_55b5a5006e943fb664ff8cff3cfe7768.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_f6c3ae42d7e27145d0a3c3e38ca1c000.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1b7ae9123c88e650426d50d95c19d414.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_b7c3d80b0dadb2139bc73b7161751c12.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="reduction__operation_8cl.xhtml">reduction_operation.cl</a></li>
-    <li class="footer">Generated on Thu Sep 28 2017 14:37:50 for Compute Library by
+    <li class="footer">Generated on Thu Oct 12 2017 14:26:33 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -58,13 +58,16 @@ namespace test
 class AssetsLibrary final
 {
 public:
-    /** Initialises the library with a @p path to the image directory.
+    /** Initialises the library with a @p path to the assets directory.
      * Furthermore, sets the seed for the random generator to @p seed.
      *
-     * @param[in] path Path to load images from.
+     * @param[in] path Path to load assets from.
      * @param[in] seed Seed used to initialise the random number generator.
      */
     AssetsLibrary(std::string path, std::random_device::result_type seed);
+
+    /** Path to assets directory used to initialise library. */
+    std::string path() const;
 
     /** Seed that is used to fill tensors with random values. */
     std::random_device::result_type seed() const;
