@@ -33,6 +33,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 using namespace arm_compute;
 
@@ -48,14 +49,22 @@ BorderSize CLDepthwiseConvolution3x3Kernel::border_size() const
 
 void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, weights);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
 
     if(biases != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        if(is_data_type_quantized_asymmetric(weights->info()->data_type()))
+        {
+            ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        }
         ARM_COMPUTE_ERROR_ON(biases->info()->dimension(0) != weights->info()->dimension(2));
         ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
     }
@@ -80,13 +89,12 @@ void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, const IC
 
     // Set build options
     ARM_COMPUTE_ERROR_ON(_conv_stride_x < 1 || _conv_stride_x > 3);
-    std::set<std::string> options{ "-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x) };
-    if(_biases != nullptr)
-    {
-        options.emplace("-DHAS_BIAS");
-    }
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
+    build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_convolution_3x3", options));
+    std::string kernel_name = is_data_type_quantized_asymmetric(_input->info()->data_type()) ? "depthwise_convolution_3x3_quantized" : "depthwise_convolution_3x3";
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
     const unsigned int num_elems_processed_per_iteration = 2;
@@ -105,6 +113,23 @@ void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, const IC
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
+
+    // Set static arguments
+    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
+    {
+        float multiplier        = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+        unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0);
+
+        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
+        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
+        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
+        _kernel.setArg(idx++, output_multiplier);
+        _kernel.setArg(idx++, output_shift);
+    }
 }
 
 void CLDepthwiseConvolution3x3Kernel::run(const Window &window, cl::CommandQueue &queue)

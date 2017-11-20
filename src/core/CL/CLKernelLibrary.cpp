@@ -187,6 +187,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "copy_planes_3p", "channel_combine.cl" },
     { "copy_to_keypoint", "fast_corners.cl" },
     { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_quantized", "depthwise_convolution_quantized.cl" },
     { "depthwise_im2col", "depthwise_convolution.cl" },
     { "depthwise_vector_to_tensor", "depthwise_convolution.cl" },
     { "depthwise_weights_reshape", "depthwise_convolution.cl" },
@@ -417,6 +418,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "depthwise_convolution.cl",
 #include "./cl_kernels/depthwise_convolution.clembed"
+    },
+    {
+        "depthwise_convolution_quantized.cl",
+#include "./cl_kernels/depthwise_convolution_quantized.clembed"
     },
     {
         "dequantization_layer.cl",

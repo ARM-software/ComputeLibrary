@@ -84,6 +84,12 @@ protected:
                 library->fill(tensor, distribution, i);
                 break;
             }
+            case DataType::S32:
+            {
+                std::uniform_int_distribution<int32_t> distribution(-1000, 1000);
+                library->fill(tensor, distribution, i);
+                break;
+            }
             default:
                 library->fill_tensor_uniform(tensor, i);
         }

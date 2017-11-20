@@ -26,7 +26,12 @@
 #include "ConvolutionLayer.h"
 #include "Utils.h"
 
+#include "tests/validation/CPP/Utils.h"
+#include "tests/validation/CPP/UtilsQuantizedAsymm.h"
+#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
+
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 namespace arm_compute
 {
@@ -44,8 +49,8 @@ namespace reference
  * - Padding, stride and output shape "match"
  *
  */
-template <typename T>
-SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info)
+template <typename T, typename TB>
+SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info)
 {
     // Create reference
     SimpleTensor<T> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position() };
@@ -97,8 +102,80 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
                     }
                     coords.set(0, x);
                     coords.set(1, y);
-                    dst[out_pos++] = saturate_cast<T>(val + *static_cast<const T *>(biases(Coordinates(z))));
+                    dst[out_pos++] = saturate_cast<T>(val + *static_cast<const TB *>(biases(Coordinates(z))));
                 }
+            }
+        }
+    }
+
+    return dst;
+}
+
+template <>
+SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
+                                            const PadStrideInfo &conv_info)
+{
+    // Create reference
+    SimpleTensor<uint8_t> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
+
+    const int   input_offset   = -src.quantization_info().offset;
+    const float input_scale    = src.quantization_info().scale;
+    const int   weights_offset = -weights.quantization_info().offset;
+    const float weights_scale  = weights.quantization_info().scale;
+    const int   output_offset  = dst.quantization_info().offset;
+    const float output_scale   = dst.quantization_info().scale;
+
+    int         output_multiplier;
+    int         output_shift;
+    const float multiplier = input_scale * weights_scale / output_scale;
+    arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+    // Compute reference
+    const int filter_width  = weights.shape().x();
+    const int filter_height = weights.shape().y();
+    const int filter_plane  = filter_width * filter_height;
+    const int input_width   = src.shape().x();
+    const int input_height  = src.shape().y();
+    const int input_depth   = src.shape().z();
+
+    const int filter_half_size = filter_width / 2;
+    const int pad_x            = std::min(filter_half_size, static_cast<int>(conv_info.pad().first));
+    const int pad_y            = std::min(filter_half_size, static_cast<int>(conv_info.pad().second));
+    const int minimum_x        = -pad_x + filter_half_size;
+    const int minimum_y        = -pad_y + filter_half_size;
+
+    int out_pos = 0;
+    for(int z = 0; z < input_depth; ++z)
+    {
+        int32_t bias_val = *static_cast<const int32_t *>(biases(Coordinates(z)));
+        for(int y = minimum_y; y < input_height + pad_y - filter_half_size; y += conv_info.stride().second)
+        {
+            for(int x = minimum_x; x < input_width + pad_x - filter_half_size; x += conv_info.stride().first)
+            {
+                Coordinates coords(x, y, z);
+                int         filter_offset = filter_plane * z;
+
+                uint32_t val = 0;
+                for(int j = y - filter_half_size; j <= (y + filter_half_size); ++j)
+                {
+                    for(int i = x - filter_half_size; i <= (x + filter_half_size); ++i)
+                    {
+                        coords.set(0, i);
+                        coords.set(1, j);
+                        auto    in_val = tensor_elem_at<uint8_t>(src, coords, BorderMode::CONSTANT, 0);
+                        uint8_t w_val  = *(weights.data() + filter_offset);
+                        val += (in_val + input_offset) * (w_val + weights_offset);
+                        ++filter_offset;
+                    }
+                }
+                val += bias_val;
+                val = asymm_rounding_divide_by_pow2(asymm_int_mult(val, output_multiplier), output_shift);
+                val += output_offset;
+                val = std::max<int32_t>(val, 0);
+                val = std::min<int32_t>(val, 255);
+
+                // Store the result
+                dst[out_pos++] = val;
             }
         }
     }

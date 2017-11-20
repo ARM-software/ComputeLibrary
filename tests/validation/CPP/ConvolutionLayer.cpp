@@ -55,8 +55,8 @@ void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, co
 {
     const T *in_ptr  = in.data() + i_offset;
     const T *w_ptr   = weights.data() + w_offset;
-    const T *b_ptr   = bias.data() + b_offset;
-    T       *out_ptr = out.data() + o_offset;
+    const TB *b_ptr   = bias.data() + b_offset;
+    T        *out_ptr = out.data() + o_offset;
 
     const int half_width_weights  = width_weights / 2;
     const int half_height_weights = height_weights / 2;

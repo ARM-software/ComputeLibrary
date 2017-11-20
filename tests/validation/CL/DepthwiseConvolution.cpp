@@ -42,7 +42,8 @@ namespace validation
 {
 namespace
 {
-constexpr RelativeTolerance<float> tolerance_f32(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr RelativeTolerance<float>   tolerance_f32(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr RelativeTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
 } // namespace
 
 TEST_SUITE(CL)
@@ -52,11 +53,13 @@ template <typename T>
 using CLDepthwiseConvolutionFixture = DepthwiseConvolutionValidationFixture<CLTensor, CLAccessor, CLDepthwiseConvolution, T>;
 
 TEST_SUITE(Generic)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::PRECOMMIT, datasets::SmallDepthwiseConvolutionDataset())
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallDepthwiseConvolutionDataset(), framework::dataset::make("DataType",
+                                                                                                            DataType::F32)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::NIGHTLY, datasets::LargeDepthwiseConvolutionDataset())
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionDataset(), framework::dataset::make("DataType",
+                                                                                                                DataType::F32)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
@@ -65,15 +68,43 @@ TEST_SUITE_END()
 template <typename T>
 using CLDepthwiseConvolutionFixture3x3 = DepthwiseConvolutionValidationFixture<CLTensor, CLAccessor, CLDepthwiseConvolution3x3, T>;
 
+TEST_SUITE(Float)
+TEST_SUITE(FP32)
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionFixture3x3<float>, framework::DatasetMode::PRECOMMIT, datasets::SmallDepthwiseConvolutionDataset3x3())
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionFixture3x3<float>, framework::DatasetMode::ALL, combine(datasets::SmallDepthwiseConvolutionDataset3x3(), framework::dataset::make("DataType",
+                                                                                                               DataType::F32)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionFixture3x3<float>, framework::DatasetMode::NIGHTLY, datasets::LargeDepthwiseConvolutionDataset3x3())
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionDataset3x3(), framework::dataset::make("DataType",
+                                                                                                                   DataType::F32)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+TEST_SUITE_END()
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using CLDepthwiseConvolutionQuantizedFixture3x3 = DepthwiseConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDepthwiseConvolution3x3, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+TEST_SUITE(W3x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallDepthwiseConvolutionDataset3x3(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127) })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionDataset3x3(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127) })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE_END()

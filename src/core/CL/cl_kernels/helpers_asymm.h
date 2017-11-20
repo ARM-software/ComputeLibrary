@@ -44,6 +44,7 @@
         return (x >> exponent) + select(zero, one, (x & mask) > threshold);                                        \
     }
 
+ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(2)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(8)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(16)
 
@@ -80,6 +81,7 @@ ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(16)
         return select(ab_x2_high32, INT_MAX, overflow);                                                      \
     }
 
+ASYMM_MULT_IMP(2)
 ASYMM_MULT_IMP(8)
 ASYMM_MULT_IMP(16)
 
