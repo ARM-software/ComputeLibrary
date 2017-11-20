@@ -29,6 +29,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
@@ -60,7 +61,7 @@ void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor
 
     update_window_and_padding(win,
                               AccessWindowHorizontal(accum->info(), 0, num_elems_processed_per_iteration),
-                              AccessWindowStatic(biases->info(), 0, 0, win.x().end(), biases->info()->tensor_shape().y()));
+                              AccessWindowStatic(biases->info(), 0, 0, ceil_to_multiple(biases->info()->dimension(0), num_elems_processed_per_iteration), biases->info()->tensor_shape().y()));
 
     AccessWindowHorizontal output_access(accum->info(), 0, num_elems_processed_per_iteration);
 
