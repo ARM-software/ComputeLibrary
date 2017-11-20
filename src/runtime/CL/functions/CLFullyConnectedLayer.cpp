@@ -45,7 +45,7 @@ CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> mem
 {
 }
 
-void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
+void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, const GPUTarget gpu_target)
 {
     ARM_COMPUTE_ERROR_ON((weights->info()->dimension(1) != (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))));
 
@@ -67,17 +67,19 @@ void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLT
     _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
 
     // Configure matrix multiply kernel
+    _mm_kernel.set_target(gpu_target);
     _mm_kernel.configure(&_im2col_output, weights, output, 1.0f, false);
 
     // Allocate the output tensor for im2col once all the configure methods have been called
     _im2col_output.allocator()->allocate();
 }
 
-void CLFullyConnectedLayer::configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
+void CLFullyConnectedLayer::configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, const GPUTarget gpu_target)
 {
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != weights->info()->dimension(1));
 
     // Configure matrix multiply kernel
+    _mm_kernel.set_target(gpu_target);
     _mm_kernel.configure(input, weights, output, 1.0f, false);
 }
 
@@ -91,6 +93,9 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
     _is_fc_after_conv     = true;
     _accumulate_biases    = false;
 
+    // Get GPU target
+    const GPUTarget gpu_target = CLScheduler::get().target();
+
     if(biases != nullptr)
     {
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
@@ -98,6 +103,7 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
         _accumulate_biases = true;
 
         // Configure accumulate biases kernel
+        _accumulate_biases_kernel.set_target(gpu_target);
         _accumulate_biases_kernel.configure(output, biases);
     }
 
@@ -134,12 +140,12 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
     if(_is_fc_after_conv)
     {
         // Fully Connected layer after a Convolution Layer without batches
-        configure_conv_fc(input, weights_to_use, output);
+        configure_conv_fc(input, weights_to_use, output, gpu_target);
     }
     else
     {
         // Fully Connected layer after a Fully Connected Layer without batches
-        configure_fc_fc(input, weights_to_use, output);
+        configure_fc_fc(input, weights_to_use, output, gpu_target);
     }
 
     // Allocate the transpose tensor if the are_weights_reshaped flag is false and once all the configure methods have been called

@@ -81,8 +81,8 @@ public:
     void run() override;
 
 private:
-    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
-    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
+    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, const GPUTarget gpu_target);
+    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, const GPUTarget gpu_target);
 
     CLMemoryGroup                       _memory_group;
     CLIm2ColKernel                      _im2col_kernel;
