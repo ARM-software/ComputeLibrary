@@ -58,12 +58,25 @@ const auto data_matrix_multiply = framework::dataset::make("M", 12, 20) * framew
 
 TEST_SUITE(NEON)
 TEST_SUITE(ASSEMBLY_MATRIX_MULTIPLY)
-using NEGEMMAssemblyFixture = GEMMLowpAssemblyFixture<Tensor, Accessor, NEGEMMLowpAssemblyMatrixMultiplyCore>;
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMAssemblyFixture, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)
+
+using NEGEMMAssemblyFixture_S8 = GEMMLowpAssemblyFixture<Tensor, Accessor, NEGEMMLowpAssemblyMatrixMultiplyCore, int8_t>;
+using NEGEMMAssemblyFixture_U8 = GEMMLowpAssemblyFixture<Tensor, Accessor, NEGEMMLowpAssemblyMatrixMultiplyCore, uint8_t>;
+
+TEST_SUITE(S8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMAssemblyFixture_S8, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
+TEST_SUITE_END()
+
+TEST_SUITE(U8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMAssemblyFixture_U8, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(GEMMLowp)

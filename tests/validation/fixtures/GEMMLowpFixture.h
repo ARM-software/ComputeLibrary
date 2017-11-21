@@ -110,7 +110,7 @@ protected:
         fill(a, 0);
         fill(b, 1);
 
-        return reference::gemmlowp_matrix_multiply_core<uint8_t>(a, b, a_offset, b_offset);
+        return reference::gemmlowp_matrix_multiply_core<int32_t, uint8_t>(a, b, a_offset, b_offset);
     }
 
     TensorType            _target{};

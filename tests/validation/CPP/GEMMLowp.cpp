@@ -63,19 +63,21 @@ void quantize_down_int32_to_uint8_scale(const SimpleTensor<T> *in, const SimpleT
 }
 } // namespace
 
-template <typename T>
-SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<T> &a, const SimpleTensor<T> &b, int32_t a_offset, int32_t b_offset)
+template <typename T_out, typename T_in>
+SimpleTensor<T_out> gemmlowp_matrix_multiply_core(const SimpleTensor<T_in> &a, const SimpleTensor<T_in> &b, int32_t a_offset, int32_t b_offset)
 {
-    TensorShape shape(b.shape()[0], a.shape()[1]);
+    static_assert(std::is_same<typename std::decay<T_out>::type, int32_t>::value, "Only int32_t is allowed for the output");
 
-    SimpleTensor<int32_t> c(shape, DataType::S32);
+    TensorShape         shape(b.shape()[0], a.shape()[1]);
+    DataType            dt = std::is_same<T_out, int32_t>::value ? DataType::S32 : DataType::U32;
+    SimpleTensor<T_out> c(shape, dt);
 
     const int K       = a.shape().x();
     const int b_width = b.shape().x();
     const int rows    = c.shape().y(); //M
     const int cols    = c.shape().x(); //N
 
-    std::vector<int32_t> acc;
+    std::vector<T_out> acc;
     acc.resize(cols);
 
     for(int i = 0; i < rows; ++i)
@@ -86,11 +88,11 @@ SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<T> &a, co
         }
         for(int k = 0; k < K; ++k)
         {
-            const int32_t tmp_a = a_offset + static_cast<int32_t>(a[k + i * K]);
+            const T_out tmp_a = a_offset + static_cast<T_out>(a[k + i * K]);
             for(int j = 0; j < b_width; ++j)
             {
-                const int32_t tmp_b       = b_offset + static_cast<int32_t>(b[j + k * b_width]);
-                const int32_t mult_as_int = tmp_a * tmp_b;
+                const T_out tmp_b       = b_offset + static_cast<T_out>(b[j + k * b_width]);
+                const T_out mult_as_int = tmp_a * tmp_b;
                 acc[j] += mult_as_int;
             }
         }
@@ -104,9 +106,10 @@ SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<T> &a, co
 }
 
 // used to validate assembly kernels which don't know anything about offsets
-SimpleTensor<int32_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b)
+template <typename T1, typename T2>
+SimpleTensor<T1> gemmlowp(const SimpleTensor<T2> &a, const SimpleTensor<T2> &b)
 {
-    return gemmlowp_matrix_multiply_core(a, b, 0, 0);
+    return gemmlowp_matrix_multiply_core<T1, T2>(a, b, 0, 0);
 }
 
 template <typename T>
@@ -130,11 +133,14 @@ SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTe
     return dst;
 }
 
-template SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, int32_t a_offset, int32_t b_offset);
 template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min,
                                                                            int32_t max);
 template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b, int32_t result_offset, int32_t result_mult_int,
                                                                            int32_t result_shift, int32_t min, int32_t max);
+template SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, int32_t a_offset, int32_t b_offset);
+template SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, int32_t a_offset, int32_t b_offset);
+template SimpleTensor<int32_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b);
+template SimpleTensor<int32_t> gemmlowp(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b);
 } // namespace reference
 } // namespace validation
 } // namespace test

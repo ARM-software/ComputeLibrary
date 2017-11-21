@@ -43,6 +43,7 @@ namespace arm_compute
 #include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_s8_12x8.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_s8_4x4.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_u8_4x4.hpp"
 
 } // namespace arm_compute
 
@@ -55,8 +56,8 @@ NEGEMMLowpAssemblyMatrixMultiplyCore::NEGEMMLowpAssemblyMatrixMultiplyCore(std::
 
 void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::S8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::U8, DataType::S8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32, DataType::S32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
     ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(0) != (b)->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(1) != (output)->info()->dimension(1), "The output matrix must have the same number of rows as the matrix A");
@@ -92,9 +93,25 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
 #elif defined(ARM_COMPUTE_AARCH64_V8A)
     if(1)
     {
-        // Configure matrix multiply kernel
-        GemmInterleaved<gemm_s8_4x4, int8_t, int32_t> gemm(&ci, M, N, K, false, false);
-        _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + workspace_alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
+        switch(a->info()->data_type())
+        {
+            case DataType::S8:
+            {
+                // Configure matrix multiply kernel
+                GemmInterleaved<gemm_s8_4x4, int8_t, int32_t> gemm(&ci, M, N, K, false, false);
+                _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + workspace_alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
+            }
+            break;
+            case DataType::U8:
+            {
+                // Configure matrix multiply kernel
+                GemmInterleaved<gemm_u8_4x4, uint8_t, uint32_t> gemm(&ci, M, N, K, false, false);
+                _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + workspace_alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
+            }
+            break;
+            default:
+                ARM_COMPUTE_ERROR("Datatype not supported");
+        }
         _memory_group.manage(&_workspace);
         // Configure matrix multiplication kernel
         auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpAArch64Kernel>();
