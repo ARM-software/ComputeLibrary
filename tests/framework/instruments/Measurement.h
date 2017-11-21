@@ -92,6 +92,44 @@ struct Measurement
             return b;
         }
 
+        /** Subtract with another value and return the result
+         *
+         * @param[in] b Other value
+         *
+         * @return Result of the stored value - b
+         */
+        Value operator-(Value b) const
+        {
+            if(is_floating_point)
+            {
+                b.v.floating_point -= v.floating_point;
+            }
+            else
+            {
+                b.v.integer -= v.integer;
+            }
+            return b;
+        }
+
+        /** Multiple with another value and return the result
+         *
+         * @param[in] b Other value
+         *
+         * @return Result of the stored value * b
+         */
+        Value operator*(Value b) const
+        {
+            if(is_floating_point)
+            {
+                b.v.floating_point *= v.floating_point;
+            }
+            else
+            {
+                b.v.integer *= v.integer;
+            }
+            return b;
+        }
+
         /** Return the stored value divided by an integer.
          *
          * @param[in] b Integer to divide the value by.
@@ -146,6 +184,18 @@ struct Measurement
             else
             {
                 return v.integer < b.v.integer;
+            }
+        }
+
+        static double relative_standard_deviation(const Value &variance, const Value &mean)
+        {
+            if(variance.is_floating_point)
+            {
+                return 100.0 * sqrt(variance.v.floating_point) / mean.v.floating_point;
+            }
+            else
+            {
+                return 100.0 * sqrt(static_cast<double>(variance.v.integer)) / mean.v.integer;
             }
         }
 
