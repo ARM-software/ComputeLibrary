@@ -299,7 +299,13 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 
             for(int i = 0; i < _num_iterations; ++i)
             {
-                if(_num_iterations > 1 && i != 0)
+                //Start the profiler if:
+                //- there is only one iteration
+                //- it's not the first iteration of a multi-iterations run.
+                //
+                //Reason: if the CLTuner is enabled then the first run will be really messy
+                //as each kernel will be executed several times, messing up the instruments like OpenCL timers.
+                if(_num_iterations == 1 || i != 0)
                 {
                     profiler.start();
                 }
@@ -316,7 +322,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
                     GCScheduler::get().sync();
                 }
 #endif /* ARM_COMPUTE_GC */
-                if(_num_iterations > 1 && i != 0)
+                if(_num_iterations == 1 || i != 0)
                 {
                     profiler.stop();
                 }
