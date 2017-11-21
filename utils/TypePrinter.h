@@ -572,6 +572,24 @@ inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy 
     return os;
 }
 
+/** Formatted output of the SamplingPolicy type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &policy)
+{
+    switch(policy)
+    {
+        case SamplingPolicy::CENTER:
+            os << "CENTER";
+            break;
+        case SamplingPolicy::TOP_LEFT:
+            os << "TOP_LEFT";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
 /** Formatted output of the TensorInfo type. */
 inline std::string to_string(const TensorInfo &info)
 {
@@ -657,6 +675,13 @@ inline std::string to_string(const BorderSize &border)
 }
 
 inline std::string to_string(const InterpolationPolicy &policy)
+{
+    std::stringstream str;
+    str << policy;
+    return str.str();
+}
+
+inline std::string to_string(const SamplingPolicy &policy)
 {
     std::stringstream str;
     str << policy;

@@ -21,47 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "GaussianPyramidHalf.h"
+#ifndef __ARM_COMPUTE_TEST_SAMPLING_POLICY_DATASET_H__
+#define __ARM_COMPUTE_TEST_SAMPLING_POLICY_DATASET_H__
 
-#include "arm_compute/core/Helpers.h"
-
-#include "Gaussian5x5.h"
-#include "Scale.h"
-#include "Utils.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
 namespace test
 {
-namespace validation
+namespace datasets
 {
-namespace reference
+class SamplingPolicies final : public framework::dataset::ContainerDataset<std::vector<SamplingPolicy>>
 {
-template <typename T>
-std::vector<SimpleTensor<T>> gaussian_pyramid_half(const SimpleTensor<T> &src, BorderMode border_mode, uint8_t constant_border_value, size_t num_levels)
-{
-    std::vector<SimpleTensor<T>> dst;
-
-    // Level0 is equal to src
-    dst.push_back(src);
-
-    for(size_t i = 1; i < num_levels; ++i)
+public:
+    SamplingPolicies()
+        : ContainerDataset("SamplingPolicy",
     {
-        // Gaussian Filter
-        const SimpleTensor<T> out_gaus5x5 = reference::gaussian5x5(dst[i - 1], border_mode, constant_border_value);
-
-        // Scale down by 2 with nearest interpolation
-        const SimpleTensor<T> out = reference::scale(out_gaus5x5, SCALE_PYRAMID_HALF, SCALE_PYRAMID_HALF, InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, constant_border_value, SamplingPolicy::CENTER,
-                                                     true);
-
-        dst.push_back(out);
+        SamplingPolicy::CENTER,
+                       SamplingPolicy::TOP_LEFT
+    })
+    {
     }
-
-    return dst;
-}
-
-template std::vector<SimpleTensor<uint8_t>> gaussian_pyramid_half(const SimpleTensor<uint8_t> &src, BorderMode border_mode, uint8_t constant_border_value, size_t num_levels);
-} // namespace reference
-} // namespace validation
+};
+} // namespace datasets
 } // namespace test
 } // namespace arm_compute
+#endif /* __ARM_COMPUTE_TEST_SAMPLING_POLICY_DATASET_H__ */

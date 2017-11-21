@@ -41,23 +41,23 @@ using half = half_float::half;
 /** Image colour formats */
 enum class Format
 {
-    UNKNOWN,  /** Unknown image format */
-    U8,       /** 1 channel, 1 U8 per channel */
-    S16,      /** 1 channel, 1 S16 per channel */
-    U16,      /** 1 channel, 1 U16 per channel */
-    S32,      /** 1 channel, 1 S32 per channel */
-    U32,      /** 1 channel, 1 U32 per channel */
-    F16,      /** 1 channel, 1 F16 per channel */
-    F32,      /** 1 channel, 1 F32 per channel */
-    UV88,     /** 2 channel, 1 U8 per channel */
-    RGB888,   /** 3 channels, 1 U8 per channel */
-    RGBA8888, /** 4 channels, 1 U8 per channel */
-    YUV444,   /** A 3 plane of 8 bit 4:4:4 sampled Y, U, V planes */
-    YUYV422,  /** A single plane of 32-bit macro pixel of Y0, U0, Y1, V0 bytes */
-    NV12,     /** A 2 plane YUV format of Luma (Y) and interleaved UV data at 4:2:0 sampling */
-    NV21,     /** A 2 plane YUV format of Luma (Y) and interleaved VU data at 4:2:0 sampling */
-    IYUV,     /** A 3 plane of 8-bit 4:2:0 sampled Y, U, V planes */
-    UYVY422   /** A single plane of 32-bit macro pixel of U0, Y0, V0, Y1 byte */
+    UNKNOWN,  /**< Unknown image format */
+    U8,       /**< 1 channel, 1 U8 per channel */
+    S16,      /**< 1 channel, 1 S16 per channel */
+    U16,      /**< 1 channel, 1 U16 per channel */
+    S32,      /**< 1 channel, 1 S32 per channel */
+    U32,      /**< 1 channel, 1 U32 per channel */
+    F16,      /**< 1 channel, 1 F16 per channel */
+    F32,      /**< 1 channel, 1 F32 per channel */
+    UV88,     /**< 2 channel, 1 U8 per channel */
+    RGB888,   /**< 3 channels, 1 U8 per channel */
+    RGBA8888, /**< 4 channels, 1 U8 per channel */
+    YUV444,   /**< A 3 plane of 8 bit 4:4:4 sampled Y, U, V planes */
+    YUYV422,  /**< A single plane of 32-bit macro pixel of Y0, U0, Y1, V0 bytes */
+    NV12,     /**< A 2 plane YUV format of Luma (Y) and interleaved UV data at 4:2:0 sampling */
+    NV21,     /**< A 2 plane YUV format of Luma (Y) and interleaved VU data at 4:2:0 sampling */
+    IYUV,     /**< A 3 plane of 8-bit 4:2:0 sampled Y, U, V planes */
+    UYVY422   /**< A single plane of 32-bit macro pixel of U0, Y0, V0, Y1 byte */
 };
 
 /** Available data types */
@@ -80,6 +80,13 @@ enum class DataType
     F32,
     F64,
     SIZET
+};
+
+/** Available Sampling Policies */
+enum class SamplingPolicy
+{
+    CENTER,  /**< Samples are taken at pixel center */
+    TOP_LEFT /**< Samples are taken at pixel top left corner */
 };
 
 /** Constant value of the border pixels when using BorderMode::CONSTANT */
