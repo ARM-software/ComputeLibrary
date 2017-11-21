@@ -209,7 +209,7 @@ void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInf
             uint32x4_t sum_row_u32 = vdupq_n_u32(0);
             uint32_t   sum_row     = 0;
 
-            const uint8_t *matrix_a = (in.ptr() + id.x() * _input->info()->strides_in_bytes()[1] + +id.y() * _input->info()->strides_in_bytes()[2]);
+            const uint8_t *matrix_a = (in.ptr() + id.x() * _input->info()->strides_in_bytes()[1] + id.y() * _input->info()->strides_in_bytes()[2]);
 
 #if __arm__
             asm volatile("PLD [%0, #128*4]" ::"r"(matrix_a));

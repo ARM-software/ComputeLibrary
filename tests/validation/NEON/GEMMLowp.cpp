@@ -177,11 +177,11 @@ TEST_SUITE(OutputStage)
 
 TEST_SUITE(QuantizeDownInt32ToUint8Scale)
 
-const auto quantize_down_int32_to_uint8_scale_cases = framework::dataset::make("result_offset", -2, 2) * framework::dataset::make("result_mult_int", 1, 2) * framework::dataset::make("result_shift", 2,
+const auto quantize_down_int32_to_uint8_scale_cases = framework::dataset::make("result_offset", -2, 1) * framework::dataset::make("result_mult_int", 1, 2) * framework::dataset::make("result_shift", 2,
                                                       3)
                                                       * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
 
-const auto quantize_down_int32_to_uint8_scale_relu_cases = framework::dataset::make("result_offset", -2, 2) * framework::dataset::make("result_mult_int", 1,
+const auto quantize_down_int32_to_uint8_scale_relu_cases = framework::dataset::make("result_offset", -2, 1) * framework::dataset::make("result_mult_int", 1,
                                                            2)
                                                            * framework::dataset::make("result_shift", 2, 3) * framework::dataset::make("min", 0, 2) * framework::dataset::make("max", 171, 174) * framework::dataset::make("addBias", { false, true });
 
@@ -253,20 +253,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture,
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END() // BoundedReLu
-
-TEST_SUITE(AddBias)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_uint8_scale_relu_cases))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), quantize_down_int32_to_uint8_scale_relu_cases))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END() // AddBias
 
 TEST_SUITE_END() // QuantizeDownInt32ToUint8Scale
 TEST_SUITE_END() // OutputStage

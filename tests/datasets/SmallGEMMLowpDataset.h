@@ -42,11 +42,13 @@ class SmallGEMMLowpDataset final : public GEMMLowpDataset
 public:
     SmallGEMMLowpDataset()
     {
+        add_config(TensorShape(21U, 2U), TensorShape(43U, 21U), TensorShape(43U, 2U), 0, 0);
         add_config(TensorShape(21U, 13U), TensorShape(33U, 21U), TensorShape(33U, 13U), 0, 0);
+        add_config(TensorShape(31U, 3U), TensorShape(72U, 31U), TensorShape(72U, 3U), -2, 13);
         add_config(TensorShape(52U, 13U), TensorShape(33U, 52U), TensorShape(33U, 13U), 0, 4);
         add_config(TensorShape(52U, 26U), TensorShape(33U, 52U), TensorShape(33U, 26U), -2, 0);
         add_config(TensorShape(31U, 27U), TensorShape(23U, 31U), TensorShape(23U, 27U), 5, 13);
-        add_config(TensorShape(38U, 12U), TensorShape(21U, 38U), TensorShape(21U, 12U), -3, -2);
+        add_config(TensorShape(38U, 43U), TensorShape(21U, 38U), TensorShape(21U, 43U), -3, -2);
         add_config(TensorShape(32U, 72U), TensorShape(17U, 32U), TensorShape(17U, 72U), -9, 1);
     }
 };

@@ -253,7 +253,7 @@ v17.03.1 First Major public release of the sources
  - New CPP target introduced for C++ kernels shared between NEON and CL functions.
  - New padding calculation interface introduced and ported most kernels / functions to use it.
  - New OpenCL kernels / functions:
-   - @ref arm_compute::CLGEMMLowpMatrixMultiplyKernel / @ref arm_compute::CLGEMMLowp
+   - @ref arm_compute::CLGEMMLowpMatrixMultiplyKernel / arm_compute::CLGEMMLowp
  - New NEON kernels / functions:
    - @ref arm_compute::NENormalizationLayerKernel / @ref arm_compute::NENormalizationLayer
    - @ref arm_compute::NETransposeKernel / @ref arm_compute::NETranspose

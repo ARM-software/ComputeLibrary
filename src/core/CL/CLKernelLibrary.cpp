@@ -218,7 +218,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_ma_qs8", "gemm.cl" },
     { "gemm_ma_qs16", "gemm.cl" },
     { "gemm_mv", "gemv.cl" },
-    { "gemm_mm_interleaved_transposed_u8", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f16", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f32_midgard", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f32_bifrost", "gemm.cl" },
@@ -233,6 +232,12 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_transpose1x16", "gemm.cl" },
     { "gemm_transpose1x8", "gemm.cl" },
     { "gemm_transpose1x4", "gemm.cl" },
+    { "gemmlowp_matrix_a_reduction", "gemmlowp.cl" },
+    { "gemmlowp_matrix_b_reduction", "gemmlowp.cl" },
+    { "gemmlowp_mm", "gemmlowp.cl" },
+    { "gemmlowp_mm_interleaved_transposed", "gemmlowp.cl" },
+    { "gemmlowp_offset_contribution", "gemmlowp.cl" },
+    { "gemmlowp_output_stage_quantize_down", "gemmlowp.cl" },
     { "harris_score_3x3", "harris_corners.cl" },
     { "harris_score_5x5", "harris_corners.cl" },
     { "harris_score_7x7", "harris_corners.cl" },
@@ -480,6 +485,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "gemm.cl",
 #include "./cl_kernels/gemm.clembed"
+    },
+    {
+        "gemmlowp.cl",
+#include "./cl_kernels/gemmlowp.clembed"
     },
     {
         "gemv.cl",

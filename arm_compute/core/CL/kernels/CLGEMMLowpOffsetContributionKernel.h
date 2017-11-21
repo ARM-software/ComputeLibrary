@@ -21,18 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEGEMMLOWPOFFSETCONTRIBUTIONKERNEL_H__
-#define __ARM_COMPUTE_NEGEMMLOWPOFFSETCONTRIBUTIONKERNEL_H__
+#ifndef __ARM_COMPUTE_CLGEMMLOWPOFFSETCONTRIBUTIONKERNEL_H__
+#define __ARM_COMPUTE_CLGEMMLOWPOFFSETCONTRIBUTIONKERNEL_H__
 
-#include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {
-class ITensor;
+class ICLTensor;
 
-/** NEON kernel used to add the offset contribution after @ref NEGEMMLowpMatrixMultiplyKernel. The computation is performed in-place
+/** OpenCL kernel used to add the offset contribution after @ref CLGEMMLowpMatrixMultiplyKernel. The computation is performed in-place
  *
- * This kernel takes a final int32 accumulator value (the output of @ref NEGEMMLowpMatrixMultiplyKernel),
+ * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel),
  * and adds to it the offset contribution of matrix A and matrix B in-place.
  *
  * The final result is:
@@ -43,22 +43,22 @@ class ITensor;
  *                   (a_offset * b_offset * k)
  *
  */
-class NEGEMMLowpOffsetContributionKernel : public INEKernel
+class CLGEMMLowpOffsetContributionKernel : public ICLKernel
 {
 public:
     /** Constructor */
-    NEGEMMLowpOffsetContributionKernel();
+    CLGEMMLowpOffsetContributionKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers)*/
-    NEGEMMLowpOffsetContributionKernel(const NEGEMMLowpOffsetContributionKernel &) = delete;
+    CLGEMMLowpOffsetContributionKernel(const CLGEMMLowpOffsetContributionKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers)*/
-    NEGEMMLowpOffsetContributionKernel &operator=(const NEGEMMLowpOffsetContributionKernel &) = delete;
+    CLGEMMLowpOffsetContributionKernel &operator=(const CLGEMMLowpOffsetContributionKernel &) = delete;
     /** Allow instances of this class to be moved */
-    NEGEMMLowpOffsetContributionKernel(NEGEMMLowpOffsetContributionKernel &&) = default;
+    CLGEMMLowpOffsetContributionKernel(CLGEMMLowpOffsetContributionKernel &&) = default;
     /** Allow instances of this class to be moved */
-    NEGEMMLowpOffsetContributionKernel &operator=(NEGEMMLowpOffsetContributionKernel &&) = default;
+    CLGEMMLowpOffsetContributionKernel &operator=(CLGEMMLowpOffsetContributionKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in, out] mm_result      Input tensor containing the result of @ref NEGEMMLowpMatrixMultiplyKernel. Data type supported: S32
+     * @param[in, out] mm_result      Input tensor containing the result of @ref CLGEMMLowpMatrixMultiplyKernel. Data type supported: S32
      * @param[in]      vector_sum_col Input row-vector of sums of all the entries in each column of matrix B.
      *                                Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
      * @param[in]      vector_sum_row Input row-vector of sums of all the entries in each row of matrix A.
@@ -67,31 +67,16 @@ public:
      * @param[in]      a_offset       Offset to be added to each element of the matrix A.
      * @param[in]      b_offset       Offset to be added to each element of the matrix B.
      */
-    void configure(ITensor *mm_result, const ITensor *vector_sum_col, const ITensor *vector_sum_row, int32_t k, int32_t a_offset, int32_t b_offset);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpOffsetContributionKernel
-     *
-     * @param[in] mm_result      Input tensor containing the result of @ref NEGEMMLowpMatrixMultiplyKernel. Data type supported: S32
-     * @param[in] vector_sum_col Input row-vector of sums of all the entries in each column of matrix B.
-     *                           Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
-     * @param[in] vector_sum_row Input row-vector of sums of all the entries in each row of matrix A.
-     *                           Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p mm_result
-     * @param[in] a_offset       Offset to be added to each element of the matrix A.
-     * @param[in] b_offset       Offset to be added to each element of the matrix B.
-     */
-    static Error validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, int32_t a_offset, int32_t b_offset);
+    void configure(ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, int32_t k, int32_t a_offset, int32_t b_offset);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    const ITensor *_vector_sum_col;
-    const ITensor *_vector_sum_row;
-    ITensor       *_mm_result;
-    int32_t        _a_offset;
-    int32_t        _b_offset;
-    int32_t        _k_offset;
-    bool           _slide_vector_sum_col;
+    const ICLTensor *_vector_sum_col;
+    const ICLTensor *_vector_sum_row;
+    ICLTensor       *_mm_result;
 };
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_NEGEMMLOWPOFFSETCONTRIBUTIONKERNEL_H__ */
+#endif /* __ARM_COMPUTE_CLGEMMLOWPOFFSETCONTRIBUTIONKERNEL_H__ */

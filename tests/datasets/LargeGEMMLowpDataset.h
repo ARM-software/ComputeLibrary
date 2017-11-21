@@ -42,7 +42,9 @@ class LargeGEMMLowpDataset final : public GEMMLowpDataset
 public:
     LargeGEMMLowpDataset()
     {
+        add_config(TensorShape(923U, 2U), TensorShape(871U, 923U), TensorShape(871U, 2U), 0, 0);
         add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 429U), 0, 0);
+        add_config(TensorShape(873U, 7U), TensorShape(784U, 873U), TensorShape(784U, 7U), -1, 3);
         add_config(TensorShape(873U, 513U), TensorShape(784U, 873U), TensorShape(784U, 513U), 0, 4);
         add_config(TensorShape(697U, 872U), TensorShape(563U, 697U), TensorShape(563U, 872U), -2, 0);
         add_config(TensorShape(1021U, 973U), TensorShape(783U, 1021U), TensorShape(783U, 973U), 5, 13);
