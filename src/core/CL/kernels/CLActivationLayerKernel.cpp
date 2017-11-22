@@ -194,7 +194,7 @@ void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         {
             add_3D_tensor_argument(idx, _output, slice);
         }
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, _lws_hint);
     }
     while(collapsed.slide_window_slice_3D(slice));
 }

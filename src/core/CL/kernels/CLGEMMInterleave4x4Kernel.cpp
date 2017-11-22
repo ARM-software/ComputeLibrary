@@ -117,7 +117,7 @@ void CLGEMMInterleave4x4Kernel::run(const Window &window, cl::CommandQueue &queu
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, in_slice);
         add_2D_tensor_argument(idx, _output, out_slice);
-        enqueue(queue, *this, in_slice);
+        enqueue(queue, *this, in_slice, _lws_hint);
     }
     while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
 }

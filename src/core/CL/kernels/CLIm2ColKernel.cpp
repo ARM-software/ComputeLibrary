@@ -203,7 +203,7 @@ void CLIm2ColKernel::run_reduced(const Window &window, cl::CommandQueue &queue)
 
         _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(0));
         _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(1));
-        enqueue(queue, *this, in_slice);
+        enqueue(queue, *this, in_slice, _lws_hint);
     }
     while(window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_1D(out_slice));
 }
