@@ -62,6 +62,15 @@ constexpr auto DIV_CEIL(S val, T m) -> decltype((val + m - 1) / m)
     return (val + m - 1) / m;
 }
 
+/** Return a rounded value of x. Rounding is done according to the rounding_policy.
+ *
+ * @param[in] x               Float value to be rounded.
+ * @param[in] rounding_policy Policy determining how rounding is done.
+ *
+ * @return Rounded value of the argument x.
+ */
+int round(float x, RoundingPolicy rounding_policy);
+
 /** Returns the arm_compute library build information
  *
  * Contains the version number and the build options used to build the library

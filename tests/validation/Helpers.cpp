@@ -129,7 +129,7 @@ SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, cons
     SimpleTensor<uint8_t> dst{ src.shape(), DataType::QASYMM8, 1, 0, quantization_info };
     for(int i = 0; i < src.num_elements(); ++i)
     {
-        dst[i] = quantization_info.quantize(src[i]);
+        dst[i] = quantization_info.quantize(src[i], RoundingPolicy::TO_NEAREST_UP);
     }
     return dst;
 }

@@ -131,8 +131,8 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         }
         else
         {
-            a_const_int = input->info()->quantization_info().quantize(a_const);
-            b_const_int = input->info()->quantization_info().quantize(b_const);
+            a_const_int = input->info()->quantization_info().quantize(a_const, RoundingPolicy::TO_NEAREST_UP);
+            b_const_int = input->info()->quantization_info().quantize(b_const, RoundingPolicy::TO_NEAREST_UP);
         }
     }
 

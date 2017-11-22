@@ -60,6 +60,20 @@ DATA_TEST_CASE(Index2Coord, framework::DatasetMode::ALL, zip(zip(framework::data
     ARM_COMPUTE_EXPECT(compare_dimensions(coordinate, ref_coordinate), framework::LogLevel::ERRORS);
 }
 
+DATA_TEST_CASE(RoundFloatToZero, framework::DatasetMode::ALL, zip(framework::dataset::make("FloatIn", { 1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f }),
+                                                                  framework::dataset::make("FloatOut", { 1.f, 1.f, 1.f, 2.f, 2.f, -3.f, -3.f, -3.f, -4.f, -4.f })),
+               value, result)
+{
+    ARM_COMPUTE_EXPECT(round(value, RoundingPolicy::TO_ZERO) == result, framework::LogLevel::ERRORS);
+}
+
+DATA_TEST_CASE(RoundFloatToNearestUp, framework::DatasetMode::ALL, zip(framework::dataset::make("FloatIn", { 1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f }),
+                                                                       framework::dataset::make("FloatOut", { 1.f, 1.f, 2.f, 3.f, 3.f, -3.f, -4.f, -4.f, -4.f, -5.f })),
+               value, result)
+{
+    ARM_COMPUTE_EXPECT(round(value, RoundingPolicy::TO_NEAREST_UP) == result, framework::LogLevel::ERRORS);
+}
+
 //FIXME: Negative tests only work in debug mode
 #if 0
 DISABLED_DATA_TEST_CASE(Index2CoordFail, framework::DatasetMode::ALL, zip(framework::dataset::make("Shape", { TensorShape{}, TensorShape{ 2U }, TensorShape{ 2U } }), framework::dataset::make("Index", { 0, -1, 2 })),

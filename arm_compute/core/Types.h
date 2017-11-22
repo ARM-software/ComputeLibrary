@@ -102,6 +102,17 @@ constexpr float SCALE_PYRAMID_HALF = 0.5f;
 /* Constant value used to indicate a ORB scaled pyramid */
 constexpr float SCALE_PYRAMID_ORB = 8.408964152537146130583778358414e-01;
 
+/** Rounding method */
+enum class RoundingPolicy
+{
+    TO_ZERO,         /**< Truncates the least significand values that are lost in operations. */
+    TO_NEAREST_UP,   /**< Rounds to nearest value; half rounds away from zero */
+    TO_NEAREST_EVEN, /**< Rounds to nearest value; half rounds to nearest even */
+};
+
+//forward declare round function
+int round(float, RoundingPolicy);
+
 /** Quantization settings (used for QASYMM8 data type) */
 struct QuantizationInfo
 {
@@ -129,10 +140,10 @@ struct QuantizationInfo
     int   offset; /**< offset */
 
     /** Quantizes a value using the scale/offset in this QuantizationInfo */
-    uint8_t quantize(float value) const
+    uint8_t quantize(float value, RoundingPolicy rounding_policy) const
     {
         ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::quantize: scale == 0");
-        int quantized = static_cast<int>(value / scale + offset);
+        int quantized = arm_compute::round(value / scale, rounding_policy) + offset;
         quantized     = std::max(0, std::min(quantized, 255));
         return quantized;
     }
@@ -294,14 +305,6 @@ enum class ThresholdType
 {
     BINARY, /**< Threshold with one value */
     RANGE   /**< Threshold with two values*/
-};
-
-/** Rounding method */
-enum class RoundingPolicy
-{
-    TO_ZERO,        /**< Truncates the least significand values that are lost in operations. */
-    TO_NEAREST_UP,  /**< Rounds to nearest value; half rounds up */
-    TO_NEAREST_EVEN /**< Rounds to nearest value; half rounds to nearest even */
 };
 
 /** Termination criteria */

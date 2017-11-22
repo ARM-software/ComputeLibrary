@@ -46,7 +46,7 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     uint32_t border_value = 0;
     if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding())
     {
-        border_value = static_cast<uint32_t>(input->info()->quantization_info().quantize(0));
+        border_value = static_cast<uint32_t>(input->info()->quantization_info().quantize(0.f, RoundingPolicy::TO_NEAREST_UP));
     }
 
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(border_value));
