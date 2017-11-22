@@ -41,17 +41,20 @@ CLSoftmaxLayer::CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
 
 void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(CLSoftmaxLayer::validate(input->info(), output->info()));
 
     // Create intermediate tensors shapes
-    DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->info()->data_type()) ? DataType::S32 : input->info()->data_type();
-    TensorInfo tensor_info_tmp(input->info()->clone()->set_data_type(tmp_data_type).reset_padding());
+    const TensorInfo input_info    = input->info()->clone()->reset_padding().set_is_resizable(true);
+    DataType         tmp_data_type = is_data_type_quantized_asymmetric(input->info()->data_type()) ? DataType::S32 : input->info()->data_type();
+    TensorInfo       tensor_info_tmp(input_info.clone()->set_data_type(tmp_data_type));
     _tmp.allocator()->init(tensor_info_tmp);
 
     TensorShape max_sum_shape = input->info()->tensor_shape();
     max_sum_shape.set(0, 1);
-    _max.allocator()->init(input->info()->clone()->set_tensor_shape(max_sum_shape).reset_padding());
-    _sum.allocator()->init(input->info()->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).reset_padding());
+    _max.allocator()->init(input_info.clone()->set_tensor_shape(max_sum_shape));
+    _sum.allocator()->init(input_info.clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type));
 
     // Set GPU target to kernels
     _max_shift_exp_sum_kernel.set_target(CLScheduler::get().target());
@@ -83,7 +86,7 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
 
 Error CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
     // Create intermediate tensor info
     DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->data_type()) ? DataType::S32 : input->data_type();
