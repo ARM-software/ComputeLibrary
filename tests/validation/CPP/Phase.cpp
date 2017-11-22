@@ -34,50 +34,25 @@ namespace reference
 template <typename T>
 SimpleTensor<uint8_t> phase(const SimpleTensor<T> &gx, const SimpleTensor<T> &gy, PhaseType phase_type)
 {
-    const float pi           = std::atan(1) * 4;
-    const float rad_to_deg   = 180.0f / pi;
-    const float scale_factor = 128.f / 180.f;
-    const float epsilon      = 1e-9f; // used to avoid division by zero
-
-    const float ninety      = scale_factor * 90.f;
-    const float one_eighty  = scale_factor * 180.f;
-    const float two_seventy = scale_factor * 270.f;
-
-    // unsigned: map to [0-255)
-    // signed:   map to [0-180) degrees
-    const float scale = (phase_type == PhaseType::UNSIGNED) ? rad_to_deg : rad_to_deg * scale_factor;
-
+    const float           PI = std::atan(1) * 4;
     SimpleTensor<uint8_t> phase(gx.shape(), DataType::U8);
 
-    for(int i = 0; i < gx.num_elements(); ++i)
+    if(phase_type == PhaseType::UNSIGNED) // unsigned: map to [0-255)
     {
-        bool quad_two   = std::signbit(gx[i]) && !std::signbit(gy[i]);
-        bool quad_three = std::signbit(gx[i]) && std::signbit(gy[i]);
-        bool quad_four  = !std::signbit(gx[i]) && std::signbit(gy[i]);
-
-        float  x      = gy[i] / (gx[i] + epsilon);
-        double arctan = std::atan(x);
-
-        const bool is_negative = std::signbit(arctan);
-
-        // Radians to degrees conversion with applied scale factor
-        arctan = arctan * scale;
-
-        if(phase_type == PhaseType::UNSIGNED)
+        for(int i = 0; i < gx.num_elements(); ++i)
         {
-            arctan = is_negative ? arctan + 180.f : arctan;
+            float angle_deg = (std::atan2(float(gy[i]), float(gx[i])) / PI) * 180.0f;
+            phase[i]        = (angle_deg < 0.0f) ? 180.f + angle_deg : angle_deg;
         }
-        else
+    }
+    else // signed: map to [0-180) degrees
+    {
+        for(int i = 0; i < gx.num_elements(); ++i)
         {
-            arctan = is_negative ? arctan + ninety : arctan;
-
-            // Choose correct quandrant
-            arctan = quad_two ? ninety + arctan : arctan;
-            arctan = quad_three ? one_eighty + arctan : arctan;
-            arctan = quad_four ? two_seventy + arctan : arctan;
+            float angle_pi = std::atan2(gy[i], gx[i]) / PI;
+            angle_pi       = (angle_pi < 0.0f) ? 2 + angle_pi : angle_pi;
+            phase[i]       = lround(angle_pi * 128) & 0xFFu;
         }
-
-        phase[i] = saturate_cast<uint8_t>(arctan + 0.5f);
     }
 
     return phase;
