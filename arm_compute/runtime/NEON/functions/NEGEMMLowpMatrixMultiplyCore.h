@@ -66,20 +66,24 @@ public:
      *  -# Convert b values from QASYMM8 to int32 add b_offset to each of them.
      *  -# Compute the matrix product of the resulting a * b in int32.
      *
-     * @param[in]  a      First input tensor  (Matrix A). Data type supported: QASYMM8.
-     * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a
-     * @param[out] output Output tensor. Data type supported: Data type supported: S32
+     * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8.
+     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[out] output    Output tensor. Data type supported: Data type supported: S32
+     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                       if the reshape of matrix B should be executed only for the first run
      */
-    void configure(const ITensor *a, const ITensor *b, ITensor *output);
+    void configure(const ITensor *a, const ITensor *b, ITensor *output, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixMultiplyCore
      *
-     * @param[in]  a      First input tensor  (Matrix A). Data type supported: QASYMM8.
-     * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a
-     * @param[out] output Output tensor. Data type supported: Data type supported: S32
+     * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8.
+     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[out] output    Output tensor. Data type supported: Data type supported: S32
+     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                       if the reshape of matrix B should be executed only for the first run
      *
      * @return an error status
      */
-    static Error validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output);
+    static Error validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;

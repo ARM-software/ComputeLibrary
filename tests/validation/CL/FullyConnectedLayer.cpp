@@ -99,6 +99,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+    const QuantizationInfo src_quantization_info     = src.info()->quantization_info();
+    const QuantizationInfo weights_quantization_info = weights.info()->quantization_info();
+
     // Create and configure function.
     CLFullyConnectedLayer fc;
     fc.configure(&src, &weights, &bias, &dst, transpose_weights, !reshape_weights);
@@ -106,6 +109,10 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);
     validate(dst.info()->valid_region(), dst_valid_region);
+
+    // Validate QuantizationInfo
+    ARM_COMPUTE_EXPECT(src.info()->quantization_info() == src_quantization_info, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
 }
 
 template <typename T>

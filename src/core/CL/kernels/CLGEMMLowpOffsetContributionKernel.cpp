@@ -63,6 +63,7 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
         ARM_COMPUTE_ERROR_ON(vector_sum_col->info()->dimension(0) != mm_result->info()->dimension(0));
 
         build_opts.add_option("-DA_OFFSET=" + support::cpp11::to_string(a_offset));
+        build_opts.add_option_if(vector_sum_col->info()->tensor_shape().num_dimensions() > 1, "-DSUM_COL_HAS_BATCHES");
     }
 
     // If b_offset == 0, vector_sum_row can be a nullptr

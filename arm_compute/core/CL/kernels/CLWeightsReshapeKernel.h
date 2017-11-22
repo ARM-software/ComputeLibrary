@@ -50,6 +50,7 @@ public:
      *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QS8/QS16/QASYMM8/F16/F32
      * @param[in]  biases The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
      *                    dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
+     *                    @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
      * @param[out] output The output tensor. Should be a 2D Tensor. Data types supported: Same as @p input
      */
     void configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output);

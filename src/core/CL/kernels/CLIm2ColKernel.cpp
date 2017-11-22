@@ -61,7 +61,6 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
     build_opts.add_option_if(has_bias, "-DHAS_BIAS");
     build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
-    build_opts.add_option_if(is_data_type_quantized_asymmetric(data_type), "-DOFFSET=" + support::cpp11::to_string(input->info()->quantization_info().offset));
 
     int stride_x = 0;
     int stride_y = 0;
@@ -95,6 +94,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
         build_opts.add_option("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom()));
         build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
         build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
+        build_opts.add_option_if_else(is_data_type_quantized(data_type), "-DPAD_VALUE=" + support::cpp11::to_string(input->info()->quantization_info().offset), "-DPAD_VALUE=0");
 
         if(kernel_dims.width == 3 && kernel_dims.height == 3 && !conv_info.has_padding())
         {

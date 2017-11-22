@@ -827,6 +827,58 @@ private:
     const unsigned int _num_kernels;
 };
 
+/** GEMM Information class. This class stores the necessary information to compute GEMM functions */
+class GEMMInfo
+{
+public:
+    /** Default constructor */
+    GEMMInfo()
+        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] is_a_reshaped               True if the matrix A has been reshaped
+     * @param[in] is_b_reshaped               True if the matrix B has been reshaped
+     * @param[in] reshape_b_only_on_first_run Reshape matrix B only for the first run
+     */
+    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run)
+        : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run)
+    {
+    }
+    /** Flag which specifies if the matrix A has been reshaped
+     *
+     * @return True if the matrix A has been reshaped
+     */
+    bool is_a_reshaped() const
+    {
+        return _is_a_reshaped;
+    };
+    /** Flag which specifies if the matrix B has been reshaped
+     *
+     * @return True if the matrix B has been reshaped
+     */
+    bool is_b_reshaped() const
+    {
+        return _is_b_reshaped;
+    };
+    /** Flag which specifies if the reshape of matrix B should executed only for the first
+     *
+     * @note This flag could be set to TRUE when GEMM is used to accelerate convolution layer
+     *
+     * @return True if the reshaped of matrix B happens only for the first run
+     */
+    bool reshape_b_only_on_first_run() const
+    {
+        return _reshape_b_only_on_first_run;
+    };
+
+private:
+    const bool _is_a_reshaped;
+    const bool _is_b_reshaped;
+    const bool _reshape_b_only_on_first_run;
+};
+
 /** IO formatting information class*/
 struct IOFormatInfo
 {

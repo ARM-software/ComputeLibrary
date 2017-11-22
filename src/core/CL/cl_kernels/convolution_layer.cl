@@ -97,13 +97,14 @@ __kernel void reshape_to_columns(
     }
 }
 
-#if defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT)
+#if defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(PAD_VALUE)
 /** This kernel performs a reshaping of the input tensor to a tensor used to perform convolution using GEMM.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note The value to use for the paddings must be passed at compile time using -DPAD_VALUE: e.g. -DPAD_VALUE=0
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -149,14 +150,10 @@ __kernel void im2col_generic(
         {
 #if PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
             *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * src_stride_x + y * src_stride_y));
-#else // PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
+#else  // PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
             if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
             {
-#if defined(OFFSET)
-                *output_ptr = OFFSET;
-#else  /* OFFSET */
-                *output_ptr = 0;
-#endif /* OFFSET */
+                *output_ptr = PAD_VALUE;
             }
             else
             {
@@ -183,7 +180,7 @@ __kernel void im2col_generic(
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -252,7 +249,7 @@ __kernel void im2col_kernel3x3_padx0_pady0(
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -291,7 +288,7 @@ __kernel void col2im(
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note In case biases will be added in late stage, -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)

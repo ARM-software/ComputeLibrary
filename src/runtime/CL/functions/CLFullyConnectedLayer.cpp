@@ -50,13 +50,20 @@ void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor
 {
     if(_is_quantized)
     {
+        // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate input and weights offset
-        QuantizationInfo input_quantization_info   = input->info()->quantization_info();
-        QuantizationInfo weights_quantization_info = weights->info()->quantization_info();
+        const QuantizationInfo input_quantization_info   = input->info()->quantization_info();
+        const QuantizationInfo weights_quantization_info = weights->info()->quantization_info();
+
         input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
         weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
+
         // Configure gemmlowp function
         _mm_gemmlowp.configure(input, weights, output);
+
+        // Revert back QuantizatioInfo as input and weights could be used in other fully connected layers
+        input->info()->set_quantization_info(input_quantization_info);
+        weights->info()->set_quantization_info(weights_quantization_info);
     }
     else
     {

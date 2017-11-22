@@ -41,8 +41,6 @@ namespace
 Error validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(max > 255);
     ARM_COMPUTE_RETURN_ERROR_ON(min < 0 || min > max);
 
@@ -53,6 +51,13 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, cons
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != bias->dimension(0));
     }
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    }
+
     return Error{};
 }
 
@@ -64,19 +69,23 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
 
     bool window_changed = update_window_and_padding(win,
-                                                    input_access,
-                                                    output_result_access);
+                                                    input_access);
+
+    if(output->total_size() != 0)
+    {
+        AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
+        window_changed = window_changed || update_window_and_padding(win, output_result_access);
+
+        output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+    }
 
     if(bias != nullptr)
     {
         AccessWindowStatic bias_access(bias, 0, 0, ceil_to_multiple(bias->dimension(0), num_elems_processed_per_iteration), bias->tensor_shape()[1]);
         window_changed = window_changed || update_window_and_padding(win, bias_access);
     }
-
-    output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
     Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
     return std::make_pair(err, win);
@@ -92,6 +101,7 @@ CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::CLGEMMLowpQuantizeDownInt32ToUint
 }
 Error CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
                                                               (bias != nullptr) ? bias->clone().get() : nullptr,

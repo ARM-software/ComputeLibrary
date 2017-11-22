@@ -380,6 +380,7 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
  * @attention The k_offset = a_offset * b_offset * k (where k is the number of matrix A columns) needs to be passed at compile time using -DK_OFFSET (i.e. -DK_OFFSET=1200)
  * @note In case the offset contribution due to a_offset is required, a_offset needs to be passed at compile time using -DA_OFFSET (i.e. -DA_OFFSET=1)
  * @note In case the offset contribution due to b_offset is required, b_offset needs to be passed at compile time using -DB_OFFSET (i.e. -DB_OFFSET=6)
+ * @note In case sum_col has batches, -DSUM_COL_HAS_BATCHES must be passed at compile time. Usually if gemmlowp is used to accelerate convolution layer, sum_col will not have batches
  *
  * The final result is:
  *
@@ -429,7 +430,12 @@ __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
     Image sum_col = CONVERT_TO_IMAGE_STRUCT(sum_col);
 
     // Compute the offset contribution due to A_OFFSET
+#if defined(SUM_COL_HAS_BATCHES)
+    a_offset_s32 = vload16(0, (__global int *)(sum_col.ptr + get_global_id(2) * sum_col_stride_y));
+#else  // defined(MATRIX_B_HAS_BATCHES)
     a_offset_s32 = vload16(0, (__global int *)(sum_col.ptr));
+#endif // defined(MATRIX_B_HAS_BATCHES)
+
     a_offset_s32 *= (int16)A_OFFSET;
 #endif // defined(A_OFFSET)
 

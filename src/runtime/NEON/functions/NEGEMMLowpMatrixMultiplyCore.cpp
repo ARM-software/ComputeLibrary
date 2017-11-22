@@ -52,10 +52,11 @@ NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemo
 {
 }
 
-void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, ITensor *output)
+void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, ITensor *output, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NEGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), output->info()));
+    ARM_COMPUTE_UNUSED(gemm_info);
+    ARM_COMPUTE_ERROR_THROW_ON(NEGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), output->info(), gemm_info));
 
     _a_offset                         = a->info()->quantization_info().offset;
     _b_offset                         = b->info()->quantization_info().offset;
@@ -198,7 +199,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     }
 }
 
-Error NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output)
+Error NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
@@ -209,6 +210,9 @@ Error NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensor
                                     "The output matrix must have the same number of rows as the matrix A");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((b)->dimension(0) != (output)->dimension(0),
                                     "The output matrix must have the same number of columns as the matrix B");
+    ARM_COMPUTE_UNUSED(gemm_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
 
     int32_t a_offset                         = a->quantization_info().offset;
     int32_t b_offset                         = b->quantization_info().offset;

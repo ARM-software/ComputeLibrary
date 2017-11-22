@@ -126,7 +126,7 @@ void CLGEMMLowpMatrixBReductionKernel::configure(const ICLTensor *mtx_b, ICLTens
     // Configure kernel window
     Window win = calculate_max_window(*vector_sum_col->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic     input_access(_input->info(), 0, 0, ceil_to_multiple(_input->info()->dimension(0), 16), _input->info()->dimension(1));
+    AccessWindowStatic     input_access(_input->info(), 0, 0, ceil_to_multiple(_input->info()->dimension(0), num_elems_processed_per_iteration), _input->info()->dimension(1));
     AccessWindowHorizontal output_access(_output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win,
