@@ -88,7 +88,7 @@ protected:
         TensorType dst               = create_tensor<TensorType>(output_shape, DataType::F32);
 
         // Create Depthwise Separable Convolution Layer configure function
-        CLDepthwiseSeparableConvolutionLayer depthwise_separable_convolution_layer;
+        FunctionType depthwise_separable_convolution_layer;
         depthwise_separable_convolution_layer.configure(&src, &depthwise_weights, &depthwise_biases, &depthwise_out, &pointwise_weights, &pointwise_biases, &dst, pad_stride_depthwise_info,
                                                         pad_stride_pointwise_info);
 
