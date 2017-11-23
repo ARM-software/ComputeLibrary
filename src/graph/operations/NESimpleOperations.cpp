@@ -106,7 +106,7 @@ REGISTER_SIMPLE_OPERATION(NEBatchNormalizationLayerOperation, NEON, OperationTyp
     return std::move(batch_norm);
 }
 
-/* DepthConvert Layer */
+/* DepthConvertLayer Layer */
 REGISTER_SIMPLE_OPERATION(NEDepthConvertLayerOperation, NEON, OperationType::DepthConvertLayer)
 {
     ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 1);
@@ -121,7 +121,7 @@ REGISTER_SIMPLE_OPERATION(NEDepthConvertLayerOperation, NEON, OperationType::Dep
     const auto shift       = ctx.parameter<uint32_t>("shift");
 
     // Create and configure function
-    auto depthconvert = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthConvert>();
+    auto depthconvert = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthConvertLayer>();
     depthconvert->configure(in, out, conv_policy, shift);
 
     // Log info
@@ -156,13 +156,13 @@ REGISTER_SIMPLE_OPERATION(NEDepthwiseConvolutionOperation, NEON, OperationType::
     bool                                    run_3x3_opt = opt3x3 && weights->info()->dimension(0) == 3;
     if(run_3x3_opt)
     {
-        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolution>();
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolutionLayer>();
         depwthwise_conv->configure(in, weights, biases, out, conv_info);
         func = std::move(depwthwise_conv);
     }
     else
     {
-        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolution3x3>();
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolutionLayer3x3>();
         depwthwise_conv->configure(in, weights, biases, out, conv_info);
         func = std::move(depwthwise_conv);
     }
@@ -313,7 +313,7 @@ REGISTER_SIMPLE_OPERATION(NEL2NormalizeLayerOperation, NEON, OperationType::L2No
     const auto epsilon = ctx.parameter<float>("epsilon");
 
     // Create and configure function
-    auto l2_norm = arm_compute::support::cpp14::make_unique<arm_compute::NEL2Normalize>();
+    auto l2_norm = arm_compute::support::cpp14::make_unique<arm_compute::NEL2NormalizeLayer>();
     l2_norm->configure(in, out, axis, epsilon);
 
     // Log info

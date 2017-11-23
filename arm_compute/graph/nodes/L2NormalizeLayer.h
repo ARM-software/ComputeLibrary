@@ -33,7 +33,7 @@ namespace arm_compute
 {
 namespace graph
 {
-/** L2Normalize layer node */
+/** L2NormalizeLayer layer node */
 class L2NormalizeLayer final : public INode
 {
 public:

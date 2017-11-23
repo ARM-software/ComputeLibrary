@@ -24,7 +24,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensorAllocator.h"
-#include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenate.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenateLayer.h"
 #include "tests/GLES_COMPUTE/GCAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
@@ -45,7 +45,7 @@ TEST_SUITE(DepthConcatenateLayer)
 //TODO(COMPMID-415): Add configuration test?
 
 template <typename T>
-using GCDepthConcatenateLayerFixture = DepthConcatenateValidationFixture<GCTensor, IGCTensor, GCAccessor, GCDepthConcatenate, T>;
+using GCDepthConcatenateLayerFixture = DepthConcatenateLayerValidationFixture<GCTensor, IGCTensor, GCAccessor, GCDepthConcatenateLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -70,7 +70,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthConcatenateLayerFixture<float>, framewor
     // Validate output
     validate(GCAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)))
 {
     // Validate output

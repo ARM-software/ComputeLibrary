@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCAbsoluteDifference.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCBatchNormalizationLayer.h"
-#include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenate.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenateLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDirectConvolutionLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDropoutLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCFillBorder.h"

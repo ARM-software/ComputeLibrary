@@ -43,7 +43,7 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename ITensorType, typename AccessorType, typename FunctionType, typename T>
-class DepthConcatenateValidationFixture : public framework::Fixture
+class DepthConcatenateLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>

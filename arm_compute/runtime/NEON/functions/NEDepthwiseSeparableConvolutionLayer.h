@@ -27,7 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
-#include "arm_compute/runtime/NEON/functions/NEDepthwiseConvolution.h"
+#include "arm_compute/runtime/NEON/functions/NEDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -39,7 +39,7 @@ class ITensor;
 
 /** Basic function to execute depthwise convolution. This function calls the following NEON kernels and function:
  *
- * -# @ref NEDepthwiseConvolution
+ * -# @ref NEDepthwiseConvolutionLayer
  * -# @ref NEDirectConvolutionLayer
  *
  */
@@ -72,8 +72,8 @@ public:
     void run() override;
 
 private:
-    NEDepthwiseConvolution   _depthwise_conv;
-    NEDirectConvolutionLayer _pointwise_conv;
+    NEDepthwiseConvolutionLayer _depthwise_conv;
+    NEDirectConvolutionLayer    _pointwise_conv;
 };
 }
 #endif /*__ARM_COMPUTE_NEON_DEPTHWISE_SEPARABLE_CONVOLUTION_H__ */

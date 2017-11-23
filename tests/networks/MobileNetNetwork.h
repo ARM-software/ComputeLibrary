@@ -47,7 +47,7 @@ template <typename TensorType,
           typename ActivationLayerFunction,
           typename ConvolutionLayerFunction,
           typename DirectConvolutionLayerFunction,
-          typename DepthwiseConvolutionFunction,
+          typename DepthwiseConvolutionLayerFunction,
           typename ReshapeFunction,
           typename PoolingLayerFunction>
 class MobileNetNetwork
@@ -279,9 +279,9 @@ private:
 
     ConvolutionLayerFunction conv3x3{};
     ActivationLayerFunction  conv3x3_act{};
-    std::array<ActivationLayerFunction, 26>        act{ {} };
-    std::array<DirectConvolutionLayerFunction, 14> conv1x1{ {} };
-    std::array<DepthwiseConvolutionFunction, 13>   dwc3x3{ {} };
+    std::array<ActivationLayerFunction, 26>           act{ {} };
+    std::array<DirectConvolutionLayerFunction, 14>    conv1x1{ {} };
+    std::array<DepthwiseConvolutionLayerFunction, 13> dwc3x3{ {} };
     PoolingLayerFunction    pool{};
     ActivationLayerFunction logistic{};
     ReshapeFunction         reshape{};

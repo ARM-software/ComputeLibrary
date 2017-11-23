@@ -269,11 +269,11 @@ public:
     }
 };
 
-/** Data set containing 2D tensor shapes for DepthConcatenate. */
-class DepthConcatenateShapes final : public ShapeDataset
+/** Data set containing 2D tensor shapes for DepthConcatenateLayer. */
+class DepthConcatenateLayerShapes final : public ShapeDataset
 {
 public:
-    DepthConcatenateShapes()
+    DepthConcatenateLayerShapes()
         : ShapeDataset("Shape",
     {
         TensorShape{ 322U, 243U },

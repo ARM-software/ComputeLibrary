@@ -106,7 +106,7 @@ REGISTER_SIMPLE_OPERATION(CLBatchNormalizationLayerOperation, OPENCL, OperationT
     return std::move(batch_norm);
 }
 
-/* DepthConvert Layer */
+/* DepthConvertLayer Layer */
 REGISTER_SIMPLE_OPERATION(CLDepthConvertLayerOperation, OPENCL, OperationType::DepthConvertLayer)
 {
     ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 1);
@@ -121,7 +121,7 @@ REGISTER_SIMPLE_OPERATION(CLDepthConvertLayerOperation, OPENCL, OperationType::D
     const auto shift       = ctx.parameter<uint32_t>("shift");
 
     // Create and configure function
-    auto depthconvert = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthConvert>();
+    auto depthconvert = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthConvertLayer>();
     depthconvert->configure(in, out, conv_policy, shift);
 
     // Log info
@@ -156,13 +156,13 @@ REGISTER_SIMPLE_OPERATION(CLDepthwiseConvolutionOperation, OPENCL, OperationType
     bool                                    run_3x3_opt = opt3x3 && weights->info()->dimension(0) == 3;
     if(run_3x3_opt)
     {
-        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolution>();
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolutionLayer>();
         depwthwise_conv->configure(in, weights, biases, out, conv_info);
         func = std::move(depwthwise_conv);
     }
     else
     {
-        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolution3x3>();
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolutionLayer3x3>();
         depwthwise_conv->configure(in, weights, biases, out, conv_info);
         func = std::move(depwthwise_conv);
     }
@@ -313,7 +313,7 @@ REGISTER_SIMPLE_OPERATION(CLL2NormalizeLayerOperation, OPENCL, OperationType::L2
     const auto epsilon = ctx.parameter<float>("epsilon");
 
     // Create and configure function
-    auto l2_norm = arm_compute::support::cpp14::make_unique<arm_compute::CLL2Normalize>();
+    auto l2_norm = arm_compute::support::cpp14::make_unique<arm_compute::CLL2NormalizeLayer>();
     l2_norm->configure(in, out, axis, epsilon);
 
     // Log info

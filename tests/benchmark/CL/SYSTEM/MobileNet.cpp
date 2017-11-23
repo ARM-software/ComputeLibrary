@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
-#include "arm_compute/runtime/CL/functions/CLDepthwiseConvolution.h"
+#include "arm_compute/runtime/CL/functions/CLDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
@@ -46,7 +46,7 @@ using CLMobileNetFixture = MobileNetFixture<CLTensor,
       CLActivationLayer,
       CLConvolutionLayer,
       CLDirectConvolutionLayer,
-      CLDepthwiseConvolution,
+      CLDepthwiseConvolutionLayer,
       CLReshapeLayer,
       CLPoolingLayer>;
 

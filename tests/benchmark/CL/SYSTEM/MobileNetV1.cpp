@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
-#include "arm_compute/runtime/CL/functions/CLDepthwiseConvolution.h"
+#include "arm_compute/runtime/CL/functions/CLDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
@@ -49,7 +49,7 @@ using CLMobileNetV1_224_Fixture = MobileNetV1Fixture<CLTensor,
       CLBatchNormalizationLayer,
       CLConvolutionLayer,
       CLDirectConvolutionLayer,
-      CLDepthwiseConvolution3x3,
+      CLDepthwiseConvolutionLayer3x3,
       CLReshapeLayer,
       CLPoolingLayer,
       CLSoftmaxLayer,
@@ -61,7 +61,7 @@ using CLMobileNetV1_128_Fixture = MobileNetV1Fixture<CLTensor,
       CLBatchNormalizationLayer,
       CLConvolutionLayer,
       CLDirectConvolutionLayer,
-      CLDepthwiseConvolution3x3,
+      CLDepthwiseConvolutionLayer3x3,
       CLReshapeLayer,
       CLPoolingLayer,
       CLSoftmaxLayer,

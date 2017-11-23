@@ -175,21 +175,21 @@ v17.09 Public major release
     - @ref arm_compute::NEGEMMAssemblyBaseKernel @ref arm_compute::NEGEMMAArch64Kernel
     - @ref arm_compute::NEDequantizationLayerKernel / @ref arm_compute::NEDequantizationLayer
     - @ref arm_compute::NEFloorKernel / @ref arm_compute::NEFloor
-    - @ref arm_compute::NEL2NormalizeKernel / @ref arm_compute::NEL2Normalize
+    - @ref arm_compute::NEL2NormalizeLayerKernel / @ref arm_compute::NEL2NormalizeLayer
     - @ref arm_compute::NEQuantizationLayerKernel @ref arm_compute::NEMinMaxLayerKernel / @ref arm_compute::NEQuantizationLayer
     - @ref arm_compute::NEROIPoolingLayerKernel / @ref arm_compute::NEROIPoolingLayer
     - @ref arm_compute::NEReductionOperationKernel / @ref arm_compute::NEReductionOperation
     - @ref arm_compute::NEReshapeLayerKernel / @ref arm_compute::NEReshapeLayer
 
  - New OpenCL kernels / functions:
-    - @ref arm_compute::CLDepthwiseConvolution3x3Kernel @ref arm_compute::CLDepthwiseIm2ColKernel @ref arm_compute::CLDepthwiseVectorToTensorKernel @ref arm_compute::CLDepthwiseWeightsReshapeKernel / @ref arm_compute::CLDepthwiseConvolution3x3 @ref arm_compute::CLDepthwiseConvolution @ref arm_compute::CLDepthwiseSeparableConvolutionLayer
+    - @ref arm_compute::CLDepthwiseConvolutionLayer3x3Kernel @ref arm_compute::CLDepthwiseIm2ColKernel @ref arm_compute::CLDepthwiseVectorToTensorKernel @ref arm_compute::CLDepthwiseWeightsReshapeKernel / @ref arm_compute::CLDepthwiseConvolutionLayer3x3 @ref arm_compute::CLDepthwiseConvolutionLayer @ref arm_compute::CLDepthwiseSeparableConvolutionLayer
     - @ref arm_compute::CLDequantizationLayerKernel / @ref arm_compute::CLDequantizationLayer
     - @ref arm_compute::CLDirectConvolutionLayerKernel / @ref arm_compute::CLDirectConvolutionLayer
     - @ref arm_compute::CLFlattenLayer
     - @ref arm_compute::CLFloorKernel / @ref arm_compute::CLFloor
     - @ref arm_compute::CLGEMMTranspose1xW
     - @ref arm_compute::CLGEMMMatrixVectorMultiplyKernel
-    - @ref arm_compute::CLL2NormalizeKernel / @ref arm_compute::CLL2Normalize
+    - @ref arm_compute::CLL2NormalizeLayerKernel / @ref arm_compute::CLL2NormalizeLayer
     - @ref arm_compute::CLQuantizationLayerKernel @ref arm_compute::CLMinMaxLayerKernel / @ref arm_compute::CLQuantizationLayer
     - @ref arm_compute::CLROIPoolingLayerKernel / @ref arm_compute::CLROIPoolingLayer
     - @ref arm_compute::CLReductionOperationKernel / @ref arm_compute::CLReductionOperation
@@ -206,7 +206,7 @@ v17.06 Public major release
  - User can specify his own scheduler by implementing the @ref arm_compute::IScheduler interface.
  - New OpenCL kernels / functions:
     - @ref arm_compute::CLBatchNormalizationLayerKernel / @ref arm_compute::CLBatchNormalizationLayer
-    - @ref arm_compute::CLDepthConcatenateKernel / @ref arm_compute::CLDepthConcatenate
+    - @ref arm_compute::CLDepthConcatenateLayerKernel / @ref arm_compute::CLDepthConcatenateLayer
     - @ref arm_compute::CLHOGOrientationBinningKernel @ref arm_compute::CLHOGBlockNormalizationKernel, @ref arm_compute::CLHOGDetectorKernel / @ref arm_compute::CLHOGDescriptor @ref arm_compute::CLHOGDetector @ref arm_compute::CLHOGGradient @ref arm_compute::CLHOGMultiDetection
     - @ref arm_compute::CLLocallyConnectedMatrixMultiplyKernel / @ref arm_compute::CLLocallyConnectedLayer
     - @ref arm_compute::CLWeightsReshapeKernel / @ref arm_compute::CLConvolutionLayerReshapeWeights
@@ -214,7 +214,7 @@ v17.06 Public major release
     - @ref arm_compute::CPPDetectionWindowNonMaximaSuppressionKernel
  - New NEON kernels / functions:
     - @ref arm_compute::NEBatchNormalizationLayerKernel / @ref arm_compute::NEBatchNormalizationLayer
-    - @ref arm_compute::NEDepthConcatenateKernel / @ref arm_compute::NEDepthConcatenate
+    - @ref arm_compute::NEDepthConcatenateLayerKernel / @ref arm_compute::NEDepthConcatenateLayer
     - @ref arm_compute::NEDirectConvolutionLayerKernel / @ref arm_compute::NEDirectConvolutionLayer
     - @ref arm_compute::NELocallyConnectedMatrixMultiplyKernel / @ref arm_compute::NELocallyConnectedLayer
     - @ref arm_compute::NEWeightsReshapeKernel / @ref arm_compute::NEConvolutionLayerReshapeWeights

@@ -27,7 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
-#include "arm_compute/runtime/CL/functions/CLDepthwiseConvolution.h"
+#include "arm_compute/runtime/CL/functions/CLDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -39,7 +39,7 @@ class ICLTensor;
 
 /** Basic function to execute depthwise convolution. This function calls the following OpenCL kernels and function:
  *
- * -# @ref CLDepthwiseConvolution
+ * -# @ref CLDepthwiseConvolutionLayer
  * -# @ref CLDirectConvolutionLayer
  *
  */
@@ -72,8 +72,8 @@ public:
     void run() override;
 
 private:
-    CLDepthwiseConvolution   _depthwise_conv;
-    CLDirectConvolutionLayer _pointwise_conv;
+    CLDepthwiseConvolutionLayer _depthwise_conv;
+    CLDirectConvolutionLayer    _pointwise_conv;
 };
 }
 #endif /*__ARM_COMPUTE_CL_DEPTHWISE_SEPARABLE_CONVOLUTION_H__ */

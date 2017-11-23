@@ -38,7 +38,7 @@ template <typename TensorType,
           typename ActivationLayerFunction,
           typename ConvolutionLayerFunction,
           typename DirectConvolutionLayerFunction,
-          typename DepthwiseConvolutionFunction,
+          typename DepthwiseConvolutionLayerFunction,
           typename ReshapeFunction,
           typename PoolingLayerFunction>
 class MobileNetFixture : public framework::Fixture
@@ -69,7 +69,7 @@ private:
              ActivationLayerFunction,
              ConvolutionLayerFunction,
              DirectConvolutionLayerFunction,
-             DepthwiseConvolutionFunction,
+             DepthwiseConvolutionLayerFunction,
              ReshapeFunction,
              PoolingLayerFunction>
              network{};
