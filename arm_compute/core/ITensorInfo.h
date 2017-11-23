@@ -90,11 +90,11 @@ public:
      */
     virtual ITensorInfo &set_fixed_point_position(int fixed_point_position) = 0;
     /** Set the quantization settings (scale and offset) of the tensor.
-    *
-    * @param[in] quantization_info QuantizationInfo containing the scale and offset
-    *
-    * @return Reference to this ITensorInfo object
-    */
+     *
+     * @param[in] quantization_info QuantizationInfo containing the scale and offset
+     *
+     * @return Reference to this ITensorInfo object
+     */
     virtual ITensorInfo &set_quantization_info(QuantizationInfo quantization_info) = 0;
     /** Resets the padding settings of the tensor.
     *

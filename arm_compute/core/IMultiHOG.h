@@ -43,14 +43,14 @@ public:
     virtual size_t num_models() const = 0;
     /** Return a pointer to the requested HOG model
      *
-     *  @param[in] index The index of the wanted HOG model.
+     * @param[in] index The index of the wanted HOG model.
      *
      *  @return A pointer pointed to the HOG model
      */
     virtual IHOG *model(size_t index) = 0;
     /** Return a const pointer to the requested HOG model
      *
-     *  @param[in] index The index of the wanted HOG model.
+     * @param[in] index The index of the wanted HOG model.
      *
      *  @return A const pointer pointed to the HOG model
      */

@@ -12,32 +12,38 @@ def process_comment(fd, comment, first_param, last_param):
     else:
         params = list()
 
-        # Copy the non param lines unmodified:
-        fd.write("".join(comment[:first_param]))
-
         # Measure the indentation of the first param and use that to create an empty comment line string:
-        m = re.match(r" *\*", comment[first_param])
+        m = re.match(r" */", comment[0])
 
         if not m:
-            raise Exception("Not a comment ? '{}'".format(comment[first_param]))
+            raise Exception("{}: Not a comment ? '{}'".format(path,comment[first_param]))
 
-        empty_line = "{}\n".format(m.group(0))
+        line_prefix = " " * len(m.group(0)) + "*"
+        empty_line =  line_prefix +"\n"
+
+        fd.write(comment[0])
+        # Copy the non param lines with the correct indentation:
+        for comment_line in range(1,first_param):
+            line = comment[comment_line]
+            m = re.match(" *\*(.*)", line)
+            if not m:
+                raise Exception("{}:{}: Not a comment line ? ".format(path, n_line - len(comment) + comment_line + 1))
+            fd.write(line_prefix+ m.group(1)+"\n")
 
         # For each param split the line into 3 columns: param, param_name, description
         for param in range(first_param, last_param):
-            m = re.match(r"([^@]+@param\[[^\]]+\]) +(\S+) +(.+)", comment[param])
+            m = re.match(r"[^@]+(@param\[[^\]]+\]) +(\S+) +(.+)", comment[param])
 
             if m:
-                params.append( (m.group(1), m.group(2), m.group(3)) )
+                params.append( (" "+m.group(1), m.group(2), m.group(3)) )
             else:
                 # If it's not a match then it must be a multi-line param description:
 
-                m = re.match("( *\*) +(.*)", comment[param])
-
+                m = re.match(" *\* +(.*)", comment[param])
                 if not m:
-                    raise Exception("Not a comment line ? ({})".format(n_line - len(comment) + param))
+                    raise Exception("{}:{}: Not a comment line ? ".format(path, n_line - len(comment) + param + 1))
 
-                params.append( (m.group(1), "", m.group(2)) )
+                params.append( ("", "", m.group(1)) )
 
         # Now that we've got a list of params, find what is the longest string for each column:
         max_len = [0, 0]
@@ -55,7 +61,7 @@ def process_comment(fd, comment, first_param, last_param):
 
         # Write out the formatted list of params:
         for p in params:
-            fd.write("{}{} {}{} {}\n".format(
+            fd.write("{}{}{} {}{} {}\n".format( line_prefix,
                     p[0], " " * (max_len[0] - len(p[0])),
                     p[1], " " * (max_len[1] - len(p[1])),
                     p[2]))
@@ -66,8 +72,13 @@ def process_comment(fd, comment, first_param, last_param):
                 # insert empty line
                 fd.write(empty_line)
 
-        # Copy the remaining of the comment unmodified:
-        fd.write("".join(comment[last_param:]))
+        # Copy the remaining of the comment with the correct indentation:
+        for comment_line in range(last_param,len(comment)):
+            line = comment[comment_line]
+            m = re.match(" *\*(.*)", line)
+            if not m:
+                raise Exception("{}:{}: Not a comment line ? ".format(path, n_line - len(comment) + comment_line + 1))
+            fd.write(line_prefix+ m.group(1)+"\n")
 
 if __name__ == "__main__":
     n_file=0
@@ -111,7 +122,7 @@ if __name__ == "__main__":
                     #print("Start comment {}".format(n_line))
 
                     if len(comment) > 0:
-                        raise Exception("Already in a comment! ({})".format(n_line))
+                        raise Exception("{}:{}: Already in a comment!".format(path,n_line))
 
                     comment.append(line)
 
@@ -146,7 +157,7 @@ if __name__ == "__main__":
                         #print("End comment {}".format(n_line))
 
                         if len(comment) < 1:
-                            raise Exception("Was not in a comment! ({})".format(n_line))
+                            raise Exception("{}:{}: Was not in a comment! ".format(path, n_line))
 
                         #print("Process comment {} {}".format(first_param, last_param))
 

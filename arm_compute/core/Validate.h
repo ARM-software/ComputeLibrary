@@ -123,10 +123,10 @@ struct get_tensor_info_t<ITensorInfo *>
 
 /** Create an error if one of the pointers is a nullptr.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] pointers Pointers to check against nullptr.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] pointers Pointers to check against nullptr.
  *
  * @return Error
  */
@@ -153,11 +153,11 @@ inline arm_compute::Error error_on_nullptr(const char *function, const char *fil
  * - Its dimensions don't match the full window's ones
  * - The step for each of its dimension is not identical to the corresponding one of the full window.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] full     Full size window
- *  @param[in] win      Window to validate.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] full     Full size window
+ * @param[in] win      Window to validate.
  *
  * @return Error
  */
@@ -175,11 +175,11 @@ arm_compute::Error error_on_mismatching_windows(const char *function, const char
  * - It is not fully contained inside the full window
  * - The step for each of its dimension is not identical to the corresponding one of the full window.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] full     Full size window
- *  @param[in] sub      Sub-window to validate.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] full     Full size window
+ * @param[in] sub      Sub-window to validate.
  *
  * @return Error
  */
@@ -194,12 +194,12 @@ arm_compute::Error error_on_invalid_subwindow(const char *function, const char *
  *
  * The window cannot be collapsed if the given dimension not equal to the full window's dimension or not start from 0.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] full     Full size window
- *  @param[in] window   Window to be collapsed.
- *  @param[in] dim      Dimension need to be checked.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] full     Full size window
+ * @param[in] window   Window to be collapsed.
+ * @param[in] dim      Dimension need to be checked.
  *
  * @return Error
  */
@@ -214,11 +214,11 @@ arm_compute::Error error_on_window_not_collapsable_at_dimension(const char *func
  *
  * The coordinates have too many dimensions if any of the dimensions greater or equal to max_dim is different from 0.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] pos      Coordinates to validate
- *  @param[in] max_dim  Maximum number of dimensions allowed.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] pos      Coordinates to validate
+ * @param[in] max_dim  Maximum number of dimensions allowed.
  *
  * @return Error
  */
@@ -233,11 +233,11 @@ arm_compute::Error error_on_coordinates_dimensions_gte(const char *function, con
  *
  * The window has too many dimensions if any of the dimension greater or equal to max_dim is different from 0.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] win      Window to validate
- *  @param[in] max_dim  Maximum number of dimensions allowed.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] win      Window to validate
+ * @param[in] max_dim  Maximum number of dimensions allowed.
  *
  * @return Error
  */
@@ -250,12 +250,12 @@ arm_compute::Error error_on_window_dimensions_gte(const char *function, const ch
 
 /** Return an error if the passed dimension objects differ.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] dim1     The first object to be compared.
- *  @param[in] dim2     The second object to be compared.
- *  @param[in] dims     (Optional) Further allowed objects.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] dim1     The first object to be compared.
+ * @param[in] dim2     The second object to be compared.
+ * @param[in] dims     (Optional) Further allowed objects.
  *
  * @return Error
  */
@@ -273,12 +273,12 @@ arm_compute::Error error_on_mismatching_dimensions(const char *function, const c
 
 /** Return an error if the passed two tensor infos have different shapes from the given dimension
  *
- *  @param[in] function      Function in which the error occurred.
- *  @param[in] file          Name of the file where the error occurred.
- *  @param[in] line          Line on which the error occurred.
- *  @param[in] tensor_info_1 The first tensor info to be compared.
- *  @param[in] tensor_info_2 The second tensor info to be compared.
- *  @param[in] tensor_infos  (Optional) Further allowed tensor infos.
+ * @param[in] function      Function in which the error occurred.
+ * @param[in] file          Name of the file where the error occurred.
+ * @param[in] line          Line on which the error occurred.
+ * @param[in] tensor_info_1 The first tensor info to be compared.
+ * @param[in] tensor_info_2 The second tensor info to be compared.
+ * @param[in] tensor_infos  (Optional) Further allowed tensor infos.
  *
  * @return Error
  */
@@ -290,12 +290,12 @@ inline arm_compute::Error error_on_mismatching_shapes(const char *function, cons
 }
 /** Return an error if the passed two tensors have different shapes from the given dimension
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] tensor_1 The first tensor to be compared.
- *  @param[in] tensor_2 The second tensor to be compared.
- *  @param[in] tensors  (Optional) Further allowed tensors.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor_1 The first tensor to be compared.
+ * @param[in] tensor_2 The second tensor to be compared.
+ * @param[in] tensors  (Optional) Further allowed tensors.
  *
  * @return Error
  */
@@ -307,13 +307,13 @@ inline arm_compute::Error error_on_mismatching_shapes(const char *function, cons
 }
 /** Return an error if the passed two tensors have different shapes from the given dimension
  *
- *  @param[in] function      Function in which the error occurred.
- *  @param[in] file          Name of the file where the error occurred.
- *  @param[in] line          Line on which the error occurred.
- *  @param[in] upper_dim     The dimension from which to check.
- *  @param[in] tensor_info_1 The first tensor info to be compared.
- *  @param[in] tensor_info_2 The second tensor info to be compared.
- *  @param[in] tensor_infos  (Optional) Further allowed tensor infos.
+ * @param[in] function      Function in which the error occurred.
+ * @param[in] file          Name of the file where the error occurred.
+ * @param[in] line          Line on which the error occurred.
+ * @param[in] upper_dim     The dimension from which to check.
+ * @param[in] tensor_info_1 The first tensor info to be compared.
+ * @param[in] tensor_info_2 The second tensor info to be compared.
+ * @param[in] tensor_infos  (Optional) Further allowed tensor infos.
  *
  * @return Error
  */
@@ -335,13 +335,13 @@ inline arm_compute::Error error_on_mismatching_shapes(const char *function, cons
 }
 /** Return an error if the passed two tensors have different shapes from the given dimension
  *
- *  @param[in] function  Function in which the error occurred.
- *  @param[in] file      Name of the file where the error occurred.
- *  @param[in] line      Line on which the error occurred.
- *  @param[in] upper_dim The dimension from which to check.
- *  @param[in] tensor_1  The first tensor to be compared.
- *  @param[in] tensor_2  The second tensor to be compared.
- *  @param[in] tensors   (Optional) Further allowed tensors.
+ * @param[in] function  Function in which the error occurred.
+ * @param[in] file      Name of the file where the error occurred.
+ * @param[in] line      Line on which the error occurred.
+ * @param[in] upper_dim The dimension from which to check.
+ * @param[in] tensor_1  The first tensor to be compared.
+ * @param[in] tensor_2  The second tensor to be compared.
+ * @param[in] tensors   (Optional) Further allowed tensors.
  *
  * @return Error
  */
@@ -363,11 +363,11 @@ inline arm_compute::Error error_on_mismatching_shapes(const char *function, cons
 
 /** Return an error if the passed two tensor infos have different data types
  *
- *  @param[in] function     Function in which the error occurred.
- *  @param[in] file         Name of the file where the error occurred.
- *  @param[in] line         Line on which the error occurred.
- *  @param[in] tensor_info  The first tensor info to be compared.
- *  @param[in] tensor_infos (Optional) Further allowed tensor infos.
+ * @param[in] function     Function in which the error occurred.
+ * @param[in] file         Name of the file where the error occurred.
+ * @param[in] line         Line on which the error occurred.
+ * @param[in] tensor_info  The first tensor info to be compared.
+ * @param[in] tensor_infos (Optional) Further allowed tensor infos.
  *
  * @return Error
  */
@@ -389,11 +389,11 @@ inline arm_compute::Error error_on_mismatching_data_types(const char *function, 
 }
 /** Return an error if the passed two tensors have different data types
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] tensor   The first tensor to be compared.
- *  @param[in] tensors  (Optional) Further allowed tensors.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor   The first tensor to be compared.
+ * @param[in] tensors  (Optional) Further allowed tensors.
  *
  * @return Error
  */
@@ -416,12 +416,12 @@ inline arm_compute::Error error_on_mismatching_data_types(const char *function, 
  *
  * @note: If the first tensor doesn't have fixed point data type, the function returns without throwing an error
  *
- *  @param[in] function      Function in which the error occurred.
- *  @param[in] file          Name of the file where the error occurred.
- *  @param[in] line          Line on which the error occurred.
- *  @param[in] tensor_info_1 The first tensor info to be compared.
- *  @param[in] tensor_info_2 The second tensor info to be compared.
- *  @param[in] tensor_infos  (Optional) Further allowed tensor infos.
+ * @param[in] function      Function in which the error occurred.
+ * @param[in] file          Name of the file where the error occurred.
+ * @param[in] line          Line on which the error occurred.
+ * @param[in] tensor_info_1 The first tensor info to be compared.
+ * @param[in] tensor_info_2 The second tensor info to be compared.
+ * @param[in] tensor_infos  (Optional) Further allowed tensor infos.
  *
  * @return Error
  */
@@ -455,12 +455,12 @@ inline arm_compute::Error error_on_mismatching_fixed_point(const char *function,
  *
  * @note: If the first tensor doesn't have fixed point data type, the function returns without throwing an error
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] tensor_1 The first tensor to be compared.
- *  @param[in] tensor_2 The second tensor to be compared.
- *  @param[in] tensors  (Optional) Further allowed tensors.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor_1 The first tensor to be compared.
+ * @param[in] tensor_2 The second tensor to be compared.
+ * @param[in] tensors  (Optional) Further allowed tensors.
  *
  * @return Error
  */
@@ -481,12 +481,12 @@ inline arm_compute::Error error_on_mismatching_fixed_point(const char *function,
  *
  * @note: If the first tensor info doesn't have asymmetric quantized data type, the function returns without throwing an error
  *
- *  @param[in] function      Function in which the error occurred.
- *  @param[in] file          Name of the file where the error occurred.
- *  @param[in] line          Line on which the error occurred.
- *  @param[in] tensor_info_1 The first tensor info to be compared.
- *  @param[in] tensor_info_2 The second tensor info to be compared.
- *  @param[in] tensor_infos  (Optional) Further allowed tensor infos.
+ * @param[in] function      Function in which the error occurred.
+ * @param[in] file          Name of the file where the error occurred.
+ * @param[in] line          Line on which the error occurred.
+ * @param[in] tensor_info_1 The first tensor info to be compared.
+ * @param[in] tensor_info_2 The second tensor info to be compared.
+ * @param[in] tensor_infos  (Optional) Further allowed tensor infos.
  *
  * @return Error
  */
@@ -520,12 +520,12 @@ inline arm_compute::Error error_on_mismatching_quantization_info(const char *fun
  *
  * @note: If the first tensor doesn't have asymmetric quantized data type, the function returns without throwing an error
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] tensor_1 The first tensor to be compared.
- *  @param[in] tensor_2 The second tensor to be compared.
- *  @param[in] tensors  (Optional) Further allowed tensors.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor_1 The first tensor to be compared.
+ * @param[in] tensor_2 The second tensor to be compared.
+ * @param[in] tensors  (Optional) Further allowed tensors.
  *
  * @return Error
  */
@@ -544,12 +544,12 @@ inline arm_compute::Error error_on_mismatching_quantization_info(const char *fun
 
 /** Throw an error if the format of the passed tensor/multi-image does not match any of the formats provided.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] object   Tensor/multi-image to validate.
- *  @param[in] format   First format allowed.
- *  @param[in] formats  (Optional) Further allowed formats.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] object   Tensor/multi-image to validate.
+ * @param[in] format   First format allowed.
+ * @param[in] formats  (Optional) Further allowed formats.
  */
 template <typename T, typename F, typename... Fs>
 void error_on_format_not_in(const char *function, const char *file, const int line,
@@ -575,12 +575,12 @@ void error_on_format_not_in(const char *function, const char *file, const int li
 
 /** Return an error if the data type of the passed tensor info does not match any of the data types provided.
  *
- *  @param[in] function    Function in which the error occurred.
- *  @param[in] file        Name of the file where the error occurred.
- *  @param[in] line        Line on which the error occurred.
- *  @param[in] tensor_info Tensor info to validate.
- *  @param[in] dt          First data type allowed.
- *  @param[in] dts         (Optional) Further allowed data types.
+ * @param[in] function    Function in which the error occurred.
+ * @param[in] file        Name of the file where the error occurred.
+ * @param[in] line        Line on which the error occurred.
+ * @param[in] tensor_info Tensor info to validate.
+ * @param[in] dt          First data type allowed.
+ * @param[in] dts         (Optional) Further allowed data types.
  *
  * @return Error
  */
@@ -603,12 +603,12 @@ inline arm_compute::Error error_on_data_type_not_in(const char *function, const 
 }
 /** Return an error if the data type of the passed tensor does not match any of the data types provided.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] tensor   Tensor to validate.
- *  @param[in] dt       First data type allowed.
- *  @param[in] dts      (Optional) Further allowed data types.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor   Tensor to validate.
+ * @param[in] dt       First data type allowed.
+ * @param[in] dts      (Optional) Further allowed data types.
  *
  * @return Error
  */
@@ -627,13 +627,13 @@ inline arm_compute::Error error_on_data_type_not_in(const char *function, const 
 
 /** Return an error if the data type or the number of channels of the passed tensor info does not match any of the data types and number of channels provided.
  *
- *  @param[in] function     Function in which the error occurred.
- *  @param[in] file         Name of the file where the error occurred.
- *  @param[in] line         Line on which the error occurred.
- *  @param[in] tensor_info  Tensor info to validate.
- *  @param[in] num_channels Number of channels to check
- *  @param[in] dt           First data type allowed.
- *  @param[in] dts          (Optional) Further allowed data types.
+ * @param[in] function     Function in which the error occurred.
+ * @param[in] file         Name of the file where the error occurred.
+ * @param[in] line         Line on which the error occurred.
+ * @param[in] tensor_info  Tensor info to validate.
+ * @param[in] num_channels Number of channels to check
+ * @param[in] dt           First data type allowed.
+ * @param[in] dts          (Optional) Further allowed data types.
  *
  * @return Error
  */
@@ -648,13 +648,13 @@ inline arm_compute::Error error_on_data_type_channel_not_in(const char *function
 }
 /** Return an error if the data type or the number of channels of the passed tensor does not match any of the data types and number of channels provided.
  *
- *  @param[in] function     Function in which the error occurred.
- *  @param[in] file         Name of the file where the error occurred.
- *  @param[in] line         Line on which the error occurred.
- *  @param[in] tensor       Tensor to validate.
- *  @param[in] num_channels Number of channels to check
- *  @param[in] dt           First data type allowed.
- *  @param[in] dts          (Optional) Further allowed data types.
+ * @param[in] function     Function in which the error occurred.
+ * @param[in] file         Name of the file where the error occurred.
+ * @param[in] line         Line on which the error occurred.
+ * @param[in] tensor       Tensor to validate.
+ * @param[in] num_channels Number of channels to check
+ * @param[in] dt           First data type allowed.
+ * @param[in] dts          (Optional) Further allowed data types.
  *
  * @return Error
  */
@@ -673,10 +673,10 @@ inline arm_compute::Error error_on_data_type_channel_not_in(const char *function
 
 /** Return an error if the tensor is not 2D.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] tensor   Tensor to validate.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor   Tensor to validate.
  *
  * @return Error
  */
@@ -689,12 +689,12 @@ arm_compute::Error error_on_tensor_not_2d(const char *function, const char *file
 
 /** Return an error if the channel is not in channels.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] cn       Input channel
- *  @param[in] channel  First channel allowed.
- *  @param[in] channels (Optional) Further allowed channels.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] cn       Input channel
+ * @param[in] channel  First channel allowed.
+ * @param[in] channels (Optional) Further allowed channels.
  *
  * @return Error
  */
@@ -719,11 +719,11 @@ inline arm_compute::Error error_on_channel_not_in(const char *function, const ch
 
 /** Return an error if the channel is not in format.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] fmt      Input channel
- *  @param[in] cn       First channel allowed.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] fmt      Input channel
+ * @param[in] cn       First channel allowed.
  *
  * @return Error
  */
@@ -742,10 +742,10 @@ arm_compute::Error error_on_channel_not_in_known_format(const char *function, co
  * -# it doesn't contain models
  * -# it doesn't have the HOG data objects with the same phase_type, normalization_type and l2_hyst_threshold (if normalization_type == L2HYS_NORM)
  *
- *  @param[in] function  Function in which the error occurred.
- *  @param[in] file      Name of the file where the error occurred.
- *  @param[in] line      Line on which the error occurred.
- *  @param[in] multi_hog IMultiHOG container to validate
+ * @param[in] function  Function in which the error occurred.
+ * @param[in] file      Name of the file where the error occurred.
+ * @param[in] line      Line on which the error occurred.
+ * @param[in] multi_hog IMultiHOG container to validate
  *
  * @return Error
  */
@@ -758,10 +758,10 @@ arm_compute::Error error_on_invalid_multi_hog(const char *function, const char *
 
 /** Return an error if the kernel is not configured.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] kernel   Kernel to validate.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] kernel   Kernel to validate.
  */
 arm_compute::Error error_on_unconfigured_kernel(const char *function, const char *file, const int line,
                                                 const IKernel *kernel);
@@ -807,12 +807,12 @@ arm_compute::Error error_on_invalid_subtensor_valid_region(const char *function,
 
 /** Return an error if the input fixed-point positions are different.
  *
- *  @param[in] function      Function in which the error occurred.
- *  @param[in] file          Name of the file where the error occurred.
- *  @param[in] line          Line on which the error occurred.
- *  @param[in] tensor_info_1 The first tensor info to be compared.
- *  @param[in] tensor_info_2 The second tensor info to be compared.
- *  @param[in] tensor_infos  (Optional) Further allowed tensor infos.
+ * @param[in] function      Function in which the error occurred.
+ * @param[in] file          Name of the file where the error occurred.
+ * @param[in] line          Line on which the error occurred.
+ * @param[in] tensor_info_1 The first tensor info to be compared.
+ * @param[in] tensor_info_2 The second tensor info to be compared.
+ * @param[in] tensor_infos  (Optional) Further allowed tensor infos.
  *
  * @return Error
  */
@@ -830,12 +830,12 @@ inline arm_compute::Error error_on_mismatching_fixed_point_position(const char *
 }
 /** Return an error if the input fixed-point positions are different.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] tensor_1 The first tensor to be compared.
- *  @param[in] tensor_2 The second tensor to be compared.
- *  @param[in] tensors  (Optional) Further allowed tensors.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor_1 The first tensor to be compared.
+ * @param[in] tensor_2 The second tensor to be compared.
+ * @param[in] tensors  (Optional) Further allowed tensors.
  *
  * @return Error
  */
@@ -854,11 +854,11 @@ inline arm_compute::Error error_on_mismatching_fixed_point_position(const char *
 
 /** Return an error if the fixed-point value is not representable in the specified Q format.
  *
- *  @param[in] function    Function in which the error occurred.
- *  @param[in] file        Name of the file where the error occurred.
- *  @param[in] line        Line on which the error occurred.
- *  @param[in] value       The floating point value to be checked.
- *  @param[in] tensor_info Input tensor info that has information on data type and fixed-point position.
+ * @param[in] function    Function in which the error occurred.
+ * @param[in] file        Name of the file where the error occurred.
+ * @param[in] line        Line on which the error occurred.
+ * @param[in] value       The floating point value to be checked.
+ * @param[in] tensor_info Input tensor info that has information on data type and fixed-point position.
  *
  * @return Error
  */
@@ -876,11 +876,11 @@ inline arm_compute::Error error_on_value_not_representable_in_fixed_point(const 
 }
 /** Return an error an error if the fixed-point value is not representable in the specified Q format.
  *
- *  @param[in] function Function in which the error occurred.
- *  @param[in] file     Name of the file where the error occurred.
- *  @param[in] line     Line on which the error occurred.
- *  @param[in] value    The floating point value to be checked.
- *  @param[in] tensor   Input tensor that has information on data type and fixed-point position.
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] value    The floating point value to be checked.
+ * @param[in] tensor   Input tensor that has information on data type and fixed-point position.
  *
  * @return Error
  */

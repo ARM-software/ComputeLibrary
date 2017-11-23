@@ -62,7 +62,7 @@ inline const float8 apply_perspective_transform(const float2 coord, const float1
  *   x0 = M[1][1] * x + M[1][2] * y + M[1][3]
  *   y0 = M[2][1] * x + M[2][2] * y + M[2][3]
  *   z0 = M[3][1] * x + M[3][2] * y + M[3][3]
-
+ *
  *   output(x,y) = input(x0/z0,y0/z0)
  *
  * @attention The matrix coefficients need to be passed at compile time:\n

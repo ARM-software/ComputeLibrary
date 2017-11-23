@@ -68,18 +68,18 @@ public:
     /** Constructor */
     NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input, weights, biases and output tensors.
-      *
-      * @param[in,out] input    Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32.
-      * @param[in]     weights  The 4d weights with dimensions [width, height, OFM, IFM]. Data type supported: Same as @p input.
-      * @param[in]     bias     Optional, ignored if NULL. The biases have one dimension. Data type supported: Same as @p input.
-      * @param[out]    output   Output tensor. The output has the same number of dimensions as the @p input.
-      * @param[in]     info     Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
-      * @param[in]     ax       The number of zeros added to right edge of the input.
-      * @param[in]     ay       The number of zeros added to top edge of the input.
-      * @param[in]     upscalex How much to scale the X axis.
-      * @param[in]     upscaley How much to scale the Y axis.
-      *
-      */
+     *
+     * @param[in,out] input    Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32.
+     * @param[in]     weights  The 4d weights with dimensions [width, height, OFM, IFM]. Data type supported: Same as @p input.
+     * @param[in]     bias     Optional, ignored if NULL. The biases have one dimension. Data type supported: Same as @p input.
+     * @param[out]    output   Output tensor. The output has the same number of dimensions as the @p input.
+     * @param[in]     info     Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
+     * @param[in]     ax       The number of zeros added to right edge of the input.
+     * @param[in]     ay       The number of zeros added to top edge of the input.
+     * @param[in]     upscalex How much to scale the X axis.
+     * @param[in]     upscaley How much to scale the Y axis.
+     *
+     */
     void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info,
                    unsigned int ax, unsigned int ay, float upscalex, float upscaley);
 

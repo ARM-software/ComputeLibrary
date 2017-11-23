@@ -124,7 +124,7 @@ public:
     /** Resizes the array to contain "num" elements. If "num" is smaller than the maximum array size, the content is reduced to its first "num" elements,
      *  "num" elements can't be bigger than the maximum number of values which can be stored in this array.
      *
-     *  @param[in] num The new array size in number of elements
+     * @param[in] num The new array size in number of elements
      */
     void resize(size_t num)
     {

@@ -78,7 +78,7 @@ inline const float2 get_current_coords()
  * @param[in] coord Input coordinates
  *
  * @return vector of 8 floats with the coordinates, even positions are x and odd y.
-*/
+ */
 inline const float8 get_neighbour_coords(const float2 coord)
 {
     return (float8)(/*tl*/ coord.s0, coord.s1, /*tr*/ coord.s0 + 1, coord.s1, /*bl*/ coord.s0, coord.s1 + 1, /*br*/ coord.s0 + 1, coord.s1 + 1);
@@ -91,7 +91,7 @@ inline const float8 get_neighbour_coords(const float2 coord)
  * @param[in] width       Width of the image
  * @param[in] height      Height of the image
  * @param[in] border_size Border size
-*/
+ */
 inline const VEC_DATA_TYPE(DATA_TYPE, 4) bilinear_interpolate_with_border(const Image *in, const float8 coords, const float width, const float height, const float border_size)
 {
     // If any of the 4 texels is out of the image's boundaries we use the border value (REPLICATE or CONSTANT) for any texel out of the image.
@@ -133,7 +133,7 @@ inline const VEC_DATA_TYPE(DATA_TYPE, 4) bilinear_interpolate_with_border(const 
  * @param[in] coords Vector of four 2D coordinates. Even pos is x and odd y.
  * @param[in] width  Width of the image
  * @param[in] height Height of the image
-*/
+ */
 inline const VEC_DATA_TYPE(DATA_TYPE, 4) bilinear_interpolate(const Image *in, const float8 coords, const float width, const float height)
 {
     return bilinear_interpolate_with_border(in, coords, width, height, 1);

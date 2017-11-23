@@ -44,18 +44,18 @@ public:
     CLMultiImage();
     /** Init the multi-planar image
      *
-     *  @param[in] width  Width of the whole image
-     *  @param[in] height Heigth of the whole image
-     *  @param[in] format Format of the whole image
+     * @param[in] width  Width of the whole image
+     * @param[in] height Heigth of the whole image
+     * @param[in] format Format of the whole image
      */
     void init(unsigned int width, unsigned int height, Format format);
     /** Init the multi-planar image
      *
      * @note Uses conservative padding strategy which fits all kernels.
      *
-     *  @param[in] width  Width of the whole image
-     *  @param[in] height Height of the whole image
-     *  @param[in] format Format of the whole image
+     * @param[in] width  Width of the whole image
+     * @param[in] height Height of the whole image
+     * @param[in] format Format of the whole image
      */
     void init_auto_padding(unsigned int width, unsigned int height, Format format);
     /** Allocated a previously initialised multi image
@@ -73,10 +73,10 @@ public:
 private:
     /** Init the multi-planar image
      *
-     *  @param[in] width        Width of the whole image
-     *  @param[in] height       Height of the whole image
-     *  @param[in] format       Format of the whole image
-     *  @param[in] auto_padding Specifies whether the image uses auto padding
+     * @param[in] width        Width of the whole image
+     * @param[in] height       Height of the whole image
+     * @param[in] format       Format of the whole image
+     * @param[in] auto_padding Specifies whether the image uses auto padding
      */
     void internal_init(unsigned int width, unsigned int height, Format format, bool auto_padding);
 

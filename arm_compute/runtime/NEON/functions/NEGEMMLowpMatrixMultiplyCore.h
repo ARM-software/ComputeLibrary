@@ -58,18 +58,18 @@ public:
     /** Constructor */
     NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the kernel's inputs, output
-    *
-    * @note GEMM_LOWP:  low precision GEMM kernel
-    *  This kernel performs the following computations:
-    *
-    *  -# Convert a values from QASYMM8 to int32 and add a_offset to each of them.
-    *  -# Convert b values from QASYMM8 to int32 add b_offset to each of them.
-    *  -# Compute the matrix product of the resulting a * b in int32.
-    *
-    * @param[in]  a      First input tensor  (Matrix A). Data type supported: QASYMM8.
-    * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a
-    * @param[out] output Output tensor. Data type supported: Data type supported: S32
-    */
+     *
+     * @note GEMM_LOWP:  low precision GEMM kernel
+     *  This kernel performs the following computations:
+     *
+     *  -# Convert a values from QASYMM8 to int32 and add a_offset to each of them.
+     *  -# Convert b values from QASYMM8 to int32 add b_offset to each of them.
+     *  -# Compute the matrix product of the resulting a * b in int32.
+     *
+     * @param[in]  a      First input tensor  (Matrix A). Data type supported: QASYMM8.
+     * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[out] output Output tensor. Data type supported: Data type supported: S32
+     */
     void configure(const ITensor *a, const ITensor *b, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixMultiplyCore
      *

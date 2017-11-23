@@ -384,14 +384,14 @@ inline DataType get_promoted_data_type(DataType dt)
 }
 
 /** Separate a 2D convolution into two 1D convolutions
-*
-* @param[in]  conv     2D convolution
-* @param[out] conv_col 1D vertical convolution
-* @param[out] conv_row 1D horizontal convolution
-* @param[in]  size     Size of the 2D convolution
-*
-* @return true if the separation was successful
-*/
+ *
+ * @param[in]  conv     2D convolution
+ * @param[out] conv_col 1D vertical convolution
+ * @param[out] conv_row 1D horizontal convolution
+ * @param[in]  size     Size of the 2D convolution
+ *
+ * @return true if the separation was successful
+ */
 inline bool separate_matrix(const int16_t *conv, int16_t *conv_col, int16_t *conv_row, uint8_t size)
 {
     int32_t min_col     = -1;

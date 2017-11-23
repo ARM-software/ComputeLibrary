@@ -58,7 +58,7 @@ public:
          *
          * @param[in] binding Tensor's binding point.
          * @param[in] shift   Number of bits to be shift for offset calculation
-        */
+         */
         BufferParam(const unsigned int binding, const unsigned int shift)
             : binding_point(binding), buffer_data_type_shift(shift)
         {

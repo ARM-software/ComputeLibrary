@@ -227,8 +227,8 @@ public:
         return _kernel_path;
     };
     /** Gets the source of the selected program
-      *
-      * @param[in] program_name Program name.
+     *
+     * @param[in] program_name Program name.
      */
     std::string get_program_source(const std::string &program_name);
     /** Sets the CL context used to create programs.

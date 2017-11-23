@@ -176,41 +176,41 @@ inline uchar2 convolution3x3(
 }
 
 /** This function computes the horizontal integral of the image.
-  *
-  * @param[in] src_ptr                               Pointer to the source image. Supported data types: QASYMM8
-  * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
-  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
-  * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
-  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
-  * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
-  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
-  * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
-  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: QASYMM8
-  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
-  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
-  * @param[in] dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
-  * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
-  * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
-  * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
-  * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
-  * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
-  * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
-  * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
-  * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
-  * @param[in] weights_step_y                        weights_stride_y * number of elements along Y processed per workitem(in bytes)
-  * @param[in] weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
-  * @param[in] weights_step_z                        weights_stride_z * number of elements along Y processed per workitem(in bytes)
-  * @param[in] weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
-  * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: QASYMM8
-  * @param[in] biases_stride_x                       (Optional) Stride of the biases vector in X dimension (in bytes)
-  * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
-  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
-  * @param[in] input_offset                          Quantized offset of zero point of the input tensor data range
-  * @param[in] weight_offset                         Quantized offset of zero point of the weights tensor data range
-  * @param[in] output_offset                         Quantized offset of zero point of the output tensor data range
-  * @param[in] output_multiplier                     Output scale multiplier
-  * @param[in] output_shift                          Output scale divisor exponent
-  */
+ *
+ * @param[in] src_ptr                               Pointer to the source image. Supported data types: QASYMM8
+ * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
+ * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: QASYMM8
+ * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
+ * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
+ * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in] weights_step_y                        weights_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in] weights_step_z                        weights_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
+ * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: QASYMM8
+ * @param[in] biases_stride_x                       (Optional) Stride of the biases vector in X dimension (in bytes)
+ * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
+ * @param[in] input_offset                          Quantized offset of zero point of the input tensor data range
+ * @param[in] weight_offset                         Quantized offset of zero point of the weights tensor data range
+ * @param[in] output_offset                         Quantized offset of zero point of the output tensor data range
+ * @param[in] output_multiplier                     Output scale multiplier
+ * @param[in] output_shift                          Output scale divisor exponent
+ */
 
 __kernel void depthwise_convolution_3x3_quantized(
     TENSOR3D_DECLARATION(src),

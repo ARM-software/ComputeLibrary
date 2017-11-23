@@ -66,17 +66,17 @@ public:
 private:
     /** Function to perform magnitude on the given window
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     void magnitude(const Window &window);
     /** Function to perform phase on the given window
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     void phase(const Window &window);
     /** Function to perform magnitude and phase on the given window
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     void magnitude_phase(const Window &window);
 
@@ -130,17 +130,17 @@ public:
 private:
     /** Function to perform magnitude on the given window
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     void magnitude(const Window &window);
     /** Function to perform phase on the given window
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     void phase(const Window &window);
     /** Function to perform magnitude and phase on the given window
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     void magnitude_phase(const Window &window);
 

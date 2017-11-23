@@ -60,29 +60,29 @@ class NEGEMMLowpQuantizeDownInt32ToUint8Scale : public INESimpleFunction
 {
 public:
     /** Initialise the kernel's inputs, output
-    *
-    * @param[in]  input           Input tensor. It is the output of @ref NEGEMMLowpMatrixMultiplyCore function. Data type supported: S32
-    * @param[in]  bias            Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
-    *                             Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-    * @param[out] output          Output tensor. Data type supported: Data type supported: QASYMM8
-    * @param[in]  result_offset   Offset to be added to each element of the input matrix
-    * @param[in]  result_mult_int Value to be multiplied to each element of the input matrix when once the result_offset has been add
-    * @param[in]  result_shift    Number of bits to shift right the result before converting back to QASYMM8
-    * @param[in]  min             (Optional) Min value used to saturate down the output result before converting back to QASYMM8
-    * @param[in]  max             (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-    *                             Along with @p min, this value can be used to implement "rectified linear unit" activation functions
-    */
+     *
+     * @param[in]  input           Input tensor. It is the output of @ref NEGEMMLowpMatrixMultiplyCore function. Data type supported: S32
+     * @param[in]  bias            Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
+     *                             Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[out] output          Output tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in]  result_offset   Offset to be added to each element of the input matrix
+     * @param[in]  result_mult_int Value to be multiplied to each element of the input matrix when once the result_offset has been add
+     * @param[in]  result_shift    Number of bits to shift right the result before converting back to QASYMM8
+     * @param[in]  min             (Optional) Min value used to saturate down the output result before converting back to QASYMM8
+     * @param[in]  max             (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
+     *                             Along with @p min, this value can be used to implement "rectified linear unit" activation functions
+     */
     void configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_offset, int result_mult_int, int result_shift, int min = 0, int max = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
-    *
-    * @param[in] input  Input tensor. It is the output of @ref NEGEMMLowpMatrixMultiplyCore function. Data type supported: S32
-    * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
-    *                   Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-    * @param[in] output Output tensor. Data type supported: Data type supported: QASYMM8
-    * @param[in] min    (Optional) Min value used to saturate down the output result before converting back to QASYMM8
-    * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-    *                   Along with @p min, this value can be used to implement "rectified linear unit" activation functions
-    */
+     *
+     * @param[in] input  Input tensor. It is the output of @ref NEGEMMLowpMatrixMultiplyCore function. Data type supported: S32
+     * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
+     *                   Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[in] output Output tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in] min    (Optional) Min value used to saturate down the output result before converting back to QASYMM8
+     * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
+     *                   Along with @p min, this value can be used to implement "rectified linear unit" activation functions
+     */
     static Error validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
 };
 }

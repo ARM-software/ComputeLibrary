@@ -72,27 +72,27 @@ private:
     using ActivationFunctionExecutorPtr = void (NEActivationLayerKernel::*)(const Window &window);
     /** Function to apply an activation function on a tensor.
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, float>::value, void>::type activation(const Window &window);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     /** Function to apply an activation function on a tensor.
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, float16_t>::value, void>::type activation(const Window &window);
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     /** Function to apply an activation function on a tensor.
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, qint8_t>::value, void>::type activation(const Window &window);
     /** Function to apply an activation function on a tensor.
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, qint16_t>::value, void>::type activation(const Window &window);

@@ -52,26 +52,26 @@ public:
     /** Constructor */
     CLGEMMLowp(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the kernel's inputs, output
-    *
-    * @note GEMM_LOWP:  low precision matrix multiply kernel
-    *  This kernel performs the following computation:
-    *
-    *  -# Convert a values from uint8 to int32 and add a_offset to each of them.
-    *  -# Convert b values from uint8 to int32 and add b_offset to each of them.
-    *  -# Compute the int32 matrix product of the resulting a * b.
-    *  -# Add output_offset to each entry of the result.
-    *  -# Multiply each entry of the result and round to the nearest integer
-    *  -# Clamp the resulting int32 values to the [0..255] range and cast to uint8.
-    *
-    * @param[in]  a               First input tensor  (Matrix A). Data types supported: U8.
-    * @param[in]  b               Second input tensor (Matrix B). Data types supported: same as @p a.
-    * @param[out] output          Output tensor. Data types supported: same as @p a.
-    * @param[in]  a_offset        Offset to be added to each element of the matrix A.
-    * @param[in]  b_offset        Offset to be added to each element of the matrix B.
-    * @param[in]  output_offset   Offset to be added to each element of the output matrix
-    * @param[in]  output_mult_int Multiplied with each element of the output matrix
-    * @param[in]  shift           Number of bits to shift right the result.
-    */
+     *
+     * @note GEMM_LOWP:  low precision matrix multiply kernel
+     *  This kernel performs the following computation:
+     *
+     *  -# Convert a values from uint8 to int32 and add a_offset to each of them.
+     *  -# Convert b values from uint8 to int32 and add b_offset to each of them.
+     *  -# Compute the int32 matrix product of the resulting a * b.
+     *  -# Add output_offset to each entry of the result.
+     *  -# Multiply each entry of the result and round to the nearest integer
+     *  -# Clamp the resulting int32 values to the [0..255] range and cast to uint8.
+     *
+     * @param[in]  a               First input tensor  (Matrix A). Data types supported: U8.
+     * @param[in]  b               Second input tensor (Matrix B). Data types supported: same as @p a.
+     * @param[out] output          Output tensor. Data types supported: same as @p a.
+     * @param[in]  a_offset        Offset to be added to each element of the matrix A.
+     * @param[in]  b_offset        Offset to be added to each element of the matrix B.
+     * @param[in]  output_offset   Offset to be added to each element of the output matrix
+     * @param[in]  output_mult_int Multiplied with each element of the output matrix
+     * @param[in]  shift           Number of bits to shift right the result.
+     */
     void configure(const ICLTensor *a, const ICLTensor *b, ICLTensor *output, int32_t a_offset, int32_t b_offset, int32_t output_offset, int32_t output_mult_int, int32_t shift);
 
     // Inherited methods overridden:
