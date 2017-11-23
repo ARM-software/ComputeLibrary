@@ -47,11 +47,11 @@ std::unique_ptr<arm_compute::IFunction> ReshapeLayer::instantiate_node(GraphCont
     arm_compute::auto_init_if_empty(*out->info(), _shape, 1, in->info()->data_type(), in->info()->fixed_point_position());
 
     // Create node context
-    NodeContext node_ctx(OperationType::QuantizationLayer);
+    NodeContext node_ctx(OperationType::ReshapeLayer);
     node_ctx.set_target(_target_hint);
     node_ctx.add_input(in);
     node_ctx.add_output(out);
 
     // Get function
-    return OperationRegistry::get().find_operation(OperationType::QuantizationLayer, _target_hint)->configure(node_ctx);
+    return OperationRegistry::get().find_operation(OperationType::ReshapeLayer, _target_hint)->configure(node_ctx);
 }

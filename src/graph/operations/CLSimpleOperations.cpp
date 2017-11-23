@@ -138,7 +138,7 @@ REGISTER_SIMPLE_OPERATION(CLDepthConvertLayerOperation, OPENCL, OperationType::D
 /* DepthwiseConvolutionLayer Layer */
 REGISTER_SIMPLE_OPERATION(CLDepthwiseConvolutionOperation, OPENCL, OperationType::DepthwiseConvolutionLayer)
 {
-    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 2 || ctx.num_inputs() != 3);
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 2 && ctx.num_inputs() != 3);
     ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 1);
     ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0)) == nullptr);
     ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);

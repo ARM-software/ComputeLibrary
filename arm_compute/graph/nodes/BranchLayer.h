@@ -64,6 +64,17 @@ public:
         },
         std::move(rest_sub_graphs)...);
     }
+    /** Default Constructor
+     *
+     * @param[in] sub_graph Sub graph
+     */
+    template <typename... Ts>
+    BranchLayer(SubGraph &&sub_graph)
+        : _branch_merge_method(BranchMergeMethod::DEPTH_CONCATENATE), _sub_graphs()
+    {
+        /* TODO:(geopin01) Use traits to make sure variadic arguments are of SubGraph type */
+        _sub_graphs.push_back(arm_compute::support::cpp14::make_unique<SubGraph>(std::move(sub_graph)));
+    }
 
     // Inherited methods overriden:
     std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) override;

@@ -37,6 +37,29 @@
 
 using namespace arm_compute;
 
+namespace
+{
+/** Calculates expected output shape dimension
+ *
+ * @param[in] Input shape
+ *
+ * @return Expected output shape
+ */
+TensorShape get_output_shape(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info)
+{
+    unsigned int output_width  = 0;
+    unsigned int output_height = 0;
+
+    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(), weights_shape.x(), weights_shape.y(), conv_info);
+
+    TensorShape output_shape = input_shape;
+    output_shape.set(0, output_width);
+    output_shape.set(1, output_height);
+
+    return output_shape;
+}
+} // namespace
+
 CLDepthwiseConvolution3x3Kernel::CLDepthwiseConvolution3x3Kernel()
     : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_x(0), _conv_stride_y(0), _conv_pad_left(0), _conv_pad_top(0)
 {
@@ -50,9 +73,7 @@ BorderSize CLDepthwiseConvolution3x3Kernel::border_size() const
 void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, weights);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
 
     if(biases != nullptr)
@@ -69,13 +90,18 @@ void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, const IC
         ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
     }
 
-    std::pair<unsigned int, unsigned int> expected_output = scaled_dimensions(input->info()->tensor_shape().x(), input->info()->tensor_shape().y(),
-                                                                              weights->info()->tensor_shape().x(), weights->info()->tensor_shape().y(),
-                                                                              conv_info);
+    // Get convolved dimensions
+    TensorShape output_shape = get_output_shape(input->info()->tensor_shape(), weights->info()->tensor_shape(), conv_info);
 
-    ARM_COMPUTE_UNUSED(expected_output);
-    ARM_COMPUTE_ERROR_ON(expected_output.first != output->info()->tensor_shape().x());
-    ARM_COMPUTE_ERROR_ON(expected_output.second != output->info()->tensor_shape().y());
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(),
+                       output_shape,
+                       1,
+                       input->info()->data_type(),
+                       input->info()->fixed_point_position(),
+                       input->info()->quantization_info());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
     _input         = input;
     _output        = output;

@@ -189,7 +189,7 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
                                      in->info()->data_type(),
                                      in->info()->fixed_point_position()));
     }
-    if(_biases.tensor() == nullptr)
+    if(_biases.has_accessor() && _biases.tensor() == nullptr)
     {
         _biases.set_info(TensorInfo(TensorShape(_ofm), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
     }
@@ -200,11 +200,14 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
 
     // Check if the weights and biases are loaded
     bool weights_are_loaded = _weights.tensor() != nullptr;
-    bool biases_are_loaded  = _weights.tensor() != nullptr;
+    bool biases_are_loaded  = _biases.has_accessor() ? _biases.tensor() != nullptr : true;
 
     // Set bias and weights target
     _weights.set_target(_target_hint);
-    _biases.set_target(_target_hint);
+    if(_biases.has_accessor())
+    {
+        _biases.set_target(_target_hint);
+    }
 
     // Calculate output shape
     TensorShape output_shape = calculate_convolution_layer_output_shape(in->info()->tensor_shape(), _weights.info().tensor_shape(), _conv_info);

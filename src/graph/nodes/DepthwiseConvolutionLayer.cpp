@@ -51,10 +51,13 @@ std::unique_ptr<arm_compute::IFunction> DepthwiseConvolutionLayer::instantiate_n
     }
 
     bool weights_is_loaded = _weights.tensor() != nullptr;
-    bool biases_is_loaded  = _biases.has_accessor() ? _biases.tensor() != nullptr : false;
+    bool biases_is_loaded  = _biases.has_accessor() ? _biases.tensor() != nullptr : true;
 
     _weights.set_target(_target_hint);
-    _biases.set_target(_target_hint);
+    if(_biases.has_accessor())
+    {
+        _biases.set_target(_target_hint);
+    }
 
     // Create node context
     NodeContext node_ctx(OperationType::DepthwiseConvolutionLayer);

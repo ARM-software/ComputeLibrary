@@ -47,13 +47,13 @@ public:
      * @param[in] conv_width  Convolution width
      * @param[in] conv_height Convolution height
      * @param[in] weights     Weights values tensor
+     * @param[in] biases      Biases values tensor
      * @param[in] conv_info   Convolution info
-     * @param[in] biases      (Optional) Biases values tensor
      * @param[in] opt3x3      (Optional) If true executes DepthwiseConvolutionLayer3x3
      */
     template <typename AccessorType>
-    DepthwiseConvolutionLayer(unsigned int conv_width, unsigned int conv_height, AccessorType &&weights, const PadStrideInfo conv_info, AccessorType &&biases = nullptr, bool opt3x3 = true)
-        : _conv_width(conv_width), _conv_height(conv_height), _weights(std::move(weights)), _conv_info(conv_info), _biases(std::move(biases)), _opt3x3(opt3x3)
+    DepthwiseConvolutionLayer(unsigned int conv_width, unsigned int conv_height, AccessorType &&weights, AccessorType &&biases, const PadStrideInfo conv_info, bool opt3x3 = true)
+        : _conv_width(conv_width), _conv_height(conv_height), _weights(std::move(weights)), _biases(std::move(biases)), _conv_info(conv_info), _opt3x3(opt3x3)
     {
     }
 
@@ -64,8 +64,8 @@ private:
     unsigned int        _conv_width;
     unsigned int        _conv_height;
     Tensor              _weights;
-    const PadStrideInfo _conv_info;
     Tensor              _biases;
+    const PadStrideInfo _conv_info;
     bool                _opt3x3;
 };
 } // namespace graph

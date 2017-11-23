@@ -29,6 +29,7 @@
 #include "arm_compute/graph/nodes/BranchLayer.h"
 #include "arm_compute/graph/nodes/ConvolutionLayer.h"
 #include "arm_compute/graph/nodes/DepthConvertLayer.h"
+#include "arm_compute/graph/nodes/DepthwiseConvolutionLayer.h"
 #include "arm_compute/graph/nodes/DequantizationLayer.h"
 #include "arm_compute/graph/nodes/FlattenLayer.h"
 #include "arm_compute/graph/nodes/FloorLayer.h"
