@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,13 +106,24 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
 
     unsigned int output_width  = 0;
     unsigned int output_height = 0;
-    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(), weights_shape.x(), weights_shape.y(), conv_info);
+    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(), weights_shape.x(),
+                                                              weights_shape.y(), conv_info);
 
     TensorShape output_shape{ input_shape };
     output_shape.set(0, output_width);
     output_shape.set(1, output_height);
 
     return output_shape;
+}
+inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, unsigned int sx, unsigned int sy, unsigned int inner_border_right, unsigned int inner_border_top, const PadStrideInfo &info)
+{
+    TensorShape        scale_out_shape(input.tensor_shape());
+    const unsigned int out_x = input.dimension(0) + (input.dimension(0) - 1) * (sx - 1) + inner_border_right + 2 * info.pad().first;
+    const unsigned int out_y = input.dimension(1) + (input.dimension(1) - 1) * (sy - 1) + inner_border_top + 2 * info.pad().second;
+    scale_out_shape.set(0, out_x);
+    scale_out_shape.set(1, out_y);
+
+    return scale_out_shape;
 }
 } // namespace shape_calculator
 } // namespace misc

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,7 @@ class ICLTensor;
 class CLDirectConvolutionLayer : public IFunction
 {
 public:
+    /** Default constructor */
     CLDirectConvolutionLayer();
     /** Set the input and output tensors.
      *

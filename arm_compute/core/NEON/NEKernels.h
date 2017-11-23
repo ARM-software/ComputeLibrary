@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,6 @@
 #include "arm_compute/core/NEON/kernels/NEColorConvertKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvolutionKernel.h"
 #include "arm_compute/core/NEON/kernels/NECumulativeDistributionKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDeconvolutionLayerUpsampleKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthConvertLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayer3x3Kernel.h"

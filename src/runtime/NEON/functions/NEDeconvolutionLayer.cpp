@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,38 +24,41 @@
 #include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayer.h"
 
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
 
 NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
-      _scale_f(),
       _conv_f(),
-      _scaled_output()
+      _scaled_output(),
+      _input(nullptr),
+      _info(),
+      _inner_border()
 {
 }
 
 void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info,
-                                     unsigned int ax, unsigned int ay, float upscalex, float upscaley)
+                                     unsigned int inner_border_right, unsigned int inner_border_top)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != weights->info()->dimension(1));
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) < 1);
+    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 1 && weights->info()->dimension(0) != 3 && weights->info()->dimension(0) != 5);
 
-    auto out_dims = deconvolution_output_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0), weights->info()->dimension(1),
-                                                    info.pad().first, info.pad().second, ax, ay, upscalex, upscaley, info.round());
+    _input        = input;
+    _info         = info;
+    _inner_border = std::make_pair(inner_border_right, inner_border_top);
+
+    const unsigned int stride_x = info.stride().first;
+    const unsigned int stride_y = info.stride().second;
+    auto               out_dims = deconvolution_output_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0), weights->info()->dimension(1),
+                                                                  info.pad().first, info.pad().second, inner_border_right, inner_border_top, stride_x, stride_y);
 
     const TensorShape output_shape = deconvolution_output_shape(out_dims, input->info()->tensor_shape(), weights->info()->tensor_shape());
-
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, weights, bias);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, weights, bias);
 
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->dimension(Window::DimX) != output_shape.x(), "Output's width is invalid.");
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->dimension(Window::DimY) != output_shape.y(), "Output's height is invalid.");
@@ -64,51 +67,51 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     _memory_group.manage(&_scaled_output);
 
     // configure scale function
-    //Init and allocate intermmidiate tensor for output, same size as input but the first two axis are the same as the output tensor
-    TensorShape scale_out_shape(input->info()->tensor_shape());
-    scale_out_shape.set(0, output->info()->dimension(0));
-    scale_out_shape.set(1, output->info()->dimension(1));
-    TensorInfo scale_out_info(scale_out_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    // Init and allocate intermmidiate tensor for output, same size as input but the first two axis are the same as the output tensor
+    const TensorInfo scale_out_info(compute_deconvolution_shape(*input->info(), stride_x, stride_y, inner_border_right, inner_border_top, info), 1, input->info()->data_type(),
+                                    input->info()->fixed_point_position());
     _scaled_output.allocator()->init(scale_out_info);
-    const unsigned int kernel_size = weights->info()->dimension(0);
-    // Padding for the upsampled image is calculated with the equiation: p' = k - p - 1, where k is kernel size and p is the input padding
-    ARM_COMPUTE_ERROR_ON(info.pad().first > (kernel_size - 1));
-    const unsigned int  tr_px     = kernel_size - info.pad().first - 1;
-    const unsigned int  tr_py     = kernel_size - info.pad().second - 1;
-    const unsigned int  tr_stride = 1;
-    const PadStrideInfo transposed_info(tr_stride, tr_stride, tr_px, tr_py);
-    _scale_f.configure(input, &_scaled_output, std::make_pair(ax, ay), std::make_pair(info.stride().first - 1u, info.stride().second - 1u), transposed_info);
+
     // setup the function to convolve the upscaled output
-    switch(kernel_size)
-    {
-        case 1:
-        {
-            _conv_f.configure(&_scaled_output, weights, bias, output, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
-            break;
-        }
-        case 3:
-        {
-            _conv_f.configure(&_scaled_output, weights, bias, output, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
-            break;
-        }
-        case 5:
-        {
-            _conv_f.configure(&_scaled_output, weights, bias, output, PadStrideInfo(1, 1, 2, 2, DimensionRoundingType::CEIL));
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Not supported");
-            break;
-        }
-    }
+    const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
+    _conv_f.configure(&_scaled_output, weights, bias, output, conv_info);
     _scaled_output.allocator()->allocate();
 }
 
 void NEDeconvolutionLayer::run()
 {
     _memory_group.acquire();
-    _scale_f.run();
+
+    // Initialize _scaled_output buffer
+    const int width_in      = _input->info()->dimension(0);
+    const int height_in     = _input->info()->dimension(1);
+    const int width_scaled  = _scaled_output.info()->dimension(0);
+    const int height_scaled = _scaled_output.info()->dimension(1);
+    const int num_2d_slices = _input->info()->tensor_shape().total_size() / (width_in * height_in);
+    const int stride_x      = _info.stride().first;
+    const int stride_y      = _info.stride().second;
+
+    std::fill_n(reinterpret_cast<float *>(_scaled_output.buffer()), _scaled_output.info()->tensor_shape().total_size(), 0.f);
+
+    // scaled_output is the input for the forward convolution. We copy the input elements to scaled_output
+    // and insert rows and columns with zeroes depending on the stride values.
+    for(int slice = 0; slice < num_2d_slices; ++slice)
+    {
+        const int start_x = _info.pad().first;
+        const int start_y = _inner_border.second + _info.pad().second;
+        const int end_y   = height_scaled - _info.pad().second;
+        const int end_x   = width_scaled - _inner_border.first - _info.pad().first;
+
+        for(int yi = start_y, in_y = 0; yi < end_y; yi += stride_y, in_y++)
+        {
+            for(int xi = start_x, in_x = 0; xi < end_x; xi += stride_x, in_x++)
+            {
+                const auto in = *(reinterpret_cast<float *>(_input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(in_x, in_y, slice))));
+                *(reinterpret_cast<float *>(_scaled_output.buffer() + _scaled_output.info()->offset_element_in_bytes(Coordinates(xi, yi, slice)))) = in;
+            }
+        }
+    }
+
     _conv_f.run();
     _memory_group.release();
 }

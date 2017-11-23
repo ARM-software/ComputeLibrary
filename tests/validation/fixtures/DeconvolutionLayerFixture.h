@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,20 +43,15 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DeconvolutionLayerFixtureBase : public framework::Fixture
 {
 public:
-    /*
-     *
-     * @param[in] a The number of zeros added to right and bottom edges of the input.
-     * @param[in] u How much to scale the X and Y axis.
-     */
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info,
-               const std::pair<unsigned int, unsigned int> &a, const std::pair<unsigned int, unsigned int> &u, DataType data_type, int fractional_bits)
+               const std::pair<unsigned int, unsigned int> &inner_border, DataType data_type, int fractional_bits)
     {
         _fractional_bits = fractional_bits;
         _data_type       = data_type;
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, a, u, data_type, fractional_bits);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, a, data_type, fractional_bits);
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, fractional_bits);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, fractional_bits);
     }
 
 protected:
@@ -75,13 +70,9 @@ protected:
                 library->fill_tensor_uniform(tensor, i);
         }
     }
-    /*
-     *
-     * @param[in] a The number of zeros added to right and bottom edges of the input.
-     * @param[in] u How much to scale the X and Y axis.
-     */
+
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
-                              const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a, const std::pair<float, float> &u, DataType data_type, int fixed_point_position)
+                              const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &inner_border, DataType data_type, int fixed_point_position)
     {
         // Create tensors
         TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, fixed_point_position);
@@ -91,7 +82,7 @@ protected:
 
         // Create and configure function
         FunctionType conv;
-        conv.configure(&src, &weights, &bias, &dst, info, a.first, a.second, u.first, u.second);
+        conv.configure(&src, &weights, &bias, &dst, info, inner_border.first, inner_border.second);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -121,7 +112,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
-                                      const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> a, DataType data_type, int fixed_point_position)
+                                      const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> inner_border, DataType data_type, int fixed_point_position)
     {
         // Create reference
         SimpleTensor<T> src{ input_shape, data_type, 1, fixed_point_position };
@@ -133,7 +124,7 @@ protected:
         fill(weights, 1);
         fill(bias, 2);
 
-        return reference::deconvolution_layer<T>(src, weights, bias, output_shape, info, a);
+        return reference::deconvolution_layer<T>(src, weights, bias, output_shape, info, inner_border);
     }
 
     TensorType      _target{};
@@ -148,18 +139,16 @@ class DeconvolutionValidationFixture : public DeconvolutionLayerFixtureBase<Tens
 public:
     template <typename...>
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
-               unsigned int ax, unsigned int ay, unsigned int ux, unsigned int uy, unsigned int num_kernels, DataType data_type)
+               unsigned int inner_border_right, unsigned int inner_border_top, unsigned int num_kernels, DataType data_type)
     {
         ARM_COMPUTE_ERROR_ON_MSG(kernel_size_x != kernel_size_y, "Only square kernels supported");
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
-        const std::pair<unsigned int, unsigned int> a(ax, ay);
-        const std::pair<float, float>               u(ux, uy);
-        auto out_dim = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, a.first, a.second, u.first, u.second,
-                                                       DimensionRoundingType::CEIL);
+        const std::pair<unsigned int, unsigned int> inner_border(inner_border_right, inner_border_top);
+        auto        out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, inner_border.first, inner_border.second, sx, sy);
         TensorShape output_shape = deconvolution_output_shape(out_dim, input_shape, weights_shape);
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, a, u, data_type, 0);
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, 0);
     }
 };
 

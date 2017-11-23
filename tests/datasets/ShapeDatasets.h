@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -239,7 +239,7 @@ public:
     SmallDeconvolutionShapes()
         : ShapeDataset("InputShape",
     {
-        TensorShape{ 2U, 3U, 3U, 2U },
+        TensorShape{ 4U, 3U, 3U, 2U },
                      TensorShape{ 5U, 5U, 3U },
                      TensorShape{ 11U, 13U, 4U, 3U }
     })

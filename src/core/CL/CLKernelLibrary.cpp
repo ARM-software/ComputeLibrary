@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -186,6 +186,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "copy_plane", "channel_extract.cl" },
     { "copy_planes_3p", "channel_combine.cl" },
     { "copy_to_keypoint", "fast_corners.cl" },
+    { "deconvolution_upsample", "deconvolution_layer.cl" },
     { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_quantized", "depthwise_convolution_quantized.cl" },
     { "depthwise_im2col", "depthwise_convolution.cl" },
@@ -419,6 +420,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "convolution_rectangle.cl",
 #include "./cl_kernels/convolution_rectangle.clembed"
+    },
+    {
+        "deconvolution_layer.cl",
+#include "./cl_kernels/deconvolution_layer.clembed"
     },
     {
         "depth_convert.cl",

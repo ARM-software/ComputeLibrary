@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,8 @@
 #include "arm_compute/runtime/CL/functions/CLColorConvert.h"
 #include "arm_compute/runtime/CL/functions/CLConvolution.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
+#include "arm_compute/runtime/CL/functions/CLDeconvolutionLayer.h"
+#include "arm_compute/runtime/CL/functions/CLDeconvolutionLayerUpsample.h"
 #include "arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDepthConvertLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDepthwiseConvolutionLayer.h"

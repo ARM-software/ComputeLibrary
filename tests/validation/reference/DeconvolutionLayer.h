@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ namespace reference
  * bias             Optional, ignored if NULL. The biases have one dimension. Data type supported: Same as @p input.
  * output_shape     Output tensor shape. The output has the same number of dimensions as the @p input.
  * info             Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
- * a                The number of zeros added to right edge of the input.
+ * a                The number of zeros added to right and top edges of the input.
  *
  */
 template <typename T>
