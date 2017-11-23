@@ -21,11 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
+#include "tests/NEON/Helper.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeGEMMDataset.h"
 #include "tests/datasets/SmallGEMMDataset.h"
@@ -34,6 +36,7 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/GEMMFixture.h"
+#include "tests/validation/fixtures/GEMMInterleave4x4Fixture.h"
 
 namespace arm_compute
 {
@@ -56,10 +59,51 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::QS8,
     DataType::QS16,
 });
+
+const auto data_interleave = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12);
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(GEMM)
+
+TEST_SUITE(INTERLEAVE_4X4)
+using NEGEMMInterleave4x4 = NESynthetizeFunctionWithZeroConstantBorder<NEGEMMInterleave4x4Kernel, 4>;
+
+TEST_SUITE(FP32)
+using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, NEGEMMInterleave4x4, float>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::F32))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // FP32
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QS8)
+using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixedPointFixture<Tensor, Accessor, NEGEMMInterleave4x4, int8_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave *
+                       framework::dataset::make("DataType", DataType::QS8)
+                       * framework::dataset::make("FractionalBits", 1, 7))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QS16)
+using NEGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixedPointFixture<Tensor, Accessor, NEGEMMInterleave4x4, int16_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave *
+                       framework::dataset::make("DataType", DataType::QS16)
+                       * framework::dataset::make("FractionalBits", 1, 14))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+
+TEST_SUITE_END() // INTERLEAVE_4X4
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes),
                shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type)

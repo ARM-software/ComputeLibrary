@@ -64,6 +64,21 @@ public:
     }
 };
 
+// As above but this also setups a Zero border on the input tensor of the specified bordersize
+template <typename K, int bordersize>
+class NESynthetizeFunctionWithZeroConstantBorder : public INESimpleFunction
+{
+public:
+    template <typename T, typename... Args>
+    void configure(T first, Args &&... args)
+    {
+        auto k = arm_compute::support::cpp14::make_unique<K>();
+        k->configure(first, std::forward<Args>(args)...);
+        _kernel = std::move(k);
+        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue(0));
+    }
+};
+
 } // namespace test
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_NEON_HELPER_H__ */
