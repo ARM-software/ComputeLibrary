@@ -61,12 +61,12 @@ Framework::Framework()
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1K), Instrument::make_instrument<MaliCounter, ScaleFactor::SCALE_1K>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1M), Instrument::make_instrument<MaliCounter, ScaleFactor::SCALE_1M>);
 #endif /* MALI_ENABLED */
-#ifdef OPENCL_TIMER_ENABLED
+#ifdef ARM_COMPUTE_CL
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::NONE), Instrument::make_instrument<OpenCLTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_US), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_US>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_MS>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_S>);
-#endif /* OPENCL_TIMER_ENABLED */
+#endif /* ARM_COMPUTE_CL */
 }
 
 std::set<InstrumentsDescription> Framework::available_instruments() const
