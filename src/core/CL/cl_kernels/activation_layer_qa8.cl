@@ -91,8 +91,8 @@ __kernel void activation_layer_qa8(
 
     // requantize to output space
     float16 fdata = convert_float16(data);
-    fdata         = round((fdata - O1_VAL) * (S1_VAL / S2_VAL) + O2_VAL);
-    uchar16 qdata = convert_uchar16(fdata);
+    fdata         = round((fdata - (float)O1_VAL) * ((float)S1_VAL / (float)S2_VAL) + (float)O2_VAL);
+    uchar16 qdata = convert_uchar16_sat(fdata);
 
     // Store result
     VSTORE(VEC_SIZE)
