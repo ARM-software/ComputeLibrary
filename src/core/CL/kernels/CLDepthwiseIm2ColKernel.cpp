@@ -32,6 +32,7 @@
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
 
+#include "arm_compute/runtime/CL/CLScheduler.h"
 #include <tuple>
 
 using namespace arm_compute;

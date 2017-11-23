@@ -84,12 +84,26 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->padding(), padding);
 }
 
-template <typename T>
-using NEDepthwiseConvolutionFixture3x3 = DepthwiseConvolutionValidationFixture<Tensor, Accessor, NEDepthwiseConvolution3x3, T>;
-
 TEST_SUITE(Float)
 TEST_SUITE(F32)
+TEST_SUITE(Generic)
+template <typename T>
+using NEDepthwiseConvolutionFixture = DepthwiseConvolutionValidationFixture<Tensor, Accessor, NEDepthwiseConvolution, T>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDepthwiseConvolutionDataset(), framework::dataset::make("DataType",
+                                                                                                                  DataType::F32)))
+{
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionDataset(), framework::dataset::make("DataType",
+                                                                                                                DataType::F32)))
+{
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END()
+
 TEST_SUITE(W3x3)
+template <typename T>
+using NEDepthwiseConvolutionFixture3x3 = DepthwiseConvolutionValidationFixture<Tensor, Accessor, NEDepthwiseConvolution3x3, T>;
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionFixture3x3<float>, framework::DatasetMode::ALL, combine(datasets::SmallDepthwiseConvolutionDataset3x3(), framework::dataset::make("DataType",
                                                                                                                DataType::F32)))
 {
@@ -101,6 +115,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionFixture3x3<float>, framew
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE_END()
+
 TEST_SUITE_END()
 TEST_SUITE_END()
 

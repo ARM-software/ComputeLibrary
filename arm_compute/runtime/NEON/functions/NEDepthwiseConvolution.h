@@ -25,8 +25,12 @@
 #define __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__
 
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolution3x3Kernel.h"
+#include "arm_compute/core/NEON/kernels/NEDepthwiseIm2ColKernel.h"
+#include "arm_compute/core/NEON/kernels/NEDepthwiseVectorToTensorKernel.h"
+#include "arm_compute/core/NEON/kernels/NEDepthwiseWeightsReshapeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerBiasAccumulateKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -67,6 +71,43 @@ private:
     NEDirectConvolutionLayerBiasAccumulateKernel _bias_kernel;
     NEFillBorderKernel                           _border_handler;
     bool                                         _has_bias;
+};
+
+/** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:
+ *
+ * -# @ref NEDepthwiseIm2ColKernel
+ * -# @ref NEDepthwiseWeightsReshapeKernel
+ * -# @ref NEGEMMMatrixVectorMultiplyKernel
+ * -# @ref NEFillBorderKernel (if pad_x or pad_y > 0)
+ *
+ */
+class NEDepthwiseConvolution : public IFunction
+{
+public:
+    /** Default constructor */
+    NEDepthwiseConvolution();
+    /** Initialize the function's source, destination, weights and convolution information.
+     *
+     * @param[in, out] input     Source tensor. Data type supported: F32. (Written to only for border filling).
+     * @param[out]     output    Destination tensor. Data type supported: same as @p input.
+     * @param[in]      weights   Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
+     * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     *                           Data type supported: Same as @p input.
+     * @param[in]      conv_info Padding and stride information to use for the convolution.
+     */
+    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info);
+
+    // Inherited methods overriden:
+    void run() override;
+
+private:
+    NEDepthwiseIm2ColKernel          _im2col_kernel;
+    NEDepthwiseWeightsReshapeKernel  _weights_reshape_kernel;
+    NEGEMMMatrixVectorMultiplyKernel _v2mm_kernel;
+    NEDepthwiseVectorToTensorKernel  _vector_to_tensor_kernel;
+    Tensor                           _input_reshaped;
+    Tensor                           _weights_reshaped;
+    Tensor                           _v2mm_output;
 };
 }
 #endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__ */
