@@ -108,6 +108,13 @@ void PrettyPrinter::print_error(const std::exception &error, bool expected)
     *_stream << begin_color("1") << prefix << error.what() << end_color() << "\n";
 }
 
+void PrettyPrinter::print_list_tests(const std::vector<TestInfo> &infos)
+{
+    for(auto info : infos)
+    {
+        *_stream << "[" << info.id << ", " << info.mode << ", " << info.status << "] " << info.name << "\n";
+    }
+}
 void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
 {
     for(const auto &instrument : measurements)

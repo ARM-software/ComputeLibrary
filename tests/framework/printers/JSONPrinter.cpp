@@ -113,6 +113,21 @@ void JSONPrinter::print_test_footer()
     *_stream << "}";
 }
 
+void JSONPrinter::print_list_tests(const std::vector<TestInfo> &infos)
+{
+    *_stream << R"(, "list_tests" : {)";
+    bool first = true;
+    for(auto info : infos)
+    {
+        if(!first)
+        {
+            *_stream << ",";
+        }
+        *_stream << R"(")" << info.id << R"(" : { "name": ")" << info.name << R"(", "mode": ")" << info.mode << R"(", "status" : ")" << info.status << R"(" })";
+        first = false;
+    }
+    *_stream << "}";
+}
 void JSONPrinter::print_errors_header()
 {
     _errors.clear();

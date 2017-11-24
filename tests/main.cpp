@@ -254,9 +254,10 @@ int main(int argc, char **argv)
 
         if(list_tests->value())
         {
-            for(const auto &info : framework.test_infos())
+            for(auto &p : printers)
             {
-                std::cout << "[" << info.id << ", " << info.mode << ", " << info.status << "] " << info.name << "\n";
+                p->print_list_tests(framework.test_infos());
+                p->print_global_footer();
             }
 
             return 0;
