@@ -94,6 +94,7 @@ enum class OperationType
     BatchNormalizationLayer,
     ConvolutionLayer,
     DepthConvertLayer,
+    DepthwiseConvolutionLayer,
     DequantizationLayer,
     FlattenLayer,
     FloorLayer,

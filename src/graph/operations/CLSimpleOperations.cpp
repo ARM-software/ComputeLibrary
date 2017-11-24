@@ -135,6 +135,56 @@ REGISTER_SIMPLE_OPERATION(CLDepthConvertLayerOperation, OPENCL, OperationType::D
     return std::move(depthconvert);
 }
 
+/* DepthwiseConvolutionLayer Layer */
+REGISTER_SIMPLE_OPERATION(CLDepthwiseConvolutionOperation, OPENCL, OperationType::DepthwiseConvolutionLayer)
+{
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 2 || ctx.num_inputs() != 3);
+    ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 1);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);
+
+    // Extract IO and info
+    auto      *in        = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
+    auto      *weights   = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(1));
+    auto      *biases    = ctx.num_inputs() == 3 ? dynamic_cast<arm_compute::ICLTensor *>(ctx.input(2)) : nullptr;
+    auto      *out       = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
+    const auto conv_info = ctx.parameter<PadStrideInfo>("ConvolutionInfo");
+    const auto opt3x3    = ctx.parameter<bool>("Optimized3x3");
+
+    // Create and configure function
+    std::unique_ptr<arm_compute::IFunction> func;
+    bool                                    run_3x3_opt = opt3x3 && weights->info()->dimension(0) == 3;
+    if(run_3x3_opt)
+    {
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolution>();
+        depwthwise_conv->configure(in, weights, biases, out, conv_info);
+        func = std::move(depwthwise_conv);
+    }
+    else
+    {
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolution3x3>();
+        depwthwise_conv->configure(in, weights, biases, out, conv_info);
+        func = std::move(depwthwise_conv);
+    }
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLDepthwiseConvolutionLayer"
+                               << " Data Type: " << in->info()->data_type()
+                               << " Input shape: " << in->info()->tensor_shape()
+                               << " Weights shape: " << weights->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape());
+    if(biases == nullptr)
+    {
+        ARM_COMPUTE_LOG_GRAPH_INFO(" Biases shape: No biases provided" << std::endl);
+    }
+    else
+    {
+        ARM_COMPUTE_LOG_GRAPH_INFO(" Biases shape: " << biases->info()->tensor_shape() << std::endl);
+    }
+
+    return func;
+}
+
 /* DeQuantizationLayer Layer */
 REGISTER_SIMPLE_OPERATION(CLDequantizationLayerOperation, OPENCL, OperationType::DequantizationLayer)
 {
