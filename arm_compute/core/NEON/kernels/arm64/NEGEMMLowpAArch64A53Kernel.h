@@ -37,11 +37,18 @@ class ITensor;
 class NEGEMMLowpAArch64A53Kernel : public NEGEMMAssemblyBaseKernel
 {
 public:
+    /** Default constructor */
+    NEGEMMLowpAArch64A53Kernel();
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 protected:
     void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;
+
+private:
+    using NEGEMMLowpAArch64A53 = void(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1, const Window &window,
+                                      const ThreadInfo &info);
+    NEGEMMLowpAArch64A53 *_func;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_AARCH64_V8A */

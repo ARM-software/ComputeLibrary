@@ -39,6 +39,7 @@ namespace arm_compute
 {
 #include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_s16_12x8.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_u16_12x8.hpp"
 } // namespace arm_compute
 
 #include <arm_neon.h>
@@ -50,9 +51,100 @@ namespace arm_compute
 
 namespace arm_compute
 {
+NEGEMMLowpAArch64A53Kernel::NEGEMMLowpAArch64A53Kernel()
+    : _func(nullptr)
+{
+}
+
+void gemm_interleaved_s16_12x8(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1, const Window &window,
+                               const ThreadInfo &info)
+{
+    const int lda = input0->info()->strides_in_bytes().y();
+    const int ldb = input1->info()->strides_in_bytes().y();
+    const int ldc = output->info()->strides_in_bytes().y() / sizeof(int32_t);
+
+    const auto in1_ptr = reinterpret_cast<const int8_t *>(input1->buffer());
+
+    const int M = std::min(output->info()->tensor_shape().y(), static_cast<size_t>(window.y().end())) - window.y().start();
+    const int N = output->info()->tensor_shape().x();
+    const int K = input0->info()->tensor_shape().x();
+
+    // Only iterate over batches
+    Window win(window);
+    win.set(0, Window::Dimension(0, 1, 1));
+    win.set(1, Window::Dimension(0, 1, 1));
+
+    Iterator in0(input0, window);
+    Iterator out(output, window);
+
+    GemmInterleaved<gemm_s16_12x8, int8_t, int32_t> gemm(&info.cpu_info, M, N, K, !transform_1, !transform_1);
+
+    constexpr size_t alignment      = 4096;
+    const size_t     offset         = (gemm.get_working_size() + alignment - 1) * info.thread_id;
+    void            *_workspace     = workspace->buffer() + offset;
+    size_t           workspace_size = workspace->info()->total_size();
+
+    if(support::cpp11::align(alignment, gemm.get_working_size(), _workspace, workspace_size) == nullptr)
+    {
+        ARM_COMPUTE_ERROR("Not enough space to align buffer!");
+    }
+
+    execute_window_loop(win, [&](const Coordinates & id)
+    {
+        gemm.execute(reinterpret_cast<const int8_t *>(in0.ptr()), lda,
+                     reinterpret_cast<const int8_t *>(in1_ptr), ldb,
+                     reinterpret_cast<int32_t *>(out.ptr()), ldc,
+                     alpha, beta, _workspace);
+    },
+    in0, out);
+}
+
+void gemm_interleaved_u16_12x8(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1, const Window &window,
+                               const ThreadInfo &info)
+{
+    const int lda = input0->info()->strides_in_bytes().y();
+    const int ldb = input1->info()->strides_in_bytes().y();
+    const int ldc = output->info()->strides_in_bytes().y() / sizeof(int32_t);
+
+    const auto in1_ptr = reinterpret_cast<const int8_t *>(input1->buffer());
+
+    const int M = std::min(output->info()->tensor_shape().y(), static_cast<size_t>(window.y().end())) - window.y().start();
+    const int N = output->info()->tensor_shape().x();
+    const int K = input0->info()->tensor_shape().x();
+
+    // Only iterate over batches
+    Window win(window);
+    win.set(0, Window::Dimension(0, 1, 1));
+    win.set(1, Window::Dimension(0, 1, 1));
+
+    Iterator in0(input0, window);
+    Iterator out(output, window);
+
+    GemmInterleaved<gemm_u16_12x8, uint8_t, uint32_t> gemm(&info.cpu_info, M, N, K, !transform_1, !transform_1);
+
+    constexpr size_t alignment      = 4096;
+    const size_t     offset         = (gemm.get_working_size() + alignment - 1) * info.thread_id;
+    void            *_workspace     = workspace->buffer() + offset;
+    size_t           workspace_size = workspace->info()->total_size();
+
+    if(support::cpp11::align(alignment, gemm.get_working_size(), _workspace, workspace_size) == nullptr)
+    {
+        ARM_COMPUTE_ERROR("Not enough space to align buffer!");
+    }
+
+    execute_window_loop(win, [&](const Coordinates & id)
+    {
+        gemm.execute(reinterpret_cast<const uint8_t *>(in0.ptr()), lda,
+                     reinterpret_cast<const uint8_t *>(in1_ptr), ldb,
+                     reinterpret_cast<uint32_t *>(out.ptr()), ldc,
+                     alpha, beta, _workspace);
+    },
+    in0, out);
+}
+
 void NEGEMMLowpAArch64A53Kernel::internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::S8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::S8, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
 
@@ -64,6 +156,19 @@ void NEGEMMLowpAArch64A53Kernel::internal_configure(const ITensor *input0, const
     _beta        = beta;
     _transform_0 = transform_0;
     _transform_1 = transform_1;
+
+    switch(input0->info()->data_type())
+    {
+        case DataType::S8:
+            _func = &gemm_interleaved_s16_12x8;
+            break;
+        case DataType::U8:
+            _func = &gemm_interleaved_u16_12x8;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Element size not supported");
+            break;
+    }
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info());
@@ -85,45 +190,9 @@ void NEGEMMLowpAArch64A53Kernel::run(const Window &window, const ThreadInfo &inf
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    const int lda = _input0->info()->strides_in_bytes().y();
-    const int ldb = _input1->info()->strides_in_bytes().y();
-    const int ldc = _output->info()->strides_in_bytes().y() / sizeof(int32_t);
-
-    const auto in1_ptr = reinterpret_cast<const int8_t *>(_input1->buffer());
-
-    const int M = std::min(_output->info()->tensor_shape().y(), static_cast<size_t>(window.y().end())) - window.y().start();
-    const int N = _output->info()->tensor_shape().x();
-    const int K = _input0->info()->tensor_shape().x();
-
-    // Only iterate over batches
-    Window win(window);
-    win.set(0, Window::Dimension(0, 1, 1));
-    win.set(1, Window::Dimension(0, 1, 1));
-
-    Iterator in0(_input0, window);
-    Iterator out(_output, window);
-
-    GemmInterleaved<gemm_s16_12x8, int8_t, int32_t> gemm(&info.cpu_info, M, N, K, !_transform_1, !_transform_1);
-
-    constexpr size_t alignment      = 4096;
-    const size_t     offset         = (gemm.get_working_size() + alignment - 1) * info.thread_id;
-    void            *workspace      = _workspace->buffer() + offset;
-    size_t           workspace_size = _workspace->info()->total_size();
-
-    if(support::cpp11::align(alignment, gemm.get_working_size(), workspace, workspace_size) == nullptr)
-    {
-        ARM_COMPUTE_ERROR("Not enough space to align buffer!");
-    }
-
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        gemm.execute(reinterpret_cast<const int8_t *>(in0.ptr()), lda,
-                     reinterpret_cast<const int8_t *>(in1_ptr), ldb,
-                     reinterpret_cast<int32_t *>(out.ptr()), ldc,
-                     _alpha, _beta, workspace);
-    },
-    in0, out);
+    (*_func)(_input0, _input1, _output, _workspace, _alpha, _beta, _transform_0, _transform_1, window, info);
 }
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_AARCH64_V8A */
