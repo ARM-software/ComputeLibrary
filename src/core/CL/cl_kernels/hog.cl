@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -124,7 +124,7 @@ __kernel void hog_orientation_binning(IMAGE_DECLARATION(mag),
         for(; xc < CELL_WIDTH; xc++)
         {
             const float mag_value   = *((__global short *)mag_row_ptr + xc);
-            const float phase_value = *(mag_row_ptr + xc) * (float)PHASE_SCALE + 0.5f;
+            const float phase_value = *(phase_row_ptr + xc) * (float)PHASE_SCALE + 0.5f;
             const float w1          = phase_value - floor(phase_value);
 
             // The quantised phase is the histogram index [0, NUM_BINS - 1]

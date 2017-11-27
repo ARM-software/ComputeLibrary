@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,8 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/FixedPoint.h"
+#include "arm_compute/core/HOGInfo.h"
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -492,6 +494,30 @@ inline T create_tensor(const TensorShape &shape, Format format)
     tensor.allocator()->init(info);
 
     return tensor;
+}
+
+/** Create and initialize a HOG (Histogram of Oriented Gradients) of the given type.
+ *
+ * @param[in] cell_size             Cell size in pixels
+ * @param[in] block_size            Block size in pixels. Must be a multiple of cell_size.
+ * @param[in] detection_window_size Detection window size in pixels. Must be a multiple of block_size and block_stride.
+ * @param[in] block_stride          Distance in pixels between 2 consecutive blocks along the x and y direction. Must be a multiple of cell size
+ * @param[in] num_bins              Number of histogram bins for each cell
+ * @param[in] normalization_type    (Optional) Normalization type to use for each block
+ * @param[in] l2_hyst_threshold     (Optional) Threshold used for L2HYS_NORM normalization method
+ * @param[in] phase_type            (Optional) Type of @ref PhaseType
+ *
+ * @return Initialized HOG of given type.
+ */
+template <typename T>
+inline T create_HOG(const Size2D &cell_size, const Size2D &block_size, const Size2D &detection_window_size, const Size2D &block_stride, size_t num_bins,
+                    HOGNormType normalization_type = HOGNormType::L2HYS_NORM, float l2_hyst_threshold = 0.2f, PhaseType phase_type = PhaseType::UNSIGNED)
+{
+    T       hog;
+    HOGInfo hog_info(cell_size, block_size, block_size, block_stride, num_bins, normalization_type, l2_hyst_threshold, phase_type);
+    hog.init(hog_info);
+
+    return hog;
 }
 
 /** Create a vector of random ROIs.
