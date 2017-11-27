@@ -37,6 +37,55 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
+                         const ITensorInfo *mean, const ITensorInfo *var,
+                         const ITensorInfo *beta, const ITensorInfo *gamma,
+                         float epsilon)
+{
+    ARM_COMPUTE_UNUSED(epsilon);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var, beta, gamma);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var, beta, gamma);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != mean->dimension(0));
+
+    if(output != nullptr && output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+{
+    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
+
+    // Configure kernel window
+    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+
+    bool window_changed;
+    if(output != nullptr)
+    {
+        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+        window_changed = update_window_and_padding(win, input_access, output_access);
+        output_access.set_valid_region(win, input->valid_region());
+    }
+    else
+    {
+        window_changed = update_window_and_padding(win, input_access);
+    }
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 CLBatchNormalizationLayerKernel::CLBatchNormalizationLayerKernel()
     : _input(nullptr), _output(nullptr), _mean(nullptr), _var(nullptr), _beta(nullptr), _gamma(nullptr), _epsilon(0)
 {
@@ -85,19 +134,9 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     _kernel.setArg<cl_float>(idx++, _epsilon);
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    if(output != nullptr)
-    {
-        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-        update_window_and_padding(win, input_access, output_access);
-        output_access.set_valid_region(win, input->info()->valid_region());
-    }
-    else
-    {
-        update_window_and_padding(win, input_access);
-    }
-    ICLKernel::configure(win);
+    auto win_config = validate_and_configure_window(input->info(), (output == nullptr) ? nullptr : output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
 }
 
 Error CLBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output,
@@ -105,19 +144,8 @@ Error CLBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const 
                                                 const ITensorInfo *beta, const ITensorInfo *gamma,
                                                 float epsilon)
 {
-    ARM_COMPUTE_UNUSED(epsilon);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var, beta, gamma);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var, beta, gamma);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != mean->dimension(0));
-
-    if(output != nullptr && output->total_size() != 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mean, var, beta, gamma, epsilon));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (output == nullptr) ? nullptr : output->clone().get()).first);
 
     return Error{};
 }
