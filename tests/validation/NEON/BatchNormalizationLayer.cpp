@@ -80,6 +80,52 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Ran
     validate(dst.info()->valid_region(), valid_region);
 }
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Window shrink
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Invalid mean/var/beta/gamma shape
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2), // Mismatching fixed point position
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                       TensorInfo(),
+                                                     })),
+               framework::dataset::make("MVBGInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F16),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(5U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                   })),
+               framework::dataset::make("Expected", { false, true, true, true, true, true, false, false})),
+               input_info, output_info, mvbg_info, expected)
+{
+    const auto &mean_info = mvbg_info;
+    const auto &var_info = mvbg_info;
+    const auto &beta_info = mvbg_info;
+    const auto &gamma_info = mvbg_info;
+    bool has_error = bool(NEBatchNormalizationLayer::validate(
+            &input_info.clone()->set_is_resizable(false), output_info.total_size() ? &output_info.clone()->set_is_resizable(false) : nullptr,
+            &mean_info.clone()->set_is_resizable(false), &var_info.clone()->set_is_resizable(false),
+            &beta_info.clone()->set_is_resizable(false), &gamma_info.clone()->set_is_resizable(false), 1.f));
+    ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 TEST_SUITE(Float)
 FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomBatchNormalizationLayerDataset(),
                                                                                                                    framework::dataset::make("DataType", DataType::F32)))

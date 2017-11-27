@@ -43,6 +43,12 @@ void NEBatchNormalizationLayer::configure(ITensor *input, ITensor *output, const
     _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon);
 }
 
+Error NEBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *var, const ITensorInfo *beta, const ITensorInfo *gamma,
+                                          float epsilon)
+{
+    return NEBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon);
+}
+
 void NEBatchNormalizationLayer::run()
 {
     NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
