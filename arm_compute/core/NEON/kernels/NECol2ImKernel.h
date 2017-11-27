@@ -66,7 +66,7 @@ public:
 
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input          The input tensor to convert. Data types supported: U8/S8/QS8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[in]  input          The input tensor to convert. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
      * @param[out] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                            while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in]  convolved_dims Output convolved dimensions.
