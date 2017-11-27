@@ -292,7 +292,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     }
 
     _input_im2col_reshaped.allocator()->allocate();
-    _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
+    _output_col2im_kernel.configure(&_gemm_output, output, Size2D(conv_w, conv_h));
     _gemm_output.allocator()->allocate();
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");

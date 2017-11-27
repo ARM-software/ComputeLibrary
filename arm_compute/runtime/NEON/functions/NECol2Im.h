@@ -26,24 +26,35 @@
 
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run @ref NECol2ImKernel */
+/** Basic function to run @ref NECol2Im */
 class NECol2Im : public INESimpleFunction
 {
 public:
     /** Configure the col2im NEON kernel
      *
-     * @param[in]  input          The input tensor to convert. Data types supported: QS8/QS16/QASYMM8/F16/F32
+     * @param[in]  input          The input tensor to convert. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
      * @param[out] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                            while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in]  convolved_dims Output convolved dimensions.
      */
-    void configure(const ITensor *input, ITensor *output, std::pair<unsigned int, unsigned int> convolved_dims);
+    void configure(const ITensor *input, ITensor *output, const Size2D &convolved_dims);
+    /** Static function to check if given info will lead to a valid configuration of @ref NECol2Im
+     *
+     * @param[in] input          The input tensor to convert. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[in] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
+     *                           while the rest represent batch of outputs. Data types supported: Same as @p input
+     * @param[in] convolved_dims Output convolved dimensions.
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims);
 };
 }
 #endif /* __ARM_COMPUTE_NECOL2IM_H__ */

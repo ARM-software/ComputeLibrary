@@ -36,6 +36,37 @@
 
 using namespace arm_compute;
 
+namespace
+{
+TensorShape get_output_shape(const ITensorInfo *input, const Size2D &convolved_dims)
+{
+    TensorShape output_shape = input->tensor_shape();
+    output_shape.set(0, convolved_dims.width);
+    output_shape.set(1, convolved_dims.height);
+    output_shape.set(2, input->tensor_shape()[0]);
+
+    return output_shape;
+}
+
+Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,
+                                                         DataType::U16, DataType::S16, DataType::QS16,
+                                                         DataType::U32, DataType::S32,
+                                                         DataType::F16, DataType::F32);
+
+    // Validate configured output
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), get_output_shape(input, convolved_dims));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Error{};
+}
+} // namespace
+
 template <typename T>
 void NECol2ImKernel::run_col2im(const Window &window)
 {
@@ -55,7 +86,7 @@ void NECol2ImKernel::run_col2im(const Window &window)
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const int hidx = id.y();
-        const int idx  = id.x() * output_stride_z + (hidx / _convolved_dims.first) * output_stride_y + (hidx % _convolved_dims.first) * output_stride_x;
+        const int idx  = id.x() * output_stride_z + (hidx / _convolved_dims.width) * output_stride_y + (hidx % _convolved_dims.width) * output_stride_x;
 
         *(reinterpret_cast<T *>(out.ptr() + idx)) = *(reinterpret_cast<const T *>(in.ptr()));
     },
@@ -67,24 +98,15 @@ NECol2ImKernel::NECol2ImKernel()
 {
 }
 
-void NECol2ImKernel::configure(const ITensor *input, ITensor *output, std::pair<unsigned int, unsigned int> convolved_dims)
+void NECol2ImKernel::configure(const ITensor *input, ITensor *output, const Size2D &convolved_dims)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8, DataType::U16, DataType::S16, DataType::QS16, DataType::U32, DataType::S32,
-                                                  DataType::F16,
-                                                  DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-
-    TensorShape output_shape = input->info()->tensor_shape();
-    output_shape.set(0, convolved_dims.first);
-    output_shape.set(1, convolved_dims.second);
-    output_shape.set(2, input->info()->tensor_shape()[0]);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(get_output_shape(input->info(), convolved_dims)));
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), convolved_dims));
 
     _input          = input;
     _output         = output;
@@ -115,6 +137,12 @@ void NECol2ImKernel::configure(const ITensor *input, ITensor *output, std::pair<
     output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     INEKernel::configure(win);
+}
+
+Error NECol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, convolved_dims));
+    return Error{};
 }
 
 void NECol2ImKernel::run(const Window &window, const ThreadInfo &info)
