@@ -41,7 +41,7 @@ CLWeightsReshapeKernel::CLWeightsReshapeKernel()
 
 void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     const DataType dt                   = input->info()->data_type();
@@ -54,7 +54,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     output_shape.set(1, tmp_dim + (biases != nullptr ? 1 : 0));
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, dt, fixed_point_position);
+    auto_init_if_empty(*output->info(), output_shape, 1, dt, fixed_point_position, input->info()->quantization_info());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
