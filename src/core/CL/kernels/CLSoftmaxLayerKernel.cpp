@@ -288,7 +288,7 @@ void CLLogits1DShiftExpSumKernel::run(const Window &window, cl::CommandQueue &qu
         add_3D_tensor_argument(idx, _max, slice);
         add_3D_tensor_argument(idx, _output, slice);
         add_3D_tensor_argument(idx, _sum, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, _lws_hint);
     }
     while(window_collapsed.slide_window_slice_3D(slice));
 }
@@ -334,8 +334,6 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
     build_opts.add_option_if(is_data_type_fixed_point(dt) && (beta != 1.0f), "-DBETA=" + support::cpp11::to_string(beta_int));
     build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), "-DBETA=" + float_to_string_with_full_precision(beta));
 
-    // Setting _lws_hint in this way can also communicate grid_size to CLLogits1DMaxShiftExpSumKernel::run().
-    // A single workgroup performs reduction in dimension 0 in the parallel case, hence lws[0]==gws[0].
     _lws_hint                                     = cl::NullRange;
     std::string           kernel_name             = std::string("softmax_layer_max_shift_exp_sum_serial");
     ParallelReductionInfo parallel_reduction_info = is_parallel_reduction(reduction_dim_size);
@@ -355,6 +353,9 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
         // Handle boundary conditions.
         const unsigned int multiple_grid_size = (reduction_dim_size / vector_size) % _grid_size;
         build_opts.add_option_if((multiple_grid_size != 0) || ((reduction_dim_size % vector_size) != 0), "-DNON_MULTIPLE_OF_GRID_SIZE");
+        // Setting _lws_hint in this way can also communicate grid_size to CLLogits1DMaxShiftExpSumKernel::run().
+        // A single workgroup performs reduction in dimension 0 in the parallel case, hence lws[0]==gws[0].
+        _lws_hint = cl::NDRange(_grid_size);
     }
 
     // Create kernel.
@@ -548,7 +549,7 @@ void CLLogits1DNormKernel::run(const Window &window, cl::CommandQueue &queue)
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _sum, sum_slice);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, _lws_hint);
     }
     while(window_collapsed.slide_window_slice_3D(slice));
 }
