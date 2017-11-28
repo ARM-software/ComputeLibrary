@@ -53,7 +53,8 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     _input  = input;
     _output = output;
 
-    const DataType data_type = input->info()->data_type();
+    const DataType  data_type  = input->info()->data_type();
+    const GPUTarget gpu_target = get_arch_from_target(get_target());
 
     // Create kernel
     CLBuildOptions build_opts;
@@ -98,6 +99,56 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
         if(kernel_dims.width == 3 && kernel_dims.height == 3 && !conv_info.has_padding())
         {
             kernel_name = "im2col_kernel3x3_padx0_pady0";
+
+            // Local work size optimized for the 3x3 MobileNets convolution on Bifrost.
+            if(gpu_target == GPUTarget::BIFROST && input->info()->dimension(0) == 224)
+            {
+                _lws_hint = cl::NDRange(2, 3, 3);
+            }
+        }
+        else if(kernel_dims.width > 1 && !conv_info.has_padding())
+        {
+            kernel_name = "im2col_generic_padx0_pady0";
+
+            // Optimized im2col is performed using one or more vector operations with the specified vector size
+            // and a remainder. For example, for 5x5 convolutions, im2col is performed using vectors of size 4
+            // and scalars; for 7x7 convolutions, using vectors of size 4 and vectors of size 3.
+            // Using the vector size of 4 is always safe since OpenCL supports vectors of size 2 and 3.
+            // Using the vector size of 8, however, may be faster.
+            size_t vector_size = 4;
+            // For 2x2 convolutions, use vectors of size 2. (For 3x3 convolutions, im2col_kernel3x3_padx0_pady0
+            // is used instead.)
+            if(kernel_dims.width < vector_size)
+            {
+                vector_size = kernel_dims.width;
+            }
+            // Local work size and vector size optimized for the 11x11 AlexNet convolution on Bifrost.
+            if(gpu_target == GPUTarget::BIFROST && kernel_dims.width == 11)
+            {
+                _lws_hint   = cl::NDRange(1, 1, 1);
+                vector_size = 8;
+            }
+            const size_t width_mod_vector_size = kernel_dims.width % vector_size;
+            build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
+            build_opts.add_option("-DWIDTH_MOD_VECTOR_SIZE=" + support::cpp11::to_string(width_mod_vector_size));
+        }
+        else
+        {
+            if(gpu_target == GPUTarget::BIFROST)
+            {
+                const size_t input_channels = input->info()->dimension(2);
+                if((input_channels & (input_channels - 1)) == 0)
+                {
+                    // input_channels is a power of two
+                    _lws_hint = cl::NDRange(1, 1, 4);
+                }
+                else if(input_channels < 192 && (input_channels % 4) == 0)
+                {
+                    // input_channels is less than 192 and is a multiple of 4
+                    _lws_hint = cl::NDRange(1, 1, 2);
+                }
+                // otherwise the default is optimal
+            }
         }
         _run_func = &CLIm2ColKernel::run_generic;
     }
@@ -173,7 +224,6 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice_out);
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->dimension(2)));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
         enqueue(queue, *this, slice, _lws_hint);

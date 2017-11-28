@@ -202,6 +202,8 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     _memory_group.manage(&_gemm_output);
 
     // Configure kernels
+
+    _input_im2col_kernel.set_target(CLScheduler::get().target());
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
 
     // Configure matrix multiply
@@ -217,6 +219,7 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
         _input_interleaved_reshaped.allocator()->allocate();
     }
     _input_im2col_reshaped.allocator()->allocate();
+    _output_col2im_kernel.set_target(CLScheduler::get().target());
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
     _gemm_output.allocator()->allocate();
 

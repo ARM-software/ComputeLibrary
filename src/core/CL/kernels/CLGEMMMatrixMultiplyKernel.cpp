@@ -68,7 +68,19 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     GPUTarget arch_target = get_arch_from_target(get_target());
 
     // Configure LWS hint
-    _lws_hint = (output->info()->dimension(1) == 196) ? cl::NDRange(1, 7) : cl::NDRange(8, 8);
+    if(arch_target == GPUTarget::BIFROST && input1->info()->dimension(1) == 24)
+    {
+        // LWS optimized for the 11x11 AlexNet convolution on Bifrost.
+        _lws_hint = cl::NDRange(2, 2);
+    }
+    else if(output->info()->dimension(1) == 196)
+    {
+        _lws_hint = cl::NDRange(1, 7);
+    }
+    else
+    {
+        _lws_hint = cl::NDRange(8, 8);
+    }
 
     // Create build options
     CLBuildOptions build_opts;

@@ -117,27 +117,25 @@ __kernel void reshape_to_columns(
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in]  filter_depth                      The depth of the used filter
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col_generic(
     TENSOR3D_DECLARATION(src),
     IMAGE_DECLARATION(dst),
-    uint filter_depth,
     uint src_stride_w,
     uint dst_stride_w)
 {
     const int xc    = get_global_id(0);                // x coordinate in the convolved tensor
     const int yc    = get_global_id(1);                // y coordinate in the convolved tensor
-    const int ch    = get_global_id(2) % filter_depth; // input feature map
-    const int batch = get_global_id(2) / filter_depth; // the batch
+    const int ch    = get_global_id(2) % KERNEL_DEPTH; // input feature map
+    const int batch = get_global_id(2) / KERNEL_DEPTH; // batch size
 
-    // Calculate input indeces
+    // Calculate input indices
     const int xi = xc * STRIDE_X - PAD_LEFT;
     const int yi = yc * STRIDE_Y - PAD_TOP;
 
-    // Calculate output indeces
+    // Calculate output indices
     const int xo = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
     const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
 
@@ -199,27 +197,25 @@ __kernel void im2col_generic(
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in]  filter_depth                      The depth of the used filter
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col_kernel3x3_padx0_pady0(
     TENSOR3D_DECLARATION(src),
     IMAGE_DECLARATION(dst),
-    uint filter_depth,
     uint src_stride_w,
     uint dst_stride_w)
 {
     const int xc    = get_global_id(0);                // x coordinate in the convolved tensor
     const int yc    = get_global_id(1);                // y coordinate in the convolved tensor
-    const int ch    = get_global_id(2) % filter_depth; // input feature map
-    const int batch = get_global_id(2) / filter_depth; // the batch
+    const int ch    = get_global_id(2) % KERNEL_DEPTH; // input feature map
+    const int batch = get_global_id(2) / KERNEL_DEPTH; // batch size
 
-    // Calculate input indeces
+    // Calculate input indices
     const int xi = xc * STRIDE_X;
     const int yi = yc * STRIDE_Y;
 
-    // Calculate output indeces
+    // Calculate output indices
     const int xo = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
     const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
 
@@ -336,3 +332,86 @@ __kernel void im2col_reduced(
     }
 #endif // HAS_BIAS
 }
+
+#if defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(VECTOR_SIZE) && defined(WIDTH_MOD_VECTOR_SIZE)
+/** This kernel reshapes the input tensor to a tensor used to perform convolution using GEMM when
+ * the kernel width is greater than 1 (except when the kernel size is 3x3) and pad_x == pad_y == 0.
+ *
+ * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float.
+ * @note The vector size must be passed at compile time using -DVECTOR_SIZE e.g. -DVECTOR_SIZE=4.
+ * @note The width modulo vector size must be passed at compile time using -DWIDTH_MOD_VECTOR_SIZE e.g. -DWIDTH_MOD_VECTOR_SIZE=3.
+ * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
+ *
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
+ * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
+ */
+__kernel void im2col_generic_padx0_pady0(
+    TENSOR3D_DECLARATION(src),
+    IMAGE_DECLARATION(dst),
+    uint src_stride_w,
+    uint dst_stride_w)
+{
+    const int xc    = get_global_id(0);                // x coordinate in the convolved tensor
+    const int yc    = get_global_id(1);                // y coordinate in the convolved tensor
+    const int ch    = get_global_id(2) % KERNEL_DEPTH; // input feature map
+    const int batch = get_global_id(2) / KERNEL_DEPTH; // batch size
+
+    // Calculate input indices
+    const int xi = xc * STRIDE_X;
+    const int yi = yc * STRIDE_Y;
+    // Calculate output indices
+    const int xo                   = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
+    const int yo                   = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
+    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + ch * src_stride_z + batch * src_stride_w;
+    __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y + batch * dst_stride_w)) + xo;
+    // Linearize convolution elements
+    for(int y = yi, y_e = yi + KERNEL_HEIGHT; y < y_e; ++y)
+    {
+        int last_x = 0;
+        for(int x = xi, x_e = xi + KERNEL_WIDTH; x + VECTOR_SIZE <= x_e; x += VECTOR_SIZE, output_ptr += VECTOR_SIZE)
+        {
+            VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
+            row = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + x * src_stride_x + y * src_stride_y));
+            VSTORE(VECTOR_SIZE)
+            (row, 0, output_ptr);
+            last_x = x;
+        }
+        // Copy the remainder of the row by doing VLOAD(WIDTH_MOD_VECTOR_SIZE) and VSTORE(WIDTH_MOD_VECTOR_SIZE).
+        // Note that x and output_ptr have already been incremented by VECTOR_SIZE by the loop just before exit.
+#if WIDTH_MOD_VECTOR_SIZE == 1
+        *output_ptr = *((__global DATA_TYPE *)(input_ptr + (last_x + VECTOR_SIZE) * src_stride_x + y * src_stride_y));
+#elif WIDTH_MOD_VECTOR_SIZE > 1
+        VEC_DATA_TYPE(DATA_TYPE, WIDTH_MOD_VECTOR_SIZE)
+        row = VLOAD(WIDTH_MOD_VECTOR_SIZE)(0, (__global DATA_TYPE *)(input_ptr + (last_x + VECTOR_SIZE) * src_stride_x + y * src_stride_y));
+        VSTORE(WIDTH_MOD_VECTOR_SIZE)
+        (row, 0, output_ptr);
+#endif /* WIDTH_MOD_VECTOR_SIZE */
+        output_ptr += WIDTH_MOD_VECTOR_SIZE;
+    } /* End of loop over KERNEL_HEIGHT */
+
+#ifdef HAS_BIAS
+    if(ch == (KERNEL_DEPTH - 1))
+    {
+#ifdef FIXED_POINT_POSITION
+        *output_ptr = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
+#else  // FIXED_POINT_POSITION
+        *output_ptr       = 1.0f;
+#endif // FIXED_POINT_POSITION
+    }
+#endif // HAS_BIAS
+}
+#endif //defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(VECTOR_SIZE) && defined(WIDTH_MOD_VECTOR_SIZE)

@@ -72,6 +72,21 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts));
 
+    // Configure the local work size for Bifrost with a value obtained
+    // via exhaustive autotuning over 30 representative tensor shapes.
+    const GPUTarget gpu_target = get_arch_from_target(get_target());
+    if(gpu_target == GPUTarget::BIFROST)
+    {
+        if((_convolved_dims.first == 7) || (_convolved_dims.first == 14))
+        {
+            _lws_hint = cl::NDRange(1, 7, 1);
+        }
+        else
+        {
+            _lws_hint = cl::NDRange(1, 8, 1);
+        }
+    }
+
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());
 
