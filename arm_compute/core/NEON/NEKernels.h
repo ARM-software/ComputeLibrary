@@ -66,6 +66,7 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAccumulateBiasesKernel.h"

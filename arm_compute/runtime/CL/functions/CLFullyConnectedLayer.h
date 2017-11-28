@@ -87,20 +87,20 @@ private:
     void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
     void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool is_interleaved_transposed = true);
 
-    CLMemoryGroup                           _memory_group;
-    CLIm2ColKernel                          _im2col_kernel;
-    CLFullyConnectedLayerReshapeWeights     _reshape_weights_kernel;
-    CLGEMMMatrixMultiplyKernel              _mm_kernel;
-    CLGEMMLowpMatrixMultiplyCore            _mm_gemmlowp;
-    CLGEMMLowpQuantizeDownInt32ToUint8Scale _gemmlowp_output_stage;
-    CLGEMMMatrixAccumulateBiasesKernel      _accumulate_biases_kernel;
-    CLTensor                                _im2col_output;
-    CLTensor                                _gemmlowp_output;
-    CLTensor                                _reshape_weights_output;
-    bool                                    _are_weights_reshaped;
-    bool                                    _is_fc_after_conv;
-    bool                                    _accumulate_biases;
-    bool                                    _is_quantized;
+    CLMemoryGroup                                       _memory_group;
+    CLIm2ColKernel                                      _im2col_kernel;
+    CLFullyConnectedLayerReshapeWeights                 _reshape_weights_kernel;
+    CLGEMMMatrixMultiplyKernel                          _mm_kernel;
+    CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
+    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
+    CLGEMMMatrixAccumulateBiasesKernel                  _accumulate_biases_kernel;
+    CLTensor                                            _im2col_output;
+    CLTensor                                            _gemmlowp_output;
+    CLTensor                                            _reshape_weights_output;
+    bool                                                _are_weights_reshaped;
+    bool                                                _is_fc_after_conv;
+    bool                                                _accumulate_biases;
+    bool                                                _is_quantized;
 };
 }
 #endif /* __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__ */

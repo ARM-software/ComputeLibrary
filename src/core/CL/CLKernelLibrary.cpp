@@ -238,6 +238,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemmlowp_mm_interleaved_transposed", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution", "gemmlowp.cl" },
     { "gemmlowp_output_stage_quantize_down", "gemmlowp.cl" },
+    { "gemmlowp_output_stage_quantize_down_fixedpoint", "gemmlowp.cl" },
     { "harris_score_3x3", "harris_corners.cl" },
     { "harris_score_5x5", "harris_corners.cl" },
     { "harris_score_7x7", "harris_corners.cl" },

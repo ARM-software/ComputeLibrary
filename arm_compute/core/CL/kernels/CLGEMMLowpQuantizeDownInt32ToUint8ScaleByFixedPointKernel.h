@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMLOWPQUANTIZEDOWNINT32TOUINT8SCALEKERNEL_H__
-#define __ARM_COMPUTE_CLGEMMLOWPQUANTIZEDOWNINT32TOUINT8SCALEKERNEL_H__
+#ifndef __ARM_COMPUTE_CLGEMMLOWPQUANTIZEDOWNINT32TOUINT8SCALEBYFIXEDPOINTKERNEL_H__
+#define __ARM_COMPUTE_CLGEMMLOWPQUANTIZEDOWNINT32TOUINT8SCALEBYFIXEDPOINTKERNEL_H__
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -35,42 +35,41 @@ class ICLTensor;
  * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel), and processes it to obtain the final QASYMM8 value.
  * The following computations will be performed by the kernel:
  *
- *  -# Add offset terms to final result
- *  -# Multiply each entry of result by result_mult_int
+ *  -# Compute fixed point multiplication between each entry of input by result_fixedpoint_multiplier
  *  -# Add bias to final result if bias tensor is not a nullptr
- *  -# Shift the int32 accumulator by result_shift
+ *  -# Round to nearest division by a power-of-two using result_shift
+ *  -# Add offset to each result
  *  -# Clamp the value between the specified min and max bounds
  *  -# Clamp the resulting int32 values to the [0..255] range and cast to QASYMM8.
- *
  */
-class CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel : public ICLKernel
+class CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel : public ICLKernel
 {
 public:
     /** Constructor */
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel();
+    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers)*/
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel(const CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel &) = delete;
+    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel(const CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers)*/
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel &operator=(const CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel &) = delete;
+    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel &operator=(const CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel &) = delete;
     /** Allow instances of this class to be moved */
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel(CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel &&) = default;
+    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel(CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel &&) = default;
     /** Allow instances of this class to be moved */
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel &operator=(CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel &&) = default;
+    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel &operator=(CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input           Input tensor. Data type supported: S32
-     * @param[in]  bias            Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
-     *                             Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output          Output tensor. Data type supported: Data type supported: QASYMM8
-     * @param[in]  result_offset   Offset to be added to each element of the input matrix
-     * @param[in]  result_mult_int Value to be multiplied to each element of the input matrix when once the result_offset has been add
-     * @param[in]  result_shift    Number of bits to shift right the result before converting back to QASYMM8
-     * @param[in]  min             (Optional) Min value used to saturate down the output result before converting back to QASYMM8
-     * @param[in]  max             (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-     *                             Along with @p min, this value can be used to implement "rectified linear unit" activation functions
+     * @param[in]  input                        Input tensor. Data type supported: S32
+     * @param[in]  bias                         Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
+     *                                          Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[out] output                       Output tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in]  result_fixedpoint_multiplier Fixed point value to be multiplied to each element of the input matrix when once the result_offset has been add
+     * @param[in]  result_shift                 Integer value used to round to nearest division by a power-of-two the result after the fixed point multiplication
+     * @param[in]  result_offset_after_shift    Offset to be applied to result before converting it back to QASYMM8
+     * @param[in]  min                          (Optional) Min value used to saturate down the output result before converting back to QASYMM8
+     * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
+     *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions
      */
-    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_offset, int result_mult_int, int result_shift, int min = 0, int max = 0);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel
+    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift, int min = 0, int max = 0);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
      *
      * @param[in] input  Input tensor. Data type supported: S32
      * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
@@ -94,4 +93,4 @@ private:
 };
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_CLGEMMLOWPQUANTIZEDOWNINT32TOUINT8SCALEKERNEL_H__ */
+#endif /* __ARM_COMPUTE_CLGEMMLOWPQUANTIZEDOWNINT32TOUINT8SCALEBYFIXEDPOINTKERNEL_H__ */

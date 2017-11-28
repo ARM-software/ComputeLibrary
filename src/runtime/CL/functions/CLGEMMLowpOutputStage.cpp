@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
 #include "support/ToolchainSupport.h"
 
@@ -34,4 +35,22 @@ void CLGEMMLowpQuantizeDownInt32ToUint8Scale::configure(const ICLTensor *input, 
     auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel>();
     k->configure(input, bias, output, result_offset, result_mult_int, result_shift, min, max);
     _kernel = std::move(k);
+}
+
+Error CLGEMMLowpQuantizeDownInt32ToUint8Scale::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+{
+    return CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(input, bias, output, min, max);
+}
+
+void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift,
+                                                                    int result_offset_after_shift, int min, int max)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
+    k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
+    _kernel = std::move(k);
+}
+
+Error CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+{
+    return CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(input, bias, output, min, max);
 }

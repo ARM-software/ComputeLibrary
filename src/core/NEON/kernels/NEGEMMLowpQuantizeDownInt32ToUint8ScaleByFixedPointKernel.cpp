@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -84,31 +85,29 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
     return std::make_pair(err, win);
 }
 
-inline void scale_input(int32x4x4_t &in_s32, int32x4_t result_offset_s32, int32_t result_mult_int)
-{
-    // Add the offset terms to GEMM's result
-    in_s32.val[0] = vaddq_s32(in_s32.val[0], result_offset_s32);
-    in_s32.val[1] = vaddq_s32(in_s32.val[1], result_offset_s32);
-    in_s32.val[2] = vaddq_s32(in_s32.val[2], result_offset_s32);
-    in_s32.val[3] = vaddq_s32(in_s32.val[3], result_offset_s32);
-
-    // Multiply by result_mult_int
-    in_s32.val[0] = vmulq_n_s32(in_s32.val[0], result_mult_int);
-    in_s32.val[1] = vmulq_n_s32(in_s32.val[1], result_mult_int);
-    in_s32.val[2] = vmulq_n_s32(in_s32.val[2], result_mult_int);
-    in_s32.val[3] = vmulq_n_s32(in_s32.val[3], result_mult_int);
-}
-
 template <bool    is_bounded_relu>
-inline uint8x16_t finalize_quantization(int32x4x4_t &in_s32, int32x4_t result_shift_s32, uint8x16_t min_u8, uint8x16_t max_u8)
+inline uint8x16_t finalize_quantization(int32x4x4_t &in_s32, int result_fixedpoint_multiplier, int32_t result_shift, int32x4_t result_offset_after_shift_s32, uint8x16_t min_u8,
+                                        uint8x16_t max_u8)
 {
     const static int32x4_t zero_s32 = vdupq_n_s32(0);
 
-    // Shift final result (negative value shift right)
-    in_s32.val[0] = vshlq_s32(in_s32.val[0], result_shift_s32);
-    in_s32.val[1] = vshlq_s32(in_s32.val[1], result_shift_s32);
-    in_s32.val[2] = vshlq_s32(in_s32.val[2], result_shift_s32);
-    in_s32.val[3] = vshlq_s32(in_s32.val[3], result_shift_s32);
+    // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
+    in_s32.val[0] = vqrdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
+    in_s32.val[1] = vqrdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
+    in_s32.val[2] = vqrdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
+    in_s32.val[3] = vqrdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
+
+    // Round to the nearest division by a power-of-two using result_shift_s32
+    in_s32.val[0] = rounding_divide_by_pow2(in_s32.val[0], result_shift);
+    in_s32.val[1] = rounding_divide_by_pow2(in_s32.val[1], result_shift);
+    in_s32.val[2] = rounding_divide_by_pow2(in_s32.val[2], result_shift);
+    in_s32.val[3] = rounding_divide_by_pow2(in_s32.val[3], result_shift);
+
+    // Add the offset terms
+    in_s32.val[0] = vaddq_s32(in_s32.val[0], result_offset_after_shift_s32);
+    in_s32.val[1] = vaddq_s32(in_s32.val[1], result_offset_after_shift_s32);
+    in_s32.val[2] = vaddq_s32(in_s32.val[2], result_offset_after_shift_s32);
+    in_s32.val[3] = vaddq_s32(in_s32.val[3], result_offset_after_shift_s32);
 
     // Saturate negative values
     in_s32.val[0] = vmaxq_s32(in_s32.val[0], zero_s32);
@@ -144,12 +143,11 @@ class Coordinates;
 } // namespace arm_compute
 
 template <bool is_bounded_relu>
-void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
+void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window &window)
 {
-    const int32x4_t  result_offset_s32 = vdupq_n_s32(_result_offset);
-    const int32x4_t  result_shift_s32  = vdupq_n_s32(-_result_shift);
-    const uint8x16_t min_u8            = vdupq_n_u8(static_cast<uint8_t>(_min));
-    const uint8x16_t max_u8            = vdupq_n_u8(static_cast<uint8_t>(_max));
+    const int32x4_t  result_offset_after_shift_s32 = vdupq_n_s32(_result_offset_after_shift);
+    const uint8x16_t min_u8                        = vdupq_n_u8(static_cast<uint8_t>(_min));
+    const uint8x16_t max_u8                        = vdupq_n_u8(static_cast<uint8_t>(_max));
 
     ARM_COMPUTE_UNUSED(min_u8);
     ARM_COMPUTE_UNUSED(max_u8);
@@ -192,10 +190,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
             in_s32.val[2] = vaddq_s32(in_s32.val[2], bias_s32.val[2]);
             in_s32.val[3] = vaddq_s32(in_s32.val[3], bias_s32.val[3]);
 
-            // Add the offset terms to GEMM's result and multiply by result_mult_int
-            scale_input(in_s32, result_offset_s32, _result_mult_int);
-
-            vst1q_u8(out.ptr(), finalize_quantization<is_bounded_relu>(in_s32, result_shift_s32, min_u8, max_u8));
+            vst1q_u8(out.ptr(), finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8));
         },
         in, bias, out);
     }
@@ -213,21 +208,19 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
                 }
             };
 
-            // Add the offset terms to GEMM's result and multiply by result_mult_int
-            scale_input(in_s32, result_offset_s32, _result_mult_int);
-
-            vst1q_u8(out.ptr(), finalize_quantization<is_bounded_relu>(in_s32, result_shift_s32, min_u8, max_u8));
+            vst1q_u8(out.ptr(), finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8));
         },
         in, out);
     }
 }
 
-NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel()
-    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _result_offset(0), _result_mult_int(0), _result_shift(0), _min(0), _max(0)
+NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel()
+    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _result_fixedpoint_multiplier(0), _result_shift(0), _result_offset_after_shift(0), _min(0), _max(0)
 {
 }
 
-void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_offset, int result_mult_int, int result_shift, int min, int max)
+void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift,
+                                                                          int result_offset_after_shift, int min, int max)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
@@ -241,14 +234,14 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ITensor *inp
                                                   min,
                                                   max));
 
-    _input           = input;
-    _bias            = bias;
-    _output          = output;
-    _result_offset   = result_offset;
-    _result_mult_int = result_mult_int;
-    _result_shift    = result_shift;
-    _min             = min;
-    _max             = max;
+    _input                        = input;
+    _bias                         = bias;
+    _output                       = output;
+    _result_fixedpoint_multiplier = result_fixedpoint_multiplier;
+    _result_shift                 = result_shift;
+    _result_offset_after_shift    = result_offset_after_shift;
+    _min                          = min;
+    _max                          = max;
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
@@ -257,10 +250,10 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ITensor *inp
 
     // Check if we need to clamp the result using min and max
     const bool is_bounded_relu = ((min != max) && !(min == 0 && max == 255));
-    _func                      = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run<false>;
+    _func                      = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<false>;
 }
 
-Error NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Error NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
@@ -271,7 +264,7 @@ Error NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(const ITensorInfo 
     return Error{};
 }
 
-void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window, const ThreadInfo &info)
+void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);

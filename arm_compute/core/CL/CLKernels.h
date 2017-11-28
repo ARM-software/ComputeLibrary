@@ -59,6 +59,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"

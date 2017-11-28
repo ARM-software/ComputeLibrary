@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -86,11 +86,12 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
 class Coordinates;
 } // namespace arm_compute
 
-CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel()
+CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel()
     : _input(nullptr), _bias(nullptr), _output(nullptr)
 {
 }
-Error CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+
+Error CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
@@ -101,8 +102,8 @@ Error CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(const ITensorInfo 
     return Error{};
 }
 
-void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_offset, int result_mult_int, int result_shift, int min,
-                                                              int max)
+void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift,
+                                                                          int result_offset_after_shift, int min, int max)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
@@ -122,15 +123,15 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ICLTensor *i
 
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
-    build_opts.add_option("-DRESULT_OFFSET=" + support::cpp11::to_string(result_offset));
-    build_opts.add_option("-DRESULT_MULT_INT=" + support::cpp11::to_string(result_mult_int));
+    build_opts.add_option("-DRESULT_OFFSET_AFTER_SHIFT=" + support::cpp11::to_string(result_offset_after_shift));
+    build_opts.add_option("-DRESULT_FIXEDPOINT_MULTIPLIER=" + support::cpp11::to_string(result_fixedpoint_multiplier));
     build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(result_shift));
     build_opts.add_option_if((min != 0) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
     build_opts.add_option_if((max != 255) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_output_stage_quantize_down", build_opts.options()));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_output_stage_quantize_down_fixedpoint", build_opts.options()));
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
@@ -138,7 +139,7 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ICLTensor *i
     ICLKernel::configure(win_config.second);
 }
 
-void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);

@@ -77,6 +77,8 @@ public:
      *                           Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p mm_result
      * @param[in] a_offset       Offset to be added to each element of the matrix A.
      * @param[in] b_offset       Offset to be added to each element of the matrix B.
+     *
+     * @return an error status
      */
     static Error validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, int32_t a_offset, int32_t b_offset);
 
