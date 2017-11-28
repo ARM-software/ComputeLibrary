@@ -72,9 +72,9 @@ TEST_SUITE(PoolingLayer)
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Mismatching data type
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Window shrink
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4),     // Mismatching fixed point position
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS16, 11),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS16, 11),   // Window shrink
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8, 0), // Invalid parameters
@@ -104,10 +104,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        PoolingLayerInfo(PoolingType::MAX),
                                                        PoolingLayerInfo(PoolingType::AVG),
                                                       })),
-               framework::dataset::make("Expected", { true, false, true, false, true, true, true, true, true, false })),
+               framework::dataset::make("Expected", { true, true, true, true, true, true, true, true, true, false })),
                input_info, output_info, pool_info, expected)
 {
-    ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info, &output_info, pool_info)) == expected, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info)) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
