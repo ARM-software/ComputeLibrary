@@ -73,6 +73,14 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     }
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_im2col", build_opts));
 
+    // Configure the local work size for Bifrost with a value obtained
+    // via exhaustive autotuning for the MobileNets tensor shapes.
+    const GPUTarget gpu_target = get_arch_from_target(get_target());
+    if(gpu_target == GPUTarget::BIFROST)
+    {
+        _lws_hint = cl::NDRange(1, 2, 1);
+    }
+
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());
     // The CLDepthwiseIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
@@ -105,7 +113,7 @@ void CLDepthwiseIm2ColKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, _lws_hint);
     }
     while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_in));
 }

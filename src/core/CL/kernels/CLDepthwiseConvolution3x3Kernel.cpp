@@ -93,8 +93,46 @@ void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, const IC
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
 
+    // Create kernel
     std::string kernel_name = is_data_type_quantized_asymmetric(_input->info()->data_type()) ? "depthwise_convolution_3x3_quantized" : "depthwise_convolution_3x3";
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+
+    // Set static arguments
+    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
+    {
+        float multiplier        = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+        unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0);
+
+        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
+        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
+        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
+        _kernel.setArg(idx++, output_multiplier);
+        _kernel.setArg(idx++, output_shift);
+    }
+
+    // Configure the local work size for Bifrost with a value obtained
+    // via exhaustive autotuning for the MobileNets tensor shapes.
+    const GPUTarget gpu_target = get_arch_from_target(get_target());
+    if(gpu_target == GPUTarget::BIFROST)
+    {
+        const size_t width = input->info()->dimension(0);
+        if(width >= 56) // 56 or 112
+        {
+            _lws_hint = cl::NDRange(8, 5, 2);
+        }
+        else if(width >= 14) // 14 or 28
+        {
+            _lws_hint = cl::NDRange(1, 5, 2);
+        }
+        else // 7
+        {
+            _lws_hint = cl::NDRange(1, 1, 2);
+        }
+    }
 
     // Configure kernel window
     const unsigned int num_elems_processed_per_iteration = 2;
@@ -113,23 +151,6 @@ void CLDepthwiseConvolution3x3Kernel::configure(const ICLTensor *input, const IC
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
-
-    // Set static arguments
-    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
-    {
-        float multiplier        = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
-        int   output_multiplier = 0;
-        int   output_shift      = 0;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-
-        unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0);
-
-        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
-        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
-        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
-        _kernel.setArg(idx++, output_multiplier);
-        _kernel.setArg(idx++, output_shift);
-    }
 }
 
 void CLDepthwiseConvolution3x3Kernel::run(const Window &window, cl::CommandQueue &queue)
@@ -166,7 +187,7 @@ void CLDepthwiseConvolution3x3Kernel::run(const Window &window, cl::CommandQueue
         add_3D_tensor_argument(idx, _output, slice_out);
         add_3D_tensor_argument(idx, _weights, slice_weights);
 
-        enqueue(queue, *this, slice_out);
+        enqueue(queue, *this, slice_out, _lws_hint);
     }
     while(window.slide_window_slice_3D(slice_out) && win_in.slide_window_slice_3D(slice_in));
 }

@@ -63,6 +63,14 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_mv", build_opts));
 
+    // Configure the local work size for Bifrost with a value obtained
+    // via exhaustive autotuning for the MobileNets tensor shapes.
+    const GPUTarget gpu_target = get_arch_from_target(get_target());
+    if(gpu_target == GPUTarget::BIFROST)
+    {
+        _lws_hint = cl::NDRange(1, 1, 1);
+    }
+
     // Configure kernel window
     const unsigned int num_elems_read_per_iteration = 4;
 
@@ -119,7 +127,7 @@ void CLGEMMMatrixVectorMultiplyKernel::run(const Window &window, cl::CommandQueu
         unsigned int idx_2 = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor();
         add_3D_tensor_argument(idx_0, _input0, slice_in);
         add_1D_tensor_argument(idx_2, _output, slice_out);
-        enqueue(queue, *this, slice_in);
+        enqueue(queue, *this, slice_in, _lws_hint);
     }
     while(window.slide_window_slice_3D(slice_in) && window.slide_window_slice_3D(slice_out));
 }

@@ -41,6 +41,7 @@ void CLDepthwiseConvolution3x3::configure(ICLTensor *input, const ICLTensor *wei
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, weights);
 
+    _kernel.set_target(CLScheduler::get().target());
     _kernel.configure(input, weights, biases, output, conv_info);
     _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
 }
@@ -67,7 +68,8 @@ void CLDepthwiseConvolution::configure(ICLTensor *input, const ICLTensor *weight
     const size_t weights_h = weights->info()->dimension(1);
     const size_t weights_z = weights->info()->dimension(2);
 
-    bool has_bias = (biases != nullptr);
+    const bool      has_bias   = (biases != nullptr);
+    const GPUTarget gpu_target = CLScheduler::get().target();
 
     unsigned int conv_w = 0;
     unsigned int conv_h = 0;
@@ -84,6 +86,7 @@ void CLDepthwiseConvolution::configure(ICLTensor *input, const ICLTensor *weight
     shape_im2col.set(2, weights_z);
     const TensorInfo info_im2col(shape_im2col, 1, input->info()->data_type(), input->info()->fixed_point_position());
     _input_reshaped.allocator()->init(info_im2col);
+    _im2col_kernel.set_target(gpu_target);
     _im2col_kernel.configure(input, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, has_bias);
 
     // Weights reshape configuration
@@ -99,6 +102,7 @@ void CLDepthwiseConvolution::configure(ICLTensor *input, const ICLTensor *weight
     shape_v2mm_out.set(2, 1);
     const TensorInfo info_v2mm_out(shape_v2mm_out, 1, input->info()->data_type(), input->info()->fixed_point_position());
     _v2mm_output.allocator()->init(info_v2mm_out);
+    _v2mm_kernel.set_target(gpu_target);
     _v2mm_kernel.configure(&_input_reshaped, &_weights_reshaped, &_v2mm_output);
     _vector_to_tensor_kernel.configure(&_v2mm_output, output, conv_w, conv_h);
 
