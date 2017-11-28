@@ -43,7 +43,14 @@ void CLDepthwiseConvolution3x3::configure(ICLTensor *input, const ICLTensor *wei
 
     _kernel.set_target(CLScheduler::get().target());
     _kernel.configure(input, weights, biases, output, conv_info);
-    _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
+
+    // Configure border handler
+    PixelValue &&zero_value(0.f);
+    if(is_data_type_quantized_asymmetric(input->info()->data_type()))
+    {
+        zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().offset));
+    }
+    _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, zero_value);
 }
 
 void CLDepthwiseConvolution3x3::run()
