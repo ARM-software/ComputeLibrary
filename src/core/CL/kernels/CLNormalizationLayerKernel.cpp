@@ -35,6 +35,56 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(norm_info.type() == NormType::IN_MAP_2D, "2D In-Map Normalization not implemented");
+
+    if(is_data_type_fixed_point(input->data_type()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.beta(), input);
+        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.kappa(), input);
+        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.scale_coeff(), input);
+    }
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, bool is_in_map, unsigned int norm_size)
+{
+    const unsigned int border_width = is_in_map ? std::min(norm_size / 2, 3U) : 0;
+    const BorderSize   border_size  = BorderSize(0, border_width);
+
+    const unsigned int num_elems_processed_per_iteration = (is_data_type_fixed_point(input->data_type())) ? 16 : 4;
+    const unsigned int num_elems_read_per_iteration      = is_in_map ? (num_elems_processed_per_iteration + 2 * (norm_size / 2)) : num_elems_processed_per_iteration;
+
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input, -border_size.left, num_elems_read_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+
+    bool window_changed = update_window_and_padding(win, input_access, output_access);
+
+    output_access.set_valid_region(win, input->valid_region());
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 CLNormalizationLayerKernel::CLNormalizationLayerKernel()
     : _input(nullptr), _output(nullptr), _border_size(0), _is_in_map(false)
 {
@@ -63,7 +113,6 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     _border_size                    = BorderSize(0, border_width);
 
     const unsigned int num_elems_processed_per_iteration = (is_data_type_fixed_point(input->info()->data_type())) ? 16 : 4;
-    const unsigned int num_elems_read_per_iteration      = _is_in_map ? (num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2)) : num_elems_processed_per_iteration;
 
     // Set build options
     std::set<std::string> build_opts;
@@ -84,16 +133,9 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal input_access(input->info(), -_border_size.left, num_elems_read_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-
-    update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
-
-    ICLKernel::configure(win);
+    auto win_config = validate_and_configure_window(input->info(), output->info(), _is_in_map, norm_info.norm_size());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "normalization_layer_";
@@ -110,26 +152,8 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
 
 Error CLNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(norm_info.type() == NormType::IN_MAP_2D, "2D In-Map Normalization not implemented");
-
-    if(is_data_type_fixed_point(input->data_type()))
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.beta(), input);
-        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.kappa(), input);
-        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.scale_coeff(), input);
-    }
-
-    // Checks performed when output is configured
-    if(output->total_size() != 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, norm_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), norm_info.is_in_map(), norm_info.norm_size()).first);
 
     return Error{};
 }
