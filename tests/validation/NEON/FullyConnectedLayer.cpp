@@ -157,7 +157,7 @@ TEST_SUITE_END()
 template <typename T>
 using NEFullyConnectedLayerFixedPointFixture = FullyConnectedLayerValidationFixedPointFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
 
-TEST_SUITE(Quantized)
+TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
 FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),

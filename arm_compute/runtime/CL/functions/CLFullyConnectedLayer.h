@@ -32,6 +32,8 @@
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 
 namespace arm_compute
 {
@@ -46,7 +48,7 @@ class CLFullyConnectedLayerReshapeWeights : public ICLSimpleFunction
 public:
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Weights tensor. The weights must be 2 dimensional. Data types supported: QS8/QS16/F16/F32.
+     * @param[in]  input  Weights tensor. The weights must be 2 dimensional. Data types supported: QS8/QASYMM8/QS16/F16/F32.
      * @param[out] output Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
@@ -56,8 +58,8 @@ public:
  *
  *  -# @ref CLIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref CLFullyConnectedLayerReshapeWeights (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
- *  -# @ref CLGEMMMatrixMultiplyKernel
- *  -# @ref CLGEMMMatrixAccumulateBiasesKernel (if @p biases is not equal to nullptr)
+ *  -# @ref CLGEMMMatrixMultiplyKernel or @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
+ *  -# @ref CLGEMMMatrixAccumulateBiasesKernel or @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale (if quantized asymmetric) (if @p biases is not equal to nullptr)
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
@@ -68,7 +70,7 @@ public:
     CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input                Source tensor. Data type supported: QS8/QS16/F16/F32.
+     * @param[in]  input                Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
      * @param[in]  weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
      * @param[in]  biases               Bias tensor. It can be nullptr. Data type supported:Same as @p input.
      * @param[out] output               Destination tensor. Data type supported: Same as @p input.
@@ -81,19 +83,24 @@ public:
     void run() override;
 
 private:
-    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, const GPUTarget gpu_target);
-    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, const GPUTarget gpu_target);
+    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
+    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool is_interleaved_transposed = true);
 
-    CLMemoryGroup                       _memory_group;
-    CLIm2ColKernel                      _im2col_kernel;
-    CLFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
-    CLGEMMMatrixMultiplyKernel          _mm_kernel;
-    CLGEMMMatrixAccumulateBiasesKernel  _accumulate_biases_kernel;
-    CLTensor                            _im2col_output;
-    CLTensor                            _reshape_weights_output;
-    bool                                _are_weights_reshaped;
-    bool                                _is_fc_after_conv;
-    bool                                _accumulate_biases;
+    CLMemoryGroup                           _memory_group;
+    CLIm2ColKernel                          _im2col_kernel;
+    CLFullyConnectedLayerReshapeWeights     _reshape_weights_kernel;
+    CLGEMMMatrixMultiplyKernel              _mm_kernel;
+    CLGEMMLowpMatrixMultiplyCore            _mm_gemmlowp;
+    CLGEMMLowpQuantizeDownInt32ToUint8Scale _gemmlowp_output_stage;
+    CLGEMMMatrixAccumulateBiasesKernel      _accumulate_biases_kernel;
+    CLTensor                                _im2col_output;
+    CLTensor                                _gemmlowp_output;
+    CLTensor                                _reshape_weights_output;
+    bool                                    _are_weights_reshaped;
+    bool                                    _is_fc_after_conv;
+    bool                                    _accumulate_biases;
+    bool                                    _is_quantized;
 };
 }
 #endif /* __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__ */

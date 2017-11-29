@@ -35,8 +35,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, const TensorShape &dst_shape);
+template <typename T, typename TB>
+SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &dst_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -24,7 +24,10 @@
 #include "FullyConnectedLayer.h"
 
 #include "arm_compute/core/Types.h"
+#include "tests/validation/CPP/UtilsQuantizedAsymm.h"
 #include "tests/validation/FixedPoint.h"
+
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 #include <numeric>
 
@@ -39,22 +42,34 @@ namespace reference
 namespace
 {
 // Vector matrix multiply for floating point
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-void vector_matrix_multiply(const T *src, const T *weights, const T *bias, T *dst, int cols_weights, int rows_weights, uint8_t fixed_point_position)
+template < typename T, typename TB, typename std::enable_if < is_floating_point<T>::value &&is_floating_point<TB>::value, int >::type = 0 >
+void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &dst, int offset_src, int offset_dst, int cols_weights,
+                            int rows_weights, uint8_t fixed_point_position)
 {
     ARM_COMPUTE_UNUSED(fixed_point_position);
 
+    const T *src_ptr     = src.data() + offset_src;
+    const T *weights_ptr = weights.data();
+    const TB *bias_ptr    = bias.data();
+    T        *dst_ptr     = dst.data() + offset_dst;
+
     for(int y = 0; y < rows_weights; ++y)
     {
-        dst[y] = std::inner_product(src, src + cols_weights, weights, static_cast<T>(0)) + bias[y];
-        weights += cols_weights;
+        dst_ptr[y] = std::inner_product(src_ptr, src_ptr + cols_weights, weights_ptr, static_cast<T>(0)) + bias_ptr[y];
+        weights_ptr += cols_weights;
     }
 }
 
 // Vector matrix multiply for fixed point type
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-void vector_matrix_multiply(const T *src, const T *weights, const T *bias, T *dst, int cols_weights, int rows_weights, uint8_t fixed_point_position)
+template < typename T, typename TB, typename std::enable_if < std::is_integral<T>::value &&std::is_integral<TB>::value, int >::type = 0 >
+void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &dst, int offset_src, int offset_dst, int cols_weights,
+                            int rows_weights, uint8_t fixed_point_position)
 {
+    const T *src_ptr     = src.data() + offset_src;
+    const T *weights_ptr = weights.data();
+    const TB *bias_ptr    = bias.data();
+    T        *dst_ptr     = dst.data() + offset_dst;
+
     using namespace fixed_point_arithmetic;
     using promoted_type = fixed_point_arithmetic::traits::promote_t<T>;
 
@@ -65,31 +80,79 @@ void vector_matrix_multiply(const T *src, const T *weights, const T *bias, T *ds
 
         for(int x = 0; x < cols_weights; ++x)
         {
-            const fixed_point<promoted_type> i_value(src[x], fixed_point_position, true);
-            const fixed_point<promoted_type> w_value(weights[x], fixed_point_position, true);
+            const fixed_point<promoted_type> i_value(src_ptr[x], fixed_point_position, true);
+            const fixed_point<promoted_type> w_value(weights_ptr[x], fixed_point_position, true);
             acc = acc + i_value * w_value;
         }
 
         // Get the bias
-        const fixed_point<T> b(bias[y], fixed_point_position, true);
+        const fixed_point<T> b(bias_ptr[y], fixed_point_position, true);
 
         // Convert back and accumulate the bias
         fixed_point<T> res(acc);
         res = res + b;
 
         // Store the result
-        dst[y] = res.raw();
+        dst_ptr[y] = res.raw();
 
-        weights += cols_weights;
+        weights_ptr += cols_weights;
+    }
+}
+
+// Vector matrix multiply for quantized type
+template <>
+void vector_matrix_multiply(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, SimpleTensor<uint8_t> &dst, int offset_src, int offset_dst,
+                            int cols_weights, int rows_weights, uint8_t fixed_point_position)
+{
+    ARM_COMPUTE_UNUSED(fixed_point_position);
+
+    const uint8_t *src_ptr     = src.data() + offset_src;
+    const uint8_t *weights_ptr = weights.data();
+    const int32_t *bias_ptr    = bias.data();
+    uint8_t       *dst_ptr     = dst.data() + offset_dst;
+
+    const int   input_offset   = -src.quantization_info().offset;
+    const float input_scale    = src.quantization_info().scale;
+    const int   weights_offset = -weights.quantization_info().offset;
+    const float weights_scale  = weights.quantization_info().scale;
+    const int   output_offset  = dst.quantization_info().offset;
+    const float output_scale   = dst.quantization_info().scale;
+
+    int         output_multiplier = 0;
+    int         output_shift      = 0;
+    const float multiplier        = input_scale * weights_scale / output_scale;
+    arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+    for(int y = 0; y < rows_weights; ++y)
+    {
+        // Reset accumulator
+        int32_t acc = 0;
+
+        for(int x = 0; x < cols_weights; ++x)
+        {
+            acc += (src_ptr[x] + input_offset) * (weights_ptr[x] + weights_offset);
+        }
+
+        // Accumulate the bias
+        acc += bias_ptr[y];
+
+        acc = asymm_rounding_divide_by_pow2(asymm_int_mult(acc, output_multiplier), output_shift);
+        acc += output_offset;
+        acc = clamp<int32_t>(acc, 0, 255);
+
+        // Store the result
+        dst_ptr[y] = static_cast<uint8_t>(acc);
+
+        weights_ptr += cols_weights;
     }
 }
 } // namespace
 
-template <typename T>
-SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, const TensorShape &dst_shape)
+template <typename T, typename TB>
+SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &dst_shape)
 {
     // Create reference
-    SimpleTensor<T> dst{ TensorShape{ dst_shape }, src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ TensorShape{ dst_shape }, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
 
     // Sanity checks
     const int          num_batch_dimensions = std::max(0, static_cast<int>(dst_shape.num_dimensions()) - 1);
@@ -110,10 +173,15 @@ SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTe
 
     for(int k = 0; k < num_batches; ++k)
     {
-        vector_matrix_multiply<T>(src.data() + k * cols_weights,
-                                  weights.data(),
-                                  bias.data(),
-                                  dst.data() + k * rows_weights,
+        const int offset_in  = k * cols_weights;
+        const int offset_out = k * rows_weights;
+
+        vector_matrix_multiply<T>(src,
+                                  weights,
+                                  bias,
+                                  dst,
+                                  offset_in,
+                                  offset_out,
                                   cols_weights,
                                   rows_weights,
                                   src.fixed_point_position());
@@ -126,6 +194,7 @@ template SimpleTensor<float> fully_connected_layer(const SimpleTensor<float> &sr
 template SimpleTensor<half> fully_connected_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &dst_shape);
 template SimpleTensor<qint8_t> fully_connected_layer(const SimpleTensor<qint8_t> &src, const SimpleTensor<qint8_t> &weights, const SimpleTensor<qint8_t> &bias, const TensorShape &dst_shape);
 template SimpleTensor<qint16_t> fully_connected_layer(const SimpleTensor<qint16_t> &src, const SimpleTensor<qint16_t> &weights, const SimpleTensor<qint16_t> &bias, const TensorShape &dst_shape);
+template SimpleTensor<uint8_t> fully_connected_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &dst_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test

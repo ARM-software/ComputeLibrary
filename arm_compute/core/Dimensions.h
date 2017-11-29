@@ -141,6 +141,17 @@ public:
         std::fill(_id.begin() + _num_dimensions, _id.end(), 0);
     }
 
+    /** Collapse dimensions starting from a given point
+     *
+     * @param[in] start Starting point of collapsing dimensions
+     */
+    void collapse_from(size_t start)
+    {
+        ARM_COMPUTE_ERROR_ON(start > num_dimensions());
+
+        collapse(num_dimensions() - start, start);
+    }
+
     /** Returns a read/write iterator that points to the first element in the dimension array. */
     typename std::array<T, num_max_dimensions>::iterator begin()
     {

@@ -151,10 +151,14 @@ __kernel void im2col_generic(
         {
 #if PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
             *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * src_stride_x + y * src_stride_y));
-#else  // PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
+#else // PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
             if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
             {
+#if defined(OFFSET)
+                *output_ptr = OFFSET;
+#else  /* OFFSET */
                 *output_ptr = 0;
+#endif /* OFFSET */
             }
             else
             {

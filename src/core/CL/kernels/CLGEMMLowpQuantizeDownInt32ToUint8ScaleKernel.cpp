@@ -48,7 +48,6 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ICLTensor *i
                                                               int max)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
     ARM_COMPUTE_ERROR_ON(max > 255);
     ARM_COMPUTE_ERROR_ON(min < 0 || min > max);
 
@@ -58,6 +57,11 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ICLTensor *i
         ARM_COMPUTE_ERROR_ON(bias->info()->num_dimensions() > 1);
         ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != bias->info()->dimension(0));
     }
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8));
+
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
 
     _input  = input;
     _bias   = bias;
@@ -95,7 +99,7 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ICLTensor *i
                                   bias_access);
     }
 
-    output_result_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+    output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
 }

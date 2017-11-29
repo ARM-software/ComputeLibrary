@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "helpers.h"
+#include "helpers_asymm.h"
 
 #if defined(COLS_B)
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
@@ -428,7 +429,7 @@ __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
     Image sum_col = CONVERT_TO_IMAGE_STRUCT(sum_col);
 
     // Compute the offset contribution due to A_OFFSET
-    a_offset_s32 = vload16(0, (__global int *)sum_col.ptr + get_global_id(2) * sum_col_stride_y);
+    a_offset_s32 = vload16(0, (__global int *)(sum_col.ptr));
     a_offset_s32 *= (int16)A_OFFSET;
 #endif // defined(A_OFFSET)
 
@@ -507,23 +508,17 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
 
     int16 input_values = vload16(0, (__global int *)src.ptr);
 
-    // Add the offset terms to GEMM's result
-    input_values += (int16)RESULT_OFFSET;
-
-    // Multiply by result_mult_int
-    input_values *= (int16)RESULT_MULT_INT;
-
 #if defined(ADD_BIAS)
     // Add bias
     const int16 biases_values = vload16(0, (__global int *)biases.ptr);
     input_values += (int16)biases_values;
 #endif // defined(ADD_BIAS)
 
-    // Shift final result
-    input_values >>= RESULT_SHIFT;
+    // Multiply by result_mult_int and shift
+    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_MULT_INT, RESULT_SHIFT, 16);
 
-    // Saturate negative values
-    input_values = max(input_values, (int16)0);
+    // Add the offset terms to GEMM's result
+    input_values += (int16)RESULT_OFFSET;
 
     uchar16 res = convert_uchar16_sat(input_values);
 

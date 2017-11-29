@@ -40,7 +40,7 @@ class CLGEMMInterleave4x4 : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output
      *
-     * @param[in]  input  First input tensor. Data types supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  First input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);

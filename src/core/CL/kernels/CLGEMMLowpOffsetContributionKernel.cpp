@@ -62,9 +62,6 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
         ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
         ARM_COMPUTE_ERROR_ON(vector_sum_col->info()->dimension(0) != mm_result->info()->dimension(0));
 
-        TensorShape vector_sum_col_shape = vector_sum_col->info()->tensor_shape();
-        vector_sum_col_shape.collapse(1);
-
         build_opts.add_option("-DA_OFFSET=" + support::cpp11::to_string(a_offset));
     }
 
@@ -74,21 +71,25 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
         ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
         ARM_COMPUTE_ERROR_ON(vector_sum_row->info()->dimension(0) != mm_result->info()->dimension(1));
 
-        TensorShape output_shape         = mm_result->info()->tensor_shape();
-        TensorShape vector_sum_row_shape = vector_sum_row->info()->tensor_shape();
-        vector_sum_row_shape.collapse(1);
-        output_shape.collapse(2);
-
-        ARM_COMPUTE_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[2], "mm_result tensor must have the same number of batches of output tensor");
-
-        if(a_offset != 0)
+        // Validate batches
+        TensorShape output_shape = mm_result->info()->tensor_shape();
+        if(output_shape.num_dimensions() > 1)
         {
-            TensorShape vector_sum_col_shape = vector_sum_col->info()->tensor_shape();
-            vector_sum_col_shape.collapse(1);
+            TensorShape vector_sum_row_shape = vector_sum_row->info()->tensor_shape();
+            vector_sum_row_shape.collapse_from(1);
+            output_shape.collapse_from(2);
 
-            ARM_COMPUTE_ERROR_ON_MSG(vector_sum_col_shape[1] != 1
-                                     && vector_sum_col_shape[1] != vector_sum_row_shape[1],
-                                     "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
+            ARM_COMPUTE_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[2], "mm_result tensor must have the same number of batches of output tensor");
+
+            if(a_offset != 0)
+            {
+                TensorShape vector_sum_col_shape = vector_sum_col->info()->tensor_shape();
+                vector_sum_col_shape.collapse_from(1);
+
+                ARM_COMPUTE_ERROR_ON_MSG(vector_sum_col_shape[1] != 1
+                                         && vector_sum_col_shape[1] != vector_sum_row_shape[1],
+                                         "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
+            }
         }
 
         build_opts.add_option("-DB_OFFSET=" + support::cpp11::to_string(b_offset));

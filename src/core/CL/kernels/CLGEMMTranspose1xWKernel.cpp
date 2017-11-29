@@ -40,9 +40,9 @@ using namespace arm_compute;
 
 void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8, DataType::U16, DataType::S16, DataType::QS16, DataType::U32, DataType::S32,
-                                                  DataType::F16,
-                                                  DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,
+                                                  DataType::U16, DataType::S16, DataType::QS16,
+                                                  DataType::U32, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     TensorShape  output_shape{ input->info()->tensor_shape() };
@@ -51,7 +51,7 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
     output_shape.set(1, static_cast<size_t>(std::ceil((input->info()->dimension(0) / static_cast<float>(transpose_w)))));
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position(), input->info()->quantization_info());
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);

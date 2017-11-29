@@ -46,22 +46,21 @@ CLIm2ColKernel::CLIm2ColKernel()
 
 void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     _input  = input;
     _output = output;
 
-    // Create kernel
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    build_opts.emplace((has_bias ? "-DHAS_BIAS" : ""));
+    const DataType data_type = input->info()->data_type();
 
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
-    }
+    // Create kernel
+    CLBuildOptions build_opts;
+    build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
+    build_opts.add_option_if(has_bias, "-DHAS_BIAS");
+    build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    build_opts.add_option_if(is_data_type_quantized_asymmetric(data_type), "-DOFFSET=" + support::cpp11::to_string(input->info()->quantization_info().offset));
 
     int stride_x = 0;
     int stride_y = 0;
@@ -74,6 +73,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
                                                     output->info()->tensor_shape().cbegin() + 1))
                                      && ((stride_x == 1) && (stride_y == 1) && !conv_info.has_padding());
 
+    std::string kernel_name = "im2col_generic";
     if(!run_img2col_reduced)
     {
         _convolved_dims = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
@@ -81,36 +81,35 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
                                             conv_info);
         _num_elems_processed_per_iteration = output->info()->dimension(0);
 
-        build_opts.emplace("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
-        build_opts.emplace("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
-        build_opts.emplace("-DKERNEL_DEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
-        build_opts.emplace("-DCONVOLVED_WIDTH=" + support::cpp11::to_string(_convolved_dims.first));
-        build_opts.emplace("-DCONVOLVED_HEIGHT=" + support::cpp11::to_string(_convolved_dims.second));
-        build_opts.emplace("-DSTRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
-        build_opts.emplace("-DSTRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
-        build_opts.emplace("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
-        build_opts.emplace("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
-        build_opts.emplace("-DPAD_RIGHT=" + support::cpp11::to_string(conv_info.pad_right()));
-        build_opts.emplace("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom()));
-        build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
-        build_opts.emplace("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
+        build_opts.add_option("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
+        build_opts.add_option("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
+        build_opts.add_option("-DKERNEL_DEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
+        build_opts.add_option("-DCONVOLVED_WIDTH=" + support::cpp11::to_string(_convolved_dims.first));
+        build_opts.add_option("-DCONVOLVED_HEIGHT=" + support::cpp11::to_string(_convolved_dims.second));
+        build_opts.add_option("-DSTRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
+        build_opts.add_option("-DSTRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
+        build_opts.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
+        build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
+        build_opts.add_option("-DPAD_RIGHT=" + support::cpp11::to_string(conv_info.pad_right()));
+        build_opts.add_option("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom()));
+        build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+        build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
 
         if(kernel_dims.width == 3 && kernel_dims.height == 3 && !conv_info.has_padding())
         {
-            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("im2col_kernel3x3_padx0_pady0", build_opts));
-        }
-        else
-        {
-            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("im2col_generic", build_opts));
+            kernel_name = "im2col_kernel3x3_padx0_pady0";
         }
         _run_func = &CLIm2ColKernel::run_generic;
     }
     else
     {
+        kernel_name                        = "im2col_reduced";
         _num_elems_processed_per_iteration = 1;
-        _kernel                            = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("im2col_reduced", build_opts));
         _run_func                          = &CLIm2ColKernel::run_reduced;
     }
+
+    // Create kernel
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());

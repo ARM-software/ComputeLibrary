@@ -62,9 +62,6 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
         ARM_COMPUTE_ERROR_ON(input0->info()->dimension(0) != input1->info()->dimension(1));
     }
 
-    TensorShape in1_shape = input1->info()->tensor_shape();
-    in1_shape.collapse(2);
-
     _input0 = input0;
     _input1 = input1;
     _output = output;
