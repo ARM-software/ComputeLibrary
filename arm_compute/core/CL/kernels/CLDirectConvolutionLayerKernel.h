@@ -93,8 +93,6 @@ private:
     const ICLTensor *_weights;
     ICLTensor       *_output;
     BorderSize       _border_size;
-    int              _conv_pad_x;
-    int              _conv_pad_y;
     int              _conv_stride_x;
     int              _conv_stride_y;
 };

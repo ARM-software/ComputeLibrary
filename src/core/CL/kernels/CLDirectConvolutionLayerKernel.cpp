@@ -63,7 +63,7 @@ TensorShape get_output_shape(TensorShape input_shape, TensorShape weights_shape,
 } // namespace
 
 CLDirectConvolutionLayerKernel::CLDirectConvolutionLayerKernel()
-    : _input(nullptr), _biases(nullptr), _weights(nullptr), _output(nullptr), _border_size(0), _conv_pad_x(0), _conv_pad_y(0), _conv_stride_x(0), _conv_stride_y(0)
+    : _input(nullptr), _biases(nullptr), _weights(nullptr), _output(nullptr), _border_size(0), _conv_stride_x(0), _conv_stride_y(0)
 {
 }
 
@@ -99,14 +99,17 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 
     _conv_stride_x = std::get<0>(conv_info.stride());
     _conv_stride_y = std::get<1>(conv_info.stride());
-    _conv_pad_x    = std::min(std::get<0>(conv_info.pad()), kernel_size / 2);
-    _conv_pad_y    = std::min(std::get<1>(conv_info.pad()), kernel_size / 2);
 
-    _input       = input;
-    _weights     = weights;
-    _output      = output;
-    _biases      = biases;
-    _border_size = BorderSize(_conv_pad_y, _conv_pad_x);
+    _input   = input;
+    _weights = weights;
+    _output  = output;
+    _biases  = biases;
+
+    int conv_pad_left   = std::min(conv_info.pad_left(), kernel_size / 2);
+    int conv_pad_top    = std::min(conv_info.pad_top(), kernel_size / 2);
+    int conv_pad_right  = std::min(conv_info.pad_right(), kernel_size / 2);
+    int conv_pad_bottom = std::min(conv_info.pad_bottom(), kernel_size / 2);
+    _border_size        = BorderSize(conv_pad_top, conv_pad_right, conv_pad_bottom, conv_pad_left);
 
     const GPUTarget gpu_target = get_arch_from_target(get_target());
 
@@ -217,13 +220,13 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         }
 
         // Calculate right and bottom border
-        const int input_width  = input->info()->dimension(0) - kernel_size / 2 + _conv_pad_x;
-        const int input_height = input->info()->dimension(1) - kernel_size / 2 + _conv_pad_y;
+        const int input_width  = input->info()->dimension(0) - kernel_size / 2 + conv_pad_right;
+        const int input_height = input->info()->dimension(1) - kernel_size / 2 + conv_pad_bottom;
 
         // Create window and update padding
         win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
 
-        AccessWindowStatic    input_access(input->info(), -_conv_pad_x, -_conv_pad_y, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
+        AccessWindowStatic    input_access(input->info(), -conv_pad_left, -conv_pad_top, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
         AccessWindowStatic    weights_access(weights->info(), 0, 0, kernel_size, kernel_size);
         AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
 
@@ -262,13 +265,13 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         const unsigned int num_elems_written_per_iteration_y = 1;
 
         // Calculate right and bottom border
-        const int input_width  = input->info()->dimension(0) - kernel_size / 2 + _conv_pad_x;
-        const int input_height = input->info()->dimension(1) - kernel_size / 2 + _conv_pad_y;
+        const int input_width  = input->info()->dimension(0) - kernel_size / 2 + conv_pad_right;
+        const int input_height = input->info()->dimension(1) - kernel_size / 2 + conv_pad_bottom;
 
         // Create window and update padding
         Window win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
 
-        AccessWindowStatic    input_access(input->info(), -_conv_pad_x, -_conv_pad_y, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
+        AccessWindowStatic    input_access(input->info(), -conv_pad_left, -conv_pad_top, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
         AccessWindowStatic    weights_access(weights->info(), 0, 0, kernel_size, kernel_size);
         AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
 
@@ -302,9 +305,13 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     _config_id += "_";
     _config_id += support::cpp11::to_string(kernel_size);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(_conv_pad_x);
+    _config_id += support::cpp11::to_string(conv_pad_left);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(_conv_pad_y);
+    _config_id += support::cpp11::to_string(conv_pad_top);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(conv_pad_right);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(conv_pad_bottom);
     _config_id += "_";
     _config_id += support::cpp11::to_string(_conv_stride_x);
     _config_id += "_";
@@ -371,8 +378,8 @@ void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue 
     Window slice  = window.first_slice_window_3D();
     Window win_in = window;
 
-    win_in.adjust(Window::DimX, -_conv_pad_x, true);
-    win_in.adjust(Window::DimY, -_conv_pad_y, true);
+    win_in.adjust(Window::DimX, -_border_size.left, true);
+    win_in.adjust(Window::DimY, -_border_size.top, true);
     win_in.set_dimension_step(Window::DimX, window.x().step() * _conv_stride_x);
     win_in.set_dimension_step(Window::DimY, window.y().step() * _conv_stride_y);
 

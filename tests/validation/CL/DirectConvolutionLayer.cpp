@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
+#include "tests/datasets/DirectConvolutionLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -148,6 +149,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 
 template <typename T>
 using CLDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
+template <typename T>
+using CLDirectConvolutionValidationWithTensorShapesFixture = DirectConvolutionValidationWithTensorShapesFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -160,6 +163,15 @@ TEST_SUITE_END()
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(FP32_CustomDataset)
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture<float>, framework::DatasetMode::ALL, combine(datasets::DirectConvolutionLayerDataset(),
+                       framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -192,11 +204,23 @@ TEST_SUITE_END()
 
 template <typename T>
 using CLDirectConvolutionLayerQuantizedFixture = DirectConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
+template <typename T>
+using CLDirectConvolutionValidationWithTensorShapesQuantizedFixture = DirectConvolutionValidationWithTensorShapesQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                                     framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QASYMM8_CustomDataset)
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(datasets::DirectConvolutionLayerDataset(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
