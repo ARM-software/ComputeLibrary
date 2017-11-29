@@ -61,7 +61,7 @@ using NEFixedPointFixture = FixedPointValidationFixture<Tensor, Accessor, T>;
 TEST_SUITE(QS8)
 TEST_SUITE(Exp)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::QS8)),
                                                                                                            framework::dataset::make("FixedPointOp", FixedPointOp::EXP)),
                                                                                                    framework::dataset::make("FractionalBits", 1, 7)))
@@ -72,7 +72,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(Invsqrt)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::QS8)),
                                                                                                            framework::dataset::make("FixedPointOp", FixedPointOp::INV_SQRT)),
                                                                                                    framework::dataset::make("FractionalBits", 1, 6)))
@@ -83,7 +83,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(Log)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::QS8)),
                                                                                                            framework::dataset::make("FixedPointOp", FixedPointOp::LOG)),
                                                                                                    framework::dataset::make("FractionalBits", 3, 6)))
@@ -94,7 +94,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(Reciprocal)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::QS8)),
                                                                                                            framework::dataset::make("FixedPointOp", FixedPointOp::RECIPROCAL)),
                                                                                                    framework::dataset::make("FractionalBits", 1, 6)))
@@ -107,7 +107,7 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 TEST_SUITE(Exp)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                     DataType::QS16)),
                                                                                                             framework::dataset::make("FixedPointOp", FixedPointOp::EXP)),
                                                                                                     framework::dataset::make("FractionalBits", 1, 15)))
@@ -130,7 +130,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(Log)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                     DataType::QS16)),
                                                                                                             framework::dataset::make("FixedPointOp", FixedPointOp::LOG)),
                                                                                                     framework::dataset::make("FractionalBits", 4, 14)))
@@ -141,7 +141,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(Reciprocal)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                     DataType::QS16)),
                                                                                                             framework::dataset::make("FixedPointOp", FixedPointOp::RECIPROCAL)),
                                                                                                     framework::dataset::make("FractionalBits", 1, 14)))

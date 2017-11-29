@@ -380,7 +380,10 @@ void AssetsLibrary::fill_borders_with_garbage(T &&tensor, D &&distribution, std:
 
     Window window;
     window.set(0, Window::Dimension(-padding_size.left, tensor.shape()[0] + padding_size.right, 1));
-    window.set(1, Window::Dimension(-padding_size.top, tensor.shape()[1] + padding_size.bottom, 1));
+    if(tensor.shape().num_dimensions() > 1)
+    {
+        window.set(1, Window::Dimension(-padding_size.top, tensor.shape()[1] + padding_size.bottom, 1));
+    }
 
     std::mt19937 gen(_seed);
 

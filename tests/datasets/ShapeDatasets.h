@@ -35,18 +35,21 @@ namespace test
 {
 namespace datasets
 {
-/** Data set containing 1D tensor shapes. */
-class Small1DShape final : public framework::dataset::SingletonDataset<TensorShape>
+/** Parent type for all for shape datasets. */
+using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
+
+/** Data set containing small 1D tensor shapes. */
+class Small1DShapes final : public ShapeDataset
 {
 public:
-    Small1DShape()
-        : SingletonDataset("Shape", TensorShape{ 256U })
+    Small1DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 256U }
+    })
     {
     }
 };
-
-/** Parent type for all for shape datasets. */
-using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
 
 /** Data set containing small 2D tensor shapes. */
 class Small2DShapes final : public ShapeDataset
@@ -164,6 +167,21 @@ public:
                      TensorShape{ 4160U, 3120U },
                      // Batch size 4
                      TensorShape{ 800U, 600U, 1U, 4U },
+    })
+    {
+    }
+};
+
+/** Data set containing large 1D tensor shapes. */
+class Large1DShapes final : public ShapeDataset
+{
+public:
+    Large1DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1921U },
+                     TensorShape{ 1245U },
+                     TensorShape{ 4160U }
     })
     {
     }

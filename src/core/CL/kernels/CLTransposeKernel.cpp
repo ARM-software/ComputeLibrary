@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
 
-#include "arm_compute/core/AccessWindowTranspose.h"
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 
 #include <set>
 #include <sstream>
@@ -75,7 +76,9 @@ void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_elems_processed_per_iteration));
 
     AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
-    AccessWindowTranspose output_access(output->info(), 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+    // TODO (COMPMID-708): Replace AccessWindowStatic with AccessWindowTranspose
+    AccessWindowStatic output_access(output->info(), 0, 0, ceil_to_multiple(output->info()->dimension(0), num_elems_processed_per_iteration), ceil_to_multiple(output->info()->dimension(1),
+                                     num_elems_processed_per_iteration));
 
     update_window_and_padding(win, input_access, output_access);
 

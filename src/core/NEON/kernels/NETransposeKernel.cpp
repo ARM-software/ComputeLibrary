@@ -23,10 +23,11 @@
  */
 #include "arm_compute/core/NEON/kernels/NETransposeKernel.h"
 
-#include "arm_compute/core/AccessWindowTranspose.h"
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 
 #include <arm_neon.h>
@@ -221,8 +222,11 @@ void NETransposeKernel::configure(const ITensor *input, ITensor *output)
     }
 
     // Configure kernel window
-    Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_elems_processed_per_iteration));
-    AccessWindowTranspose output_access(output->info(), 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_elems_processed_per_iteration));
+
+    // TODO (COMPMID-708): Replace AccessWindowStatic with AccessWindowTranspose
+    AccessWindowStatic output_access(output->info(), 0, 0, ceil_to_multiple(output->info()->dimension(0), num_elems_processed_per_iteration), ceil_to_multiple(output->info()->dimension(1),
+                                     num_elems_processed_per_iteration));
 
     update_window_and_padding(win,
                               AccessWindowRectangle(input->info(), 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration),
