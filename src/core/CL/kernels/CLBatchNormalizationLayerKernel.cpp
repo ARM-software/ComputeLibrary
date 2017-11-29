@@ -69,7 +69,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
     Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
 
-    bool window_changed;
+    bool window_changed = false;
     if(output != nullptr)
     {
         AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);

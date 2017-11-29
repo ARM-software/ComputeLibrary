@@ -43,6 +43,58 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
+                                    "For QASYMM8 only lower/upper bounded relu is supported");
+
+    // Checks performed when output is configured
+    if((output != nullptr) && (output->total_size() != 0))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+{
+    if(output != nullptr)
+    {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+        // Output auto inizialitation if not yet initialized
+        auto_init_if_empty(*output,
+                           *input->clone());
+    }
+
+    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
+
+    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    bool   window_changed = false;
+
+    if(output != nullptr)
+    {
+        AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+        window_changed = update_window_and_padding(win, input_access, output_access);
+        output_access.set_valid_region(win, input->valid_region());
+    }
+    else
+    {
+        window_changed = update_window_and_padding(win,
+                                                   AccessWindowHorizontal(input, 0, num_elems_processed_per_iteration));
+    }
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 CLActivationLayerKernel::CLActivationLayerKernel()
     : _input(nullptr), _output(nullptr)
 {
@@ -57,11 +109,7 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), output->info());
         // Output auto inizialitation if not yet initialized
         auto_init_if_empty(*output->info(),
-                           input->info()->tensor_shape(),
-                           1,
-                           input->info()->data_type(),
-                           input->info()->fixed_point_position(),
-                           input->info()->quantization_info());
+                           *input->info()->clone());
     }
 
     ARM_COMPUTE_ERROR_THROW_ON(CLActivationLayerKernel::validate(input->info(), (output != nullptr) ? output->info() : nullptr, act_info));
@@ -135,22 +183,9 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     _output = output;
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
-    if(output != nullptr)
-    {
-        AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-        update_window_and_padding(win, input_access, output_access);
-        output_access.set_valid_region(win, input->info()->valid_region());
-    }
-    else
-    {
-        update_window_and_padding(win,
-                                  AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
-    }
-
-    ICLKernel::configure(win);
+    auto win_config = validate_and_configure_window(input->info(), (output == nullptr) ? nullptr : output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "activation_layer_";
@@ -163,17 +198,8 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
 
 Error CLActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
-                                    "For QASYMM8 only lower/upper bounded relu is supported");
-
-    // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, act_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (output == nullptr) ? nullptr : output->clone().get()).first);
 
     return Error{};
 }
