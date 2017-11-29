@@ -256,8 +256,8 @@ __kernel void softmax_layer_norm_quantized(
 
     data = asymm_mult(shifted_scale, data);
     data = asymm_rounding_divide_by_pow2(data, num_bits_over_unit + 31 - 8);
-    data = select(0, max(min(data, 255), 0), data_diff >= (int16)(DIFF_MIN));
-    vstore16(convert_uchar16(data), 0, (__global uchar *)offset(&dst, 0, 0));
+    data = select(0, data, data_diff >= (int16)(DIFF_MIN));
+    vstore16(convert_uchar16_sat(data), 0, (__global uchar *)offset(&dst, 0, 0));
 }
 
 #endif /* defined(DIFF_MIN) */
