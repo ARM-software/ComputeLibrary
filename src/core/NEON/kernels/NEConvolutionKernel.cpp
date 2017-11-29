@@ -627,16 +627,17 @@ void NEConvolutionKernel<matrix_size>::run(const Window &window, const ThreadInf
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    switch(_output->info()->format())
+    switch(_output->info()->data_type())
     {
-        case Format::U8:
+        case DataType::U8:
             convolution<uint8_t>(window);
             break;
-        case Format::S16:
+        case DataType::S16:
             convolution<int16_t>(window);
             break;
         default:
-            ARM_COMPUTE_ERROR("Not supported");
+            ARM_COMPUTE_ERROR("Not supported Data type!");
+            break;
     }
 }
 
