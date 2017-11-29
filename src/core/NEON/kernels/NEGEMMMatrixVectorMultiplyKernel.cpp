@@ -62,7 +62,7 @@ void NEGEMMMatrixVectorMultiplyKernel::configure(const ITensor *input0, const IT
 
     AccessWindowHorizontal input0_access(input0->info(), 0, num_elems_read_per_iteration);
     AccessWindowHorizontal input1_access(input1->info(), 0, num_elems_read_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, 1);
+    AccessWindowStatic     output_access(output->info(), 0, 0, output->info()->dimension(0), output->info()->dimension(1));
 
     update_window_and_padding(win, input0_access, input1_access, output_access);
 
