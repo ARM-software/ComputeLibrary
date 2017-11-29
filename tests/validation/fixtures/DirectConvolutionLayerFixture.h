@@ -73,7 +73,7 @@ protected:
         {
             case DataType::QASYMM8:
             {
-                std::uniform_int_distribution<uint8_t> distribution(0, 10);
+                std::uniform_int_distribution<uint8_t> distribution(0, 50);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -86,7 +86,7 @@ protected:
             }
             case DataType::S32:
             {
-                std::uniform_int_distribution<int32_t> distribution(-1000, 1000);
+                std::uniform_int_distribution<int32_t> distribution(-5, 5);
                 library->fill(tensor, distribution, i);
                 break;
             }

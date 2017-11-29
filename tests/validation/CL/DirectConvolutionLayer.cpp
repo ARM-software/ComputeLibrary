@@ -196,7 +196,7 @@ using CLDirectConvolutionLayerQuantizedFixture = DirectConvolutionValidationQuan
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127) })))
+                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);

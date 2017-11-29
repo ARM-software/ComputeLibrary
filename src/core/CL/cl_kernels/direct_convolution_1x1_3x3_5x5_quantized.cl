@@ -243,9 +243,7 @@ __kernel void direct_convolution_1x1_3x3_5x5_quantized(
 
     pixels0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(pixels0, output_multiplier, output_shift, 8);
     pixels0 = pixels0 + output_offset;
-    pixels0 = max(pixels0, 0);
-    pixels0 = min(pixels0, 255);
 
-    vstore8(convert_uchar8(pixels0), 0, (__global uchar *)dst.ptr);
+    vstore8(convert_uchar8_sat(pixels0), 0, (__global uchar *)dst.ptr);
 }
 #endif // defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)

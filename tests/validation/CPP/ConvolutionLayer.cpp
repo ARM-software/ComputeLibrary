@@ -210,8 +210,7 @@ void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<uint8_t> 
 
     acc = asymm_rounding_divide_by_pow2(asymm_int_mult(acc, output_multiplier), output_shift);
     acc += output_offset;
-    acc = std::max<int32_t>(acc, 0);
-    acc = std::min<int32_t>(acc, 255);
+    acc = clamp<int32_t>(acc, 0, 255);
 
     // Store the result
     *out_ptr = acc;
