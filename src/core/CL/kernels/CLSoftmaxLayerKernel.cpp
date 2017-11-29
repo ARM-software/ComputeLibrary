@@ -78,74 +78,10 @@ CLBuildOptions prepare_quantized_softmax_build_options(float input_scale, float 
 
     return build_opts;
 }
-} // namespace
 
-void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+// Arguments Validation
 
-    // Softmax across the x dimension
-    TensorShape output_shape{ input->info()->tensor_shape() };
-    output_shape.set(0, 1);
-
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(),
-                       output_shape,
-                       1,
-                       input->info()->data_type(),
-                       input->info()->fixed_point_position(),
-                       input->info()->quantization_info());
-
-    // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(CLLogits1DMaxKernel::validate(input->info(), output->info()));
-
-    _input  = input;
-    _output = output;
-
-    const DataType data_type = input->info()->data_type();
-    // The kernel loops over all elements in steps of 16
-    const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 16);
-
-    // Set build options
-    CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
-    build_opts.add_option_if(is_data_type_fixed_point(data_type),
-                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
-    build_opts.add_option_if(data_type == DataType::F16, "-DUSE_F16");
-    // Tell the kernel that the width is not a multiple of 16
-    build_opts.add_option_if((input->info()->dimension(0) % max_cl_vector_width) != 0, "-DNON_MULTIPLE_OF_16");
-
-    // Create kernel
-    std::string kernel_name = is_data_type_quantized_asymmetric(data_type) ? "softmax_layer_max_quantized" : "softmax_layer_max";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
-
-    // Set fixed arguments
-    unsigned int idx = 2 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
-    _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
-
-    // Configure kernel window
-    constexpr unsigned int num_elems_written_per_iteration = 1;
-
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
-
-    update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-    ICLKernel::configure(win);
-
-    // Set config_id for enabling LWS tuning
-    _config_id = "softmax_layer_";
-    _config_id += lower_string(string_from_data_type(data_type));
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(0));
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(input->info()->dimension(1));
-}
-
-Error CLLogits1DMaxKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Error validate_arguments_1DMax(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
@@ -165,74 +101,7 @@ Error CLLogits1DMaxKernel::validate(const ITensorInfo *input, const ITensorInfo 
     return Error{};
 }
 
-CLLogits1DShiftExpSumKernel::CLLogits1DShiftExpSumKernel()
-    : _input(nullptr), _max(nullptr), _output(nullptr), _sum(nullptr)
-{
-}
-
-void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum, float beta)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, sum, output);
-
-    const bool     is_quantized_asymmetric = is_data_type_quantized_asymmetric(input->info()->data_type());
-    const DataType tmp_data_type           = is_quantized_asymmetric ? DataType::S32 : input->info()->data_type();
-
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, tmp_data_type, input->info()->fixed_point_position());
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, tmp_data_type, input->info()->fixed_point_position());
-
-    // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(CLLogits1DShiftExpSumKernel::validate(input->info(), max->info(), output->info(), sum->info()));
-
-    _input  = input;
-    _max    = max;
-    _output = output;
-    _sum    = sum;
-
-    const DataType dt       = input->info()->data_type();
-    auto           beta_int = static_cast<int>(lround(beta * (1 << input->info()->fixed_point_position())));
-
-    // The kernel loops over all elements in steps of 16
-    const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->info()->dimension(0), 16);
-
-    // Set build options
-    CLBuildOptions build_opts;
-    build_opts.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
-    build_opts.add_option_if(is_data_type_fixed_point(dt),
-                             std::string("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
-    build_opts.add_option_if(dt == DataType::F16, std::string("-DUSE_F16"));
-    // Tell the kernel that the width is not a multiple of 16
-    build_opts.add_option_if((input->info()->dimension(0) % max_cl_vector_width) != 0, std::string("-DNON_MULTIPLE_OF_16"));
-    build_opts.add_option_if(is_data_type_fixed_point(dt) && (beta != 1.0f), std::string("-DBETA=" + support::cpp11::to_string(beta_int)));
-    build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), std::string("-DBETA=" + float_to_string_with_full_precision(beta)));
-    build_opts.add_options_if(is_quantized_asymmetric,
-                              prepare_quantized_softmax_build_options(input->info()->quantization_info().scale, beta).options());
-
-    // Create kernel
-    std::string kernel_name = is_quantized_asymmetric ? "softmax_layer_shift_exp_sum_quantized" : "softmax_layer_shift_exp_sum";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
-
-    // Set fixed arguments
-    unsigned int idx = 4 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
-    _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
-
-    // Configure window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal max_access(max->info(), 0, 1);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal sum_access(sum->info(), 0, 1);
-
-    update_window_and_padding(win, input_access, max_access, output_access, sum_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
-    sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->info()->tensor_shape()));
-
-    ICLKernel::configure(win);
-}
-
-Error CLLogits1DShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
+Error validate_arguments_1DShiftExpSum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(max, sum, output);
@@ -268,6 +137,289 @@ Error CLLogits1DShiftExpSumKernel::validate(const ITensorInfo *input, const ITen
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(max, sum);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(max, sum);
     }
+
+    return Error{};
+}
+
+Error validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(max, sum, output);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, max);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, max);
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
+    }
+
+    // Checks performed when sum is configured
+    if(sum->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(max, sum);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(max, sum);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(max, sum);
+    }
+
+    return Error{};
+}
+
+Error validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(sum, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, sum);
+
+    // Note: output should always have a scale of 1/256 and offset 0
+    const QuantizationInfo allowed_quantization_info = QuantizationInfo(1.f / 256, 0);
+    const bool             is_quantized_asymmetric   = (input->data_type() == DataType::S32);
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
+        if(!is_quantized_asymmetric)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+            ARM_COMPUTE_RETURN_ERROR_ON(output->quantization_info() != allowed_quantization_info);
+        }
+    }
+
+    return Error{};
+}
+
+// Window validation
+
+std::pair<Error, Window> validate_and_configure_window_1DMax(ITensorInfo *input, ITensorInfo *output)
+{
+    TensorShape output_shape{ input->tensor_shape() };
+    output_shape.set(0, 1);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
+
+    // The kernel loops over all elements in steps of 16
+    const unsigned int     num_elems_processed_per_iteration = ceil_to_multiple(input->dimension(0), 16);
+    constexpr unsigned int num_elems_written_per_iteration   = 1;
+
+    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, num_elems_written_per_iteration);
+
+    bool window_changed = update_window_and_padding(win, input_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+
+std::pair<Error, Window> validate_and_configure_window_1DShiftExpSum(ITensorInfo *input, ITensorInfo *max, ITensorInfo *output, ITensorInfo *sum)
+{
+    const bool     is_quantized_asymmetric = is_data_type_quantized_asymmetric(input->data_type());
+    const DataType tmp_data_type           = is_quantized_asymmetric ? DataType::S32 : input->data_type();
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*sum, max->clone()->set_data_type(tmp_data_type).set_fixed_point_position(input->fixed_point_position()));
+    auto_init_if_empty(*output, input->clone()->set_data_type(tmp_data_type));
+
+    // The kernel loops over all elements in steps of 16
+    const unsigned int num_elems_processed_per_iteration = ceil_to_multiple(input->dimension(0), 16);
+
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal max_access(max, 0, 1);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal sum_access(sum, 0, 1);
+
+    bool window_changed = update_window_and_padding(win, input_access, max_access, output_access, sum_access);
+
+    output_access.set_valid_region(win, input->valid_region());
+    sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->tensor_shape()));
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+
+std::pair<Error, Window> validate_and_configure_window_1DMaxShiftExpSum(ITensorInfo *input, ITensorInfo *max, ITensorInfo *output, ITensorInfo *sum)
+{
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*sum, input->clone()->set_tensor_shape(max->tensor_shape()));
+    auto_init_if_empty(*output, *input->clone());
+
+    CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo parallel_reduction_info = CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(input->dimension(0));
+    unsigned int                                          vector_size             = std::get<1>(parallel_reduction_info);
+    const unsigned int                                    num_elems_x             = ceil_to_multiple(input->tensor_shape().x(), vector_size);
+    Window                                                win                     = calculate_max_window(*input, Steps(num_elems_x));
+
+    AccessWindowHorizontal input_access(input, 0, num_elems_x);
+    AccessWindowHorizontal max_access(max, 0, 1);
+    AccessWindowHorizontal output_access(output, 0, num_elems_x);
+    AccessWindowHorizontal sum_access(sum, 0, 1);
+
+    bool window_changed = update_window_and_padding(win, input_access, max_access, output_access, sum_access);
+
+    output_access.set_valid_region(win, input->valid_region());
+    sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->tensor_shape()));
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+
+std::pair<Error, Window> validate_and_configure_window_1DNorm(ITensorInfo *input, ITensorInfo *output, ITensorInfo *sum)
+{
+    const QuantizationInfo allowed_quantization_info = QuantizationInfo(1.f / 256, 0);
+    const bool             is_quantized_asymmetric   = (input->data_type() == DataType::S32);
+    const DataType         output_data_type          = is_quantized_asymmetric ? DataType::QASYMM8 : input->data_type();
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output,
+                       input->clone()->set_data_type(output_data_type).set_quantization_info(allowed_quantization_info));
+
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowStatic     sum_access(sum, 0, 0, 1, sum->dimension(1));
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+
+    bool window_changed = update_window_and_padding(win, input_access, sum_access, output_access);
+
+    output_access.set_valid_region(win, input->valid_region());
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+
+} // namespace
+
+void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    TensorShape output_shape{ input->info()->tensor_shape() };
+    output_shape.set(0, 1);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DMax(input->info(), output->info()));
+
+    _input  = input;
+    _output = output;
+
+    const DataType data_type = input->info()->data_type();
+
+    // Set build options
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option_if(is_data_type_fixed_point(data_type),
+                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    build_opts.add_option_if(data_type == DataType::F16, "-DUSE_F16");
+    // Tell the kernel that the width is not a multiple of 16
+    build_opts.add_option_if((input->info()->dimension(0) % max_cl_vector_width) != 0, "-DNON_MULTIPLE_OF_16");
+
+    // Create kernel
+    std::string kernel_name = is_data_type_quantized_asymmetric(data_type) ? "softmax_layer_max_quantized" : "softmax_layer_max";
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+
+    // Set fixed arguments
+    unsigned int idx = 2 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
+    _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
+
+    // Configure kernel window
+    auto win_config = validate_and_configure_window_1DMax(input->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "softmax_layer_";
+    _config_id += lower_string(string_from_data_type(data_type));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+}
+
+Error CLLogits1DMaxKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DMax(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DMax(input->clone().get(), output->clone().get()).first);
+
+    return Error{};
+}
+
+CLLogits1DShiftExpSumKernel::CLLogits1DShiftExpSumKernel()
+    : _input(nullptr), _max(nullptr), _output(nullptr), _sum(nullptr)
+{
+}
+
+void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum, float beta)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, sum, output);
+
+    const bool     is_quantized_asymmetric = is_data_type_quantized_asymmetric(input->info()->data_type());
+    const DataType tmp_data_type           = is_quantized_asymmetric ? DataType::S32 : input->info()->data_type();
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*sum->info(), max->info()->clone()->set_data_type(tmp_data_type).set_fixed_point_position(input->info()->fixed_point_position()));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(tmp_data_type));
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DShiftExpSum(input->info(), max->info(), output->info(), sum->info()));
+
+    _input  = input;
+    _max    = max;
+    _output = output;
+    _sum    = sum;
+
+    const DataType dt       = input->info()->data_type();
+    auto           beta_int = static_cast<int>(lround(beta * (1 << input->info()->fixed_point_position())));
+
+    // Set build options
+    CLBuildOptions build_opts;
+    build_opts.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
+    build_opts.add_option_if(is_data_type_fixed_point(dt),
+                             std::string("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
+    build_opts.add_option_if(dt == DataType::F16, std::string("-DUSE_F16"));
+    // Tell the kernel that the width is not a multiple of 16
+    build_opts.add_option_if((input->info()->dimension(0) % max_cl_vector_width) != 0, std::string("-DNON_MULTIPLE_OF_16"));
+    build_opts.add_option_if(is_data_type_fixed_point(dt) && (beta != 1.0f), std::string("-DBETA=" + support::cpp11::to_string(beta_int)));
+    build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), std::string("-DBETA=" + float_to_string_with_full_precision(beta)));
+    build_opts.add_options_if(is_quantized_asymmetric,
+                              prepare_quantized_softmax_build_options(input->info()->quantization_info().scale, beta).options());
+
+    // Create kernel
+    std::string kernel_name = is_quantized_asymmetric ? "softmax_layer_shift_exp_sum_quantized" : "softmax_layer_shift_exp_sum";
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+
+    // Set fixed arguments
+    unsigned int idx = 4 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
+    _kernel.setArg<cl_uint>(idx++, input->info()->dimension(0));
+
+    // Configure window
+    auto win_config = validate_and_configure_window_1DShiftExpSum(input->info(), max->info(), output->info(), sum->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
+}
+
+Error CLLogits1DShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DShiftExpSum(input, max, output, sum));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DShiftExpSum(input->clone().get(), max->clone().get(), output->clone().get(), sum->clone().get()).first);
 
     return Error{};
 }
@@ -310,11 +462,11 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, sum, output);
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*sum->info(), input->info()->clone()->set_tensor_shape(max->info()->tensor_shape()));
+    auto_init_if_empty(*output->info(), *input->info()->clone());
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(CLLogits1DMaxShiftExpSumKernel::validate(input->info(), max->info(), output->info(), sum->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DMaxShiftExpSum(input->info(), max->info(), output->info(), sum->info()));
 
     _input  = input;
     _max    = max;
@@ -366,45 +518,15 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
     _kernel.setArg<cl_uint>(idx++, reduction_dim_size);
 
     // Configure window
-    const unsigned int num_elems_x = ceil_to_multiple(input->info()->tensor_shape().x(), vector_size);
-    Window             win         = calculate_max_window(*input->info(), Steps(num_elems_x));
-
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_x);
-    AccessWindowHorizontal max_access(max->info(), 0, 1);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_x);
-    AccessWindowHorizontal sum_access(sum->info(), 0, 1);
-
-    update_window_and_padding(win, input_access, max_access, output_access, sum_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
-    sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->info()->tensor_shape()));
-
-    ICLKernel::configure(win);
+    auto win_config = validate_and_configure_window_1DMaxShiftExpSum(input->info(), max->info(), output->info(), sum->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
 }
 
 Error CLLogits1DMaxShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(max, sum, output);
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, max);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, max);
-
-    // Checks performed when output is configured
-    if(output->total_size() != 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
-    }
-
-    // Checks performed when sum is configured
-    if(sum->total_size() != 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(max, sum);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(max, sum);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(max, sum);
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DMaxShiftExpSum(input, max, output, sum));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DMaxShiftExpSum(input->clone().get(), max->clone().get(), output->clone().get(), sum->clone().get()).first);
 
     return Error{};
 }
@@ -467,7 +589,7 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
                        input->info()->clone()->set_data_type(output_data_type).set_quantization_info(allowed_quantization_info));
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(CLLogits1DNormKernel::validate(input->info(), sum->info(), output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DNorm(input->info(), sum->info(), output->info()));
 
     _input  = input;
     _sum    = sum;
@@ -486,47 +608,15 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure window
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowStatic     sum_access(sum->info(), 0, 0, 1, sum->info()->dimension(1));
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-
-    update_window_and_padding(win, input_access, sum_access, output_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
-
-    ICLKernel::configure(win);
+    auto win_config = validate_and_configure_window_1DNorm(input->info(), output->info(), sum->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
 }
 
 Error CLLogits1DNormKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::S32, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(sum, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, sum);
-
-    // Note: output should always have a scale of 1/256 and offset 0
-    const QuantizationInfo allowed_quantization_info = QuantizationInfo(1.f / 256, 0);
-    const bool             is_quantized_asymmetric   = (input->data_type() == DataType::S32);
-
-    // Checks performed when output is configured
-    if(output->total_size() != 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
-        if(!is_quantized_asymmetric)
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
-            ARM_COMPUTE_RETURN_ERROR_ON(output->quantization_info() != allowed_quantization_info);
-        }
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DNorm(input, sum, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DNorm(input->clone().get(), output->clone().get(), sum->clone().get()).first);
 
     return Error{};
 }

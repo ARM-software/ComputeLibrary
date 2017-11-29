@@ -52,7 +52,7 @@ void auto_init(const ITensorInfo *input, ITensorInfo *output, unsigned int poole
     output_shape.set(0, pooled_w);
     output_shape.set(1, pooled_h);
 
-    auto_init_if_empty(*output, output_shape, 1, input->data_type(), input->fixed_point_position(), input->quantization_info());
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
 }
 
 Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
