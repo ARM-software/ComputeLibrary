@@ -137,6 +137,7 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
     const int input_width   = src.shape().x();
     const int input_height  = src.shape().y();
     const int input_depth   = src.shape().z();
+    const int num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
 
     const int filter_half_size = filter_width / 2;
     const int pad_x            = std::min(filter_half_size, static_cast<int>(conv_info.pad().first));
@@ -145,37 +146,40 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
     const int minimum_y        = -pad_y + filter_half_size;
 
     int out_pos = 0;
-    for(int z = 0; z < input_depth; ++z)
+    for(int r = 0; r < num_batches; ++r)
     {
-        int32_t bias_val = *static_cast<const int32_t *>(biases(Coordinates(z)));
-        for(int y = minimum_y; y < input_height + pad_y - filter_half_size; y += conv_info.stride().second)
+        for(int z = 0; z < input_depth; ++z)
         {
-            for(int x = minimum_x; x < input_width + pad_x - filter_half_size; x += conv_info.stride().first)
+            int32_t bias_val = *static_cast<const int32_t *>(biases(Coordinates(z)));
+            for(int y = minimum_y; y < input_height + pad_y - filter_half_size; y += conv_info.stride().second)
             {
-                Coordinates coords(x, y, z);
-                int         filter_offset = filter_plane * z;
-
-                uint32_t val = 0;
-                for(int j = y - filter_half_size; j <= (y + filter_half_size); ++j)
+                for(int x = minimum_x; x < input_width + pad_x - filter_half_size; x += conv_info.stride().first)
                 {
-                    for(int i = x - filter_half_size; i <= (x + filter_half_size); ++i)
-                    {
-                        coords.set(0, i);
-                        coords.set(1, j);
-                        auto    in_val = tensor_elem_at<uint8_t>(src, coords, BorderMode::CONSTANT, 0);
-                        uint8_t w_val  = *(weights.data() + filter_offset);
-                        val += (in_val + input_offset) * (w_val + weights_offset);
-                        ++filter_offset;
-                    }
-                }
-                val += bias_val;
-                val = asymm_rounding_divide_by_pow2(asymm_int_mult(val, output_multiplier), output_shift);
-                val += output_offset;
-                val = std::max<int32_t>(val, 0);
-                val = std::min<int32_t>(val, 255);
+                    Coordinates coords(x, y, z);
+                    int         filter_offset = filter_plane * z;
 
-                // Store the result
-                dst[out_pos++] = val;
+                    uint32_t val = 0;
+                    for(int j = y - filter_half_size; j <= (y + filter_half_size); ++j)
+                    {
+                        for(int i = x - filter_half_size; i <= (x + filter_half_size); ++i)
+                        {
+                            coords.set(0, i);
+                            coords.set(1, j);
+                            auto    in_val = tensor_elem_at<uint8_t>(src, coords, BorderMode::CONSTANT, 0);
+                            uint8_t w_val  = *(weights.data() + filter_offset);
+                            val += (in_val + input_offset) * (w_val + weights_offset);
+                            ++filter_offset;
+                        }
+                    }
+                    val += bias_val;
+                    val = asymm_rounding_divide_by_pow2(asymm_int_mult(val, output_multiplier), output_shift);
+                    val += output_offset;
+                    val = std::max<int32_t>(val, 0);
+                    val = std::min<int32_t>(val, 255);
+
+                    // Store the result
+                    dst[out_pos++] = val;
+                }
             }
         }
     }

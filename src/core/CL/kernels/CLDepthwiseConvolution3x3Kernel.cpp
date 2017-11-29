@@ -137,14 +137,16 @@ void CLDepthwiseConvolution3x3Kernel::run(const Window &window, cl::CommandQueue
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    Window slice_in      = window.first_slice_window_3D();
+    // Create input window and adjust
+    Window win_in = window;
+    win_in.adjust(Window::DimX, -_conv_pad_left, true);
+    win_in.adjust(Window::DimY, -_conv_pad_top, true);
+    win_in.set_dimension_step(Window::DimX, window.x().step() * _conv_stride_x);
+    win_in.set_dimension_step(Window::DimY, window.y().step() * _conv_stride_y);
+
+    Window slice_in      = win_in.first_slice_window_3D();
     Window slice_out     = window.first_slice_window_3D();
     Window slice_weights = window.first_slice_window_3D();
-
-    slice_in.adjust(Window::DimX, -_conv_pad_left, true);
-    slice_in.adjust(Window::DimY, -_conv_pad_top, true);
-    slice_in.set_dimension_step(Window::DimX, window.x().step() * _conv_stride_x);
-    slice_in.set_dimension_step(Window::DimY, window.y().step() * _conv_stride_y);
     slice_weights.set_dimension_step(Window::DimX, 0);
     slice_weights.set_dimension_step(Window::DimY, 0);
 
@@ -166,5 +168,5 @@ void CLDepthwiseConvolution3x3Kernel::run(const Window &window, cl::CommandQueue
 
         enqueue(queue, *this, slice_out);
     }
-    while(window.slide_window_slice_3D(slice_out));
+    while(window.slide_window_slice_3D(slice_out) && win_in.slide_window_slice_3D(slice_in));
 }
