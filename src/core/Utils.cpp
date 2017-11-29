@@ -390,34 +390,3 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
     }
     return 0;
 }
-
-int arm_compute::round(float x, RoundingPolicy rounding_policy)
-{
-    using namespace std;
-    int rounded = 0;
-    switch(rounding_policy)
-    {
-        case RoundingPolicy::TO_ZERO:
-        {
-            rounded = static_cast<int>(x);
-            break;
-        }
-        case RoundingPolicy::TO_NEAREST_UP:
-        {
-            rounded = static_cast<int>(support::cpp11::round(x));
-            break;
-        }
-        case RoundingPolicy::TO_NEAREST_EVEN:
-        {
-            ARM_COMPUTE_ERROR("TO_NEAREST_EVEN rounding policy is not supported.");
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Unsupported rounding policy.");
-            break;
-        }
-    }
-
-    return rounded;
-}

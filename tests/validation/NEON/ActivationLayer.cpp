@@ -209,7 +209,7 @@ TEST_SUITE_END()
 template <typename T>
 using NEActivationLayerFixedPointFixture = ActivationValidationFixedPointFixture<Tensor, Accessor, NEActivationLayer, T>;
 
-TEST_SUITE(Quantized)
+TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // We test for fixed point precision [3,5] because [1,2] and [6,7] ranges cause
 // overflowing issues in most of the transcendentals functions.
@@ -245,6 +245,34 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixedPointFixture<int16_t>, fr
                                                                                                                        framework::dataset::make("DataType",
                                                                                                                                DataType::QS16)),
                                                                                                                        framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using NEActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<Tensor, Accessor, NEActivationLayer, T>;
+
+/** Input data sets. */
+const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU })),
+                                                framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::QASYMM8)),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), QuantizedActivationDataset),
+                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                              DataType::QASYMM8)),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance(_data_type, _function));

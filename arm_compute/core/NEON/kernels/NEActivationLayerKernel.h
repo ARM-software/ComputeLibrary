@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/QAsymm8.h"
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #include <arm_fp16.h>
@@ -100,6 +101,12 @@ private:
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, qint8_t>::value, void>::type activation(const Window &window);
+    /** Function to apply an activation function on a tensor.
+     *
+     * @param[in] window Region on which to execute the kernel
+     */
+    template <ActivationLayerInfo::ActivationFunction F, typename T>
+    typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type activation(const Window &window);
     /** Function to apply an activation function on a tensor.
      *
      * @param[in] window Region on which to execute the kernel

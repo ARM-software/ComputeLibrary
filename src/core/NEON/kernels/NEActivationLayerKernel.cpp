@@ -26,8 +26,10 @@
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/NEMath.h"
+#include "arm_compute/core/QAsymm8.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -44,7 +46,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
@@ -106,6 +108,9 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     }
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr));
+
+    ARM_COMPUTE_ERROR_ON_MSG((input->info()->data_type() == DataType::QASYMM8) && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
+                             "For QASYMM8 only lower/upper bounded relu is supported");
 
     // Activation functions : FP32
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f32 =
@@ -170,9 +175,17 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, qint16_t> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qint16_t> },
     };
+    // Activation functions : QASYMM8
+    static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qasymm8 =
+    {
+        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qasymm8_t> },
+    };
 
     switch(input->info()->data_type())
     {
+        case DataType::QASYMM8:
+            _func = act_map_qasymm8[activation_info.activation()];
+            break;
         case DataType::QS8:
             _func = act_map_qs8[activation_info.activation()];
             break;
@@ -541,6 +554,47 @@ typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivation
         }
 
         vst1q_qs8(output_ptr, tmp);
+    },
+    input, output);
+}
+
+template <ActivationLayerInfo::ActivationFunction F, typename T>
+typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
+{
+    Iterator               input(_input, window);
+    Iterator               output(_output, window);
+    const QuantizationInfo qi_in  = _input->info()->quantization_info();
+    const QuantizationInfo qi_out = _output->info()->quantization_info();
+    const qasymm8x16_t     a      = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset));
+    const qasymm8x16_t     b      = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset));
+    // Initialise scale/offset for re-quantization
+    float       s  = qi_in.scale / qi_out.scale;
+    float       o  = -qi_in.offset * s + qi_out.offset;
+    float32x4_t vs = vdupq_n_f32(s);
+    float32x4_t vo = vdupq_n_f32(o);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const auto input_ptr  = reinterpret_cast<const qasymm8_t *>(input.ptr());
+        const auto output_ptr = reinterpret_cast<qasymm8_t *>(output.ptr());
+
+        const qasymm8x16_t in  = vld1q_u8(input_ptr);
+        qasymm8x16_t       tmp = {};
+
+        switch(F)
+        {
+            case ActivationFunction::LU_BOUNDED_RELU:
+                // Perform activation
+                tmp = vminq_u8(a, vmaxq_u8(b, in));
+                // Re-quantize to new output space
+                tmp = vmlaq_qasymm8(tmp, vs, vo);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Function not implemented");
+                break;
+        }
+
+        vst1q_u8(output_ptr, tmp);
     },
     input, output);
 }

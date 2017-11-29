@@ -30,4 +30,38 @@ inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent)
     const int32x4_t fixed_up_x = vqaddq_s32(x, fixup);
     return vrshlq_s32(fixed_up_x, shift_vec);
 }
+
+inline qasymm8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t vo)
+{
+    // Convert uint8 vectors to uint16 vectors
+    const uint8x8_t vd_low        = vget_low_u8(vd);
+    const uint8x8_t vd_high       = vget_high_u8(vd);
+    uint16x8_t      vd_low_u16x8  = vmovl_u8(vd_low);
+    uint16x8_t      vd_high_u16x8 = vmovl_u8(vd_high);
+    // Convert uint16 vectors to uint32 vectors
+    uint32x4_t A_u32x4 = vmovl_u16(vget_low_u16(vd_low_u16x8));
+    uint32x4_t B_u32x4 = vmovl_u16(vget_high_u16(vd_low_u16x8));
+    uint32x4_t C_u32x4 = vmovl_u16(vget_low_u16(vd_high_u16x8));
+    uint32x4_t D_u32x4 = vmovl_u16(vget_high_u16(vd_high_u16x8));
+    // Convert uint32 vectors to float32 vectors
+    float32x4_t A_f32x4 = vcvtq_f32_u32(A_u32x4);
+    float32x4_t B_f32x4 = vcvtq_f32_u32(B_u32x4);
+    float32x4_t C_f32x4 = vcvtq_f32_u32(C_u32x4);
+    float32x4_t D_f32x4 = vcvtq_f32_u32(D_u32x4);
+    // vd = vd*vs + vo
+    A_f32x4 = vmlaq_f32(vo, A_f32x4, vs);
+    B_f32x4 = vmlaq_f32(vo, B_f32x4, vs);
+    C_f32x4 = vmlaq_f32(vo, C_f32x4, vs);
+    D_f32x4 = vmlaq_f32(vo, D_f32x4, vs);
+    // Convert float32 vectors to uint32 vectors
+    A_u32x4 = vcvtq_u32_f32(A_f32x4);
+    B_u32x4 = vcvtq_u32_f32(B_f32x4);
+    C_u32x4 = vcvtq_u32_f32(C_f32x4);
+    D_u32x4 = vcvtq_u32_f32(D_f32x4);
+    // Convert uint32 vectors to uint16 vectors (with saturation)
+    vd_low_u16x8  = vcombine_u16(vqmovn_u32(A_u32x4), vqmovn_u32(B_u32x4));
+    vd_high_u16x8 = vcombine_u16(vqmovn_u32(C_u32x4), vqmovn_u32(D_u32x4));
+    // convert uint16 vectors to uint8 vectors (with saturation)
+    return vcombine_u8(vqmovn_u16(vd_low_u16x8), vqmovn_u16(vd_high_u16x8));
+}
 } // namespace arm_compute
