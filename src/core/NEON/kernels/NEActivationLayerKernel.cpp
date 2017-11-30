@@ -39,6 +39,51 @@
 #include <map>
 
 using namespace arm_compute;
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+
+    // Checks performed when output is configured
+    if((output != nullptr) && (output->total_size() != 0))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+{
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    Window                 win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    bool                   window_changed                    = false;
+
+    if(output != nullptr && (output->total_size() != 0))
+    {
+        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+
+        window_changed = update_window_and_padding(win,
+                                                   AccessWindowHorizontal(input, 0, num_elems_processed_per_iteration),
+                                                   output_access);
+
+        output_access.set_valid_region(win, input->valid_region());
+    }
+    else
+    {
+        // In-place computation
+        window_changed = update_window_and_padding(win,
+                                                   AccessWindowHorizontal(input, 0, num_elems_processed_per_iteration));
+    }
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
 
 NEActivationLayerKernel::NEActivationLayerKernel()
     : _input(nullptr), _output(nullptr), _func(nullptr), _act_info(ActivationFunction::LOGISTIC)
@@ -47,7 +92,7 @@ NEActivationLayerKernel::NEActivationLayerKernel()
 
 void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
     _input    = input;
     _act_info = activation_info;
@@ -56,14 +101,11 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     if(output != nullptr)
     {
         // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
-
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-
+        auto_init_if_empty(*output->info(), *input->info()->clone());
         _output = output;
     }
+
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr));
 
     // Activation functions : FP32
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f32 =
@@ -149,29 +191,10 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
             ARM_COMPUTE_ERROR("Unsupported data type.");
     }
 
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
-    if(output != nullptr)
-    {
-        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-
-        update_window_and_padding(win,
-                                  AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
-                                  output_access);
-
-        output_access.set_valid_region(win, input->info()->valid_region());
-    }
-    else
-    {
-        // In-place computation
-        update_window_and_padding(win,
-                                  AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
-    }
-
-    ICPPKernel::configure(win);
+    auto win_config = validate_and_configure_window(input->info(), (output != nullptr) ? output->info() : nullptr);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICPPKernel::configure(win_config.second);
 }
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -651,6 +674,15 @@ typename std::enable_if<std::is_same<T, qint16_t>::value, void>::type NEActivati
         vst2q_qs16(output_ptr, tmp);
     },
     input, output);
+}
+
+Status NEActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (output != nullptr) ? output->clone().get() : nullptr).first);
+
+    return Status{};
 }
 
 void NEActivationLayerKernel::run(const Window &window, const ThreadInfo &info)

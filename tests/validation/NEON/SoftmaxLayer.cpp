@@ -93,6 +93,28 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     validate(dst.info()->padding(), padding);
 }
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching shapes
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2), // Mismatching fixed point
+                                            TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
+                                           }),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                            TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
+                                          })),
+    framework::dataset::make("Expected", { false, false, false, true })),
+    input_info, output_info, expected)
+{
+    bool is_valid = bool(NESoftmaxLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false)));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using NESoftmaxLayerFixture = SoftmaxValidationFixture<Tensor, Accessor, NESoftmaxLayer, T>;
 

@@ -66,6 +66,48 @@ TEST_SUITE(PoolingLayer)
 
 //TODO(COMPMID-415): Configuration tests?
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Mismatching data type
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Window shrink
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4),     // Mismatching fixed point position
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS16, 11),   // Window shrink
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
+                                            TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32, 0),     // Non-rectangular Global Pooling
+                                            TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0),     // Invalid output Global Pooling
+                                            TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0),
+                                          }),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0),
+                                            TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::QS8, 5),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::QS16, 11),
+                                            TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(2U, 2U, 5U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 0),
+                                          })),
+    framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 2, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 0, 2)),
+                                            PoolingLayerInfo(PoolingType::AVG),
+                                            PoolingLayerInfo(PoolingType::MAX),
+                                            PoolingLayerInfo(PoolingType::AVG),
+                                           })),
+    framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, true })),
+    input_info, output_info, pool_info, expected)
+{
+    bool is_valid = bool(NEPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using NEPoolingLayerFixture = PoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, T>;
 

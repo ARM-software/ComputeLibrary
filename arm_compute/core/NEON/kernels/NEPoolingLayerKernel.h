@@ -55,6 +55,17 @@ public:
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(const ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEPoolingLayerKernel
+     *
+     * @note QS8, QS16 and F16 are supported for pool sizes 2 and 3 only
+     *
+     * @param[in] input     Source tensor. Data types supported: QS8/QS16/F16/F32.
+     * @param[in] output    Destination tensor. Data types supported: Same as @p input.
+     * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -144,7 +155,7 @@ private:
     const ITensor   *_input;
     ITensor         *_output;
     PoolingLayerInfo _pool_info;
-    int              _num_elems_processed_per_iteration;
+    unsigned int     _num_elems_processed_per_iteration;
     BorderSize       _border_size;
 };
 } // namespace arm_compute

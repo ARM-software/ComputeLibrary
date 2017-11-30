@@ -56,6 +56,15 @@ public:
      * @param[in]  beta   (Optional) A scaling factor for the exponent. QS8/QS16 only support a beta value of 1.
      */
     void configure(ITensor *input, ITensor *output, float beta = 1.0f);
+    /** Static function to check if given info will lead to a valid configuration of @ref NESoftmaxLayer
+     *
+     * @param[in] input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[in] output Destination tensor. Data types supported: same as @p input
+     * @param[in] beta   (Optional) A scaling factor for the exponent. QS8/QS16 only support a beta value of 1.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f);
 
     // Inherited methods overridden:
     void run() override;

@@ -85,6 +85,30 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
     _input_border_handler.configure(input, _conv_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
 }
 
+Status NEDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &conv_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, bias, output);
+
+    DataType data_type = output->data_type();
+    if(is_data_type_fixed_point(data_type))
+    {
+        // Promote data type in case of fixed point
+        data_type = ((data_type == DataType::QS8) ? DataType::QS16 : DataType::QS32);
+    }
+    TensorInfo accumulator(output->clone()->set_is_resizable(true).reset_padding().set_data_type(data_type));
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, bias);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(bias->dimension(0) != weights->dimension(3),
+                                    "Biases size and number of input feature maps should match");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(bias->num_dimensions() > 1,
+                                    "Biases should be one dimensional");
+
+    ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerKernel::validate(input, weights, &accumulator, conv_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerBiasAccumulateKernel::validate(&accumulator, bias, output));
+
+    return Status{};
+}
+
 void NEDirectConvolutionLayer::run()
 {
     NEScheduler::get().schedule(&_input_border_handler, Window::DimZ);

@@ -39,7 +39,7 @@ NENormalizationLayer::NENormalizationLayer(std::shared_ptr<IMemoryManager> memor
 
 void NENormalizationLayer::configure(const ITensor *input, ITensor *output, const NormalizationLayerInfo &norm_info)
 {
-    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     TensorInfo tensor_info(input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
     _input_squared.allocator()->init(tensor_info);
@@ -54,6 +54,17 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, cons
 
     // Allocate the tensor once the configure methods have been called
     _input_squared.allocator()->allocate();
+}
+
+Status NENormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)
+{
+    // Perform validation step
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+
+    ARM_COMPUTE_RETURN_ON_ERROR(NENormalizationLayerKernel::validate(input, input, output, norm_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(input, input, output, 1.0f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+
+    return Status{};
 }
 
 void NENormalizationLayer::run()

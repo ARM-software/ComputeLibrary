@@ -137,6 +137,36 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
     }
 }
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),  // Mismatching fixed point
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                          }),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                            TensorInfo(),
+                                          })),
+    framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                               })),
+    framework::dataset::make("Expected", { false, true, false, false, true })),
+    input_info, output_info, act_info, expected)
+{
+    bool is_valid = bool(NEActivationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), act_info));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using NEActivationLayerFixture = ActivationValidationFixture<Tensor, Accessor, NEActivationLayer, T>;
 

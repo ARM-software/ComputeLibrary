@@ -36,7 +36,6 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "support/ToolchainSupport.h"
 
 #include <cmath>

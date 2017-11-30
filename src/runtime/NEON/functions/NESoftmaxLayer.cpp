@@ -38,7 +38,7 @@ NESoftmaxLayer::NESoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
 
 void NESoftmaxLayer::configure(ITensor *input, ITensor *output, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Create intermediate tensors shapes
     TensorInfo tensor_info_tmp(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
@@ -65,6 +65,23 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output, float beta)
     _tmp.allocator()->allocate();
     _max.allocator()->allocate();
     _sum.allocator()->allocate();
+}
+
+Status NESoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float beta)
+{
+    // Perform validation step
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+
+    TensorShape max_sum_shape = input->tensor_shape();
+    max_sum_shape.set(0, 1);
+
+    TensorInfo tensor_info_max_sum(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(max_sum_shape));
+
+    ARM_COMPUTE_RETURN_ON_ERROR(NELogits1DMaxKernel::validate(input, &tensor_info_max_sum));
+    ARM_COMPUTE_RETURN_ON_ERROR(NELogits1DShiftExpSumKernel::validate(input, &tensor_info_max_sum, input, &tensor_info_max_sum, beta));
+    ARM_COMPUTE_RETURN_ON_ERROR(NELogits1DNormKernel::validate(input, &tensor_info_max_sum, output));
+
+    return Status{};
 }
 
 void NESoftmaxLayer::run()

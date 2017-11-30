@@ -34,6 +34,67 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *input_squared, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, input_squared, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, input_squared);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, input_squared);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
+
+    if(is_data_type_fixed_point(input->data_type()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, input_squared);
+        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.beta(), input);
+        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.kappa(), input);
+        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.scale_coeff(), input);
+    }
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *input_squared, ITensorInfo *output, const NormalizationLayerInfo &norm_info)
+{
+    unsigned int       num_elems_processed_per_iteration = 16 / input->element_size();
+    const unsigned int num_elems_read_per_iteration      = num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2);
+    const unsigned int num_rows                          = (norm_info.type() == NormType::IN_MAP_2D) ? norm_info.norm_size() : 1;
+    const unsigned int border_width                      = (norm_info.is_cross_map()) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
+    BorderSize         border_size                       = BorderSize(0, border_width);
+    bool               window_changed                    = false;
+
+    // Configure window
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowRectangle input_access(input, -border_size.left, 0, num_elems_read_per_iteration, num_rows);
+    AccessWindowRectangle input_squared_access(input_squared, -border_size.left, 0, num_elems_read_per_iteration, num_rows);
+
+    if(output->total_size() != 0)
+    {
+        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+        window_changed = update_window_and_padding(win, input_access, input_squared_access, output_access);
+        output_access.set_valid_region(win, input->valid_region());
+    }
+    else
+    {
+        window_changed = update_window_and_padding(win, input_access, input_squared_access);
+    }
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 NENormalizationLayerKernel::NENormalizationLayerKernel()
     : _func(nullptr), _input(nullptr), _input_squared(nullptr), _output(nullptr), _norm_info(NormType::IN_MAP_1D), _border_size()
 {
@@ -46,20 +107,12 @@ BorderSize NENormalizationLayerKernel::border_size() const
 
 void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *input_squared, ITensor *output, NormalizationLayerInfo norm_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, input_squared, output);
     // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, input_squared, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, input_squared, output);
-    ARM_COMPUTE_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, input_squared, output);
-        ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.beta(), input);
-        ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.kappa(), input);
-        ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.scale_coeff(), input);
-    }
+    auto_init_if_empty(*output->info(), *input->info());
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), input_squared->info(), output->info(), norm_info));
 
     const unsigned int border_width = (norm_info.is_cross_map()) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
 
@@ -69,14 +122,10 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     _norm_info     = norm_info;
     _border_size   = BorderSize(0, border_width);
 
-    unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
-    ARM_COMPUTE_UNUSED(num_elems_processed_per_iteration);
-
     switch(_input->info()->data_type())
     {
         case DataType::F32:
         {
-            num_elems_processed_per_iteration = 4;
             switch(norm_info.type())
             {
                 case NormType::IN_MAP_1D:
@@ -90,14 +139,12 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
                     _func = &NENormalizationLayerKernel::normalize_float<DataType::F32, 2, false>;
                     break;
                 default:
-                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
         }
         case DataType::F16:
         {
-            num_elems_processed_per_iteration = 8;
             switch(norm_info.type())
             {
                 case NormType::IN_MAP_1D:
@@ -111,14 +158,12 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
                     _func = &NENormalizationLayerKernel::normalize_float<DataType::F16, 2, false>;
                     break;
                 default:
-                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
         }
         case DataType::QS8:
         {
-            num_elems_processed_per_iteration = 16;
             switch(norm_info.type())
             {
                 case NormType::IN_MAP_1D:
@@ -132,14 +177,12 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
                     _func = &NENormalizationLayerKernel::normalize_fixed_point<DataType::QS8, 2, false>;
                     break;
                 default:
-                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
         }
         case DataType::QS16:
         {
-            num_elems_processed_per_iteration = 8;
             switch(norm_info.type())
             {
                 case NormType::IN_MAP_1D:
@@ -153,7 +196,6 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
                     _func = &NENormalizationLayerKernel::normalize_fixed_point<DataType::QS16, 2, false>;
                     break;
                 default:
-                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
@@ -162,21 +204,10 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
 
-    const unsigned int num_elems_read_per_iteration = num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2);
-    const unsigned int num_rows                     = (norm_info.type() == NormType::IN_MAP_2D) ? norm_info.norm_size() : 1;
-
-    // Configure window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
-    AccessWindowRectangle  input_access(input->info(), -_border_size.left, 0, num_elems_read_per_iteration, num_rows);
-    AccessWindowRectangle  input_squared_access(input_squared->info(), -_border_size.left, 0, num_elems_read_per_iteration, num_rows);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-
-    update_window_and_padding(win, input_access, input_squared_access, output_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
-
-    INEKernel::configure(win);
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), input_squared->info(), output->info(), norm_info);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
 }
 
 template <DataType dt, unsigned int dim, bool do_2D_norm>
@@ -372,6 +403,14 @@ void NENormalizationLayerKernel::normalize_fixed_point(const Window &window)
     {
         ARM_COMPUTE_ERROR("Not supported");
     }
+}
+
+Status NENormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *input_squared, const ITensorInfo *output, const NormalizationLayerInfo norm_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, input_squared, output, norm_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), input_squared->clone().get(), output->clone().get(), norm_info).first);
+
+    return Status{};
 }
 
 void NENormalizationLayerKernel::run(const Window &window, const ThreadInfo &info)

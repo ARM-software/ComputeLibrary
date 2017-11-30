@@ -55,11 +55,21 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                       and an optional 4th dimension for batch of inputs. Data type supported: QS8/F16/F32
+     *                       and an optional 4th dimension for batch of inputs. Data type supported: QS8/QS16/F16/F32
      * @param[out] output    Destination with the same dimensions, data type and number of channels of  @p input
      * @param[in]  norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */
     void configure(const ITensor *input, ITensor *output, const NormalizationLayerInfo &norm_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NENormalizationLayer
+     *
+     * @param[in] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
+     *                      and an optional 4th dimension for batch of inputs. Data type supported: QS8/QS16/F16/F32
+     * @param[in] output    Destination with the same dimensions, data type and number of channels of  @p input
+     * @param[in] norm_info Normalization layer information like the normalization type, normalization size and other parameters.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info);
 
     // Inherited methods overridden:
     void run() override;

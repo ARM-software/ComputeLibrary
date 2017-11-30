@@ -47,6 +47,15 @@ using namespace arm_compute;
 
 namespace
 {
+void auto_init(const ITensorInfo *input, ITensorInfo *output, unsigned int pooled_w, unsigned int pooled_h)
+{
+    TensorShape output_shape{ input->tensor_shape() };
+    output_shape.set(0, pooled_w);
+    output_shape.set(1, pooled_h);
+
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
+}
+
 template <bool exclude_padding>
 inline float calculate_avg_scale(const Coordinates &id, const int pool_size, const int upper_bound_w, const int upper_bound_h,
                                  const int pad_x, const int pad_y, const int stride_x, const int stride_y)
@@ -88,75 +97,77 @@ inline qint16_t calculate_avg_scale_q16(const Coordinates &id, int pool_size, in
     const int val     = ((end_y - start_y) * (end_x - start_x));
     return sshr_qs16(scale_values_q16[val], (15 - fixed_point_position));
 }
-} // namespace
 
-NEPoolingLayerKernel::NEPoolingLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _pool_info(), _num_elems_processed_per_iteration(0), _border_size(0)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, unsigned int &pooled_w, unsigned int pooled_h, int pool_size)
 {
-}
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
-BorderSize NEPoolingLayerKernel::border_size() const
-{
-    return _border_size;
-}
-
-void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
-{
     int                 pool_pad_x        = 0;
     int                 pool_pad_y        = 0;
     int                 pool_stride_x     = 0;
     int                 pool_stride_y     = 0;
-    unsigned int        pooled_w          = 0;
-    unsigned int        pooled_h          = 0;
     PoolingType         pool_type         = pool_info.pool_type();
-    int                 pool_size         = pool_info.pool_size();
     const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
     const bool          exclude_padding   = pool_info.exclude_padding();
     const bool          is_global_pooling = pool_info.is_global_pooling();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
-
     static const std::set<int> supported_pool_sizes = { 2, 3 };
-    ARM_COMPUTE_UNUSED(supported_pool_sizes);
 
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_fixed_point(input->info()->data_type()));
-    ARM_COMPUTE_ERROR_ON((supported_pool_sizes.find(pool_size) == supported_pool_sizes.end()) && (input->info()->data_type() != DataType::F32));
-    ARM_COMPUTE_ERROR_ON(!is_global_pooling && (pool_pad_x >= pool_size || pool_pad_y >= pool_size));
-    ARM_COMPUTE_ERROR_ON(is_global_pooling && (input->info()->tensor_shape().x() != input->info()->tensor_shape().y()));
-    ARM_COMPUTE_ERROR_ON(is_data_type_fixed_point(input->info()->data_type()) && pool_stride_x > 2);
-    ARM_COMPUTE_ERROR_ON(exclude_padding && is_data_type_fixed_point(input->info()->data_type()));
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_fixed_point(input->data_type()));
+    ARM_COMPUTE_RETURN_ERROR_ON((supported_pool_sizes.find(pool_size) == supported_pool_sizes.end()) && (input->data_type() != DataType::F32));
+    ARM_COMPUTE_RETURN_ERROR_ON(!is_global_pooling && (pool_pad_x >= pool_size || pool_pad_y >= pool_size));
+    ARM_COMPUTE_RETURN_ERROR_ON(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()));
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_fixed_point(input->data_type()) && pool_stride_x > 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(exclude_padding && is_data_type_fixed_point(input->data_type()));
 
-    // Update pool size in case of global pooling
-    pool_size = is_global_pooling ? input->info()->dimension(0) : pool_size;
-
-    // Check output dimensions
-    std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
-                                                     input->info()->dimension(1),
-                                                     pool_size,
-                                                     pool_size,
-                                                     pool_info.pad_stride_info());
-
-    // Output auto initialization if not yet initialized
+    if(output->total_size() != 0)
     {
-        TensorShape output_shape{ input->info()->tensor_shape() };
-        output_shape.set(0, pooled_w);
-        output_shape.set(1, pooled_h);
-
-        auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(0) != pooled_w) || (output->dimension(1) != pooled_h));
     }
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pooled_w) || (output->info()->dimension(1) != pooled_h));
+    return Status{};
+}
 
-    unsigned int num_elems_read_per_iteration      = 0;
-    unsigned int num_elems_processed_per_iteration = 0;
-    unsigned int num_elems_horizontal_window       = 0;
+Status validate_arguments_pool_info(const ITensorInfo *input, const PoolingLayerInfo &pool_info, const unsigned int pool_size)
+{
+    const bool is_global_pooling = pool_info.is_global_pooling();
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()),
+                                    "Global pooling is supported only with rectangular inputs!");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_global_pooling && ((pool_info.pad_stride_info().pad().first >= pool_size) || (pool_info.pad_stride_info().pad().second >= pool_size)),
+                                    "Invalid pool size and pool pad combination!");
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info, unsigned int &num_elems_processed_per_iteration,
+                                                        BorderSize &border_size,
+                                                        unsigned int pooled_w, unsigned int pooled_h, int pool_size)
+{
+    unsigned int        num_elems_read_per_iteration = 0;
+    unsigned int        num_elems_horizontal_window  = 0;
+    int                 pool_pad_x                   = 0;
+    int                 pool_pad_y                   = 0;
+    int                 pool_stride_x                = 0;
+    int                 pool_stride_y                = 0;
+    const int           input_width                  = input->dimension(0);
+    const int           input_height                 = input->dimension(1);
+    const PadStrideInfo pad_stride_info              = pool_info.pad_stride_info();
+    std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
+    std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
+
+    // Check output dimensions
+    std::tie(pooled_w, pooled_h) = scaled_dimensions(input->dimension(0),
+                                                     input->dimension(1),
+                                                     pool_size,
+                                                     pool_size,
+                                                     pad_stride_info);
 
     // Select element size
-    switch(input->info()->data_type())
+    switch(input->data_type())
     {
         case DataType::QS8:
             num_elems_read_per_iteration = 16;
@@ -233,19 +244,89 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
             break;
     }
 
-    _num_elems_processed_per_iteration = num_elems_processed_per_iteration;
-    const int input_width              = input->info()->dimension(0);
-    const int input_height             = input->info()->dimension(1);
-    const int upper_bound_w            = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
-    const int upper_bound_h            = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+    const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
+    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+
+    border_size         = BorderSize(pool_pad_y, pool_pad_x);
+    border_size.right   = std::max(upper_bound_w, pool_pad_x);
+    border_size.bottom  = std::max(upper_bound_h, pool_pad_y);
+    bool window_changed = false;
+
+    TensorShape output_shape{ input->tensor_shape() };
+    output_shape.set(0, pooled_w);
+    output_shape.set(1, pooled_h);
+    TensorInfo output_info(input->clone()->set_tensor_shape(output_shape));
+
+    Window             win = calculate_max_window(output_info, Steps(num_elems_processed_per_iteration));
+    AccessWindowStatic input_access(input, -pool_pad_x, -pool_pad_y, input_width + border_size.right, input_height + border_size.bottom);
+
+    if(output->total_size() != 0)
+    {
+        AccessWindowHorizontal output_access(output, 0, num_elems_horizontal_window);
+        window_changed = update_window_and_padding(win, input_access, output_access);
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+    }
+    else
+    {
+        window_changed = update_window_and_padding(win, input_access);
+    }
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
+NEPoolingLayerKernel::NEPoolingLayerKernel()
+    : _func(nullptr), _input(nullptr), _output(nullptr), _pool_info(), _num_elems_processed_per_iteration(0), _border_size(0)
+{
+}
+
+BorderSize NEPoolingLayerKernel::border_size() const
+{
+    return _border_size;
+}
+
+void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    int                 pool_pad_x        = 0;
+    int                 pool_pad_y        = 0;
+    int                 pool_stride_x     = 0;
+    int                 pool_stride_y     = 0;
+    unsigned int        pooled_w          = 0;
+    unsigned int        pooled_h          = 0;
+    PoolingType         pool_type         = pool_info.pool_type();
+    int                 pool_size         = pool_info.pool_size();
+    const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
+    const bool          exclude_padding   = pool_info.exclude_padding();
+    const bool          is_global_pooling = pool_info.is_global_pooling();
+    std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
+    std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
+
+    // Update pool size in case of global pooling
+    pool_size = is_global_pooling ? input->info()->dimension(0) : pool_size;
+
+    // Validate pool info before calling scaled_dimensions
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_pool_info(input->info(), pool_info, pool_size));
+
+    // Check output dimensions
+    std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
+                                                     input->info()->dimension(1),
+                                                     pool_size,
+                                                     pool_size,
+                                                     pool_info.pad_stride_info());
+
+    // Output auto initialization if not yet initialized
+    auto_init(input->info(), output->info(), pooled_w, pooled_h);
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, pooled_w, pooled_h, pool_size));
 
     // Set instance variables
-    _input              = input;
-    _output             = output;
-    _pool_info          = pool_info;
-    _border_size        = BorderSize(pool_pad_y, pool_pad_x);
-    _border_size.right  = std::max(upper_bound_w, pool_pad_x);
-    _border_size.bottom = std::max(upper_bound_h, pool_pad_y);
+    _input     = input;
+    _output    = output;
+    _pool_info = pool_info;
 
     // Select appropriate function
     switch(pool_size)
@@ -413,12 +494,9 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     }
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowStatic     input_access(input->info(), -pool_pad_x, -pool_pad_y, input_width + _border_size.right, input_height + _border_size.bottom);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_horizontal_window);
-    update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    INEKernel::configure(win);
+    auto win_config = validate_and_configure_window(input->info(), output->info(), pool_info, _num_elems_processed_per_iteration, _border_size, pooled_w, pooled_h, pool_size);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
 }
 
 template <PoolingType pooling_type>
@@ -1152,6 +1230,34 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
         *(reinterpret_cast<float *>(output.ptr())) = res;
     },
     input, output);
+}
+
+Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+
+    unsigned int pooled_w                          = 0;
+    unsigned int pooled_h                          = 0;
+    unsigned int num_elems_processed_per_iteration = 0;
+    BorderSize   border_size(0);
+
+    const bool         is_global_pooling = pool_info.is_global_pooling();
+    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size();
+
+    // Validate pool info befor calling scaled_dimensions
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_pool_info(input, pool_info, pool_size));
+
+    // Check output dimensions
+    std::tie(pooled_w, pooled_h) = scaled_dimensions(input->dimension(0),
+                                                     input->dimension(1),
+                                                     pool_size,
+                                                     pool_size,
+                                                     pool_info.pad_stride_info());
+
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info, pooled_w, pooled_h, pool_size));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), pool_info, num_elems_processed_per_iteration, border_size, pooled_w, pooled_h, pool_size).first);
+
+    return Status{};
 }
 
 void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
