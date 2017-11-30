@@ -86,6 +86,57 @@ void weights_reshape(const ITensor *input, const ITensor *bias, ITensor *output,
     },
     in);
 }
+
+TensorShape get_output_shape(const ITensorInfo *input, bool has_bias)
+{
+    TensorShape output_shape{ input->tensor_shape() };
+
+    output_shape.collapse(3);
+    const size_t tmp_dim = output_shape[0];
+    output_shape.set(0, output_shape[1]);
+    output_shape.set(1, tmp_dim + (has_bias ? 1 : 0));
+
+    return output_shape;
+}
+
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+
+    if(biases != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
+        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 4) && (biases->num_dimensions() != 1));
+        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 5) && (biases->num_dimensions() != 2));
+        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 4) && (biases->dimension(0) != input->tensor_shape()[3]));
+        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 5) && (biases->dimension(0) != input->tensor_shape()[3] || biases->dimension(1) != input->tensor_shape()[4]));
+    }
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), get_output_shape(input, biases != nullptr));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+{
+    Window window = calculate_max_window(*input, Steps());
+    window.set(Window::DimX, Window::Dimension(0, input->dimension(0), input->dimension(0)));
+    window.set(Window::DimY, Window::Dimension(0, input->dimension(1), input->dimension(1)));
+    window.set(Window::DimZ, Window::Dimension(0, input->dimension(2), input->dimension(2)));
+
+    // The NEConvolutionLayerWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+
+    return std::make_pair(Status{}, window);
+}
 } // namespace
 
 NEWeightsReshapeKernel::NEWeightsReshapeKernel()
@@ -95,35 +146,15 @@ NEWeightsReshapeKernel::NEWeightsReshapeKernel()
 
 void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-
-    const int          fixed_point_position = input->info()->fixed_point_position();
-    const DataType     dt                   = input->info()->data_type();
-    const TensorShape &input_shape          = input->info()->tensor_shape();
-    TensorShape        output_shape{ input_shape };
-    output_shape.collapse(3);
-
-    const size_t tmp_dim = output_shape[0];
-    output_shape.set(0, output_shape[1]);
-    output_shape.set(1, tmp_dim + (bias != nullptr ? 1 : 0));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, dt, fixed_point_position);
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(get_output_shape(input->info(), (bias != nullptr))));
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-
-    if(bias != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, bias);
-        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (bias->info()->num_dimensions() != 1));
-        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (bias->info()->num_dimensions() != 2));
-        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (bias->info()->dimension(0) != input->info()->tensor_shape()[3]));
-        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (bias->info()->dimension(0) != input->info()->tensor_shape()[3] || bias->info()->dimension(1) != input->info()->tensor_shape()[4]));
-    }
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
+                                                  (bias != nullptr) ? bias->info() : nullptr,
+                                                  output->info()));
 
     _input  = input;
     _bias   = bias;
@@ -154,15 +185,17 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
     }
 
     // Configure kernel
-    Window window = calculate_max_window(*input->info(), Steps());
-    window.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _input->info()->dimension(0)));
-    window.set(Window::DimY, Window::Dimension(0, _input->info()->dimension(1), _input->info()->dimension(1)));
-    window.set(Window::DimZ, Window::Dimension(0, _input->info()->dimension(2), _input->info()->dimension(2)));
+    auto win_config = validate_and_configure_window(input->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    // The NEConvolutionLayerWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+Status NEWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, biases, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
 
-    INEKernel::configure(window);
+    return Status{};
 }
 
 void NEWeightsReshapeKernel::run(const Window &window, const ThreadInfo &info)

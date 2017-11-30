@@ -61,6 +61,15 @@ public:
      * @param[in]  alpha  Weight of the matrix product
      */
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output, float alpha);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMMatrixMultiplyKernel
+     *
+     * @param[in] input0 Input tensor containing the Matrix A. Data types supported: QS8/QS16/F16/F32
+     * @param[in] input1 Input tensor containing the Matrix B. Data type supported: same as @p input0
+     * @param[in] output Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

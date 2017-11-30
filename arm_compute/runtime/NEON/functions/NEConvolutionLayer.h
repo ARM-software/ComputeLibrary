@@ -62,6 +62,17 @@ public:
      *                          Data types supported: Same as @p weights.
      */
     void configure(const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose1xW);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayerReshapeWeights
+     *
+     * @param[in] weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QS16/F16/F32.
+     * @param[in] biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[in] output       Destination tensor. Data types supported: Same as @p weights.
+     * @param[in] transpose1xW True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise.
+     *                         Data types supported: Same as @p weights.
+     *
+     * @return an error status
+     */
+    static Status validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose1xW);
 
     // Inherited methods overridden:
     void run() override;
@@ -101,6 +112,23 @@ public:
      *                          tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      */
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayer
+     *
+     * @param[in] input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
+     *                         while every optional dimension from 4 and above represent a batch of inputs.
+     *                         Data types supported: QS8/QS16/F16/F32.
+     * @param[in] weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
+     * @param[in] biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported:Same as @p input.
+     * @param[in] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
+     *                         Data types supported: Same as @p input.
+     * @param[in] conv_info    Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in] weights_info Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
+     *                         tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                           const WeightsInfo &weights_info = WeightsInfo());
 
     // Inherited methods overridden:
     void run() override;
