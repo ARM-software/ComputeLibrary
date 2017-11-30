@@ -99,6 +99,8 @@ private:
     Tensor                             _workspace;
     int32_t                            _a_offset;
     int32_t                            _b_offset;
+    bool                               _run_vector_matrix_multiplication;
+    bool                               _dot_product_path;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H__ */

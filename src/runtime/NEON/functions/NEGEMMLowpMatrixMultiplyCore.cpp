@@ -48,7 +48,7 @@ using namespace arm_compute;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(),
-      _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _workspace(), _a_offset(0), _b_offset(0)
+      _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _workspace(), _a_offset(0), _b_offset(0), _run_vector_matrix_multiplication(false), _dot_product_path(false)
 {
 }
 
@@ -57,10 +57,9 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), output->info()));
 
-    bool dot_product_path = false;
-
-    _a_offset = a->info()->quantization_info().offset;
-    _b_offset = b->info()->quantization_info().offset;
+    _a_offset                         = a->info()->quantization_info().offset;
+    _b_offset                         = b->info()->quantization_info().offset;
+    _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
 
 #ifdef ARM_COMPUTE_AARCH64_V8_2
     // Check for DOT product instruction
@@ -69,7 +68,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
 
     if(cpu_has_dotprod != 0)
     {
-        dot_product_path = true;
+        _dot_product_path = true;
 
         // Configure matrix multiply kernel
         struct CPUInfo ci = NEScheduler::get().cpu_info();
@@ -90,42 +89,54 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     else
 #endif /* ARM_COMPUTE_AARCH64_V8_2 */
     {
-        // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
-        TensorShape shape_tmp_a = a->info()->tensor_shape();
-        shape_tmp_a.set(0, a->info()->dimension(0) * 4);
-        shape_tmp_a.set(1, std::ceil(a->info()->dimension(1) / 4.f));
-
-        // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
-        TensorShape shape_tmp_b = b->info()->tensor_shape();
-        shape_tmp_b.set(0, b->info()->dimension(1) * 16);
-        shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / 16.f));
-
-        TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type());
-        TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type());
-        _tmp_a.allocator()->init(info_a);
-        _tmp_b.allocator()->init(info_b);
-        _memory_group.manage(&_tmp_a);
-        _memory_group.manage(&_tmp_b);
-
-        // Configure interleave kernel
+        if(_run_vector_matrix_multiplication)
         {
-            auto k = arm_compute::support::cpp14::make_unique<NEGEMMInterleave4x4Kernel>();
-            k->configure(a, &_tmp_a);
-            _mtx_a_reshape_kernel = std::move(k);
+            // Configure matrix multiply kernel
+            {
+                auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
+                k->configure(a, b, output);
+                _mm_kernel = std::move(k);
+            }
         }
-
-        // Configure transpose kernel
+        else
         {
-            auto k = arm_compute::support::cpp14::make_unique<NEGEMMTranspose1xWKernel>();
-            k->configure(b, &_tmp_b);
-            _mtx_b_reshape_kernel = std::move(k);
-        }
+            // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
+            TensorShape shape_tmp_a = a->info()->tensor_shape();
+            shape_tmp_a.set(0, a->info()->dimension(0) * 4);
+            shape_tmp_a.set(1, std::ceil(a->info()->dimension(1) / 4.f));
 
-        // Configure matrix multiply kernel
-        {
-            auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
-            k->configure(&_tmp_a, &_tmp_b, output);
-            _mm_kernel = std::move(k);
+            // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
+            TensorShape shape_tmp_b = b->info()->tensor_shape();
+            shape_tmp_b.set(0, b->info()->dimension(1) * 16);
+            shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / 16.f));
+
+            TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type());
+            TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type());
+            _tmp_a.allocator()->init(info_a);
+            _tmp_b.allocator()->init(info_b);
+            _memory_group.manage(&_tmp_a);
+            _memory_group.manage(&_tmp_b);
+
+            // Configure interleave kernel
+            {
+                auto k = arm_compute::support::cpp14::make_unique<NEGEMMInterleave4x4Kernel>();
+                k->configure(a, &_tmp_a);
+                _mtx_a_reshape_kernel = std::move(k);
+            }
+
+            // Configure transpose kernel
+            {
+                auto k = arm_compute::support::cpp14::make_unique<NEGEMMTranspose1xWKernel>();
+                k->configure(b, &_tmp_b);
+                _mtx_b_reshape_kernel = std::move(k);
+            }
+
+            // Configure matrix multiply kernel
+            {
+                auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
+                k->configure(&_tmp_a, &_tmp_b, output);
+                _mm_kernel = std::move(k);
+            }
         }
     }
 
@@ -166,7 +177,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     _offset_contribution_kernel.configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a->info()->dimension(0), _a_offset, _b_offset);
 
     // Allocate tensors
-    if(!dot_product_path)
+    if(!_dot_product_path && !_run_vector_matrix_multiplication)
     {
         _tmp_a.allocator()->allocate();
         _tmp_b.allocator()->allocate();
@@ -199,8 +210,9 @@ Error NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensor
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((b)->dimension(0) != (output)->dimension(0),
                                     "The output matrix must have the same number of columns as the matrix B");
 
-    int32_t a_offset = a->quantization_info().offset;
-    int32_t b_offset = b->quantization_info().offset;
+    int32_t a_offset                         = a->quantization_info().offset;
+    int32_t b_offset                         = b->quantization_info().offset;
+    bool    run_vector_matrix_multiplication = a->dimension(1) < 2;
 
 #ifdef ARM_COMPUTE_AARCH64_V8_2
     // Check for DOT product instruction
@@ -215,22 +227,29 @@ Error NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensor
     else
 #endif /* ARM_COMPUTE_AARCH64_V8_2 */
     {
-        // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
-        TensorShape shape_tmp_a = a->tensor_shape();
-        shape_tmp_a.set(0, a->dimension(0) * 4);
-        shape_tmp_a.set(1, std::ceil(a->dimension(1) / 4.f));
+        if(!run_vector_matrix_multiplication)
+        {
+            // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
+            TensorShape shape_tmp_a = a->tensor_shape();
+            shape_tmp_a.set(0, a->dimension(0) * 4);
+            shape_tmp_a.set(1, std::ceil(a->dimension(1) / 4.f));
 
-        // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
-        TensorShape shape_tmp_b = b->tensor_shape();
-        shape_tmp_b.set(0, b->dimension(1) * 16);
-        shape_tmp_b.set(1, std::ceil(b->dimension(0) / 16.f));
+            // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
+            TensorShape shape_tmp_b = b->tensor_shape();
+            shape_tmp_b.set(0, b->dimension(1) * 16);
+            shape_tmp_b.set(1, std::ceil(b->dimension(0) / 16.f));
 
-        TensorInfo info_a(shape_tmp_a, 1, a->data_type());
-        TensorInfo info_b(shape_tmp_b, 1, b->data_type());
+            TensorInfo info_a(shape_tmp_a, 1, a->data_type());
+            TensorInfo info_b(shape_tmp_b, 1, b->data_type());
 
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a, &info_a));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(b, &info_b));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(&info_a, &info_b, output));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a, &info_a));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(b, &info_b));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(&info_a, &info_b, output));
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(a, b, output));
+        }
     }
 
     TensorInfo info_vector_sum_col, info_vector_sum_row;
@@ -271,14 +290,18 @@ void NEGEMMLowpMatrixMultiplyCore::run()
 {
     _memory_group.acquire();
 
-    if(_mtx_a_reshape_kernel)
+    // Do not reshape if we run the vector-by-matrix case and we do not have the optimized gemm with dot product instruction
+    if(!_run_vector_matrix_multiplication && !_dot_product_path)
     {
-        NEScheduler::get().schedule(_mtx_a_reshape_kernel.get(), Window::DimY);
-    }
+        if(_mtx_a_reshape_kernel)
+        {
+            NEScheduler::get().schedule(_mtx_a_reshape_kernel.get(), Window::DimY);
+        }
 
-    if(_mtx_b_reshape_kernel)
-    {
-        NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
+        if(_mtx_b_reshape_kernel)
+        {
+            NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
+        }
     }
 
     NEScheduler::get().schedule(_mm_kernel.get(), Window::DimY);

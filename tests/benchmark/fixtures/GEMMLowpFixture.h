@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GEMMFIXTURE
-#define ARM_COMPUTE_TEST_GEMMFIXTURE
+#ifndef ARM_COMPUTE_TEST_GEMMLOWPFIXTURE
+#define ARM_COMPUTE_TEST_GEMMLOWPFIXTURE
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -34,59 +34,26 @@ namespace arm_compute
 {
 namespace test
 {
-template <typename TensorType, typename Function, typename Accessor, bool Transposed = false>
-class GEMMInterleaveBlockedFixture : public framework::Fixture
-{
-public:
-    template <typename...>
-    void setup(size_t x, size_t y, int int_by, int block)
-    {
-        const float       interleave_by_f32 = int_by;
-        const TensorShape shape_a(x, y);
-        const TensorShape shape_b(static_cast<size_t>(x * interleave_by_f32), static_cast<size_t>(std::ceil(y / interleave_by_f32)));
-        // Create tensors
-        a = create_tensor<TensorType>(shape_a, DataType::U8, 1);
-        b = create_tensor<TensorType>(shape_b, DataType::U8, 1);
-
-        // Create and configure function
-        f.configure(&a, &b, int_by, block, Transposed);
-
-        // Allocate tensors
-        a.allocator()->allocate();
-        b.allocator()->allocate();
-    }
-    void run()
-    {
-        f.run();
-    }
-
-    void teardown()
-    {
-        a.allocator()->free();
-        b.allocator()->free();
-    }
-
-private:
-    TensorType a{};
-    TensorType b{};
-    Function   f{};
-};
-
 /** Fixture that can be used for NEON and CL */
 template <typename TensorType, typename Function, typename Accessor>
-class GEMMLowpFixture : public framework::Fixture
+class GEMMLowpMatrixMultiplyCoreFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(size_t m, size_t n, size_t k)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape shape_dst, float alpha, float beta)
     {
-        const TensorShape shape_a(k, m);
-        const TensorShape shape_b(n, k);
-        const TensorShape shape_c(n, m);
+        // TODO (COMPMID-717): The interface used for GEMMLowp is the same one used for GEMM in order to re-use the datasets
+        // However the interface for both GEMM and GEMMLowp should be reworked in order to accepts only the 3 dimensions M, N and K
+        ARM_COMPUTE_UNUSED(shape_c);
+        ARM_COMPUTE_UNUSED(alpha);
+        ARM_COMPUTE_UNUSED(beta);
+
+        // Note: The offsets for matrix A and matrix B are set to 0 in order to skip the computation for the offset contribution
+
         // Create tensors
-        a = create_tensor<TensorType>(shape_a, DataType::U8, 1);
-        b = create_tensor<TensorType>(shape_b, DataType::U8, 1);
-        c = create_tensor<TensorType>(shape_c, DataType::U32, 1);
+        a = create_tensor<TensorType>(shape_a, DataType::QASYMM8, 1, 0, QuantizationInfo(1.0f / 255.0f, 0));
+        b = create_tensor<TensorType>(shape_b, DataType::QASYMM8, 1, 0, QuantizationInfo(1.0f / 255.0f, 0));
+        c = create_tensor<TensorType>(shape_dst, DataType::S32, 1, 0, QuantizationInfo(1.0f / 255.0f, 0));
 
         // Create and configure function
         gemmlowp.configure(&a, &b, &c);
@@ -99,7 +66,6 @@ public:
         // Fill tensors
         library->fill_tensor_uniform(Accessor(a), 0);
         library->fill_tensor_uniform(Accessor(b), 1);
-        library->fill_tensor_uniform(Accessor(c), 2);
     }
     void run()
     {
@@ -122,4 +88,4 @@ private:
 
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GEMMFIXTURE */
+#endif /* ARM_COMPUTE_TEST_GEMMLOWPFIXTURE */

@@ -21,38 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LARGE_GEMMLOWP_DATASET
-#define ARM_COMPUTE_TEST_LARGE_GEMMLOWP_DATASET
-
-#include "tests/datasets/GEMMLowpDataset.h"
-
-#include "utils/TypePrinter.h"
-
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/CLTensorAllocator.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
+#include "tests/CL/CLAccessor.h"
+#include "tests/benchmark/fixtures/GEMMLowpFixture.h"
+#include "tests/datasets/GoogleNetGEMMDataset.h"
+#include "tests/datasets/MatrixMultiplyGEMMDataset.h"
+#include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
 namespace test
 {
-namespace datasets
-{
-class LargeGEMMLowpDataset final : public GEMMLowpDataset
-{
-public:
-    LargeGEMMLowpDataset()
-    {
-        add_config(TensorShape(923U, 1U), TensorShape(871U, 923U), TensorShape(871U, 1U), 0, 0);
-        add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 429U), 0, 0);
-        add_config(TensorShape(873U, 7U), TensorShape(784U, 873U), TensorShape(784U, 7U), -1, 3);
-        add_config(TensorShape(873U, 513U), TensorShape(784U, 873U), TensorShape(784U, 513U), 0, 4);
-        add_config(TensorShape(697U, 872U), TensorShape(563U, 697U), TensorShape(563U, 872U), -2, 0);
-        add_config(TensorShape(1021U, 973U), TensorShape(783U, 1021U), TensorShape(783U, 973U), 5, 13);
-        add_config(TensorShape(681U, 1023U), TensorShape(213U, 681U), TensorShape(213U, 1023U), -3, -2);
-        add_config(TensorShape(941U, 1011U), TensorShape(623U, 941U), TensorShape(623U, 1011U), -9, 1);
-    }
-};
-} // namespace datasets
+using CLGEMMLowpFixture = GEMMLowpMatrixMultiplyCoreFixture<CLTensor, CLGEMMLowpMatrixMultiplyCore, CLAccessor>;
+
+TEST_SUITE(CL)
+
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::ALL, datasets::GoogLeNetInceptionV1GEMMDataset());
+REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::ALL, datasets::MatrixMultiplyGEMMDataset());
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::NIGHTLY, datasets::GoogleNetGEMMDataset());
+
+TEST_SUITE_END()
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_LARGE_GEMMLOWP_DATASET */
