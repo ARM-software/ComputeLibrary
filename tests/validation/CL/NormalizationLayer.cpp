@@ -49,14 +49,19 @@ RelativeTolerance<float> tolerance_f32(0.05f);
 
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
-constexpr AbsoluteTolerance<int16_t> tolerance_qs16(3);
+constexpr AbsoluteTolerance<int16_t> tolerance_qs16(4);
 
 /** Input data set. */
-const auto NormalizationDataset = combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
+const auto NormalizationDataset = combine(combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()),
                                                           framework::dataset::make("NormalizationSize", 3, 9, 2)),
                                                   framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
                                           framework::dataset::make("IsScaled", { true }));
-const auto NormalizationDatasetFP32 = combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
+const auto NormalizationDatasetFP16 = combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
+                                                              framework::dataset::make("NormalizationSize", 3, 9, 2)),
+                                                      framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
+                                              framework::dataset::make("IsScaled", { true }));
+
+const auto NormalizationDatasetFP32 = combine(combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()),
                                                               framework::dataset::make("NormalizationSize", 3, 9, 2)),
                                                       framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
                                               framework::dataset::make("IsScaled", { true, false }));
@@ -107,12 +112,12 @@ using CLNormalizationLayerFixture = NormalizationValidationFixture<CLTensor, CLA
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDatasetFP16, framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(NormalizationDatasetFP16, framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

@@ -278,7 +278,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "non_linear_filter_disk5x5", "non_linear_filter5x5.cl" },
     { "non_max_suppression", "nonmax.cl" },
     { "normalization_layer_cross_map", "normalization_layer.cl" },
-    { "normalization_layer_in_map_1D", "normalization_layer.cl" },
+    { "normalization_layer_in_map", "normalization_layer.cl" },
     { "batchnormalization_layer", "batchnormalization_layer.cl" },
     { "NV12_to_IYUV_bt709", "color_convert.cl" },
     { "NV12_to_RGB888_bt709", "color_convert.cl" },

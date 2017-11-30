@@ -43,7 +43,6 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, No
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(norm_info.type() == NormType::IN_MAP_2D, "2D In-Map Normalization not implemented");
 
     if(is_data_type_fixed_point(input->data_type()))
     {
@@ -63,8 +62,11 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, No
     return Error{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, bool is_in_map, unsigned int norm_size)
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, NormalizationLayerInfo norm_info)
 {
+    const unsigned int norm_size = norm_info.norm_size();
+    bool               is_in_map = norm_info.is_in_map();
+
     const unsigned int border_width = is_in_map ? std::min(norm_size / 2, 3U) : 0;
     const BorderSize   border_size  = BorderSize(0, border_width);
 
@@ -73,6 +75,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
 
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
+    // We do not use a Rectangle window for IN_MAP_2D as we clamp the top and bottom accesses inside the kernel, avoiding padding
     AccessWindowHorizontal input_access(input, -border_size.left, num_elems_read_per_iteration);
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
 
@@ -113,27 +116,27 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     _border_size                    = BorderSize(0, border_width);
 
     const unsigned int num_elems_processed_per_iteration = (is_data_type_fixed_point(input->info()->data_type())) ? 16 : 4;
+    const bool         is_in_map_2D                      = (norm_info.type() == NormType::IN_MAP_2D);
 
     // Set build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
-    }
-    build_opts.emplace(("-DCOEFF=" + float_to_string_with_full_precision(norm_info.scale_coeff())));
-    build_opts.emplace(("-DBETA=" + float_to_string_with_full_precision(norm_info.beta())));
-    build_opts.emplace(("-DKAPPA=" + float_to_string_with_full_precision(norm_info.kappa())));
-    build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
-    build_opts.emplace(("-DRADIUS=" + support::cpp11::to_string(norm_info.norm_size() / 2)));
-    build_opts.emplace(("-DNUM_SLICES=" + support::cpp11::to_string(input->info()->dimension(2))));
+    CLBuildOptions build_opts;
+    build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    build_opts.add_option_if(is_data_type_fixed_point(input->info()->data_type()),
+                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    build_opts.add_option(("-DCOEFF=" + float_to_string_with_full_precision(norm_info.scale_coeff())));
+    build_opts.add_option(("-DBETA=" + float_to_string_with_full_precision(norm_info.beta())));
+    build_opts.add_option(("-DKAPPA=" + float_to_string_with_full_precision(norm_info.kappa())));
+    build_opts.add_option(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
+    build_opts.add_option(("-DRADIUS=" + support::cpp11::to_string(norm_info.norm_size() / 2)));
+    build_opts.add_option(("-DNUM_SLICES=" + support::cpp11::to_string(input->info()->dimension(2))));
+    build_opts.add_option_if(is_in_map_2D, "-DIN_MAP_2D");
 
     // Create kernel
-    std::string kernel_name = (norm_info.type() == NormType::IN_MAP_1D) ? "normalization_layer_in_map_1D" : "normalization_layer_cross_map";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    std::string kernel_name = _is_in_map ? "normalization_layer_in_map" : "normalization_layer_cross_map";
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), _is_in_map, norm_info.norm_size());
+    auto win_config = validate_and_configure_window(input->info(), output->info(), norm_info);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 
@@ -153,7 +156,7 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
 Error CLNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, norm_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), norm_info.is_in_map(), norm_info.norm_size()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), norm_info).first);
 
     return Error{};
 }
