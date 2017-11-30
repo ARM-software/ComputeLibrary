@@ -43,6 +43,16 @@ public:
      * @param[in]  policy Policy to use to handle overflow.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAddition
+     *
+     * @param[in] input1 First tensor input. Data types supported: U8/QS8/QS16/S16/F16/F32
+     * @param[in] input2 Second tensor input. Data types supported: U8/QS8/QS16/S16/F16/F32
+     * @param[in] output Output tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
+     * @param[in] policy Policy to use to handle overflow.
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
 };
 }
 #endif /*__ARM_COMPUTE_NEARITHMETICADDITION_H__ */

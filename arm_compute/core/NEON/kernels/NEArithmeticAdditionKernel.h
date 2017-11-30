@@ -68,6 +68,16 @@ public:
      * @param[in]  policy Overflow policy.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAdditionKernel
+     *
+     * @param[in] input1 An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
+     * @param[in] input2 An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
+     * @param[in] output The output tensor. Data types supported: U8/QS8/QS16/S16/F16/F32.
+     * @param[in] policy Overflow policy.
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
