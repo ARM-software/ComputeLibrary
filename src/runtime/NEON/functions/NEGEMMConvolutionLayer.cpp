@@ -178,7 +178,7 @@ TensorShape get_reshaped_weights_shape_conv(const ITensorInfo *weights, bool app
 Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const PadStrideInfo &conv_info, const WeightsInfo &weights_info, DataType &dt,
                                       bool &append_bias,
                                       bool &are_weights_reshaped, unsigned int &kernel_width, unsigned int &kernel_height,
-                                      bool &is_fully_connected_convolution, bool &is_interleaved_transposed, bool &is_quantized,
+                                      bool &is_fully_connected_convolution, bool &is_interleaved, bool &is_quantized,
                                       unsigned int &mat_weights_cols, unsigned int &mat_weights_rows,
                                       unsigned int &conv_w, unsigned int &conv_h)
 {
@@ -219,7 +219,7 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
 
     // Check if its a "fully connected" convolution
     is_fully_connected_convolution = ((conv_w == 1) && (conv_h == 1));
-    is_interleaved_transposed      = (!is_fully_connected_convolution && !is_quantized);
+    is_interleaved                 = (!is_fully_connected_convolution && !is_quantized);
 
     return Status{};
 }
@@ -228,11 +228,11 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
     : _memory_group(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_optimised_kernel(nullptr), _mm_gemmlowp(memory_manager),
       _gemmlowp_output_stage(), _output_col2im_kernel(), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _tmp_output(), _workspace(), _append_bias(false),
-      _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false), _is_interleaved_transposed(false)
+      _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false), _is_interleaved(false)
 {
 }
 
-void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *weights, ITensor *output)
+void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *weights, ITensor *output, bool is_interleaved, const GEMMReshapeInfo &reshape_info)
 {
     if(_is_quantized)
     {
@@ -252,7 +252,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
     }
     else
     {
-        _mm_kernel.configure(input, weights, output, 1.f);
+        _mm_kernel.configure(input, weights, output, 1.f, is_interleaved, reshape_info);
     }
 }
 
@@ -290,7 +290,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 
     Status status = validate_and_initialize_values(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(), conv_info, weights_info, dt, _append_bias, _are_weights_reshaped,
                                                    kernel_width, kernel_height,
-                                                   _is_fully_connected_convolution, _is_interleaved_transposed, _is_quantized,
+                                                   _is_fully_connected_convolution, _is_interleaved, _is_quantized,
                                                    mat_weights_cols, mat_weights_rows, conv_w, conv_h);
 
     ARM_COMPUTE_ERROR_THROW_ON(status);
@@ -339,9 +339,8 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
             }
             else
             {
-                const unsigned int transpose_width = 16 / input->info()->element_size();
-                mat_weights_cols                   = weights_info.num_kernels();
-                mat_weights_rows                   = weights->info()->dimension(0) / transpose_width + (_append_bias ? 1 : 0);
+                mat_weights_cols = weights_info.num_kernels();
+                mat_weights_rows = weights_info.kernel_size().first * weights_info.kernel_size().second * input->info()->dimension(2) + (_append_bias ? 1 : 0);
             }
         }
         else
@@ -362,7 +361,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 
             // Create tensor to store the reshaped weights
             _weights_reshaped.allocator()->init(TensorInfo(reshaped_weights_shape, 1, dt, fixed_point_position));
-            _reshape_weights.configure(weights, biases_to_use, &_weights_reshaped, _is_interleaved_transposed /* 1xW transpose */);
+            _reshape_weights.configure(weights, biases_to_use, &_weights_reshaped, _is_interleaved /* 1xW transpose */);
             weights = &_weights_reshaped;
         }
     }
@@ -430,18 +429,19 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     }
     else
     {
-        if(_is_interleaved_transposed)
+        if(_is_interleaved)
         {
             // Configure GEMMInterleave4x4. _input_interleaved_reshaped will be auto configured in the kernel
             _input_interleave_kernel.configure(&_input_im2col_reshaped, &_input_interleaved_reshaped);
 
             // Configure GEMM
-            configure_mm(&_input_interleaved_reshaped, weights, &_gemm_output);
+            configure_mm(&_input_interleaved_reshaped, weights, &_gemm_output, _is_interleaved, GEMMReshapeInfo(_input_im2col_reshaped.info()->dimension(1), 0 /* no transpose */,
+                                                                                                                _input_im2col_reshaped.info()->dimension(0)));
             _input_interleaved_reshaped.allocator()->allocate();
         }
         else
         {
-            configure_mm(&_input_im2col_reshaped, weights, &_gemm_output);
+            configure_mm(&_input_im2col_reshaped, weights, &_gemm_output, _is_interleaved);
         }
     }
 
@@ -479,11 +479,13 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                         const WeightsInfo &weights_info)
 {
+    ARM_COMPUTE_UNUSED(output);
+
     DataType     dt{};
     bool         append_bias{};
     bool         are_weights_reshaped{};
     bool         is_fully_connected_convolution{};
-    bool         is_interleaved_transposed{};
+    bool         is_interleaved{};
     bool         is_quantized{};
     unsigned int kernel_width     = 0;
     unsigned int kernel_height    = 0;
@@ -493,8 +495,10 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     unsigned int conv_h           = 0;
 
     Status status = validate_and_initialize_values(input, weights, biases, conv_info, weights_info, dt, append_bias, are_weights_reshaped, kernel_width, kernel_height,
-                                                   is_fully_connected_convolution, is_interleaved_transposed, is_quantized, mat_weights_cols, mat_weights_rows,
+                                                   is_fully_connected_convolution, is_interleaved, is_quantized, mat_weights_cols, mat_weights_rows,
                                                    conv_w, conv_h);
+
+    const Size2D kernel_weights = Size2D(kernel_width, kernel_height);
 
     ARM_COMPUTE_RETURN_ON_ERROR(status);
 
@@ -570,7 +574,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
     TensorInfo im2_col_info = input->clone()->set_tensor_shape(shape_im2col);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2_col_info, Size2D(weights->dimension(0), weights->dimension(1)), conv_info, append_bias));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2_col_info, kernel_weights, conv_info, append_bias, false));
 
     // Create GEMM output tensor
     TensorShape shape_gemm(im2_col_info.tensor_shape());
@@ -579,23 +583,19 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     TensorInfo gemm_output_info = input->clone()->set_tensor_shape(shape_gemm);
 
     // Validate GEMM interleave and multiply
-    if(is_interleaved_transposed)
+    if(is_interleaved)
     {
         TensorShape shape_interleaved = shape_im2col;
         shape_interleaved.set(0, shape_interleaved.x() * 4);
         shape_interleaved.set(1, std::ceil(shape_interleaved.y() / 4.f));
         TensorInfo input_interleaved_info = input->clone()->set_tensor_shape(shape_interleaved);
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(&im2_col_info, &input_interleaved_info));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(&input_interleaved_info, weights, &gemm_output_info));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(&input_interleaved_info, weights, &gemm_output_info, 1.f, is_interleaved, GEMMReshapeInfo()));
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(&im2_col_info, weights, &gemm_output_info));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(&im2_col_info, weights, &gemm_output_info, 1.f, is_interleaved, GEMMReshapeInfo()));
     }
-
-    ARM_COMPUTE_RETURN_ON_ERROR(NECol2ImKernel::validate(&gemm_output_info, output, Size2D(conv_w, conv_h)));
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output->dimension(0) != conv_w) || (output->dimension(1) != conv_h), "Output shape does not match the expected one");
 
     return Status{};
 }
@@ -621,7 +621,7 @@ void NEGEMMConvolutionLayer::run()
     }
     else
     {
-        if(_is_interleaved_transposed)
+        if(_is_interleaved)
         {
             // Run interleave
             NEScheduler::get().schedule(&_input_interleave_kernel, Window::DimY);

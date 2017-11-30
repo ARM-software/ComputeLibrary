@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,16 @@ public:
      * @param[in]  is_batched_fc_layer True if it is a batched fully connected layer
      */
     void configure(const ITensor *input, ITensor *output, bool transpose_weights, bool is_batched_fc_layer);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayerReshapeWeights
+     *
+     * @param[in] input               Weights tensor info. The weights must be 2 dimensional. Data types supported: QS8/QS16/F32.
+     * @param[in] output              Destination tensor info. Data type supported: Same as @p input.
+     * @param[in] transpose_weights   True if the weights must be transposed. Data types supported: Same as @p weights.
+     * @param[in] is_batched_fc_layer True if it is a batched fully connected layer
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, bool transpose_weights, bool is_batched_fc_layer);
 
     // Inherited methods overridden:
     void run() override;
@@ -94,6 +104,18 @@ public:
      * @param[in]  are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
      */
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose_weights = true, bool are_weights_reshaped = false);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
+     *
+     * @param[in] input                Source tensor info. Data type supported: QS8/QS16/F16/F32.
+     * @param[in] weights              Weights tensor info. The weights must be 2 dimensional. Data type supported: Same as @p input
+     * @param[in] biases               Bias tensor info. It can be nullptr. Data type supported:Same as @p input.
+     * @param[in] output               Destination tensor info. Data type supported: Same as @p input.
+     * @param[in] transpose_weights    (Optional) Transpose weights if true. Defaults to true.
+     * @param[in] are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose_weights = true, bool are_weights_reshaped = false);
 
     //Inherited methods override
     void run() override;

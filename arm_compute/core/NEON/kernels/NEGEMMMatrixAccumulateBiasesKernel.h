@@ -55,6 +55,14 @@ public:
      * @param[in]      biases The shared biases tensor to append. It must be 1D Tensor. Data type supported: Same as @p input
      */
     void configure(ITensor *accum, const ITensor *biases);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMMatrixAccumulateBiasesKernel
+     *
+     * @param[in] accum  The accumulate tensor to convert. Data type supported: QS8/QS16/F32
+     * @param[in] biases The shared biases tensor to append. It must be 1D Tensor. Data type supported: Same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *accum, const ITensorInfo *biases);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

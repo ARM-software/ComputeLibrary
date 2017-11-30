@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::F32),     // Mismatching data type
                                                        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QS8, 2),  // Mismatching fixed point
                                                        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8), // Bias not supported with QASYMM8
+                                                       TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8), // Mismatching shapes
                                                        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
@@ -51,12 +52,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::QS8, 3),
                                                        TensorInfo(TensorShape(3U, 3U, 10U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(18U, 80U, 1U, 2U), 1, DataType::QASYMM8),
                                                      })),
-               framework::dataset::make("HasBias", { true, true, true, true, false })),
-               framework::dataset::make("Expected", { false, false, false, false, true })),
+               framework::dataset::make("HasBias", { true, true, true, true, false, false })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true })),
                input_info, output_info, has_bias, expected)
 {
-    bool status = bool(NEIm2Col::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias));
+    bool status = bool(NEIm2Col::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias, false));
     ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

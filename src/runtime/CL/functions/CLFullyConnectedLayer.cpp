@@ -114,7 +114,7 @@ void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLT
     // If the fully connected layer is called after a convolution layer, the input tensor must be linearized
 
     // Initialize output tensor for im2col
-    TensorShape shape_im2col = compute_im2col_shape(*input->info());
+    TensorShape shape_im2col = compute_im2col_shape(input->info());
     _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col));
 
     // Configure im2col kernel
@@ -243,7 +243,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     bool            is_quantized     = is_data_type_quantized_asymmetric(input->data_type());
     const GPUTarget gpu_target       = CLScheduler::get().target();
 
-    const ITensorInfo &im2col_input     = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_shape(*input)));
+    const ITensorInfo &im2col_input     = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_shape(input)));
     const ITensorInfo &reshaped_weights = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
     const ITensorInfo &gemmlowp_output  = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
 

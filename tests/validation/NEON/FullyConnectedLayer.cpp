@@ -115,6 +115,52 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     validate(dst.info()->valid_region(), dst_valid_region);
 }
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Mismatching data types
+                                            TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::QS8, 2), // Mismatching fixed point position
+                                            TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Invalid weights dimensions
+                                            TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Wrongly reshaped weights
+                                            TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
+                                          }),
+    framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(315U, 271U), 1, DataType::F16),
+                                             TensorInfo(TensorShape(315U, 271U), 1, DataType::QS8, 3),
+                                             TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(217U, 315U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(217U, 315U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
+                                          })),
+    framework::dataset::make("BiasInfo",{ TensorInfo(TensorShape(271U), 1, DataType::F32),
+                                          TensorInfo(TensorShape(271U), 1, DataType::QS8, 2),
+                                          TensorInfo(TensorShape(192U), 1, DataType::F32),
+                                          TensorInfo(TensorShape(192U), 1, DataType::F32),
+                                          TensorInfo(TensorShape(271U), 1, DataType::F32),
+                                          TensorInfo(TensorShape(271U), 1, DataType::F32),
+                                          TensorInfo(TensorShape(192U), 1, DataType::F32),
+                                          })),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(271U, 3U), 1, DataType::QS8, 3),
+                                            TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
+                                           })),
+    framework::dataset::make("TransposeWeights",{ true, true, true, false, true, true, true })),
+    framework::dataset::make("ReshapedWeights",{ false, false, false, false, false, false , false})),
+    framework::dataset::make("Expected", { false, false, true, true, false, false, true })),
+    input_info, weights_info, bias_info, output_info, transpose_weights, reshaped_weights, expected)
+{
+    Status status = NEFullyConnectedLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), transpose_weights, reshaped_weights);
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using NEFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
 

@@ -157,6 +157,43 @@ inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, unsigne
 
     return scale_out_shape;
 }
+inline TensorShape compute_im2col_shape(const ITensorInfo *input, const int num_input_dimensions = 3)
+{
+    TensorShape output_shape{ input->tensor_shape() };
+
+    output_shape.collapse(num_input_dimensions);
+
+    return output_shape;
+}
+inline TensorShape compute_interleave_custom_shape(const TensorShape &input, const int x_interleave, const int y_interleave)
+{
+    TensorShape output_shape{ input };
+
+    output_shape.set(0, output_shape.x() * x_interleave);
+    output_shape.set(1, std::ceil(output_shape.y() / static_cast<float>(y_interleave)));
+
+    return output_shape;
+}
+
+inline TensorShape compute_fully_connected_reshaped_weights_shape(const ITensorInfo *input, bool transpose_weights, bool is_batched_fc_layer, const int interleave)
+{
+    TensorShape output_shape{ input->tensor_shape() };
+
+    // Transpose weights if the user hasn't done it
+    if(transpose_weights)
+    {
+        output_shape = compute_transposed_shape(*input);
+    }
+
+    // If the we run multiple batches we need 1xW transpose, too.
+    if(is_batched_fc_layer)
+    {
+        output_shape = compute_transposed_shape(input->clone()->set_tensor_shape(output_shape));
+        output_shape = compute_interleave_custom_shape(output_shape, interleave, interleave);
+    }
+
+    return output_shape;
+}
 } // namespace shape_calculator
 } // namespace misc
 } // namespace arm_compute

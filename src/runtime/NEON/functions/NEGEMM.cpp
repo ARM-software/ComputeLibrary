@@ -120,7 +120,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 #endif /* defined(__aarch64__) */
         {
             // Configure the matrix multiply kernel
-            _mm_kernel.configure(a, b, d, alpha);
+            _mm_kernel.configure(a, b, d, alpha, false);
         }
 
         // Configure matrix addition kernel
@@ -212,6 +212,10 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             _memory_group.manage(&_tmp_a);
             _memory_group.manage(&_tmp_b);
 
+            int m = a->info()->dimension(1);
+            int n = b->info()->dimension(0);
+            int k = a->info()->dimension(0);
+
             // Configure interleave kernel
             _interleave_kernel.configure(a, &_tmp_a);
 
@@ -219,7 +223,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             _transpose_kernel.configure(b, &_tmp_b);
 
             // Configure matrix multiplication kernel
-            _mm_kernel.configure(&_tmp_a, &_tmp_b, d, alpha);
+            _mm_kernel.configure(&_tmp_a, &_tmp_b, d, alpha, true, GEMMReshapeInfo(m, n, k));
 
             // Allocate once the all configure methods have been called
             _tmp_a.allocator()->allocate();

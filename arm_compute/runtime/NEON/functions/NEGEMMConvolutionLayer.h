@@ -141,12 +141,14 @@ public:
 private:
     /** Configures the appropriate matrix multiply routine
      *
-     * @param[in]  input   Input tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in]  weights Weights tensor. Data type supported: Same as @p input.
-     * @param[out] output  Output tensor. Data types supported: Same as @p input,
-     *                     except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in]  input          Input tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in]  weights        Weights tensor. Data type supported: Same as @p input.
+     * @param[out] output         Output tensor. Data types supported: Same as @p input,
+     *                            except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in]  is_interleaved (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMTranspose1xWKernel
+     * @param[in]  reshape_info   (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
      */
-    void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output);
+    void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output, bool is_interleaved, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo());
     /** Prepare the appropriate assembly optimized kernel
      *
      * @param[in] ci CPU information
@@ -178,7 +180,7 @@ private:
     bool _is_fully_connected_convolution;
     bool _are_weights_reshaped;
     bool _is_quantized;
-    bool _is_interleaved_transposed;
+    bool _is_interleaved;
 };
 }
 #endif /* __ARM_COMPUTE_NECONVOLUTIONGEMMLAYER_H__ */
