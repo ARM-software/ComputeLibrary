@@ -56,3 +56,7 @@ void arm_compute::error(const char *function, const char *file, const int line, 
     va_end(args);
     throw std::runtime_error(err.description());
 }
+void Error::internal_throw_on_error()
+{
+    throw std::runtime_error(_description);
+}

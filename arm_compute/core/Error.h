@@ -25,7 +25,6 @@
 #define __ARM_COMPUTE_ERROR_H__
 
 #include <stdarg.h>
-#include <stdexcept>
 #include <string>
 
 namespace arm_compute
@@ -97,10 +96,7 @@ public:
 
 private:
     /** Internal throwing function */
-    [[noreturn]] void internal_throw_on_error()
-    {
-        throw std::runtime_error(_description);
-    }
+    [[noreturn]] void internal_throw_on_error();
 
 private:
     ErrorCode   _code;
