@@ -37,6 +37,34 @@ namespace test
 {
 namespace datasets
 {
+class GoogLeNetInceptionV1WinogradLayerDataset final : public ConvolutionLayerDataset
+{
+public:
+    // GoogLeNetInceptionV1 inception v1 dataset
+    GoogLeNetInceptionV1WinogradLayerDataset()
+    {
+        add_config(TensorShape(56U, 56U, 64U), TensorShape(3U, 3U, 64U, 192U), TensorShape(192U), TensorShape(56U, 56U, 192U), PadStrideInfo(1, 1, 1, 1));
+        // inception_3a/3x3
+        add_config(TensorShape(28U, 28U, 96U), TensorShape(3U, 3U, 96U, 128U), TensorShape(128U), TensorShape(28U, 28U, 128U), PadStrideInfo(1, 1, 1, 1));
+        // inception_3b/3x3
+        add_config(TensorShape(28U, 28U, 128U), TensorShape(3U, 3U, 128U, 192U), TensorShape(192U), TensorShape(28U, 28U, 192U), PadStrideInfo(1, 1, 1, 1));
+        // inception_4a/3x3
+        add_config(TensorShape(14U, 14U, 96U), TensorShape(3U, 3U, 96U, 208U), TensorShape(208U), TensorShape(14U, 14U, 208U), PadStrideInfo(1, 1, 1, 1));
+        // inception_4b/3x3
+        add_config(TensorShape(14U, 14U, 112U), TensorShape(3U, 3U, 112U, 224U), TensorShape(224U), TensorShape(14U, 14U, 224U), PadStrideInfo(1, 1, 1, 1));
+        // inception_4c/3x3
+        add_config(TensorShape(14U, 14U, 128U), TensorShape(3U, 3U, 128U, 256U), TensorShape(256U), TensorShape(14U, 14U, 256U), PadStrideInfo(1, 1, 1, 1));
+        // inception_4d/3x3
+        add_config(TensorShape(14U, 14U, 144U), TensorShape(3U, 3U, 144U, 288U), TensorShape(288U), TensorShape(14U, 14U, 288U), PadStrideInfo(1, 1, 1, 1));
+        // inception_4e/3x3
+        add_config(TensorShape(14U, 14U, 160U), TensorShape(3U, 3U, 160U, 320U), TensorShape(320U), TensorShape(14U, 14U, 320U), PadStrideInfo(1, 1, 1, 1));
+        // inception_5a/3x3
+        add_config(TensorShape(7U, 7U, 160U), TensorShape(3U, 3U, 160U, 320U), TensorShape(320U), TensorShape(7U, 7U, 320U), PadStrideInfo(1, 1, 1, 1));
+        // inception_5b/3x3
+        add_config(TensorShape(7U, 7U, 192U), TensorShape(3U, 3U, 192U, 384U), TensorShape(384U), TensorShape(7U, 7U, 384U), PadStrideInfo(1, 1, 1, 1));
+    }
+};
+
 class GoogLeNetInceptionV1ConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:

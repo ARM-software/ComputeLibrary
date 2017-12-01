@@ -37,6 +37,17 @@ namespace test
 {
 namespace datasets
 {
+class AlexNetWinogradLayerDataset final : public ConvolutionLayerDataset
+{
+public:
+    AlexNetWinogradLayerDataset()
+    {
+        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 192U), TensorShape(192U), TensorShape(13U, 13U, 192U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 192U), TensorShape(3U, 3U, 192U, 128U), TensorShape(128U), TensorShape(13U, 13U, 128U), PadStrideInfo(1, 1, 1, 1));
+    }
+};
+
 class AlexNetConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:
