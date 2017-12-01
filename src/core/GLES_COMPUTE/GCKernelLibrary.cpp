@@ -133,6 +133,11 @@ GCKernel::GCKernel()
 {
 }
 
+// Add a default destructor in cpp file to workaround the free unallocated value issue on Android
+GCKernel::~GCKernel() // NOLINT
+{
+}
+
 GCKernel::GCKernel(std::string name, GLuint program)
     : _name(std::move(name)),
       _program(program),

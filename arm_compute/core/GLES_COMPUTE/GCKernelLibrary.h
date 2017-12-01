@@ -103,6 +103,9 @@ public:
      * @param[in] program Built program.
      */
     GCKernel(std::string name, GLuint program);
+    /** Destructor.
+     */
+    ~GCKernel();
     /** Returns kernel name.
      *
      * @return Kernel's name.
