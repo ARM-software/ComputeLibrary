@@ -56,9 +56,9 @@ void arm_compute::enqueue(IGCKernel &kernel, const Window &window, const gles::N
     ARM_COMPUTE_ERROR_ON_MSG((((window.z().end() - window.z().start()) % (window.z().step() * lws[2])) != 0),
                              "window z end =%d, start=%d, step=%d, lws z=%d", window.z().end(), window.z().start(), window.z().step(), lws[2]);
 
-    ARM_COMPUTE_GL_CHECK(glDispatchCompute((window.x().end() - window.x().start()) / (window.x().step() / lws[0]),
-                                           (window.y().end() - window.y().start()) / (window.y().step() / lws[1]),
-                                           (window.z().end() - window.z().start()) / (window.z().step() / lws[2])));
+    ARM_COMPUTE_GL_CHECK(glDispatchCompute(((window.x().end() - window.x().start()) / window.x().step()) / lws[0],
+                                           ((window.y().end() - window.y().start()) / window.y().step()) / lws[1],
+                                           ((window.z().end() - window.z().start()) / window.z().step()) / lws[2]));
 }
 
 IGCKernel::IGCKernel()
