@@ -70,9 +70,9 @@ void main()
     {
         // Handle left border
         float left_val = LOAD4(buf, offset(buf, 0, gidH));
-        for(int i = -BORDER_SIZE_LEFT; i < 0; ++i)
+        for(int i = 0; i < BORDER_SIZE_LEFT; ++i)
         {
-            STORE4(buf, offset(buf, i, gidH), left_val);
+            STORE4(buf, offset(buf, -(i + 1), gidH), left_val);
         }
         // Handle right border
         float right_val = LOAD4(buf, offset(buf, int(width) - 1, gidH));
@@ -92,9 +92,9 @@ void main()
 
         // Handle top border
         float top_val = LOAD4(buf, offset(buf, val_idx, 0));
-        for(int i = -BORDER_SIZE_TOP; i < 0; ++i)
+        for(int i = 0; i < BORDER_SIZE_TOP; ++i)
         {
-            STORE4(buf, offset(buf, gidW, i), top_val);
+            STORE4(buf, offset(buf, gidW, -(i + 1)), top_val);
         }
         // Handle bottom border
         float bottom_val = LOAD4(buf, offset(buf, val_idx, int(height) - 1));
@@ -150,9 +150,9 @@ void main()
     if(gidH >= 0)
     {
         // Handle left border
-        for(int i = -BORDER_SIZE_LEFT; i < 0; ++i)
+        for(int i = 0; i < BORDER_SIZE_LEFT; ++i)
         {
-            STORE1(buf, offset(buf, i, gidH), constant_value);
+            STORE1(buf, offset(buf, -(i + 1), gidH), constant_value);
         }
         // Handle right border
         for(int i = 0; i < BORDER_SIZE_RIGHT; ++i)
@@ -163,9 +163,9 @@ void main()
     else
     {
         // Handle top border
-        for(int i = -BORDER_SIZE_TOP; i < 0; ++i)
+        for(int i = 0; i < BORDER_SIZE_TOP; ++i)
         {
-            STORE1(buf, offset(buf, gidW, i), constant_value);
+            STORE1(buf, offset(buf, gidW, -(i + 1)), constant_value);
         }
         // Handle bottom border
         for(int i = 0; i < BORDER_SIZE_BOTTOM; ++i)
@@ -247,11 +247,11 @@ void main()
         // Handle left border
         uint left_val;
         LOAD1(left_val, buf, offset_fp16(buf, 0, gidH) >> uint(2));
-        for(int i = -BORDER_SIZE_LEFT; i < 0; ++i)
+        for(int i = 0; i < BORDER_SIZE_LEFT; ++i)
         {
-            uint offset = offset_fp16(buf, i, gidH) >> 2;
-            int  pos    = i + BORDER_SIZE_LEFT;
-            if(i == -1)
+            uint offset = offset_fp16(buf, -(i + 1), gidH) >> 2;
+            int  pos    = BORDER_SIZE_LEFT - i - 1;
+            if(i == 0)
             {
                 if(pos % 2 == 0)
                 {
@@ -312,9 +312,9 @@ void main()
         // Handle top border
         uint top_val;
         LOAD1(top_val, buf, offset_fp16(buf, val_idx, 0) >> uint(2));
-        for(int i = -BORDER_SIZE_TOP; i < 0; ++i)
+        for(int i = 0; i < BORDER_SIZE_TOP; ++i)
         {
-            uint offset = offset_fp16(buf, gidW, i) >> 2;
+            uint offset = offset_fp16(buf, gidW, -(i + 1)) >> 2;
 
             if(gid0 % 2 == 0)
             {
@@ -479,12 +479,12 @@ void main()
     if(gidH >= 0)
     {
         // Handle left border
-        for(int i = -BORDER_SIZE_LEFT; i < 0; ++i)
+        for(int i = 0; i < BORDER_SIZE_LEFT; ++i)
         {
-            uint offset = offset_fp16(buf, i, gidH) >> 2;
-            int  pos    = i + BORDER_SIZE_LEFT;
+            uint offset = offset_fp16(buf, -(i + 1), gidH) >> 2;
+            int  pos    = BORDER_SIZE_LEFT - i - 1;
 
-            if(i == -1)
+            if(i == 0)
             {
                 if(pos % 2 == 0)
                 {
@@ -528,9 +528,9 @@ void main()
     else
     {
         // Handle top border
-        for(int i = -BORDER_SIZE_TOP; i < 0; ++i)
+        for(int i = 0; i < BORDER_SIZE_TOP; ++i)
         {
-            uint offset = offset_fp16(buf, gidW, i) >> 2;
+            uint offset = offset_fp16(buf, gidW, -(i + 1)) >> 2;
 
             if(gid0 % 2 == 0)
             {
