@@ -87,11 +87,11 @@ void CommandLineParser::parse(int argc, char **argv)
         {
             if(positional_index >= _positional_options.size())
             {
-                _invalid_options.push_back(option);
+                _invalid_options.push_back(mixed_case_opt);
             }
             else
             {
-                _positional_options[positional_index]->parse(option);
+                _positional_options[positional_index]->parse(mixed_case_opt);
                 ++positional_index;
             }
         }
