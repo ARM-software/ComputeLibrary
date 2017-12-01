@@ -32,6 +32,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/utility.h"
 
 #include <algorithm>
 #include <arm_neon.h>
@@ -319,34 +320,14 @@ bool NEMinMaxLocationKernel::is_parallelisable() const
     return false;
 }
 
-template <unsigned int...>
-struct index_seq
-{
-    index_seq()                  = default;
-    index_seq(const index_seq &) = default;
-    index_seq &operator=(const index_seq &) = default;
-    index_seq(index_seq &&) noexcept        = default;
-    index_seq &operator=(index_seq &&) noexcept = default;
-    virtual ~index_seq()                        = default;
-};
-template <unsigned int N, unsigned int... S>
-struct gen_index_seq : gen_index_seq < N - 1, N - 1, S... >
-{
-};
-template <unsigned int... S>
-struct gen_index_seq<0u, S...> : index_seq<S...>
-{
-    using type = index_seq<S...>;
-};
-
-template <class T, unsigned int... N>
-struct NEMinMaxLocationKernel::create_func_table<T, index_seq<N...>>
+template <class T, std::size_t... N>
+struct NEMinMaxLocationKernel::create_func_table<T, utility::index_sequence<N...>>
 {
     static const NEMinMaxLocationKernel::MinMaxLocFunction func_table[sizeof...(N)];
 };
 
-template <class T, unsigned int... N>
-const NEMinMaxLocationKernel::MinMaxLocFunction NEMinMaxLocationKernel::create_func_table<T, index_seq<N...>>::func_table[sizeof...(N)] =
+template <class T, std::size_t... N>
+const NEMinMaxLocationKernel::MinMaxLocFunction NEMinMaxLocationKernel::create_func_table<T, utility::index_sequence<N...>>::func_table[sizeof...(N)] =
 {
     &NEMinMaxLocationKernel::minmax_loc<T, bool(N & 8), bool(N & 4), bool(N & 2), bool(N & 1)>...
 };
@@ -378,13 +359,13 @@ void NEMinMaxLocationKernel::configure(const IImage *input, void *min, void *max
     switch(input->info()->data_type())
     {
         case DataType::U8:
-            _func = create_func_table<uint8_t, gen_index_seq<16>::type>::func_table[table_idx];
+            _func = create_func_table<uint8_t, utility::index_sequence_t<16>>::func_table[table_idx];
             break;
         case DataType::S16:
-            _func = create_func_table<int16_t, gen_index_seq<16>::type>::func_table[table_idx];
+            _func = create_func_table<int16_t, utility::index_sequence_t<16>>::func_table[table_idx];
             break;
         case DataType::F32:
-            _func = create_func_table<float, gen_index_seq<16>::type>::func_table[table_idx];
+            _func = create_func_table<float, utility::index_sequence_t<16>>::func_table[table_idx];
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported data type");

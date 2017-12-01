@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_TYPES_H__
 
 #include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "support/Half.h"
 
@@ -37,6 +38,9 @@ namespace arm_compute
 {
 /** 16-bit floating point type */
 using half = half_float::half;
+
+/** Permutation vector */
+using PermutationVector = Strides;
 
 /** Image colour formats */
 enum class Format

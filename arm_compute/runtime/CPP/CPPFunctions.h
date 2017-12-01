@@ -21,41 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_STRIDES_H__
-#define __ARM_COMPUTE_STRIDES_H__
+#ifndef __ARM_COMPUTE_CPPFUNCTIONS_H__
+#define __ARM_COMPUTE_CPPFUNCTIONS_H__
 
-#include "arm_compute/core/Dimensions.h"
-#include "arm_compute/core/Error.h"
+/* Header regrouping all the CPP functions */
+#include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 
-#include <algorithm>
-#include <array>
-#include <cstddef>
-
-namespace arm_compute
-{
-/** Strides of an item in bytes */
-class Strides : public Dimensions<size_t>
-{
-public:
-    /** Constructor to initialize the strides.
-     *
-     * @param[in] strides Values to initialize the strides.
-     */
-    template <typename... Ts>
-    constexpr Strides(Ts... strides)
-        : Dimensions{ strides... }
-    {
-    }
-    /** Allow instances of this class to be copy constructed */
-    constexpr Strides(const Strides &) = default;
-    /** Allow instances of this class to be copied */
-    Strides &operator=(const Strides &) = default;
-    /** Allow instances of this class to be move constructed */
-    constexpr Strides(Strides &&) = default;
-    /** Allow instances of this class to be moved */
-    Strides &operator=(Strides &&) = default;
-    /** Default destructor */
-    ~Strides() = default;
-};
-} // namespace arm_compute
-#endif /*__ARM_COMPUTE_STRIDES_H__*/
+#endif /* __ARM_COMPUTE_CPPFUNCTIONS_H__ */

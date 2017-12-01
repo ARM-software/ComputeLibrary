@@ -21,41 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_STRIDES_H__
-#define __ARM_COMPUTE_STRIDES_H__
+#ifndef __ARM_COMPUTE_ICPPSIMPLEFUNCTION_H__
+#define __ARM_COMPUTE_ICPPSIMPLEFUNCTION_H__
 
-#include "arm_compute/core/Dimensions.h"
-#include "arm_compute/core/Error.h"
+#include "arm_compute/core/CPP/ICPPKernel.h"
+#include "arm_compute/runtime/IFunction.h"
 
-#include <algorithm>
-#include <array>
-#include <cstddef>
+#include <memory>
 
 namespace arm_compute
 {
-/** Strides of an item in bytes */
-class Strides : public Dimensions<size_t>
+/** Basic interface for functions which have a single CPP kernel */
+class ICPPSimpleFunction : public IFunction
 {
 public:
-    /** Constructor to initialize the strides.
-     *
-     * @param[in] strides Values to initialize the strides.
-     */
-    template <typename... Ts>
-    constexpr Strides(Ts... strides)
-        : Dimensions{ strides... }
-    {
-    }
-    /** Allow instances of this class to be copy constructed */
-    constexpr Strides(const Strides &) = default;
-    /** Allow instances of this class to be copied */
-    Strides &operator=(const Strides &) = default;
-    /** Allow instances of this class to be move constructed */
-    constexpr Strides(Strides &&) = default;
-    /** Allow instances of this class to be moved */
-    Strides &operator=(Strides &&) = default;
-    /** Default destructor */
-    ~Strides() = default;
+    /** Constructor */
+    ICPPSimpleFunction();
+
+    // Inherited methods overridden:
+    void run() override final;
+
+protected:
+    std::unique_ptr<ICPPKernel> _kernel; /**< Kernel to run */
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_STRIDES_H__*/
+#endif /*__ARM_COMPUTE_ICPPSIMPLEFUNCTION_H__ */

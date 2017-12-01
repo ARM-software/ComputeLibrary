@@ -33,6 +33,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/utility.h"
 
 #include <array>
 #include <cstddef>
@@ -457,6 +458,23 @@ template <typename... Ts>
 inline Strides compute_strides(const ITensorInfo &info)
 {
     return compute_strides(info, info.element_size());
+}
+
+/** Permutes given Dimensions according to a permutation vector
+ *
+ * @warning Validity of permutation is not checked
+ *
+ * @param[in, out] dimensions Dimensions to permute
+ * @param[in]      perm       Permutation vector
+ */
+template <typename T>
+inline void permute(Dimensions<T> &dimensions, const PermutationVector &perm)
+{
+    auto copy_dimensions = utility::make_array<Dimensions<T>::num_max_dimensions>(dimensions.begin(), dimensions.end());
+    for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
+    {
+        dimensions[i] = copy_dimensions[perm[i]];
+    }
 }
 
 /* Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.

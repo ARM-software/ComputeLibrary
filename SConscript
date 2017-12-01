@@ -142,6 +142,9 @@ core_files += Glob('src/core/CPP/kernels/*.cpp')
 core_files += Glob('src/core/utils/*/*.cpp')
 
 runtime_files = Glob('src/runtime/*.cpp')
+runtime_files += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
+runtime_files += Glob('src/runtime/CPP/functions/*.cpp')
+
 # CLHarrisCorners uses the Scheduler to run CPP kernels
 runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
 

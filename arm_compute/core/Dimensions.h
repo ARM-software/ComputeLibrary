@@ -100,7 +100,20 @@ public:
      *
      * @return The size of the requested dimension.
      */
-    T operator[](size_t dimension) const
+    const T &operator[](size_t dimension) const
+    {
+        ARM_COMPUTE_ERROR_ON(dimension >= num_max_dimensions);
+        return _id[dimension];
+    }
+    /** Generic accessor to get the size of any dimension
+     *
+     * @note Precondition: dimension < Dimensions::num_max_dimensions
+     *
+     * @param[in] dimension Dimension of the wanted size
+     *
+     * @return The size of the requested dimension.
+     */
+    T &operator[](size_t dimension)
     {
         ARM_COMPUTE_ERROR_ON(dimension >= num_max_dimensions);
         return _id[dimension];

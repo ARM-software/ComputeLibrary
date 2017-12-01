@@ -21,41 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_STRIDES_H__
-#define __ARM_COMPUTE_STRIDES_H__
+#include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 
-#include "arm_compute/core/Dimensions.h"
-#include "arm_compute/core/Error.h"
+#include "arm_compute/core/CPP/kernels/CPPPermuteKernel.h"
+#include "support/ToolchainSupport.h"
 
-#include <algorithm>
-#include <array>
-#include <cstddef>
+using namespace arm_compute;
 
-namespace arm_compute
+void CPPPermute::configure(const ITensor *input, ITensor *output, const PermutationVector &perm)
 {
-/** Strides of an item in bytes */
-class Strides : public Dimensions<size_t>
+    auto k = arm_compute::support::cpp14::make_unique<CPPPermuteKernel>();
+    k->configure(input, output, perm);
+    _kernel = std::move(k);
+}
+
+Error CPPPermute::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
-public:
-    /** Constructor to initialize the strides.
-     *
-     * @param[in] strides Values to initialize the strides.
-     */
-    template <typename... Ts>
-    constexpr Strides(Ts... strides)
-        : Dimensions{ strides... }
-    {
-    }
-    /** Allow instances of this class to be copy constructed */
-    constexpr Strides(const Strides &) = default;
-    /** Allow instances of this class to be copied */
-    Strides &operator=(const Strides &) = default;
-    /** Allow instances of this class to be move constructed */
-    constexpr Strides(Strides &&) = default;
-    /** Allow instances of this class to be moved */
-    Strides &operator=(Strides &&) = default;
-    /** Default destructor */
-    ~Strides() = default;
-};
-} // namespace arm_compute
-#endif /*__ARM_COMPUTE_STRIDES_H__*/
+    return CPPPermuteKernel::validate(input, output, perm);
+}

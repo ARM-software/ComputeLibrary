@@ -21,41 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_STRIDES_H__
-#define __ARM_COMPUTE_STRIDES_H__
+#include "Permute.h"
 
-#include "arm_compute/core/Dimensions.h"
-#include "arm_compute/core/Error.h"
-
-#include <algorithm>
-#include <array>
-#include <cstddef>
+#include "arm_compute/core/Types.h"
+#include "tests/validation/Helpers.h"
 
 namespace arm_compute
 {
-/** Strides of an item in bytes */
-class Strides : public Dimensions<size_t>
+namespace test
 {
-public:
-    /** Constructor to initialize the strides.
-     *
-     * @param[in] strides Values to initialize the strides.
-     */
-    template <typename... Ts>
-    constexpr Strides(Ts... strides)
-        : Dimensions{ strides... }
+namespace validation
+{
+namespace reference
+{
+template <typename T>
+SimpleTensor<T> permute(const SimpleTensor<T> &src, PermutationVector perm)
+{
+    // Permute shapes
+    TensorShape dst_shape = src.shape();
+    permute(dst_shape, perm);
+
+    // Create reference
+    SimpleTensor<T> dst{ dst_shape, src.data_type() };
+
+    // Compute reference
+    for(int i = 0; i < src.num_elements(); ++i)
     {
+        Coordinates coord = index2coord(src.shape(), i);
+        permute(coord, perm);
+        const size_t dst_index = coord2index(dst.shape(), coord);
+
+        dst[dst_index] = src[i];
     }
-    /** Allow instances of this class to be copy constructed */
-    constexpr Strides(const Strides &) = default;
-    /** Allow instances of this class to be copied */
-    Strides &operator=(const Strides &) = default;
-    /** Allow instances of this class to be move constructed */
-    constexpr Strides(Strides &&) = default;
-    /** Allow instances of this class to be moved */
-    Strides &operator=(Strides &&) = default;
-    /** Default destructor */
-    ~Strides() = default;
-};
+
+    return dst;
+}
+
+template SimpleTensor<uint8_t> permute(const SimpleTensor<uint8_t> &src, PermutationVector perm);
+template SimpleTensor<uint16_t> permute(const SimpleTensor<uint16_t> &src, PermutationVector perm);
+template SimpleTensor<uint32_t> permute(const SimpleTensor<uint32_t> &src, PermutationVector perm);
+} // namespace reference
+} // namespace validation
+} // namespace test
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_STRIDES_H__*/

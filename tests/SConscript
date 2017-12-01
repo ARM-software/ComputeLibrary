@@ -87,6 +87,10 @@ files_validation += Glob('validation/reference/*.cpp')
 files_validation += Glob('validation/UNIT/*/*.cpp')
 files_validation += Glob('validation/UNIT/*.cpp')
 
+# Add CPP tests
+filter_pattern = test_env['test_filter']
+files_validation += Glob('validation/CPP/' + filter_pattern)
+
 if env['opencl']:
     Import('opencl')
     filter_pattern = test_env['test_filter']

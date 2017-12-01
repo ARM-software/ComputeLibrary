@@ -21,41 +21,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_STRIDES_H__
-#define __ARM_COMPUTE_STRIDES_H__
+#ifndef __ARM_COMPUTE_MISC_UTILITY_H__
+#define __ARM_COMPUTE_MISC_UTILITY_H__
 
-#include "arm_compute/core/Dimensions.h"
-#include "arm_compute/core/Error.h"
-
-#include <algorithm>
 #include <array>
-#include <cstddef>
 
 namespace arm_compute
 {
-/** Strides of an item in bytes */
-class Strides : public Dimensions<size_t>
+namespace utility
 {
-public:
-    /** Constructor to initialize the strides.
-     *
-     * @param[in] strides Values to initialize the strides.
-     */
-    template <typename... Ts>
-    constexpr Strides(Ts... strides)
-        : Dimensions{ strides... }
-    {
-    }
-    /** Allow instances of this class to be copy constructed */
-    constexpr Strides(const Strides &) = default;
-    /** Allow instances of this class to be copied */
-    Strides &operator=(const Strides &) = default;
-    /** Allow instances of this class to be move constructed */
-    constexpr Strides(Strides &&) = default;
-    /** Allow instances of this class to be moved */
-    Strides &operator=(Strides &&) = default;
-    /** Default destructor */
-    ~Strides() = default;
+/** @cond */
+template <std::size_t...>
+struct index_sequence
+{
 };
+
+template <std::size_t N, std::size_t... S>
+struct index_sequence_generator : index_sequence_generator < N - 1, N - 1, S... >
+{
+};
+
+template <std::size_t... S>
+struct index_sequence_generator<0u, S...> : index_sequence<S...>
+{
+    using type = index_sequence<S...>;
+};
+
+template <std::size_t N>
+using index_sequence_t = typename index_sequence_generator<N>::type;
+/** @endcond */
+
+namespace detail
+{
+template <std::size_t... S,
+          typename Iterator,
+          typename T = std::array<typename std::iterator_traits<Iterator>::value_type, sizeof...(S)>>
+T make_array(Iterator first, index_sequence<S...>)
+{
+    return T{ { first[S]... } };
+}
+} // namespace detail
+
+template <std::size_t N, typename Iterator>
+std::array<typename std::iterator_traits<Iterator>::value_type, N> make_array(Iterator first, Iterator last)
+{
+    return detail::make_array(first, index_sequence_t<N> {});
+}
+} // namespace misc
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_STRIDES_H__*/
+#endif /* __ARM_COMPUTE_MISC_UTILITY_H__ */
