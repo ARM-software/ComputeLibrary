@@ -24,9 +24,9 @@
 #include "HarrisCornerDetector.h"
 
 #include "Utils.h"
-#include "tests/validation/CPP/NonMaximaSuppression.h"
-#include "tests/validation/CPP/Sobel.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/NonMaximaSuppression.h"
+#include "tests/validation/reference/Sobel.h"
 
 namespace arm_compute
 {

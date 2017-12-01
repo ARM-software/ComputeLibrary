@@ -32,7 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/DequantizationLayer.h"
+#include "tests/validation/reference/DequantizationLayer.h"
 
 #include <random>
 

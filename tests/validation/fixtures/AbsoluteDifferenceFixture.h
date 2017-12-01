@@ -31,8 +31,8 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/AbsoluteDifference.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/AbsoluteDifference.h"
 
 namespace arm_compute
 {

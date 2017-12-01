@@ -32,7 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/SoftmaxLayer.h"
+#include "tests/validation/reference/SoftmaxLayer.h"
 
 #include <random>
 

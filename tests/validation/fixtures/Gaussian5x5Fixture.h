@@ -31,7 +31,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/Gaussian5x5.h"
+#include "tests/validation/reference/Gaussian5x5.h"
 
 #include <random>
 

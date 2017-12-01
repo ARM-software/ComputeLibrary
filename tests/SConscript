@@ -81,7 +81,7 @@ files_benchmark = Glob('benchmark/*.cpp')
 files_validation = Glob('validation/*.cpp')
 
 # Always compile reference for validation
-files_validation += Glob('validation/CPP/*.cpp')
+files_validation += Glob('validation/reference/*.cpp')
 
 # Add unit tests
 files_validation += Glob('validation/UNIT/*/*.cpp')

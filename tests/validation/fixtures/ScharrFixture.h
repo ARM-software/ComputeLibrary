@@ -29,7 +29,7 @@
 #include "tests/Types.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/Scharr.h"
+#include "tests/validation/reference/Scharr.h"
 
 #include <memory>
 

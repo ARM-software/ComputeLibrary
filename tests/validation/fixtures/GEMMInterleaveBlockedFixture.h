@@ -31,8 +31,8 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/GEMMInterleaveBlocked.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/GEMMInterleaveBlocked.h"
 
 #include <random>
 

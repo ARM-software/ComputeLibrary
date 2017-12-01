@@ -33,7 +33,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/GaussianPyramidHalf.h"
+#include "tests/validation/reference/GaussianPyramidHalf.h"
 
 namespace arm_compute
 {

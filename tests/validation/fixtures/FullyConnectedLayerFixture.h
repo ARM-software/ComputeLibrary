@@ -33,9 +33,9 @@
 #include "tests/RawTensor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/FullyConnectedLayer.h"
-#include "tests/validation/CPP/Utils.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/FullyConnectedLayer.h"
+#include "tests/validation/reference/Utils.h"
 
 #include <random>
 

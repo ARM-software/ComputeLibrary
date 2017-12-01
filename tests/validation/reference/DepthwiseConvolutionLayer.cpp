@@ -26,10 +26,10 @@
 #include "ConvolutionLayer.h"
 #include "Utils.h"
 
-#include "tests/validation/CPP/Utils.h"
-#include "tests/validation/CPP/UtilsQuantizedAsymm.h"
 #include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/Utils.h"
+#include "tests/validation/reference/UtilsQuantizedAsymm.h"
 
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 

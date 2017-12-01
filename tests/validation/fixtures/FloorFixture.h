@@ -32,7 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/Floor.h"
+#include "tests/validation/reference/Floor.h"
 
 namespace arm_compute
 {

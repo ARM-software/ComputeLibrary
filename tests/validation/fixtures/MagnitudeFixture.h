@@ -30,7 +30,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/Magnitude.h"
+#include "tests/validation/reference/Magnitude.h"
 
 namespace arm_compute
 {

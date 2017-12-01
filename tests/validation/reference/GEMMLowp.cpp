@@ -24,7 +24,7 @@
 #include "GEMMLowp.h"
 
 #include "arm_compute/core/Types.h"
-#include "tests/validation/CPP/UtilsQuantizedAsymm.h"
+#include "tests/validation/reference/UtilsQuantizedAsymm.h"
 
 #include <limits>
 

@@ -31,7 +31,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/FixedPointPixelWiseMultiplication.h"
+#include "tests/validation/reference/FixedPointPixelWiseMultiplication.h"
 
 namespace arm_compute
 {
