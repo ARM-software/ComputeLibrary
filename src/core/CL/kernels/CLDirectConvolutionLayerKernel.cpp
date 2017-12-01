@@ -60,269 +60,8 @@ TensorShape get_output_shape(TensorShape input_shape, TensorShape weights_shape,
 
     return output_shape;
 }
-} // namespace
 
-CLDirectConvolutionLayerKernel::CLDirectConvolutionLayerKernel()
-    : _input(nullptr), _biases(nullptr), _weights(nullptr), _output(nullptr), _border_size(0), _conv_stride_x(0), _conv_stride_y(0)
-{
-}
-
-BorderSize CLDirectConvolutionLayerKernel::border_size() const
-{
-    return _border_size;
-}
-
-void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-
-    const unsigned int kernel_size = weights->info()->dimension(0);
-    const DataType     data_type   = input->info()->data_type();
-
-    // Get convolved dimensions
-    TensorShape output_shape = get_output_shape(input->info()->tensor_shape(), weights->info()->tensor_shape(), conv_info);
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(),
-                       output_shape,
-                       1,
-                       input->info()->data_type(),
-                       input->info()->fixed_point_position(),
-                       input->info()->quantization_info());
-
-    // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(CLDirectConvolutionLayerKernel::validate(input->info(),
-                                                                        weights->info(),
-                                                                        (biases != nullptr) ? biases->info() : nullptr,
-                                                                        output->info(),
-                                                                        conv_info));
-
-    _conv_stride_x = std::get<0>(conv_info.stride());
-    _conv_stride_y = std::get<1>(conv_info.stride());
-
-    _input   = input;
-    _weights = weights;
-    _output  = output;
-    _biases  = biases;
-
-    int conv_pad_left   = std::min(conv_info.pad_left(), kernel_size / 2);
-    int conv_pad_top    = std::min(conv_info.pad_top(), kernel_size / 2);
-    int conv_pad_right  = std::min(conv_info.pad_right(), kernel_size / 2);
-    int conv_pad_bottom = std::min(conv_info.pad_bottom(), kernel_size / 2);
-    _border_size        = BorderSize(conv_pad_top, conv_pad_right, conv_pad_bottom, conv_pad_left);
-
-    const GPUTarget gpu_target = get_arch_from_target(get_target());
-
-    std::stringstream kernel_name;
-    kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
-
-    CLBuildOptions build_options;
-    build_options.add_option_if(_biases != nullptr, std::string("-DHAS_BIAS"));
-
-    if((gpu_target == GPUTarget::BIFROST) && (kernel_size <= 5) && (_conv_stride_x == 1) && (_conv_stride_y == 1) && (data_type == DataType::F32))
-    {
-        build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));
-
-        kernel_name << "_f32_bifrost";
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), build_options.options()));
-
-        // Configure kernel window
-        Window win = calculate_max_window(*output->info());
-
-        unsigned int num_elems_read_per_iteration_x    = 0;
-        unsigned int num_elems_read_per_iteration_y    = 0;
-        unsigned int num_elems_written_per_iteration_x = 0;
-        unsigned int num_elems_written_per_iteration_y = 0;
-
-        // Through extensive experimentation with over 30 representative tensor
-        // shapes, we found a small number of local work size configurations
-        // that result in nearly optimal execution times. Selecting the right
-        // lws for a given shape, however, required a complex decision tree,
-        // until we constructed a simple feature as described below.
-        //
-        // We started from the number of multiply-accumulate operations for a
-        // convolution layer, which is equal to the product of the input
-        // dimensions 0..2 and the weights dimensions 0..2.  Unfortunately,
-        // this resulted in ties between distinct shapes that required distinct
-        // lws configurations. Replacing the width of the input with the kernel
-        // size, however, resulted in nearly optimal predictions. We use underscores
-        // in variable names to indicate when they are intentionally misleading.
-        const size_t product_of_weights_dimensions = weights->info()->dimension(0) * weights->info()->dimension(1) * weights->info()->dimension(2);
-        const size_t product_of_input_dimensions_  = input->info()->dimension(0) * weights->info()->dimension(1) * input->info()->dimension(2);
-        const float  mega_ops_                     = 1e-6 * product_of_weights_dimensions * product_of_input_dimensions_;
-
-        switch(kernel_size)
-        {
-            case 1:
-            {
-                num_elems_read_per_iteration_x    = 4;
-                num_elems_read_per_iteration_y    = 4;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_written_per_iteration_y = 4;
-                if(mega_ops_ < 1.f)
-                {
-                    _lws_hint = cl::NDRange(1, 1, 8);
-                }
-                else if(mega_ops_ < 7.f)
-                {
-                    _lws_hint = cl::NDRange(1, 1, 4);
-                }
-                else
-                {
-                    _lws_hint = cl::NDRange(1, 1, 2);
-                }
-                break;
-            }
-            case 3:
-            {
-                num_elems_read_per_iteration_x    = 6;
-                num_elems_read_per_iteration_y    = 5;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_written_per_iteration_y = 3;
-                if(mega_ops_ < 1.f)
-                {
-                    _lws_hint = cl::NDRange(1, 1, 8);
-                }
-                else if(mega_ops_ < 13.f)
-                {
-                    _lws_hint = cl::NDRange(2, 1, 4);
-                }
-                else if(mega_ops_ < 50.f)
-                {
-                    _lws_hint = cl::NDRange(3, 1, 4);
-                }
-                else
-                {
-                    _lws_hint = cl::NDRange(2, 1, 6);
-                }
-                break;
-            }
-            case 5:
-            {
-                num_elems_read_per_iteration_x    = 8;
-                num_elems_read_per_iteration_y    = 6;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_written_per_iteration_y = 2;
-                if(mega_ops_ < 2.f || mega_ops_ > 80.f)
-                {
-                    _lws_hint = cl::NDRange(2, 1, 4);
-                }
-                else
-                {
-                    _lws_hint = cl::NDRange(2, 1, 8);
-                }
-                break;
-            }
-            default:
-            {
-                ARM_COMPUTE_ERROR("Kernel size not optimized for Bifrost");
-            }
-        }
-
-        // Calculate right and bottom border
-        const int input_width  = input->info()->dimension(0) - kernel_size / 2 + conv_pad_right;
-        const int input_height = input->info()->dimension(1) - kernel_size / 2 + conv_pad_bottom;
-
-        // Create window and update padding
-        win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
-
-        AccessWindowStatic    input_access(input->info(), -conv_pad_left, -conv_pad_top, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
-        AccessWindowStatic    weights_access(weights->info(), 0, 0, kernel_size, kernel_size);
-        AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
-
-        update_window_and_padding(win, input_access, weights_access, output_access);
-
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-        ICLKernel::configure(win);
-    }
-    else
-    {
-        bool     is_quantized_fixed_point = is_data_type_fixed_point(data_type);
-        bool     is_quantized_asymm       = is_data_type_quantized_asymmetric(data_type);
-        DataType promoted_type            = (is_quantized_fixed_point) ? get_promoted_data_type(data_type) : data_type;
-
-        build_options.add_option_if(is_quantized_asymm, std::string("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size)));
-        build_options.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
-        build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));
-        build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));
-        build_options.add_option(std::string("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x)));
-        build_options.add_option_if(is_quantized_fixed_point,
-                                    std::string("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
-        build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(promoted_type)));
-
-        // Create kernel
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(is_quantized_asymm ? "direct_convolution_1x1_3x3_5x5_quantized" : kernel_name.str(),
-                                                                               build_options.options()));
-
-        // Configure kernel window
-
-        bool is_stride2 = ((kernel_size != 1) && (_conv_stride_x == 2));
-
-        const unsigned int num_elems_read_per_iteration_x    = 8 + 2 * (kernel_size / 2) + (is_stride2 ? 6 + kernel_size / 2 : 0);
-        const unsigned int num_elems_read_per_iteration_y    = kernel_size;
-        const unsigned int num_elems_written_per_iteration_x = 8;
-        const unsigned int num_elems_written_per_iteration_y = 1;
-
-        // Calculate right and bottom border
-        const int input_width  = input->info()->dimension(0) - kernel_size / 2 + conv_pad_right;
-        const int input_height = input->info()->dimension(1) - kernel_size / 2 + conv_pad_bottom;
-
-        // Create window and update padding
-        Window win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
-
-        AccessWindowStatic    input_access(input->info(), -conv_pad_left, -conv_pad_top, input_width + num_elems_read_per_iteration_x, input_height + num_elems_read_per_iteration_y);
-        AccessWindowStatic    weights_access(weights->info(), 0, 0, kernel_size, kernel_size);
-        AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
-
-        update_window_and_padding(win, input_access, weights_access, output_access);
-
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-        ICLKernel::configure(win);
-    }
-
-    // Set static kernel arguments
-    if(is_data_type_quantized_asymmetric(data_type))
-    {
-        int output_multiplier = 0;
-        int output_shift      = 0;
-
-        float multiplier = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
-        ARM_COMPUTE_THROW_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
-
-        unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0) + 1;
-        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
-        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
-        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
-        _kernel.setArg(idx++, output_multiplier);
-        _kernel.setArg(idx++, output_shift);
-    }
-
-    // Set config_id for enabling LWS tuning
-    _config_id = "direct_convolution_";
-    _config_id += lower_string(string_from_data_type(data_type));
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(kernel_size);
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_left);
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_top);
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_right);
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_bottom);
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(_conv_stride_x);
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(_conv_stride_y);
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(output->info()->dimension(0));
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(output->info()->dimension(1));
-}
-
-Error CLDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+Error validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -365,6 +104,326 @@ Error CLDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const I
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
+
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *output, const PadStrideInfo &conv_info, const GPUTarget target)
+{
+    const unsigned int kernel_size = weights->dimension(0);
+    const DataType     data_type   = input->data_type();
+
+    // Get convolved dimensions
+    TensorShape output_shape = get_output_shape(input->tensor_shape(), weights->tensor_shape(), conv_info);
+
+    // Output auto inizialitation if not yet initialized
+    // FIXME: input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
+    auto_init_if_empty(*output, output_shape,
+                       1,
+                       input->data_type(),
+                       input->fixed_point_position(),
+                       input->quantization_info());
+
+    unsigned int conv_stride_x   = std::get<0>(conv_info.stride());
+    unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
+    unsigned int conv_pad_left   = std::min(conv_info.pad_left(), kernel_size / 2);
+    unsigned int conv_pad_top    = std::min(conv_info.pad_top(), kernel_size / 2);
+    unsigned int conv_pad_right  = std::min(conv_info.pad_right(), kernel_size / 2);
+    unsigned int conv_pad_bottom = std::min(conv_info.pad_bottom(), kernel_size / 2);
+
+    unsigned int num_elems_read_per_iteration_x    = 0;
+    unsigned int num_elems_read_per_iteration_y    = 0;
+    unsigned int num_elems_written_per_iteration_x = 0;
+    unsigned int num_elems_written_per_iteration_y = 0;
+
+    Window win            = Window();
+    bool   window_changed = false;
+
+    if((target == GPUTarget::BIFROST) && (kernel_size <= 5) && (conv_stride_x == 1) && (conv_stride_y == 1) && (data_type == DataType::F32))
+    {
+        // Configure kernel window
+        win = calculate_max_window(*output);
+
+        switch(kernel_size)
+        {
+            case 1:
+            {
+                num_elems_read_per_iteration_x    = 4;
+                num_elems_read_per_iteration_y    = 4;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_written_per_iteration_y = 4;
+                break;
+            }
+            case 3:
+            {
+                num_elems_read_per_iteration_x    = 6;
+                num_elems_read_per_iteration_y    = 5;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_written_per_iteration_y = 3;
+                break;
+            }
+            case 5:
+            {
+                num_elems_read_per_iteration_x    = 8;
+                num_elems_read_per_iteration_y    = 6;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_written_per_iteration_y = 2;
+                break;
+            }
+            default:
+            {
+                ARM_COMPUTE_ERROR("Kernel size not optimized for Bifrost");
+            }
+        }
+    }
+    else
+    {
+        bool is_stride2 = ((kernel_size != 1) && (conv_stride_x == 2));
+
+        num_elems_read_per_iteration_x    = 8 + 2 * (kernel_size / 2) + (is_stride2 ? 6 + kernel_size / 2 : 0);
+        num_elems_read_per_iteration_y    = kernel_size;
+        num_elems_written_per_iteration_x = 8;
+        num_elems_written_per_iteration_y = 1;
+    }
+
+    // Calculate right and bottom border
+    int input_width  = input->dimension(0) - kernel_size / 2 + conv_pad_right;
+    int input_height = input->dimension(1) - kernel_size / 2 + conv_pad_bottom;
+
+    // Add padding only if necessary or it would always result in a window_changed
+    if(input_width % num_elems_read_per_iteration_x > 0)
+    {
+        input_width += num_elems_read_per_iteration_x;
+    }
+    if(input_height % num_elems_read_per_iteration_y > 0)
+    {
+        input_height += num_elems_read_per_iteration_y;
+    }
+
+    // Create window and update padding
+    win = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
+
+    AccessWindowStatic    input_access(input, -conv_pad_left, -conv_pad_top, input_width, input_height);
+    AccessWindowStatic    weights_access(weights, 0, 0, kernel_size, kernel_size);
+    AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
+
+    window_changed = update_window_and_padding(win, input_access, weights_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
+CLDirectConvolutionLayerKernel::CLDirectConvolutionLayerKernel()
+    : _input(nullptr), _biases(nullptr), _weights(nullptr), _output(nullptr), _border_size(0), _conv_stride_x(0), _conv_stride_y(0)
+{
+}
+
+BorderSize CLDirectConvolutionLayerKernel::border_size() const
+{
+    return _border_size;
+}
+
+void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+
+    const unsigned int kernel_size = weights->info()->dimension(0);
+    const DataType     data_type   = input->info()->data_type();
+
+    // Get convolved dimensions
+    TensorShape output_shape = get_output_shape(input->info()->tensor_shape(), weights->info()->tensor_shape(), conv_info);
+
+    // Output auto inizialitation if not yet initialized
+    // FIXME: input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
+    auto_init_if_empty(*output->info(),
+                       output_shape,
+                       1,
+                       input->info()->data_type(),
+                       input->info()->fixed_point_position(),
+                       input->info()->quantization_info());
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
+                                                  weights->info(),
+                                                  (biases != nullptr) ? biases->info() : nullptr,
+                                                  output->info(),
+                                                  conv_info));
+
+    _conv_stride_x = std::get<0>(conv_info.stride());
+    _conv_stride_y = std::get<1>(conv_info.stride());
+
+    _input   = input;
+    _weights = weights;
+    _output  = output;
+    _biases  = biases;
+
+    int conv_pad_left   = std::min(conv_info.pad_left(), kernel_size / 2);
+    int conv_pad_top    = std::min(conv_info.pad_top(), kernel_size / 2);
+    int conv_pad_right  = std::min(conv_info.pad_right(), kernel_size / 2);
+    int conv_pad_bottom = std::min(conv_info.pad_bottom(), kernel_size / 2);
+    _border_size        = BorderSize(conv_pad_top, conv_pad_right, conv_pad_bottom, conv_pad_left);
+
+    const GPUTarget gpu_target = get_arch_from_target(get_target());
+
+    std::stringstream kernel_name;
+    kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
+
+    CLBuildOptions build_options;
+    build_options.add_option_if(_biases != nullptr, std::string("-DHAS_BIAS"));
+
+    if((gpu_target == GPUTarget::BIFROST) && (kernel_size <= 5) && (_conv_stride_x == 1) && (_conv_stride_y == 1) && (data_type == DataType::F32))
+    {
+        build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));
+
+        kernel_name << "_f32_bifrost";
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), build_options.options()));
+
+        // Through extensive experimentation with over 30 representative tensor
+        // shapes, we found a small number of local work size configurations
+        // that result in nearly optimal execution times. Selecting the right
+        // lws for a given shape, however, required a complex decision tree,
+        // until we constructed a simple feature as described below.
+        //
+        // We started from the number of multiply-accumulate operations for a
+        // convolution layer, which is equal to the product of the input
+        // dimensions 0..2 and the weights dimensions 0..2.  Unfortunately,
+        // this resulted in ties between distinct shapes that required distinct
+        // lws configurations. Replacing the width of the input with the kernel
+        // size, however, resulted in nearly optimal predictions. We use underscores
+        // in variable names to indicate when they are intentionally misleading.
+        const size_t product_of_weights_dimensions = weights->info()->dimension(0) * weights->info()->dimension(1) * weights->info()->dimension(2);
+        const size_t product_of_input_dimensions_  = input->info()->dimension(0) * weights->info()->dimension(1) * input->info()->dimension(2);
+        const float  mega_ops_                     = 1e-6 * product_of_weights_dimensions * product_of_input_dimensions_;
+
+        switch(kernel_size)
+        {
+            case 1:
+            {
+                if(mega_ops_ < 1.f)
+                {
+                    _lws_hint = cl::NDRange(1, 1, 8);
+                }
+                else if(mega_ops_ < 7.f)
+                {
+                    _lws_hint = cl::NDRange(1, 1, 4);
+                }
+                else
+                {
+                    _lws_hint = cl::NDRange(1, 1, 2);
+                }
+                break;
+            }
+            case 3:
+            {
+                if(mega_ops_ < 1.f)
+                {
+                    _lws_hint = cl::NDRange(1, 1, 8);
+                }
+                else if(mega_ops_ < 13.f)
+                {
+                    _lws_hint = cl::NDRange(2, 1, 4);
+                }
+                else if(mega_ops_ < 50.f)
+                {
+                    _lws_hint = cl::NDRange(3, 1, 4);
+                }
+                else
+                {
+                    _lws_hint = cl::NDRange(2, 1, 6);
+                }
+                break;
+            }
+            case 5:
+            {
+                if(mega_ops_ < 2.f || mega_ops_ > 80.f)
+                {
+                    _lws_hint = cl::NDRange(2, 1, 4);
+                }
+                else
+                {
+                    _lws_hint = cl::NDRange(2, 1, 8);
+                }
+                break;
+            }
+            default:
+            {
+                ARM_COMPUTE_ERROR("Kernel size not optimized for Bifrost");
+            }
+        }
+    }
+    else
+    {
+        bool     is_quantized_fixed_point = is_data_type_fixed_point(data_type);
+        bool     is_quantized_asymm       = is_data_type_quantized_asymmetric(data_type);
+        DataType promoted_type            = (is_quantized_fixed_point) ? get_promoted_data_type(data_type) : data_type;
+
+        build_options.add_option_if(is_quantized_asymm, std::string("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size)));
+        build_options.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
+        build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));
+        build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));
+        build_options.add_option(std::string("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x)));
+        build_options.add_option_if(is_quantized_fixed_point,
+                                    std::string("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
+        build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(promoted_type)));
+
+        // Create kernel
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(is_quantized_asymm ? "direct_convolution_1x1_3x3_5x5_quantized" : kernel_name.str(),
+                                                                               build_options.options()));
+    }
+
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, gpu_target);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
+
+    // Set static kernel arguments
+    if(is_data_type_quantized_asymmetric(data_type))
+    {
+        int output_multiplier = 0;
+        int output_shift      = 0;
+
+        float multiplier = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
+        ARM_COMPUTE_THROW_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
+
+        unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0) + 1;
+        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
+        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
+        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
+        _kernel.setArg(idx++, output_multiplier);
+        _kernel.setArg(idx++, output_shift);
+    }
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "direct_convolution_";
+    _config_id += lower_string(string_from_data_type(data_type));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(kernel_size);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(conv_pad_left);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(conv_pad_top);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(conv_pad_right);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(conv_pad_bottom);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(_conv_stride_x);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(_conv_stride_y);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+}
+
+Error CLDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                               const GPUTarget target)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), output->clone().get(), conv_info, target).first);
 
     return Error{};
 }

@@ -92,7 +92,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid biases size
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid biases dimensions
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid output size
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Window shrink
+                                                       TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32, 0),
                                                      }),
                framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F16, 0),
                                                         TensorInfo(TensorShape(3U, 3U, 3U, 4U), 1, DataType::F32, 0),
@@ -104,6 +105,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                         TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
                                                         TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
                                                         TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
+                                                        TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32, 0),
                                                      })),
                framework::dataset::make("BiasesInfo",{ TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
@@ -113,6 +115,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(3U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(4U, 2U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
                                                      })),
@@ -126,6 +129,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(26U, 11U, 4U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
+                                                       TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32, 0),
                                                      })),
                framework::dataset::make("ConvInfo",  { PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
@@ -137,11 +141,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 0, 0),
                                                       })),
-               framework::dataset::make("Expected", { true, true, true, true, true, true, true, true, true, false })),
+               framework::dataset::make("Expected", { true, true, true, true, true, true, true, true, true, true, false })),
                input_info, weights_info, biases_info, output_info, conv_info, expected)
 {
-    bool is_error = bool(CLDirectConvolutionLayer::validate(&input_info, &weights_info, &biases_info, &output_info, conv_info));
+    bool is_error = bool(CLDirectConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info));
     ARM_COMPUTE_EXPECT(is_error == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

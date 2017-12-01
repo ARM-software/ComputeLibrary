@@ -56,7 +56,7 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
 
 Error CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
-    return CLDirectConvolutionLayerKernel::validate(input, weights, biases, output, conv_info);
+    return CLDirectConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, CLScheduler::get().target());
 }
 
 void CLDirectConvolutionLayer::run()

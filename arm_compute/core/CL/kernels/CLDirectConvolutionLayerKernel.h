@@ -78,10 +78,11 @@ public:
      * @param[in] output    Output tensor.
      *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in] target    Target GPU architecture.
      *
      * @return an error status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info);
+    static Error validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, const GPUTarget target);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
