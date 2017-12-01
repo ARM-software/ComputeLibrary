@@ -105,7 +105,7 @@ void CLArithmeticSubtractionKernel::configure(const ICLTensor *input1, const ICL
         }
     }
 
-    ARM_COMPUTE_ERROR_THROW_ON(CLArithmeticSubtractionKernel::validate(input1->info(), input2->info(), output->info(), policy));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), output->info(), policy));
 
     _input1 = input1;
     _input2 = input2;

@@ -63,6 +63,12 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
 
 std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
+    if(output != nullptr)
+    {
+        // Output tensor auto initialization if not yet initialized
+        auto_init_if_empty(*output, *input->clone());
+    }
+
     const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
 
     // Configure kernel window
@@ -108,11 +114,11 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), output->info());
         // Output tensor auto initialization if not yet initialized
-        auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+        auto_init_if_empty(*output->info(), *input->info()->clone());
     }
 
-    ARM_COMPUTE_ERROR_THROW_ON(CLBatchNormalizationLayerKernel::validate(input->info(), (output != nullptr) ? output->info() : nullptr,
-                                                                         mean->info(), var->info(), beta->info(), gamma->info(), epsilon));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr,
+                                                  mean->info(), var->info(), beta->info(), gamma->info(), epsilon));
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
 

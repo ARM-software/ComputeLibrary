@@ -204,7 +204,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
 
     auto_init(input->info(), output->info(), pooled_w, pooled_h);
 
-    ARM_COMPUTE_ERROR_THROW_ON(CLPoolingLayerKernel::validate(input->info(), output->info(), pool_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info));
 
     // Set instance variables
     _input     = input;

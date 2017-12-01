@@ -64,6 +64,9 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, No
 
 std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, NormalizationLayerInfo norm_info)
 {
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output, *input->clone());
+
     const unsigned int norm_size = norm_info.norm_size();
     bool               is_in_map = norm_info.is_in_map();
 
@@ -103,10 +106,10 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), *input->info()->clone());
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(CLNormalizationLayerKernel::validate(input->info(), output->info(), norm_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), norm_info));
 
     _input  = input;
     _output = output;

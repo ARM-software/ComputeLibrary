@@ -106,13 +106,12 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
 
     if(output != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), output->info());
         // Output auto inizialitation if not yet initialized
         auto_init_if_empty(*output->info(),
                            *input->info()->clone());
     }
 
-    ARM_COMPUTE_ERROR_THROW_ON(CLActivationLayerKernel::validate(input->info(), (output != nullptr) ? output->info() : nullptr, act_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, act_info));
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
     const DataType     dt                                = input->info()->data_type();
