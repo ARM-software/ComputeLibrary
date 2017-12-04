@@ -25,7 +25,6 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include "alloc.hpp"
 #include "gemm.hpp"
 #include "profiler.hpp"
 #include "utils.hpp"

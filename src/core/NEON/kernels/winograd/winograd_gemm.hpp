@@ -26,7 +26,6 @@
 #include <cstdlib>
 #include <cassert>
 
-#include "alloc.hpp"
 #include "gemm.hpp"
 #include "profiler.hpp"
 #include "utils.hpp"

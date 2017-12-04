@@ -67,8 +67,6 @@ public:
     NEWinogradLayer &operator=(const NEWinogradLayer &) = delete;
 
 private:
-    using Winograd3x3F32 = NEWinogradLayerKernel::Winograd3x3F32;
-
     MemoryGroup                     _memory_group;
     NEWinogradLayerKernel           _winograd_kernel;
     Tensor                          _weights_workspace;

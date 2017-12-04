@@ -83,18 +83,18 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
 
     // Get the memory required to instantiate a new Winograd operator.
     constexpr size_t kstore_alignment          = 64;
-    const size_t     kernel_storage_per_thread = Winograd3x3F32::get_kernel_storage_size(kernel_shape);
+    const size_t     kernel_storage_per_thread = NEWinogradLayerKernel::get_kernel_storage_size(kernel_shape);
     _kernel_storage.allocator()->init(TensorInfo(TensorShape{ (kernel_storage_per_thread + kstore_alignment - 1) }, 1, DataType::U8));
     _memory_group.manage(&_kernel_storage);
 
     // Get workbench size and allocate memory
     constexpr size_t wspace_alignment = 64;
-    const size_t     ws_size          = Winograd3x3F32::get_working_space_size(in_shape, kernel_shape, padding);
+    const size_t     ws_size          = NEWinogradLayerKernel::get_working_space_size(in_shape, kernel_shape, padding);
     _workspace.allocator()->init(TensorInfo(TensorShape{ (ws_size + wspace_alignment - 1) }, 1, DataType::U8));
     _memory_group.manage(&_workspace);
 
     // Workspace for weights transform
-    const size_t weights_transform_size = Winograd3x3F32::get_kernel_transform_working_size(kernel_shape);
+    const size_t weights_transform_size = NEWinogradLayerKernel::get_kernel_transform_working_size(kernel_shape);
     _weights_workspace.allocator()->init(TensorInfo(TensorShape{ (weights_transform_size + wspace_alignment - 1) }, 1, DataType::U8));
     _memory_group.manage(&_weights_workspace);
 
@@ -125,7 +125,7 @@ void NEWinogradLayer::run()
     _conv->nchw2nhwc(in_shape, padding, _workspace.buffer(), reinterpret_cast<const float *>(_input->buffer()));
 
     //Get ptrs into the workspace
-    std::pair<float *, float *> nhwc_ptrs = _conv->get_nhwc_ptrs(in_shape, padding, _workspace.buffer());
+    std::pair<void *, void *> nhwc_ptrs = _conv->get_nhwc_ptrs(in_shape, padding, _workspace.buffer());
 
     //Setup matrices ptrs and transfor the input tensor to the appropriate form before running GEMM.
     _conv->reshape_input(in_shape, padding, nhwc_ptrs.second, _workspace.buffer());

@@ -91,6 +91,7 @@ def filter_clang_tidy_lines( lines ):
                ("parameter 'memory_manager' is unused" in line) or
                ("parameter 'memory_manager' is copied for each invocation but only used as a const reference" in line) or
                ("DeconvolutionLayer.cpp" in line and "casting (double + 0.5) to integer leads to incorrect rounding; consider using lround" in line) or
+               ("NEWinogradLayerKernel.cpp" in line and "use '= default' to define a trivial destructor" in line) or
                "3rdparty" in line):
                 print_context=False
                 continue

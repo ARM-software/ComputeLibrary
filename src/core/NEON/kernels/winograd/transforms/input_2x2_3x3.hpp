@@ -22,7 +22,8 @@
  * SOFTWARE.
  */
 #pragma once
-#include "../tensor.hpp"
+#include "arm_compute/core/NEON/kernels/winograd/tensor.hpp"
+
 
 namespace winograd {
   /* Transform an input tensor into the Winograd domain.
