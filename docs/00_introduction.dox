@@ -360,8 +360,8 @@ v17.04 Public bug fixes release
  -  @ref arm_compute::NEHarrisScoreKernel
  -  @ref arm_compute::NEHOGDetectorKernel
  -  @ref arm_compute::NELogits1DMaxKernel
- -  @ref arm_compute::NELogits1DShiftExpSumKernel
- -  @ref arm_compute::NELogits1DNormKernel
+ -  arm_compute::NELogits1DShiftExpSumKernel
+ -  arm_compute::NELogits1DNormKernel
  -  @ref arm_compute::NENonMaximaSuppression3x3FP16Kernel
  -  @ref arm_compute::NENonMaximaSuppression3x3Kernel
 
@@ -374,7 +374,7 @@ v17.03.1 First Major public release of the sources
  - New NEON kernels / functions:
    - @ref arm_compute::NENormalizationLayerKernel / @ref arm_compute::NENormalizationLayer
    - @ref arm_compute::NETransposeKernel / @ref arm_compute::NETranspose
-   - @ref arm_compute::NELogits1DMaxKernel, @ref arm_compute::NELogits1DShiftExpSumKernel, @ref arm_compute::NELogits1DNormKernel / @ref arm_compute::NESoftmaxLayer
+   - @ref arm_compute::NELogits1DMaxKernel, arm_compute::NELogits1DShiftExpSumKernel, arm_compute::NELogits1DNormKernel / @ref arm_compute::NESoftmaxLayer
    - @ref arm_compute::NEIm2ColKernel, @ref arm_compute::NECol2ImKernel, arm_compute::NEConvolutionLayerWeightsReshapeKernel / @ref arm_compute::NEConvolutionLayer
    - @ref arm_compute::NEGEMMMatrixAccumulateBiasesKernel / @ref arm_compute::NEFullyConnectedLayer
    - @ref arm_compute::NEGEMMLowpMatrixMultiplyKernel / arm_compute::NEGEMMLowp

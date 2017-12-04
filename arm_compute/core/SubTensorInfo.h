@@ -98,8 +98,8 @@ public:
         _parent->set_fixed_point_position(fixed_point_position);
         return *this;
     };
-    ITensorInfo &set_tensor_shape(TensorShape shape) override;
-    ITensorInfo &set_quantization_info(QuantizationInfo quantization_info) override
+    ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
+    ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         _parent->set_quantization_info(quantization_info);
@@ -196,7 +196,7 @@ public:
     {
         return _valid_region;
     }
-    void set_valid_region(ValidRegion valid_region) override
+    void set_valid_region(const ValidRegion &valid_region) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         // Check if subtensor is valid if parent is configured
@@ -204,7 +204,7 @@ public:
         {
             ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(_parent->valid_region(), valid_region);
         }
-        _valid_region = std::move(valid_region);
+        _valid_region = valid_region;
     }
     QuantizationInfo quantization_info() const override
     {

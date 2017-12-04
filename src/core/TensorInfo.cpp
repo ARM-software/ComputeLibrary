@@ -348,7 +348,7 @@ ITensorInfo &TensorInfo::set_format(Format format)
     return *this;
 }
 
-ITensorInfo &TensorInfo::set_tensor_shape(TensorShape shape)
+ITensorInfo &TensorInfo::set_tensor_shape(const TensorShape &shape)
 {
     _tensor_shape                  = shape;
     _offset_first_element_in_bytes = 0;
@@ -378,7 +378,7 @@ ITensorInfo &TensorInfo::set_fixed_point_position(int fixed_point_position)
     return *this;
 }
 
-ITensorInfo &TensorInfo::set_quantization_info(QuantizationInfo quantization_info)
+ITensorInfo &TensorInfo::set_quantization_info(const QuantizationInfo &quantization_info)
 {
     _quantization_info = quantization_info;
     return *this;

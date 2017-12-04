@@ -190,6 +190,21 @@ struct ValidRegion
         return anchor[d] + shape[d];
     }
 
+    /** Accessor to set the value of anchor and shape for one of the dimensions.
+     *
+     * @param[in] dimension Dimension for which the value is set.
+     * @param[in] start     Value to be set in anchor for the dimension.
+     * @param[in] size      Value to be set in shape for the dimension.
+     *
+     * @return *this.
+     */
+    ValidRegion &set(size_t dimension, int start, size_t size)
+    {
+        anchor.set(dimension, start);
+        shape.set(dimension, size);
+        return *this;
+    }
+
     Coordinates anchor;
     TensorShape shape;
 };

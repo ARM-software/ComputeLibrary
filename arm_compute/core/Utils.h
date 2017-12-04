@@ -40,12 +40,19 @@
 
 namespace arm_compute
 {
+/** Calculate the rounded up quotient of val / m. */
+template <typename S, typename T>
+constexpr auto DIV_CEIL(S val, T m) -> decltype((val + m - 1) / m)
+{
+    return (val + m - 1) / m;
+}
+
 /** Computes the smallest number larger or equal to value that is a multiple of divisor. */
 template <typename S, typename T>
 inline auto ceil_to_multiple(S value, T divisor) -> decltype(((value + divisor - 1) / divisor) * divisor)
 {
     ARM_COMPUTE_ERROR_ON(value < 0 || divisor <= 0);
-    return ((value + divisor - 1) / divisor) * divisor;
+    return DIV_CEIL(value, divisor) * divisor;
 }
 
 /** Computes the largest number smaller or equal to value that is a multiple of divisor. */
@@ -54,13 +61,6 @@ inline auto floor_to_multiple(S value, T divisor) -> decltype((value / divisor) 
 {
     ARM_COMPUTE_ERROR_ON(value < 0 || divisor <= 0);
     return (value / divisor) * divisor;
-}
-
-/** Calculate the rounded up quotient of val / m. */
-template <typename S, typename T>
-constexpr auto DIV_CEIL(S val, T m) -> decltype((val + m - 1) / m)
-{
-    return (val + m - 1) / m;
 }
 
 /** Returns the arm_compute library build information

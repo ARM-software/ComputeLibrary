@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,26 +70,30 @@ public:
      *
      * @param[in] dimension Dimension for which the value is set.
      * @param[in] value     Value to be set for the dimension.
+     *
+     * @return *this.
      */
-    void set(size_t dimension, size_t value)
+    TensorShape &set(size_t dimension, size_t value)
     {
         // Clear entire shape if one dimension is zero
         if(value == 0)
         {
             _num_dimensions = 0;
             std::fill(_id.begin(), _id.end(), 0);
-            return;
         }
+        else
+        {
+            // Make sure all empty dimensions are filled with 1
+            std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
 
-        // Make sure all empty dimensions are filled with 1
-        std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
+            // Set the specified dimension and increase the number of dimensions if
+            // necessary
+            Dimensions::set(dimension, value);
 
-        // Set the specified dimension and increase the number of dimensions if
-        // necessary
-        Dimensions::set(dimension, value);
-
-        // Correct number dimensions to ignore trailing dimensions of size 1
-        apply_dimension_correction();
+            // Correct number dimensions to ignore trailing dimensions of size 1
+            apply_dimension_correction();
+        }
+        return *this;
     }
 
     /** Accessor to remove the dimension n from the tensor shape.

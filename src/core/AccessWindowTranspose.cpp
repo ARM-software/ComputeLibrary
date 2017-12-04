@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -180,7 +180,7 @@ bool AccessWindowTranspose::update_window_if_needed(Window &window) const
     return window_modified;
 }
 
-bool AccessWindowTranspose::update_padding_if_needed(const Window &window) const
+bool AccessWindowTranspose::update_padding_if_needed(const Window &window)
 {
     // Only update the padding if the tensor allows it
     if(_info == nullptr || !_info->is_resizable())

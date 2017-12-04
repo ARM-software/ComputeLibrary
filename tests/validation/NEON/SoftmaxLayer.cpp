@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,9 @@ constexpr AbsoluteTolerance<float> tolerance_f16(0.0001f);
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int16_t> tolerance_fixed_point(2);
 
+/** Tolerance for quantized operations */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
@@ -90,7 +93,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     const int         step    = 16 / data_size_from_type(data_type);
     const PaddingSize padding = PaddingCalculator(shape.x(), step).required_padding();
     validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
+    validate(dst.info()->padding(), PaddingSize());
 }
 
 // *INDENT-OFF*
@@ -159,7 +162,7 @@ TEST_SUITE_END()
 template <typename T>
 using NESoftmaxLayerFixedPointFixture = SoftmaxValidationFixedPointFixture<Tensor, Accessor, NESoftmaxLayer, T>;
 
-TEST_SUITE(Quantized)
+TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
 FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType",
@@ -195,6 +198,30 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixedPointFixture<int16_t>, frame
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fixed_point);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using NESoftmaxLayerQuantizedFixture = SoftmaxValidationQuantizedFixture<Tensor, Accessor, NESoftmaxLayer, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                               combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.0f }))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                   combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f }))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

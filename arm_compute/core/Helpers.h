@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -350,7 +350,7 @@ bool update_window_and_padding(Window &win, Ts &&... patterns)
 
     bool padding_changed = false;
 
-    utility::for_each([&](const IAccessWindow & w)
+    utility::for_each([&](IAccessWindow & w)
     {
         padding_changed |= w.update_padding_if_needed(win);
     },

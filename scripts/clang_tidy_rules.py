@@ -83,7 +83,7 @@ def filter_clang_tidy_lines( lines ):
                ("ReferenceCPP.cpp" in line and re.search(r"parameter '[^']+' is unused", line)) or
                ("NEGEMMMatrixMultiplyKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
                ("NEPoolingLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
-               ("NESoftmaxLayerKernel.cpp" in line and "do not use C-style cast to convert between unrelated types" in line) or
+               ("NESoftmaxLayerKernel.cpp" in line and "macro argument should be enclosed in parentheses" in line) or
                ("GraphUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint32'" in line) or
                ("GraphUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
                ("ConvolutionLayer.cpp" in line and "move assignment operators should be marked noexcept" in line) or

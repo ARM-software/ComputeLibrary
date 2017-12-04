@@ -92,7 +92,7 @@ std::unique_ptr<ITensorInfo> SubTensorInfo::clone() const
     return clone_obj;
 }
 
-ITensorInfo &SubTensorInfo::set_tensor_shape(TensorShape shape)
+ITensorInfo &SubTensorInfo::set_tensor_shape(const TensorShape &shape)
 {
     ARM_COMPUTE_ERROR_ON(_parent == nullptr);
 

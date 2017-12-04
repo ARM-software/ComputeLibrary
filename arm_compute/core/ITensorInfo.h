@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,7 +79,7 @@ public:
      *
      * @return Reference to this ITensorInfo object
      */
-    virtual ITensorInfo &set_tensor_shape(TensorShape shape) = 0;
+    virtual ITensorInfo &set_tensor_shape(const TensorShape &shape) = 0;
     /** Set the fixed point position to the specified value
      *
      * @warning The fixed point position must be set once the data type has been configured
@@ -95,7 +95,7 @@ public:
      *
      * @return Reference to this ITensorInfo object
      */
-    virtual ITensorInfo &set_quantization_info(QuantizationInfo quantization_info) = 0;
+    virtual ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) = 0;
     /** Resets the padding settings of the tensor.
     *
     * @return Reference to this ITensorInfo object
@@ -214,7 +214,7 @@ public:
      *
      * @param[in] valid_region Valid region to set.
      */
-    virtual void set_valid_region(ValidRegion valid_region) = 0;
+    virtual void set_valid_region(const ValidRegion &valid_region) = 0;
 
     /** Get the quantization settings (scale and offset) of the tensor.
     *

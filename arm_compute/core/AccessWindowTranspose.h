@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ class AccessWindowTranspose : public AccessWindowRectangle
 public:
     using AccessWindowRectangle::AccessWindowRectangle;
     bool update_window_if_needed(Window &window) const override;
-    bool update_padding_if_needed(const Window &window) const override;
+    bool update_padding_if_needed(const Window &window) override;
     using AccessWindowRectangle::compute_valid_region;
     ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
 };

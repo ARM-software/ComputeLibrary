@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_MISC_UTILITY_H__
 
 #include <array>
+#include <limits>
 
 namespace arm_compute
 {
@@ -122,6 +123,22 @@ template <typename F, typename T, typename U, typename... Us>
 inline auto foldl(F &&func, T &&initial, U &&value, Us &&... values) -> decltype(func(std::forward<T>(initial), std::forward<U>(value)))
 {
     return foldl(std::forward<F>(func), func(std::forward<T>(initial), std::forward<U>(value)), std::forward<Us>(values)...);
+}
+
+/** Type cast with saturation.
+ *
+ * @param[in] val Value of type U to cast.
+ *
+ * @return Original value clamped to numeric limits of T and converted to type T.
+ *
+ * @warning Numeric limits of T must be representable without loss in type U.
+ */
+template <typename T, typename U>
+T saturate_cast(U val)
+{
+    const auto low  = static_cast<U>(std::numeric_limits<T>::lowest());
+    const auto high = static_cast<U>(std::numeric_limits<T>::max());
+    return static_cast<T>(clamp(val, low, high));
 }
 } // namespace utility
 } // namespace arm_compute
