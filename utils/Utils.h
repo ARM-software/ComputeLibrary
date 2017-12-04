@@ -512,16 +512,16 @@ public:
         return _fortran_order;
     }
 
-    /** Initialise an image's metadata with the dimensions of the NPY file currently open
+    /** Initialise the tensor's metadata with the dimensions of the NPY file currently open
      *
      * @param[out] tensor Tensor to initialise
-     * @param[in]  format Format to use for the image
+     * @param[in]  dt     Data type to use for the tensor
      */
     template <typename T>
-    void init_tensor(T &tensor, arm_compute::Format format)
+    void init_tensor(T &tensor, arm_compute::DataType dt)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON(format != arm_compute::Format::F32);
+        ARM_COMPUTE_ERROR_ON(dt != arm_compute::DataType::F32);
 
         // Use the size of the input NPY tensor
         TensorShape shape;
@@ -531,7 +531,7 @@ public:
             shape.set(i, _shape.at(i));
         }
 
-        arm_compute::TensorInfo tensor_info(shape, format);
+        arm_compute::TensorInfo tensor_info(shape, 1, dt);
         tensor.allocator()->init(tensor_info);
     }
 
@@ -545,7 +545,7 @@ public:
     void fill_tensor(T &tensor)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&tensor, arm_compute::Format::F32);
+        ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&tensor, arm_compute::DataType::F32);
         try
         {
             // Map buffer if creating a CLTensor
@@ -582,9 +582,9 @@ public:
                 }
             }
 
-            switch(tensor.info()->format())
+            switch(tensor.info()->data_type())
             {
-                case arm_compute::Format::F32:
+                case arm_compute::DataType::F32:
                 {
                     // Read data
                     if(tensor.info()->padding().empty())
@@ -607,7 +607,7 @@ public:
                     break;
                 }
                 default:
-                    ARM_COMPUTE_ERROR("Unsupported format");
+                    ARM_COMPUTE_ERROR("Unsupported data type");
             }
 
             // Unmap buffer if creating a CLTensor
@@ -875,9 +875,9 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
 }
 
 template <typename T>
-void init_sgemm_output(T &dst, T &src0, T &src1, arm_compute::Format format)
+void init_sgemm_output(T &dst, T &src0, T &src1, arm_compute::DataType dt)
 {
-    dst.allocator()->init(TensorInfo(src1.info()->dimension(0), src0.info()->dimension(1), format));
+    dst.allocator()->init(TensorInfo(TensorShape(src1.info()->dimension(0), src0.info()->dimension(1)), 1, dt));
 }
 
 } // namespace utils
