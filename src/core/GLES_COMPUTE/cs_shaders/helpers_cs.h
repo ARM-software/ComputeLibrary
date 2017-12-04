@@ -393,4 +393,45 @@ mediump vec4[2] unpack8_half(highp uvec4 packed_data)
 #define LOAD_UNPACK8_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter) LOAD_UNPACK8_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
 #define STORE_PACK8_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter, data) STORE_PACK8_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
 
+/** Converting the uvec4 object to 4 low-precision uint values and packing into a uint object
+ *
+ * @param[in] data The uvec4 object to be packed
+ *
+ * @return The packed uint object
+ */
+highp uint pack4_u8(lowp uvec4 data)
+{
+    highp uint r = uint(0);
+
+    for(int i = 0; i < 4; i++)
+    {
+        r |= data[i] << uint(i * 8);
+    }
+
+    return r;
+}
+
+/** Unpacking the uint object to 4 low-precision uint values and converting to a uvec4 object
+ *
+ * @param[in] packed_data The uint object to be unpacked
+ *
+ * @return The unpacked uvec4 object
+ */
+lowp uvec4 unpack4_u8(highp uint packed_data)
+{
+    lowp uvec4 uvec;
+
+    for(int i = 0; i < 4; i++)
+    {
+        uvec[i] = (packed_data >> uint(i * 8)) & uint(0xFF);
+    }
+
+    return uvec;
+}
+
+#define LOAD_UNPACK4_U8(tensor_ptr, offset) unpack4_u8(uint(LOAD(tensor_ptr, offset)))
+#define STORE_PACK4_U8(tensor_ptr, offset, data) STORE(tensor_ptr, offset, pack4_u8(data))
+#define LOAD_UNPACK4_CURRENT_ITEM_U8(tensor_ptr, tensor_iter) LOAD_UNPACK4_U8(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
+#define STORE_PACK4_CURRENT_ITEM_U8(tensor_ptr, tensor_iter, data) STORE_PACK4_U8(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
+
 #endif // ARM_COMPUTE_HELPER_CS_H
