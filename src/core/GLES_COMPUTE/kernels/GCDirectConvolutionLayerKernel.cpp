@@ -191,6 +191,10 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
             case DataType::F16:
                 num_elems_read_per_iteration_x    = 8;
                 num_elems_written_per_iteration_x = 8;
+                if(weights->info()->dimension(2) % 2 == 0)
+                {
+                    options.emplace("#define WEIGHTS_OPTIMIZATION");
+                }
                 break;
 
             case DataType::F32:
@@ -255,7 +259,10 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
     switch(weights->info()->data_type())
     {
         case DataType::F16:
-            weights_access = AccessWindowStatic(weights->info(), 0, 0, kernel_size + 1, kernel_size);
+            if((weights->info()->dimension(2) % 2 != 0) || (kernel_size != 1))
+            {
+                weights_access = AccessWindowStatic(weights->info(), 0, 0, kernel_size + 1, kernel_size);
+            }
             if(_bias != nullptr)
             {
                 bias_access = AccessWindowStatic(_bias->info(), 0, 0, _bias->info()->dimension(0) + 1, 1);

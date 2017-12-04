@@ -160,6 +160,29 @@ void main()
     uint z_index = gl_GlobalInvocationID.z;
     TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_stride_w);
 
+#ifdef WEIGHTS_OPTIMIZATION
+    float w1, w2;
+    int   nums = (int(weights_depth)) / 2;
+    for(int d = 0; d < nums; ++d)
+    {
+        vec2 vec2_w = LOAD_UNPACK2_CURRENT_ITEM_HALF(weights_ptr, weights_iter);
+
+        w1         = vec2_w.x;
+        vec4 r1[2] = CONVOLVE(src_iter, w1);
+        pixels[0] += r1[0];
+        pixels[1] += r1[1];
+
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+
+        w2         = vec2_w.y;
+        vec4 r2[2] = CONVOLVE(src_iter, w2);
+        pixels[0] += r2[0];
+        pixels[1] += r2[1];
+
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z * uint(2));
+    }
+#else  /* WEIGHTS_OPTIMIZATION */
     float w;
     for(int d = 0; d < int(weights_depth); ++d)
     {
@@ -172,6 +195,7 @@ void main()
         TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
         TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
     }
+#endif /* WEIGHTS_OPTIMIZATION */
 
 #ifdef BIAS
     vec2  vec2_b;
