@@ -44,6 +44,14 @@ public:
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLTransposeKernel
+     *
+     * @param[in] input  Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[in] output Output tensor. Data type supported: Same as @p input
+     *
+     * @return an error status
+     */
+    static Error validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLTRANSPOSEKERNEL_H__ */

@@ -36,3 +36,8 @@ void CLTranspose::configure(const ICLTensor *input, ICLTensor *output)
     k->configure(input, output);
     _kernel = std::move(k);
 }
+
+Error CLTranspose::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLTransposeKernel::validate(input, output);
+}

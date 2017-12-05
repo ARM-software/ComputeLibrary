@@ -41,6 +41,80 @@ class Coordinates;
 
 namespace
 {
+TensorShape transposed_tensor_shape(const TensorShape &in)
+{
+    TensorShape  output_shape{ in };
+    const size_t w_out = in[1];
+    const size_t h_out = in[0];
+    output_shape.set(0, w_out);
+    output_shape.set(1, h_out);
+
+    return output_shape;
+}
+
+unsigned int num_elems_processed(size_t element_size)
+{
+    switch(element_size)
+    {
+        case 1:
+            return 8;
+            break;
+        case 2:
+            return 4;
+            break;
+        case 4:
+            return 4;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Element size not supported");
+            break;
+    }
+}
+
+Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8, DataType::U16, DataType::S16, DataType::QS16, DataType::U32, DataType::S32,
+                                                         DataType::F16,
+                                                         DataType::F32);
+
+    if(output->total_size() != 0)
+    {
+        const TensorInfo tensor_info = input->clone()->set_tensor_shape(transposed_tensor_shape(input->tensor_shape()));
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Error{};
+}
+
+std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+{
+    const unsigned int num_elems_processed_per_iteration = num_elems_processed(input->element_size());
+
+    // Configure kernel window
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration, num_elems_processed_per_iteration));
+
+    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+
+    bool window_changed = update_window_and_padding(win, input_access);
+
+    if(output->total_size() != 0)
+    {
+        // TODO (COMPMID-708): Replace AccessWindowStatic with AccessWindowTranspose
+        AccessWindowStatic output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration), ceil_to_multiple(output->dimension(1),
+                                         num_elems_processed_per_iteration));
+
+        window_changed = window_changed || update_window_and_padding(win, output_access);
+
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+    }
+
+    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    return std::make_pair(err, win);
+}
+
 void transpose_8bit_elements(const ITensor *in, ITensor *out, const Window &window)
 {
     Window window_out(window);
@@ -173,6 +247,14 @@ void transpose_32bit_elements(const ITensor *in, ITensor *out, const Window &win
 }
 } // namespace
 
+Error NETransposeKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
+    return Error{};
+}
+
 NETransposeKernel::NETransposeKernel()
     : _func(nullptr), _input(nullptr), _output(nullptr)
 {
@@ -180,41 +262,26 @@ NETransposeKernel::NETransposeKernel()
 
 void NETransposeKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::U16, DataType::S16, DataType::QS16, DataType::U32, DataType::S32, DataType::F16,
-                                                  DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-
-    TensorShape  output_shape{ input->info()->tensor_shape() };
-    const size_t w_out = input->info()->dimension(1);
-    const size_t h_out = input->info()->dimension(0);
-    output_shape.set(0, w_out);
-    output_shape.set(1, h_out);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(transposed_tensor_shape(input->info()->tensor_shape())));
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
     _input  = input;
     _output = output;
 
-    unsigned int num_elems_processed_per_iteration = 0;
-
     switch(input->info()->element_size())
     {
         case 1:
-            _func                             = &transpose_8bit_elements;
-            num_elems_processed_per_iteration = 8;
+            _func = &transpose_8bit_elements;
             break;
         case 2:
-            _func                             = &transpose_16bit_elements;
-            num_elems_processed_per_iteration = 4;
+            _func = &transpose_16bit_elements;
             break;
         case 4:
-            _func                             = &transpose_32bit_elements;
-            num_elems_processed_per_iteration = 4;
+            _func = &transpose_32bit_elements;
             break;
         default:
             ARM_COMPUTE_ERROR("Element size not supported");
@@ -222,19 +289,9 @@ void NETransposeKernel::configure(const ITensor *input, ITensor *output)
     }
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_elems_processed_per_iteration));
-
-    // TODO (COMPMID-708): Replace AccessWindowStatic with AccessWindowTranspose
-    AccessWindowStatic output_access(output->info(), 0, 0, ceil_to_multiple(output->info()->dimension(0), num_elems_processed_per_iteration), ceil_to_multiple(output->info()->dimension(1),
-                                     num_elems_processed_per_iteration));
-
-    update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration),
-                              output_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
-
-    INEKernel::configure(win);
+    auto win_config = validate_and_configure_window(input->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
 }
 
 void NETransposeKernel::run(const Window &window, const ThreadInfo &info)
