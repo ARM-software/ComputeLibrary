@@ -109,14 +109,15 @@ void main(void)
 #elif defined(DATA_TYPE_FP16)
 precision mediump float;
 
-BUFFER_DECLARATION(src, 1, uvec2, readonly);
-BUFFER_DECLARATION(dst, 2, uvec2, writeonly);
-
 layout(std140) uniform shader_params
 {
     IMAGE_PARAM_DECLARATION(src);
     IMAGE_PARAM_DECLARATION(dst);
 };
+
+#if defined(TRANSPOSE_4X4)
+BUFFER_DECLARATION(src, 1, uvec2, readonly);
+BUFFER_DECLARATION(dst, 2, uvec2, writeonly);
 
 /** This OpenGL ES kernel computes the matrix transposition of input matrix
  *
@@ -184,4 +185,93 @@ void main(void)
     GC_STORE1(packed_s[2], dst, uint((dst_offset_in_bytes + uint(2) * dst_stride_y) >> 3));
     GC_STORE1(packed_s[3], dst, uint((dst_offset_in_bytes + uint(3) * dst_stride_y) >> 3));
 }
+#elif defined(TRANSPOSE_8X8) /* TRANSPOSE_4X4 */
+BUFFER_DECLARATION(src, 1, uvec4, readonly);
+BUFFER_DECLARATION(dst, 2, uvec4, writeonly);
+
+#define SWAP_ROW(u0, l0)     \
+    {                        \
+        tmp_swap = u0;       \
+        u0       = l0;       \
+        l0       = tmp_swap; \
+    }
+
+#define SWAP_4x4(u0, u1, u2, u3, l0, l1, l2, l3) \
+    {                                            \
+        vec4 tmp_swap;                           \
+        SWAP_ROW(u0, l0);                        \
+        SWAP_ROW(u1, l1);                        \
+        SWAP_ROW(u2, l2);                        \
+        SWAP_ROW(u3, l3);                        \
+    }
+
+#define TRANSPOSE_4x4(u0, u1, u2, u3) \
+    {                                 \
+        vec4 tmp;                     \
+        tmp.xyz = u0.yzw;             \
+        u0.y    = u1.x;               \
+        u0.z    = u2.x;               \
+        u0.w    = u3.x;               \
+        u1.x    = tmp.x;              \
+        u2.x    = tmp.y;              \
+        u3.x    = tmp.z;              \
+        tmp.xy  = u1.zw;              \
+        u1.z    = u2.y;               \
+        u1.w    = u3.y;               \
+        u2.y    = tmp.x;              \
+        u3.y    = tmp.y;              \
+        tmp.x   = u2.w;               \
+        u2.w    = u3.z;               \
+        u3.z    = tmp.x;              \
+    }
+
+/** This OpenGL ES kernel computes the matrix transposition of input matrix
+ *
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types:F16
+ * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data type: same as src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
+ */
+void main(void)
+{
+    // Compute source address
+    Image src = GC_CONVERT_TO_IMAGE_STRUCT(src);
+    Image dst = GC_CONVERT_TO_IMAGE_STRUCT(dst);
+
+    vec4 u[8][2];
+
+    uvec4 packed_s[8];
+
+    for(int i = 0; i < 8; i++)
+    {
+        GC_LOAD1_2D_OFFSET(packed_s[i], src, 0, i);
+        u[i][0] = vec4(unpackHalf2x16(packed_s[i].x), unpackHalf2x16(packed_s[i].y));
+        u[i][1] = vec4(unpackHalf2x16(packed_s[i].z), unpackHalf2x16(packed_s[i].w));
+    }
+
+    // Transpose the block
+    TRANSPOSE_4x4(u[0][0], u[1][0], u[2][0], u[3][0]);
+    TRANSPOSE_4x4(u[0][1], u[1][1], u[2][1], u[3][1]);
+    TRANSPOSE_4x4(u[4][0], u[5][0], u[6][0], u[7][0]);
+    TRANSPOSE_4x4(u[4][1], u[5][1], u[6][1], u[7][1]);
+    SWAP_4x4(u[0][1], u[1][1], u[2][1], u[3][1], u[4][0], u[5][0], u[6][0], u[7][0]);
+
+    // Store the block at (y, x)
+    uint dst_offset_in_bytes = uint(16) * uint(gl_GlobalInvocationID.y) + uint(gl_GlobalInvocationID.x) * (dst_step_y) + (dst.offset_first_element_in_bytes);
+
+    for(int i = 0; i < 8; i++)
+    {
+        packed_s[i] = uvec4(packHalf2x16(u[i][0].xy), packHalf2x16(u[i][0].zw), packHalf2x16(u[i][1].xy), packHalf2x16(u[i][1].zw));
+        GC_STORE1(packed_s[i], dst, uint((dst_offset_in_bytes + uint(i) * dst_stride_y) >> 4));
+    }
+}
+#endif /* TRANSPOSE_4X4 */
 #endif /*ARM_COMPUTE_ENABLE_FP16*/

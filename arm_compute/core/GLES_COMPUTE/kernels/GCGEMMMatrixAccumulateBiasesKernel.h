@@ -57,6 +57,7 @@ public:
 private:
     IGCTensor       *_accum;
     const IGCTensor *_biases;
+    gles::NDRange    _lws;
 };
 }
 

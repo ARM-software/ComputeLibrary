@@ -107,7 +107,38 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, std::p
     else
     {
         build_opts.insert("#define IM2COL_REDUCED");
-        _num_elems_processed_per_iteration = 4 / input->info()->element_size();
+
+        if(input->info()->data_type() == DataType::F32)
+        {
+            _num_elems_processed_per_iteration = 4 / input->info()->element_size();
+        }
+        else if(input->info()->data_type() == DataType::F16)
+        {
+            int input_width  = input->info()->dimension(0);
+            int input_height = input->info()->dimension(1);
+
+            build_opts.insert("#define IMAGE_SIZE " + support::cpp11::to_string(input_width * input_height));
+            if(input_width % 8 == 0)
+            {
+                _num_elems_processed_per_iteration = 8;
+                build_opts.insert("#define IM2COL_REDUCED_8X");
+            }
+            else if(input_width % 4 == 0)
+            {
+                _num_elems_processed_per_iteration = 4;
+                build_opts.insert("#define IM2COL_REDUCED_4X");
+            }
+            else if(input_width % 2 == 0)
+            {
+                _num_elems_processed_per_iteration = 2;
+                build_opts.insert("#define IM2COL_REDUCED_2X");
+            }
+            else
+            {
+                _num_elems_processed_per_iteration = 2;
+                build_opts.insert("#define IM2COL_REDUCED_GENERIC");
+            }
+        }
 
         // Create kernel
         _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("im2col_reduced", build_opts));

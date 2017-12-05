@@ -64,11 +64,24 @@ void GCTransposeKernel::configure(const IGCTensor *input, IGCTensor *output)
     build_opts.emplace("#define LOCAL_SIZE_Y " + support::cpp11::to_string(1));
     build_opts.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(1));
 
+    // Configure kernel window
+    unsigned int num_elems_processed_per_iteration = 4;
+
+    if(input->info()->data_type() == DataType::F16)
+    {
+#define TRANSPOSE_8X8
+
+#if defined(TRANSPOSE_4X4)
+        build_opts.emplace(("#define TRANSPOSE_4X4"));
+        num_elems_processed_per_iteration = 4;
+#elif defined(TRANSPOSE_8X8) /* TRANSPOSE_4X4 */
+        build_opts.emplace(("#define TRANSPOSE_8X8"));
+        num_elems_processed_per_iteration = 8;
+#endif                       /* TRANSPOSE_4X4 */
+    }
+
     // Create kernel
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("transpose", build_opts));
-
-    // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = 4;
 
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_elems_processed_per_iteration));
 
@@ -100,8 +113,17 @@ void GCTransposeKernel::run(const Window &window)
         }
         else if(_input->info()->data_type() == DataType::F16)
         {
-            add_2D_tensor_argument(idx, _input, BufferParam(1, 3), slice);
-            add_2D_tensor_argument(idx, _output, BufferParam(2, 3), slice);
+#if defined(TRANSPOSE_4X4)
+            BufferParam param = { 1, 3 };
+            add_2D_tensor_argument(idx, _input, param, slice);
+            param.binding_point = 2;
+            add_2D_tensor_argument(idx, _output, param, slice);
+#elif defined(TRANSPOSE_8X8) /* TRANSPOSE_4X4 */
+            BufferParam param = { 1, 4 };
+            add_2D_tensor_argument(idx, _input, param, slice);
+            param.binding_point = 2;
+            add_2D_tensor_argument(idx, _output, param, slice);
+#endif                       /* TRANSPOSE_4X4 */
         }
 
         _kernel.update_shader_params();

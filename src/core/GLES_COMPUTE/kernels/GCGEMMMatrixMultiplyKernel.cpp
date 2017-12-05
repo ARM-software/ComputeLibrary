@@ -118,9 +118,23 @@ void GCGEMMMatrixMultiplyKernel::configure(const IGCTensor *input0, const IGCTen
         switch(input0->info()->data_type())
         {
             case DataType::F16:
-                num_elems_processed_per_iteration_x = 4;
-                num_elems_processed_per_iteration_y = 1;
                 build_opts.emplace("#define DATA_TYPE_FP16");
+
+#define MM_PROCESS_4X_OPTIMIZED
+
+#if defined(MM_PROCESS_4X)
+                num_elems_processed_per_iteration_x = 4;
+                num_elems_processed_per_iteration_y = std::min(static_cast<int>(output->info()->dimension(1)), 4);
+                build_opts.emplace("#define MM_PROCESS_4X");
+#elif defined(MM_PROCESS_4X_OPTIMIZED) /* MM_PROCESS_4X */
+                num_elems_processed_per_iteration_x = 4;
+                num_elems_processed_per_iteration_y = std::min(static_cast<int>(output->info()->dimension(1)), 4);
+                build_opts.emplace("#define MM_PROCESS_4X_OPTIMIZED");
+#elif defined(MM_PROCESS_8X)           /* MM_PROCESS_4X */
+                num_elems_processed_per_iteration_x = 8;
+                num_elems_processed_per_iteration_y = 1;
+                build_opts.emplace("#define MM_PROCESS_8X");
+#endif                                 /* MM_PROCESS_4X */
                 break;
 
             case DataType::F32:
@@ -143,8 +157,12 @@ void GCGEMMMatrixMultiplyKernel::configure(const IGCTensor *input0, const IGCTen
 
         win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
+#if defined(MM_PROCESS_4X_OPTIMIZED)
+        AccessWindowStatic input0_access(input0->info(), 0, 0, ceil_to_multiple(input0->info()->dimension(0), 8), ceil_to_multiple(input0->info()->dimension(1), num_elems_processed_per_iteration_y));
+#else  /* MM_PROCESS_4X_OPTIMIZED */
         AccessWindowStatic input0_access(input0->info(), 0, 0, ceil_to_multiple(input0->info()->dimension(0), num_elems_processed_per_iteration_x), ceil_to_multiple(input0->info()->dimension(1),
                                          num_elems_processed_per_iteration_y));
+#endif /* MM_PROCESS_4X_OPTIMIZED */
         AccessWindowStatic    input1_access(input1->info(), 0, 0, ceil_to_multiple(input1->info()->dimension(0), num_elems_processed_per_iteration_x), input1->info()->dimension(1));
         AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
 
@@ -185,9 +203,19 @@ void GCGEMMMatrixMultiplyKernel::run(const Window &window)
         switch(_input0->info()->data_type())
         {
             case DataType::F16:
+#if defined(MM_PROCESS_4X)
                 add_2D_tensor_argument(idx, _input0, BufferParam(1, 2), slice);
                 add_2D_tensor_argument(idx, _input1, BufferParam(2, 3), slice_b);
                 add_2D_tensor_argument(idx, _output, BufferParam(3, 3), slice);
+#elif defined(MM_PROCESS_4X_OPTIMIZED) /* MM_PROCESS_4X */
+                add_2D_tensor_argument(idx, _input0, BufferParam(1, 4), slice);
+                add_2D_tensor_argument(idx, _input1, BufferParam(2, 3), slice_b);
+                add_2D_tensor_argument(idx, _output, BufferParam(3, 3), slice);
+#elif defined(MM_PROCESS_8X)           /* MM_PROCESS_4X */
+                add_2D_tensor_argument(idx, _input0, BufferParam(1, 4), slice);
+                add_2D_tensor_argument(idx, _input1, BufferParam(2, 4), slice_b);
+                add_2D_tensor_argument(idx, _output, BufferParam(3, 4), slice);
+#endif                                 /* MM_PROCESS_4X */
                 break;
 
             case DataType::F32:

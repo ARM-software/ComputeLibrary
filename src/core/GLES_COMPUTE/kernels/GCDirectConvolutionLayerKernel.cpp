@@ -53,7 +53,6 @@ template <unsigned int kernel_size>
 void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *bias, IGCTensor *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(2) != input->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != weights->info()->dimension(1));
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
@@ -67,6 +66,24 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
         //ARM_COMPUTE_ERROR_ON(bias->info()->dimension(0) != weights->info()->dimension(3));
         ARM_COMPUTE_ERROR_ON(bias->info()->num_dimensions() > 1);
     }
+
+    // Get convolved dimensions
+    unsigned int owidth  = 0;
+    unsigned int oheight = 0;
+    std::tie(owidth, oheight) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_size, kernel_size, conv_info);
+
+    TensorShape output_shape = input->info()->tensor_shape();
+    output_shape.set(0, owidth);
+    output_shape.set(1, oheight);
+    output_shape.set(2, weights->info()->dimension(3));
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     _conv_stride_x = std::get<0>(conv_info.stride());
     _conv_stride_y = std::get<1>(conv_info.stride());

@@ -37,7 +37,7 @@
 using namespace arm_compute;
 
 GCGEMMMatrixAccumulateBiasesKernel::GCGEMMMatrixAccumulateBiasesKernel()
-    : _accum(nullptr), _biases(nullptr)
+    : _accum(nullptr), _biases(nullptr), _lws(gles::NDRange(1U, 1U, 1U))
 {
 }
 
@@ -51,14 +51,23 @@ void GCGEMMMatrixAccumulateBiasesKernel::configure(IGCTensor *accum, const IGCTe
     _accum  = accum;
 
     std::set<std::string> build_opts;
-    build_opts.emplace("#define LOCAL_SIZE_X " + support::cpp11::to_string(1));
-    build_opts.emplace("#define LOCAL_SIZE_Y " + support::cpp11::to_string(1));
-    build_opts.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(1));
+    build_opts.emplace("#define LOCAL_SIZE_X " + support::cpp11::to_string(_lws[0]));
+    build_opts.emplace("#define LOCAL_SIZE_Y " + support::cpp11::to_string(_lws[1]));
+    build_opts.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(_lws[2]));
 
     // Create kernel
     build_opts.emplace("#define GEMM_ACCUMULATE_BIASES");
+
+#define ACCUM_PROCESS_4X
+
+#if defined(ACCUM_PROCESS_4X)
+    build_opts.emplace("#define ACCUM_PROCESS_4X");
+#elif defined(ACCUM_PROCESS_8X) /* ACCUM_PROCESS_4X */
+    build_opts.emplace("#define ACCUM_PROCESS_8X");
+#endif                          /* ACCUM_PROCESS_4X */
     std::string dt_name = (accum->info()->data_type() == DataType::F32) ? "DATA_TYPE_FP32" : "DATA_TYPE_FP16";
     build_opts.emplace(("#define " + dt_name));
+
     _kernel = GCKernelLibrary::get().create_kernel("gemm_accumulate_biases", build_opts);
 
     // Configure kernel window
@@ -70,13 +79,21 @@ void GCGEMMMatrixAccumulateBiasesKernel::configure(IGCTensor *accum, const IGCTe
     }
     else if(_accum->info()->data_type() == DataType::F16)
     {
+#if defined(ACCUM_PROCESS_4X)
         num_elems_processed_per_iteration = 4;
+#elif defined(ACCUM_PROCESS_8X) /* ACCUM_PROCESS_4X */
+        num_elems_processed_per_iteration = 8;
+#endif                          /* ACCUM_PROCESS_4X */
     }
 
-    Window win = calculate_max_window(*_accum->info(), Steps(num_elems_processed_per_iteration));
+    const int  accum_width         = accum->info()->dimension(0);
+    const int  accum_padding_right = ceil_to_multiple(accum_width, num_elems_processed_per_iteration * _lws[0]) - accum_width;
+    BorderSize border              = BorderSize(0, accum_padding_right, 0, 0);
 
-    AccessWindowStatic     biases_access(biases->info(), 0, 0, ceil_to_multiple(biases->info()->dimension(0), num_elems_processed_per_iteration), biases->info()->dimension(1));
-    AccessWindowHorizontal accum_access(_accum->info(), 0, num_elems_processed_per_iteration);
+    Window win = calculate_max_enlarged_window(*_accum->info(), Steps(num_elems_processed_per_iteration), border);
+
+    AccessWindowStatic biases_access(biases->info(), 0, 0, ceil_to_multiple(biases->info()->dimension(0), num_elems_processed_per_iteration * _lws[0]), biases->info()->dimension(1));
+    AccessWindowStatic accum_access(_accum->info(), 0, 0, accum_width + accum_padding_right, _accum->info()->dimension(1));
 
     update_window_and_padding(win, biases_access, accum_access);
 
@@ -107,13 +124,22 @@ void GCGEMMMatrixAccumulateBiasesKernel::run(const Window &window)
         }
         else if(_accum->info()->data_type() == DataType::F16)
         {
-            add_2D_tensor_argument(idx, _accum, BufferParam(1, 3), accum_slice);
-            add_1D_tensor_argument(idx, _biases, BufferParam(2, 3), biases_slice);
+#if defined(ACCUM_PROCESS_4X)
+            BufferParam param = { 1, 3 };
+            add_2D_tensor_argument(idx, _accum, param, accum_slice);
+            param.binding_point = 2;
+            add_1D_tensor_argument(idx, _biases, param, biases_slice);
+#elif defined(ACCUM_PROCESS_8X) /* ACCUM_PROCESS_4X */
+            BufferParam param             = { 1, 4 };
+            add_2D_tensor_argument(idx, _accum, param, accum_slice);
+            param.binding_point = 2;
+            add_1D_tensor_argument(idx, _biases, param, biases_slice);
+#endif                          /* ACCUM_PROCESS_4X */
         }
 
         _kernel.update_shader_params();
 
-        enqueue(*this, accum_slice);
+        enqueue(*this, accum_slice, _lws);
     }
     while(window.slide_window_slice_2D(accum_slice));
 }

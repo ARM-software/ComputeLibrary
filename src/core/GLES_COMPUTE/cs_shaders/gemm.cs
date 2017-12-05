@@ -475,6 +475,7 @@ void main(void)
 #elif defined(DATA_TYPE_FP16)
 precision mediump float;
 #ifdef GEMM_MM_FLOATING_POINT
+#if defined(MM_PROCESS_4X)
 BUFFER_DECLARATION(src0, 1, uint, readonly);
 BUFFER_DECLARATION(src1, 2, uvec2, readonly);
 BUFFER_DECLARATION(dst, 3, uvec2, writeonly);
@@ -526,14 +527,41 @@ void main()
 
     /* Reset accumulators */
     vec4 acc0 = vec4(0.0f);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    vec4 acc1 = vec4(0.0f);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    vec4 acc2 = vec4(0.0f);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    vec4 acc3 = vec4(0.0f);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-    for(; src0.current_offset < (end_row_vec_a - uint(2)); src0.current_offset += uint(2 * 2), src1.current_offset += uint(2) * src1_stride_y)
+    for(; int(src0.current_offset) < int(end_row_vec_a - uint(2)); src0.current_offset += uint(2 * 2), src1.current_offset += uint(2) * src1_stride_y)
     {
-        uint packed_a0;
+        uint packed_a;
         vec2 a0;
 
-        GC_LOAD1_2D_OFFSET(packed_a0, src0, 0, 0);
-        a0 = vec2(unpackHalf2x16(packed_a0));
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
+        a0 = vec2(unpackHalf2x16(packed_a));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        vec2 a1;
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 1);
+        a1 = vec2(unpackHalf2x16(packed_a));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        vec2 a2;
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 2);
+        a2 = vec2(unpackHalf2x16(packed_a));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        vec2 a3;
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 3);
+        a3 = vec2(unpackHalf2x16(packed_a));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
         uvec2 packed_b0;
         uvec2 packed_b1;
@@ -548,6 +576,18 @@ void main()
 
         acc0 += b0 * vec4(a0.x);
         acc0 += b1 * vec4(a0.y);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 += b0 * vec4(a1.x);
+        acc1 += b1 * vec4(a1.y);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 += b0 * vec4(a2.x);
+        acc2 += b1 * vec4(a2.y);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 += b0 * vec4(a3.x);
+        acc3 += b1 * vec4(a3.y);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
     for(; src0.current_offset < end_row_vec_a; src0.current_offset += uint(2 * 2), src1.current_offset += src1_stride_y)
@@ -557,6 +597,24 @@ void main()
 
         GC_LOAD1_2D_OFFSET(packed_a0, src0, 0, 0);
         a0 = vec2(unpackHalf2x16(packed_a0));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        vec2 a1;
+
+        GC_LOAD1_2D_OFFSET(packed_a0, src0, 0, 1);
+        a1 = vec2(unpackHalf2x16(packed_a0));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        vec2 a2;
+
+        GC_LOAD1_2D_OFFSET(packed_a0, src0, 0, 2);
+        a2 = vec2(unpackHalf2x16(packed_a0));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        vec2 a3;
+
+        GC_LOAD1_2D_OFFSET(packed_a0, src0, 0, 3);
+        a3 = vec2(unpackHalf2x16(packed_a0));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
         uvec2 packed_b0;
         vec4  b0;
@@ -566,6 +624,15 @@ void main()
         b0 = vec4(unpackHalf2x16(packed_b0.x), unpackHalf2x16(packed_b0.y));
 
         acc0 += b0 * (a0.x);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 += b0 * (a1.x);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 += b0 * (a2.x);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 += b0 * (a3.x);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
     /* Multiply by the weight of vector-matrix product */
@@ -574,10 +641,340 @@ void main()
     uvec2 packed_d;
     packed_d = uvec2(packHalf2x16(acc0.xy), packHalf2x16(acc0.zw));
     GC_STORE1_2D_OFFSET(packed_d, dst, 0, 0);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    packed_d = uvec2(packHalf2x16(acc1.xy), packHalf2x16(acc1.zw));
+    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 1);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    packed_d = uvec2(packHalf2x16(acc2.xy), packHalf2x16(acc2.zw));
+    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 2);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    packed_d = uvec2(packHalf2x16(acc3.xy), packHalf2x16(acc3.zw));
+    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 3);
+#endif                                 // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 }
-#endif /* GEMM_MM_FLOATING_POINT */
+#elif defined(MM_PROCESS_4X_OPTIMIZED) /* PROCESS_4X */
+BUFFER_DECLARATION(src0, 1, uvec4, readonly);
+BUFFER_DECLARATION(src1, 2, uvec2, readonly);
+BUFFER_DECLARATION(dst, 3, uvec2, writeonly);
+
+layout(std140) uniform shader_params
+{
+    IMAGE_PARAM_DECLARATION(src0);
+    IMAGE_PARAM_DECLARATION(src1);
+    IMAGE_PARAM_DECLARATION(dst);
+};
+
+/** This OpenGL ES kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
+ *
+ * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
+ *
+ * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ */
+void main()
+{
+    Image src0 = GC_CONVERT_TO_IMAGE_STRUCT(src0);
+    Image src1 = GC_CONVERT_TO_IMAGE_STRUCT(src1);
+    Image dst  = GC_CONVERT_TO_IMAGE_STRUCT(dst);
+
+    int idx = int(gl_GlobalInvocationID.x) * int(NUM_ELEMS_PROCESSED_PER_THREAD_X);
+    /* Compute the address for the vector A and matrix B */
+    src0.current_offset = (src0_offset_first_element_in_bytes + uint(gl_GlobalInvocationID.y) * src0_stride_y * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
+    src1.current_offset = src1_offset_first_element_in_bytes + uint(idx) * src1_stride_x;
+
+    /* Compute end row address for matrix A */
+    uint end_row_vec_a = src0.current_offset + uint(COLS_A << 1);
+
+    /* Reset accumulators */
+    vec4 acc0 = vec4(0.0f);
+
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    vec4 acc1 = vec4(0.0f);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    vec4 acc2 = vec4(0.0f);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    vec4 acc3 = vec4(0.0f);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+    for(; int(src0.current_offset) < int(end_row_vec_a - uint(16)); src0.current_offset += uint(8) * src0_stride_x, src1.current_offset += uint(8) * src1_stride_y)
+    {
+        uvec4 packed_a;
+        vec4  a0[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
+        a0[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a0[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        vec4 a1[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 1);
+        a1[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a1[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        vec4 a2[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 2);
+        a2[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a2[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        vec4 a3[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 3);
+        a3[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a3[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+        uvec2 packed_b;
+        vec4  b;
+
+        for(int i = 0; i < 8; i++)
+        {
+            int j = i >> 2;
+            int k = i % 4;
+
+            GC_LOAD1_2D_OFFSET(packed_b, src1, 0, i);
+
+            b = vec4(unpackHalf2x16(packed_b.x), unpackHalf2x16(packed_b.y));
+
+            acc0 += b * vec4(a0[j][k]);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+            acc1 += b * vec4(a1[j][k]);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+            acc2 += b * vec4(a2[j][k]);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+            acc3 += b * vec4(a3[j][k]);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        }
+    }
+
+    for(; src0.current_offset < end_row_vec_a; src0.current_offset += uint(2 * 8), src1.current_offset += uint(8) * src1_stride_y)
+    {
+        uvec4 packed_a;
+        vec4  a0[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
+        a0[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a0[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        vec4 a1[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 1);
+        a1[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a1[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        vec4 a2[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 2);
+        a2[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a2[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        vec4 a3[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 3);
+        a3[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a3[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+        uvec2 packed_b;
+        vec4  b;
+
+        int leftover = COLS_A % 8;
+
+        for(int i = 0; i < leftover; i++)
+        {
+            int j = i >> 2;
+            int k = i % 4;
+
+            GC_LOAD1_2D_OFFSET(packed_b, src1, 0, i);
+
+            b = vec4(unpackHalf2x16(packed_b.x), unpackHalf2x16(packed_b.y));
+
+            acc0 += b * vec4(a0[j][k]);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+            acc1 += b * vec4(a1[j][k]);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+            acc2 += b * vec4(a2[j][k]);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+            acc3 += b * vec4(a3[j][k]);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        }
+    }
+
+    /* Multiply by the weight of vector-matrix product */
+    acc0 = acc0 * vec4(ALPHA);
+
+    uvec2 packed_d;
+    packed_d = uvec2(packHalf2x16(acc0.xy), packHalf2x16(acc0.zw));
+    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 0);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    packed_d = uvec2(packHalf2x16(acc1.xy), packHalf2x16(acc1.zw));
+    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 1);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    packed_d = uvec2(packHalf2x16(acc2.xy), packHalf2x16(acc2.zw));
+    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 2);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    packed_d = uvec2(packHalf2x16(acc3.xy), packHalf2x16(acc3.zw));
+    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 3);
+#endif                       // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+}
+#elif defined(MM_PROCESS_8X) /* PROCESS_4X */
+BUFFER_DECLARATION(src0, 1, uvec4, readonly);
+BUFFER_DECLARATION(src1, 2, uvec4, readonly);
+BUFFER_DECLARATION(dst, 3, uvec4, writeonly);
+
+layout(std140) uniform shader_params
+{
+    IMAGE_PARAM_DECLARATION(src0);
+    IMAGE_PARAM_DECLARATION(src1);
+    IMAGE_PARAM_DECLARATION(dst);
+};
+
+/** This OpenGL ES kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
+ *
+ * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
+ *
+ * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ */
+void main()
+{
+    Image src0 = GC_CONVERT_TO_IMAGE_STRUCT(src0);
+    Image src1 = GC_CONVERT_TO_IMAGE_STRUCT(src1);
+    Image dst  = GC_CONVERT_TO_IMAGE_STRUCT(dst);
+
+    int idx = int(gl_GlobalInvocationID.x) * int(NUM_ELEMS_PROCESSED_PER_THREAD_X);
+    /* Compute the address for the vector A and matrix B */
+    src0.current_offset = (src0_offset_first_element_in_bytes + uint(gl_GlobalInvocationID.y) * src0_stride_y * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
+    src1.current_offset = src1_offset_first_element_in_bytes + uint(idx) * src1_stride_x;
+
+    /* Compute end row address for matrix A */
+    uint end_row_vec_a = src0.current_offset + uint(COLS_A << 1);
+
+    /* Reset accumulators */
+    vec4 acc[2];
+
+    acc[0] = vec4(0.0f);
+    acc[1] = vec4(0.0f);
+
+    for(; int(src0.current_offset) < int(end_row_vec_a - uint(16)); src0.current_offset += uint(8) * src0_stride_x, src1.current_offset += uint(8) * src1_stride_y)
+    {
+        uvec4 packed_a;
+        vec4  a[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
+        a[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+
+        uvec4 packed_b;
+        vec4  b[2];
+
+        for(int i = 0; i < 8; i++)
+        {
+            int j = i >> 2;
+            int k = i % 4;
+
+            GC_LOAD1_2D_OFFSET(packed_b, src1, 0, i);
+
+            b[0] = vec4(unpackHalf2x16(packed_b.x), unpackHalf2x16(packed_b.y));
+            b[1] = vec4(unpackHalf2x16(packed_b.z), unpackHalf2x16(packed_b.w));
+
+            acc[0] += b[0] * vec4(a[j][k]);
+            acc[1] += b[1] * vec4(a[j][k]);
+        }
+    }
+
+    for(; src0.current_offset < end_row_vec_a; src0.current_offset += uint(2 * 8), src1.current_offset += uint(8) * src1_stride_y)
+    {
+        uvec4 packed_a;
+        vec4  a[2];
+
+        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
+        a[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
+        a[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+
+        uvec4 packed_b;
+        vec4  b[2];
+
+        int leftover = COLS_A % 8;
+
+        for(int i = 0; i < leftover; i++)
+        {
+            int j = i >> 2;
+            int k = i % 4;
+
+            GC_LOAD1_2D_OFFSET(packed_b, src1, 0, i);
+
+            b[0] = vec4(unpackHalf2x16(packed_b.x), unpackHalf2x16(packed_b.y));
+            b[1] = vec4(unpackHalf2x16(packed_b.z), unpackHalf2x16(packed_b.w));
+
+            acc[0] += b[0] * vec4(a[j][k]);
+            acc[1] += b[1] * vec4(a[j][k]);
+        }
+    }
+
+    /* Multiply by the weight of vector-matrix product */
+    acc[0] = acc[0] * vec4(ALPHA);
+    acc[1] = acc[1] * vec4(ALPHA);
+
+    uvec4 packed_d;
+    packed_d = uvec4(packHalf2x16(acc[0].xy), packHalf2x16(acc[0].zw), packHalf2x16(acc[1].xy), packHalf2x16(acc[1].zw));
+    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 0);
+}
+#endif                       /* PROCESS_4X */
+#endif                       /* GEMM_MM_FLOATING_POINT */
 
 #ifdef GEMM_ACCUMULATE_BIASES
+#if defined(ACCUM_PROCESS_4X)
 BUFFER_DECLARATION(accum, 1, uvec2, restrict);
 BUFFER_DECLARATION(biases, 2, uvec2, readonly);
 
@@ -617,7 +1014,54 @@ void main(void)
     packed_s[0] = uvec2(packHalf2x16(tmp.xy), packHalf2x16(tmp.zw));
     GC_STORE1_2D_OFFSET(packed_s[0], accum, 0, 0);
 }
-#endif /* GEMM_ACCUMULATE_BIASES */
-#else  /* DATA_TYPE_FP32 */
+#elif defined(ACCUM_PROCESS_8X) /* ACCUM_PROCESS_4X */
+BUFFER_DECLARATION(accum, 1, uvec4, restrict);
+BUFFER_DECLARATION(biases, 2, uvec4, readonly);
+
+layout(std140) uniform shader_params
+{
+    IMAGE_PARAM_DECLARATION(accum);
+    VECTOR_PARAM_DECLARATION(biases);
+};
+
+/** This kernel accumulates each row with the biases vector
+ *
+ * @param[in, out] accum_ptr                            Pointer to the accumulate tensor. Supported data type: F16
+ * @param[in]      accum_stride_x                       Stride of the accmulate tensor in X dimension (in bytes)
+ * @param[in]      accum_step_x                         accum_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]      accum_stride_y                       Stride of the accumlulate tensor in Y dimension (in bytes)
+ * @param[in]      accum_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]      accum_offset_first_element_in_bytes  The offset of the first element in the accumulate tensor
+ * @param[in]      biases_ptr                           Pointer to the biases vector. Same as @p accum_ptr
+ * @param[in]      biases_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]      biases_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]      biases_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+void main(void)
+{
+    Image  accum  = GC_CONVERT_TO_IMAGE_STRUCT(accum);
+    Vector biases = GC_CONVERT_TO_VECTOR_STRUCT(biases);
+
+    vec4  u[2];
+    vec4  v[2];
+    uvec4 packed_s[2];
+    GC_LOAD1_2D_OFFSET(packed_s[0], accum, 0, 0);
+    GC_LOAD1_1D_OFFSET(packed_s[1], biases, 0);
+
+    u[0] = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
+    u[1] = vec4(unpackHalf2x16(packed_s[0].z), unpackHalf2x16(packed_s[0].w));
+
+    v[0] = vec4(unpackHalf2x16(packed_s[1].x), unpackHalf2x16(packed_s[1].y));
+    v[1] = vec4(unpackHalf2x16(packed_s[1].z), unpackHalf2x16(packed_s[1].w));
+
+    vec4 r[2];
+    r[0]        = u[0] + v[0];
+    r[1]        = u[1] + v[1];
+    packed_s[0] = uvec4(packHalf2x16(r[0].xy), packHalf2x16(r[0].zw), packHalf2x16(r[1].xy), packHalf2x16(r[1].zw));
+    GC_STORE1_2D_OFFSET(packed_s[0], accum, 0, 0);
+}
+#endif                          /* ACCUM_PROCESS_4X */
+#endif                          /* GEMM_ACCUMULATE_BIASES */
+#else                           /* DATA_TYPE_FP32 */
 #error Data type not supported
 #endif /* DATA_TYPE_FP32 */
