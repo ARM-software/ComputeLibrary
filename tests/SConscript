@@ -50,7 +50,7 @@ vars.Update(test_env)
 
 Help(new_options.GenerateHelpText(test_env))
 
-if env['os'] in ['bare_metal'] or env['standalone']:
+if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
     Import("arm_compute_core_a")
     test_env.Append(LIBS = [arm_compute_a, arm_compute_core_a])

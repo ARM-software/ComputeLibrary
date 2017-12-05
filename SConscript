@@ -231,17 +231,16 @@ if env['neon'] and env['opencl']:
     shared_graph_objects = [arm_compute_env.SharedObject(f) for f in graph_files]
     static_graph_objects = [arm_compute_env.StaticObject(f) for f in graph_files]
 
-    #FIXME OpenCL can't be linked statically: revisit when we can have a NEON only build of the graph library
-    #arm_compute_graph_a = build_library('arm_compute_graph-static', static_graph_objects, static=True, libs = [ arm_compute_a ])
-    #Export('arm_compute_graph_a')
+    arm_compute_graph_a = build_library('arm_compute_graph-static', static_graph_objects, static=True, libs = [ arm_compute_a ])
+    Export('arm_compute_graph_a')
 
     arm_compute_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
     arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core", "OpenCL" ])
-    Depends(arm_compute_graph_so, [ arm_compute_so, opencl])
+    Depends(arm_compute_graph_so, arm_compute_so)
+    Depends(arm_compute_graph_so, opencl)
     Export('arm_compute_graph_so')
 
-   #graph_alias = arm_compute_env.Alias("arm_compute_graph", [arm_compute_graph_a, arm_compute_graph_so])
-    graph_alias = arm_compute_env.Alias("arm_compute_graph", [arm_compute_graph_so])
+    graph_alias = arm_compute_env.Alias("arm_compute_graph", [arm_compute_graph_a, arm_compute_graph_so])
     Default(graph_alias)
 
 if env['standalone']:

@@ -609,24 +609,24 @@ Once you've got your Android standalone toolchain built and added to your path y
 To cross compile a NEON example:
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -L. -o neon_convolution_arm -pie
+	arm-linux-androideabi-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o neon_convolution_arm -static-libstdc++ -pie
 	#64 bit:
-	aarch64-linux-android-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -L. -o neon_convolution_aarch64 -pie
+	aarch64-linux-android-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o neon_convolution_aarch64 -static-libstdc++ -pie
 
 To cross compile an OpenCL example:
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -L. -o cl_convolution_arm -pie -lOpenCL -DARM_COMPUTE_CL
+	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -L. -o cl_convolution_aarch64 -pie -lOpenCL -DARM_COMPUTE_CL
+	aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 
 To cross compile the examples with the Graph API, such as graph_lenet.cpp, you need to link the library arm_compute_graph also.
 (notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1)
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -larm_compute_graph -larm_compute -larm_compute_core -L. -o graph_lenet_arm -pie -Wl,--allow-shlib-undefined
+	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -larm_compute_graph-static -larm_compute-static -larm_compute_core -static-L. -o graph_lenet_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -larm_compute_graph -larm_compute -larm_compute_core -L. -o graph_lenet_aarch64 -pie -Wl,--allow-shlib-undefined
+	aarch64-linux-android-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -larm_compute_graph-static -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 
 @note Due to some issues in older versions of the Mali OpenCL DDK (<= r13p0), we recommend to link arm_compute statically on Android.
 

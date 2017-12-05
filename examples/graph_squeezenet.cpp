@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Nodes.h"
 #include "arm_compute/graph/SubGraph.h"
