@@ -127,12 +127,12 @@ void main(void)
 }
 
 #elif defined(DATA_TYPE_FP16)
-BUFFER_DECLARATION(src, 1, uint, );
-BUFFER_DECLARATION(dst, 2, uint, writeonly);
-BUFFER_DECLARATION(mean, 3, uint, );
-BUFFER_DECLARATION(var, 4, uint, );
-BUFFER_DECLARATION(beta, 5, uint, );
-BUFFER_DECLARATION(gamma, 6, uint, );
+BUFFER_DECLARATION(src, 1, uvec2, readonly);
+BUFFER_DECLARATION(dst, 2, uvec2, writeonly);
+BUFFER_DECLARATION(mean, 3, uvec2, readonly);
+BUFFER_DECLARATION(var, 4, uvec2, readonly);
+BUFFER_DECLARATION(beta, 5, uvec2, readonly);
+BUFFER_DECLARATION(gamma, 6, uvec2, readonly);
 
 /** Apply batch normalization.
  *
@@ -180,43 +180,86 @@ void main(void)
     Vector   beta  = CONVERT_TO_VECTOR_STRUCT_FP16(beta);
     Vector   gamma = CONVERT_TO_VECTOR_STRUCT_FP16(gamma);
 
-    vec2  input_value;
+    uvec2 packed_s[5];
+    vec4  unpacked_s[5];
     float denominator;
     float numerator;
-    vec2  x_bar;
     float gamma_param;
     float beta_param;
+    vec4  x_bar;
+    vec4  result;
 
     uint current_slice = gl_GlobalInvocationID.z;
-    if((current_slice % uint(2)) == uint(0))
+    packed_s[0]        = src_ptr[src.current_offset >> 3];
+    packed_s[1]        = var_ptr[(var.current_offset + current_slice * var.stride_x) >> 3];
+    packed_s[2]        = mean_ptr[(mean.current_offset + current_slice * mean.stride_x) >> 3];
+    packed_s[3]        = gamma_ptr[(gamma.current_offset + current_slice * beta.stride_x) >> 3];
+    packed_s[4]        = beta_ptr[(beta.current_offset + current_slice * beta.stride_x) >> 3];
+    unpacked_s[0]      = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
+    unpacked_s[1]      = vec4(unpackHalf2x16(packed_s[1].x), unpackHalf2x16(packed_s[1].y));
+    unpacked_s[2]      = vec4(unpackHalf2x16(packed_s[2].x), unpackHalf2x16(packed_s[2].y));
+    unpacked_s[3]      = vec4(unpackHalf2x16(packed_s[3].x), unpackHalf2x16(packed_s[3].y));
+    unpacked_s[4]      = vec4(unpackHalf2x16(packed_s[4].x), unpackHalf2x16(packed_s[4].y));
+
+    if((current_slice % uint(4)) == uint(0))
     {
-        input_value = unpackHalf2x16(src_ptr[src.current_offset >> 2]);
-        denominator = unpackHalf2x16(var_ptr[(var.current_offset + current_slice * var.stride_x) >> 2]).x;
+        denominator = unpacked_s[1].x;
         denominator = INVSQRT_OP(ADD_OP(denominator, SQCVT_SAT(float(ESPILON))));
 
         //Calculate x bar and store results
-        numerator = unpackHalf2x16(mean_ptr[(mean.current_offset + current_slice * mean.stride_x) >> 2]).x;
-        x_bar     = MUL_OP(SUB_OP(input_value, numerator), denominator);
+        numerator = unpacked_s[2].x;
+        x_bar     = MUL_OP(SUB_OP(unpacked_s[0], numerator), denominator);
 
-        gamma_param = unpackHalf2x16(gamma_ptr[(gamma.current_offset + current_slice * beta.stride_x) >> 2]).x;
-        beta_param  = unpackHalf2x16(beta_ptr[(beta.current_offset + current_slice * beta.stride_x) >> 2]).x;
+        gamma_param = unpacked_s[3].x;
+        beta_param  = unpacked_s[4].x;
+        result      = ADD_OP(MUL_OP(gamma_param, x_bar), beta_param);
 
-        dst_ptr[dst.current_offset >> 2] = packHalf2x16(ADD_OP(MUL_OP(gamma_param, x_bar), beta_param));
+        dst_ptr[dst.current_offset >> 3] = uvec2(packHalf2x16(result.xy), packHalf2x16(result.zw));
+    }
+    else if((current_slice % uint(4)) == uint(1))
+    {
+        denominator = unpacked_s[1].y;
+        denominator = INVSQRT_OP(ADD_OP(denominator, SQCVT_SAT(float(ESPILON))));
+
+        //Calculate x bar and store results
+        numerator = unpacked_s[2].y;
+        x_bar     = MUL_OP(SUB_OP(unpacked_s[0], numerator), denominator);
+
+        gamma_param = unpacked_s[3].y;
+        beta_param  = unpacked_s[4].y;
+        result      = ADD_OP(MUL_OP(gamma_param, x_bar), beta_param);
+
+        dst_ptr[dst.current_offset >> 3] = uvec2(packHalf2x16(result.xy), packHalf2x16(result.zw));
+    }
+    else if((current_slice % uint(4)) == uint(2))
+    {
+        denominator = unpacked_s[1].z;
+        denominator = INVSQRT_OP(ADD_OP(denominator, SQCVT_SAT(float(ESPILON))));
+
+        //Calculate x bar and store results
+        numerator = unpacked_s[2].z;
+        x_bar     = MUL_OP(SUB_OP(unpacked_s[0], numerator), denominator);
+
+        gamma_param = unpacked_s[3].z;
+        beta_param  = unpacked_s[4].z;
+        result      = ADD_OP(MUL_OP(gamma_param, x_bar), beta_param);
+
+        dst_ptr[dst.current_offset >> 3] = uvec2(packHalf2x16(result.xy), packHalf2x16(result.zw));
     }
     else
     {
-        input_value = unpackHalf2x16(src_ptr[src.current_offset >> 2]);
-        denominator = unpackHalf2x16(var_ptr[(var.current_offset + current_slice * var.stride_x) >> 2]).y;
+        denominator = unpacked_s[1].w;
         denominator = INVSQRT_OP(ADD_OP(denominator, SQCVT_SAT(float(ESPILON))));
 
         //Calculate x bar and store results
-        numerator = unpackHalf2x16(mean_ptr[(mean.current_offset + current_slice * mean.stride_x) >> 2]).y;
-        x_bar     = MUL_OP(SUB_OP(input_value, numerator), denominator);
+        numerator = unpacked_s[2].w;
+        x_bar     = MUL_OP(SUB_OP(unpacked_s[0], numerator), denominator);
 
-        gamma_param = unpackHalf2x16(gamma_ptr[(gamma.current_offset + current_slice * beta.stride_x) >> 2]).y;
-        beta_param  = unpackHalf2x16(beta_ptr[(beta.current_offset + current_slice * beta.stride_x) >> 2]).y;
+        gamma_param = unpacked_s[3].w;
+        beta_param  = unpacked_s[4].w;
+        result      = ADD_OP(MUL_OP(gamma_param, x_bar), beta_param);
 
-        dst_ptr[dst.current_offset >> 2] = packHalf2x16(ADD_OP(MUL_OP(gamma_param, x_bar), beta_param));
+        dst_ptr[dst.current_offset >> 3] = uvec2(packHalf2x16(result.xy), packHalf2x16(result.zw));
     }
 }
-#endif /*DATA_TYPE_FP32*/
+#endif /*DATA_TYPE_FP16*/
