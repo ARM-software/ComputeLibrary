@@ -201,24 +201,18 @@ if env['gles_compute']:
 
         generate_embed.append(arm_compute_env.Command(embed_files, cs_files, action=resolve_includes))
 
-static_core_objects = [arm_compute_env.StaticObject(f) for f in core_files]
-shared_core_objects = [arm_compute_env.SharedObject(f) for f in core_files]
-
-arm_compute_core_a = build_library('arm_compute_core-static', static_core_objects, static=True)
+arm_compute_core_a = build_library('arm_compute_core-static', core_files, static=True)
 Export('arm_compute_core_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_core_so = build_library('arm_compute_core', shared_core_objects, static=False)
+    arm_compute_core_so = build_library('arm_compute_core', core_files, static=False)
     Export('arm_compute_core_so')
 
-shared_runtime_objects = [arm_compute_env.SharedObject(f) for f in runtime_files]
-static_runtime_objects = [arm_compute_env.StaticObject(f) for f in runtime_files]
-
-arm_compute_a = build_library('arm_compute-static', static_runtime_objects, static=True, libs = [ arm_compute_core_a ])
+arm_compute_a = build_library('arm_compute-static', runtime_files, static=True, libs = [ arm_compute_core_a ])
 Export('arm_compute_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_so = build_library('arm_compute', shared_runtime_objects, static=False, libs = [ "arm_compute_core" ])
+    arm_compute_so = build_library('arm_compute', runtime_files, static=False, libs = [ "arm_compute_core" ])
     Depends(arm_compute_so, arm_compute_core_so)
     Export('arm_compute_so')
 
