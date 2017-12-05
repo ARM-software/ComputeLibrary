@@ -206,6 +206,7 @@ inline void a64_gemm_u8_12x8_a55r1(const uint8_t *Apanel, const uint8_t *Bpanel,
 
                 // Branch to alternative tail for odd K
                 "cbnz	%w[oddk], 2f\n"
+                "ldr	%d[b2], [%[b_ptr], #32]\n"
 
                 // Detached final iteration (even K)
                 "udot	v8.4s , %[b0].16b, %[a0].4b[0]\n"
@@ -216,13 +217,13 @@ inline void a64_gemm_u8_12x8_a55r1(const uint8_t *Apanel, const uint8_t *Bpanel,
                 "ldr	%d[a0a], [%[a_ptr], #32]\n"
 
                 "udot 	v12.4s, %[b0].16b, %[a1].4b[0]\n"
-                "ldr	%d[b2], [%[b_ptr], #32]\n"
+                "ins	%[b2].d[1], x20\n"
+
                 "udot   v13.4s, %[b0].16b, %[a1].4b[1]\n"
                 "ldr    x20, [%[a_ptr], #40]\n"
                 "udot	v14.4s, %[b0].16b, %[a1].4b[2]\n"
                 "udot	v15.4s, %[b0].16b, %[a1].4b[3]\n"
                 "ldr	%d[a1a], [%[a_ptr], #48]\n"
-
 
                 "udot	v16.4s, %[b1].16b, %[a0].4b[0]\n"
                 "ins    %[a0a].d[1], x20\n"
