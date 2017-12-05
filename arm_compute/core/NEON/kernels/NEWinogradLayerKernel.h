@@ -52,8 +52,6 @@ private:
 class NEWinogradLayerKernel : public INEKernel
 {
 public:
-    //    using Winograd3x3F32 = winograd_shim_nchw::Winograd2x2_3x3GEMM<float, float>;
-
     /** Constructor */
     NEWinogradLayerKernel();
 
@@ -92,8 +90,7 @@ public:
 
 protected:
     Winograd3x3F32 *_convolver;
-    //    std::unique_ptr<Winograd3x3F32> _conv;
-    ITensor *_output;
+    ITensor        *_output;
 };
 
 } // namespace arm_compute
