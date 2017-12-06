@@ -35,15 +35,19 @@ namespace quantization
  * @param[in]  multiplier       Real multiplier.
  * @param[out] quant_multiplier Integer multiplier.
  * @param[out] right_shift      Right bit shift.
+ *
+ * @return a status
  */
-arm_compute::Error calculate_quantized_multiplier_less_than_one(double multiplier, int *quant_multiplier, int *right_shift);
+arm_compute::Status calculate_quantized_multiplier_less_than_one(double multiplier, int *quant_multiplier, int *right_shift);
 /** Calculate quantized representation of multiplier having value greater than one.
  *
  * @param[in]  multiplier           Real multiplier.
  * @param[out] quantized_multiplier Integer multiplier.
  * @param[out] left_shift           Left bit shift.
+ *
+ * @return a status
  */
-arm_compute::Error calculate_quantized_multiplier_greater_than_one(double multiplier, int *quantized_multiplier, int *left_shift);
+arm_compute::Status calculate_quantized_multiplier_greater_than_one(double multiplier, int *quantized_multiplier, int *left_shift);
 } // namespace quantization
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_IO_FILE_HANDLER_H__ */

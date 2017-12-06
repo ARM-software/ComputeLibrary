@@ -55,7 +55,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                      })),
                framework::dataset::make("ConvolvedWidth", { 3, 3, 3, 3, 3 })),
                framework::dataset::make("ConvolvedHeight", { 4, 4, 4, 4, 4 })),
-               framework::dataset::make("Expected", { true, true, true, true, false })),
+               framework::dataset::make("Expected", { false, false, false, false, true })),
                input_info, output_info, convolved_width, convolved_height, expected)
 {
     bool err = bool(NECol2Im::validate(&input_info, &output_info, Size2D(convolved_width, convolved_height)));

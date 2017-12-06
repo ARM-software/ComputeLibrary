@@ -143,11 +143,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
                                                       })),
-               framework::dataset::make("Expected", { true, true, true, true, true, true, true, true, true, true, false })),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, false, true })),
                input_info, weights_info, biases_info, output_info, conv_info, expected)
 {
-    bool is_error = bool(CLDirectConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info));
-    ARM_COMPUTE_EXPECT(is_error == expected, framework::LogLevel::ERRORS);
+    bool is_valid = bool(CLDirectConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*

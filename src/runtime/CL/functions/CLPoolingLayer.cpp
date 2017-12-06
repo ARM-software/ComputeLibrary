@@ -52,7 +52,7 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(border_value));
 }
 
-Error CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
 {
     return CLPoolingLayerKernel::validate(input, output, pool_info);
 }

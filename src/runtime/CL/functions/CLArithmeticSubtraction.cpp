@@ -37,7 +37,7 @@ void CLArithmeticSubtraction::configure(const ICLTensor *input1, const ICLTensor
     _kernel = std::move(k);
 }
 
-Error CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+Status CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
 {
     return CLArithmeticSubtractionKernel::validate(input1, input2, output, policy);
 }

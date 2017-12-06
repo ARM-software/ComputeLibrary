@@ -84,9 +84,9 @@ public:
      * @param[in] num_mtx_a_cols    Number of matrix A columns
      * @param[in] is_interleaved4x4 True if the matrix A has been interleaved4x4
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4);
+    static Status validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -115,9 +115,9 @@ public:
      * @param[in] num_mtx_b_rows   Number of matrix B rows
      * @param[in] is_transposed1xW True if the input tensor is transposed 1xW
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW);
+    static Status validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

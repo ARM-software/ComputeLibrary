@@ -58,9 +58,9 @@ public:
      * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] has_bias    In case biases are provided expands the matrix with 1.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
 };
 }
 #endif /* __ARM_COMPUTE_NEIM2COL_H__ */

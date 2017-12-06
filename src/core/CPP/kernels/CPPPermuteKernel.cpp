@@ -44,7 +44,7 @@ TensorShape get_output_shape(const ITensorInfo *input, const PermutationVector &
     return output_shape;
 }
 
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,
                                                          DataType::U16, DataType::S16, DataType::QS16,
@@ -62,7 +62,7 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, co
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
-    return Error{};
+    return Status{};
 }
 } // namespace
 
@@ -150,10 +150,10 @@ void CPPPermuteKernel::configure(const ITensor *input, ITensor *output, const Pe
     ICPPKernel::configure(win);
 }
 
-Error CPPPermuteKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
+Status CPPPermuteKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, perm));
-    return Error{};
+    return Status{};
 }
 
 void CPPPermuteKernel::run(const Window &window, const ThreadInfo &info)

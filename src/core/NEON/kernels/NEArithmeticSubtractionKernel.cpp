@@ -349,7 +349,7 @@ void sub_saturate_U8_U8_S16(const ITensor *in1, const ITensor *in2, ITensor *out
     input1, input2, output);
 }
 
-inline Error validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+inline Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
 {
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, input2, output);
@@ -375,10 +375,10 @@ inline Error validate_arguments(const ITensorInfo *input1, const ITensorInfo *in
         && !(input1->data_type() == DataType::F16 && input2->data_type() == DataType::F16 && output->data_type() == DataType::F16),
         "You called subtract with the wrong image formats");
 
-    return Error{};
+    return Status{};
 }
 
-inline std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
+inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
@@ -396,7 +396,7 @@ inline std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input
 
     output_access.set_valid_region(win, valid_region);
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -475,12 +475,12 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
     INEKernel::configure(win_config.second);
 }
 
-Error NEArithmeticSubtractionKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+Status NEArithmeticSubtractionKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output, policy));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEArithmeticSubtractionKernel::run(const Window &window, const ThreadInfo &info)

@@ -199,7 +199,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     }
 }
 
-Error NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info)
+Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
@@ -287,7 +287,7 @@ Error NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensor
                                                                              b_offset == 0 ? nullptr : &info_vector_sum_row,
                                                                              a_offset, b_offset));
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMLowpMatrixMultiplyCore::run()

@@ -61,7 +61,7 @@ TensorShape get_output_shape(TensorShape input_shape, TensorShape weights_shape,
     return output_shape;
 }
 
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -105,10 +105,10 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, c
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *output, const PadStrideInfo &conv_info, const GPUTarget target)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *output, const PadStrideInfo &conv_info, const GPUTarget target)
 {
     const unsigned int kernel_size = weights->dimension(0);
     const DataType     data_type   = input->data_type();
@@ -211,7 +211,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -419,13 +419,13 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
-Error CLDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                               const GPUTarget target)
+Status CLDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                                const GPUTarget target)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), output->clone().get(), conv_info, target).first);
 
-    return Error{};
+    return Status{};
 }
 
 void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue &queue)

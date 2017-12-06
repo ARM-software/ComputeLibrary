@@ -35,7 +35,7 @@ void NECol2Im::configure(const ITensor *input, ITensor *output, const Size2D &co
     _kernel = std::move(k);
 }
 
-Error NECol2Im::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims)
+Status NECol2Im::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims)
 {
     return NECol2ImKernel::validate(input, output, convolved_dims);
 }

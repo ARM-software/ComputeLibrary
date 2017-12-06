@@ -42,10 +42,10 @@ void CLBatchNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, c
     _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon);
 }
 
-Error CLBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
-                                          const ITensorInfo *mean, const ITensorInfo *var,
-                                          const ITensorInfo *beta, const ITensorInfo *gamma,
-                                          float epsilon)
+Status CLBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
+                                           const ITensorInfo *mean, const ITensorInfo *var,
+                                           const ITensorInfo *beta, const ITensorInfo *gamma,
+                                           float epsilon)
 {
     return CLBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon);
 }

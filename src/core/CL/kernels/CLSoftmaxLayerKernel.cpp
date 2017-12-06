@@ -81,7 +81,7 @@ CLBuildOptions prepare_quantized_softmax_build_options(float input_scale, float 
 
 // Arguments Validation
 
-Error validate_arguments_1DMax(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments_1DMax(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
@@ -98,10 +98,10 @@ Error validate_arguments_1DMax(const ITensorInfo *input, const ITensorInfo *outp
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
     }
 
-    return Error{};
+    return Status{};
 }
 
-Error validate_arguments_1DShiftExpSum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
+Status validate_arguments_1DShiftExpSum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(max, sum, output);
@@ -138,10 +138,10 @@ Error validate_arguments_1DShiftExpSum(const ITensorInfo *input, const ITensorIn
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(max, sum);
     }
 
-    return Error{};
+    return Status{};
 }
 
-Error validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
+Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(max, sum, output);
@@ -165,10 +165,10 @@ Error validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITenso
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(max, sum);
     }
 
-    return Error{};
+    return Status{};
 }
 
-Error validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
+Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(sum, output);
@@ -195,12 +195,12 @@ Error validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *sum
         }
     }
 
-    return Error{};
+    return Status{};
 }
 
 // Window validation
 
-std::pair<Error, Window> validate_and_configure_window_1DMax(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window_1DMax(ITensorInfo *input, ITensorInfo *output)
 {
     TensorShape output_shape{ input->tensor_shape() };
     output_shape.set(0, 1);
@@ -220,11 +220,11 @@ std::pair<Error, Window> validate_and_configure_window_1DMax(ITensorInfo *input,
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
-std::pair<Error, Window> validate_and_configure_window_1DShiftExpSum(ITensorInfo *input, ITensorInfo *max, ITensorInfo *output, ITensorInfo *sum)
+std::pair<Status, Window> validate_and_configure_window_1DShiftExpSum(ITensorInfo *input, ITensorInfo *max, ITensorInfo *output, ITensorInfo *sum)
 {
     const bool     is_quantized_asymmetric = is_data_type_quantized_asymmetric(input->data_type());
     const DataType tmp_data_type           = is_quantized_asymmetric ? DataType::S32 : input->data_type();
@@ -248,11 +248,11 @@ std::pair<Error, Window> validate_and_configure_window_1DShiftExpSum(ITensorInfo
     output_access.set_valid_region(win, input->valid_region());
     sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->tensor_shape()));
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
-std::pair<Error, Window> validate_and_configure_window_1DMaxShiftExpSum(ITensorInfo *input, ITensorInfo *max, ITensorInfo *output, ITensorInfo *sum)
+std::pair<Status, Window> validate_and_configure_window_1DMaxShiftExpSum(ITensorInfo *input, ITensorInfo *max, ITensorInfo *output, ITensorInfo *sum)
 {
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*sum, input->clone()->set_tensor_shape(max->tensor_shape()));
@@ -273,11 +273,11 @@ std::pair<Error, Window> validate_and_configure_window_1DMaxShiftExpSum(ITensorI
     output_access.set_valid_region(win, input->valid_region());
     sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->tensor_shape()));
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
-std::pair<Error, Window> validate_and_configure_window_1DNorm(ITensorInfo *input, ITensorInfo *output, ITensorInfo *sum)
+std::pair<Status, Window> validate_and_configure_window_1DNorm(ITensorInfo *input, ITensorInfo *output, ITensorInfo *sum)
 {
     const QuantizationInfo allowed_quantization_info = QuantizationInfo(1.f / 256, 0);
     const bool             is_quantized_asymmetric   = (input->data_type() == DataType::S32);
@@ -299,7 +299,7 @@ std::pair<Error, Window> validate_and_configure_window_1DNorm(ITensorInfo *input
 
     output_access.set_valid_region(win, input->valid_region());
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
@@ -354,12 +354,12 @@ void CLLogits1DMaxKernel::configure(const ICLTensor *input, ICLTensor *output)
     _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
-Error CLLogits1DMaxKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status CLLogits1DMaxKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DMax(input, output));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DMax(input->clone().get(), output->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 CLLogits1DShiftExpSumKernel::CLLogits1DShiftExpSumKernel()
@@ -416,12 +416,12 @@ void CLLogits1DShiftExpSumKernel::configure(const ICLTensor *input, const ICLTen
     ICLKernel::configure(win_config.second);
 }
 
-Error CLLogits1DShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
+Status CLLogits1DShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DShiftExpSum(input, max, output, sum));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DShiftExpSum(input->clone().get(), max->clone().get(), output->clone().get(), sum->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void CLLogits1DShiftExpSumKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -523,12 +523,12 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
     ICLKernel::configure(win_config.second);
 }
 
-Error CLLogits1DMaxShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
+Status CLLogits1DMaxShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DMaxShiftExpSum(input, max, output, sum));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DMaxShiftExpSum(input->clone().get(), max->clone().get(), output->clone().get(), sum->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(size_t size)
@@ -613,12 +613,12 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
     ICLKernel::configure(win_config.second);
 }
 
-Error CLLogits1DNormKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
+Status CLLogits1DNormKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DNorm(input, sum, output));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DNorm(input->clone().get(), output->clone().get(), sum->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void CLLogits1DNormKernel::run(const Window &window, cl::CommandQueue &queue)

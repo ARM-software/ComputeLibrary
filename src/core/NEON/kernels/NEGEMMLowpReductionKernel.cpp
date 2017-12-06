@@ -46,14 +46,14 @@ class Coordinates;
 
 namespace
 {
-Error validate_arguments_matrix_a_reduction(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments_matrix_a_reduction(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
 
-    return Error{};
+    return Status{};
 }
-std::pair<Error, Window> validate_and_configure_window_matrix_a_reduction(ITensorInfo *input, ITensorInfo *output, bool is_reshaped)
+std::pair<Status, Window> validate_and_configure_window_matrix_a_reduction(ITensorInfo *input, ITensorInfo *output, bool is_reshaped)
 {
     const unsigned int num_elems_processed_per_iteration = is_reshaped ? 4 : 1;
 
@@ -66,19 +66,19 @@ std::pair<Error, Window> validate_and_configure_window_matrix_a_reduction(ITenso
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
-Error validate_arguments_matrix_b_reduction(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments_matrix_b_reduction(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window_matrix_b_reduction(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window_matrix_b_reduction(ITensorInfo *input, ITensorInfo *output)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
@@ -92,7 +92,7 @@ std::pair<Error, Window> validate_and_configure_window_matrix_b_reduction(ITenso
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -119,13 +119,13 @@ void NEGEMMLowpMatrixAReductionKernel::configure(const ITensor *mtx_a, ITensor *
     INEKernel::configure(win_config.second);
 }
 
-Error NEGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4)
+Status NEGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4)
 {
     ARM_COMPUTE_UNUSED(num_mtx_a_cols);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_a_reduction(mtx_a, vector_sum_row));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_matrix_a_reduction(mtx_a->clone().get(), vector_sum_row->clone().get(), is_interleaved4x4).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInfo &info)
@@ -266,14 +266,14 @@ void NEGEMMLowpMatrixBReductionKernel::configure(const ITensor *mtx_b, ITensor *
     INEKernel::configure(win_config.second);
 }
 
-Error NEGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW)
+Status NEGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW)
 {
     ARM_COMPUTE_UNUSED(num_mtx_b_rows);
     ARM_COMPUTE_UNUSED(is_transposed1xW);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_b_reduction(mtx_b, vector_sum_col));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_matrix_b_reduction(mtx_b->clone().get(), vector_sum_col->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInfo &info)

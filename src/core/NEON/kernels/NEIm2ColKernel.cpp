@@ -42,7 +42,7 @@ using namespace arm_compute;
 
 namespace
 {
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -51,7 +51,7 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, co
     ARM_COMPUTE_UNUSED(kernel_dims);
     ARM_COMPUTE_UNUSED(conv_info);
 
-    return Error{};
+    return Status{};
 }
 
 template <typename T, bool has_pads>
@@ -373,10 +373,10 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
     IKernel::configure(window);
 }
 
-Error NEIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+Status NEIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias));
-    return Error{};
+    return Status{};
 }
 
 void NEIm2ColKernel::run(const Window &window, const ThreadInfo &info)

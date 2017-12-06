@@ -35,39 +35,39 @@ enum class ErrorCode
     RUNTIME_ERROR /**< Generic runtime error */
 };
 
-/** Error class */
-class Error
+/** Status class */
+class Status
 {
 public:
     /** Default Constructor **/
-    Error()
-        : _code(ErrorCode::OK), _description(" ")
+    Status()
+        : _code(ErrorCode::OK), _error_description(" ")
     {
     }
     /** Default Constructor
      *
      * @param error_status      Error status.
-     * @param error_description Error description if error_status is not valid.
+     * @param error_description (Optional) Error description if error_status is not valid.
      */
-    explicit Error(ErrorCode error_status, std::string error_description = " ")
-        : _code(error_status), _description(error_description)
+    explicit Status(ErrorCode error_status, std::string error_description = " ")
+        : _code(error_status), _error_description(error_description)
     {
     }
     /** Allow instances of this class to be copy constructed */
-    Error(const Error &) = default;
+    Status(const Status &) = default;
     /** Allow instances of this class to be move constructed */
-    Error(Error &&) = default;
+    Status(Status &&) = default;
     /** Allow instances of this class to be copy assigned */
-    Error &operator=(const Error &) = default;
+    Status &operator=(const Status &) = default;
     /** Allow instances of this class to be move assigned */
-    Error &operator=(Error &&) = default;
+    Status &operator=(Status &&) = default;
     /** Explicit bool conversion operator
      *
-     * @return True if there is a valid error else false if status is OK.
+     * @return True if there is no error else false
      */
     explicit operator bool() const noexcept
     {
-        return _code != ErrorCode::OK;
+        return _code == ErrorCode::OK;
     }
     /** Gets error code
      *
@@ -81,14 +81,14 @@ public:
      *
      * @return Error description.
      */
-    std::string description() const
+    std::string error_description() const
     {
-        return _description;
+        return _error_description;
     }
     /** Throws a runtime exception in case it contains a valid error status */
     void throw_if_error()
     {
-        if(bool(*this))
+        if(!bool(*this))
         {
             internal_throw_on_error();
         }
@@ -100,7 +100,7 @@ private:
 
 private:
     ErrorCode   _code;
-    std::string _description;
+    std::string _error_description;
 };
 
 /** Creates an error containing the error message from variable argument list
@@ -111,8 +111,10 @@ private:
  * @param[in] line       Line on which the error occurred.
  * @param[in] msg        Message to display before aborting.
  * @param[in] args       Variable argument list of the message.
+ *
+ * @return status containing the error
  */
-Error create_error_va_list(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, va_list args);
+Status create_error_va_list(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, va_list args);
 /** Creates an error containing the error message
  *
  * @param[in] error_code Error code
@@ -121,8 +123,10 @@ Error create_error_va_list(ErrorCode error_code, const char *function, const cha
  * @param[in] line       Line on which the error occurred.
  * @param[in] msg        Message to display before aborting.
  * @param[in] ...        Variable number of arguments of the message.
+ *
+ * @return status containing the error
  */
-Error create_error(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, ...);
+Status create_error(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, ...);
 /** Print an error message then throw an std::runtime_error
  *
  * @param[in] function Function in which the error occurred.
@@ -159,17 +163,17 @@ Error create_error(ErrorCode error_code, const char *function, const char *file,
  */
 #define ARM_COMPUTE_CREATE_ERROR_LOC(error_code, func, file, line, ...) ::arm_compute::create_error(error_code, func, file, line, __VA_ARGS__) // NOLINT
 
-/** Checks if an error value is valid if not returns
+/** Checks if a status contains an error and returns it
  *
- * @param[in] error Error value to check
+ * @param[in] status Status value to check
  */
-#define ARM_COMPUTE_RETURN_ON_ERROR(error) \
-    do                                     \
-    {                                      \
-        if(bool(error))                    \
-        {                                  \
-            return error;                  \
-        }                                  \
+#define ARM_COMPUTE_RETURN_ON_ERROR(status) \
+    do                                      \
+    {                                       \
+        if(!bool(status))                   \
+        {                                   \
+            return status;                  \
+        }                                   \
     } while(false)
 
 /** Checks if an error value is valid if not throws an exception with the error
@@ -243,12 +247,12 @@ Error create_error(ErrorCode error_code, const char *function, const char *file,
 #define ARM_COMPUTE_ERROR_LOC(func, file, line, ...) ::arm_compute::error(func, file, line, __VA_ARGS__) // NOLINT
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
-/** Checks if an error value is valid if not throws an exception with the error
+/** Checks if a status value is valid if not throws an exception with the error
  *
- * @param[in] error Error value to check.
+ * @param[in] status Status value to check.
  */
-#define ARM_COMPUTE_ERROR_THROW_ON(error) \
-    error.throw_if_error()
+#define ARM_COMPUTE_ERROR_THROW_ON(status) \
+    status.throw_if_error()
 
 /** If the condition is true, the given message is printed and an exception is thrown
  *
@@ -289,7 +293,7 @@ Error create_error(ErrorCode error_code, const char *function, const char *file,
  */
 #define ARM_COMPUTE_CONST_ON_ERROR(cond, val, msg) (cond) ? throw std::logic_error(msg) : val;
 #else /* ARM_COMPUTE_ASSERTS_ENABLED */
-#define ARM_COMPUTE_ERROR_THROW_ON(error)
+#define ARM_COMPUTE_ERROR_THROW_ON(status)
 #define ARM_COMPUTE_ERROR_ON_MSG(cond, ...)
 #define ARM_COMPUTE_ERROR_ON_LOC_MSG(cond, func, file, line, ...)
 #define ARM_COMPUTE_CONST_ON_ERROR(cond, val, msg) val

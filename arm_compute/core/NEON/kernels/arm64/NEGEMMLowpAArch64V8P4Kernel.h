@@ -48,7 +48,7 @@ public:
      * @param[in] output Output tensor info to store the result of matrix multiplication.
      *                        If @p beta is not zero the values are multiplied by @p beta before the result is accumulated. Otherwise the values are overwritten by the result. Data types supported: S32
      */
-    static Error validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
 
 protected:
     void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;

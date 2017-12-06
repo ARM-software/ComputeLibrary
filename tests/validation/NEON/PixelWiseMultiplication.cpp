@@ -155,7 +155,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
                                                      })),
                framework::dataset::make("Scale",{  scale_unity, scale_unity, scale_unity, -1.f, scale_unity, scale_unity, scale_unity, scale_unity, 3.f})),
-               framework::dataset::make("Expected", { false, false, true, true, true, true, true, true, true })),
+               framework::dataset::make("Expected", { true, true, false, false, false, false, false, false, false })),
                input1_info, input2_info, output_info, scale, expected)
 {
     bool has_error = bool(NEPixelWiseMultiplication::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), scale, ConvertPolicy::WRAP, RoundingPolicy::TO_ZERO));

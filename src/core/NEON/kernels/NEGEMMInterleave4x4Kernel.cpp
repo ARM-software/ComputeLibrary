@@ -40,7 +40,7 @@ using namespace arm_compute;
 
 namespace
 {
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::U8, DataType::S8,
                                                          DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
@@ -58,10 +58,10 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
     unsigned int           num_elems_processed_per_iteration_x = (input->element_size() == 1) ? 8 : 4;
     constexpr unsigned int num_elems_processed_per_iteration_y = 4;
@@ -80,7 +80,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
         output_access.set_valid_region(win, input->valid_region());
     }
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
@@ -213,12 +213,12 @@ void NEGEMMInterleave4x4Kernel::configure(const ITensor *input, ITensor *output)
     INEKernel::configure(win_config.second);
 }
 
-Error NEGEMMInterleave4x4Kernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status NEGEMMInterleave4x4Kernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMInterleave4x4Kernel::run(const Window &window, const ThreadInfo &info)

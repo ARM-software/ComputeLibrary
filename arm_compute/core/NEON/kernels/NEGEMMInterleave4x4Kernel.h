@@ -65,9 +65,9 @@ public:
      * @param[in] input  Input tensor info. Data types supported: U8/S8/QS8/QASYMM8/QS16/U16/S16/F16/U32/S32/F32
      * @param[in] output Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

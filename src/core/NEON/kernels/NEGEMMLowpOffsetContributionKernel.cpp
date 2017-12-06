@@ -46,8 +46,8 @@ class Coordinates;
 
 namespace
 {
-Error validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
-                         int32_t a_offset, int32_t b_offset)
+Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
+                          int32_t a_offset, int32_t b_offset)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
 
@@ -82,11 +82,11 @@ Error validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector
         }
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row,
-                                                       int32_t a_offset, int32_t b_offset)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row,
+                                                        int32_t a_offset, int32_t b_offset)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 16;
     bool                   window_changed                    = false;
@@ -111,7 +111,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *mm_result, I
                                                                      vector_sum_row_access);
     }
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -158,8 +158,8 @@ void NEGEMMLowpOffsetContributionKernel::configure(ITensor *mm_result, const ITe
     INEKernel::configure(win_config.second);
 }
 
-Error NEGEMMLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
-                                                   int32_t a_offset, int32_t b_offset)
+Status NEGEMMLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
+                                                    int32_t a_offset, int32_t b_offset)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, a_offset, b_offset));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(mm_result->clone().get(),
@@ -168,7 +168,7 @@ Error NEGEMMLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result,
                                                               a_offset, b_offset)
                                 .first); // NOLINT
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMLowpOffsetContributionKernel::run(const Window &window, const ThreadInfo &info)

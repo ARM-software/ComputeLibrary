@@ -84,7 +84,7 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
     _sum.allocator()->allocate();
 }
 
-Error CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
@@ -109,7 +109,7 @@ Error CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *outp
     }
     ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DNormKernel::validate(&tensor_info_tmp, &tensor_info_sum, output));
 
-    return Error{};
+    return Status{};
 }
 
 void CLSoftmaxLayer::run()

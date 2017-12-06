@@ -53,20 +53,20 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     // Negative case : Import empty memory
     Tensor t1;
     t1.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(bool(t1.allocator()->import_memory(Memory())), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!bool(t1.allocator()->import_memory(Memory())), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t1.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Negative case : Import memory to a tensor that is memory managed
     Tensor      t2;
     MemoryGroup mg;
     t2.allocator()->set_associated_memory_group(&mg);
-    ARM_COMPUTE_EXPECT(bool(t2.allocator()->import_memory(Memory(buf.get()))), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!bool(t2.allocator()->import_memory(Memory(buf.get()))), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t2.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Positive case : Set raw pointer
     Tensor t3;
     t3.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(!bool(t3.allocator()->import_memory(Memory(buf.get()))), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bool(t3.allocator()->import_memory(Memory(buf.get()))), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(!t3.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t3.buffer() == buf.get(), framework::LogLevel::ERRORS);
     t3.allocator()->free();
@@ -76,7 +76,7 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     // Positive case : Set managed pointer
     Tensor t4;
     t4.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(!bool(t4.allocator()->import_memory(Memory(buf))), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bool(t4.allocator()->import_memory(Memory(buf))), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(!t4.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t4.buffer() == buf.get(), framework::LogLevel::ERRORS);
     t4.allocator()->free();

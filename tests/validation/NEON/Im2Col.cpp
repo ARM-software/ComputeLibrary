@@ -53,7 +53,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::QASYMM8),
                                                      })),
                framework::dataset::make("HasBias", { true, true, true, true, false })),
-               framework::dataset::make("Expected", { true, true, true, true, false })),
+               framework::dataset::make("Expected", { false, false, false, false, true })),
                input_info, output_info, has_bias, expected)
 {
     bool err = bool(NEIm2Col::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias));

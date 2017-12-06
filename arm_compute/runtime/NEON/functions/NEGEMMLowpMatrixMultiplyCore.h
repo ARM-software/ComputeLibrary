@@ -81,9 +81,9 @@ public:
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;

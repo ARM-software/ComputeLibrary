@@ -35,7 +35,7 @@ void CPPPermute::configure(const ITensor *input, ITensor *output, const Permutat
     _kernel = std::move(k);
 }
 
-Error CPPPermute::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
+Status CPPPermute::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
     return CPPPermuteKernel::validate(input, output, perm);
 }

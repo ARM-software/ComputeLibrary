@@ -104,7 +104,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        PoolingLayerInfo(PoolingType::MAX),
                                                        PoolingLayerInfo(PoolingType::AVG),
                                                       })),
-               framework::dataset::make("Expected", { true, true, true, true, true, true, true, true, true, false })),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, true })),
                input_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info)) == expected, framework::LogLevel::ERRORS);

@@ -48,7 +48,7 @@ TensorShape get_output_shape(const ITensorInfo *input, const Size2D &convolved_d
     return output_shape;
 }
 
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,
                                                          DataType::U16, DataType::S16, DataType::QS16,
@@ -63,7 +63,7 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, co
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
-    return Error{};
+    return Status{};
 }
 } // namespace
 
@@ -139,10 +139,10 @@ void NECol2ImKernel::configure(const ITensor *input, ITensor *output, const Size
     INEKernel::configure(win);
 }
 
-Error NECol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims)
+Status NECol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, convolved_dims));
-    return Error{};
+    return Status{};
 }
 
 void NECol2ImKernel::run(const Window &window, const ThreadInfo &info)

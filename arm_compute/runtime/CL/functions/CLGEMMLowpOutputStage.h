@@ -83,9 +83,9 @@ public:
      * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
      *                   Along with @p min, this value can be used to implement "rectified linear unit" activation functions
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
 };
 
 /** Basic function to execute CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint on OpenCL.
@@ -143,9 +143,9 @@ public:
      * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
      *                   Along with @p min, this value can be used to implement "rectified linear unit" activation functions
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
 };
 }
 #endif /*__ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H__ */

@@ -41,7 +41,7 @@ using namespace arm_compute;
 
 namespace
 {
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(max > 255);
@@ -61,10 +61,10 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, cons
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
@@ -90,7 +90,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
         window_changed = window_changed || update_window_and_padding(win, bias_access);
     }
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
@@ -262,7 +262,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     _func                      = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<false>;
 }
 
-Error NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
@@ -271,7 +271,7 @@ Error NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const 
                                                               output->clone().get())
                                 .first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window &window, const ThreadInfo &info)

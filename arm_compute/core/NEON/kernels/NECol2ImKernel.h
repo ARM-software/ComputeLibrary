@@ -81,9 +81,9 @@ public:
      *                           while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in] convolved_dims Output convolved dimensions.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

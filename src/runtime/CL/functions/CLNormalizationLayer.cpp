@@ -48,7 +48,7 @@ void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const 
     _border_handler.configure(input, _norm_kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
 }
 
-Error CLNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)
+Status CLNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)
 {
     return CLNormalizationLayerKernel::validate(input, output, norm_info);
 }

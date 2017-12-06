@@ -720,7 +720,7 @@ class Coordinates;
 
 namespace
 {
-Error validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::S8, DataType::U8);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
@@ -745,10 +745,10 @@ Error validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, c
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(in1_shape[2] != 1 && in0_shape[2] != in1_shape[2], "Input1 tensor must have the same number of batches of input0 or the number of batches must be set to 1");
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
 {
     constexpr unsigned int num_elems_processed_per_iteration_x = 16;
     constexpr unsigned int num_elems_processed_per_iteration_y = 4;
@@ -786,7 +786,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input0, ITen
         output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
     }
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -815,12 +815,12 @@ void NEGEMMLowpMatrixMultiplyKernel::configure(const ITensor *input0, const ITen
     INEKernel::configure(win_config.second);
 }
 
-Error NEGEMMLowpMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+Status NEGEMMLowpMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(), input1->clone().get(), output->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMLowpMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &info)

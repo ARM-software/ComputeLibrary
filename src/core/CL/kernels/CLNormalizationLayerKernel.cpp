@@ -37,7 +37,7 @@ using namespace arm_compute;
 
 namespace
 {
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
@@ -59,10 +59,10 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, No
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, NormalizationLayerInfo norm_info)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, NormalizationLayerInfo norm_info)
 {
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output, *input->clone());
@@ -86,7 +86,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
 
     output_access.set_valid_region(win, input->valid_region());
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -156,12 +156,12 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
-Error CLNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info)
+Status CLNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, norm_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), norm_info).first);
 
-    return Error{};
+    return Status{};
 }
 
 void CLNormalizationLayerKernel::run(const Window &window, cl::CommandQueue &queue)

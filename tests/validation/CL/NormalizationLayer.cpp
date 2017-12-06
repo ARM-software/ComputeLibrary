@@ -99,7 +99,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
                                                        NormalizationLayerInfo(NormType::CROSS_MAP, 5),
                                                       })),
-               framework::dataset::make("Expected", { true, true, true, true, true, true, false })),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, true })),
                input_info, output_info, norm_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLNormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), norm_info)) == expected, framework::LogLevel::ERRORS);

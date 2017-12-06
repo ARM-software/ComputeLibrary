@@ -99,7 +99,7 @@ public:
      *
      * @return error status
      */
-    arm_compute::Error import_memory(Memory memory);
+    arm_compute::Status import_memory(Memory memory);
     /** Associates the tensor with a memory group
      *
      * @param[in] associated_memory_group Memory group to associate the tensor with

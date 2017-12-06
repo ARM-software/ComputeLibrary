@@ -93,7 +93,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
                                                      })),
-               framework::dataset::make("Expected", { false, false, true, true, true, true, false })),
+               framework::dataset::make("Expected", { true, true, false, false, false, false, true })),
                input1_info, input2_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEArithmeticAddition::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), ConvertPolicy::WRAP)) == expected, framework::LogLevel::ERRORS);

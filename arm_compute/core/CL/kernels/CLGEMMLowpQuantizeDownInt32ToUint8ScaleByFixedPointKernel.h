@@ -79,9 +79,9 @@ public:
      * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
      *                   Along with @p min, this value can be used to implement "rectified linear unit" activation functions
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

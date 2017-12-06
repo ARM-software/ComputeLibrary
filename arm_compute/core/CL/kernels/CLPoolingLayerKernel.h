@@ -64,9 +64,9 @@ public:
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

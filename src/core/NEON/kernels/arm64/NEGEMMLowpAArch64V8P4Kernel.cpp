@@ -52,17 +52,17 @@ namespace
 {
 using namespace arm_compute;
 
-Error validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
 {
     // Configure kernel window
     Window win = calculate_max_window(*output);
@@ -77,7 +77,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input0, ITen
                                                     AccessWindowStatic(input1, 0, 0, input1_access_end, input1->tensor_shape().y()),
                                                     output_access);
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -105,12 +105,12 @@ void NEGEMMLowpAArch64V8P4Kernel::internal_configure(const ITensor *input0, cons
     INEKernel::configure(win_config.second);
 }
 
-Error NEGEMMLowpAArch64V8P4Kernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+Status NEGEMMLowpAArch64V8P4Kernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(), input1->clone().get(), output->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMLowpAArch64V8P4Kernel::run(const Window &window, const ThreadInfo &info)

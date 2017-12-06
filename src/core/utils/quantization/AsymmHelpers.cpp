@@ -31,9 +31,9 @@ using namespace arm_compute::quantization;
 
 constexpr int64_t fixed_point_one_Q0 = (1ll << 31);
 
-arm_compute::Error arm_compute::quantization::calculate_quantized_multiplier_less_than_one(double multiplier,
-                                                                                           int   *quant_multiplier,
-                                                                                           int   *right_shift)
+arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_less_than_one(double multiplier,
+                                                                                            int   *quant_multiplier,
+                                                                                            int   *right_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quant_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(right_shift == nullptr);
@@ -43,7 +43,7 @@ arm_compute::Error arm_compute::quantization::calculate_quantized_multiplier_les
     {
         *quant_multiplier = 0;
         *right_shift      = 0;
-        return arm_compute::Error{};
+        return arm_compute::Status{};
     }
     const double q = std::frexp(multiplier, right_shift);
     *right_shift *= -1;
@@ -58,12 +58,12 @@ arm_compute::Error arm_compute::quantization::calculate_quantized_multiplier_les
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > std::numeric_limits<int32_t>::max());
     *quant_multiplier = static_cast<int32_t>(q_fixed);
 
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::quantization::calculate_quantized_multiplier_greater_than_one(double multiplier,
-                                                                                              int   *quantized_multiplier,
-                                                                                              int   *left_shift)
+arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_greater_than_one(double multiplier,
+                                                                                               int   *quantized_multiplier,
+                                                                                               int   *left_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quantized_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(left_shift == nullptr);
@@ -80,5 +80,5 @@ arm_compute::Error arm_compute::quantization::calculate_quantized_multiplier_gre
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > std::numeric_limits<int32_t>::max());
     *quantized_multiplier = static_cast<int32_t>(q_fixed);
 
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }

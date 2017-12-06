@@ -37,7 +37,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8Scale::configure(const ITensor *input, co
     _kernel = std::move(k);
 }
 
-Error NEGEMMLowpQuantizeDownInt32ToUint8Scale::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status NEGEMMLowpQuantizeDownInt32ToUint8Scale::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     return NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(input, bias, output, min, max);
 }
@@ -50,7 +50,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const ITenso
     _kernel = std::move(k);
 }
 
-Error NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     return NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(input, bias, output, min, max);
 }

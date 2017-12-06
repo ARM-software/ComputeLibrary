@@ -36,7 +36,7 @@ void NEPixelWiseMultiplication::configure(const ITensor *input1, const ITensor *
     k->configure(input1, input2, output, scale, overflow_policy, rounding_policy);
     _kernel = std::move(k);
 }
-Error NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
     return NEPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy);
 }

@@ -65,9 +65,9 @@ public:
      *                      Data types supported: Same as @p input.
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overridden:
     void run() override;

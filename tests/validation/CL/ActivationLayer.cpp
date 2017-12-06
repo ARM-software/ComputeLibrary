@@ -189,7 +189,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                           })),
-               framework::dataset::make("Expected", { true, true, false, false, true, true, true, false, false })),
+               framework::dataset::make("Expected", { false, false, true, true, false, false, false, true, true })),
                input_info, output_info, act_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLActivationLayer::validate(&input_info.clone()->set_is_resizable(false), (output_info.total_size() == 0) ? nullptr : &output_info.clone()->set_is_resizable(false), act_info)) == expected, framework::LogLevel::ERRORS);

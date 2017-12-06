@@ -69,9 +69,9 @@ public:
      * @param[in] input1 Input tensor info containing the transposed Matrix B. Data type supported: same as @p input0
      * @param[in] output Output tensor info to store the result of matrix multiplication. Data type supported: S32
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

@@ -60,9 +60,9 @@ public:
      * @param[in] output    Destination tensor. Output will have the same number of dimensions as input. Data types supported: same as @p input.
      * @param[in] norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

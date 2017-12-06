@@ -42,8 +42,8 @@ using namespace arm_compute;
 
 namespace
 {
-Error validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
-                         ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
+                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
     ARM_COMPUTE_UNUSED(overflow_policy);
     ARM_COMPUTE_UNUSED(rounding_policy);
@@ -75,10 +75,10 @@ Error validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, c
         }
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
@@ -94,7 +94,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input1, ITen
                                                        input2->valid_region());
     output_access.set_valid_region(win, valid_region);
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -213,13 +213,13 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
     ICLKernel::configure(win_config.second);
 }
 
-Error CLPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
-                                                ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+Status CLPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
+                                                 ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output, scale, overflow_policy, rounding_policy));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void CLPixelWiseMultiplicationKernel::run(const Window &window, cl::CommandQueue &queue)

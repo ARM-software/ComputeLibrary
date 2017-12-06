@@ -35,7 +35,7 @@ using namespace arm_compute;
 
 namespace
 {
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *var, const ITensorInfo *beta, const ITensorInfo *gamma, float epsilon)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *var, const ITensorInfo *beta, const ITensorInfo *gamma, float epsilon)
 {
     ARM_COMPUTE_UNUSED(epsilon);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
@@ -52,10 +52,10 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, co
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != mean->dimension(0));
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
     unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
 
@@ -64,7 +64,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
     bool                   window_changed = update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, input->valid_region());
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
@@ -306,13 +306,14 @@ void NEBatchNormalizationLayerKernel::configure(ITensor *input, ITensor *output,
     INEKernel::configure(win_config.second);
 }
 
-Error NEBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *var, const ITensorInfo *beta, const ITensorInfo *gamma,
-                                                float epsilon)
+Status NEBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *var, const ITensorInfo *beta,
+                                                 const ITensorInfo *gamma,
+                                                 float              epsilon)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mean, var, beta, gamma, epsilon));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output ? output->clone().get() : nullptr).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEBatchNormalizationLayerKernel::run(const Window &window, const ThreadInfo &info)

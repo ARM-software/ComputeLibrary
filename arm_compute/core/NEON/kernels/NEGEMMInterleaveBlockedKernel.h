@@ -58,9 +58,9 @@ public:
      * @param[in] block_width  The width of the blocks to be interleaved.
      * @param[in] transpose    True if transpose operation must be performed, false otherwise.
      *
-     * @return an error status
+     * @return a status
      */
-    Error validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int block_height, unsigned int block_width, bool transpose);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int block_height, unsigned int block_width, bool transpose);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

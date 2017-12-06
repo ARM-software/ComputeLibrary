@@ -50,9 +50,9 @@ public:
      * @param[in] input  The input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[in] output The output tensor. Data types supported: Same as @p input
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 }
 

@@ -135,7 +135,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8,
                                                                   QuantizationInfo(1.f/256, 0)),
                                                      })),
-               framework::dataset::make("Expected", { true, true, true, true, true, false, false, false })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true, true, true })),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLSoftmaxLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);

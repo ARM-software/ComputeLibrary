@@ -66,9 +66,9 @@ public:
      * @param[in] output Output tensor info. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16/F32.
      * @param[in] policy Policy to use to handle overflow.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

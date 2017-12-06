@@ -23,8 +23,8 @@
  */
 #include "arm_compute/core/Validate.h"
 
-arm_compute::Error arm_compute::error_on_mismatching_windows(const char *function, const char *file, const int line,
-                                                             const arm_compute::Window &full, const arm_compute::Window &win)
+arm_compute::Status arm_compute::error_on_mismatching_windows(const char *function, const char *file, const int line,
+                                                              const arm_compute::Window &full, const arm_compute::Window &win)
 {
     full.validate();
     win.validate();
@@ -35,11 +35,11 @@ arm_compute::Error arm_compute::error_on_mismatching_windows(const char *functio
         ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[i].end() != win[i].end(), function, file, line);
         ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[i].step() != win[i].step(), function, file, line);
     }
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_invalid_subwindow(const char *function, const char *file, const int line,
-                                                           const arm_compute::Window &full, const arm_compute::Window &sub)
+arm_compute::Status arm_compute::error_on_invalid_subwindow(const char *function, const char *file, const int line,
+                                                            const arm_compute::Window &full, const arm_compute::Window &sub)
 {
     full.validate();
     sub.validate();
@@ -51,11 +51,11 @@ arm_compute::Error arm_compute::error_on_invalid_subwindow(const char *function,
         ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[i].step() != sub[i].step(), function, file, line);
         ARM_COMPUTE_RETURN_ERROR_ON_LOC((sub[i].start() - full[i].start()) % sub[i].step(), function, file, line);
     }
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_window_not_collapsable_at_dimension(const char *function, const char *file, const int line,
-                                                                             const arm_compute::Window &full, const arm_compute::Window &window, const int dim)
+arm_compute::Status arm_compute::error_on_window_not_collapsable_at_dimension(const char *function, const char *file, const int line,
+                                                                              const arm_compute::Window &full, const arm_compute::Window &window, const int dim)
 {
     full.validate();
     window.validate();
@@ -64,21 +64,21 @@ arm_compute::Error arm_compute::error_on_window_not_collapsable_at_dimension(con
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(window[dim].start() != full[dim].start(), function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[dim].end() != window[dim].end(), function, file, line);
 
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_coordinates_dimensions_gte(const char *function, const char *file, const int line,
-                                                                    const arm_compute::Coordinates &pos, unsigned int max_dim)
+arm_compute::Status arm_compute::error_on_coordinates_dimensions_gte(const char *function, const char *file, const int line,
+                                                                     const arm_compute::Coordinates &pos, unsigned int max_dim)
 {
     for(unsigned int i = max_dim; i < arm_compute::Coordinates::num_max_dimensions; ++i)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_LOC(pos[i] != 0, function, file, line);
     }
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_window_dimensions_gte(const char *function, const char *file, const int line,
-                                                               const arm_compute::Window &win, unsigned int max_dim)
+arm_compute::Status arm_compute::error_on_window_dimensions_gte(const char *function, const char *file, const int line,
+                                                                const arm_compute::Window &win, unsigned int max_dim)
 {
     for(unsigned int i = max_dim; i < arm_compute::Coordinates::num_max_dimensions; ++i)
     {
@@ -86,22 +86,22 @@ arm_compute::Error arm_compute::error_on_window_dimensions_gte(const char *funct
                                             function, file, line,
                                             "Maximum number of dimensions expected %u but dimension %u is not empty", max_dim, i);
     }
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_tensor_not_2d(const char *function, const char *file, const int line,
-                                                       const arm_compute::ITensor *tensor)
+arm_compute::Status arm_compute::error_on_tensor_not_2d(const char *function, const char *file, const int line,
+                                                        const arm_compute::ITensor *tensor)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor->info() == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(tensor->info()->num_dimensions() != 2,
                                         function, file, line,
                                         "Only 2D Tensors are supported by this kernel (%d passed)", tensor->info()->num_dimensions());
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_channel_not_in_known_format(const char *function, const char *file, const int line,
-                                                                     arm_compute::Format fmt, arm_compute::Channel cn)
+arm_compute::Status arm_compute::error_on_channel_not_in_known_format(const char *function, const char *file, const int line,
+                                                                      arm_compute::Format fmt, arm_compute::Channel cn)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(fmt == arm_compute::Format::UNKNOWN, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(cn == arm_compute::Channel::UNKNOWN, function, file, line);
@@ -128,11 +128,11 @@ arm_compute::Error arm_compute::error_on_channel_not_in_known_format(const char 
         default:
             ARM_COMPUTE_ERROR_LOC(function, file, line, "Not supported format.");
     }
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_invalid_multi_hog(const char *function, const char *file, const int line,
-                                                           const arm_compute::IMultiHOG *multi_hog)
+arm_compute::Status arm_compute::error_on_invalid_multi_hog(const char *function, const char *file, const int line,
+                                                            const arm_compute::IMultiHOG *multi_hog)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(nullptr == multi_hog, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(0 == multi_hog->num_models(), function, file, line);
@@ -150,21 +150,21 @@ arm_compute::Error arm_compute::error_on_invalid_multi_hog(const char *function,
                                             function, file, line,
                                             "All HOG parameters must have the same l2 hysteresis threshold if you use L2 hysteresis normalization type");
     }
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_unconfigured_kernel(const char *function, const char *file, const int line,
-                                                             const arm_compute::IKernel *kernel)
+arm_compute::Status arm_compute::error_on_unconfigured_kernel(const char *function, const char *file, const int line,
+                                                              const arm_compute::IKernel *kernel)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(kernel == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((kernel->window().x().start() == kernel->window().x().end()) && (kernel->window().x().end() == 0) && (kernel->window().x().step() == 0),
                                         function, file, line,
                                         "This kernel hasn't been configured.");
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_invalid_subtensor(const char *function, const char *file, const int line,
-                                                           const TensorShape &parent_shape, const Coordinates &coords, const TensorShape &shape)
+arm_compute::Status arm_compute::error_on_invalid_subtensor(const char *function, const char *file, const int line,
+                                                            const TensorShape &parent_shape, const Coordinates &coords, const TensorShape &shape)
 {
     // Subtensor should not index in x, y dimensions.
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(((coords.x() != 0) && (coords.y() != 0)), function, file, line);
@@ -177,11 +177,11 @@ arm_compute::Error arm_compute::error_on_invalid_subtensor(const char *function,
         ARM_COMPUTE_RETURN_ERROR_ON_LOC(((coords[i] >= static_cast<int>(parent_shape[i])) || (coords[i] + static_cast<int>(shape[i]) > static_cast<int>(parent_shape[i]))),
                                         function, file, line);
     }
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }
 
-arm_compute::Error arm_compute::error_on_invalid_subtensor_valid_region(const char *function, const char *file, const int line,
-                                                                        const ValidRegion &parent_valid_region, const ValidRegion &valid_region)
+arm_compute::Status arm_compute::error_on_invalid_subtensor_valid_region(const char *function, const char *file, const int line,
+                                                                         const ValidRegion &parent_valid_region, const ValidRegion &valid_region)
 {
     // Check valid regions
     for(unsigned int d = 0; d < TensorShape::num_max_dimensions; ++d)
@@ -191,5 +191,5 @@ arm_compute::Error arm_compute::error_on_invalid_subtensor_valid_region(const ch
                                         function, file, line);
     }
 
-    return arm_compute::Error{};
+    return arm_compute::Status{};
 }

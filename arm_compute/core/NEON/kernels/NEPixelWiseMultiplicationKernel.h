@@ -72,9 +72,9 @@ public:
      * @param[in] overflow_policy Overflow policy.
      * @param[in] rounding_policy Rounding policy.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

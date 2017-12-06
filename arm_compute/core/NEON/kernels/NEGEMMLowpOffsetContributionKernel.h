@@ -78,9 +78,9 @@ public:
      * @param[in] a_offset       Offset to be added to each element of the matrix A.
      * @param[in] b_offset       Offset to be added to each element of the matrix B.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, int32_t a_offset, int32_t b_offset);
+    static Status validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, int32_t a_offset, int32_t b_offset);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

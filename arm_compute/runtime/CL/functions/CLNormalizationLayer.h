@@ -63,9 +63,9 @@ public:
      * @param[in] output    Destination tensor. Dimensions, data type and number of channels must match the input ones.
      * @param[in] norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info);
 
     // Inherited methods overridden:
     void run() override;

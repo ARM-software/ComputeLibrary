@@ -147,14 +147,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             TensorInfo(TensorShape(8U, 11U), 1, DataType::S32),
                                             TensorInfo(TensorShape(64U, 32U), 1, DataType::S32),
                                            })),
-    framework::dataset::make("Expected", { true, true, true, true, false })),
+    framework::dataset::make("Expected", { false, false, false, false, true })),
     a_info, b_info, output_info, expected)
 {
     // Lock tensors
-    Error error =  NEGEMMLowpMatrixMultiplyCore::validate(&a_info.clone()->set_is_resizable(false),
-                                                          &b_info.clone()->set_is_resizable(false),
-                                                          &output_info.clone()->set_is_resizable(false));
-    ARM_COMPUTE_EXPECT(bool(error) == expected, framework::LogLevel::ERRORS);
+    Status status =  NEGEMMLowpMatrixMultiplyCore::validate(&a_info.clone()->set_is_resizable(false),
+                                                            &b_info.clone()->set_is_resizable(false),
+                                                            &output_info.clone()->set_is_resizable(false));
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*

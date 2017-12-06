@@ -40,7 +40,7 @@ using namespace arm_compute;
 
 namespace
 {
-Error validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
 {
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
@@ -58,10 +58,10 @@ Error validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, c
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input1, output);
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
@@ -77,7 +77,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input1, ITen
 
     output_access.set_valid_region(win, valid_region);
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -133,12 +133,12 @@ void CLArithmeticSubtractionKernel::configure(const ICLTensor *input1, const ICL
     ICLKernel::configure(win_config.second);
 }
 
-Error CLArithmeticSubtractionKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+Status CLArithmeticSubtractionKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output, policy));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void CLArithmeticSubtractionKernel::run(const Window &window, cl::CommandQueue &queue)

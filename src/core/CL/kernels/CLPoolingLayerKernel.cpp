@@ -55,7 +55,7 @@ void auto_init(const ITensorInfo *input, ITensorInfo *output, unsigned int poole
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
 }
 
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
@@ -87,10 +87,10 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, co
                                         "Invalid output pooling dimensions!");
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::tuple<Error, Window, CLPoolingConfig> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info)
+std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info)
 {
     int                 pool_pad_x      = 0;
     int                 pool_pad_y      = 0;
@@ -160,7 +160,7 @@ std::tuple<Error, Window, CLPoolingConfig> validate_and_configure_window(ITensor
     bool                   window_changed = update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_tuple(err, win, CLPoolingConfig(num_elems_processed_per_iteration, border_size));
 }
 } // namespace
@@ -281,12 +281,12 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
-Error CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info));
     ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), pool_info)));
 
-    return Error{};
+    return Status{};
 }
 
 void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)

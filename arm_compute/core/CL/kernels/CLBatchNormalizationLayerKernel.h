@@ -75,12 +75,12 @@ public:
      * @param[in] gamma   Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in] epsilon Small value to avoid division with zero.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output,
-                          const ITensorInfo *mean, const ITensorInfo *var,
-                          const ITensorInfo *beta, const ITensorInfo *gamma,
-                          float epsilon);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output,
+                           const ITensorInfo *mean, const ITensorInfo *var,
+                           const ITensorInfo *beta, const ITensorInfo *gamma,
+                           float epsilon);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

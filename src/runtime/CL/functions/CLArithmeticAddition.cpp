@@ -37,7 +37,7 @@ void CLArithmeticAddition::configure(const ICLTensor *input1, const ICLTensor *i
     _kernel = std::move(k);
 }
 
-Error CLArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+Status CLArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
 {
     return CLArithmeticAdditionKernel::validate(input1, input2, output, policy);
 }

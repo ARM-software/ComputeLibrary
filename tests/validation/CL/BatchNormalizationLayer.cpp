@@ -108,7 +108,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                      TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
                                                      TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
                                                    })),
-               framework::dataset::make("Expected", { false, true, true, true, true, true, false, false})),
+               framework::dataset::make("Expected", { true, false, false, false, false, false, true, true})),
                input_info, output_info, mvbg_info, expected)
 {
     const auto &mean_info = mvbg_info;

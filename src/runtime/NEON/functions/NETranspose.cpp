@@ -37,7 +37,7 @@ void NETranspose::configure(const ITensor *input, ITensor *output)
     _kernel = std::move(k);
 }
 
-Error NETranspose::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status NETranspose::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     return NETransposeKernel::validate(input, output);
 }

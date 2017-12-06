@@ -80,9 +80,9 @@ public:
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] target    Target GPU architecture.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, const GPUTarget target);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, const GPUTarget target);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

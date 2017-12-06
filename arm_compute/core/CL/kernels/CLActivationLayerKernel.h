@@ -63,9 +63,9 @@ public:
      * @param[in] output   Destination tensor info. Data type supported: same as @p input
      * @param[in] act_info Activation layer information.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

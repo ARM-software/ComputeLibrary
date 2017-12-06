@@ -36,7 +36,7 @@ void NEArithmeticAddition::configure(const ITensor *input1, const ITensor *input
     k->configure(input1, input2, output, policy);
     _kernel = std::move(k);
 }
-Error NEArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+Status NEArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
 {
     return NEArithmeticAdditionKernel::validate(input1, input2, output, policy);
 }

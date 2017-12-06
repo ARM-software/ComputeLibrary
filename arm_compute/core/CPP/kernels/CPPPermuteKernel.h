@@ -63,9 +63,9 @@ public:
      * @param[in] output The output tensor. Data types supported: Same as @p input
      * @param[in] perm   Permutation vector
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

@@ -52,7 +52,7 @@ TensorShape get_output_shape(const ITensorInfo *input)
     return output_shape;
 }
 
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::U8, DataType::S8,
                                                          DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
@@ -67,10 +67,10 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
     const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
     const int          scale_x                           = num_elems_processed_per_iteration;
@@ -92,7 +92,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
         output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->tensor_shape()));
     }
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -116,12 +116,12 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
     INEKernel::configure(win_config.second);
 }
 
-Error NEGEMMTranspose1xWKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status NEGEMMTranspose1xWKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMTranspose1xWKernel::run(const Window &window, const ThreadInfo &info)

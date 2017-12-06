@@ -49,7 +49,7 @@ TensorShape get_output_shape(const ITensorInfo *input, unsigned int block_height
     return output_shape;
 }
 
-Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, unsigned int block_width, unsigned int block_height)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, unsigned int block_width, unsigned int block_height)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
@@ -63,10 +63,10 @@ Error validate_arguments(const ITensorInfo *input, const ITensorInfo *output, un
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
-    return Error{};
+    return Status{};
 }
 
-std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int block_width, unsigned int block_height)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int block_width, unsigned int block_height)
 {
     const unsigned int num_elems_processed_per_iteration_x = block_width;
     const unsigned int num_elems_processed_per_iteration_y = block_height;
@@ -90,7 +90,7 @@ std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input, ITens
         output_access.set_valid_region(win, input->valid_region());
     }
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
@@ -196,13 +196,13 @@ void NEGEMMInterleaveBlockedKernel::configure(const ITensor *input, ITensor *out
     INEKernel::configure(win_config.second);
 }
 
-Error NEGEMMInterleaveBlockedKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int block_height, unsigned int block_width, bool transpose)
+Status NEGEMMInterleaveBlockedKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int block_height, unsigned int block_width, bool transpose)
 {
     ARM_COMPUTE_UNUSED(transpose);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, block_width, block_height));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), block_width, block_height).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEGEMMInterleaveBlockedKernel::run(const Window &window, const ThreadInfo &info)

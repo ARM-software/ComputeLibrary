@@ -35,7 +35,7 @@ void NEIm2Col::configure(const ITensor *input, ITensor *output, const Size2D &ke
     _kernel = std::move(k);
 }
 
-Error NEIm2Col::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+Status NEIm2Col::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
     return NEIm2ColKernel::validate(input, output, kernel_dims, conv_info, has_bias);
 }

@@ -152,14 +152,14 @@ void TensorAllocator::free()
     info().set_is_resizable(true);
 }
 
-arm_compute::Error TensorAllocator::import_memory(Memory memory)
+arm_compute::Status TensorAllocator::import_memory(Memory memory)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(memory.buffer() == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(_associated_memory_group != nullptr);
     _memory = memory;
     info().set_is_resizable(false);
 
-    return Error{};
+    return Status{};
 }
 
 void TensorAllocator::set_associated_memory_group(MemoryGroup *associated_memory_group)

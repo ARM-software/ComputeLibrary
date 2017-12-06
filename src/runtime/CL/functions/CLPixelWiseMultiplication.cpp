@@ -38,8 +38,8 @@ void CLPixelWiseMultiplication::configure(const ICLTensor *input1, const ICLTens
     _kernel = std::move(k);
 }
 
-Error CLPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
-                                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+Status CLPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
+                                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
     return CLPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy);
 }

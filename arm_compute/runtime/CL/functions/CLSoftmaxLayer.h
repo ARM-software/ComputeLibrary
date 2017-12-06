@@ -63,9 +63,9 @@ public:
      * @param[in] input  Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32
      * @param[in] output Destination tensor. Data types supported: same as @p input
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;

@@ -75,9 +75,9 @@ public:
      * @param[in] output The output tensor. Data types supported: U8/QS8/QS16/S16/F16/F32.
      * @param[in] policy Overflow policy.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

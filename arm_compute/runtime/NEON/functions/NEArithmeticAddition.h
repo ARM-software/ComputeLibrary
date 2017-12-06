@@ -50,9 +50,9 @@ public:
      * @param[in] output Output tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
      * @param[in] policy Policy to use to handle overflow.
      *
-     * @return an error status
+     * @return a status
      */
-    static Error validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
 };
 }
 #endif /*__ARM_COMPUTE_NEARITHMETICADDITION_H__ */

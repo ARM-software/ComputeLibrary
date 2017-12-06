@@ -54,7 +54,7 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
     _input_border_handler.configure(input, _direct_conv_kernel.border_size(), BorderMode::CONSTANT, zero_value);
 }
 
-Error CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+Status CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
     return CLDirectConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, CLScheduler::get().target());
 }

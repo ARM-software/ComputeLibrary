@@ -54,7 +54,7 @@ const float       scale255_constant      = 1.f / 255.f;
 const float32x4_t scale255_constant_f32q = vdupq_n_f32(scale255_constant);
 const float32x4_t positive_round_f32q    = vdupq_n_f32(0.5f);
 
-inline Error validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+inline Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
     ARM_COMPUTE_UNUSED(overflow_policy);
     ARM_COMPUTE_UNUSED(rounding_policy);
@@ -91,10 +91,10 @@ inline Error validate_arguments(const ITensorInfo *input1, const ITensorInfo *in
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(!((normalized_mantissa == 0.5f) && (-14 <= exponent) && (exponent <= 1)), "Scale value not supported (Should be 1/(2^n) or 1/255");
     }
 
-    return Error{};
+    return Status{};
 }
 
-inline std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
+inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
@@ -112,7 +112,7 @@ inline std::pair<Error, Window> validate_and_configure_window(ITensorInfo *input
 
     output_access.set_valid_region(win, valid_region);
 
-    Error err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Error{};
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
@@ -662,13 +662,13 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
     INEKernel::configure(win_config.second);
 }
 
-Error NEPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy,
-                                                RoundingPolicy rounding_policy)
+Status NEPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy,
+                                                 RoundingPolicy rounding_policy)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output, scale, overflow_policy, rounding_policy));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
 
-    return Error{};
+    return Status{};
 }
 
 void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo &info)
