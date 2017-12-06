@@ -99,9 +99,9 @@ std::vector<KeyPoint> harris_corner_detector_impl(const SimpleTensor<U> &src, fl
         float Gxy = 0.f;
 
         // Calculate Gx^2, Gy^2 and Gxy within the given window
-        for(int y = src_coord.y() - block_size / 2; y <= src_coord.y() + block_size / 2; ++y)
+        for(int y = block_top_left.y(); y <= block_bottom_right.y(); ++y)
         {
-            for(int x = src_coord.x() - block_size / 2; x <= src_coord.x() + block_size / 2; ++x)
+            for(int x = block_top_left.x(); x <= block_bottom_right.x(); ++x)
             {
                 Coordinates block_coord(x, y);
 
@@ -139,7 +139,7 @@ std::vector<KeyPoint> harris_corner_detector_impl(const SimpleTensor<U> &src, fl
     {
         Coordinates coord = index2coord(suppressed_scores.shape(), i);
 
-        if(is_in_valid_region(suppressed_scores_region, coord) && suppressed_scores[i] > 0.f)
+        if(is_in_valid_region(suppressed_scores_region, coord) && suppressed_scores[i] != 0.f)
         {
             KeyPoint corner;
             corner.x               = coord.x();
