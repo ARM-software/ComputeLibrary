@@ -145,18 +145,36 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     const GPUTarget gpu_target = get_arch_from_target(get_target());
     if(gpu_target == GPUTarget::BIFROST)
     {
-        const size_t width = input->info()->dimension(0);
-        if(width >= 56) // 56 or 112
+        // Assume uniform padding and striding.
+        const size_t pad    = _conv_pad_left;
+        const size_t stride = _conv_stride_x;
+        const size_t width  = input->info()->dimension(0);
+        if(pad == 1)
         {
-            _lws_hint = cl::NDRange(8, 5, 2);
+            const size_t width_by_stride = width / stride;
+            if(width_by_stride == 28) // 56/2 or 28/1
+            {
+                _lws_hint = cl::NDRange(7, 4, 3);
+            }
+            else if(width_by_stride == 14) // 28/2 or 14/1
+            {
+                _lws_hint = cl::NDRange(7, 7, 4);
+            }
         }
-        else if(width >= 14) // 14 or 28
+        else if(pad == 0)
         {
-            _lws_hint = cl::NDRange(1, 5, 2);
-        }
-        else // 7
-        {
-            _lws_hint = cl::NDRange(1, 1, 2);
+            if(width >= 56) // 56 or 112
+            {
+                _lws_hint = cl::NDRange(8, 5, 2);
+            }
+            else if(width >= 14) // 14 or 28
+            {
+                _lws_hint = cl::NDRange(1, 5, 2);
+            }
+            else // 7
+            {
+                _lws_hint = cl::NDRange(1, 1, 2);
+            }
         }
     }
 
