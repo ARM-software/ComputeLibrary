@@ -22,44 +22,47 @@
  * SOFTWARE.
  */
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
-#include "helpers.h"
 
-#if defined(DATA_TYPE_FP32)
+#include "helpers_cs.h"
+
+#if defined(DATA_TYPE_FP16)
+precision mediump float;
+#endif // DATA_TYPE_FP16
+
 #ifdef FILL_IMAGE_BORDERS_REPLICATE
-BUFFER_DECLARATION(buf, 1, float, restrict);
-layout(std140) uniform shader_params
-{
-    TENSOR3D_PARAM_DECLARATION(buf);
-    uint width;
-    uint height;
-    int  start_pos_x;
-    int  start_pos_y;
-};
 
 /** Fill N pixel of the padding edge of a single channel image by replicating the closest valid pixel.
  *
+ * @note The data type must be passed at compile time using "#define DATA_TYPE_NAME". e.g. "#define DATA_TYPE_FP32"
  * @attention  The border size for top, bottom, left, right needs to be passed at the compile time.
  * e.g. BORDER_SIZE_TOP=0 BORDER_SIZE_BOTTOM=2 BORDER_SIZE_LEFT=0 BORDER_SIZE_RIGHT=2
  *
- * @param[in,out] buf_ptr                           Pointer to the source image. Supported data types: F32
- * @param[in]     buf_stride_x                      Stride of the source image in X dimension (in bytes)
- * @param[in]     buf_step_x                        buf_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     buf_stride_y                      Stride of the source image in Y dimension (in bytes)
- * @param[in]     buf_step_y                        buf_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     buf_stride_z                      Stride between images if batching images (in bytes)
- * @param[in]     buf_step_z                        buf_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     buf_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[in]     width                             Width of the valid region of the image
- * @param[in]     height                            Height of the valid region of the image
- * @param[in]     start_pos_x                       X coordinate indicating the start point of the valid region
- * @param[in]     start_pos_y                       Y coordinate indicating the start point of the valid region
+ * @param[in,out] buf_ptr     Pointer to the source image. Supported data types: F16/F32
+ * @param[in]     buf_attrs   The attributes of the source image
+ * @param[in]     width       Width of the valid region of the image
+ * @param[in]     height      Height of the valid region of the image
+ * @param[in]     start_pos_x X coordinate indicating the start point of the valid region
+ * @param[in]     start_pos_y Y coordinate indicating the start point of the valid region
  */
+SHADER_PARAMS_DECLARATION
+{
+    Tensor3DAttributes buf_attrs;
+    uint               width;
+    uint               height;
+    int                start_pos_x;
+    int                start_pos_y;
+};
+
+#if defined(DATA_TYPE_FP32)
+
+TENSOR_DECLARATION(1, bufBuffer, float, buf_ptr, buf_shift, 2, restrict);
+
 void main()
 {
-    Image buf = CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP(buf);
+    ImageIterator buf_iter = CONVERT_TENSOR3D_TO_IMAGE_ITERATOR_NO_STEP(buf_attrs, buf_shift);
 
     // Update pointer to point to the starting point of the valid region
-    buf.current_offset = uint(int(buf.current_offset) + ((start_pos_y * int(buf_stride_y) + start_pos_x * int(buf_stride_x)) >> 2));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(buf_iter, start_pos_y * int(buf_attrs.stride_y) + start_pos_x * int(buf_attrs.stride_x));
 
     int total_width = BORDER_SIZE_LEFT + int(width) + BORDER_SIZE_RIGHT;
     int gid0        = int(gl_GlobalInvocationID.x);
@@ -69,16 +72,16 @@ void main()
     if(gidH >= 0)
     {
         // Handle left border
-        float left_val = LOAD4(buf, offset(buf, 0, gidH));
+        float left_val = LOAD(buf_ptr, IMAGE_OFFSET(buf_iter, 0, gidH));
         for(int i = 0; i < BORDER_SIZE_LEFT; ++i)
         {
-            STORE4(buf, offset(buf, -(i + 1), gidH), left_val);
+            STORE(buf_ptr, IMAGE_OFFSET(buf_iter, -(i + 1), gidH), left_val);
         }
         // Handle right border
-        float right_val = LOAD4(buf, offset(buf, int(width) - 1, gidH));
+        float right_val = LOAD(buf_ptr, IMAGE_OFFSET(buf_iter, int(width) - 1, gidH));
         for(int i = 0; i < BORDER_SIZE_RIGHT; ++i)
         {
-            STORE4(buf, offset(buf, int(width) + i, gidH), right_val);
+            STORE(buf_ptr, IMAGE_OFFSET(buf_iter, int(width) + i, gidH), right_val);
         }
     }
     else
@@ -91,151 +94,45 @@ void main()
         }
 
         // Handle top border
-        float top_val = LOAD4(buf, offset(buf, val_idx, 0));
+        float top_val = LOAD(buf_ptr, IMAGE_OFFSET(buf_iter, val_idx, 0));
         for(int i = 0; i < BORDER_SIZE_TOP; ++i)
         {
-            STORE4(buf, offset(buf, gidW, -(i + 1)), top_val);
+            STORE(buf_ptr, IMAGE_OFFSET(buf_iter, gidW, -(i + 1)), top_val);
         }
         // Handle bottom border
-        float bottom_val = LOAD4(buf, offset(buf, val_idx, int(height) - 1));
+        float bottom_val = LOAD(buf_ptr, IMAGE_OFFSET(buf_iter, val_idx, int(height) - 1));
         for(int i = 0; i < BORDER_SIZE_BOTTOM; ++i)
         {
-            STORE4(buf, offset(buf, gidW, int(height) + i), bottom_val);
+            STORE(buf_ptr, IMAGE_OFFSET(buf_iter, gidW, int(height) + i), bottom_val);
         }
     }
 }
-#endif /* FILL_IMAGE_BORDERS_REPLICATE */
-
-#ifdef FILL_IMAGE_BORDERS_CONSTANT
-BUFFER_DECLARATION(buf, 1, float, writeonly);
-layout(std140) uniform shader_params
-{
-    TENSOR3D_PARAM_DECLARATION(buf);
-    uint  width;
-    uint  height;
-    int   start_pos_x;
-    int   start_pos_y;
-    float constant_value;
-};
-
-/** Fill N pixels of the padding edge of a single channel image with a constant value.
- *
- * @attention  The border size for top, bottom, left, right needs to be passed at the compile time.
- * e.g. BORDER_SIZE_TOP=0 BORDER_SIZE_BOTTOM=2 BORDER_SIZE_LEFT=0 BORDER_SIZE_RIGHT=2
- *
- * @param[out] buf_ptr                           Pointer to the source image. Supported data types: F32
- * @param[in]  buf_stride_x                      Stride of the source image in X dimension (in bytes)
- * @param[in]  buf_step_x                        buf_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  buf_stride_y                      Stride of the source image in Y dimension (in bytes)
- * @param[in]  buf_step_y                        buf_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  buf_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[in]  width                             Width of the valid region of the image
- * @param[in]  height                            Height of the valid region of the image
- * @param[in]  start_pos_x                       X coordinate indicating the start point of the valid region
- * @param[in]  start_pos_y                       Y coordinate indicating the start point of the valid region
- * @param[in]  constant_value                    Constant value to use to fill the edges
- */
-void main()
-{
-    Image buf = CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP(buf);
-
-    // Update pointer to point to the starting point of the valid region
-    buf.current_offset = uint(int(buf.current_offset) + ((start_pos_y * int(buf_stride_y) + start_pos_x * int(buf_stride_x)) >> 2));
-
-    int total_width = BORDER_SIZE_LEFT + int(width) + BORDER_SIZE_RIGHT;
-    int gid0        = int(gl_GlobalInvocationID.x);
-    int gidH        = gid0 - total_width;
-    int gidW        = gid0 - BORDER_SIZE_LEFT;
-
-    if(gidH >= 0)
-    {
-        // Handle left border
-        for(int i = 0; i < BORDER_SIZE_LEFT; ++i)
-        {
-            STORE1(buf, offset(buf, -(i + 1), gidH), constant_value);
-        }
-        // Handle right border
-        for(int i = 0; i < BORDER_SIZE_RIGHT; ++i)
-        {
-            STORE1(buf, offset(buf, int(width) + i, gidH), constant_value);
-        }
-    }
-    else
-    {
-        // Handle top border
-        for(int i = 0; i < BORDER_SIZE_TOP; ++i)
-        {
-            STORE1(buf, offset(buf, gidW, -(i + 1)), constant_value);
-        }
-        // Handle bottom border
-        for(int i = 0; i < BORDER_SIZE_BOTTOM; ++i)
-        {
-            STORE1(buf, offset(buf, gidW, int(height) + i), constant_value);
-        }
-    }
-}
-#endif /* FILL_IMAGE_BORDERS_CONSTANT */
-
 #elif defined(DATA_TYPE_FP16)
-precision mediump float;
 
-#ifdef FILL_IMAGE_BORDERS_REPLICATE
-BUFFER_DECLARATION(buf, 1, uint, restrict);
-layout(std140) uniform shader_params
+TENSOR_DECLARATION(1, bufBuffer, uint, buf_ptr, buf_shift, 2, restrict);
+
+void set_replicate(uint offset, int pos, vec2 replicate_value)
 {
-    TENSOR3D_PARAM_DECLARATION(buf);
-    uint width;
-    uint height;
-    int  start_pos_x;
-    int  start_pos_y;
-};
-
-void set_replicate(uint offset, int pos, uint replicate_value)
-{
-    uint packed_b;
-    LOAD1(packed_b, buf, offset);
-
-    vec2 b = unpackHalf2x16(packed_b);
-    vec2 c = unpackHalf2x16(replicate_value);
+    vec2 b = LOAD_UNPACK2_HALF(buf_ptr, offset);
 
     if(pos % 2 == 0)
     {
-        b.x = c.y;
+        b.x = replicate_value.y;
     }
     else
     {
-        b.y = c.x;
+        b.y = replicate_value.x;
     }
 
-    packed_b = packHalf2x16(b);
-
-    STORE1(buf, offset, packed_b);
+    STORE_PACK2_HALF(buf_ptr, offset, b);
 }
 
-/** Fill N pixel of the padding edge of a single channel image by replicating the closest valid pixel.
- *
- * @attention  The border size for top, bottom, left, right needs to be passed at the compile time.
- * e.g. BORDER_SIZE_TOP=0 BORDER_SIZE_BOTTOM=2 BORDER_SIZE_LEFT=0 BORDER_SIZE_RIGHT=2
- *
- * @param[in,out] buf_ptr                           Pointer to the source image. Supported data types: F16
- * @param[in]     buf_stride_x                      Stride of the source image in X dimension (in bytes)
- * @param[in]     buf_step_x                        buf_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     buf_stride_y                      Stride of the source image in Y dimension (in bytes)
- * @param[in]     buf_step_y                        buf_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     buf_stride_z                      Stride between images if batching images (in bytes)
- * @param[in]     buf_step_z                        buf_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     buf_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[in]     width                             Width of the valid region of the image
- * @param[in]     height                            Height of the valid region of the image
- * @param[in]     start_pos_x                       X coordinate indicating the start point of the valid region
- * @param[in]     start_pos_y                       Y coordinate indicating the start point of the valid region
- */
 void main()
 {
-    Image buf = CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP_FP16(buf);
+    ImageIterator buf_iter = CONVERT_TENSOR3D_TO_IMAGE_ITERATOR_NO_STEP(buf_attrs, buf_shift);
 
     // Update pointer to point to the starting point of the valid region
-    buf.current_offset = uint(buf.current_offset + uint(start_pos_y) * buf_stride_y + uint(start_pos_x) * buf_stride_x);
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(buf_iter, uint(start_pos_y) * buf_attrs.stride_y + uint(start_pos_x) * buf_attrs.stride_x);
 
     int total_width = BORDER_SIZE_LEFT + int(width) + BORDER_SIZE_RIGHT;
     int gid0        = int(gl_GlobalInvocationID.x);
@@ -245,11 +142,10 @@ void main()
     if(gidH >= 0)
     {
         // Handle left border
-        uint left_val;
-        LOAD1(left_val, buf, offset_fp16(buf, 0, gidH) >> uint(2));
+        vec2 left_val = LOAD_UNPACK2_HALF(buf_ptr, IMAGE_OFFSET(buf_iter, 0, gidH));
         for(int i = 0; i < BORDER_SIZE_LEFT; ++i)
         {
-            uint offset = offset_fp16(buf, -(i + 1), gidH) >> 2;
+            uint offset = IMAGE_OFFSET(buf_iter, -(i + 1), gidH);
             int  pos    = BORDER_SIZE_LEFT - i - 1;
             if(i == 0)
             {
@@ -262,27 +158,22 @@ void main()
             {
                 if(pos % 2 == 0)
                 {
-                    vec2 a = unpackHalf2x16(left_val);
-                    uint b = packHalf2x16(a.xx);
-                    STORE1(buf, offset, b);
+                    STORE_PACK2_HALF(buf_ptr, offset, left_val.xx);
                 }
             }
         }
         // Handle right border
-        uint right_val;
-        LOAD1(right_val, buf, offset_fp16(buf, int(width) - 1, gidH) >> uint(2));
+        vec2 right_val = LOAD_UNPACK2_HALF(buf_ptr, IMAGE_OFFSET(buf_iter, int(width) - 1, gidH));
         for(int i = 0; i < BORDER_SIZE_RIGHT; ++i)
         {
-            uint offset = offset_fp16(buf, int(width) + i, gidH) >> 2;
+            uint offset = IMAGE_OFFSET(buf_iter, int(width) + i, gidH);
             int  pos    = i + BORDER_SIZE_LEFT + int(width);
 
             if(i == 0)
             {
                 if(pos % 2 == 0)
                 {
-                    vec2 a = unpackHalf2x16(right_val);
-                    uint b = packHalf2x16(a.yy);
-                    STORE1(buf, offset, b);
+                    STORE_PACK2_HALF(buf_ptr, offset, right_val.yy);
                 }
                 else
                 {
@@ -293,9 +184,7 @@ void main()
             {
                 if(pos % 2 == 0)
                 {
-                    vec2 a = unpackHalf2x16(right_val);
-                    uint b = packHalf2x16(a.yy);
-                    STORE1(buf, offset, b);
+                    STORE_PACK2_HALF(buf_ptr, offset, right_val.yy);
                 }
             }
         }
@@ -310,124 +199,165 @@ void main()
         }
 
         // Handle top border
-        uint top_val;
-        LOAD1(top_val, buf, offset_fp16(buf, val_idx, 0) >> uint(2));
+        vec2 top_val = LOAD_UNPACK2_HALF(buf_ptr, IMAGE_OFFSET(buf_iter, val_idx, 0));
         for(int i = 0; i < BORDER_SIZE_TOP; ++i)
         {
-            uint offset = offset_fp16(buf, gidW, -(i + 1)) >> 2;
+            uint offset = IMAGE_OFFSET(buf_iter, gidW, -(i + 1));
 
             if(gid0 % 2 == 0)
             {
                 if(gidW == (int(width) - 1))
                 {
-                    vec2 a = unpackHalf2x16(top_val);
-                    uint b = packHalf2x16(a.xx);
-                    STORE1(buf, offset, b);
+                    STORE_PACK2_HALF(buf_ptr, offset, top_val.xx);
                 }
                 else
                 {
                     if(gidW < 0)
                     {
-                        vec2 a = unpackHalf2x16(top_val);
-                        uint b;
                         if(BORDER_SIZE_LEFT % 2 == 0)
                         {
-                            b = packHalf2x16(a.xx);
+                            STORE_PACK2_HALF(buf_ptr, offset, top_val.xx);
                         }
                         else
                         {
-                            b = packHalf2x16(a.yy);
+                            STORE_PACK2_HALF(buf_ptr, offset, top_val.yy);
                         }
-                        STORE1(buf, offset, b);
                     }
                     else if(gidW >= int(width))
                     {
-                        vec2 a = unpackHalf2x16(top_val);
-                        uint b;
                         if((BORDER_SIZE_LEFT + int(width)) % 2 == 0)
                         {
-                            b = packHalf2x16(a.yy);
+                            STORE_PACK2_HALF(buf_ptr, offset, top_val.yy);
                         }
-                        STORE1(buf, offset, b);
                     }
                     else
                     {
-                        STORE1(buf, offset, top_val);
+                        STORE_PACK2_HALF(buf_ptr, offset, top_val);
                     }
                 }
             }
         }
         // Handle bottom border
-        uint bottom_val;
-        LOAD1(bottom_val, buf, offset_fp16(buf, val_idx, int(height) - 1) >> uint(2));
+        vec2 bottom_val = LOAD_UNPACK2_HALF(buf_ptr, IMAGE_OFFSET(buf_iter, val_idx, int(height) - 1));
         for(int i = 0; i < BORDER_SIZE_BOTTOM; ++i)
         {
-            uint offset = offset_fp16(buf, gidW, int(height) + i) >> 2;
+            uint offset = IMAGE_OFFSET(buf_iter, gidW, int(height) + i);
 
             if(gid0 % 2 == 0)
             {
                 if(gidW == (int(width) - 1))
                 {
-                    vec2 a = unpackHalf2x16(bottom_val);
-                    uint b = packHalf2x16(a.xx);
-                    STORE1(buf, offset, b);
+                    STORE_PACK2_HALF(buf_ptr, offset, bottom_val.xx);
                 }
                 else
                 {
                     if(gidW < 0)
                     {
-                        vec2 a = unpackHalf2x16(bottom_val);
-                        uint b;
                         if(BORDER_SIZE_LEFT % 2 == 0)
                         {
-                            b = packHalf2x16(a.xx);
+                            STORE_PACK2_HALF(buf_ptr, offset, bottom_val.xx);
                         }
                         else
                         {
-                            b = packHalf2x16(a.yy);
+                            STORE_PACK2_HALF(buf_ptr, offset, bottom_val.yy);
                         }
-                        STORE1(buf, offset, b);
                     }
                     else if(gidW >= int(width))
                     {
-                        vec2 a = unpackHalf2x16(bottom_val);
-                        uint b;
                         if((BORDER_SIZE_LEFT + int(width)) % 2 == 0)
                         {
-                            b = packHalf2x16(a.yy);
+                            STORE_PACK2_HALF(buf_ptr, offset, bottom_val.yy);
                         }
-                        STORE1(buf, offset, b);
                     }
                     else
                     {
-                        STORE1(buf, offset, bottom_val);
+                        STORE_PACK2_HALF(buf_ptr, offset, bottom_val);
                     }
                 }
             }
         }
     }
 }
+
+#endif /* DATA_TYPE_FP32 */
+
 #endif /* FILL_IMAGE_BORDERS_REPLICATE */
 
 #ifdef FILL_IMAGE_BORDERS_CONSTANT
-BUFFER_DECLARATION(buf, 1, uint, restrict);
 
-layout(std140) uniform shader_params
+/** Fill N pixels of the padding edge of a single channel image with a constant value.
+ *
+ * @note The data type must be passed at compile time using "#define DATA_TYPE_NAME". e.g. "#define DATA_TYPE_FP32"
+ * @attention  The border size for top, bottom, left, right needs to be passed at the compile time.
+ * e.g. BORDER_SIZE_TOP=0 BORDER_SIZE_BOTTOM=2 BORDER_SIZE_LEFT=0 BORDER_SIZE_RIGHT=2
+ *
+ * @param[out] buf_ptr        Pointer to the source image. Supported data types: F16/F32
+ * @param[in]  buf_attrs      The attributes of the source image
+ * @param[in]  width          Width of the valid region of the image
+ * @param[in]  height         Height of the valid region of the image
+ * @param[in]  start_pos_x    X coordinate indicating the start point of the valid region
+ * @param[in]  start_pos_y    Y coordinate indicating the start point of the valid region
+ * @param[in]  constant_value Constant value to use to fill the edges
+ */
+SHADER_PARAMS_DECLARATION
 {
-    TENSOR3D_PARAM_DECLARATION(buf);
-    uint  width;
-    uint  height;
-    int   start_pos_x;
-    int   start_pos_y;
-    float constant_value;
+    Tensor3DAttributes buf_attrs;
+    uint               width;
+    uint               height;
+    int                start_pos_x;
+    int                start_pos_y;
+    float              constant_value;
 };
+
+#if defined(DATA_TYPE_FP32)
+TENSOR_DECLARATION(1, bufBuffer, float, buf_ptr, buf_shift, 2, writeonly);
+
+void main()
+{
+    ImageIterator buf_iter = CONVERT_TENSOR3D_TO_IMAGE_ITERATOR_NO_STEP(buf_attrs, buf_shift);
+
+    // Update pointer to point to the starting point of the valid region
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(buf_iter, start_pos_y * int(buf_attrs.stride_y) + start_pos_x * int(buf_attrs.stride_x));
+
+    int total_width = BORDER_SIZE_LEFT + int(width) + BORDER_SIZE_RIGHT;
+    int gid0        = int(gl_GlobalInvocationID.x);
+    int gidH        = gid0 - total_width;
+    int gidW        = gid0 - BORDER_SIZE_LEFT;
+
+    if(gidH >= 0)
+    {
+        // Handle left border
+        for(int i = 0; i < BORDER_SIZE_LEFT; ++i)
+        {
+            STORE(buf_ptr, IMAGE_OFFSET(buf_iter, -(i + 1), gidH), constant_value);
+        }
+        // Handle right border
+        for(int i = 0; i < BORDER_SIZE_RIGHT; ++i)
+        {
+            STORE(buf_ptr, IMAGE_OFFSET(buf_iter, int(width) + i, gidH), constant_value);
+        }
+    }
+    else
+    {
+        // Handle top border
+        for(int i = 0; i < BORDER_SIZE_TOP; ++i)
+        {
+            STORE(buf_ptr, IMAGE_OFFSET(buf_iter, gidW, -(i + 1)), constant_value);
+        }
+        // Handle bottom border
+        for(int i = 0; i < BORDER_SIZE_BOTTOM; ++i)
+        {
+            STORE(buf_ptr, IMAGE_OFFSET(buf_iter, gidW, int(height) + i), constant_value);
+        }
+    }
+}
+
+#elif defined(DATA_TYPE_FP16)
+TENSOR_DECLARATION(1, bufBuffer, uint, buf_ptr, buf_shift, 2, restrict);
 
 void set_constant(uint offset, int pos)
 {
-    uint packed_b;
-    LOAD1(packed_b, buf, offset);
-
-    vec2 b = unpackHalf2x16(packed_b);
+    vec2 b = LOAD_UNPACK2_HALF(buf_ptr, offset);
 
     if(pos % 2 == 0)
     {
@@ -438,31 +368,12 @@ void set_constant(uint offset, int pos)
         b.y = constant_value;
     }
 
-    packed_b = packHalf2x16(b);
-
-    STORE1(buf, offset, packed_b);
+    STORE_PACK2_HALF(buf_ptr, offset, b);
 }
 
-/** Fill N pixels of the padding edge of a single channel image with a constant value.
- *
- * @attention  The border size for top, bottom, left, right needs to be passed at the compile time.
- * e.g. BORDER_SIZE_TOP=0 BORDER_SIZE_BOTTOM=2 BORDER_SIZE_LEFT=0 BORDER_SIZE_RIGHT=2
- *
- * @param[out] buf_ptr                           Pointer to the source image. Supported data types: F16
- * @param[in]  buf_stride_x                      Stride of the source image in X dimension (in bytes)
- * @param[in]  buf_step_x                        buf_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  buf_stride_y                      Stride of the source image in Y dimension (in bytes)
- * @param[in]  buf_step_y                        buf_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  buf_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[in]  width                             Width of the valid region of the image
- * @param[in]  height                            Height of the valid region of the image
- * @param[in]  start_pos_x                       X coordinate indicating the start point of the valid region
- * @param[in]  start_pos_y                       Y coordinate indicating the start point of the valid region
- * @param[in]  constant_value                    Constant value to use to fill the edges
- */
 void main()
 {
-    Image buf = CONVERT_TENSOR3D_TO_IMAGE_STRUCT_NO_STEP_FP16(buf);
+    ImageIterator buf_iter = CONVERT_TENSOR3D_TO_IMAGE_ITERATOR_NO_STEP(buf_attrs, buf_shift);
 
     int total_width = BORDER_SIZE_LEFT + int(width) + BORDER_SIZE_RIGHT;
     int gid0        = int(gl_GlobalInvocationID.x);
@@ -470,18 +381,16 @@ void main()
     int gidW        = gid0 - BORDER_SIZE_LEFT;
 
     // Update pointer to point to the starting point of the valid region
-    buf.current_offset = uint(int(buf.current_offset) + ((start_pos_y * int(buf_stride_y) + start_pos_x * int(buf_stride_x))));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(buf_iter, start_pos_y * int(buf_attrs.stride_y) + start_pos_x * int(buf_attrs.stride_x));
 
     vec2 b = vec2(constant_value, constant_value);
-
-    uint packed_b = packHalf2x16(b);
 
     if(gidH >= 0)
     {
         // Handle left border
         for(int i = 0; i < BORDER_SIZE_LEFT; ++i)
         {
-            uint offset = offset_fp16(buf, -(i + 1), gidH) >> 2;
+            uint offset = IMAGE_OFFSET(buf_iter, -(i + 1), gidH);
             int  pos    = BORDER_SIZE_LEFT - i - 1;
 
             if(i == 0)
@@ -495,21 +404,21 @@ void main()
             {
                 if(pos % 2 == 0)
                 {
-                    STORE1(buf, offset, packed_b);
+                    STORE_PACK2_HALF(buf_ptr, offset, b);
                 }
             }
         }
         // Handle right border
         for(int i = 0; i < BORDER_SIZE_RIGHT; ++i)
         {
-            uint offset = offset_fp16(buf, int(width) + i, gidH) >> 2;
+            uint offset = IMAGE_OFFSET(buf_iter, int(width) + i, gidH);
             int  pos    = i + BORDER_SIZE_LEFT + int(width);
 
             if(i == 0)
             {
                 if(pos % 2 == 0)
                 {
-                    STORE1(buf, offset, packed_b);
+                    STORE_PACK2_HALF(buf_ptr, offset, b);
                 }
                 else
                 {
@@ -520,7 +429,7 @@ void main()
             {
                 if(pos % 2 == 0)
                 {
-                    STORE1(buf, offset, packed_b);
+                    STORE_PACK2_HALF(buf_ptr, offset, b);
                 }
             }
         }
@@ -530,24 +439,26 @@ void main()
         // Handle top border
         for(int i = 0; i < BORDER_SIZE_TOP; ++i)
         {
-            uint offset = offset_fp16(buf, gidW, -(i + 1)) >> 2;
+            uint offset = IMAGE_OFFSET(buf_iter, gidW, -(i + 1));
 
             if(gid0 % 2 == 0)
             {
-                STORE1(buf, offset, packed_b);
+                STORE_PACK2_HALF(buf_ptr, offset, b);
             }
         }
         // Handle bottom border
         for(int i = 0; i < BORDER_SIZE_BOTTOM; ++i)
         {
-            uint offset = offset_fp16(buf, gidW, int(height) + i) >> 2;
+            uint offset = IMAGE_OFFSET(buf_iter, gidW, int(height) + i);
 
             if(gid0 % 2 == 0)
             {
-                STORE1(buf, offset, packed_b);
+                STORE_PACK2_HALF(buf_ptr, offset, b);
             }
         }
     }
 }
-#endif /* FILL_IMAGE_BORDERS_CONSTANT */
+
 #endif /* DATA_TYPE_FP32 */
+
+#endif /* FILL_IMAGE_BORDERS_CONSTANT */
