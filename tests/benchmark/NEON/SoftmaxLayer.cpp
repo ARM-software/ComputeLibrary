@@ -23,10 +23,10 @@
  */
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
-#include "tests/CL/CLAccessor.h"
+#include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/TensorAllocator.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/benchmark/fixtures/SoftmaxLayerFixture.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Macros.h"
@@ -39,17 +39,17 @@ namespace test
 {
 namespace
 {
-const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F32 });
 } // namespace
 
-using CLSoftmaxLayerFixture = SoftmaxLayerFixture<CLTensor, CLSoftmaxLayer, CLAccessor>;
+using NESoftmaxLayerFixture = SoftmaxLayerFixture<Tensor, NESoftmaxLayer, Accessor>;
 
-TEST_SUITE(CL)
+TEST_SUITE(NEON)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(SoftmaxLayerSmall, CLSoftmaxLayerFixture, framework::DatasetMode::ALL,
+REGISTER_FIXTURE_DATA_TEST_CASE(SoftmaxLayerSmall, NESoftmaxLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(datasets::SoftmaxLayerSmallShapes(), data_types));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(SoftmaxLayerLarge, CLSoftmaxLayerFixture, framework::DatasetMode::NIGHTLY,
+REGISTER_FIXTURE_DATA_TEST_CASE(SoftmaxLayerLarge, NESoftmaxLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(datasets::SoftmaxLayerLargeShapes(), data_types));
 
 TEST_SUITE_END()

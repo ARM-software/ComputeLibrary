@@ -50,12 +50,11 @@ public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type)
     {
-        // Set batched in source and destination shapes
-        const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
+        const unsigned int fixed_point_position = 4;
 
         // Create tensors
-        src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position);
-        dst = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position);
+        src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, QuantizationInfo(1.f / 256, 10));
+        dst = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, QuantizationInfo(1.f / 256, 0));
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
