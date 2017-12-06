@@ -60,6 +60,8 @@ SimpleTensor<T> transpose(const SimpleTensor<T> &src)
 template SimpleTensor<uint8_t> transpose(const SimpleTensor<uint8_t> &src);
 template SimpleTensor<uint16_t> transpose(const SimpleTensor<uint16_t> &src);
 template SimpleTensor<uint32_t> transpose(const SimpleTensor<uint32_t> &src);
+template SimpleTensor<half> transpose(const SimpleTensor<half> &src);
+template SimpleTensor<float> transpose(const SimpleTensor<float> &src);
 } // namespace reference
 } // namespace validation
 } // namespace test

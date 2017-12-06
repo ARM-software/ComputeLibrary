@@ -75,8 +75,16 @@ void GCTransposeKernel::configure(const IGCTensor *input, IGCTensor *output)
         build_opts.emplace(("#define TRANSPOSE_4X4"));
         num_elems_processed_per_iteration = 4;
 #elif defined(TRANSPOSE_8X8) /* TRANSPOSE_4X4 */
-        build_opts.emplace(("#define TRANSPOSE_8X8"));
-        num_elems_processed_per_iteration = 8;
+        if(w_out != h_out)
+        {
+            build_opts.emplace("#define TRANSPOSE_8X8");
+            num_elems_processed_per_iteration = 8;
+        }
+        else
+        {
+            build_opts.emplace("#define TRANSPOSE_8X8_SQUARE");
+            num_elems_processed_per_iteration = 8;
+        }
 #endif                       /* TRANSPOSE_4X4 */
     }
 
