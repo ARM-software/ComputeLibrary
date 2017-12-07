@@ -43,6 +43,34 @@ namespace validation
 TEST_SUITE(NEON)
 TEST_SUITE(Transpose)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::U8),  // Input not a multiple of 8
+                                            TensorInfo(TensorShape(21U, 13U), 1, DataType::U16), // Invalid shape
+                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::U32),
+                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::U8),  // Wrong data type
+                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::U16),
+                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::U32),
+                                          }),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(13U, 21U), 1, DataType::U8),
+                                            TensorInfo(TensorShape(21U, 13U), 1, DataType::U16),
+                                            TensorInfo(TensorShape(13U, 20U), 1, DataType::U32),
+                                            TensorInfo(TensorShape(31U, 20U), 1, DataType::U16),
+                                            TensorInfo(TensorShape(13U, 20U), 1, DataType::U16),
+                                            TensorInfo(TensorShape(13U, 20U), 1, DataType::U32),
+                                           })),
+    framework::dataset::make("Expected", { true, false, true, false, true, true })),
+    a_info, output_info, expected)
+{
+    // Lock tensors
+    Status status =  NETranspose::validate(&a_info.clone()->set_is_resizable(false),
+                                           &output_info.clone()->set_is_resizable(false));
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("DataType", { DataType::S8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32 })),
                shape, data_type)
 {
@@ -50,30 +78,35 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     TensorShape output_shape{ shape[1], shape[0] };
 
     // Create tensors
-    Tensor ref_src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst     = create_tensor<Tensor>(output_shape, data_type);
+    Tensor src = create_tensor<Tensor>(shape, data_type);
+    Tensor dst = create_tensor<Tensor>(output_shape, data_type);
 
     // Create and Configure function
     NETranspose trans;
-    trans.configure(&ref_src, &dst);
+    trans.configure(&src, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(output_shape);
     validate(dst.info()->valid_region(), valid_region);
 
-    // TODO(bsgcomp): Add padding validation (COMPMID-659)
+    // Validate padding
+    const PaddingSize padding(0, 0);
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
 }
 
 template <typename T>
 using NETransposeFixture = TransposeValidationFixture<Tensor, Accessor, NETranspose, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETransposeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NETransposeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
+                                                                                                         framework::dataset::make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
+                                                                                                       framework::dataset::make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -81,12 +114,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint8_t>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETransposeFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NETransposeFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
+                                                                                                          framework::dataset::make("DataType", DataType::U16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
+                                                                                                        framework::dataset::make("DataType", DataType::U16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -94,12 +129,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint16_t>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETransposeFixture<uint32_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NETransposeFixture<uint32_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
+                                                                                                          framework::dataset::make("DataType", DataType::U32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint32_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint32_t>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
+                                                                                                        framework::dataset::make("DataType", DataType::U32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
