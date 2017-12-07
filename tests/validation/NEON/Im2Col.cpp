@@ -56,8 +56,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("Expected", { false, false, false, false, true })),
                input_info, output_info, has_bias, expected)
 {
-    bool err = bool(NEIm2Col::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias));
-    ARM_COMPUTE_EXPECT(err == expected, framework::LogLevel::ERRORS);
+    bool status = bool(NEIm2Col::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias));
+    ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*

@@ -58,8 +58,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                framework::dataset::make("Expected", { false, false, false, false, true })),
                input_info, output_info, convolved_width, convolved_height, expected)
 {
-    bool err = bool(NECol2Im::validate(&input_info, &output_info, Size2D(convolved_width, convolved_height)));
-    ARM_COMPUTE_EXPECT(err == expected, framework::LogLevel::ERRORS);
+    bool status = bool(NECol2Im::validate(&input_info, &output_info, Size2D(convolved_width, convolved_height)));
+    ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*

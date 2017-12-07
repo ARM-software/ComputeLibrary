@@ -69,7 +69,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/QASYMM8/F16/F32
+     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QASYMM8/QS16/F16/F32
      * @param[out] output      The output tensor. First 2 lower dimensions represent a transform of each 3D input,
      *                         while every dimension above represents a batch. Data types supported: Same as @p input
      * @param[in]  kernel_dims The kernel dimensions (width and height).
@@ -80,6 +80,19 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
+    /** Static function to check if given info will lead to a valid configuration of @ref CLIm2ColKernel
+     *
+     * @param[in] input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     *                        while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QASYMM8/QS16/F16/F32
+     * @param[in] output      The output tensor. First 2 lower dimensions represent a transform of each 3D input,
+     *                        while every dimension above represents a batch. Data types supported: Same as @p input
+     * @param[in] kernel_dims The kernel dimensions (width and height).
+     * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in] has_bias    In case biases are provided expands the matrix with 1.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
 
 private:
     /** Run the reshape kernel optimised for the special case (stride is 1, padding is 0 and kernel's low 3 dimensions are same as input)

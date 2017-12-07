@@ -50,6 +50,15 @@ public:
      * @param[in]      biases The shared biases tensor to append. It must be 1D tensor. Data types supported: Same as @p input
      */
     void configure(ICLTensor *accum, const ICLTensor *biases);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixAccumulateBiasesKernel
+     *
+     * @param[in] accum      The accumulate tensor to convert. Data types supported: QS8/QS16/F16/F32
+     * @param[in] biases     The shared biases tensor to append. It must be 1D tensor. Data types supported: Same as @p input
+     * @param[in] gpu_target GPU target
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *accum, const ITensorInfo *biases, GPUTarget gpu_target);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

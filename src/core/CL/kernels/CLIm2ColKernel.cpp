@@ -39,6 +39,24 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Status{};
+}
+} // namespace
+
 CLIm2ColKernel::CLIm2ColKernel()
     : _input(nullptr), _output(nullptr), _convolved_dims(), _num_elems_processed_per_iteration(1), _run_func(nullptr)
 {
@@ -46,9 +64,10 @@ CLIm2ColKernel::CLIm2ColKernel()
 
 void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
     _input  = input;
     _output = output;
@@ -182,6 +201,15 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
+}
+
+Status CLIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+{
+    ARM_COMPUTE_UNUSED(kernel_dims);
+    ARM_COMPUTE_UNUSED(conv_info);
+    ARM_COMPUTE_UNUSED(has_bias);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    return Status{};
 }
 
 void CLIm2ColKernel::run(const Window &window, cl::CommandQueue &queue)

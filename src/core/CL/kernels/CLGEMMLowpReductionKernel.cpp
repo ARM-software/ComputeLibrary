@@ -44,6 +44,59 @@ namespace arm_compute
 class Coordinates;
 } // namespace arm_compute
 
+namespace
+{
+Status validate_arguments_matrix_a_reduction(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+
+    return Status{};
+}
+std::pair<Status, Window> validate_and_configure_window_matrix_a_reduction(ITensorInfo *input, ITensorInfo *output)
+{
+    const unsigned int num_elems_processed_per_iteration = 1;
+
+    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowStatic     input_access(input, 0, 0, ceil_to_multiple(input->dimension(0), 16), input->dimension(1));
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+
+    bool window_changed = update_window_and_padding(win, input_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+
+Status validate_arguments_matrix_b_reduction(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window_matrix_b_reduction(ITensorInfo *input, ITensorInfo *output)
+{
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+    // Configure kernel window
+    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowStatic     input_access(input, 0, 0, ceil_to_multiple(input->dimension(0), num_elems_processed_per_iteration), input->dimension(1));
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+
+    bool window_changed = update_window_and_padding(win, input_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 ICLGEMMLowpReductionKernel::ICLGEMMLowpReductionKernel()
     : _input(), _output()
 {
@@ -51,8 +104,9 @@ ICLGEMMLowpReductionKernel::ICLGEMMLowpReductionKernel()
 
 void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTensor *vector_sum_row)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mtx_a, 1, DataType::QASYMM8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
+    // Perform validate step
+    ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_a, vector_sum_row);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_a_reduction(mtx_a->info(), vector_sum_row->info()));
 
     _input  = mtx_a;
     _output = vector_sum_row;
@@ -64,21 +118,18 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTens
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_matrix_a_reduction", build_opts.options()));
 
-    const unsigned int num_elems_processed_per_iteration = 1;
-
     // Configure kernel window
-    Window win = calculate_max_window(*_output->info(), Steps(num_elems_processed_per_iteration));
+    auto win_config = validate_and_configure_window_matrix_a_reduction(_input->info(), _output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
+}
 
-    AccessWindowStatic     input_access(_input->info(), 0, 0, ceil_to_multiple(_input->info()->dimension(0), 16), _input->info()->dimension(1));
-    AccessWindowHorizontal output_access(_output->info(), 0, num_elems_processed_per_iteration);
+Status CLGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_a_reduction(mtx_a, vector_sum_row));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_matrix_a_reduction(mtx_a->clone().get(), vector_sum_row->clone().get()).first);
 
-    update_window_and_padding(win,
-                              input_access,
-                              output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), _output->info()->tensor_shape()));
-
-    ICLKernel::configure(win);
+    return Status{};
 }
 
 void CLGEMMLowpMatrixAReductionKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -107,8 +158,8 @@ void CLGEMMLowpMatrixAReductionKernel::run(const Window &window, cl::CommandQueu
 
 void CLGEMMLowpMatrixBReductionKernel::configure(const ICLTensor *mtx_b, ICLTensor *vector_sum_col)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mtx_b, 1, DataType::QASYMM8);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_b, vector_sum_col);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_b_reduction(mtx_b->info(), vector_sum_col->info()));
 
     _input  = mtx_b;
     _output = vector_sum_col;
@@ -121,21 +172,18 @@ void CLGEMMLowpMatrixBReductionKernel::configure(const ICLTensor *mtx_b, ICLTens
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_matrix_b_reduction", build_opts.options()));
 
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
     // Configure kernel window
-    Window win = calculate_max_window(*vector_sum_col->info(), Steps(num_elems_processed_per_iteration));
+    auto win_config = validate_and_configure_window_matrix_b_reduction(_input->info(), _output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
+}
 
-    AccessWindowStatic     input_access(_input->info(), 0, 0, ceil_to_multiple(_input->info()->dimension(0), num_elems_processed_per_iteration), _input->info()->dimension(1));
-    AccessWindowHorizontal output_access(_output->info(), 0, num_elems_processed_per_iteration);
+Status CLGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_b_reduction(mtx_b, vector_sum_col));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_matrix_b_reduction(mtx_b->clone().get(), vector_sum_col->clone().get()).first);
 
-    update_window_and_padding(win,
-                              input_access,
-                              output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), _output->info()->tensor_shape()));
-
-    ICLKernel::configure(win);
+    return Status{};
 }
 
 void CLGEMMLowpMatrixBReductionKernel::run(const Window &window, cl::CommandQueue &queue)

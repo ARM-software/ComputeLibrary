@@ -52,6 +52,14 @@ public:
      * @param[out] output Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayerReshapeWeights
+     *
+     * @param[in] input  Weights tensor. The weights must be 2 dimensional. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] output Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 
 /** Basic function to compute a Fully Connected layer on OpenCL. This function calls the following OpenCL kernels:
@@ -78,6 +86,18 @@ public:
      * @param[in]  are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose_weights = true, bool are_weights_reshaped = false);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
+     *
+     * @param[in] input                Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
+     * @param[in] biases               Bias tensor. It can be nullptr. Data type supported:Same as @p input.
+     * @param[in] output               Destination tensor. Data type supported: Same as @p input.
+     * @param[in] transpose_weights    (Optional) Transpose weights if true. Defaults to true.
+     * @param[in] are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose_weights = true, bool are_weights_reshaped = false);
 
     //Inherited methods override
     void run() override;

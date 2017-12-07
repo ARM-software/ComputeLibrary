@@ -44,6 +44,81 @@ namespace arm_compute
 class Coordinates;
 } // namespace arm_compute
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
+                          int32_t a_offset, int32_t b_offset)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
+
+    // If a_offset == 0, vector_sum_col can be a nullptr
+    if(a_offset != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_col->dimension(0) != mm_result->dimension(0));
+    }
+
+    // If b_offset == 0, vector_sum_row can be a nullptr
+    if(b_offset != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_row->dimension(0) != mm_result->dimension(1));
+
+        TensorShape output_shape = mm_result->tensor_shape();
+        if(output_shape.num_dimensions() > 1)
+        {
+            TensorShape vector_sum_row_shape = vector_sum_row->tensor_shape();
+            vector_sum_row_shape.collapse_from(1);
+            output_shape.collapse_from(2);
+
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[2],
+                                            "mm_result tensor must have the same number of batches of output tensor");
+
+            if(a_offset != 0)
+            {
+                TensorShape vector_sum_col_shape = vector_sum_col->tensor_shape();
+                vector_sum_col_shape.collapse_from(1);
+
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_col_shape[1] != 1 && vector_sum_col_shape[1] != vector_sum_row_shape[1],
+                                                "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
+            }
+        }
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row,
+                                                        int32_t a_offset, int32_t b_offset)
+{
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    bool                   window_changed                    = false;
+
+    // Configure kernel window
+    Window win = calculate_max_window(*mm_result, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal mm_result_access(mm_result, 0, num_elems_processed_per_iteration);
+    window_changed = window_changed || update_window_and_padding(win,
+                                                                 mm_result_access);
+
+    if(a_offset != 0)
+    {
+        AccessWindowHorizontal vector_sum_col_access(vector_sum_col, 0, num_elems_processed_per_iteration);
+        window_changed = window_changed || update_window_and_padding(win,
+                                                                     vector_sum_col_access);
+    }
+    if(b_offset != 0)
+    {
+        AccessWindowStatic vector_sum_row_access(vector_sum_row, 0, 0, vector_sum_row->dimension(0), 0); // NOLINT
+        window_changed = window_changed || update_window_and_padding(win,
+                                                                     vector_sum_row_access);
+    }
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 CLGEMMLowpOffsetContributionKernel::CLGEMMLowpOffsetContributionKernel()
     : _vector_sum_col(nullptr), _vector_sum_row(nullptr), _mm_result(nullptr)
 {
@@ -51,7 +126,16 @@ CLGEMMLowpOffsetContributionKernel::CLGEMMLowpOffsetContributionKernel()
 
 void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, int32_t k, int32_t a_offset, int32_t b_offset)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
+    // Perform validate step
+    ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result->info(),
+                                                  vector_sum_col != nullptr ? vector_sum_col->info() : nullptr,
+                                                  vector_sum_row != nullptr ? vector_sum_row->info() : nullptr,
+                                                  a_offset, b_offset)); // NOLINT
+
+    _vector_sum_col = vector_sum_col;
+    _vector_sum_row = vector_sum_row;
+    _mm_result      = mm_result;
 
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
@@ -59,74 +143,36 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
     // If a_offset == 0, vector_sum_col can be a nullptr
     if(a_offset != 0)
     {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
-        ARM_COMPUTE_ERROR_ON(vector_sum_col->info()->dimension(0) != mm_result->info()->dimension(0));
-
         build_opts.add_option("-DA_OFFSET=" + support::cpp11::to_string(a_offset));
         build_opts.add_option_if(vector_sum_col->info()->tensor_shape().num_dimensions() > 1, "-DSUM_COL_HAS_BATCHES");
     }
-
     // If b_offset == 0, vector_sum_row can be a nullptr
-    if(b_offset != 0)
-    {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
-        ARM_COMPUTE_ERROR_ON(vector_sum_row->info()->dimension(0) != mm_result->info()->dimension(1));
-
-        // Validate batches
-        TensorShape output_shape = mm_result->info()->tensor_shape();
-        if(output_shape.num_dimensions() > 1)
-        {
-            TensorShape vector_sum_row_shape = vector_sum_row->info()->tensor_shape();
-            vector_sum_row_shape.collapse_from(1);
-            output_shape.collapse_from(2);
-
-            ARM_COMPUTE_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[2], "mm_result tensor must have the same number of batches of output tensor");
-
-            if(a_offset != 0)
-            {
-                TensorShape vector_sum_col_shape = vector_sum_col->info()->tensor_shape();
-                vector_sum_col_shape.collapse_from(1);
-
-                ARM_COMPUTE_ERROR_ON_MSG(vector_sum_col_shape[1] != 1
-                                         && vector_sum_col_shape[1] != vector_sum_row_shape[1],
-                                         "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
-            }
-        }
-
-        build_opts.add_option("-DB_OFFSET=" + support::cpp11::to_string(b_offset));
-    }
-
+    build_opts.add_option_if(b_offset != 0, "-DB_OFFSET=" + support::cpp11::to_string(b_offset));
     build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(a_offset * b_offset * k));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_offset_contribution", build_opts.options()));
 
-    _vector_sum_col = vector_sum_col;
-    _vector_sum_row = vector_sum_row;
-    _mm_result      = mm_result;
-
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
     // Configure kernel window
-    Window win = calculate_max_window(*mm_result->info(), Steps(num_elems_processed_per_iteration));
+    auto win_config = validate_and_configure_window(mm_result->info(),
+                                                    vector_sum_col != nullptr ? vector_sum_col->info() : nullptr,
+                                                    vector_sum_row != nullptr ? vector_sum_row->info() : nullptr,
+                                                    a_offset, b_offset); // NOLINT
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
+}
 
-    AccessWindowHorizontal mm_result_access(mm_result->info(), 0, num_elems_processed_per_iteration);
+Status CLGEMMLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,
+                                                    int32_t a_offset, int32_t b_offset)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, a_offset, b_offset));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(mm_result->clone().get(),
+                                                              vector_sum_col != nullptr ? vector_sum_col->clone().get() : nullptr,
+                                                              vector_sum_row != nullptr ? vector_sum_row->clone().get() : nullptr,
+                                                              a_offset, b_offset)
+                                .first); // NOLINT
 
-    update_window_and_padding(win, mm_result_access);
-
-    if(a_offset != 0)
-    {
-        AccessWindowHorizontal vector_sum_col_access(vector_sum_col->info(), 0, num_elems_processed_per_iteration);
-        update_window_and_padding(win, vector_sum_col_access);
-    }
-
-    if(b_offset != 0)
-    {
-        AccessWindowStatic vector_sum_row_access(vector_sum_row->info(), 0, 0, vector_sum_row->info()->dimension(0), 0);
-        update_window_and_padding(win, vector_sum_row_access);
-    }
-
-    ICLKernel::configure(win);
+    return Status{};
 }
 
 void CLGEMMLowpOffsetContributionKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -71,6 +71,14 @@ public:
      * @param[out] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      */
     void configure(const ICLTensor *mtx_a, ICLTensor *vector_sum_row) override;
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixAReductionKernel
+     *
+     * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8
+     * @param[in] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -90,6 +98,14 @@ public:
      * @param[out] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      */
     void configure(const ICLTensor *mtx_b, ICLTensor *vector_sum_col) override;
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixBReductionKernel
+     *
+     * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

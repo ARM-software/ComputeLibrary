@@ -71,16 +71,16 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
             vector_sum_row_shape.collapse_from(1);
             output_shape.collapse_from(2);
 
-            ARM_COMPUTE_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[2], "mm_result tensor must have the same number of batches of output tensor");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_row_shape[1] != output_shape[2],
+                                            "mm_result tensor must have the same number of batches of output tensor");
 
             if(a_offset != 0)
             {
                 TensorShape vector_sum_col_shape = vector_sum_col->tensor_shape();
                 vector_sum_col_shape.collapse_from(1);
 
-                ARM_COMPUTE_ERROR_ON_MSG(vector_sum_col_shape[1] != 1
-                                         && vector_sum_col_shape[1] != vector_sum_row_shape[1],
-                                         "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(vector_sum_col_shape[1] != 1 && vector_sum_col_shape[1] != vector_sum_row_shape[1],
+                                                "vector_sum_col tensor must have the same number of batches of vector_sum_row_shape or the number of batches must be set to 1");
             }
         }
     }
