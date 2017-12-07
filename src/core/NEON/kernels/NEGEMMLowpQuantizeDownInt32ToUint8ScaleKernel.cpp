@@ -65,7 +65,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
 {
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    // Note: This kernel performs 16 elements per iteration.
+    // However, since we use a left-over for loop, we cannot have any read or write out of memory
+    // For this reason num_elems_processed_per_iteration is set to 1
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     // Configure kernel window
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
@@ -85,7 +88,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     if(bias != nullptr)
     {
-        AccessWindowStatic bias_access(bias, 0, 0, ceil_to_multiple(bias->dimension(0), num_elems_processed_per_iteration), bias->tensor_shape()[1]);
+        AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
         window_changed = window_changed || update_window_and_padding(win, bias_access);
     }
 
@@ -163,69 +166,125 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
     ARM_COMPUTE_UNUSED(min_u8);
     ARM_COMPUTE_UNUSED(max_u8);
 
-    Iterator in(_input, window);
-    Iterator out(_output, window);
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    Window win(window);
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator in(_input, win);
+    Iterator out(_output, win);
 
     if(_bias != nullptr)
     {
         Window win_biases;
-        win_biases.set(Window::DimX, Window::Dimension(window.x().start(), window.x().end(), window.x().step()));
+        win_biases.set(Window::DimX, Window::Dimension(0, 1, 1));
         win_biases.set(Window::DimY, Window::Dimension(0, 1, 1));
 
         Iterator bias(_bias, win_biases);
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates & id)
         {
-            int32x4x4_t in_s32 =
+            // Compute 16 elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
+                int32x4x4_t in_s32 =
                 {
-                    vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + 0),
-                    vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + 4),
-                    vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + 8),
-                    vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + 12)
-                }
-            };
+                    {
+                        vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x + 0),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x + 4),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x + 8),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x + 12)
+                    }
+                };
 
-            const int32x4x4_t bias_s32 =
+                const int32x4x4_t bias_s32 =
+                {
+                    {
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 0),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 4),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 8),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + x + 12)
+                    }
+                };
+
+                // Add the bias to GEMM's result
+                in_s32.val[0] = vaddq_s32(in_s32.val[0], bias_s32.val[0]);
+                in_s32.val[1] = vaddq_s32(in_s32.val[1], bias_s32.val[1]);
+                in_s32.val[2] = vaddq_s32(in_s32.val[2], bias_s32.val[2]);
+                in_s32.val[3] = vaddq_s32(in_s32.val[3], bias_s32.val[3]);
+
+                // Add the offset terms to GEMM's result and multiply by result_mult_int
+                scale_input(in_s32, result_offset_s32, _result_mult_int);
+
+                vst1q_u8(out.ptr() + x, finalize_quantization<is_bounded_relu>(in_s32, result_shift_s32, min_u8, max_u8));
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
             {
+                const int32_t bias_value = *(reinterpret_cast<const int32_t *>(bias.ptr()) + x);
+                int32_t       in_value   = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
+
+                // Quantize
+                in_value = ((in_value + bias_value + _result_offset) * _result_mult_int) >> _result_shift;
+
+                // Finalize and store the result
+                if(is_bounded_relu)
                 {
-                    vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + 0),
-                    vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + 4),
-                    vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + 8),
-                    vld1q_s32(reinterpret_cast<const int32_t *>(bias.ptr()) + 12)
+                    *(out.ptr() + x) = static_cast<uint8_t>(std::max(_min, std::min(_max, in_value)));
                 }
-            };
-
-            // Add the bias to GEMM's result
-            in_s32.val[0] = vaddq_s32(in_s32.val[0], bias_s32.val[0]);
-            in_s32.val[1] = vaddq_s32(in_s32.val[1], bias_s32.val[1]);
-            in_s32.val[2] = vaddq_s32(in_s32.val[2], bias_s32.val[2]);
-            in_s32.val[3] = vaddq_s32(in_s32.val[3], bias_s32.val[3]);
-
-            // Add the offset terms to GEMM's result and multiply by result_mult_int
-            scale_input(in_s32, result_offset_s32, _result_mult_int);
-
-            vst1q_u8(out.ptr(), finalize_quantization<is_bounded_relu>(in_s32, result_shift_s32, min_u8, max_u8));
+                else
+                {
+                    *(out.ptr() + x) = static_cast<uint8_t>(std::max(0, std::min(255, in_value)));
+                }
+            }
         },
         in, bias, out);
     }
     else
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates & id)
         {
-            int32x4x4_t in_s32 =
+            // Compute 16 elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
+                int32x4x4_t in_s32 =
                 {
-                    vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + 0),
-                    vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + 4),
-                    vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + 8),
-                    vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + 12)
+                    {
+                        vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x + 0),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x + 4),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x + 8),
+                        vld1q_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x + 12)
+                    }
+                };
+
+                // Add the offset terms to GEMM's result and multiply by result_mult_int
+                scale_input(in_s32, result_offset_s32, _result_mult_int);
+
+                vst1q_u8(out.ptr() + x, finalize_quantization<is_bounded_relu>(in_s32, result_shift_s32, min_u8, max_u8));
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                int32_t in_value = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
+
+                // Quantize
+                in_value = ((in_value + _result_offset) * _result_mult_int) >> _result_shift;
+
+                // Finalize and store the result
+                if(is_bounded_relu)
+                {
+                    *(out.ptr() + x) = static_cast<uint8_t>(std::max(_min, std::min(_max, in_value)));
                 }
-            };
-
-            // Add the offset terms to GEMM's result and multiply by result_mult_int
-            scale_input(in_s32, result_offset_s32, _result_mult_int);
-
-            vst1q_u8(out.ptr(), finalize_quantization<is_bounded_relu>(in_s32, result_shift_s32, min_u8, max_u8));
+                else
+                {
+                    *(out.ptr() + x) = static_cast<uint8_t>(std::max(0, std::min(255, in_value)));
+                }
+            }
         },
         in, out);
     }

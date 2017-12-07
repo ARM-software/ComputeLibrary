@@ -162,11 +162,11 @@ public:
         : ShapeDataset("Shape",
     {
         // Batch size 1
-        TensorShape{ 1920U, 1080U },
-                     TensorShape{ 640U, 480U, 2U, 3U },
-                     TensorShape{ 4160U, 3120U },
+        TensorShape{ 1921U, 1083U },
+                     TensorShape{ 641U, 485U, 2U, 3U },
+                     TensorShape{ 4159U, 3117U },
                      // Batch size 4
-                     TensorShape{ 800U, 600U, 1U, 4U },
+                     TensorShape{ 799U, 595U, 1U, 4U },
     })
     {
     }

@@ -187,6 +187,43 @@ const auto quantize_down_int32_to_uint8_scale_relu_cases = framework::dataset::m
 
 using NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture = GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture<Tensor, Accessor, NEGEMMLowpQuantizeDownInt32ToUint8Scale>;
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+    framework::dataset::make("InputAInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Input not a multiple of 16
+                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Invalid min and max
+                                             TensorInfo(TensorShape(20U, 13U), 1, DataType::S32), // Wrong output data type
+                                          }),
+    framework::dataset::make("InputBInfo",{ TensorInfo(TensorShape(21U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(21U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(20U), 1, DataType::S32),
+                                          })),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8),
+                                            TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8),
+                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::S32),
+                                           })),
+    framework::dataset::make("Min",{        0,
+                                            8,
+                                            13,
+                                           })),
+    framework::dataset::make("Max",{        205,
+                                            300,
+                                            180,
+                                           })),
+    framework::dataset::make("Expected", { true, false, false })),
+    a_info, b_info, output_info, min, max, expected)
+{
+    // Lock tensors
+    Status status =  NEGEMMLowpQuantizeDownInt32ToUint8Scale::validate(&a_info.clone()->set_is_resizable(false),
+                                                                     &b_info.clone()->set_is_resizable(false),
+                                                                     &output_info.clone()->set_is_resizable(false),
+                                                                     min,
+                                                                     max);
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), quantize_down_int32_to_uint8_scale_cases),
                shape, result_offset, result_mult_int, result_shift, min, max, add_bias)
 {
@@ -218,7 +255,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     }
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding(0);
     validate(in.info()->padding(), padding);
     validate(out.info()->padding(), padding);
 
@@ -269,6 +306,43 @@ const auto quantize_down_int32_to_uint8_scale_by_fixedpoint_relu_cases = framewo
 using NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture =
     GEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointValidationFixture<Tensor, Accessor, NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint>;
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+    framework::dataset::make("InputAInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Input not a multiple of 16
+                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Invalid min and max
+                                             TensorInfo(TensorShape(20U, 13U), 1, DataType::S32), // Wrong output data type
+                                          }),
+    framework::dataset::make("InputBInfo",{ TensorInfo(TensorShape(21U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(21U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(20U), 1, DataType::S32),
+                                          })),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8),
+                                            TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8),
+                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::S32),
+                                           })),
+    framework::dataset::make("Min",{        0,
+                                            8,
+                                            13,
+                                           })),
+    framework::dataset::make("Max",{        205,
+                                            300,
+                                            180,
+                                           })),
+    framework::dataset::make("Expected", { true, false, false })),
+    a_info, b_info, output_info, min, max, expected)
+{
+    // Lock tensors
+    Status status =  NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(&a_info.clone()->set_is_resizable(false),
+                                                                                 &b_info.clone()->set_is_resizable(false),
+                                                                                 &output_info.clone()->set_is_resizable(false),
+                                                                                 min,
+                                                                                 max);
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
                                                                    quantize_down_int32_to_uint8_scale_by_fixedpoint_cases),
                shape, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max, add_bias)
@@ -301,7 +375,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     }
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding(0);
     validate(in.info()->padding(), padding);
     validate(out.info()->padding(), padding);
 
