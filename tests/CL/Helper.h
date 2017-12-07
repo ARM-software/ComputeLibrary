@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,7 +59,6 @@ public:
         _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue(0));
     }
 };
-
 } // namespace test
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_CL_HELPER_H__ */

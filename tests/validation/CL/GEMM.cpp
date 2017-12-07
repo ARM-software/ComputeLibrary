@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
@@ -37,6 +38,7 @@
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/GEMMFixture.h"
 #include "tests/validation/fixtures/GEMMInterleave4x4Fixture.h"
+#include "tests/validation/fixtures/GEMMTranspose1xWFixture.h"
 
 namespace arm_compute
 {
@@ -61,6 +63,8 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::QS16,
 });
 } // namespace
+
+const auto data_transpose = framework::dataset::make("M", 8, 14) * framework::dataset::make("N", 7, 14);
 
 TEST_SUITE(CL)
 TEST_SUITE(GEMM)
@@ -130,6 +134,46 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
 
 template <typename T>
 using CLGEMMFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM, T>;
+
+TEST_SUITE(TRANSPOSE_1XW)
+using CLGEMMTranspose1xW        = CLSynthetizeFunctionWithZeroConstantBorder<CLGEMMTranspose1xWKernel, 4>;
+using CLGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixture<CLTensor, CLAccessor, CLGEMMTranspose1xW, float>;
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose * framework::dataset::make("DataType", DataType::F32))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // FP32
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QS8)
+using CLGEMMTranspose1xW        = CLSynthetizeFunctionWithZeroConstantBorder<CLGEMMTranspose1xWKernel, 16>;
+using CLGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixedPointFixture<CLTensor, CLAccessor, CLGEMMTranspose1xW, int8_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose *
+                       framework::dataset::make("DataType", DataType::QS8)
+                       * framework::dataset::make("FractionalBits", 1, 7))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QS16)
+using CLGEMMTranspose1xW        = CLSynthetizeFunctionWithZeroConstantBorder<CLGEMMTranspose1xWKernel, 8>;
+using CLGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixedPointFixture<CLTensor, CLAccessor, CLGEMMTranspose1xW, int16_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose *
+                       framework::dataset::make("DataType", DataType::QS16)
+                       * framework::dataset::make("FractionalBits", 1, 14))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+
+TEST_SUITE_END() //TRANSPOSE_1XW
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
