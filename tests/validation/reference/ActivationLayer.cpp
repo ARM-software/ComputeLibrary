@@ -154,6 +154,15 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
     return dst;
 }
 
+template <>
+SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src, ActivationLayerInfo info)
+{
+    SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
+    SimpleTensor<float>   dst_tmp = activation_layer<float>(src_tmp, info);
+    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, src.quantization_info());
+    return dst;
+}
+
 template SimpleTensor<float> activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info);
 template SimpleTensor<half> activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info);
 template SimpleTensor<qint8_t> activation_layer(const SimpleTensor<qint8_t> &src, ActivationLayerInfo info);

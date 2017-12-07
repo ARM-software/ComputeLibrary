@@ -237,7 +237,7 @@ TEST_SUITE_END()
 template <typename T>
 using CLActivationLayerFixedPointFixture = ActivationValidationFixedPointFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
 
-TEST_SUITE(Quantized)
+TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // We test for fixed point precision [3,5] because [1,2] and [6,7] ranges cause
 // overflowing issues in most of the transcendentals functions.
@@ -273,6 +273,34 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLActivationLayerFixedPointFixture<int16_t>, fr
                                                                                                                        framework::dataset::make("DataType",
                                                                                                                                DataType::QS16)),
                                                                                                                        framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using CLActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
+
+/** Input data sets. */
+const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU })),
+                                                framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::QASYMM8)),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), QuantizedActivationDataset),
+                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                              DataType::QASYMM8)),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
