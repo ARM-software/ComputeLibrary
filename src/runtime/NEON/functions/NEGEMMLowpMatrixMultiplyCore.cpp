@@ -226,7 +226,7 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     if(cpu_has_dotprod != 0)
     {
         // Validate matrix multiply kernel
-        ARM_COMPUTE_RETURN_ERROR_ON(NEGEMMLowpAArch64V8P4Kernel::validate(a, b, output));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpAArch64V8P4Kernel::validate(a, b, output));
     }
     else
 #endif /* ARM_COMPUTE_AARCH64_V8_2 */
