@@ -224,8 +224,8 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                const int32_t bias_value = *(reinterpret_cast<const int32_t *>(bias.ptr()) + x);
-                int32_t       in_value   = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
+                const int bias_value = *(reinterpret_cast<const int *>(bias.ptr()) + x);
+                int       in_value   = *(reinterpret_cast<const int *>(in.ptr()) + x);
 
                 // Quantize
                 in_value = ((in_value + bias_value + _result_offset) * _result_mult_int) >> _result_shift;
@@ -270,7 +270,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                int32_t in_value = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
+                int in_value = *(reinterpret_cast<const int *>(in.ptr()) + x);
 
                 // Quantize
                 in_value = ((in_value + _result_offset) * _result_mult_int) >> _result_shift;
