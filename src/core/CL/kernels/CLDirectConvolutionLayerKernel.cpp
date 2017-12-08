@@ -126,10 +126,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     unsigned int conv_stride_x   = std::get<0>(conv_info.stride());
     unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
-    unsigned int conv_pad_left   = std::min(conv_info.pad_left(), kernel_size / 2);
-    unsigned int conv_pad_top    = std::min(conv_info.pad_top(), kernel_size / 2);
-    unsigned int conv_pad_right  = std::min(conv_info.pad_right(), kernel_size / 2);
-    unsigned int conv_pad_bottom = std::min(conv_info.pad_bottom(), kernel_size / 2);
+    unsigned int conv_pad_left   = std::max(conv_info.pad_left(), kernel_size / 2);
+    unsigned int conv_pad_top    = std::max(conv_info.pad_top(), kernel_size / 2);
+    unsigned int conv_pad_right  = std::max(conv_info.pad_right(), kernel_size / 2);
+    unsigned int conv_pad_bottom = std::max(conv_info.pad_bottom(), kernel_size / 2);
 
     unsigned int num_elems_read_per_iteration_x    = 0;
     unsigned int num_elems_read_per_iteration_y    = 0;
@@ -187,18 +187,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     }
 
     // Calculate right and bottom border
-    int input_width  = input->dimension(0) - kernel_size / 2 + conv_pad_right;
-    int input_height = input->dimension(1) - kernel_size / 2 + conv_pad_bottom;
+    int input_width  = input->dimension(0) + conv_pad_left + conv_pad_right;
+    int input_height = input->dimension(1) + conv_pad_top + conv_pad_bottom;
 
     // Add padding only if necessary or it would always result in a window_changed
-    if(input_width % num_elems_read_per_iteration_x > 0)
-    {
-        input_width += num_elems_read_per_iteration_x;
-    }
-    if(input_height % num_elems_read_per_iteration_y > 0)
-    {
-        input_height += num_elems_read_per_iteration_y;
-    }
+    input_width += input_width % num_elems_read_per_iteration_x;
+    input_height += ((input_height / conv_stride_y) * conv_stride_y) % num_elems_read_per_iteration_y;
 
     // Create window and update padding
     win = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
