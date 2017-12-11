@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_GCDROPOUTKERNEL_H__
-#define __ARM_COMPUTE_GCDROPOUTKERNEL_H__
+#ifndef __ARM_COMPUTE_GCDROPOUTLAYERKERNEL_H__
+#define __ARM_COMPUTE_GCDROPOUTLAYERKERNEL_H__
 
 #include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
 
@@ -31,28 +31,28 @@ namespace arm_compute
 {
 class IGCTensor;
 
-/** Interface for the dropout kernel.
+/** Interface for the dropout layer kernel.
  *
  * Dropout is used to improve over-fit on neural networks.
  *
  */
-class GCDropoutKernel : public IGCKernel
+class GCDropoutLayerKernel : public IGCKernel
 {
 public:
     /** Default constructor */
-    GCDropoutKernel();
+    GCDropoutLayerKernel();
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    GCDropoutKernel(const GCDropoutKernel &) = delete;
+    GCDropoutLayerKernel(const GCDropoutLayerKernel &) = delete;
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    GCDropoutKernel &operator=(const GCDropoutKernel &) = delete;
+    GCDropoutLayerKernel &operator=(const GCDropoutLayerKernel &) = delete;
 
     /** Allow instances of this class to be moved */
-    GCDropoutKernel(GCDropoutKernel &&) = default;
+    GCDropoutLayerKernel(GCDropoutLayerKernel &&) = default;
 
     /** Allow instances of this class to be moved */
-    GCDropoutKernel &operator=(GCDropoutKernel &&) = default;
+    GCDropoutLayerKernel &operator=(GCDropoutLayerKernel &&) = default;
 
     /** Set the input and output of the kernel.
      *
@@ -76,4 +76,4 @@ private:
 };
 }
 
-#endif /*__ARM_COMPUTE_GCDROPOUTKERNEL_H__ */
+#endif /*__ARM_COMPUTE_GCDROPOUTLAYERKERNEL_H__ */

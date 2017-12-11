@@ -25,7 +25,7 @@
 #ifndef __ARM_COMPUTE_GCDROPOUTLAYER_H__
 #define __ARM_COMPUTE_GCDROPOUTLAYER_H__
 
-#include "arm_compute/core/GLES_COMPUTE/kernels/GCDropoutKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCDropoutLayerKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
@@ -33,7 +33,7 @@ namespace arm_compute
 class IGCTensor;
 /** Basic function to do dropout op. This function calls the following kernels:
  *
- *  -# @ref GCDropoutKernel
+ *  -# @ref GCDropoutLayerKernel
  */
 class GCDropoutLayer : public IFunction
 {
@@ -56,7 +56,7 @@ public:
     void run() override;
 
 private:
-    GCDropoutKernel _dropout_kernel;
+    GCDropoutLayerKernel _dropout_kernel;
 };
 }
 

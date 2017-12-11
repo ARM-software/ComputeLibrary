@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/GLES_COMPUTE/kernels/GCDropoutKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCDropoutLayerKernel.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GLES_COMPUTE/GCHelpers.h"
@@ -40,12 +40,12 @@
 
 using namespace arm_compute;
 
-GCDropoutKernel::GCDropoutKernel()
+GCDropoutLayerKernel::GCDropoutLayerKernel()
     : _input(nullptr), _mask(nullptr), _output(nullptr), _num_elems_processed_per_iteration(0)
 {
 }
 
-void GCDropoutKernel::configure(const IGCTensor *input, IGCTensor *mask, IGCTensor *output, float ratio, bool forward)
+void GCDropoutLayerKernel::configure(const IGCTensor *input, IGCTensor *mask, IGCTensor *output, float ratio, bool forward)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, mask, output);
@@ -83,7 +83,7 @@ void GCDropoutKernel::configure(const IGCTensor *input, IGCTensor *mask, IGCTens
     IGCKernel::configure(win);
 }
 
-void GCDropoutKernel::run(const Window &window)
+void GCDropoutLayerKernel::run(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(IGCKernel::window(), window);

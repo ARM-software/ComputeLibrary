@@ -155,6 +155,61 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v17.12 Public major release
+ - Most machine learning functions on OpenCL support the new data type QASYMM8
+ - Introduced logging interface
+ - Introduced opencl timer
+ - Reworked GEMMLowp interface
+ - Added new NEON assembly kernels for GEMMLowp, SGEMM and HGEMM
+ - Added validation method for most Machine Learning kernels / functions
+ - Added new graph examples such as googlenet, mobilenet, squeezenet, vgg16 and vgg19
+ - Added sgemm example for OpenCL
+ - Added absolute difference example for GLES compute
+ - Added new tests and benchmarks in validation and benchmark frameworks
+ - Added new kernels / functions for GLES compute
+
+ - New OpenGL ES kernels / functions
+    - @ref arm_compute::GCAbsoluteDifferenceKernel / @ref arm_compute::GCAbsoluteDifference
+    - @ref arm_compute::GCActivationLayerKernel / @ref arm_compute::GCActivationLayer
+    - @ref arm_compute::GCBatchNormalizationLayerKernel / @ref arm_compute::GCBatchNormalizationLayer
+    - @ref arm_compute::GCCol2ImKernel
+    - @ref arm_compute::GCDepthConcatenateLayerKernel / @ref arm_compute::GCDepthConcatenateLayer
+    - @ref arm_compute::GCDirectConvolutionLayerKernel / @ref arm_compute::GCDirectConvolutionLayer
+    - @ref arm_compute::GCDropoutLayerKernel / @ref arm_compute::GCDropoutLayer
+    - @ref arm_compute::GCFillBorderKernel / @ref arm_compute::GCFillBorder
+    - @ref arm_compute::GCGEMMInterleave4x4Kernel / @ref arm_compute::GCGEMMInterleave4x4
+    - @ref arm_compute::GCGEMMMatrixAccumulateBiasesKernel / @ref arm_compute::GCGEMMMatrixAdditionKernel / @ref arm_compute::GCGEMMMatrixMultiplyKernel / @ref arm_compute::GCGEMM
+    - @ref arm_compute::GCGEMMTranspose1xWKernel / @ref arm_compute::GCGEMMTranspose1xW
+    - @ref arm_compute::GCIm2ColKernel
+    - @ref arm_compute::GCNormalizationLayerKernel / @ref arm_compute::GCNormalizationLayer
+    - @ref arm_compute::GCPixelWiseMultiplicationKernel / @ref arm_compute::GCPixelWiseMultiplication
+    - @ref arm_compute::GCPoolingLayerKernel / @ref arm_compute::GCPoolingLayer
+    - @ref arm_compute::GCLogits1DMaxKernel / @ref arm_compute::GCLogits1DShiftExpSumKernel / @ref arm_compute::GCLogits1DNormKernel / @ref arm_compute::GCSoftmaxLayer
+    - @ref arm_compute::GCTransposeKernel / @ref arm_compute::GCTranspose
+
+ - New NEON kernels / functions
+    - @ref arm_compute::NEGEMMLowpAArch64A53Kernel / @ref arm_compute::NEGEMMLowpAArch64Kernel / @ref arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / @ref arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
+    - @ref arm_compute::NEHGEMMAArch64FP16Kernel
+    - @ref arm_compute::NEDepthwiseConvolutionLayer3x3Kernel / @ref arm_compute::NEDepthwiseIm2ColKernel / @ref arm_compute::NEGEMMMatrixVectorMultiplyKernel / @ref arm_compute::NEDepthwiseVectorToTensorKernel / @ref arm_compute::NEDepthwiseConvolutionLayer
+    - @ref arm_compute::NEGEMMLowpOffsetContributionKernel / @ref arm_compute::NEGEMMLowpMatrixAReductionKernel / @ref arm_compute::NEGEMMLowpMatrixBReductionKernel / @ref arm_compute::NEGEMMLowpMatrixMultiplyCore
+    - @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+    - @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8Scale
+    - @ref arm_compute::NEWinogradLayerKernel / @ref arm_compute::NEWinogradLayer
+
+ - New OpenCL kernels / functions
+    - @ref arm_compute::CLGEMMLowpOffsetContributionKernel / @ref arm_compute::CLGEMMLowpMatrixAReductionKernel / @ref arm_compute::CLGEMMLowpMatrixBReductionKernel / @ref arm_compute::CLGEMMLowpMatrixMultiplyCore
+    - @ref arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+    - @ref arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8Scale
+
+ - New graph nodes for NEON and OpenCL
+    - @ref arm_compute::graph::BranchLayer
+    - @ref arm_compute::graph::DepthConvertLayer
+    - @ref arm_compute::graph::DepthwiseConvolutionLayer
+    - @ref arm_compute::graph::DequantizationLayer
+    - @ref arm_compute::graph::FlattenLayer
+    - @ref arm_compute::graph::QuantizationLayer
+    - @ref arm_compute::graph::ReshapeLayer
+
 v17.10 Public maintenance release
  - Bug fixes:
     - Check the maximum local workgroup size supported by OpenCL devices
