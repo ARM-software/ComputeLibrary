@@ -78,6 +78,9 @@ std::unique_ptr<arm_compute::IFunction> BatchNormalizationLayer::instantiate_nod
     node_ctx.add_output(out);
     node_ctx.add_parameter<float>("epsilon", _epsilon);
 
+    // Configure operation
+    auto func = OperationRegistry::get().find_operation(OperationType::BatchNormalizationLayer, _target_hint)->configure(node_ctx);
+
     // Fill tensors
     if(!mean_is_loaded)
     {
@@ -97,5 +100,5 @@ std::unique_ptr<arm_compute::IFunction> BatchNormalizationLayer::instantiate_nod
     }
 
     // Get function
-    return OperationRegistry::get().find_operation(OperationType::BatchNormalizationLayer, _target_hint)->configure(node_ctx);
+    return func;
 }

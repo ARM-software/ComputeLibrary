@@ -88,6 +88,9 @@ std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(Gr
     node_ctx.add_input(_biases.set_target(_target_hint));
     node_ctx.add_output(out);
 
+    // Configure operation
+    auto func = OperationRegistry::get().find_operation(OperationType::FullyConnectedLayer, _target_hint)->configure(node_ctx);
+
     // Fill biases
     if(!weights_are_loaded)
     {
@@ -99,5 +102,5 @@ std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(Gr
     }
 
     // Get function
-    return OperationRegistry::get().find_operation(OperationType::FullyConnectedLayer, _target_hint)->configure(node_ctx);
+    return func;
 }

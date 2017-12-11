@@ -72,6 +72,9 @@ std::unique_ptr<arm_compute::IFunction> DepthwiseConvolutionLayer::instantiate_n
     node_ctx.add_parameter<PadStrideInfo>("ConvolutionInfo", _conv_info);
     node_ctx.add_parameter<bool>("Optimized3x3", _opt3x3);
 
+    // Configure operation
+    auto func = OperationRegistry::get().find_operation(OperationType::DepthwiseConvolutionLayer, _target_hint)->configure(node_ctx);
+
     // Fill tensors
     if(!weights_is_loaded)
     {
@@ -83,5 +86,5 @@ std::unique_ptr<arm_compute::IFunction> DepthwiseConvolutionLayer::instantiate_n
     }
 
     // Get function
-    return OperationRegistry::get().find_operation(OperationType::DepthwiseConvolutionLayer, _target_hint)->configure(node_ctx);
+    return func;
 }
