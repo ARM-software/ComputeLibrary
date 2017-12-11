@@ -62,6 +62,7 @@ void CPPDetectionWindowNonMaximaSuppressionKernel::configure(IDetectionWindowArr
 void CPPDetectionWindowNonMaximaSuppressionKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(IKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_input_output->buffer() == nullptr);
