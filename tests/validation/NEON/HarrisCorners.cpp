@@ -44,6 +44,11 @@ namespace validation
 {
 namespace
 {
+/* Allowed percentage of keypoints missing for target */
+float allowed_missing_percentage = 10.f;
+/* Allowed percentage of keypoints mismatching between target and reference */
+float allowed_mismatch_percentage = 10.f;
+
 const auto use_fp16 = framework::dataset::make("UseFP16",
 {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -106,14 +111,26 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture<uint8_t>, framework::Dat
 {
     // Validate output
     ArrayAccessor<KeyPoint> array(_target);
-    validate_keypoints(array.buffer(), array.buffer() + array.num_values(), _reference.begin(), _reference.end(), RelativeTolerance<float>(0.0001f));
+    validate_keypoints(array.buffer(),
+                       array.buffer() + array.num_values(),
+                       _reference.begin(),
+                       _reference.end(),
+                       RelativeTolerance<float>(0.0001f),
+                       allowed_missing_percentage,
+                       allowed_mismatch_percentage);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::Large2DShapes(), data), framework::dataset::make("Format", Format::U8)))
 {
     // Validate output
     ArrayAccessor<KeyPoint> array(_target);
-    validate_keypoints(array.buffer(), array.buffer() + array.num_values(), _reference.begin(), _reference.end(), RelativeTolerance<float>(0.0001f));
+    validate_keypoints(array.buffer(),
+                       array.buffer() + array.num_values(),
+                       _reference.begin(),
+                       _reference.end(),
+                       RelativeTolerance<float>(0.0001f),
+                       allowed_missing_percentage,
+                       allowed_mismatch_percentage);
 }
 
 TEST_SUITE_END()
