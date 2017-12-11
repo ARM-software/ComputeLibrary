@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -123,39 +123,26 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
     const int input_width  = input->dimension(0);
     const int input_height = input->dimension(1);
 
-    unsigned int num_elems_processed_per_iteration = 1;
+    // Change the number of elements processed per iteration
+    // for pooling 3x3 with stride less equal than 3
+    const bool         can_optimize                      = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_quantized(data_type);
+    const unsigned int num_elems_processed_per_iteration = can_optimize ? 4 : 1;
+    const int          num_elems_read_per_iteration      = (num_elems_processed_per_iteration - 1) * pool_stride_x + pool_size;
 
-    if((pool_size == 3) && !is_data_type_quantized_asymmetric(data_type))
-    {
-        const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(data_type);
+    // Number of iterations in X dimension
+    const int num_iterations_x = (pooled_w + num_elems_processed_per_iteration - 1) / num_elems_processed_per_iteration;
 
-        int num_elems_read_per_iteration = pool_size;
-        if(is_pool3x3_stride_le3)
-        {
-            // Change the number of elements processed and the number of elements read per iteration
-            // for pooling 3x3 with stride less equal than 3
-            num_elems_processed_per_iteration = 4;
-            num_elems_read_per_iteration      = pool_size * (pool_stride_x + 1);
-        }
+    // Upper limit for the number of right/bottom border elements that are accessed
+    const int upper_bound_w = ((num_iterations_x - 1) * num_elems_processed_per_iteration * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
+    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
 
-        const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
-        const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
-
-        border_size.right  = std::max(upper_bound_w, pool_pad_x);
-        border_size.bottom = std::max(upper_bound_h, pool_pad_y);
-    }
-    else
-    {
-        const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + pool_size) - input_width;
-        const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
-
-        border_size.right  = std::max(upper_bound_w, pool_pad_x);
-        border_size.bottom = std::max(upper_bound_h, pool_pad_y);
-    }
+    border_size.right  = std::max(upper_bound_w, pool_pad_x);
+    border_size.bottom = std::max(upper_bound_h, pool_pad_y);
 
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
-    AccessWindowRectangle  input_access(input, -pool_pad_x, -pool_pad_y, input_width + border_size.right, input_height + border_size.bottom);
+    AccessWindowRectangle input_access(input, -pool_pad_x, -pool_pad_y, num_elems_read_per_iteration, pool_size,
+                                       pool_stride_x * num_elems_processed_per_iteration, pool_stride_y);
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
     bool                   window_changed = update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
@@ -305,8 +292,12 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         // Upsample input by pool size
         Window in_slice(slice);
-        in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - pool_pad_x, in_slice.x().end() * pool_stride_x, pool_stride_x * _num_elems_processed_per_iteration));
-        in_slice.set(Window::DimY, Window::Dimension(in_slice.y().start() - pool_pad_y, in_slice.y().end() * pool_stride_y, pool_stride_y));
+        in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - pool_pad_x,
+                                                     (in_slice.x().end() - pool_pad_x) * pool_stride_x,
+                                                     pool_stride_x * _num_elems_processed_per_iteration));
+        in_slice.set(Window::DimY, Window::Dimension(in_slice.y().start() - pool_pad_y,
+                                                     (in_slice.y().end() - pool_pad_y) * pool_stride_y,
+                                                     pool_stride_y));
 
         // Set inputs
         unsigned int idx = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,12 @@ namespace validation
 {
 namespace
 {
+/** Failing data set */
+const auto PoolingLayerDatasetSpecial = ((((framework::dataset::make("Shape", TensorShape{ 60U, 52U, 3U, 5U })
+                                            * framework::dataset::make("PoolType", PoolingType::AVG))
+                                           * framework::dataset::make("PoolingSize", 100))
+                                          * framework::dataset::make("PadStride", PadStrideInfo(5, 5, 50, 50)))
+                                         * framework::dataset::make("ExcludePadding", true));
 /** Input data set for floating-point data types */
 const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { 2, 3, 4, 7, 9 })),
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
@@ -74,7 +80,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Mismatching data type
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Window shrink
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4),     // Mismatching fixed point position
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS16, 11),   // Window shrink
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS16, 11),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8, 0), // Invalid parameters
@@ -104,7 +110,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        PoolingLayerInfo(PoolingType::MAX),
                                                        PoolingLayerInfo(PoolingType::AVG),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, true })),
+               framework::dataset::make("Expected", { false, false, false, true, false, false, false, false, false, true })),
                input_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info)) == expected, framework::LogLevel::ERRORS);
@@ -117,6 +123,11 @@ using CLPoolingLayerFixture = PoolingLayerValidationFixture<CLTensor, CLAccessor
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSpecial, CLPoolingLayerFixture<float>, framework::DatasetMode::ALL, PoolingLayerDatasetSpecial * framework::dataset::make("DataType", DataType::F32))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP, framework::dataset::make("DataType",
                                                                                                     DataType::F32))))
 {

@@ -317,7 +317,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
             break;
     }
 
-    const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
+    // Number of iterations in X dimension
+    const int num_iterations_x = (pooled_w + num_elems_processed_per_iteration - 1) / num_elems_processed_per_iteration;
+
+    // Upper limit for the number of right/bottom border elements that are accessed
+    const int upper_bound_w = ((num_iterations_x - 1) * num_elems_processed_per_iteration * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
     const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
 
     border_size         = BorderSize(pool_pad_y, pool_pad_x);
@@ -363,32 +367,25 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    int                 pool_pad_x        = 0;
-    int                 pool_pad_y        = 0;
-    int                 pool_stride_x     = 0;
-    int                 pool_stride_y     = 0;
-    unsigned int        pooled_w          = 0;
-    unsigned int        pooled_h          = 0;
-    PoolingType         pool_type         = pool_info.pool_type();
-    int                 pool_size         = pool_info.pool_size();
+    const PoolingType   pool_type         = pool_info.pool_type();
     const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
     const bool          exclude_padding   = pool_info.exclude_padding();
     const bool          is_global_pooling = pool_info.is_global_pooling();
-    std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
-    std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
+    const int           pool_stride_x     = pad_stride_info.stride().first;
 
     // Update pool size in case of global pooling
-    pool_size = is_global_pooling ? input->info()->dimension(0) : pool_size;
+    const int pool_size = is_global_pooling ? input->info()->dimension(0) : pool_info.pool_size();
 
     // Validate pool info before calling scaled_dimensions
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_pool_info(input->info(), pool_info, pool_size));
 
     // Check output dimensions
+    unsigned int pooled_w, pooled_h;
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
                                                      input->info()->dimension(1),
                                                      pool_size,
                                                      pool_size,
-                                                     pool_info.pad_stride_info());
+                                                     pad_stride_info);
 
     // Output auto initialization if not yet initialized
     auto_init(input->info(), output->info(), pooled_w, pooled_h);
