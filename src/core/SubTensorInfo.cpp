@@ -53,7 +53,13 @@ SubTensorInfo::SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coor
 
 std::unique_ptr<ITensorInfo> SubTensorInfo::clone() const
 {
-    return support::cpp14::make_unique<SubTensorInfo>(*this);
+    // Clone creates a TensorInfo object from SubTensorInfo's parent which will conclude to a TensorInfo
+    // For now it does not make sense to copy a SubTensorInfo explicitly
+    ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+    auto clone_obj = _parent->clone();
+    clone_obj->set_tensor_shape(_tensor_shape);
+    clone_obj->set_valid_region(_valid_region);
+    return clone_obj;
 }
 
 ITensorInfo &SubTensorInfo::set_tensor_shape(TensorShape shape)
