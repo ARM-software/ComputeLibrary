@@ -73,7 +73,7 @@ private:
     bool                                         _has_bias;
 };
 
-/** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:
+/** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernels:
  *
  * -# @ref NEDepthwiseIm2ColKernel
  * -# @ref NEDepthwiseWeightsReshapeKernel
