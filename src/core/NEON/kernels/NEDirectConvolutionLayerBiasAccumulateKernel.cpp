@@ -244,6 +244,7 @@ void NEDirectConvolutionLayerBiasAccumulateKernel::configure(ITensor *input, con
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, bias);
 
+    // Auto-initialize output output if required
     if(output != nullptr)
     {
         // Output tensor auto initialization if not yet initialized

@@ -62,7 +62,7 @@ public:
      *                           Supported sizes: 1x1, 3x3 and 5x5.
      *                           The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                           Data type supported: Same as @p input.
-     * @param[in]      bias      Set of biases. Data type supported: Same as @p input.
+     * @param[in]      bias      Set of biases. Can be nullptr. Data type supported: Same as @p input.
      * @param[out]     output    Output tensor.
      *                           The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in]      conv_info Contains padding and stride information described in @ref PadStrideInfo.
@@ -80,7 +80,7 @@ public:
      *                      Supported sizes: 1x1, 3x3 and 5x5.
      *                      The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                      Data type supported: Same as @p input.
-     * @param[in] bias      Set of biases. Data type supported: Same as @p input.
+     * @param[in] bias      Set of biases. Can be nullptr. Data type supported: Same as @p input.
      * @param[in] output    Output tensor.
      *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
@@ -98,6 +98,7 @@ private:
     NEDirectConvolutionLayerKernel               _conv_kernel;
     NEFillBorderKernel                           _input_border_handler;
     Tensor                                       _accumulator;
+    bool                                         _has_bias;
 };
 }
 #endif /* __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H__ */

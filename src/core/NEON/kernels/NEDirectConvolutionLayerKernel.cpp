@@ -1048,7 +1048,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int &num_weight_elems_read_per_row,
-                                                        unsigned int &num_elems_read_per_iteration, unsigned int &num_elems_written_per_iteration)
+                                                        unsigned int &num_elems_read_per_iteration, unsigned int &num_elems_written_per_iteration, BorderSize &border_size)
 {
     // Calculate right and bottom border
     unsigned int       kernel_size   = weights->dimension(0);
@@ -1056,7 +1056,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const unsigned int conv_pad_y    = std::get<1>(conv_info.pad());
     const unsigned int conv_stride_x = std::get<0>(conv_info.stride());
     const unsigned int conv_stride_y = std::get<1>(conv_info.stride());
-    BorderSize         border_size   = BorderSize(conv_pad_y, conv_pad_x);
     const int          input_width   = input->dimension(0);
     const int          input_height  = input->dimension(1);
 
@@ -1182,7 +1181,7 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, _num_weight_elems_read_per_row,
-                                                    _num_elems_read_per_iteration, _num_elems_written_per_iteration);
+                                                    _num_elems_read_per_iteration, _num_elems_written_per_iteration, _border_size);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 }
@@ -1192,9 +1191,16 @@ Status NEDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const 
     unsigned int num_weight_elems_read_per_row   = 0;
     unsigned int num_elems_read_per_iteration    = 0;
     unsigned int num_elems_written_per_iteration = 0;
+    BorderSize   border_size(conv_info.pad().first, conv_info.pad().second);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, output, conv_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), output->clone().get(), conv_info, num_weight_elems_read_per_row, num_elems_read_per_iteration,
-                                                              num_elems_written_per_iteration)
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
+                                                              weights->clone().get(),
+                                                              output->clone().get(),
+                                                              conv_info,
+                                                              num_weight_elems_read_per_row,
+                                                              num_elems_read_per_iteration,
+                                                              num_elems_written_per_iteration,
+                                                              border_size)
                                 .first);
 
     return Status{};

@@ -34,7 +34,7 @@
 using namespace arm_compute;
 
 NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _accumulate_bias_kernel(), _conv_kernel(), _input_border_handler(), _accumulator()
+    : _memory_group(std::move(memory_manager)), _accumulate_bias_kernel(), _conv_kernel(), _input_border_handler(), _accumulator(), _has_bias(false)
 {
 }
 
@@ -46,38 +46,29 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
         _accumulator.allocator()->free();
     }
 
+    // Check if bias should be added in the convolution result
+    _has_bias = (bias != nullptr);
+
     // Allocate the intermediate accumulator tensor in case of fixed point input
-    switch(output->info()->data_type())
+    if(is_data_type_fixed_point(input->info()->data_type()))
     {
-        case DataType::QS8:
+        const DataType promoted_dt = (input->info()->data_type() == DataType::QS8) ? DataType::QS16 : DataType::QS32;
+        _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, promoted_dt, output->info()->fixed_point_position()));
+        _memory_group.manage(&_accumulator);
+        _conv_kernel.configure(input, weights, &_accumulator, conv_info);
+        // TODO (COMPMID-746): Fix accumulate biases to just down-cast when no bias is provided
+        if(_has_bias)
         {
-            _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::QS16, output->info()->fixed_point_position()));
-            _memory_group.manage(&_accumulator);
-            _conv_kernel.configure(input, weights, &_accumulator, conv_info);
             _accumulate_bias_kernel.configure(&_accumulator, bias, output);
-            _accumulator.allocator()->allocate();
-            break;
         }
-        case DataType::QS16:
+        _accumulator.allocator()->allocate();
+    }
+    else
+    {
+        _conv_kernel.configure(input, weights, output, conv_info);
+        if(_has_bias)
         {
-            _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::QS32, output->info()->fixed_point_position()));
-            _memory_group.manage(&_accumulator);
-            _conv_kernel.configure(input, weights, &_accumulator, conv_info);
-            _accumulate_bias_kernel.configure(&_accumulator, bias, output);
-            _accumulator.allocator()->allocate();
-            break;
-        }
-        case DataType::F16:
-        case DataType::F32:
-        {
-            _conv_kernel.configure(input, weights, output, conv_info);
             _accumulate_bias_kernel.configure(output, bias);
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Data type not supported");
-            break;
         }
     }
 
@@ -87,7 +78,7 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
 
 Status NEDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, bias, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
 
     DataType data_type = output->data_type();
     if(is_data_type_fixed_point(data_type))
@@ -97,14 +88,22 @@ Status NEDirectConvolutionLayer::validate(const ITensorInfo *input, const ITenso
     }
     TensorInfo accumulator(output->clone()->set_is_resizable(true).reset_padding().set_data_type(data_type));
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, bias);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(bias->dimension(0) != weights->dimension(3),
-                                    "Biases size and number of input feature maps should match");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(bias->num_dimensions() > 1,
-                                    "Biases should be one dimensional");
-
+    // Validate Convolution kernel
     ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerKernel::validate(input, weights, &accumulator, conv_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerBiasAccumulateKernel::validate(&accumulator, bias, output));
+
+    // Validate bias
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((bias == nullptr) && is_data_type_fixed_point(data_type),
+                                    "Biases should be provided for fixed point inputs");
+    if(bias != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, bias);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(bias->dimension(0) != weights->dimension(3),
+                                        "Biases size and number of input feature maps should match");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(bias->num_dimensions() > 1, "Biases should be one dimensional");
+
+        // Validate bias kernel
+        ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerBiasAccumulateKernel::validate(&accumulator, bias, output));
+    }
 
     return Status{};
 }
@@ -116,7 +115,10 @@ void NEDirectConvolutionLayer::run()
     _memory_group.acquire();
 
     NEScheduler::get().schedule(&_conv_kernel, Window::DimZ);
-    NEScheduler::get().schedule(&_accumulate_bias_kernel, Window::DimY);
+    if(_has_bias)
+    {
+        NEScheduler::get().schedule(&_accumulate_bias_kernel, Window::DimY);
+    }
 
     _memory_group.release();
 }
