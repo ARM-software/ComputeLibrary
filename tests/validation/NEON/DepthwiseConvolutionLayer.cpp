@@ -46,18 +46,19 @@ constexpr RelativeTolerance<float> tolerance_f32(0.01f); /**< Tolerance value fo
 } // namespace
 
 TEST_SUITE(NEON)
-TEST_SUITE(DepthwiseConvolutionLayer)
+TEST_SUITE(DepthwiseConvLayer)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                                               datasets::LargeDepthwiseConvolutionLayerDataset3x3()),
                                                                    framework::dataset::make("DataType", DataType::F32)),
-               input_shape, weights_shape, bias_shape, output_shape, info, data_type)
+               input_shape, weights_shape, output_shape, info, data_type)
 {
     // Create tensors
-    Tensor src     = create_tensor<Tensor>(input_shape, data_type);
-    Tensor dst     = create_tensor<Tensor>(output_shape, data_type);
-    Tensor weights = create_tensor<Tensor>(weights_shape, data_type);
-    Tensor bias    = create_tensor<Tensor>(bias_shape, data_type);
+    Tensor            src     = create_tensor<Tensor>(input_shape, data_type);
+    Tensor            dst     = create_tensor<Tensor>(output_shape, data_type);
+    Tensor            weights = create_tensor<Tensor>(weights_shape, data_type);
+    const TensorShape bias_shape(weights_shape[2]);
+    Tensor            bias = create_tensor<Tensor>(bias_shape, data_type);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -120,8 +121,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<float>, f
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE_END()
-
 TEST_SUITE_END()
+
 TEST_SUITE_END()
 
 TEST_SUITE_END()

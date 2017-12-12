@@ -50,12 +50,12 @@ public:
 
 public:
     template <typename...>
-    void setup(TensorShape in_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape out_shape, PadStrideInfo pad_stride_info, DataType data_type, QuantizationInfo quantization_info)
+    void setup(TensorShape in_shape, TensorShape weights_shape, TensorShape out_shape, PadStrideInfo pad_stride_info, DataType data_type, QuantizationInfo quantization_info)
     {
         _quantization_info = quantization_info;
         _data_type         = data_type;
-
-        const DataType bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
+        const TensorShape biases_shape(weights_shape[2]);
+        const DataType    bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
         _target    = compute_target(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info, data_type, bias_data_type, quantization_info);
         _reference = compute_reference(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info, data_type, bias_data_type, quantization_info);
@@ -155,9 +155,9 @@ class DepthwiseConvolutionLayerValidationFixture : public DepthwiseConvolutionLa
 {
 public:
     template <typename...>
-    void setup(TensorShape in_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape out_shape, PadStrideInfo pad_stride_info, DataType data_type)
+    void setup(TensorShape in_shape, TensorShape weights_shape, TensorShape out_shape, PadStrideInfo pad_stride_info, DataType data_type)
     {
-        DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info,
+        DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(in_shape, weights_shape, out_shape, pad_stride_info,
                                                                                                             data_type, QuantizationInfo());
     }
 };
@@ -167,9 +167,9 @@ class DepthwiseConvolutionLayerValidationQuantizedFixture : public DepthwiseConv
 {
 public:
     template <typename...>
-    void setup(TensorShape in_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape out_shape, PadStrideInfo pad_stride_info, DataType data_type, QuantizationInfo quantization_info)
+    void setup(TensorShape in_shape, TensorShape weights_shape, TensorShape out_shape, PadStrideInfo pad_stride_info, DataType data_type, QuantizationInfo quantization_info)
     {
-        DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info,
+        DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(in_shape, weights_shape, out_shape, pad_stride_info,
                                                                                                             data_type, quantization_info);
     }
 };

@@ -42,7 +42,7 @@ using CLDepthwiseConvolutionLayerFixture = DepthwiseConvolutionLayerFixture<CLTe
 
 TEST_SUITE(CL)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetDepthwiseConvolutionLayer, CLDepthwiseConvolutionLayerFixture, framework::DatasetMode::ALL,
+REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetDepthwiseConvLayer, CLDepthwiseConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::MobileNetDepthwiseConvolutionLayerDataset(), data_types),
                                                             framework::dataset::make("Batches", { 1 })));
 
