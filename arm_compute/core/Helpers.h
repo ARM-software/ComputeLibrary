@@ -117,6 +117,57 @@ inline T delta_bilinear_c1(const T *pixel_ptr, size_t stride, float dx, float dy
     return static_cast<T>(a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4);
 }
 
+/** Computes linear interpolation using the pointer to the top pixel and the pixel's distance between
+ * the real coordinates and the smallest following integer coordinates. Input must be in single channel format.
+ *
+ * @param[in] pixel_ptr Pointer to the top pixel value of a single channel input.
+ * @param[in] stride    Stride to access the bottom pixel value
+ * @param[in] dy        Pixel's distance between the Y real coordinate and the smallest Y following integer
+ *
+ * @note dy must be in the range [0, 1.0]
+ *
+ * @return The linear interpolated pixel value
+ */
+template <typename T>
+inline T delta_linear_c1_y(const T *pixel_ptr, size_t stride, float dy)
+{
+    ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
+
+    const float dy1 = 1.0f - dy;
+
+    const T a00 = *pixel_ptr;
+    const T a10 = *(pixel_ptr + stride);
+
+    const float w1 = dy1;
+    const float w3 = dy;
+
+    return static_cast<T>(a00 * w1 + a10 * w3);
+}
+/** Computes linear interpolation using the pointer to the left pixel and the pixel's distance between
+ * the real coordinates and the smallest following integer coordinates. Input must be in single channel format.
+ *
+ * @param[in] pixel_ptr Pointer to the left pixel value of a single channel input.
+ * @param[in] dx        Pixel's distance between the X real coordinate and the smallest X following integer
+ *
+ * @note dx must be in the range [0, 1.0]
+ *
+ * @return The linear interpolated pixel value
+ */
+template <typename T>
+inline T delta_linear_c1_x(const T *pixel_ptr, float dx)
+{
+    ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
+
+    const T a00 = *pixel_ptr;
+    const T a01 = *(pixel_ptr + 1);
+
+    const float dx1 = 1.0f - dx;
+
+    const float w1 = dx1;
+    const float w2 = dx;
+
+    return static_cast<T>(a00 * w1 + a01 * w2);
+}
 /** Return the pixel at (x,y) using bilinear interpolation.
  *
  * @warning Only works if the iterator was created with an IImage
@@ -169,6 +220,18 @@ inline uint8_t pixel_bilinear_c1_clamp(const T *first_pixel_ptr, size_t stride, 
     const float dx = x - xi;
     const float dy = y - yi;
 
+    if(dx == 0.0f)
+    {
+        if(dy == 0.0f)
+        {
+            return static_cast<T>(first_pixel_ptr[static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride]);
+        }
+        return delta_linear_c1_y(first_pixel_ptr + static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride, stride, dy);
+    }
+    if(dy == 0.0f)
+    {
+        return delta_linear_c1_x(first_pixel_ptr + static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride, dx);
+    }
     return delta_bilinear_c1(first_pixel_ptr + static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride, stride, dx, dy);
 }
 
