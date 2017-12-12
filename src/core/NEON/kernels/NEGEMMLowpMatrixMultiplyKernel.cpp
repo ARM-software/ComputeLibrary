@@ -743,6 +743,7 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
 
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(in0_shape[2] != out_shape[2], "Output tensor must have the same number of batches of input0 tensor");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(in1_shape[2] != 1 && in0_shape[2] != in1_shape[2], "Input1 tensor must have the same number of batches of input0 or the number of batches must be set to 1");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(in1_shape[0] % 16, "Input1's width must be a multiple of 16");
     }
 
     return Status{};
@@ -777,8 +778,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     {
         win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
-        AccessWindowStatic     in0_access(input0, 0, 0, ceil_to_multiple(input0->dimension(0), 8), input0->dimension(1));
-        AccessWindowHorizontal in1_access(input1, 0, num_elems_processed_per_iteration_x);
+        unsigned int num_k_iterations = ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x) / 16;
+        // For each iteration of "k" we increment the input pointer by 4, and we load 8 elements a the time:
+        AccessWindowStatic     in0_access(input0, 0, 0, (num_k_iterations - 1) * 4 + 8, input0->dimension(1));
+        AccessWindowHorizontal in1_access(input1, 0, input1->dimension(0));
         AccessWindowRectangle  output_access(output, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
 
         window_changed = update_window_and_padding(win, in0_access, in1_access, output_access);
