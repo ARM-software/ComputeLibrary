@@ -45,6 +45,17 @@ NEDepthwiseVectorToTensorKernel::NEDepthwiseVectorToTensorKernel()
 void NEDepthwiseVectorToTensorKernel::configure(const ITensor *input, ITensor *output, size_t conv_w, size_t conv_h)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+
+    TensorShape output_shape = input->info()->tensor_shape();
+    output_shape.set(0, conv_w);
+    output_shape.set(1, conv_h);
+    output_shape.set(2, input->info()->tensor_shape()[0] / (conv_w * conv_h));
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 

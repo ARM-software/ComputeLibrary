@@ -37,7 +37,7 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement AlexNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
 void main_graph_alexnet(int argc, const char **argv)
 {
@@ -49,43 +49,45 @@ void main_graph_alexnet(int argc, const char **argv)
     constexpr float mean_g = 116.67f; /* Mean value to subtract from green channel */
     constexpr float mean_b = 104.01f; /* Mean value to subtract from blue channel */
 
+    // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
+    TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+    ConvolutionMethodHint convolution_hint = target_hint == TargetHint::NEON ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
+
     // Parse arguments
     if(argc < 2)
     {
         // Print help
-        std::cout << "Usage: " << argv[0] << " [path_to_data] [image] [labels]\n\n";
+        std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [image] [labels]\n\n";
         std::cout << "No data folder provided: using random values\n\n";
     }
     else if(argc == 2)
     {
-        data_path = argv[1];
-        std::cout << "Usage: " << argv[0] << " " << argv[1] << " [image] [labels]\n\n";
-        std::cout << "No image provided: using random values\n\n";
+        std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [image] [labels]\n\n";
+        std::cout << "No data folder provided: using random values\n\n";
     }
     else if(argc == 3)
     {
-        data_path = argv[1];
-        image     = argv[2];
-        std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [labels]\n\n";
+        data_path = argv[2];
+        std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [image] [labels]\n\n";
+        std::cout << "No image provided: using random values\n\n";
+    }
+    else if(argc == 4)
+    {
+        data_path = argv[2];
+        image     = argv[3];
+        std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels]\n\n";
         std::cout << "No text file with labels provided: skipping output accessor\n\n";
     }
     else
     {
-        data_path = argv[1];
-        image     = argv[2];
-        label     = argv[3];
-    }
-
-    // Check if OpenCL is available and initialize the scheduler
-    TargetHint hint = TargetHint::NEON;
-    if(Graph::opencl_is_available())
-    {
-        hint = TargetHint::OPENCL;
+        data_path = argv[2];
+        image     = argv[3];
+        label     = argv[4];
     }
 
     Graph graph;
 
-    graph << hint
+    graph << target_hint
           << Tensor(TensorInfo(TensorShape(227U, 227U, 3U, 1U), 1, DataType::F32),
                     get_input_accessor(image, mean_r, mean_g, mean_b))
           // Layer 1
@@ -98,7 +100,7 @@ void main_graph_alexnet(int argc, const char **argv)
           << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
           << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)))
           // Layer 2
-          << ConvolutionMethodHint::DIRECT
+          << convolution_hint
           << ConvolutionLayer(
               5U, 5U, 256U,
               get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv2_w.npy"),
@@ -157,7 +159,7 @@ void main_graph_alexnet(int argc, const char **argv)
 /** Main program for AlexNet
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
 int main(int argc, const char **argv)
 {

@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_GRAPH_UTILS_H__
 
 #include "arm_compute/core/PixelValue.h"
+#include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/ITensorAccessor.h"
 #include "arm_compute/graph/Types.h"
 
@@ -217,6 +218,26 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::str
     else
     {
         return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, true, mean_r, mean_g, mean_b);
+    }
+}
+
+/** Utility function to return the TargetHint
+ *
+ * @param[in] target Integer value which expresses the selected target. Must be 0 for NEON or 1 for OpenCL
+ *
+ * @return the TargetHint
+ */
+inline graph::TargetHint set_target_hint(int target)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(target > 1, "Invalid target. Target must be 0 (NEON) or 1 (OpenCL)");
+    if(target == 1 && graph::Graph::opencl_is_available())
+    {
+        // If type of target is OpenCL, check if OpenCL is available and initialize the scheduler
+        return graph::TargetHint::OPENCL;
+    }
+    else
+    {
+        return graph::TargetHint::NEON;
     }
 }
 

@@ -222,7 +222,10 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     shape_im2col.set(0, mat_input_cols);
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
-    _input_im2col_reshaped.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col));
+    // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
+    TensorInfo im2col_reshaped_info(shape_im2col, 1, dt, input->info()->fixed_point_position());
+    im2col_reshaped_info.set_quantization_info(input->info()->quantization_info());
+    _input_im2col_reshaped.allocator()->init(im2col_reshaped_info);
     _memory_group.manage(&_input_im2col_reshaped);
 
     // Create tensor (interleave) to prepare input tensor for GEMM
@@ -231,7 +234,10 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
         TensorShape shape_interleaved = shape_im2col;
         shape_interleaved.set(0, shape_interleaved.x() * 4);
         shape_interleaved.set(1, std::ceil(shape_interleaved.y() / 4.f));
-        _input_interleaved_reshaped.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_interleaved));
+        // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
+        TensorInfo interleaved_info(shape_interleaved, 1, dt, input->info()->fixed_point_position());
+        interleaved_info.set_quantization_info(input->info()->quantization_info());
+        _input_interleaved_reshaped.allocator()->init(interleaved_info);
         _memory_group.manage(&_input_interleaved_reshaped);
     }
 
@@ -241,8 +247,9 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     shape_gemm.set(1, mat_input_rows);
     const DataType gemm_data_type = _is_quantized ? DataType::S32 : dt;
     // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
-    TensorInfo info_gemm(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_gemm).set_data_type(gemm_data_type).set_quantization_info(
-                             output->info()->quantization_info()));
+    // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
+    TensorInfo info_gemm(shape_gemm, 1, gemm_data_type, input->info()->fixed_point_position());
+    info_gemm.set_quantization_info(output->info()->quantization_info());
     _gemm_output.allocator()->init(info_gemm);
     _memory_group.manage(&_gemm_output);
 

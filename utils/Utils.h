@@ -708,7 +708,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
 /** Template helper function to save a tensor image to a NPY file.
  *
- * @note Only F32 format supported.
+ * @note Only F32 data type supported.
  * @note Only works with 2D tensors.
  * @note If the input tensor is a CLTensor, the function maps and unmaps the image
  *
@@ -719,7 +719,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 template <typename T>
 void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 {
-    ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&tensor, arm_compute::Format::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::F32);
     ARM_COMPUTE_ERROR_ON(tensor.info()->num_dimensions() > 2);
 
     std::ofstream fs;
@@ -745,9 +745,9 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
         // Map buffer if creating a CLTensor
         map(tensor, true);
 
-        switch(tensor.info()->format())
+        switch(tensor.info()->data_type())
         {
-            case arm_compute::Format::F32:
+            case arm_compute::DataType::F32:
             {
                 std::vector<float> tmp; /* Used only to get the typestring */
                 npy::Typestring    typestring_o{ tmp };
@@ -851,9 +851,9 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
 
     Iterator it(&tensor, window);
 
-    switch(tensor.info()->format())
+    switch(tensor.info()->data_type())
     {
-        case arm_compute::Format::F32:
+        case arm_compute::DataType::F32:
         {
             std::uniform_real_distribution<float> dist(lower_bound, upper_bound);
 

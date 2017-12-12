@@ -35,6 +35,8 @@ using namespace arm_compute::graph;
 using namespace arm_compute::graph_utils;
 using namespace arm_compute::logging;
 
+namespace
+{
 BranchLayer get_expand_fire_node(const std::string &data_path, std::string &&param_path, unsigned int expand1_filt, unsigned int expand3_filt)
 {
     std::string total_path = "/cnn_data/squeezenet_v1.0_model/" + param_path + "_";
@@ -56,11 +58,12 @@ BranchLayer get_expand_fire_node(const std::string &data_path, std::string &&par
 
     return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b));
 }
+} // namespace
 
 /** Example demonstrating how to implement Squeezenet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
 void main_graph_squeezenet(int argc, const char **argv)
 {
@@ -72,44 +75,45 @@ void main_graph_squeezenet(int argc, const char **argv)
     constexpr float mean_g = 116.67f; /* Mean value to subtract from green channel */
     constexpr float mean_b = 104.01f; /* Mean value to subtract from blue channel */
 
+    // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
+    TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+    ConvolutionMethodHint convolution_hint = target_hint == TargetHint::NEON ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
+
     // Parse arguments
     if(argc < 2)
     {
         // Print help
-        std::cout << "Usage: " << argv[0] << " [path_to_data] [image] [labels]\n\n";
+        std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [image] [labels]\n\n";
         std::cout << "No data folder provided: using random values\n\n";
     }
     else if(argc == 2)
     {
-        //Do something with argv[1]
-        data_path = argv[1];
-        std::cout << "Usage: " << argv[0] << " " << argv[1] << " [image] [labels]\n\n";
-        std::cout << "No image provided: using random values\n";
+        std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [image] [labels]\n\n";
+        std::cout << "No data folder provided: using random values\n\n";
     }
     else if(argc == 3)
     {
-        data_path = argv[1];
-        image     = argv[2];
-        std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [labels]\n\n";
-        std::cout << "No text file with labels provided: skipping output accessor\n";
+        data_path = argv[2];
+        std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [image] [labels]\n\n";
+        std::cout << "No image provided: using random values\n\n";
+    }
+    else if(argc == 4)
+    {
+        data_path = argv[2];
+        image     = argv[3];
+        std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels]\n\n";
+        std::cout << "No text file with labels provided: skipping output accessor\n\n";
     }
     else
     {
-        data_path = argv[1];
-        image     = argv[2];
-        label     = argv[3];
-    }
-
-    // Check if OpenCL is available and initialize the scheduler
-    TargetHint hint = TargetHint::NEON;
-    if(Graph::opencl_is_available())
-    {
-        hint = TargetHint::OPENCL;
+        data_path = argv[2];
+        image     = argv[3];
+        label     = argv[4];
     }
 
     Graph graph;
 
-    graph << hint
+    graph << target_hint
           << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
                     get_input_accessor(image, mean_r, mean_g, mean_b))
           << ConvolutionLayer(
@@ -117,6 +121,7 @@ void main_graph_squeezenet(int argc, const char **argv)
               get_weights_accessor(data_path, "/cnn_data/squeezenet_v1.0_model/conv1_w.npy"),
               get_weights_accessor(data_path, "/cnn_data/squeezenet_v1.0_model/conv1_b.npy"),
               PadStrideInfo(2, 2, 0, 0))
+          << convolution_hint
           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
           << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
           << ConvolutionLayer(
@@ -194,7 +199,7 @@ void main_graph_squeezenet(int argc, const char **argv)
 /** Main program for Squeezenet v1.0
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
 int main(int argc, const char **argv)
 {

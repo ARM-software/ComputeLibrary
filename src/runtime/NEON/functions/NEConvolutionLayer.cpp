@@ -267,7 +267,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         // Configure matrix multiplication kernel
         if(_is_fully_connected_convolution)
         {
-            _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace, 1.f, 0.f, false, false);
+            _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace, 1.f, 0.f, true, false);
         }
         else
         {

@@ -32,6 +32,8 @@
 using namespace arm_compute::graph;
 using namespace arm_compute::graph_utils;
 
+namespace
+{
 /** Generates appropriate accessor according to the specified path
  *
  * @note If path is empty will generate a DummyAccessor else will generate a NumPyBinLoader
@@ -52,49 +54,51 @@ std::unique_ptr<ITensorAccessor> get_accessor(const std::string &path, const std
         return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(path + data_file);
     }
 }
+} // namespace
 
 /** Example demonstrating how to implement LeNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] batches )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches )
  */
 void main_graph_lenet(int argc, const char **argv)
 {
     std::string  data_path;   /** Path to the trainable data */
     unsigned int batches = 4; /** Number of batches */
 
+    // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
+    TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+
     // Parse arguments
     if(argc < 2)
     {
         // Print help
-        std::cout << "Usage: " << argv[0] << " [path_to_data] [batches]\n\n";
+        std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [batches]\n\n";
         std::cout << "No data folder provided: using random values\n\n";
     }
     else if(argc == 2)
     {
+        std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [batches]\n\n";
+        std::cout << "No data folder provided: using random values\n\n";
+    }
+    else if(argc == 3)
+    {
         //Do something with argv[1]
-        data_path = argv[1];
+        data_path = argv[2];
         std::cout << "Usage: " << argv[0] << " [path_to_data] [batches]\n\n";
         std::cout << "No number of batches where specified, thus will use the default : " << batches << "\n\n";
     }
     else
     {
         //Do something with argv[1] and argv[2]
-        data_path = argv[1];
-        batches   = std::strtol(argv[2], nullptr, 0);
-    }
-
-    // Check if OpenCL is available and initialize the scheduler
-    TargetHint hint = TargetHint::NEON;
-    if(Graph::opencl_is_available())
-    {
-        hint = TargetHint::OPENCL;
+        data_path = argv[2];
+        batches   = std::strtol(argv[3], nullptr, 0);
     }
 
     Graph graph;
 
     //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
-    graph << hint
+    graph << target_hint
           << Tensor(TensorInfo(TensorShape(28U, 28U, 1U, batches), 1, DataType::F32), DummyAccessor())
           << ConvolutionLayer(
               5U, 5U, 20U,
@@ -126,7 +130,7 @@ void main_graph_lenet(int argc, const char **argv)
 /** Main program for LeNet
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] batches )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches )
  */
 int main(int argc, const char **argv)
 {
