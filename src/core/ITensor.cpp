@@ -75,10 +75,11 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
 {
     ARM_COMPUTE_ERROR_ON(this->buffer() == nullptr);
 
-    const DataType    dt       = this->info()->data_type();
-    const size_t      slices2D = this->info()->tensor_shape().total_size_upper(2);
-    const Strides     strides  = this->info()->strides_in_bytes();
-    const PaddingSize padding  = this->info()->padding();
+    const DataType    dt           = this->info()->data_type();
+    const size_t      slices2D     = this->info()->tensor_shape().total_size_upper(2);
+    const Strides     strides      = this->info()->strides_in_bytes();
+    const PaddingSize padding      = this->info()->padding();
+    const size_t      num_channels = this->info()->num_channels();
 
     // Set precision
     if(is_data_type_float(dt) && (io_fmt.precision_type != IOFormatInfo::PrecisionType::Default))
@@ -116,6 +117,8 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
         default:
             break;
     }
+
+    print_width = print_width * num_channels;
 
     // Set pointer to start
     const uint8_t *ptr = this->buffer() + start_offset;
