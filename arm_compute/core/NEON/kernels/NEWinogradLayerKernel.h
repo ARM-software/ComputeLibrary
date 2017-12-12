@@ -68,7 +68,7 @@ public:
 
     /** Initialise the kernel
      *
-     * @param[in,out] output    Output tensor to store the result of matrix multiplication.
+     * @param[in,out] output    Output tensor to store the result of matrix multiplication. Data type supported: F32.
      * @param[in]     convolver A pointer to the winograd convolver, this object must have been configured and is ready to execute 16 GEMMS .
      */
     void configure(ITensor *output, Winograd3x3F32 *convolver);
