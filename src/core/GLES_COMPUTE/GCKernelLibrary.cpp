@@ -220,6 +220,7 @@ const std::map<std::string, std::string> GCKernelLibrary::_shader_program_map =
     { "batchnormalization_layer", "batchnormalization_layer.cs" },
     { "concatenate_depth", "concatenate.cs" },
     { "dropout", "dropout.cs" },
+    { "normalize_planar_yuv_layer", "normalize_planar_yuv_layer.cs" },
 };
 
 const std::map<std::string, std::string> GCKernelLibrary::_program_source_map =
@@ -288,6 +289,10 @@ const std::map<std::string, std::string> GCKernelLibrary::_program_source_map =
     {
         "dropout.cs",
 #include "./cs_shaders/dropout.csembed"
+    },
+    {
+        "normalize_planar_yuv_layer.cs",
+#include "./cs_shaders/normalize_planar_yuv_layer.csembed"
     },
 #endif /* EMBEDDED_KERNELS */
 };

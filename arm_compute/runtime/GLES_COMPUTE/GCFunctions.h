@@ -37,6 +37,7 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCGEMMInterleave4x4.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCGEMMTranspose1xW.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCNormalizationLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCNormalizePlanarYUVLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCPixelWiseMultiplication.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCPoolingLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCSoftmaxLayer.h"

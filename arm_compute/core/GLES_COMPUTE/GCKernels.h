@@ -40,6 +40,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCIm2ColKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCNormalizationLayerKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCNormalizePlanarYUVLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPoolingLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCSoftmaxLayerKernel.h"
