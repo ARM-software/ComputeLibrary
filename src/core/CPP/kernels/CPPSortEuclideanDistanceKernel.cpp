@@ -71,6 +71,7 @@ bool CPPSortEuclideanDistanceKernel::is_parallelisable() const
 void CPPSortEuclideanDistanceKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICPPKernel::window(), window);
 
