@@ -483,6 +483,21 @@ inline int get_input_num_elems_processed<3>(unsigned int num_elems_written_per_i
 {
     return num_elems_written_per_iteration * 3;
 }
+inline int get_input_num_elems_processed(unsigned int num_elems_written_per_iteration, unsigned int stridex)
+{
+    switch(stridex)
+    {
+        case 1:
+            return get_input_num_elems_processed<1>(num_elems_written_per_iteration);
+        case 2:
+            return get_input_num_elems_processed<2>(num_elems_written_per_iteration);
+        case 3:
+            return get_input_num_elems_processed<3>(num_elems_written_per_iteration);
+        default:
+            ARM_COMPUTE_ERROR("stridex not supported");
+            return 0;
+    }
+}
 }
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H__ */

@@ -60,7 +60,6 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const
                                                                               weights->info()->tensor_shape().x(), weights->info()->tensor_shape().y(),
                                                                               conv_info);
 
-    ARM_COMPUTE_UNUSED(expected_output);
     ARM_COMPUTE_ERROR_ON(expected_output.first != output->info()->tensor_shape().x());
     ARM_COMPUTE_ERROR_ON(expected_output.second != output->info()->tensor_shape().y());
 
@@ -69,6 +68,7 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const
     _weights                         = weights;
     _conv_info                       = conv_info;
     const unsigned int conv_stride_x = conv_info.stride().first;
+    const unsigned int conv_stride_y = conv_info.stride().second;
     const unsigned int conv_pad_x    = conv_info.pad().first;
     const unsigned int conv_pad_y    = conv_info.pad().second;
 
@@ -80,9 +80,12 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration));
 
-    AccessWindowStatic     input_access(input->info(), -conv_pad_x, -conv_pad_y, input->info()->dimension(0) + _border_size.right, input->info()->dimension(1) + _border_size.bottom);
-    AccessWindowStatic     weights_access(weights->info(), 0, 0, weights->info()->dimension(0), weights->info()->dimension(1));
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
+    const unsigned int num_x_steps               = (expected_output.first + num_elems_written_per_iteration - 1) / num_elems_written_per_iteration;
+    const int          input_num_elems_processed = get_input_num_elems_processed(num_elems_written_per_iteration, conv_stride_x);
+
+    AccessWindowStatic input_access(input->info(), -conv_pad_x, -conv_pad_y, (num_x_steps - 1) * input_num_elems_processed + 12, conv_stride_y * (expected_output.second - 1) + 2);
+    AccessWindowStatic weights_access(weights->info(), 0, 0, weights->info()->dimension(0), weights->info()->dimension(1));
+    AccessWindowStatic output_access(output->info(), 0, 0, num_x_steps * num_elems_written_per_iteration, expected_output.second);
 
     update_window_and_padding(win, input_access, weights_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
@@ -134,13 +137,13 @@ public:
             int            ih        = 0;
             int            oh        = 0;
 
-            const uint8_t *ptr_weights_base = weights_ptr + id.z() * kernel_stride_z;
-            const auto     ptr_weights_r0   = reinterpret_cast<const float *>(ptr_weights_base);
-            const auto     ptr_weights_r1   = reinterpret_cast<const float *>(ptr_weights_base + kernel_stride_y);
-            const auto     ptr_weights_r2   = reinterpret_cast<const float *>(ptr_weights_base + kernel_stride_y * 2);
-            const auto     vw_r0            = load_matrix_row(ptr_weights_r0);
-            const auto     vw_r1            = load_matrix_row(ptr_weights_r1);
-            const auto     vw_r2            = load_matrix_row(ptr_weights_r2);
+            const uint8_t      *ptr_weights_base = weights_ptr + id.z() * kernel_stride_z;
+            const auto          ptr_weights_r0   = reinterpret_cast<const float *>(ptr_weights_base);
+            const auto          ptr_weights_r1   = reinterpret_cast<const float *>(ptr_weights_base + kernel_stride_y);
+            const auto          ptr_weights_r2   = reinterpret_cast<const float *>(ptr_weights_base + kernel_stride_y * 2);
+            const float32x4x3_t vw_r0            = load_matrix_row(ptr_weights_r0);
+            const float32x4x3_t vw_r1            = load_matrix_row(ptr_weights_r1);
+            const float32x4x3_t vw_r2            = load_matrix_row(ptr_weights_r2);
 
             for(ih = 0, oh = 0; oh < output_h; ++oh, ih += conv_stride_y)
             {
