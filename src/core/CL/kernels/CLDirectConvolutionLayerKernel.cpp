@@ -136,13 +136,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     unsigned int num_elems_written_per_iteration_x = 0;
     unsigned int num_elems_written_per_iteration_y = 0;
 
-    Window win            = Window();
-    bool   window_changed = false;
-
     if((target == GPUTarget::BIFROST) && (kernel_size <= 5) && (conv_stride_x == 1) && (conv_stride_y == 1) && (data_type == DataType::F32))
     {
         // Configure kernel window
-        win = calculate_max_window(*output);
 
         switch(kernel_size)
         {
@@ -178,12 +174,69 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     }
     else
     {
-        bool is_stride2 = ((kernel_size != 1) && (conv_stride_x == 2));
-
-        num_elems_read_per_iteration_x    = 8 + 2 * (kernel_size / 2) + (is_stride2 ? 6 + kernel_size / 2 : 0);
         num_elems_read_per_iteration_y    = kernel_size;
         num_elems_written_per_iteration_x = 8;
         num_elems_written_per_iteration_y = 1;
+        switch(kernel_size)
+        {
+            case 1:
+                switch(conv_stride_x)
+                {
+                    case 1:
+                        num_elems_read_per_iteration_x = 8;
+                        break;
+                    case 2:
+                        num_elems_read_per_iteration_x = 16;
+                        break;
+                    case 3:
+                        switch(input->element_size())
+                        {
+                            case 1:
+                                num_elems_read_per_iteration_x = 28;
+                                break;
+                            case 2:
+                                num_elems_read_per_iteration_x = 24;
+                                break;
+                            case 4:
+                                num_elems_read_per_iteration_x = 22;
+                                break;
+                            default:
+                                ARM_COMPUTE_ERROR("Invalid data size");
+                        }
+                        break;
+                    default:
+                        ARM_COMPUTE_ERROR("Invalid convolution stride X");
+                }
+                break;
+            case 3:
+                switch(conv_stride_x)
+                {
+                    case 1:
+                        num_elems_read_per_iteration_x = 10;
+                        break;
+                    case 2:
+                        num_elems_read_per_iteration_x = 17;
+                        break;
+                    default:
+                        ARM_COMPUTE_ERROR("Invalid convolution stride X");
+                }
+                break;
+            case 5:
+                switch(conv_stride_x)
+                {
+                    case 1:
+                        num_elems_read_per_iteration_x = 12;
+                        break;
+                    case 2:
+                        num_elems_read_per_iteration_x = 20;
+                        break;
+                    default:
+                        ARM_COMPUTE_ERROR("Invalid convolution stride X");
+                }
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Invalid direct convolution size");
+        }
     }
 
     // Calculate right and bottom border
@@ -191,11 +244,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     int input_height = input->dimension(1) + conv_pad_top + conv_pad_bottom;
 
     // Add padding only if necessary or it would always result in a window_changed
-    input_width += input_width % num_elems_read_per_iteration_x;
-    input_height += ((input_height / conv_stride_y) * conv_stride_y) % num_elems_read_per_iteration_y;
+    input_width  = ceil_to_multiple(input_width, num_elems_read_per_iteration_x);
+    input_height = ceil_to_multiple(input_height, num_elems_read_per_iteration_y);
 
     // Create window and update padding
-    win = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
+    bool   window_changed = false;
+    Window win            = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
 
     AccessWindowStatic    input_access(input, -conv_pad_left, -conv_pad_top, input_width, input_height);
     AccessWindowStatic    weights_access(weights, 0, 0, kernel_size, kernel_size);
