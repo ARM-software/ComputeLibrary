@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -168,6 +168,14 @@ void validate(const arm_compute::PaddingSize &padding, const arm_compute::Paddin
     ARM_COMPUTE_EXPECT_EQUAL(padding.right, reference.right, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT_EQUAL(padding.bottom, reference.bottom, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT_EQUAL(padding.left, reference.left, framework::LogLevel::ERRORS);
+}
+
+void validate(const arm_compute::PaddingSize &padding, const arm_compute::PaddingSize &width_reference, const arm_compute::PaddingSize &height_reference)
+{
+    ARM_COMPUTE_EXPECT_EQUAL(padding.top, height_reference.top, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.right, width_reference.right, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.bottom, height_reference.bottom, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(padding.left, width_reference.left, framework::LogLevel::ERRORS);
 }
 
 void validate(const IAccessor &tensor, const void *reference_value)

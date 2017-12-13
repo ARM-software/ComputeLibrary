@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,47 +49,17 @@ namespace
  * while reference performs direct division with scale.
  */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
-
-/* Convolution3x3 */
-constexpr unsigned int filter_size_3x3 = 3;                  /* Size of the kernel/filter in number of elements. */
-constexpr BorderSize   border_size_3x3(filter_size_3x3 / 2); /* Border size of the kernel/filter around its central element. */
-
-/* Convolution5x5 */
-constexpr unsigned int filter_size_5x5 = 5;                  /* Size of the kernel/filter in number of elements. */
-constexpr BorderSize   border_size_5x5(filter_size_5x5 / 2); /* Border size of the kernel/filter around its central element. */
-
-/* Convolution7x7 */
-constexpr unsigned int filter_size_7x7 = 7;                  /* Size of the kernel/filter in number of elements. */
-constexpr BorderSize   border_size_7x7(filter_size_7x7 / 2); /* Border size of the kernel/filter around its central element. */
-
-/* Convolutionx */
-constexpr unsigned int filter_size_9x9 = 9;                  /* Size of the kernel/filter in number of elements. */
-constexpr BorderSize   border_size_9x9(filter_size_9x9 / 2); /* Border size of the kernel/filter around its central element. */
-
-/** Create conv matrix with filter size, and fill them with random value
- *
- * @param[in/out] conv        Convolution matrix to be filled with random int16_t
- * @param[in]     filter_size Filter Size.
- */
-void create_conv(int16_t *conv, const unsigned int filter_size)
-{
-    std::mt19937                           gen(library->seed());
-    std::uniform_int_distribution<int16_t> distribution_int16(-32768, 32767);
-
-    for(unsigned int i = 0; i < filter_size * filter_size; ++i)
-    {
-        conv[i] = distribution_int16(gen);
-    }
-}
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(CustomConvolution)
+TEST_SUITE(CustomConvolutionSuqare)
 TEST_SUITE(CustomConvolution3x3)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
-                                                                   datasets::BorderModes()),
-               shape, data_type, border_mode)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+                                                                           datasets::BorderModes()),
+                                                                   framework::dataset::make("filter_size", { 3 })),
+               shape, data_type, border_mode, filter_size)
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
@@ -97,22 +67,16 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 
     // Create conv matrix
     int16_t conv[9];
-    create_conv(conv, filter_size_3x3);
-
-    // Generate random scale value between 0 and 255.
-    std::mt19937                           gen(library->seed());
-    std::uniform_int_distribution<uint8_t> distribution(0, 255);
-    uint32_t                               scale = distribution(gen);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEConvolution3x3 convolution;
-    convolution.configure(&src, &dst, conv, scale, border_mode);
+    convolution.configure(&src, &dst, conv, 0, border_mode);
 
     // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), border_size_3x3);
+    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_size / 2));
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
@@ -132,29 +96,32 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 }
 
 template <typename T>
-using NEConvolutionFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolution3x3, T, filter_size_3x3>;
+using NEConvolutionFixture = ConvolutionSquareValidationFixture<Tensor, Accessor, NEConvolution3x3, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
-                                                                                                           datasets::BorderModes()))
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 3 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_3x3), tolerance_u8);
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::U8)),
-                                                                                                         datasets::BorderModes()))
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 3 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_3x3), tolerance_u8);
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
 TEST_SUITE_END() /* Custom Convolution3x3 */
 
 TEST_SUITE(CustomConvolution5x5)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
-                                                                   datasets::BorderModes()),
-               shape, data_type, border_mode)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+                                                                           datasets::BorderModes()),
+                                                                   framework::dataset::make("filter_size", { 5 })),
+               shape, data_type, border_mode, filter_size)
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
@@ -162,22 +129,16 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 
     // Create conv matrix
     int16_t conv[25];
-    create_conv(conv, filter_size_5x5);
-
-    // Generate random scale value between 0 and 255.
-    std::mt19937                           gen(library->seed());
-    std::uniform_int_distribution<uint8_t> distribution(0, 255);
-    uint32_t                               scale = distribution(gen);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEConvolution5x5 convolution;
-    convolution.configure(&src, &dst, conv, scale, border_mode);
+    convolution.configure(&src, &dst, conv, 0, border_mode);
 
     // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), border_size_5x5);
+    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_size / 2));
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
@@ -197,29 +158,32 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 }
 
 template <typename T>
-using NEConvolutionFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolution5x5, T, filter_size_5x5>;
+using NEConvolutionFixture = ConvolutionSquareValidationFixture<Tensor, Accessor, NEConvolution5x5, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
-                                                                                                           datasets::BorderModes()))
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 5 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_5x5), tolerance_u8);
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::U8)),
-                                                                                                         datasets::BorderModes()))
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 5 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_5x5), tolerance_u8);
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
 TEST_SUITE_END() /* Custom Convolution 5x5 */
 
 TEST_SUITE(CustomConvolution7x7)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
-                                                                   datasets::BorderModes()),
-               shape, data_type, border_mode)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+                                                                           datasets::BorderModes()),
+                                                                   framework::dataset::make("filter_size", { 7 })),
+               shape, data_type, border_mode, filter_size)
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
@@ -227,22 +191,16 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 
     // Create conv matrix
     int16_t conv[49];
-    create_conv(conv, filter_size_7x7);
-
-    // Generate random scale value between 0 and 255.
-    std::mt19937                           gen(library->seed());
-    std::uniform_int_distribution<uint8_t> distribution(0, 255);
-    uint32_t                               scale = distribution(gen);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEConvolution7x7 convolution;
-    convolution.configure(&src, &dst, conv, scale, border_mode);
+    convolution.configure(&src, &dst, conv, 0, border_mode);
 
     // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), border_size_7x7);
+    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_size / 2));
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
@@ -262,29 +220,32 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 }
 
 template <typename T>
-using NEConvolutionFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolution7x7, T, filter_size_7x7>;
+using NEConvolutionFixture = ConvolutionSquareValidationFixture<Tensor, Accessor, NEConvolution7x7, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
-                                                                                                           datasets::BorderModes()))
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 7 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_7x7), tolerance_u8);
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::U8)),
-                                                                                                         datasets::BorderModes()))
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 7 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_7x7), tolerance_u8);
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
 TEST_SUITE_END() /* Custom Convolution 7x7 */
 
 TEST_SUITE(CustomConvolution9x9)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
-                                                                   datasets::BorderModes()),
-               shape, data_type, border_mode)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+                                                                           datasets::BorderModes()),
+                                                                   framework::dataset::make("filter_size", { 9 })),
+               shape, data_type, border_mode, filter_size)
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
@@ -292,22 +253,16 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 
     // Create conv matrix
     int16_t conv[81];
-    create_conv(conv, filter_size_9x9);
-
-    // Generate random scale value between 0 and 255.
-    std::mt19937                           gen(library->seed());
-    std::uniform_int_distribution<uint8_t> distribution(0, 255);
-    uint32_t                               scale = distribution(gen);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEConvolution9x9 convolution;
-    convolution.configure(&src, &dst, conv, scale, border_mode);
+    convolution.configure(&src, &dst, conv, 0, border_mode);
 
     // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), border_size_9x9);
+    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_size / 2));
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
@@ -327,24 +282,98 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 }
 
 template <typename T>
-using NEConvolutionFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolution9x9, T, filter_size_9x9>;
+using NEConvolutionFixture = ConvolutionSquareValidationFixture<Tensor, Accessor, NEConvolution9x9, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
-                                                                                                           datasets::BorderModes()))
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 9 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_9x9), tolerance_u8);
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::U8)),
-                                                                                                         datasets::BorderModes()))
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 9 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_9x9), tolerance_u8);
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
 TEST_SUITE_END() /* Custom Convolution 9x9 */
+TEST_SUITE_END() /* Custom Convolution Square */
+
+TEST_SUITE(CustomConvolutionRectangle)
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
+                                                                                           DataType::U8)),
+                                                                                   datasets::BorderModes()),
+                                                                           framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
+                                                                   framework::dataset::make("filter_height", { 3, 5, 7, 9 })),
+               shape, data_type, border_mode, filter_width, filter_height)
+{
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, data_type);
+    Tensor dst = create_tensor<Tensor>(shape, data_type);
+
+    // Create conv matrix
+    int16_t conv[filter_width * filter_height];
+
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    NEConvolutionRectangle convolution;
+    convolution.configure(&src, &dst, conv, filter_width, filter_height, 1, border_mode);
+
+    // Validate valid region
+    const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_height / 2, filter_width / 2));
+    validate(dst.info()->valid_region(), dst_valid_region);
+
+    // Validate padding
+    PaddingCalculator calculator(shape.x(), 8);
+    calculator.set_border_size(filter_width / 2);
+    calculator.set_border_mode(border_mode);
+
+    const PaddingSize dst_padding = calculator.required_padding();
+
+    calculator.set_accessed_elements(16);
+    calculator.set_access_offset(-(filter_width / 2));
+
+    const PaddingSize width_padding = calculator.required_padding();
+
+    calculator.set_border_size(filter_height / 2);
+    calculator.set_access_offset(-(filter_height / 2));
+    const PaddingSize height_padding = calculator.required_padding();
+
+    validate(src.info()->padding(), width_padding, height_padding);
+    validate(dst.info()->padding(), dst_padding);
+}
+
+template <typename T>
+using NEConvolutionFixture = ConvolutionRectangleValidationFixture<Tensor, Accessor, NEConvolutionRectangle, T>;
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::U8)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                                   framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
+                                                                                                           framework::dataset::make("filter_height", { 3, 5, 7, 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::U8)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                                 framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
+                                                                                                         framework::dataset::make("filter_height", { 3, 5, 7, 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
+}
+TEST_SUITE_END()
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace validation

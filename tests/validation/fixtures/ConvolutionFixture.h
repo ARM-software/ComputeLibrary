@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,44 +41,40 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, const unsigned int filter_size>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ConvolutionValidationFixture : public framework::Fixture
 {
-public:
+protected:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type, BorderMode border_mode)
+    void setup(TensorShape shape, DataType data_type, BorderMode border_mode, const unsigned int width, const unsigned int height)
     {
         std::mt19937                           gen(library->seed());
         std::uniform_int_distribution<uint8_t> distribution(0, 255);
         const uint8_t                          constant_border_value = distribution(gen);
 
-        // Generate random scale value between 0 and 255.
-        const uint32_t scale = distribution(gen);
+        // Generate random scale value between 1 and 255.
+        std::uniform_int_distribution<uint8_t> distribution_scale(1, 255);
+        const uint32_t                         scale = distribution_scale(gen);
 
-        switch(filter_size)
-        {
-            case 3:
-            case 5:
-            case 7:
-            case 9:
-                int16_t conv[filter_size * filter_size];
-                create_conv(conv);
+        ARM_COMPUTE_ERROR_ON(3 != width && 5 != width && 7 != width && 9 != width);
+        ARM_COMPUTE_ERROR_ON(3 != height && 5 != height && 7 != height && 9 != height);
 
-                _target    = compute_target(shape, data_type, conv, scale, border_mode, constant_border_value);
-                _reference = compute_reference(shape, data_type, conv, scale, border_mode, constant_border_value);
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Filter Size Not Supported");
-        }
+        int16_t conv[width * height];
+        create_conv(conv);
+
+        _width     = width;
+        _height    = height;
+        _target    = compute_target(shape, data_type, conv, scale, border_mode, constant_border_value);
+        _reference = compute_reference(shape, data_type, conv, scale, border_mode, constant_border_value);
     }
 
-protected:
-    void create_conv(int16_t *conv)
+    void
+    create_conv(int16_t *conv)
     {
         std::mt19937                           gen(library->seed());
         std::uniform_int_distribution<int16_t> distribution_int16(-32768, 32767);
 
-        for(unsigned int i = 0; i < filter_size * filter_size; ++i)
+        for(unsigned int i = 0; i < _width * _height; ++i)
         {
             conv[i] = distribution_int16(gen);
         }
@@ -90,6 +86,40 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
+    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
+    {
+        ARM_COMPUTE_ERROR_ON(data_type != DataType::U8);
+
+        // Create reference
+        SimpleTensor<T> src{ shape, data_type };
+
+        // Fill reference
+        fill(src, 0);
+
+        // Compute reference
+        return reference::convolution<T>(src, conv, scale, border_mode, constant_border_value, _width, _height);
+    }
+
+    virtual TensorType compute_target(const TensorShape &shape, DataType data_type, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value) = 0;
+
+    BorderMode      _border_mode{};
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+    unsigned int    _width{};
+    unsigned int    _height{};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ConvolutionSquareValidationFixture : public ConvolutionValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, DataType data_type, BorderMode border_mode, const unsigned int width)
+    {
+        ConvolutionValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, border_mode, width, width);
+    }
+
+protected:
     TensorType compute_target(const TensorShape &shape, DataType data_type, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
     {
         // Create tensors
@@ -111,32 +141,56 @@ protected:
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(AccessorType(src), 0);
-        fill(AccessorType(dst), 1);
+        this->fill(AccessorType(src), 0);
+        this->fill(AccessorType(dst), 1);
 
         // Compute function
         convolution.run();
 
         return dst;
     }
+};
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ConvolutionRectangleValidationFixture : public ConvolutionValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, DataType data_type, BorderMode border_mode, const unsigned int width, const unsigned int height)
     {
-        ARM_COMPUTE_ERROR_ON(data_type != DataType::U8);
-
-        // Create reference
-        SimpleTensor<T> src{ shape, data_type };
-
-        // Fill reference
-        fill(src, 0);
-
-        // Compute reference
-        return reference::convolution<T>(src, conv, scale, border_mode, constant_border_value, filter_size);
+        ConvolutionValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, border_mode, width, height);
     }
 
-    BorderMode      _border_mode{};
-    TensorType      _target{};
-    SimpleTensor<T> _reference{};
+protected:
+    TensorType compute_target(const TensorShape &shape, DataType data_type, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
+    {
+        // Create tensors
+        TensorType src = create_tensor<TensorType>(shape, data_type);
+        TensorType dst = create_tensor<TensorType>(shape, data_type);
+
+        // Create and configure function
+        FunctionType convolution;
+        convolution.configure(&src, &dst, conv, this->_width, this->_height, scale, border_mode, constant_border_value);
+
+        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        src.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        this->fill(AccessorType(src), 0);
+        this->fill(AccessorType(dst), 1);
+
+        // Compute function
+        convolution.run();
+
+        return dst;
+    }
 };
 } // namespace validation
 } // namespace test

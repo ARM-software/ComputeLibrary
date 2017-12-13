@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> convolution(const SimpleTensor<T> &src, const int16_t *conv, uint32_t scale, BorderMode border_mode, T constant_border_value, const unsigned int filter_size);
+SimpleTensor<T> convolution(const SimpleTensor<T> &src, const int16_t *conv, uint32_t scale, BorderMode border_mode, T constant_border_value, const unsigned int width, const unsigned int height);
 } // namespace reference
 } // namespace validation
 } // namespace test

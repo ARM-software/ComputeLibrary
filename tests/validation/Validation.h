@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -162,6 +162,12 @@ void validate(const arm_compute::ValidRegion &region, const arm_compute::ValidRe
  * Padding on all sides has to be the same.
  */
 void validate(const arm_compute::PaddingSize &padding, const arm_compute::PaddingSize &reference);
+
+/** Validate padding.
+ *
+ * Padding on all sides has to be the same.
+ */
+void validate(const arm_compute::PaddingSize &padding, const arm_compute::PaddingSize &width_reference, const arm_compute::PaddingSize &height_reference);
 
 /** Validate tensors.
  *

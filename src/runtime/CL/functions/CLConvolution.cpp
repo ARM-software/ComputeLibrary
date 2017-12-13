@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,8 @@ CLConvolutionSquare<matrix_size>::CLConvolutionSquare(std::shared_ptr<IMemoryMan
 }
 
 template <unsigned int matrix_size>
-void CLConvolutionSquare<matrix_size>::configure(ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
+void CLConvolutionSquare<matrix_size>::configure(ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode,
+                                                 uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(conv == nullptr);
