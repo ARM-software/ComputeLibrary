@@ -187,9 +187,17 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     {
         if(_are_weights_reshaped)
         {
-            const unsigned int transpose_width = 16 / input->info()->element_size();
-            mat_weights_cols                   = weights_info.num_kernels();
-            mat_weights_rows                   = weights->info()->dimension(0) / transpose_width + (_has_bias ? 1 : 0);
+            if(_is_fully_connected_convolution)
+            {
+                mat_weights_cols = weights_info.num_kernels();
+                mat_weights_rows = weights->info()->dimension(1);
+            }
+            else
+            {
+                const unsigned int transpose_width = 16 / input->info()->element_size();
+                mat_weights_cols                   = weights_info.num_kernels();
+                mat_weights_rows                   = weights->info()->dimension(0) / transpose_width + (_has_bias ? 1 : 0);
+            }
         }
         else
         {
@@ -267,7 +275,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         // Configure matrix multiplication kernel
         if(_is_fully_connected_convolution)
         {
-            _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace, 1.f, 0.f, true, false);
+            _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace, 1.f, 0.f);
         }
         else
         {

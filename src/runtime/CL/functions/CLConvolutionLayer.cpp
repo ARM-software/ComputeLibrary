@@ -190,9 +190,17 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     // Reshape weights if needed
     if(_are_weights_reshaped)
     {
-        mat_weights_cols                         = weights_info.num_kernels();
-        const unsigned int quarter_reshaped_cols = weights->info()->dimension(0) / 4;
-        mat_weights_rows                         = quarter_reshaped_cols + bias_element;
+        if(_is_fully_connected_convolution || _is_quantized)
+        {
+            mat_weights_cols = weights->info()->dimension(0);
+            mat_weights_rows = weights->info()->dimension(1);
+        }
+        else
+        {
+            mat_weights_cols                         = weights_info.num_kernels();
+            const unsigned int quarter_reshaped_cols = weights->info()->dimension(0) / 4;
+            mat_weights_rows                         = quarter_reshaped_cols + bias_element;
+        }
     }
     else
     {

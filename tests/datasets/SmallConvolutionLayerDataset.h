@@ -70,7 +70,8 @@ public:
         add_config(TensorShape(17U, 31U, 2U, 4U), TensorShape(5U, 3U, 2U, 19U), TensorShape(19U), TensorShape(15U, 16U, 19U, 4U), PadStrideInfo(1, 2, 1, 1));
         // Arbitrary batch size
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 11U, 16U, 5U), PadStrideInfo(3, 2, 1, 0));
-
+        // FC convolution
+        add_config(TensorShape(1U, 1U, 1024U), TensorShape(1U, 1U, 1024U, 1001U), TensorShape(1001U), TensorShape(1U, 1U, 1001U), PadStrideInfo(1, 1, 0, 0));
         // Asymmetric padding
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR));
