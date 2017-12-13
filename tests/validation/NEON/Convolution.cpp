@@ -43,6 +43,13 @@ namespace validation
 {
 namespace
 {
+/** Tolerance value for comparing reference's output against implementation
+ *
+ * This is due to the fact that NEON target performs multiplication with reciprocal of scale,
+ * while reference performs direct division with scale.
+ */
+constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
+
 /* Convolution3x3 */
 constexpr unsigned int filter_size_3x3 = 3;                  /* Size of the kernel/filter in number of elements. */
 constexpr BorderSize   border_size_3x3(filter_size_3x3 / 2); /* Border size of the kernel/filter around its central element. */
@@ -132,7 +139,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::Datas
                                                                                                            datasets::BorderModes()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_3x3));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_3x3), tolerance_u8);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
@@ -140,7 +147,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::Datas
                                                                                                          datasets::BorderModes()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_3x3));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_3x3), tolerance_u8);
 }
 TEST_SUITE_END() /* Custom Convolution3x3 */
 
@@ -197,7 +204,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::Datas
                                                                                                            datasets::BorderModes()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_5x5));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_5x5), tolerance_u8);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
@@ -205,7 +212,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::Datas
                                                                                                          datasets::BorderModes()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_5x5));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_5x5), tolerance_u8);
 }
 TEST_SUITE_END() /* Custom Convolution 5x5 */
 
@@ -262,7 +269,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::Datas
                                                                                                            datasets::BorderModes()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_7x7));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_7x7), tolerance_u8);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
@@ -270,7 +277,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::Datas
                                                                                                          datasets::BorderModes()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_7x7));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_7x7), tolerance_u8);
 }
 TEST_SUITE_END() /* Custom Convolution 7x7 */
 
@@ -327,7 +334,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::Datas
                                                                                                            datasets::BorderModes()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_9x9));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_9x9), tolerance_u8);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
@@ -335,7 +342,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::Datas
                                                                                                          datasets::BorderModes()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_9x9));
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size_9x9), tolerance_u8);
 }
 TEST_SUITE_END() /* Custom Convolution 9x9 */
 TEST_SUITE_END()
