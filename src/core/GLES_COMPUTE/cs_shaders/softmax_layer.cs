@@ -62,7 +62,7 @@ SHADER_PARAMS_DECLARATION
 
 #if defined(DATA_TYPE_FP32)
 
-TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(1, srcBuffer, vec4[2], src_ptr, src_shift, 5, readonly);
 TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
 
 void main(void)
@@ -77,19 +77,23 @@ void main(void)
     uint width3 = width >> 3;
     for(int i = 0; i < int(width3); i++)
     {
-        vec4 data[2];
-        data[0] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
-        data[1] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, (i << 3) + 4, 0));
-        max_val = MAX_OP(data[0], max_val);
-        max_val = MAX_OP(data[1], max_val);
+        vec4 data[2] = LOAD(src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
+        max_val      = MAX_OP(data[0], max_val);
+        max_val      = MAX_OP(data[1], max_val);
     }
 
 #ifdef NON_MULTIPLE_OF_8
     // Handle non multiple of 8
-    for(int i = int(width3 << 3); i < int(width); i++)
+    vec4 data[2] = LOAD(src_ptr, IMAGE_OFFSET(src_iter, width3 << 3, 0));
+    int  idx     = 0;
+    if(width >> 2 != width3 << 1)
     {
-        float data = LOAD(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
-        max_val.x  = MAX_OP(data, max_val.x);
+        max_val = MAX_OP(data[0], max_val);
+        idx     = 1;
+    }
+    for(int i = 0; i < int(width) % 4; i++)
+    {
+        max_val.x = MAX_OP(data[idx][i], max_val.x);
     }
 #endif /* NON_MULTIPLE_OF_8 */
 
@@ -102,7 +106,7 @@ void main(void)
 }
 #elif defined(DATA_TYPE_FP16)
 
-TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(1, srcBuffer, uvec4, src_ptr, src_shift, 4, readonly);
 TENSOR_DECLARATION(2, dstBuffer, uint, dst_ptr, dst_shift, 2, writeonly);
 
 void main(void)
@@ -117,24 +121,23 @@ void main(void)
     uint width3 = width >> 3;
     for(int i = 0; i < int(width3); i++)
     {
-        vec4 data[2];
-        data    = VLOAD4_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
-        max_val = MAX_OP(data[0], max_val);
-        max_val = MAX_OP(data[1], max_val);
+        vec4 data[2] = LOAD_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
+        max_val      = MAX_OP(data[0], max_val);
+        max_val      = MAX_OP(data[1], max_val);
     }
 
 #ifdef NON_MULTIPLE_OF_8
     // Handle non multiple of 8
-    uint width1 = width >> 1 << 1;
-    for(int i = int(width3 << 3); i < int(width1); i = i + 2)
+    vec4 data[2] = LOAD_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, width3 << 3, 0));
+    int  idx     = 0;
+    if(width >> 2 != width3 << 1)
     {
-        vec2 data  = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
-        max_val.xy = MAX_OP(data, max_val.xy);
+        max_val = MAX_OP(data[0], max_val);
+        idx     = 1;
     }
-    if(width != width1)
+    for(int i = 0; i < int(width) % 4; i++)
     {
-        vec2 data = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, width1, 0));
-        max_val.x = MAX_OP(data.x, max_val.x);
+        max_val.x = MAX_OP(data[idx][i], max_val.x);
     }
 #endif /* NON_MULTIPLE_OF_8 */
 
@@ -175,9 +178,9 @@ SHADER_PARAMS_DECLARATION
 };
 #if defined(DATA_TYPE_FP32)
 
-TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(1, srcBuffer, vec4[2], src_ptr, src_shift, 5, readonly);
 TENSOR_DECLARATION(2, maxBuffer, float, max_ptr, max_shift, 2, readonly);
-TENSOR_DECLARATION(3, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+TENSOR_DECLARATION(3, dstBuffer, vec4[2], dst_ptr, dst_shift, 5, writeonly);
 TENSOR_DECLARATION(4, sumBuffer, float, sum_ptr, sum_shift, 2, writeonly);
 
 void main(void)
@@ -198,28 +201,34 @@ void main(void)
     for(int i = 0; i < int(width3); i++)
     {
         vec4 data[2];
-        data[0] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
-        data[1] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, (i << 3) + 4, 0));
+        data    = LOAD(src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
         data[0] = SUB_OP(data[0], max_val);
         data[1] = SUB_OP(data[1], max_val);
         data[0] = EXP_OP(data[0]);
         data[1] = EXP_OP(data[1]);
-        VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, i << 3, 0), data[0]);
-        VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, (i << 3) + 4, 0), data[1]);
+        STORE(dst_ptr, IMAGE_OFFSET(dst_iter, i << 3, 0), data);
         sum1D = ADD_OP(sum1D, data[0]);
         sum1D = ADD_OP(sum1D, data[1]);
     }
 
 #ifdef NON_MULTIPLE_OF_8
     // Handle non multiple of 8
-    for(int i = int(width3 << 3); i < int(width); i++)
+    vec4 data[2] = LOAD(src_ptr, IMAGE_OFFSET(src_iter, width3 << 3, 0));
+    int  idx     = 0;
+    if(width >> 2 != width3 << 1)
     {
-        float data = LOAD(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
-        data       = SUB_OP(data, max_val.x);
-        data       = EXP_OP(data);
-        STORE(dst_ptr, IMAGE_OFFSET(dst_iter, i, 0), data);
-        sum1D.x = ADD_OP(sum1D.x, data);
+        data[0] = SUB_OP(data[0], max_val);
+        data[0] = EXP_OP(data[0]);
+        sum1D   = ADD_OP(sum1D, data[0]);
+        idx     = 1;
     }
+    for(int i = 0; i < int(width) % 4; i++)
+    {
+        data[idx][i] = SUB_OP(data[idx][i], max_val.x);
+        data[idx][i] = EXP_OP(data[idx][i]);
+        sum1D.x      = ADD_OP(sum1D.x, data[idx][i]);
+    }
+    STORE(dst_ptr, IMAGE_OFFSET(dst_iter, width3 << 3, 0), data);
 #endif /* NON_MULTIPLE_OF_8 */
 
     // Perform min/max reduction
@@ -231,9 +240,9 @@ void main(void)
 }
 #elif defined(DATA_TYPE_FP16)
 
-TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(1, srcBuffer, uvec4, src_ptr, src_shift, 4, readonly);
 TENSOR_DECLARATION(2, maxBuffer, uint, max_ptr, max_shift, 2, readonly);
-TENSOR_DECLARATION(3, dstBuffer, uint, dst_ptr, dst_shift, 2, writeonly);
+TENSOR_DECLARATION(3, dstBuffer, uvec4, dst_ptr, dst_shift, 4, writeonly);
 TENSOR_DECLARATION(4, sumBuffer, uint, sum_ptr, sum_shift, 2, writeonly);
 
 void main(void)
@@ -254,36 +263,34 @@ void main(void)
     uint width3 = width >> 3;
     for(int i = 0; i < int(width3); i++)
     {
-        vec4 data[2];
-        data    = VLOAD4_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
-        data[0] = SUB_OP(data[0], max_val);
-        data[1] = SUB_OP(data[1], max_val);
-        data[0] = EXP_OP(data[0]);
-        data[1] = EXP_OP(data[1]);
-        VSTORE4_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, i << 3, 0), data);
+        vec4 data[2] = LOAD_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, i << 3, 0));
+        data[0]      = SUB_OP(data[0], max_val);
+        data[1]      = SUB_OP(data[1], max_val);
+        data[0]      = EXP_OP(data[0]);
+        data[1]      = EXP_OP(data[1]);
+        STORE_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, i << 3, 0), data);
         sum1D = ADD_OP(sum1D, data[0]);
         sum1D = ADD_OP(sum1D, data[1]);
     }
 
 #ifdef NON_MULTIPLE_OF_8
     // Handle non multiple of 8
-    uint width1 = width >> 1 << 1;
-    for(int i = int(width3 << 3); i < int(width1); i = i + 2)
+    vec4 data[2] = LOAD_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, width3 << 3, 0));
+    int  idx     = 0;
+    if(width >> 2 != width3 << 1)
     {
-        vec2 data = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, i, 0));
-        data      = SUB_OP(data, max_val.xy);
-        data      = EXP_OP(data);
-        STORE_PACK2_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, i, 0), data);
-        sum1D.xy = ADD_OP(sum1D.xy, data);
+        data[0] = SUB_OP(data[0], max_val);
+        data[0] = EXP_OP(data[0]);
+        sum1D   = ADD_OP(sum1D, data[0]);
+        idx     = 1;
     }
-    if(width != width1)
+    for(int i = 0; i < int(width) % 4; i++)
     {
-        float data = LOAD_UNPACK2_HALF(src_ptr, IMAGE_OFFSET(src_iter, width1, 0)).x;
-        data       = SUB_OP(data, max_val.x);
-        data       = EXP_OP(data);
-        STORE_PACK2_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, width1, 0), vec2(data, 0.0));
-        sum1D.x = ADD_OP(sum1D.x, data);
+        data[idx][i] = SUB_OP(data[idx][i], max_val.x);
+        data[idx][i] = EXP_OP(data[idx][i]);
+        sum1D.x      = ADD_OP(sum1D.x, data[idx][i]);
     }
+    STORE_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, width3 << 3, 0), data);
 #endif /* NON_MULTIPLE_OF_8 */
     // Perform min/max reduction
     sum1D.xy = ADD_OP(sum1D.xy, sum1D.zw);
@@ -315,9 +322,9 @@ SHADER_PARAMS_DECLARATION
     Tensor3DAttributes dst_attrs;
 };
 #if defined(DATA_TYPE_FP32)
-TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(1, srcBuffer, vec4[2], src_ptr, src_shift, 5, readonly);
 TENSOR_DECLARATION(2, sumBuffer, float, sum_ptr, sum_shift, 2, readonly);
-TENSOR_DECLARATION(3, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+TENSOR_DECLARATION(3, dstBuffer, vec4[2], dst_ptr, dst_shift, 5, writeonly);
 void main(void)
 {
     ImageIterator src_iter = CONVERT_TENSOR3D_TO_IMAGE_ITERATOR(src_attrs, src_shift);
@@ -327,16 +334,15 @@ void main(void)
     // Load max value of 1D logits vector (row)
     vec4 sum_val = vec4(LOAD(sum_ptr, IMAGE_OFFSET(sum_iter, 0, gl_GlobalInvocationID.y)));
 
-    vec4 data[2];
-    data[0] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, 0, 0));
-    data[1] = VLOAD4(vec4, src_ptr, IMAGE_OFFSET(src_iter, 4, 0));
-    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 0), DIV_OP(data[0], sum_val));
-    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 4, 0), DIV_OP(data[1], sum_val));
+    vec4 data[2] = LOAD_CURRENT_ITEM(src_ptr, src_iter);
+    data[0]      = DIV_OP(data[0], sum_val);
+    data[1]      = DIV_OP(data[1], sum_val);
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, data);
 }
 #elif defined(DATA_TYPE_FP16)
-TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(1, srcBuffer, uvec4, src_ptr, src_shift, 4, readonly);
 TENSOR_DECLARATION(2, sumBuffer, uint, sum_ptr, sum_shift, 2, readonly);
-TENSOR_DECLARATION(3, dstBuffer, uint, dst_ptr, dst_shift, 2, writeonly);
+TENSOR_DECLARATION(3, dstBuffer, uvec4, dst_ptr, dst_shift, 4, writeonly);
 void main(void)
 {
     ImageIterator src_iter = CONVERT_TENSOR3D_TO_IMAGE_ITERATOR(src_attrs, src_shift);
@@ -346,12 +352,10 @@ void main(void)
     // Load max value of 1D logits vector (row)
     vec4 sum_val = vec4(LOAD_UNPACK2_HALF(sum_ptr, IMAGE_OFFSET(sum_iter, 0, gl_GlobalInvocationID.y)).x);
 
-    vec4 data[2];
-    data = VLOAD4_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 0));
-    vec4 ret[2];
-    ret[0] = DIV_OP(data[0], sum_val);
-    ret[1] = DIV_OP(data[1], sum_val);
-    VSTORE4_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 0), ret);
+    vec4 data[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src_ptr, src_iter);
+    data[0]      = DIV_OP(data[0], sum_val);
+    data[1]      = DIV_OP(data[1], sum_val);
+    STORE_PACK8_CURRENT_ITEM_HALF(dst_ptr, dst_iter, data);
 }
 #else // DATA_TYPE_FP32
 #error Data type not supported
