@@ -63,7 +63,7 @@ if env['opencl'] and env['neon']:
         Import('arm_compute_graph_a')
         Import('arm_compute_core_a')
         Import('arm_compute_a')
-        arm_compute_graph_libs = [ arm_compute_graph_a, arm_compute_a, arm_compute_core_a, "OpenCL"]
+        arm_compute_graph_libs = [ arm_compute_a, arm_compute_core_a, "OpenCL"]
         graph_dependency = arm_compute_graph_a
     else:
         Import('arm_compute_graph_so')
@@ -75,7 +75,7 @@ if env['opencl'] and env['neon']:
         example = os.path.basename(os.path.splitext(str(file))[0])
         prog = None
         if env['os'] == 'android':
-            prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = arm_compute_graph_libs + ["OpenCL"])
+            prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = arm_compute_graph_libs + ["OpenCL"], LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
             Depends(prog, [graph_dependency, opencl])
         else:
             #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
