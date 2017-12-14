@@ -91,7 +91,7 @@
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p weights_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -197,7 +197,7 @@ __kernel void direct_convolution5x5(
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p weights_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)

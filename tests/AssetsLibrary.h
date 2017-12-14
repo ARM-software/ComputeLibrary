@@ -380,7 +380,10 @@ void AssetsLibrary::fill_borders_with_garbage(T &&tensor, D &&distribution, std:
 
     Window window;
     window.set(0, Window::Dimension(-padding_size.left, tensor.shape()[0] + padding_size.right, 1));
-    window.set(1, Window::Dimension(-padding_size.top, tensor.shape()[1] + padding_size.bottom, 1));
+    if(tensor.shape().num_dimensions() > 1)
+    {
+        window.set(1, Window::Dimension(-padding_size.top, tensor.shape()[1] + padding_size.bottom, 1));
+    }
 
     std::mt19937 gen(_seed);
 
@@ -476,6 +479,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
     switch(tensor.data_type())
     {
         case DataType::U8:
+        case DataType::QASYMM8:
         {
             std::uniform_int_distribution<uint8_t> distribution_u8(std::numeric_limits<uint8_t>::lowest(), std::numeric_limits<uint8_t>::max());
             fill(tensor, distribution_u8, seed_offset);
@@ -563,6 +567,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
     switch(tensor.data_type())
     {
         case DataType::U8:
+        case DataType::QASYMM8:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<uint8_t, D>::value));
             std::uniform_int_distribution<uint8_t> distribution_u8(low, high);
@@ -670,30 +675,12 @@ void AssetsLibrary::fill_layer_data(T &&tensor, std::string name) const
     {
         throw framework::FileNotFound("Could not load npy file: " + path);
     }
-    // Check magic bytes and version number
-    unsigned char v_major = 0;
-    unsigned char v_minor = 0;
-    npy::read_magic(stream, &v_major, &v_minor);
-
-    // Read header
-    std::string header;
-    if(v_major == 1 && v_minor == 0)
-    {
-        header = npy::read_header_1_0(stream);
-    }
-    else if(v_major == 2 && v_minor == 0)
-    {
-        header = npy::read_header_2_0(stream);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Unsupported file format version");
-    }
+    std::string header = npy::read_header(stream);
 
     // Parse header
     bool        fortran_order = false;
     std::string typestr;
-    npy::ParseHeader(header, typestr, &fortran_order, shape);
+    npy::parse_header(header, typestr, fortran_order, shape);
 
     // Check if the typestring matches the given one
     std::string expect_typestr = get_typestring(tensor.data_type());

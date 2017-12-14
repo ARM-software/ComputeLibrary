@@ -5,7 +5,7 @@ var classarm__compute_1_1graph_1_1_graph =
     [ "Graph", "classarm__compute_1_1graph_1_1_graph.xhtml#aa2249ab41ba672900ae7703ba6975179", null ],
     [ "Graph", "classarm__compute_1_1graph_1_1_graph.xhtml#a6920039a211f8f50842081c3c4204d2d", null ],
     [ "add_node", "classarm__compute_1_1graph_1_1_graph.xhtml#a38ce1a1fc4dd3131a37225ae95c143ce", null ],
-    [ "add_tensor", "classarm__compute_1_1graph_1_1_graph.xhtml#ad6aab51af350366d4844223107f54b33", null ],
+    [ "add_tensor_object", "classarm__compute_1_1graph_1_1_graph.xhtml#ab354fb05f2ce43224f098bb3dc7ff42c", null ],
     [ "hints", "classarm__compute_1_1graph_1_1_graph.xhtml#aa0dea194fb7dfe9413b77eb1d8960695", null ],
     [ "operator=", "classarm__compute_1_1graph_1_1_graph.xhtml#a5555577e36369d44917b04534e1740e7", null ],
     [ "operator=", "classarm__compute_1_1graph_1_1_graph.xhtml#aec01ee4402c9101ea8f4e6ca8fa35e22", null ],

@@ -48,6 +48,11 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     _border_handler.configure(input, _pooling_layer_kernel.border_size(), border_mode, PixelValue(static_cast<float>(0.f)));
 }
 
+Status NEPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+{
+    return NEPoolingLayerKernel::validate(input, output, pool_info);
+}
+
 void NEPoolingLayer::run()
 {
     // Fill border

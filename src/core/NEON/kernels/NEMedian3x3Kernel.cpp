@@ -61,13 +61,12 @@ void NEMedian3x3Kernel::configure(const ITensor *input, ITensor *output, bool bo
     constexpr unsigned int num_elems_read_per_iteration      = 16;
     constexpr unsigned int num_elems_written_per_iteration   = 8;
     constexpr unsigned int num_rows_read_per_iteration       = 3;
-    constexpr int          rect_offset_xy                    = -1;
 
     Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), rect_offset_xy, rect_offset_xy, num_elems_read_per_iteration, num_rows_read_per_iteration),
+                              AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration),
                               output_access);
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());

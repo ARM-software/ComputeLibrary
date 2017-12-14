@@ -32,8 +32,8 @@
 #include "tests/RawLutAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/TableLookup.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/TableLookup.h"
 
 namespace arm_compute
 {

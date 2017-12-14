@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEWinogradLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
@@ -34,6 +35,7 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ConvolutionLayerFixture.h"
+#include "tests/validation/fixtures/WinogradLayerFixture.h"
 
 namespace arm_compute
 {
@@ -44,17 +46,17 @@ namespace validation
 namespace
 {
 const AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif                                               /* ARM_COMPUTE_ENABLE_FP16 */
+#endif                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 const AbsoluteTolerance<float> tolerance_q(1.0f);    /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     DataType::F16,
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     DataType::F32,
     DataType::QS8,
     DataType::QS16,
@@ -62,6 +64,23 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 } // namespace
 
 TEST_SUITE(NEON)
+
+#if defined(__aarch64__)
+TEST_SUITE(WinogradLayer)
+template <typename T>
+using NEWinogradLayerFixture = WinogradLayerValidationFixture<Tensor, Accessor, NEWinogradLayer, T>;
+
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradLayerFixture<float>, framework::DatasetMode::PRECOMMIT, datasets::SmallWinogradLayerDataset())
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+
+TEST_SUITE_END()
+TEST_SUITE_END()
+#endif /* __aarch64__ */
+
 TEST_SUITE(ConvolutionLayer)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()), CNNDataTypes),
@@ -101,7 +120,7 @@ template <typename T>
 using NEConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 
 TEST_SUITE(Float)
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                      framework::dataset::make("ReshapeWeights", { true, false })),
@@ -118,7 +137,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixture<half>, framework::Dat
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),

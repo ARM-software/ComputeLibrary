@@ -225,96 +225,96 @@ qint16_t sqmull_qs8(qint8_t a, qint8_t b, int fixed_point_position);
 qint32_t sqmull_qs16(qint16_t a, qint16_t b, int fixed_point_position);
 
 /** 16 bit fixed point scalar saturating multiply
-*
-* @param[in] a                    First 16 bit fixed point input
-* @param[in] b                    Second 16 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 16 bit fixed point multiplication. The result is saturated in case of overflow
-*/
+ *
+ * @param[in] a                    First 16 bit fixed point input
+ * @param[in] b                    Second 16 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 16 bit fixed point multiplication. The result is saturated in case of overflow
+ */
 qint16_t sqmul_qs16(qint16_t a, qint16_t b, int fixed_point_position);
 
 /** 8 bit fixed point scalar inverse square root
-*
-* @param[in] a                    8 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 8 bit fixed point inverse square root.
-*/
+ *
+ * @param[in] a                    8 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 8 bit fixed point inverse square root.
+ */
 qint8_t sinvsqrt_qs8(qint8_t a, int fixed_point_position);
 
 /** 16 bit fixed point scalar inverse square root
-*
-* @param[in] a                    16 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 16 bit fixed point inverse square root.
-*/
+ *
+ * @param[in] a                    16 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 16 bit fixed point inverse square root.
+ */
 qint16_t sinvsqrt_qs16(qint16_t a, int fixed_point_position);
 
 /** 8 bit fixed point scalar division
-*
-* @param[in] a                    First 8 bit fixed point input
-* @param[in] b                    Second 8 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 8 bit fixed point division.
-*/
+ *
+ * @param[in] a                    First 8 bit fixed point input
+ * @param[in] b                    Second 8 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 8 bit fixed point division.
+ */
 qint8_t sdiv_qs8(qint8_t a, qint8_t b, int fixed_point_position);
 
 /** 16 bit fixed point scalar division
-*
-* @param[in] a                    First 16 bit fixed point input
-* @param[in] b                    Second 16 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 16 bit fixed point division.
-*/
+ *
+ * @param[in] a                    First 16 bit fixed point input
+ * @param[in] b                    Second 16 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 16 bit fixed point division.
+ */
 qint16_t sdiv_qs16(qint16_t a, qint16_t b, int fixed_point_position);
 
 /** 8 bit fixed point scalar exponential
-*
-* @param[in] a                    8 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 8 bit fixed point exponential.
-*/
+ *
+ * @param[in] a                    8 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 8 bit fixed point exponential.
+ */
 qint8_t sqexp_qs8(qint8_t a, int fixed_point_position);
 
 /** 16 bit fixed point scalar exponential
-*
-* @param[in] a                    16 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 16 bit fixed point exponential.
-*/
+ *
+ * @param[in] a                    16 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 16 bit fixed point exponential.
+ */
 qint16_t sqexp_qs16(qint16_t a, int fixed_point_position);
 
 /** 16 bit fixed point scalar exponential
-*
-* @param[in] a                    16 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 16 bit fixed point exponential.
-*/
+ *
+ * @param[in] a                    16 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 16 bit fixed point exponential.
+ */
 qint16_t sexp_qs16(qint16_t a, int fixed_point_position);
 
 /** 8 bit fixed point scalar logarithm
-*
-* @param[in] a                    8 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 8 bit fixed point logarithm.
-*/
+ *
+ * @param[in] a                    8 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 8 bit fixed point logarithm.
+ */
 qint8_t slog_qs8(qint8_t a, int fixed_point_position);
 
 /** 16 bit fixed point scalar logarithm
-*
-* @param[in] a                    16 bit fixed point input
-* @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
-*
-* @return The result of the 16 bit fixed point logarithm.
-*/
+ *
+ * @param[in] a                    16 bit fixed point input
+ * @param[in] fixed_point_position Fixed point position that expresses the number of bits for the fractional part of the number
+ *
+ * @return The result of the 16 bit fixed point logarithm.
+ */
 qint16_t slog_qs16(qint16_t a, int fixed_point_position);
 
 /** Convert an 8 bit fixed point to float

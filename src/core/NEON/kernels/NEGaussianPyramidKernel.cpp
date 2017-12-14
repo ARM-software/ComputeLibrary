@@ -41,20 +41,19 @@
 using namespace arm_compute;
 
 NEGaussianPyramidHorKernel::NEGaussianPyramidHorKernel()
-    : _border_size(0), _l2_load_offset(0)
+    : _l2_load_offset(0)
 {
 }
 
 BorderSize NEGaussianPyramidHorKernel::border_size() const
 {
-    return _border_size;
+    return BorderSize(0, 2);
 }
 
-void NEGaussianPyramidHorKernel::configure(const ITensor *input, ITensor *output, bool border_undefined)
+void NEGaussianPyramidHorKernel::configure(const ITensor *input, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S16);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != 2 * output->info()->dimension(0));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != output->info()->dimension(1));
 
     for(size_t i = 2; i < Coordinates::num_max_dimensions; ++i)
@@ -62,17 +61,16 @@ void NEGaussianPyramidHorKernel::configure(const ITensor *input, ITensor *output
         ARM_COMPUTE_ERROR_ON(input->info()->dimension(i) != output->info()->dimension(i));
     }
 
-    _input       = input;
-    _output      = output;
-    _border_size = BorderSize(border_undefined ? 0 : 2, 2);
+    _input  = input;
+    _output = output;
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;
     constexpr unsigned int num_elems_read_per_iteration      = 32;
     constexpr unsigned int num_elems_written_per_iteration   = 8;
-    constexpr float        scale_x                           = 0.5f;
+    const float            scale_x                           = static_cast<float>(output->info()->dimension(0)) / input->info()->dimension(0);
 
-    Window                 win = calculate_max_window_horizontal(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    Window                 win = calculate_max_window_horizontal(*input->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration, scale_x);
 
     // Sub sampling selects odd pixels (1, 3, 5, ...) for images with even
@@ -97,15 +95,12 @@ void NEGaussianPyramidHorKernel::configure(const ITensor *input, ITensor *output
         _l2_load_offset += 1;
     }
 
+    // Replace input access with static window
     update_window_and_padding(win,
                               AccessWindowHorizontal(input->info(), _l2_load_offset, num_elems_read_per_iteration),
                               output_access);
 
-    ValidRegion valid_region = input->info()->valid_region();
-    valid_region.anchor.set(0, std::ceil((valid_region.anchor[0] + (border_undefined ? border_size().left : 0)) / 2.f));
-    valid_region.shape.set(0, (valid_region.shape[0] - (border_undefined ? border_size().right : 0)) / 2 - valid_region.anchor[0]);
-
-    output_access.set_valid_region(win, valid_region);
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
@@ -163,13 +158,11 @@ BorderSize NEGaussianPyramidVertKernel::border_size() const
     return BorderSize(2, 0);
 }
 
-void NEGaussianPyramidVertKernel::configure(const ITensor *input, ITensor *output, bool border_undefined)
+void NEGaussianPyramidVertKernel::configure(const ITensor *input, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S16);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
-
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != output->info()->dimension(0));
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != 2 * output->info()->dimension(1));
 
     for(size_t i = 2; i < Coordinates::num_max_dimensions; ++i)
     {
@@ -189,9 +182,9 @@ void NEGaussianPyramidVertKernel::configure(const ITensor *input, ITensor *outpu
     constexpr unsigned int num_elems_read_per_iteration = 16;
     constexpr unsigned int num_rows_read_per_iteration  = 5;
 
-    constexpr float scale_y = 0.5f;
+    const float scale_y = static_cast<float>(output->info()->dimension(1)) / input->info()->dimension(1);
 
-    Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_rows_processed_per_iteration), border_undefined, border_size());
+    Window                win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_rows_processed_per_iteration));
     AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration, num_rows_written_per_iteration, 1.f, scale_y);
 
     // Determine whether we need to load even or odd rows. See above for a
@@ -207,11 +200,7 @@ void NEGaussianPyramidVertKernel::configure(const ITensor *input, ITensor *outpu
                               AccessWindowRectangle(input->info(), 0, _t2_load_offset, num_elems_read_per_iteration, num_rows_read_per_iteration),
                               output_access);
 
-    ValidRegion valid_region = input->info()->valid_region();
-    valid_region.anchor.set(1, std::ceil((valid_region.anchor[1] + (border_undefined ? border_size().top : 0)) / 2.f));
-    valid_region.shape.set(1, (valid_region.shape[1] - (border_undefined ? border_size().bottom : 0)) / 2 - valid_region.anchor[1]);
-
-    output_access.set_valid_region(win, valid_region);
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }

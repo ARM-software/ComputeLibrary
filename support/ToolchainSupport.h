@@ -34,6 +34,8 @@
 #include <string>
 #include <type_traits>
 
+#include "support/Half.h"
+
 namespace arm_compute
 {
 namespace support
@@ -144,8 +146,8 @@ inline T trunc(T value)
  * @note This function implements the same behaviour as std::copysign except that it doesn't
  *       support Integral type. The latter is not in the namespace std in some Android toolchains.
  *
- * @param[in] x value that contains the magnitued to be used in constructing the result.
- * @param[in] y value that contains the sign to be used in constructin the result.
+ * @param[in] x value that contains the magnitude to be used in constructing the result.
+ * @param[in] y value that contains the sign to be used in construct in the result.
  *
  * @return Floating-point value with magnitude of @p x and sign of @p y.
  */
@@ -153,6 +155,23 @@ template <typename T, typename = typename std::enable_if<std::is_floating_point<
 inline T copysign(T x, T y)
 {
     return ::copysign(x, y);
+}
+
+/** Loads the data from the given location, converts them to character string equivalents
+ *  and writes the result to a character string buffer.
+ *
+ * @param[in] s    Pointer to a character string to write to
+ * @param[in] n    Up to buf_size - 1 characters may be written, plus the null terminator
+ * @param[in] fmt  Pointer to a null-terminated multibyte string specifying how to interpret the data.
+ * @param[in] args Arguments forwarded to snprintf.
+ *
+ * @return  Number of characters that would have been written for a sufficiently large buffer
+ *          if successful (not including the terminating null character), or a negative value if an error occurred.
+ */
+template <typename... Ts>
+inline int snprintf(char *s, size_t n, const char *fmt, Ts &&... args)
+{
+    return ::snprintf(s, n, fmt, std::forward<Ts>(args)...);
 }
 #else  /* (__ANDROID__ || BARE_METAL) */
 /** Convert integer and float values to string.
@@ -250,8 +269,8 @@ inline T trunc(T value)
  * @note This function implements the same behaviour as std::copysign except that it doesn't
  *       support Integral type. The latter is not in the namespace std in some Android toolchains.
  *
- * @param[in] x value that contains the magnitued to be used in constructing the result.
- * @param[in] y value that contains the sign to be used in constructin the result.
+ * @param[in] x value that contains the magnitude to be used in constructing the result.
+ * @param[in] y value that contains the sign to be used in construct in the result.
  *
  * @return Floating-point value with magnitude of @p x and sign of @p y.
  */
@@ -259,6 +278,23 @@ template <typename T, typename = typename std::enable_if<std::is_floating_point<
 inline T copysign(T x, T y)
 {
     return std::copysign(x, y);
+}
+
+/** Loads the data from the given location, converts them to character string equivalents
+ *  and writes the result to a character string buffer.
+ *
+ * @param[in] s    Pointer to a character string to write to
+ * @param[in] n    Up to buf_size - 1 characters may be written, plus the null terminator
+ * @param[in] fmt  Pointer to a null-terminated multibyte string specifying how to interpret the data.
+ * @param[in] args Arguments forwarded to std::snprintf.
+ *
+ * @return  Number of characters that would have been written for a sufficiently large buffer
+ *          if successful (not including the terminating null character), or a negative value if an error occurred.
+ */
+template <typename... Ts>
+inline int snprintf(char *s, std::size_t n, const char *fmt, Ts &&... args)
+{
+    return std::snprintf(s, n, fmt, std::forward<Ts>(args)...);
 }
 #endif /* (__ANDROID__ || BARE_METAL) */
 
@@ -285,13 +321,23 @@ inline void *align(std::size_t alignment, std::size_t size, void *&ptr, std::siz
 
     return ptr = reinterpret_cast<void *>(aligned);
 }
+
+// std::isfinite
+template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
+inline bool isfinite(T value)
+{
+    return std::isfinite(value);
+}
+
+inline bool isfinite(half_float::half value)
+{
+    return half_float::isfinite(value);
+}
 } // namespace cpp11
 
 namespace cpp14
 {
-/** make_unqiue is missing in CPP11. Reimplement it according to the standard
- * proposal.
- */
+/** make_unique is missing in CPP11. Re-implement it according to the standard proposal. */
 template <class T>
 struct _Unique_if
 {

@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** AssemblyBase/armv7a NEON kernel to multiply two input matrices "A" and "B". */
+/** Base class for GEMM NEON kernels implemented in Assembly. */
 class NEGEMMAssemblyBaseKernel : public INEKernel
 {
 public:

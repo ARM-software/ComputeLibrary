@@ -35,7 +35,7 @@ using namespace arm_compute::graph;
 namespace
 {
 template <typename TensorType>
-std::unique_ptr<ITensor> initialise_tensor(TensorInfo &info)
+std::unique_ptr<arm_compute::ITensor> initialise_tensor(TensorInfo &info)
 {
     auto tensor = arm_compute::support::cpp14::make_unique<TensorType>();
     tensor->allocator()->init(info);
@@ -43,7 +43,7 @@ std::unique_ptr<ITensor> initialise_tensor(TensorInfo &info)
 }
 
 template <typename TensorType>
-void tensor_allocate(ITensor &tensor)
+void tensor_allocate(arm_compute::ITensor &tensor)
 {
     auto itensor = dynamic_cast<TensorType *>(&tensor);
     ARM_COMPUTE_ERROR_ON_NULLPTR(itensor);
@@ -85,7 +85,17 @@ bool Tensor::call_accessor()
     return retval;
 }
 
-ITensor *Tensor::tensor()
+bool Tensor::has_accessor() const
+{
+    return (_accessor != nullptr);
+}
+
+arm_compute::ITensor *Tensor::tensor()
+{
+    return _tensor.get();
+}
+
+const arm_compute::ITensor *Tensor::tensor() const
 {
     return _tensor.get();
 }
@@ -95,7 +105,7 @@ const TensorInfo &Tensor::info() const
     return _info;
 }
 
-ITensor *Tensor::set_target(TargetHint target)
+arm_compute::ITensor *Tensor::set_target(TargetHint target)
 {
     if(_tensor != nullptr)
     {

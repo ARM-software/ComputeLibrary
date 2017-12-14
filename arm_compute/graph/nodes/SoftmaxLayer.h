@@ -26,20 +26,19 @@
 
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/INode.h"
-#include "arm_compute/graph/Tensor.h"
+#include "arm_compute/graph/ITensorObject.h"
 #include "arm_compute/graph/Types.h"
 namespace arm_compute
 {
 namespace graph
 {
 /** Softmax layer node */
-class SoftmaxLayer : public INode
+class SoftmaxLayer final : public INode
 {
 public:
     // Inherited methods overriden:
-    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
+    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) override;
 };
-
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_SOFTMAX_LAYER_H__ */

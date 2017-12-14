@@ -31,7 +31,7 @@
 #include "tests/Types.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/MinMaxLocation.h"
+#include "tests/validation/reference/MinMaxLocation.h"
 
 namespace arm_compute
 {

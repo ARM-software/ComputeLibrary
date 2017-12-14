@@ -6,6 +6,7 @@ var functions_vars =
     [ "c", "functions_vars_c.xhtml", null ],
     [ "d", "functions_vars_d.xhtml", null ],
     [ "e", "functions_vars_e.xhtml", null ],
+    [ "f", "functions_vars_f.xhtml", null ],
     [ "g", "functions_vars_g.xhtml", null ],
     [ "h", "functions_vars_h.xhtml", null ],
     [ "i", "functions_vars_i.xhtml", null ],

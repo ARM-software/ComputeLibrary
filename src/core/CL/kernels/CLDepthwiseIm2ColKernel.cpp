@@ -32,6 +32,7 @@
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
 
+#include "arm_compute/runtime/CL/CLScheduler.h"
 #include <tuple>
 
 using namespace arm_compute;
@@ -41,13 +42,13 @@ CLDepthwiseIm2ColKernel::CLDepthwiseIm2ColKernel()
 {
 }
 
-void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info)
+void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != output->info()->dimension(2));
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != (kernel_dims.width * kernel_dims.height));
+    ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != (kernel_dims.width * kernel_dims.height + ((has_bias) ? 1 : 0)));
 
     _input  = input;
     _output = output;
@@ -58,14 +59,27 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.emplace("-DSTRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
     build_opts.emplace("-DSTRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
-    build_opts.emplace("-DPAD_X=" + support::cpp11::to_string(conv_info.pad().first));
-    build_opts.emplace("-DPAD_Y=" + support::cpp11::to_string(conv_info.pad().second));
+    build_opts.emplace("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
+    build_opts.emplace("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
+    build_opts.emplace("-DPAD_RIGHT=" + support::cpp11::to_string(conv_info.pad_right()));
+    build_opts.emplace("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom()));
     build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.emplace("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
     build_opts.emplace("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
     build_opts.emplace("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
-
+    if(has_bias)
+    {
+        build_opts.emplace("-DHAS_BIAS");
+    }
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_im2col", build_opts));
+
+    // Configure the local work size for Bifrost with a value obtained
+    // via exhaustive autotuning for the MobileNets tensor shapes.
+    const GPUTarget gpu_target = get_arch_from_target(get_target());
+    if(gpu_target == GPUTarget::BIFROST)
+    {
+        _lws_hint = cl::NDRange(1, 2, 1);
+    }
 
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -99,7 +113,7 @@ void CLDepthwiseIm2ColKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, _lws_hint);
     }
     while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_in));
 }

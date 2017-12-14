@@ -41,7 +41,7 @@ class Coordinates;
 /* Max S16 value used for saturation purposes. */
 const static uint16x8_t max_int_u16 = vdupq_n_u16(static_cast<uint16_t>(INT16_MAX));
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 namespace fp16
 {
 inline float16x8x2_t convert_u8x16_to_f16x8x2(uint8x16_t input)
@@ -132,7 +132,7 @@ void NEAccumulateWeightedFP16Kernel::run(const Window &window, const ThreadInfo 
     },
     input, accum);
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 namespace
 {

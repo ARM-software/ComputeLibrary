@@ -115,18 +115,19 @@ void CLHistogramKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
-    if(_input->info()->dimension(0) < pixels_per_item)
-    {
-        return;
-    }
-
     _output->map(queue, true);
     ARM_COMPUTE_ERROR_ON(_output->buffer() == nullptr);
     memset(_output->buffer(), 0, _output->size());
     _output->unmap(queue);
 
-    Window      slice = window.first_slice_window_2D();
-    cl::NDRange lws   = cl::NDRange(local_x_size, 1);
+    if(_input->info()->dimension(0) < pixels_per_item)
+    {
+        return;
+    }
+
+    Window             slice = window.first_slice_window_2D();
+    const unsigned int gws_x = (window.x().end() - window.x().start()) / window.x().step();
+    cl::NDRange        lws   = (local_x_size < gws_x) ? cl::NDRange(local_x_size, 1) : cl::NDRange(1, 1);
 
     do
     {

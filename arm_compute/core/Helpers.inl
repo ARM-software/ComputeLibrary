@@ -197,7 +197,12 @@ inline void Iterator::reset(const size_t dimension)
     }
 }
 
-inline bool auto_init_if_empty(ITensorInfo &info, const TensorShape &shape, int num_channels, DataType data_type, int fixed_point_position)
+inline bool auto_init_if_empty(ITensorInfo       &info,
+                               const TensorShape &shape,
+                               int                num_channels,
+                               DataType           data_type,
+                               int                fixed_point_position,
+                               QuantizationInfo   quantization_info)
 {
     if(info.tensor_shape().total_size() == 0)
     {
@@ -205,6 +210,22 @@ inline bool auto_init_if_empty(ITensorInfo &info, const TensorShape &shape, int 
         info.set_num_channels(num_channels);
         info.set_tensor_shape(shape);
         info.set_fixed_point_position(fixed_point_position);
+        info.set_quantization_info(quantization_info);
+        return true;
+    }
+
+    return false;
+}
+
+inline bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source)
+{
+    if(info_sink.tensor_shape().total_size() == 0)
+    {
+        info_sink.set_data_type(info_source.data_type());
+        info_sink.set_num_channels(info_source.num_channels());
+        info_sink.set_tensor_shape(info_source.tensor_shape());
+        info_sink.set_fixed_point_position(info_source.fixed_point_position());
+        info_sink.set_quantization_info(info_source.quantization_info());
         return true;
     }
 
@@ -249,6 +270,17 @@ inline bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_
     if(info.fixed_point_position() == 0 && (info.data_type() == DataType::QS8 || info.data_type() == DataType::QS16))
     {
         info.set_fixed_point_position(fixed_point_position);
+        return true;
+    }
+
+    return false;
+}
+
+inline bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo quantization_info)
+{
+    if(info.quantization_info().empty() && (is_data_type_quantized_asymmetric(info.data_type())))
+    {
+        info.set_quantization_info(quantization_info);
         return true;
     }
 

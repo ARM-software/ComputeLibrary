@@ -29,11 +29,11 @@
 
 namespace arm_compute
 {
-class CLTensor;
+class ICLTensor;
 
 namespace graph
 {
-class Tensor;
+class ITensorObject;
 /** OpenCL map function */
 class CLMap : public arm_compute::IFunction
 {
@@ -43,7 +43,7 @@ public:
      * @param[in] tensor   Tensor to map
      * @param[in] blocking Flag to specify if the map should be blocking or not (defaults to false)
      */
-    CLMap(Tensor *tensor, bool blocking = false);
+    CLMap(ITensorObject *tensor, bool blocking = false);
     /** Prevent instances from being copy constructed */
     CLMap(const CLMap &) = delete;
     /** Prevent instances from being copy assigned */
@@ -57,8 +57,8 @@ public:
     void run() override;
 
 private:
-    arm_compute::CLTensor *_tensor;   /**< Tensor */
-    bool                   _blocking; /**< Blocking flag */
+    arm_compute::ICLTensor *_tensor;   /**< Tensor */
+    bool                    _blocking; /**< Blocking flag */
 };
 } // namespace graph
 } // namespace arm_compute

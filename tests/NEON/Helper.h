@@ -25,6 +25,8 @@
 #define __ARM_COMPUTE_TEST_NEON_HELPER_H__
 
 #include "arm_compute/runtime/Array.h"
+#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "support/ToolchainSupport.h"
 #include "tests/Globals.h"
 
 #include <algorithm>
@@ -47,6 +49,35 @@ void fill_tensors(D &&dist, std::initializer_list<int> seeds, T &&tensor, Ts &&.
         library->fill(Accessor(*tp), std::forward<D>(dist), vs[k++]);
     }
 }
+
+// This template synthetizes an INESimpleFunction which runs the given kernel K
+template <typename K>
+class NESynthetizeFunction : public INESimpleFunction
+{
+public:
+    template <typename... Args>
+    void configure(Args &&... args)
+    {
+        auto k = arm_compute::support::cpp14::make_unique<K>();
+        k->configure(std::forward<Args>(args)...);
+        _kernel = std::move(k);
+    }
+};
+
+// As above but this also setups a Zero border on the input tensor of the specified bordersize
+template <typename K, int bordersize>
+class NESynthetizeFunctionWithZeroConstantBorder : public INESimpleFunction
+{
+public:
+    template <typename T, typename... Args>
+    void configure(T first, Args &&... args)
+    {
+        auto k = arm_compute::support::cpp14::make_unique<K>();
+        k->configure(first, std::forward<Args>(args)...);
+        _kernel = std::move(k);
+        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue(0));
+    }
+};
 
 } // namespace test
 } // namespace arm_compute

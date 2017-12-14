@@ -106,20 +106,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWarpPerspectiveFixture<uint8_t>, framework::D
                                                                                                                        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                                datasets::BorderModes()))
 {
-    // Create the valid mask Tensor
-    RawTensor valid_mask(_reference.shape(), _reference.data_type());
-
-    validate(Accessor(_target), _reference, valid_mask, tolerance_value, tolerance_number);
+    validate(Accessor(_target), _reference, _valid_mask, tolerance_value, tolerance_number);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEWarpPerspectiveFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                      DataType::U8)),
                                                                                                                      framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                              datasets::BorderModes()))
 {
-    // Create the valid mask Tensor
-    RawTensor valid_mask{ _reference.shape(), _reference.data_type() };
-
-    validate(Accessor(_target), _reference, valid_mask, tolerance_value, tolerance_number);
+    validate(Accessor(_target), _reference, _valid_mask, tolerance_value, tolerance_number);
 }
 
 TEST_SUITE_END()

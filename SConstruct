@@ -39,6 +39,7 @@ vars = Variables("scons")
 vars.AddVariables(
     BoolVariable("debug", "Debug", False),
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
+    BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "x86_32", "x86_64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile")),
@@ -47,7 +48,8 @@ vars.AddVariables(
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
     BoolVariable("neon", "Enable Neon support", False),
-    BoolVariable("embed_kernels", "Embed OpenCL kernels in library binary", False),
+    BoolVariable("gles_compute", "Enable OpenGL ES Compute Shader support", False),
+    BoolVariable("embed_kernels", "Embed OpenCL kernels and OpenGL ES compute shaders in library binary", False),
     BoolVariable("set_soname", "Set the library's soname and shlibversion (requires SCons 2.4 or above)", False),
     BoolVariable("openmp", "Enable OpenMP backend", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
@@ -81,6 +83,7 @@ env.Append(CXXFLAGS = ['-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
          '-fpermissive','-std=gnu++11','-Wno-vla','-Woverloaded-virtual',
          '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow'])
+
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
 if os.environ.get('CXX', 'g++') == 'clang++':
@@ -115,7 +118,7 @@ if env['arch'] == 'armv7a':
         env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
 elif env['arch'] == 'arm64-v8a':
     env.Append(CXXFLAGS = ['-march=armv8-a'])
-
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8A'])
     if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
     elif env['os'] == 'bare_metal':
@@ -123,8 +126,11 @@ elif env['arch'] == 'arm64-v8a':
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
 elif env['arch'] == 'arm64-v8.2-a':
-    env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16+simd'])
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_ENABLE_FP16'])
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
+
+    if os.environ.get('CXX', 'g++') == 'clang++':
+        env.Append(CXXFLAGS = ['-fno-integrated-as'])
+
     if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
     elif env['os'] == 'bare_metal':
@@ -172,6 +178,8 @@ if not GetOption("help"):
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
+    if env['cppthreads']:
+        env.Append(LINKFLAGS = ['-lpthread'])
 
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])
@@ -187,15 +195,17 @@ elif env['os'] == 'bare_metal':
     env.Append(CPPDEFINES = ['BARE_METAL'])
 
 if env['opencl']:
-    if env['os'] == 'bare_metal':
+    if env['os'] in ['bare_metal'] or env['standalone']:
         print("Cannot link OpenCL statically, which is required on bare metal")
         Exit(1)
 
+if env['opencl'] or env['gles_compute']:
     if env['embed_kernels']:
         env.Append(CPPDEFINES = ['EMBEDDED_KERNELS'])
 
 if env['debug']:
     env['asserts'] = True
+    env['logging'] = True
     env.Append(CXXFLAGS = ['-O0','-g','-gdwarf-2'])
     env.Append(CPPDEFINES = ['ARM_COMPUTE_DEBUG_ENABLED'])
 else:
@@ -205,6 +215,9 @@ if env['asserts']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_ASSERTS_ENABLED'])
     env.Append(CXXFLAGS = ['-fstack-protector-strong'])
 
+if env['logging']:
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_LOGGING_ENABLED'])
+
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
 
@@ -212,10 +225,15 @@ Export('vars')
 Export('env')
 Export('version_at_least')
 
-SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
-
 if env['opencl']:
     SConscript("./opencl-1.2-stubs/SConscript", variant_dir="build/%s/opencl-1.2-stubs" % env['build_dir'], duplicate=0)
+
+if env['gles_compute'] and env['os'] != 'android':
+    env.Append(CPPPATH = ['#/include/linux'])
+    env.Append(LIBPATH = ["#build/%s/opengles-3.1-stubs" % env['build_dir']])
+    SConscript("./opengles-3.1-stubs/SConscript", variant_dir="build/%s/opengles-3.1-stubs" % env['build_dir'], duplicate=0)
+
+SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
 
 if env['examples'] and env['os'] != 'bare_metal':
     SConscript('./examples/SConscript', variant_dir='#build/%s/examples' % env['build_dir'], duplicate=0)

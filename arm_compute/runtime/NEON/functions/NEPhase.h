@@ -36,11 +36,12 @@ class NEPhase : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output.
      *
-     * @param[in]  input1 First tensor input. Data type supported: S16.
-     * @param[in]  input2 Second tensor input. Data type supported: S16.
-     * @param[out] output Output tensor. Data type supported: U8.
+     * @param[in]  input1     First tensor input. Data type supported: S16.
+     * @param[in]  input2     Second tensor input. Data type supported: S16.
+     * @param[out] output     Output tensor. Data type supported: U8.
+     * @param[in]  phase_type (Optional) Phase calculation type. Default: SIGNED.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output);
+    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, PhaseType phase_type = PhaseType::SIGNED);
 };
 }
 #endif /*__ARM_COMPUTE_NEPHASE_H__ */

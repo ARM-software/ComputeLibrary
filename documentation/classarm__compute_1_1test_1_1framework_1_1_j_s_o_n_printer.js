@@ -7,6 +7,7 @@ var classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer =
     [ "print_global_footer", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a73c2cb1847e4110041efe047cb9421e6", null ],
     [ "print_global_header", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a4e3955a20faf3bcda615ae62b0b24efa", null ],
     [ "print_info", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a1b8f26a11ed27e8d4af56b4b297e5cd2", null ],
+    [ "print_list_tests", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a3109b7e2d037aafe5422e92c7388d89f", null ],
     [ "print_measurements", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a1989aab0187e56f1cf45e92e892c9d2d", null ],
     [ "print_run_footer", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a906cf0547c72a5e2c38697c7d6c669ba", null ],
     [ "print_run_header", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#aa520a585d43bb30a6c483e69d40f01a1", null ],

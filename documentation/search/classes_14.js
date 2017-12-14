@@ -4,7 +4,8 @@ var searchData=
   ['tensor',['Tensor',['../classarm__compute_1_1graph_1_1_tensor.xhtml',1,'arm_compute::graph']]],
   ['tensor',['Tensor',['../classarm__compute_1_1_tensor.xhtml',1,'arm_compute']]],
   ['tensor3d',['Tensor3D',['../struct_tensor3_d.xhtml',1,'']]],
-  ['tensor4d',['Tensor4D',['../struct_tensor4_d.xhtml',1,'']]],
+  ['tensor4d',['Tensor4D',['../class_tensor4_d.xhtml',1,'']]],
+  ['tensor4dshape',['Tensor4DShape',['../struct_tensor4_d_shape.xhtml',1,'']]],
   ['tensorallocator',['TensorAllocator',['../classarm__compute_1_1_tensor_allocator.xhtml',1,'arm_compute']]],
   ['tensorcache',['TensorCache',['../classarm__compute_1_1test_1_1_tensor_cache.xhtml',1,'arm_compute::test']]],
   ['tensorinfo',['TensorInfo',['../classarm__compute_1_1_tensor_info.xhtml',1,'arm_compute']]],
@@ -17,12 +18,13 @@ var searchData=
   ['testinfo',['TestInfo',['../structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml',1,'arm_compute::test::framework']]],
   ['testresult',['TestResult',['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml',1,'arm_compute::test::framework']]],
   ['testsuiteregistrar',['TestSuiteRegistrar',['../classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_suite_registrar.xhtml',1,'arm_compute::test::framework::detail']]],
+  ['threadiddecorator',['ThreadIdDecorator',['../classarm__compute_1_1logging_1_1_thread_id_decorator.xhtml',1,'arm_compute::logging']]],
   ['threadinfo',['ThreadInfo',['../structarm__compute_1_1_thread_info.xhtml',1,'arm_compute']]],
   ['thresholddataset',['ThresholdDataset',['../classarm__compute_1_1test_1_1datasets_1_1_threshold_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['thresholdvalidationfixture',['ThresholdValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_threshold_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['toggleoption',['ToggleOption',['../classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml',1,'arm_compute::test::framework']]],
+  ['topnpredictionsaccessor',['TopNPredictionsAccessor',['../classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml',1,'arm_compute::graph_utils']]],
   ['transformimpl',['TransformImpl',['../struct_transform_impl.xhtml',1,'']]],
   ['transposeinterleavecommon',['TransposeInterleaveCommon',['../struct_transpose_interleave_common.xhtml',1,'']]],
-  ['typedmeasurement',['TypedMeasurement',['../structarm__compute_1_1test_1_1framework_1_1_typed_measurement.xhtml',1,'arm_compute::test::framework']]],
-  ['typedmeasurement_3c_20double_20_3e',['TypedMeasurement&lt; double &gt;',['../structarm__compute_1_1test_1_1framework_1_1_typed_measurement.xhtml',1,'arm_compute::test::framework']]]
+  ['transposevalidationfixture',['TransposeValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_transpose_validation_fixture.xhtml',1,'arm_compute::test::validation']]]
 ];

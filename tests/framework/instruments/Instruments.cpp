@@ -34,17 +34,28 @@ namespace test
 {
 namespace framework
 {
-InstrumentType instrument_type_from_name(const std::string &name)
+InstrumentsDescription instrument_type_from_name(const std::string &name)
 {
-    static const std::map<std::string, InstrumentType> types =
+    static const std::map<std::string, framework::InstrumentsDescription> types =
     {
-        { "all", InstrumentType::ALL },
-        { "none", InstrumentType::NONE },
-        { "wall_clock", InstrumentType::WALL_CLOCK_TIMER },
-        { "pmu", InstrumentType::PMU },
-        { "pmu_cycles", InstrumentType::PMU_CYCLE_COUNTER },
-        { "pmu_instructions", InstrumentType::PMU_INSTRUCTION_COUNTER },
-        { "mali", InstrumentType::MALI },
+        { "all", std::pair<InstrumentType, ScaleFactor>(InstrumentType::ALL, ScaleFactor::NONE) },
+        { "none", std::pair<InstrumentType, ScaleFactor>(InstrumentType::NONE, ScaleFactor::NONE) },
+        { "wall_clock", std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE) },
+        { "wall_clock_timer", std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE) },
+        { "wall_clock_timer_ms", std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_MS) },
+        { "wall_clock_timer_s", std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_S) },
+        { "pmu", std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::NONE) },
+        { "pmu_k", std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::SCALE_1K) },
+        { "pmu_m", std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::SCALE_1M) },
+        { "pmu_cycles", std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU_CYCLE_COUNTER, ScaleFactor::NONE) },
+        { "pmu_instructions", std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU_INSTRUCTION_COUNTER, ScaleFactor::NONE) },
+        { "mali", std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::NONE) },
+        { "mali_k", std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1K) },
+        { "mali_m", std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1M) },
+        { "opencl_timer", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::NONE) },
+        { "opencl_timer_us", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_US) },
+        { "opencl_timer_ms", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_MS) },
+        { "opencl_timer_s", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_S) },
     };
 
     try

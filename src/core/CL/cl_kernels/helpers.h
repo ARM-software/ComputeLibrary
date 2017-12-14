@@ -24,7 +24,10 @@
 #ifndef ARM_COMPUTE_HELPER_H
 #define ARM_COMPUTE_HELPER_H
 
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
+
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
 #pragma OPENCL EXTENSION cl_arm_printf : enable
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
@@ -41,6 +44,9 @@
 
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
+
+#define CL_VEC_DATA_TYPE_STR(type, size) type##size
+#define CL_VEC_DATA_TYPE(type, size) CL_VEC_DATA_TYPE_STR(type, size)
 
 #define CONVERT_STR(x, type) (convert_##type((x)))
 #define CONVERT(x, type) CONVERT_STR(x, type)

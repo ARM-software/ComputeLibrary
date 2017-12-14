@@ -55,7 +55,7 @@ public:
      *
      * @attention The function does not reset the number of values in @ref IDetectionWindowArray so it is caller's responsibility to clear it.
      *
-     * @param[in]  input                   Input tensor. It is the output of @ref NEHOGDescriptor. Data type supported: F32
+     * @param[in]  input                   Input tensor. It is the output of @ref CLHOGDescriptor. Data type supported: F32
      * @param[in]  hog                     HOG data-object that describes the HOG descriptor
      * @param[out] detection_windows       Array of @ref DetectionWindow used to store the detected objects
      * @param[in]  detection_window_stride Distance in pixels between 2 consecutive detection windows in x and y directions.

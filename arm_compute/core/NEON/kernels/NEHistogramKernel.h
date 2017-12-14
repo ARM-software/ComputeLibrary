@@ -82,28 +82,28 @@ public:
 private:
     /** Function to merge multiple partial histograms.
      *
-     *  @param[out] global_hist Pointer to the final histogram.
-     *  @param[in]  local_hist  Pointer to the partial histograms.
-     *  @param[in]  bins        Number of bins.
+     * @param[out] global_hist Pointer to the final histogram.
+     * @param[in]  local_hist  Pointer to the partial histograms.
+     * @param[in]  bins        Number of bins.
      */
     void merge_histogram(uint32_t *global_hist, const uint32_t *local_hist, size_t bins);
     /** Function to merge multiple minimum values of partial histograms.
      *
-     *  @param[out] global_min Pointer to the global min value.
-     *  @param[in]  local_min  Local min value.
+     * @param[out] global_min Pointer to the global min value.
+     * @param[in]  local_min  Local min value.
      */
     void merge_min(uint8_t *global_min, const uint8_t &local_min);
     /** Function to perform histogram on the given window
-      *
-     *  @param[in] win  Region on which to execute the kernel
-     *  @param[in] info Info about the executing thread
+     *
+     * @param[in] win  Region on which to execute the kernel
+     * @param[in] info Info about the executing thread
      */
     void histogram_U8(Window win, const ThreadInfo &info);
     /** Function to perform histogram on the given window where histogram is
      *         of fixed size 256 without ranges and offsets.
      *
-     *  @param[in] win  Region on which to execute the kernel
-     *  @param[in] info Info about the executing thread
+     * @param[in] win  Region on which to execute the kernel
+     * @param[in] info Info about the executing thread
      */
     void histogram_fixed_U8(Window win, const ThreadInfo &info);
     /** Pre-calculate the pixel windowing for every possible pixel

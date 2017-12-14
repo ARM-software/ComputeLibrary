@@ -24,7 +24,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "arm_compute/runtime/CL/functions/CLDepthConcatenate.h"
+#include "arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
@@ -43,7 +43,7 @@ TEST_SUITE(CL)
 TEST_SUITE(DepthConcatenateLayer)
 
 template <typename T>
-using CLDepthConcatenateLayerFixture = DepthConcatenateValidationFixture<CLTensor, ICLTensor, CLAccessor, CLDepthConcatenate, T>;
+using CLDepthConcatenateLayerFixture = DepthConcatenateLayerValidationFixture<CLTensor, ICLTensor, CLAccessor, CLDepthConcatenateLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -68,7 +68,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConcatenateLayerFixture<float>, framewor
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)))
 {
     // Validate output
@@ -86,7 +86,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConcatenateLayerFixture<int8_t>, framewo
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(),
                                                                                                                   framework::dataset::make("DataType",
                                                                                                                           DataType::QS8)))
 {
@@ -103,7 +103,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConcatenateLayerFixture<int16_t>, framew
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(),
                                                                                                                    framework::dataset::make("DataType",
                                                                                                                            DataType::QS16)))
 {

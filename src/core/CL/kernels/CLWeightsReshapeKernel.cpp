@@ -41,12 +41,12 @@ CLWeightsReshapeKernel::CLWeightsReshapeKernel()
 
 void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
-    const DataType dt                   = input->info()->data_type();
-    const int      fixed_point_position = input->info()->fixed_point_position();
+    const DataType data_type = input->info()->data_type();
 
+    // Calculate output shape
     TensorShape output_shape{ input->info()->tensor_shape() };
     output_shape.collapse(3);
     const size_t tmp_dim = output_shape[0];
@@ -54,7 +54,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     output_shape.set(1, tmp_dim + (biases != nullptr ? 1 : 0));
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, dt, fixed_point_position);
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -62,6 +62,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
 
     if(biases != nullptr)
     {
+        ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(data_type));
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
         ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (biases->info()->num_dimensions() != 1));
@@ -75,16 +76,13 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     _input  = input;
 
     // Create build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    build_opts.emplace(((biases != nullptr) ? "-DHAS_BIAS" : ""));
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
-    }
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option_if(biases != nullptr, "-DHAS_BIAS");
+    build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_to_columns", build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_to_columns", build_opts.options()));
 
     // Set static arguments
     unsigned int idx = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor();

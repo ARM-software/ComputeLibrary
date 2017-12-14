@@ -23,20 +23,21 @@
  */
 #include "arm_compute/graph/CL/CLMap.h"
 
+#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/graph/Tensor.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/graph/ITensorObject.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
 
 using namespace arm_compute::graph;
 
-CLMap::CLMap(Tensor *tensor, bool blocking)
-    : _tensor(dynamic_cast<arm_compute::CLTensor *>(tensor->tensor())), _blocking(blocking)
+CLMap::CLMap(ITensorObject *tensor, bool blocking)
+    : _tensor(dynamic_cast<arm_compute::ICLTensor *>(tensor->tensor())), _blocking(blocking)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(_tensor);
 }
 
 void CLMap::run()
 {
-    _tensor->map(_blocking);
+    _tensor->map(arm_compute::CLScheduler::get().queue(), _blocking);
 }

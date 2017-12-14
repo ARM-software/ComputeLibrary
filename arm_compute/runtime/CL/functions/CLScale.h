@@ -45,8 +45,10 @@ public:
      * @param[in]     policy                The interpolation type.
      * @param[in]     border_mode           Strategy to use for borders.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     * @param[in]     sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
      */
-    void configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue());
+    void configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
+                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
 };
 }
 #endif /*__ARM_COMPUTE_CLSCALE_H__ */

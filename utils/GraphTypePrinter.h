@@ -58,6 +58,31 @@ inline std::string to_string(const ConvolutionMethodHint &conv_method)
     str << conv_method;
     return str.str();
 }
+
+/** Formatted output of the @ref TargetHint type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const TargetHint &target_hint)
+{
+    switch(target_hint)
+    {
+        case TargetHint::NEON:
+            os << "NEON";
+            break;
+        case TargetHint::OPENCL:
+            os << "OPENCL";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const TargetHint &target_hint)
+{
+    std::stringstream str;
+    str << target_hint;
+    return str.str();
+}
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_GRAPH_TYPE_PRINTER_H__ */

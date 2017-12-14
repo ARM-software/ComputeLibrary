@@ -89,7 +89,7 @@ void AccessWindowStatic::set_valid_region(const Window &window, const ValidRegio
 
 bool AccessWindowStatic::update_window_if_needed(Window &window) const
 {
-    // Only update the window size if we can't use padding
+    // If the padding is not enough and the tensor is not resizable, shrink the window to size 0
     if(_info == nullptr || _info->is_resizable())
     {
         return false;
@@ -101,80 +101,64 @@ bool AccessWindowStatic::update_window_if_needed(Window &window) const
 
     bool window_modified = false;
 
-    int front_pad_y = 0;
-
-    // Adjust window start for Y dimension
+    // Calculate if padding is enough
     if(_start_y < 0)
     {
-        // Calculate rows available above the tensor
         const int front_pad_y_available = -static_cast<int>(offset_first_element / strides[1]);
 
         if(_start_y < front_pad_y_available)
         {
-            // Not enough padding available, need to shrink the window
-            const int start = adjust_up(_start_y, front_pad_y_available, window.y().step());
-
-            window.set(1, Window::Dimension(start, window.y().end(), window.y().step()));
             window_modified = true;
         }
-
-        // Update front padding with reconstructed value
-        front_pad_y = std::max(0, -window.y().start());
     }
 
-    // Adjust window end for Y dimension
-    if(_end_y > static_cast<int>(shape[1]))
+    if(!window_modified)
     {
-        const int stride_z = _info->num_dimensions() > 2 ? strides[2] : _info->total_size();
-
-        // Calculate rows available below the tensor
-        const int tail_pad_y_available = (stride_z / strides[1]) - shape[1] - front_pad_y;
-
-        if(static_cast<int>(shape[1]) + tail_pad_y_available < _end_y)
+        if(_end_y > static_cast<int>(shape[1]))
         {
-            // Not enough padding available, need to shrink the window
-            const int end = adjust_down(_end_y, shape[1] + tail_pad_y_available, window.y().step()) + window.y().step();
-            window.set(1, Window::Dimension(window.y().start(), end, window.y().step()));
-            window_modified = true;
+            const int stride_z             = _info->num_dimensions() > 2 ? strides[2] : _info->total_size();
+            const int tail_pad_y_available = (stride_z / strides[1]) - shape[1];
+
+            if(static_cast<int>(shape[1]) + tail_pad_y_available < _end_y)
+            {
+                window_modified = true;
+            }
+        }
+
+        if(!window_modified)
+        {
+            const int stride_y = _info->num_dimensions() > 1 ? strides[1] : _info->total_size();
+
+            if(_start_x < 0)
+            {
+                const int front_pad_x_available = -std::min<int>(static_cast<int>(offset_first_element), stride_y - shape[0] * strides[0]) / static_cast<int>(strides[0]);
+
+                if(_start_x < front_pad_x_available)
+                {
+                    window_modified = true;
+                }
+            }
+
+            if(!window_modified && _end_x > static_cast<int>(shape[0]))
+            {
+                const int tail_pad_x_available = (stride_y / strides[0]) - shape[0];
+
+                if(static_cast<int>(shape[0]) + tail_pad_x_available < _end_x)
+                {
+                    window_modified = true;
+                }
+            }
         }
     }
 
-    int front_pad_x = 0;
-
-    const int stride_y = _info->num_dimensions() > 1 ? strides[1] : _info->total_size();
-
-    // Adjust window start for X dimension
-    if(_start_x < 0)
+    // If padding is not enough
+    if(window_modified)
     {
-        const int front_pad_x_available = -std::min<int>(static_cast<int>(offset_first_element) - front_pad_y * strides[1], stride_y - shape[0] * strides[0]) / static_cast<int>(strides[0]);
-
-        if(_start_x < front_pad_x_available)
+        for(size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
         {
-            // Not enough padding available, need to shrink the window
-            const int start = adjust_up(_start_x, front_pad_x_available, window.x().step());
-            window.set(0, Window::Dimension(start, window.x().end(), window.x().step()));
-            window_modified = true;
-        }
-
-        // Update front padding with reconstructed value
-        front_pad_x = std::max(0, -window.x().start());
-    }
-
-    // Adjust window end for X dimension
-    if(_end_x > static_cast<int>(shape[0]))
-    {
-        const int tail_pad_x_available = (stride_y / strides[0]) - shape[0] - front_pad_x;
-
-        if(static_cast<int>(shape[0]) + tail_pad_x_available < _end_x)
-        {
-            // Not enough padding available, need to shrink the window
-            const int end = adjust_down(_end_x, shape[0] + tail_pad_x_available, window.x().step()) + window.x().step();
-            window.set(0, Window::Dimension(window.x().start(), end, window.x().step()));
-            window_modified = true;
+            window.set(i, Window::Dimension(0, 0, 1));
         }
     }
-
-    window.validate();
 
     return window_modified;
 }

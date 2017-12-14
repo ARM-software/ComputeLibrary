@@ -1,14 +1,8 @@
 var searchData=
 [
-  ['join_5fparam',['JOIN_PARAM',['../_macros_8h.xhtml#adbfdccc4c864135d8020801232d54bd1',1,'Macros.h']]],
-  ['join_5fparam1',['JOIN_PARAM1',['../_macros_8h.xhtml#acdd2ac75560db81371f4053e6465a0eb',1,'Macros.h']]],
-  ['join_5fparam10',['JOIN_PARAM10',['../_macros_8h.xhtml#a4d997912b340aca63b12b84330f8a4bc',1,'Macros.h']]],
-  ['join_5fparam2',['JOIN_PARAM2',['../_macros_8h.xhtml#a35d1497660f569a76fe4de6bebf67c9a',1,'Macros.h']]],
-  ['join_5fparam3',['JOIN_PARAM3',['../_macros_8h.xhtml#afedfb2831ec629f6445b1d4d5ed30154',1,'Macros.h']]],
-  ['join_5fparam4',['JOIN_PARAM4',['../_macros_8h.xhtml#a43ee597995dd64cfabd52d2342342855',1,'Macros.h']]],
-  ['join_5fparam5',['JOIN_PARAM5',['../_macros_8h.xhtml#a97a58dd462df2048aefa8446a841d7a4',1,'Macros.h']]],
-  ['join_5fparam6',['JOIN_PARAM6',['../_macros_8h.xhtml#afd783b31f55f3b403a82e2b9e3770e1a',1,'Macros.h']]],
-  ['join_5fparam7',['JOIN_PARAM7',['../_macros_8h.xhtml#a29cc9415a23ee73a5f0872a0433c5637',1,'Macros.h']]],
-  ['join_5fparam8',['JOIN_PARAM8',['../_macros_8h.xhtml#ad05271218a1dc0111d1b07ecd8f94904',1,'Macros.h']]],
-  ['join_5fparam9',['JOIN_PARAM9',['../_macros_8h.xhtml#a450d225a223a3f1db8bdc093885d48c0',1,'Macros.h']]]
+  ['image_5fdeclaration',['IMAGE_DECLARATION',['../helpers_8h.xhtml#a22f42fcf2077d951271df83b55c1a71a',1,'helpers.h']]],
+  ['invsqrt_5fop',['INVSQRT_OP',['../batchnormalization__layer_8cl.xhtml#acbe0869c7899bc8d9f0e91a6249fa970',1,'batchnormalization_layer.cl']]],
+  ['invsqrt_5fop_5fexpand',['INVSQRT_OP_EXPAND',['../fixed__point_8h.xhtml#a26cc71c52d0d09b4b422c474b52b9b01',1,'fixed_point.h']]],
+  ['invsqrt_5fop_5fexpand_5fstr',['INVSQRT_OP_EXPAND_STR',['../fixed__point_8h.xhtml#ac001b306b7ead2e6dcc84a93260600b1',1,'fixed_point.h']]],
+  ['invsqrtq_5fimpl',['INVSQRTQ_IMPL',['../fixed__point_8h.xhtml#a39fff507525792a262467c3e145bb181',1,'fixed_point.h']]]
 ];

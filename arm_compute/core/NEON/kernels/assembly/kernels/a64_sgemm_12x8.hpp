@@ -28,6 +28,9 @@
 // Actual kernel implementations
 #include "a64_sgemm_12x8/generic.hpp"
 #include "a64_sgemm_12x8/a53.hpp"
+#include "a64_sgemm_12x8/a55.hpp"
+#include "a64_sgemm_12x8/a55r1.hpp"
+
 
 // 12x8 SGEMM "strategy" class.
 //
@@ -65,6 +68,12 @@ public:
         kernel = a64_sgemm_asimd_12x8;
         if (ci->CPU == CPUTarget::A53) {
             kernel = a64_sgemm_asimd_12x8_a53;
+        }
+        else if (ci->CPU == CPUTarget::A55) {
+            kernel = a64_sgemm_asimd_12x8_a55;
+        }
+        else if (ci->CPU == CPUTarget::A55_DOT) {
+            kernel = a64_sgemm_asimd_12x8_a55r1;
         }
     }
 };

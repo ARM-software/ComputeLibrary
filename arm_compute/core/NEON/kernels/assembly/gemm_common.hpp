@@ -28,6 +28,6 @@ template<typename To, typename Tr>
 class GemmCommon {
 public:
     virtual size_t get_working_size() const = 0;
-    virtual void execute(const To *, const int, const To *, const int, Tr *, const int, const Tr, const Tr, void *working_space = NULL) const = 0;
+    virtual void execute(const To *, const int, const To *, const int, Tr *, const int, const Tr, const Tr, void *working_space) const = 0;
     virtual ~GemmCommon() { }
 };

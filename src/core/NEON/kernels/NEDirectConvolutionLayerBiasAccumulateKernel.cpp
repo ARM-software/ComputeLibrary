@@ -40,6 +40,62 @@ using namespace arm_compute;
 
 namespace
 {
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, bias);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::QS32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::QS32, DataType::F32);
+    if(is_data_type_quantized(input->data_type()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS8 && bias->data_type() != DataType::QS8, "Wrong data type for bias");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS16 && bias->data_type() != DataType::QS8, "Wrong data type for bias");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS32 && bias->data_type() != DataType::QS16, "Wrong data type for bias");
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
+    }
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, bias);
+
+    // Checks performed when output is configured
+    if((output != nullptr) && (output->total_size() != 0))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::QS16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(bias, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(bias, output);
+    }
+
+    ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
+{
+    bool               window_changed                    = false;
+    const unsigned int num_elems_processed_per_iteration = 16 / element_size_from_data_type(input->data_type());
+
+    // Configure kernel window
+    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowStatic     bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
+    if(output != nullptr && (output->total_size() != 0))
+    {
+        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+        window_changed = update_window_and_padding(win, input_access, output_access, bias_access);
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+    }
+    else
+    {
+        window_changed = update_window_and_padding(win, input_access, bias_access);
+        input_access.set_valid_region(win, ValidRegion(Coordinates(), input->tensor_shape()));
+    }
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+
 // Internal load
 inline float32x4_t internal_vld1q(const float *in)
 {
@@ -124,7 +180,7 @@ inline qint32x4_t internal_vqaddq(const qint32x4_t &x, const qint32x4_t &y)
     return vqaddq_qs32(x, y);
 }
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 inline float16x8_t internal_vld1q(const float16_t *in)
 {
     return vld1q_f16(in);
@@ -141,7 +197,7 @@ inline float16x8_t internal_vqaddq(const float16x8_t &x, const float16x8_t &y)
 {
     return vaddq_f16(x, y);
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 template <typename T1, typename T2, bool in_place>
 void accumulate_bias(ITensor *input, const ITensor *bias, const Window window, ITensor *output)
@@ -186,40 +242,27 @@ NEDirectConvolutionLayerBiasAccumulateKernel::NEDirectConvolutionLayerBiasAccumu
 
 void NEDirectConvolutionLayerBiasAccumulateKernel::configure(ITensor *input, const ITensor *bias, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::QS32, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::QS32, DataType::F32);
-    ARM_COMPUTE_ERROR_ON(input->info()->fixed_point_position() != bias->info()->fixed_point_position());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, bias);
+
+    // Auto-initialize output output if required
     if(output != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::QS16, DataType::F32);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(bias, output);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(bias, output);
+        // Output tensor auto initialization if not yet initialized
+        auto_init_if_empty(*output->info(), *input->info());
     }
-    ARM_COMPUTE_ERROR_ON(bias->info()->num_dimensions() > 1);
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), bias->info(), (output == nullptr) ? nullptr : output->info()));
 
     _func   = nullptr;
     _bias   = bias;
     _input  = input;
     _output = output;
 
-    const unsigned int num_elems_processed_per_iteration = 16 / element_size_from_data_type(input->info()->data_type());
-
     // Configure kernel window
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowStatic     bias_access(bias->info(), 0, 0, bias->info()->dimension(0), bias->info()->dimension(1));
-    if(output != nullptr)
-    {
-        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-        update_window_and_padding(win, input_access, output_access, bias_access);
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    }
-    else
-    {
-        update_window_and_padding(win, input_access, bias_access);
-        input_access.set_valid_region(win, ValidRegion(Coordinates(), input->info()->tensor_shape()));
-    }
-    INEKernel::configure(win);
+    auto win_config = validate_and_configure_window(input->info(), bias->info(), (output == nullptr) ? nullptr : output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
 
     // Set appropriate function
     switch(input->info()->data_type())
@@ -246,13 +289,13 @@ void NEDirectConvolutionLayerBiasAccumulateKernel::configure(ITensor *input, con
             _func = (output == nullptr) ? &accumulate_bias<qint32_t, qint16_t, true> : &accumulate_bias<qint32_t, qint16_t, false>;
             break;
         }
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {
             _func = (output == nullptr) ? &accumulate_bias<float16_t, float16_t, true> : &accumulate_bias<float16_t, float16_t, false>;
             break;
         }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::F32:
         {
             _func = (output == nullptr) ? &accumulate_bias<float, float, true> : &accumulate_bias<float, float, false>;
@@ -264,6 +307,14 @@ void NEDirectConvolutionLayerBiasAccumulateKernel::configure(ITensor *input, con
             break;
         }
     }
+}
+
+Status NEDirectConvolutionLayerBiasAccumulateKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), bias->clone().get(), output == nullptr ? nullptr : output->clone().get()).first);
+
+    return Status{};
 }
 
 void NEDirectConvolutionLayerBiasAccumulateKernel::run(const Window &window, const ThreadInfo &info)

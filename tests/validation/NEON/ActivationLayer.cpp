@@ -78,9 +78,9 @@ AbsoluteTolerance<float> tolerance(DataType data_type, ActivationLayerInfo::Acti
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     DataType::F16,
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     DataType::F32,
     DataType::QS8,
     DataType::QS16,
@@ -137,11 +137,41 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
     }
 }
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data types
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),  // Mismatching fixed point
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                          }),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                            TensorInfo(),
+                                          })),
+    framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                               })),
+    framework::dataset::make("Expected", { false, true, false, false, true })),
+    input_info, output_info, act_info, expected)
+{
+    bool is_valid = bool(NEActivationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), act_info));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using NEActivationLayerFixture = ActivationValidationFixture<Tensor, Accessor, NEActivationLayer, T>;
 
 TEST_SUITE(Float)
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset),
                                                                                                             framework::dataset::make("DataType",
@@ -158,7 +188,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<half>, framework::Data
     validate(Accessor(_target), _reference, tolerance(_data_type, _function));
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset), framework::dataset::make("DataType",
@@ -179,7 +209,7 @@ TEST_SUITE_END()
 template <typename T>
 using NEActivationLayerFixedPointFixture = ActivationValidationFixedPointFixture<Tensor, Accessor, NEActivationLayer, T>;
 
-TEST_SUITE(Quantized)
+TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // We test for fixed point precision [3,5] because [1,2] and [6,7] ranges cause
 // overflowing issues in most of the transcendentals functions.
@@ -215,6 +245,34 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixedPointFixture<int16_t>, fr
                                                                                                                        framework::dataset::make("DataType",
                                                                                                                                DataType::QS16)),
                                                                                                                        framework::dataset::make("FractionalBits", 1, 14)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using NEActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<Tensor, Accessor, NEActivationLayer, T>;
+
+/** Input data sets. */
+const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU })),
+                                                framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::QASYMM8)),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), QuantizedActivationDataset),
+                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                              DataType::QASYMM8)),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance(_data_type, _function));

@@ -25,9 +25,13 @@
 #define __ARM_COMPUTE_TYPES_H__
 
 #include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/QAsymm8.h"
+#include "arm_compute/core/Rounding.h"
+#include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "support/Half.h"
 
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -38,26 +42,29 @@ namespace arm_compute
 /** 16-bit floating point type */
 using half = half_float::half;
 
+/** Permutation vector */
+using PermutationVector = Strides;
+
 /** Image colour formats */
 enum class Format
 {
-    UNKNOWN,  /** Unknown image format */
-    U8,       /** 1 channel, 1 U8 per channel */
-    S16,      /** 1 channel, 1 S16 per channel */
-    U16,      /** 1 channel, 1 U16 per channel */
-    S32,      /** 1 channel, 1 S32 per channel */
-    U32,      /** 1 channel, 1 U32 per channel */
-    F16,      /** 1 channel, 1 F16 per channel */
-    F32,      /** 1 channel, 1 F32 per channel */
-    UV88,     /** 2 channel, 1 U8 per channel */
-    RGB888,   /** 3 channels, 1 U8 per channel */
-    RGBA8888, /** 4 channels, 1 U8 per channel */
-    YUV444,   /** A 3 plane of 8 bit 4:4:4 sampled Y, U, V planes */
-    YUYV422,  /** A single plane of 32-bit macro pixel of Y0, U0, Y1, V0 bytes */
-    NV12,     /** A 2 plane YUV format of Luma (Y) and interleaved UV data at 4:2:0 sampling */
-    NV21,     /** A 2 plane YUV format of Luma (Y) and interleaved VU data at 4:2:0 sampling */
-    IYUV,     /** A 3 plane of 8-bit 4:2:0 sampled Y, U, V planes */
-    UYVY422   /** A single plane of 32-bit macro pixel of U0, Y0, V0, Y1 byte */
+    UNKNOWN,  /**< Unknown image format */
+    U8,       /**< 1 channel, 1 U8 per channel */
+    S16,      /**< 1 channel, 1 S16 per channel */
+    U16,      /**< 1 channel, 1 U16 per channel */
+    S32,      /**< 1 channel, 1 S32 per channel */
+    U32,      /**< 1 channel, 1 U32 per channel */
+    F16,      /**< 1 channel, 1 F16 per channel */
+    F32,      /**< 1 channel, 1 F32 per channel */
+    UV88,     /**< 2 channel, 1 U8 per channel */
+    RGB888,   /**< 3 channels, 1 U8 per channel */
+    RGBA8888, /**< 4 channels, 1 U8 per channel */
+    YUV444,   /**< A 3 plane of 8 bit 4:4:4 sampled Y, U, V planes */
+    YUYV422,  /**< A single plane of 32-bit macro pixel of Y0, U0, Y1, V0 bytes */
+    NV12,     /**< A 2 plane YUV format of Luma (Y) and interleaved UV data at 4:2:0 sampling */
+    NV21,     /**< A 2 plane YUV format of Luma (Y) and interleaved VU data at 4:2:0 sampling */
+    IYUV,     /**< A 3 plane of 8-bit 4:2:0 sampled Y, U, V planes */
+    UYVY422   /**< A single plane of 32-bit macro pixel of U0, Y0, V0, Y1 byte */
 };
 
 /** Available data types */
@@ -67,6 +74,7 @@ enum class DataType
     U8,
     S8,
     QS8,
+    QASYMM8,
     U16,
     S16,
     QS16,
@@ -81,6 +89,13 @@ enum class DataType
     SIZET
 };
 
+/** Available Sampling Policies */
+enum class SamplingPolicy
+{
+    CENTER,  /**< Samples are taken at pixel center */
+    TOP_LEFT /**< Samples are taken at pixel top left corner */
+};
+
 /** Constant value of the border pixels when using BorderMode::CONSTANT */
 constexpr uint8_t CONSTANT_BORDER_VALUE = 199;
 
@@ -89,6 +104,53 @@ constexpr float SCALE_PYRAMID_HALF = 0.5f;
 
 /* Constant value used to indicate a ORB scaled pyramid */
 constexpr float SCALE_PYRAMID_ORB = 8.408964152537146130583778358414e-01;
+
+/** Quantization settings (used for QASYMM8 data type) */
+struct QuantizationInfo
+{
+    QuantizationInfo()
+        : scale(0.0f), offset(0)
+    {
+    }
+
+    QuantizationInfo(float scale, int offset)
+        : scale(scale), offset(offset)
+    {
+    }
+
+    bool operator==(const QuantizationInfo &other)
+    {
+        return scale == other.scale && offset == other.offset;
+    }
+
+    bool operator!=(const QuantizationInfo &other)
+    {
+        return !(*this == other);
+    }
+
+    float scale;  /**< scale */
+    int   offset; /**< offset */
+
+    /** Quantizes a value using the scale/offset in this QuantizationInfo */
+    qasymm8_t quantize(float value, RoundingPolicy rounding_policy) const
+    {
+        ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::quantize: scale == 0");
+        return sqcvt_qasymm8_f32(value, scale, offset, rounding_policy);
+    }
+
+    /** Dequantizes a value using the scale/offset in this QuantizationInfo */
+    float dequantize(qasymm8_t value) const
+    {
+        ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::dequantize: scale == 0");
+        return scvt_f32_qasymm8(value, scale, offset);
+    }
+
+    /** Indicates whether this QuantizationInfo has valid settings or not */
+    bool empty() const
+    {
+        return scale == 0;
+    }
+};
 
 struct ValidRegion
 {
@@ -232,14 +294,6 @@ enum class ThresholdType
 {
     BINARY, /**< Threshold with one value */
     RANGE   /**< Threshold with two values*/
-};
-
-/** Rounding method */
-enum class RoundingPolicy
-{
-    TO_ZERO,        /**< Truncates the least significand values that are lost in operations. */
-    TO_NEAREST_UP,  /**< Rounds to nearest value; half rounds up */
-    TO_NEAREST_EVEN /**< Rounds to nearest value; half rounds to nearest even */
 };
 
 /** Termination criteria */
@@ -418,7 +472,32 @@ public:
                   unsigned int pad_x = 0, unsigned int pad_y = 0,
                   DimensionRoundingType round = DimensionRoundingType::FLOOR)
         : _stride(std::make_pair(stride_x, stride_y)),
-          _pad(std::make_pair(pad_x, pad_y)),
+          _pad_left(pad_x),
+          _pad_top(pad_y),
+          _pad_right(pad_x),
+          _pad_bottom(pad_y),
+          _round_type(round)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] stride_x   Stride, in elements, across x.
+     * @param[in] stride_y   Stride, in elements, across y.
+     * @param[in] pad_left   Padding across x on the left, in elements.
+     * @param[in] pad_top    Padding across y on the top, in elements.
+     * @param[in] pad_right  Padding across x on the right, in elements.
+     * @param[in] pad_bottom Padding across y on the bottom, in elements.
+     * @param[in] round      Dimensions rounding.
+     */
+    PadStrideInfo(unsigned int stride_x, unsigned int stride_y,
+                  unsigned int pad_left, unsigned int pad_right,
+                  unsigned int pad_top, unsigned int pad_bottom,
+                  DimensionRoundingType round)
+        : _stride(std::make_pair(stride_x, stride_y)),
+          _pad_left(pad_left),
+          _pad_top(pad_top),
+          _pad_right(pad_right),
+          _pad_bottom(pad_bottom),
           _round_type(round)
     {
     }
@@ -428,16 +507,45 @@ public:
     }
     std::pair<unsigned int, unsigned int> pad() const
     {
-        return _pad;
+        //this accessor should be used only when padding is symmetric
+        ARM_COMPUTE_ERROR_ON(_pad_left != _pad_right || _pad_top != _pad_bottom);
+        return std::make_pair(_pad_left, _pad_top);
     }
+
+    unsigned int pad_left() const
+    {
+        return _pad_left;
+    }
+    unsigned int pad_right() const
+    {
+        return _pad_right;
+    }
+    unsigned int pad_top() const
+    {
+        return _pad_top;
+    }
+    unsigned int pad_bottom() const
+    {
+        return _pad_bottom;
+    }
+
     DimensionRoundingType round() const
     {
         return _round_type;
     }
 
+    bool has_padding() const
+    {
+        return (_pad_left != 0 || _pad_top != 0 || _pad_right != 0 || _pad_bottom != 0);
+    }
+
 private:
     std::pair<unsigned int, unsigned int> _stride;
-    std::pair<unsigned int, unsigned int> _pad;
+    unsigned int _pad_left;
+    unsigned int _pad_top;
+    unsigned int _pad_right;
+    unsigned int _pad_bottom;
+
     DimensionRoundingType _round_type;
 };
 
@@ -445,14 +553,35 @@ private:
 class PoolingLayerInfo
 {
 public:
+    /** Default Constructor */
+    PoolingLayerInfo()
+        : _pool_type(PoolingType::MAX), _pool_size(0), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false)
+    {
+    }
     /** Default Constructor
      *
-     * @param[in] pool_type       Pooling type @ref PoolingType. Defaults to @ref PoolingType::MAX
-     * @param[in] pool_size       (Optional) Pooling size, in elements, across  x and y. Defaults to 2.
+     * @param[in] pool_type       Pooling type @ref PoolingType.
+     * @param[in] pool_size       Pooling size, in elements, across  x and y.
      * @param[in] pad_stride_info (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding (Optional) Strategy when accounting padding in calculations.
+     *                             True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                             Defaults to false;
      */
-    PoolingLayerInfo(PoolingType pool_type = PoolingType::MAX, unsigned int pool_size = 2, PadStrideInfo pad_stride_info = PadStrideInfo())
-        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info)
+    explicit PoolingLayerInfo(PoolingType   pool_type,
+                              unsigned int  pool_size,
+                              PadStrideInfo pad_stride_info = PadStrideInfo(),
+                              bool          exclude_padding = false)
+        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false)
+    {
+    }
+    /** Default Constructor
+     *
+     * @note This constructor is used for global pooling
+     *
+     * @param[in] pool_type Pooling type @ref PoolingType.
+     */
+    explicit PoolingLayerInfo(PoolingType pool_type)
+        : _pool_type(pool_type), _pool_size(0), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true)
     {
     }
     PoolingType pool_type() const
@@ -467,11 +596,21 @@ public:
     {
         return _pad_stride_info;
     }
+    bool exclude_padding() const
+    {
+        return _exclude_padding;
+    }
+    bool is_global_pooling() const
+    {
+        return _is_global_pooling;
+    }
 
 private:
     PoolingType   _pool_type;
     unsigned int  _pool_size;
     PadStrideInfo _pad_stride_info;
+    bool          _exclude_padding;
+    bool          _is_global_pooling;
 };
 
 /** ROI Pooling Layer Information class */
@@ -565,12 +704,14 @@ public:
      *
      * @param[in] type      The normalization type. Can be @ref NormType::IN_MAP_1D, @ref NormType::IN_MAP_2D or @ref NORM_TYPE::CROSS_MAP
      * @param[in] norm_size The normalization size is the number of elements to normalize across. Defaults to 5.
-     * @param[in] alpha     Alpha parameter used by normalization equation. Defaults to 0.0001.
-     * @param[in] beta      Beta parameter used by normalization equation. Defaults to 0.5.
-     * @param[in] kappa     Kappa parameter used by [Krichevksy 2012] Across Channel Local Brightness Normalization equation.
+     * @param[in] alpha     (Optional) Alpha parameter used by normalization equation. Defaults to 0.0001.
+     * @param[in] beta      (Optional) Beta parameter used by normalization equation. Defaults to 0.5.
+     * @param[in] kappa     (Optional) Kappa parameter used by [Krichevksy 2012] Across Channel Local Brightness Normalization equation.
+     * @param[in] is_scaled (Optional) Boolean that specifies if alpha will be scaled by the normalization size or not.
+     *                      Should be false to follow [Krichevksy 2012].
      */
-    NormalizationLayerInfo(NormType type, uint32_t norm_size = 5, float alpha = 0.0001f, float beta = 0.5f, float kappa = 1.f)
-        : _type(type), _norm_size(norm_size), _alpha(alpha), _beta(beta), _kappa(kappa)
+    NormalizationLayerInfo(NormType type, uint32_t norm_size = 5, float alpha = 0.0001f, float beta = 0.5f, float kappa = 1.f, bool is_scaled = true)
+        : _type(type), _norm_size(norm_size), _alpha(alpha), _beta(beta), _kappa(kappa), _is_scaled(is_scaled)
     {
     }
     NormType type() const
@@ -593,17 +734,25 @@ public:
     {
         return _kappa;
     }
-    /** Return the scaling factor of the normalization function. If kappa is not
-     * 1 then [Krichevksy 2012] normalization scaling is specified. Scaling
-     * factor takes into account the total number of elements used for the
-     * normalization, so in case of 2 dimensions this is _norm_size^2.
+    bool is_cross_map() const
+    {
+        return _type == NormType::CROSS_MAP;
+    }
+    bool is_in_map() const
+    {
+        return !is_cross_map();
+    }
+    /** Return the scaling factor of the normalization function.
+     *
+     * If is_scaled is set to false then [Krichevksy 2012] normalization scaling is performed,
+     * where alpha is returned plainly, else alpha is scaled by the total number of elements used for the normalization.
      *
      * @return The normalization scaling factor.
      */
     float scale_coeff() const
     {
         const uint32_t size = (_type == NormType::IN_MAP_2D) ? _norm_size * _norm_size : _norm_size;
-        return (_kappa == 1.f) ? (_alpha / size) : _alpha;
+        return (_is_scaled) ? (_alpha / size) : _alpha;
     }
 
 private:
@@ -612,6 +761,7 @@ private:
     float    _alpha;
     float    _beta;
     float    _kappa;
+    bool     _is_scaled;
 };
 
 /** Convolution Layer Weights Information class. This class stores the necessary information to compute convolution layer when the weights are already reshaped */
@@ -664,6 +814,58 @@ private:
     const unsigned int _kernel_width;
     const unsigned int _kernel_height;
     const unsigned int _num_kernels;
+};
+
+/** GEMM Information class. This class stores the necessary information to compute GEMM functions */
+class GEMMInfo
+{
+public:
+    /** Default constructor */
+    GEMMInfo()
+        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] is_a_reshaped               True if the matrix A has been reshaped
+     * @param[in] is_b_reshaped               True if the matrix B has been reshaped
+     * @param[in] reshape_b_only_on_first_run Reshape matrix B only for the first run
+     */
+    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run)
+        : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run)
+    {
+    }
+    /** Flag which specifies if the matrix A has been reshaped
+     *
+     * @return True if the matrix A has been reshaped
+     */
+    bool is_a_reshaped() const
+    {
+        return _is_a_reshaped;
+    };
+    /** Flag which specifies if the matrix B has been reshaped
+     *
+     * @return True if the matrix B has been reshaped
+     */
+    bool is_b_reshaped() const
+    {
+        return _is_b_reshaped;
+    };
+    /** Flag which specifies if the reshape of matrix B should executed only for the first
+     *
+     * @note This flag could be set to TRUE when GEMM is used to accelerate convolution layer
+     *
+     * @return True if the reshaped of matrix B happens only for the first run
+     */
+    bool reshape_b_only_on_first_run() const
+    {
+        return _reshape_b_only_on_first_run;
+    };
+
+private:
+    const bool _is_a_reshaped;
+    const bool _is_b_reshaped;
+    const bool _reshape_b_only_on_first_run;
 };
 
 /** IO formatting information class*/

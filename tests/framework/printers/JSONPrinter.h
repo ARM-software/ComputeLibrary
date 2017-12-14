@@ -52,6 +52,7 @@ public:
     void print_error(const std::exception &error, bool expected) override;
     void print_info(const std::string &info) override;
     void print_measurements(const Profiler::MeasurementsMap &measurements) override;
+    void print_list_tests(const std::vector<TestInfo> &infos) override;
 
 private:
     void print_separator(bool &flag);

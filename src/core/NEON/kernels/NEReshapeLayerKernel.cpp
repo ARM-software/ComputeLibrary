@@ -60,7 +60,7 @@ inline void reshape_tensor(const Window &window, const ITensor *input, ITensor *
 
 void NEReshapeLayerKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::U16, DataType::S16, DataType::QS16,
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QS8, DataType::U16, DataType::S16, DataType::QS16,
                                                   DataType::U32, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -94,6 +94,7 @@ void NEReshapeLayerKernel::run(const Window &window, const ThreadInfo &info)
     {
         case DataType::U8:
         case DataType::S8:
+        case DataType::QASYMM8:
         case DataType::QS8:
             reshape_tensor<uint8_t>(window, _input, _output);
             break;

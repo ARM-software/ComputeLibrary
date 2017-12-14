@@ -42,6 +42,14 @@ enum class FixedPointOp
     RECIPROCAL /**< Reciprocal */
 };
 
+/** Gradient dimension type. */
+enum class GradientDimension
+{
+    GRAD_X,  /**< x gradient dimension */
+    GRAD_Y,  /**< y gradient dimension */
+    GRAD_XY, /**< x and y gradient dimension */
+};
+
 template <typename MinMaxType>
 struct MinMaxLocationValues
 {

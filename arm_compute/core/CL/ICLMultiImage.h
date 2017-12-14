@@ -37,14 +37,14 @@ class ICLMultiImage : public IMultiImage
 public:
     /** Return a pointer to the requested OpenCL plane of the image.
      *
-     *  @param[in] index The index of the wanted planed.
+     * @param[in] index The index of the wanted planed.
      *
      *  @return A pointer pointed to the OpenCL plane
      */
     virtual ICLImage *cl_plane(unsigned int index) = 0;
     /** Return a constant pointer to the requested OpenCL plane of the image.
      *
-     *  @param[in] index The index of the wanted planed.
+     * @param[in] index The index of the wanted planed.
      *
      *  @return A constant pointer pointed to the OpenCL plane
      */

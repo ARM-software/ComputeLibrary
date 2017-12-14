@@ -1,4 +1,0 @@
-var classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_convolution_dataset =
-[
-    [ "MobileNetDepthwiseConvolutionDataset", "classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_convolution_dataset.xhtml#ad5d19f1f4b8327dc7cfe6fe3fcf1aff7", null ]
-];

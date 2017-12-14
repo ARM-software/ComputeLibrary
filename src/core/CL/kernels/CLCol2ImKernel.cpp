@@ -43,7 +43,7 @@ CLCol2ImKernel::CLCol2ImKernel()
 
 void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     TensorShape output_shape = input->info()->tensor_shape();
@@ -52,7 +52,7 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     output_shape.set(2, input->info()->tensor_shape()[0]);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -62,15 +62,30 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     _output         = output;
     _convolved_dims = convolved_dims;
 
-    // Create kernel
-    std::set<std::string> build_opts = { ("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())) };
-    build_opts.emplace("-DWIDTH_OUTPUT=" + support::cpp11::to_string(_convolved_dims.first));
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
-    }
+    const DataType data_type = input->info()->data_type();
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts));
+    // Create kernel
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option("-DWIDTH_OUTPUT=" + support::cpp11::to_string(_convolved_dims.first));
+    build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts.options()));
+
+    // Configure the local work size for Bifrost with a value obtained
+    // via exhaustive autotuning over 30 representative tensor shapes.
+    const GPUTarget gpu_target = get_arch_from_target(get_target());
+    if(gpu_target == GPUTarget::BIFROST)
+    {
+        if((_convolved_dims.first == 7) || (_convolved_dims.first == 14))
+        {
+            _lws_hint = cl::NDRange(1, 7, 1);
+        }
+        else
+        {
+            _lws_hint = cl::NDRange(1, 8, 1);
+        }
+    }
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -81,6 +96,18 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "col2im_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -103,7 +130,7 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, _lws_hint);
     }
     while(collapsed_window.slide_window_slice_3D(slice));
 }

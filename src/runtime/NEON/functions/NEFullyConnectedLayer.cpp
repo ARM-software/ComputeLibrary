@@ -133,7 +133,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     const int      num_input_dimensions = input->info()->tensor_shape().num_dimensions() - num_batch_dimensions;
     const size_t   linear_input_size    = input->info()->tensor_shape().total_size_lower(num_input_dimensions);
 
-    _linearize_input      = input->info()->tensor_shape().x() != linear_input_size;
+    _linearize_input      = (input->info()->tensor_shape().x() != linear_input_size) || (num_input_dimensions > 1 && linear_input_size == 1);
     _are_weights_reshaped = are_weights_reshaped;
     _accumulate_biases    = biases != nullptr;
     _is_batched_fc_layer  = num_batch_dimensions > 0;

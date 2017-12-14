@@ -57,6 +57,18 @@ public:
      * @param[in]  norm_info     Normalization layer information like the normalization type, normalization size and other parameters.
      */
     void configure(const ITensor *input, const ITensor *input_squared, ITensor *output, NormalizationLayerInfo norm_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NENormalizationLayerKernel
+     *
+     * @param[in] input         Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
+     *                          and an optional 4th dimension for batch of inputs. Data types supported: QS8/QS16/FP16/F32.
+     * @param[in] input_squared Source with each element has been squared. 3 lower dims represent a single input with dimensions [width, height, IFM],
+     *                          Data type supported: same as @p input
+     * @param[in] output        Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in] norm_info     Normalization layer information like the normalization type, normalization size and other parameters.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *input_squared, const ITensorInfo *output, NormalizationLayerInfo norm_info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

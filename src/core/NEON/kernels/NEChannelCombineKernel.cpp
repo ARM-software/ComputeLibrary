@@ -122,14 +122,6 @@ void NEChannelCombineKernel::configure(const ITensor *plane0, const ITensor *pla
             break;
     }
 
-    TensorShape subsampled_shape_plane1{ plane0->info()->tensor_shape() };
-    subsampled_shape_plane1.set(0, subsampled_shape_plane1[0] / _x_subsampling[1]);
-    TensorShape subsampled_shape_plane2{ plane0->info()->tensor_shape() };
-    subsampled_shape_plane2.set(0, subsampled_shape_plane2[0] / _x_subsampling[2]);
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(plane1->info()->tensor_shape(), subsampled_shape_plane1);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(plane2->info()->tensor_shape(), subsampled_shape_plane2);
-
     Window win = calculate_max_window(*plane0->info(), Steps(_num_elems_processed_per_iteration));
 
     AccessWindowHorizontal output_access(output->info(), 0, _num_elems_processed_per_iteration);
@@ -256,14 +248,14 @@ void NEChannelCombineKernel::configure(const IImage *plane0, const IImage *plane
     const unsigned int y_step = *std::max_element(_y_subsampling.begin(), _y_subsampling.end());
 
     Window                win = calculate_max_window(*plane0->info(), Steps(_num_elems_processed_per_iteration, y_step));
-    AccessWindowRectangle output_plane0_access(output->plane(0)->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f, 1.f / _y_subsampling[0]);
-    AccessWindowRectangle output_plane1_access(output->plane(1)->info(), 0, 0, num_elems_written_plane1, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
+    AccessWindowRectangle output_plane0_access(output->plane(0)->info(), 0, 0, _num_elems_processed_per_iteration, y_step, 1.f / _x_subsampling[0], 1.f / _y_subsampling[0]);
+    AccessWindowRectangle output_plane1_access(output->plane(1)->info(), 0, 0, num_elems_written_plane1, y_step, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
     AccessWindowRectangle output_plane2_access(has_two_planes ? nullptr : output->plane(2)->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
 
     update_window_and_padding(win,
-                              AccessWindowHorizontal(plane0->info(), 0, _num_elems_processed_per_iteration),
-                              AccessWindowRectangle(plane1->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]),
-                              AccessWindowRectangle(plane2->info(), 0, 0, _num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]),
+                              AccessWindowRectangle(plane0->info(), 0, 0, _num_elems_processed_per_iteration, y_step),
+                              AccessWindowRectangle(plane1->info(), 0, 0, _num_elems_processed_per_iteration, y_step, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]),
+                              AccessWindowRectangle(plane2->info(), 0, 0, _num_elems_processed_per_iteration, y_step, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]),
                               output_plane0_access,
                               output_plane1_access,
                               output_plane2_access);
@@ -358,7 +350,7 @@ void NEChannelCombineKernel::combine_YUV_1p(const Window &win)
 {
     // Create sub-sampled uv window and init uv planes
     Window win_uv(win);
-    win_uv.set_dimension_step(0, win.x().step() / _x_subsampling[1]);
+    win_uv.set_dimension_step(Window::DimX, win.x().step() / _x_subsampling[1]);
     win_uv.validate();
 
     Iterator p0(_planes[0], win);
@@ -405,13 +397,13 @@ void NEChannelCombineKernel::combine_YUV_2p(const Window &win)
 
     // Update UV window
     Window uv_win(win);
-    uv_win.set(Window::DimX, Window::Dimension(uv_win.x().start() / _x_subsampling[1], uv_win.x().end() / _x_subsampling[1], _num_elems_processed_per_iteration));
+    uv_win.set(Window::DimX, Window::Dimension(uv_win.x().start() / _x_subsampling[1], uv_win.x().end() / _x_subsampling[1], uv_win.x().step() / _x_subsampling[1]));
     uv_win.set(Window::DimY, Window::Dimension(uv_win.y().start() / _y_subsampling[1], uv_win.y().end() / _y_subsampling[1], 1));
     uv_win.validate();
 
     // Update output win
     Window out_win(win);
-    out_win.set(Window::DimX, Window::Dimension(out_win.x().start(), out_win.x().end(), out_win.x().step() * 2));
+    out_win.set(Window::DimX, Window::Dimension(out_win.x().start(), out_win.x().end(), out_win.x().step() / _x_subsampling[1]));
     out_win.set(Window::DimY, Window::Dimension(out_win.y().start() / _y_subsampling[1], out_win.y().end() / _y_subsampling[1], 1));
     out_win.validate();
 
@@ -420,6 +412,9 @@ void NEChannelCombineKernel::combine_YUV_2p(const Window &win)
     Iterator  p1(_planes[1 + shift], uv_win);
     Iterator  p2(_planes[2 - shift], uv_win);
     Iterator  out(_output_multi->plane(1), out_win);
+
+    // Increase step size after iterator is created to calculate stride correctly for multi channel format
+    out_win.set_dimension_step(Window::DimX, out_win.x().step() * 2);
 
     execute_window_loop(out_win, [&](const Coordinates & id)
     {
@@ -450,19 +445,17 @@ void NEChannelCombineKernel::copy_plane(const Window &win, uint32_t plane_id)
 
     // Update window
     Window tmp_win(win);
-    tmp_win.set(Window::DimX, Window::Dimension(tmp_win.x().start() / _x_subsampling[plane_id], tmp_win.x().end() / _x_subsampling[plane_id], _num_elems_processed_per_iteration));
+    tmp_win.set(Window::DimX, Window::Dimension(tmp_win.x().start() / _x_subsampling[plane_id], tmp_win.x().end() / _x_subsampling[plane_id], tmp_win.x().step() / _x_subsampling[plane_id]));
     tmp_win.set(Window::DimY, Window::Dimension(tmp_win.y().start() / _y_subsampling[plane_id], tmp_win.y().end() / _y_subsampling[plane_id], 1));
-    tmp_win.validate();
 
     Iterator in(_planes[plane_id], tmp_win);
     Iterator out(_output_multi->plane(plane_id), tmp_win);
 
     execute_window_loop(tmp_win, [&](const Coordinates & id)
     {
-        const auto in_ptr  = static_cast<uint8_t *>(in.ptr());
-        const auto out_ptr = static_cast<uint8_t *>(out.ptr());
+        const uint8x8_t pixels = vld1_u8(in.ptr());
 
-        vst1_u8(out_ptr, vld1_u8(in_ptr));
+        vst1_u8(out.ptr(), pixels);
     },
     in, out);
 }

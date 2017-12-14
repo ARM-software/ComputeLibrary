@@ -747,19 +747,20 @@ void NENonLinearFilterKernel::median_filter_disk<5, 5>(const Window &win)
     Iterator input(_input, win);
     Iterator output(_output, win);
 
-    const auto input_top2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-1, -2)));
-    const auto input_top_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, -1)));
-    const auto input_mid_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 0)));
-    const auto input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
-    const auto input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-1, 2)));
+    static const uint8x16_t zero           = vdupq_n_u8(0);
+    const auto              input_top2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, -2)));
+    const auto              input_top_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, -1)));
+    const auto              input_mid_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 0)));
+    const auto              input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
+    const auto              input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 2)));
 
     execute_window_loop(win, [&](const Coordinates & id)
     {
-        const uint8x16_t top2_data = vld1q_u8(input_top2_ptr + input.offset());
+        const uint8x16_t top2_data = vextq_u8(vld1q_u8(input_top2_ptr + input.offset()), zero, 1);
         const uint8x16_t top_data  = vld1q_u8(input_top_ptr + input.offset());
         const uint8x16_t mid_data  = vld1q_u8(input_mid_ptr + input.offset());
         const uint8x16_t bot_data  = vld1q_u8(input_bot_ptr + input.offset());
-        const uint8x16_t bot2_data = vld1q_u8(input_bot2_ptr + input.offset());
+        const uint8x16_t bot2_data = vextq_u8(vld1q_u8(input_bot2_ptr + input.offset()), zero, 1);
 
         uint8x8_t d[] =
         {
@@ -808,19 +809,20 @@ void NENonLinearFilterKernel::min_filter_disk<5, 5>(const Window &win)
     Iterator input(_input, win);
     Iterator output(_output, win);
 
-    const auto input_top2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-1, -2)));
-    const auto input_top_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, -1)));
-    const auto input_mid_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 0)));
-    const auto input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
-    const auto input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-1, 2)));
+    static const uint8x16_t zero           = vdupq_n_u8(0);
+    const auto              input_top2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, -2)));
+    const auto              input_top_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, -1)));
+    const auto              input_mid_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 0)));
+    const auto              input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
+    const auto              input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 2)));
 
     execute_window_loop(win, [&](const Coordinates & id)
     {
-        const uint8x16_t top2_data = vld1q_u8(input_top2_ptr + input.offset());
+        const uint8x16_t top2_data = vextq_u8(vld1q_u8(input_top2_ptr + input.offset()), zero, 1);
         const uint8x16_t top_data  = vld1q_u8(input_top_ptr + input.offset());
         const uint8x16_t mid_data  = vld1q_u8(input_mid_ptr + input.offset());
         const uint8x16_t bot_data  = vld1q_u8(input_bot_ptr + input.offset());
-        const uint8x16_t bot2_data = vld1q_u8(input_bot2_ptr + input.offset());
+        const uint8x16_t bot2_data = vextq_u8(vld1q_u8(input_bot2_ptr + input.offset()), zero, 1);
 
         const uint8x16_t rows_min_3 = vminq_u8(top2_data, bot2_data);
         uint8x16_t       rows_min_5 = vminq_u8(top_data, bot_data);
@@ -840,19 +842,20 @@ void NENonLinearFilterKernel::max_filter_disk<5, 5>(const Window &win)
     Iterator input(_input, win);
     Iterator output(_output, win);
 
-    const auto input_top2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-1, -2)));
-    const auto input_top_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, -1)));
-    const auto input_mid_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 0)));
-    const auto input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
-    const auto input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-1, 2)));
+    static const uint8x16_t zero           = vdupq_n_u8(0);
+    const auto              input_top2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, -2)));
+    const auto              input_top_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, -1)));
+    const auto              input_mid_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 0)));
+    const auto              input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
+    const auto              input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 2)));
 
     execute_window_loop(win, [&](const Coordinates & id)
     {
-        const uint8x16_t top2_data = vld1q_u8(input_top2_ptr + input.offset());
+        const uint8x16_t top2_data = vextq_u8(vld1q_u8(input_top2_ptr + input.offset()), zero, 1);
         const uint8x16_t top_data  = vld1q_u8(input_top_ptr + input.offset());
         const uint8x16_t mid_data  = vld1q_u8(input_mid_ptr + input.offset());
         const uint8x16_t bot_data  = vld1q_u8(input_bot_ptr + input.offset());
-        const uint8x16_t bot2_data = vld1q_u8(input_bot2_ptr + input.offset());
+        const uint8x16_t bot2_data = vextq_u8(vld1q_u8(input_bot2_ptr + input.offset()), zero, 1);
 
         const uint8x16_t rows_max_3 = vmaxq_u8(top2_data, bot2_data);
         uint8x16_t       rows_max_5 = vmaxq_u8(top_data, bot_data);

@@ -73,13 +73,27 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/F16/F32
+     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/QASYMM8/F16/F32
+     *                         Note: QASYMM8 works only for has_bias = false
      * @param[out] output      The output tensor. Data types supported: Same as @p input
      * @param[in]  kernel_dims The kernel dimensions (width and height).
      * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
      */
     void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEIm2ColKernel
+     *
+     * @param[in] input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     *                        while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/QASYMM8/F16/F32
+     *                        Note: QASYMM8 works only for has_bias = false
+     * @param[in] output      The output tensor. Data types supported: Same as @p input
+     * @param[in] kernel_dims The kernel dimensions (width and height).
+     * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in] has_bias    In case biases are provided expands the matrix with 1.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

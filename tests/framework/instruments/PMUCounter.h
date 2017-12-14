@@ -37,6 +37,27 @@ namespace framework
 class PMUCounter : public Instrument
 {
 public:
+    PMUCounter(ScaleFactor scale_factor)
+    {
+        switch(scale_factor)
+        {
+            case ScaleFactor::NONE:
+                _scale_factor = 1;
+                _unit         = "";
+                break;
+            case ScaleFactor::SCALE_1K:
+                _scale_factor = 1000;
+                _unit         = "K ";
+                break;
+            case ScaleFactor::SCALE_1M:
+                _scale_factor = 1000000;
+                _unit         = "M ";
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Invalid scale");
+        }
+    };
+
     std::string     id() const override;
     void            start() override;
     void            stop() override;
@@ -47,6 +68,7 @@ private:
     PMU       _pmu_instructions{ PERF_COUNT_HW_INSTRUCTIONS };
     long long _cycles{ 0 };
     long long _instructions{ 0 };
+    int       _scale_factor{};
 };
 } // namespace framework
 } // namespace test

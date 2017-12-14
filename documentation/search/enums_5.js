@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['gputarget',['GPUTarget',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3',1,'arm_compute']]]
+  ['fixedpointop',['FixedPointOp',['../namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dc',1,'arm_compute']]],
+  ['format',['Format',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58',1,'arm_compute']]]
 ];

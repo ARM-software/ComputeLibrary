@@ -27,7 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLPyramid.h"
 #include "arm_compute/runtime/CL/functions/CLArithmeticSubtraction.h"
-#include "arm_compute/runtime/CL/functions/CLDepthConvert.h"
+#include "arm_compute/runtime/CL/functions/CLDepthConvertLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
 #include "arm_compute/runtime/CL/functions/CLGaussianPyramid.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -77,7 +77,7 @@ private:
     CLGaussianPyramidHalf                      _gaussian_pyr_function;
     std::unique_ptr<CLGaussian5x5[]>           _convf;
     std::unique_ptr<CLArithmeticSubtraction[]> _subf;
-    CLDepthConvert                             _depth_function;
+    CLDepthConvertLayer                        _depth_function;
     CLPyramid                                  _gauss_pyr;
     CLPyramid                                  _conv_pyr;
 };

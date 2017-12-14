@@ -42,6 +42,149 @@ using namespace arm_compute;
 
 namespace
 {
+Status validate_arguments_logits_1d_max(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        // Softmax across the x dimension
+        TensorShape output_shape{ input->tensor_shape() };
+        output_shape.set(0, 1);
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window_logits_1d_max(ITensorInfo *input, ITensorInfo *output)
+{
+    // Configure kernel window
+    constexpr unsigned int num_elems_written_per_row = 1;
+    const int              input_width               = input->valid_region().shape.x();
+
+    unsigned int           num_elems_processed_per_iteration = 16 / data_size_from_type(input->data_type());
+    Window                 win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    bool                   window_changed = false;
+
+    if(output->total_size() != 0)
+    {
+        AccessWindowHorizontal output_access(output, 0, num_elems_written_per_row, 1.f / input_width);
+        window_changed = update_window_and_padding(win, input_access, output_access);
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+    }
+    else
+    {
+        window_changed = update_window_and_padding(win, input_access);
+    }
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+
+Status validate_arguments_logits_1d_shift_exp_sum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum, float beta)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, max, sum, output);
+    ARM_COMPUTE_RETURN_ERROR_ON((beta != 1.0f) && is_data_type_fixed_point(input->data_type()));
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
+    }
+
+    // Checks performed when sum is configured
+    if(sum->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, max, sum);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(max, sum);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, max, sum);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window_logits_1d_shift_exp_sum(ITensorInfo *input, ITensorInfo *max, ITensorInfo *output, ITensorInfo *sum)
+{
+    unsigned int num_elems_processed_per_iteration = input->valid_region().shape.x();
+
+    // Configure kernel window
+    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal max_access(max, 0, 1);
+    AccessWindowHorizontal sum_access(sum, 0, 1);
+    bool                   window_changed = false;
+
+    if(output->total_size() != 0)
+    {
+        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+        window_changed = update_window_and_padding(win, input_access, max_access, output_access, sum_access);
+        output_access.set_valid_region(win, input->valid_region());
+    }
+    else
+    {
+        window_changed = update_window_and_padding(win, input_access, max_access, sum_access);
+    }
+
+    sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+
+Status validate_arguments_logits_1d_norm(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, sum, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, sum);
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window_logits_1d_norm(ITensorInfo *input, ITensorInfo *sum, ITensorInfo *output)
+{
+    // Configure kernel window
+    unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->data_type());
+    Window       win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowStatic     sum_access(sum, 0, 0, 1, sum->dimension(1));
+    bool                   window_changed = false;
+
+    if(output->total_size() != 0)
+    {
+        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+
+        window_changed = update_window_and_padding(win, input_access, sum_access, output_access);
+
+        output_access.set_valid_region(win, input->valid_region());
+    }
+    else
+    {
+        window_changed = update_window_and_padding(win, input_access, sum_access);
+    }
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+
 void logits_1d_max_qs8(const ITensor *in, ITensor *out, const Window &window)
 {
     Window in_slice = window.first_slice_window_1D();
@@ -106,7 +249,7 @@ void logits_1d_max_qs16(const ITensor *in, ITensor *out, const Window &window)
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 void logits_1d_max_f16(const ITensor *in, ITensor *out, const Window &window)
 {
     Window in_slice = window.first_slice_window_1D();
@@ -138,7 +281,7 @@ void logits_1d_max_f16(const ITensor *in, ITensor *out, const Window &window)
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 void logits_1d_max_f32(const ITensor *in, ITensor *out, const Window &window)
 {
@@ -184,8 +327,7 @@ BorderSize NELogits1DMaxKernel::border_size() const
 
 void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Softmax across the x dimension
     TensorShape output_shape{ input->info()->tensor_shape() };
@@ -194,9 +336,8 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_1d_max(input->info(), output->info()));
 
     const int    input_width                       = input->info()->valid_region().shape.x();
     unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->info()->data_type());
@@ -213,10 +354,10 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
             _func = &logits_1d_max_f32;
             break;
         case DataType::F16:
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             _func = &logits_1d_max_f16;
             break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
     }
@@ -226,17 +367,17 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
     _border_size = BorderSize(0, num_elems_processed_per_iteration - (input_width % num_elems_processed_per_iteration), 0, 0);
 
     // Configure kernel window
-    constexpr unsigned int num_elems_written_per_row = 1;
+    auto win_config = validate_and_configure_window_logits_1d_max(input->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_row, 1.f / input_width);
+Status NELogits1DMaxKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_1d_max(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_logits_1d_max(input->clone().get(), output->clone().get()).first);
 
-    update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-    INEKernel::configure(win);
+    return Status{};
 }
 
 void NELogits1DMaxKernel::run(const Window &window, const ThreadInfo &info)
@@ -251,8 +392,10 @@ void NELogits1DMaxKernel::run(const Window &window, const ThreadInfo &info)
 
 namespace
 {
-void logits_1d_shift_exp_sum_qs8(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
+void logits_1d_shift_exp_sum_qs8(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window, float beta)
 {
+    ARM_COMPUTE_UNUSED(beta);
+
     Window window_max(window);
     window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
 
@@ -313,8 +456,10 @@ void logits_1d_shift_exp_sum_qs8(const ITensor *in, const ITensor *max, ITensor 
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
-void logits_1d_shift_exp_sum_qs16(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
+void logits_1d_shift_exp_sum_qs16(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window, float beta)
 {
+    ARM_COMPUTE_UNUSED(beta);
+
     Window window_max(window);
     window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
 
@@ -374,8 +519,8 @@ void logits_1d_shift_exp_sum_qs16(const ITensor *in, const ITensor *max, ITensor
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
-void logits_1d_shift_exp_sum_f16(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+void logits_1d_shift_exp_sum_f16(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window, float beta)
 {
     Window window_max(window);
     window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
@@ -410,6 +555,7 @@ void logits_1d_shift_exp_sum_f16(const ITensor *in, const ITensor *max, ITensor 
         {
             float16x8_t vec_elements = vld1q_f16(in_ptr);
             vec_elements             = vsubq_f16(vec_elements, vec_max);
+            vec_elements             = vmulq_n_f16(vec_elements, beta);
             vec_elements             = vexpq_f16(vec_elements);
 
             vst1q_f16(exp_ptr, vec_elements);
@@ -426,7 +572,7 @@ void logits_1d_shift_exp_sum_f16(const ITensor *in, const ITensor *max, ITensor 
         // Run remaining elements
         for(int i = 0; i < small_steps; ++i)
         {
-            const float16_t element = std::exp(static_cast<float>(in_ptr[i] - *max_ptr));
+            const float16_t element = std::exp(static_cast<float>(in_ptr[i] - *max_ptr) * beta);
             exp_ptr[i]              = element;
             sum += element;
         }
@@ -434,9 +580,9 @@ void logits_1d_shift_exp_sum_f16(const ITensor *in, const ITensor *max, ITensor 
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(max_slice));
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
-void logits_1d_shift_exp_sum_f32(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window)
+void logits_1d_shift_exp_sum_f32(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window, float beta)
 {
     Window window_max(window);
     window_max.set(Window::DimX, Window::Dimension(0, 0, 0));
@@ -471,6 +617,7 @@ void logits_1d_shift_exp_sum_f32(const ITensor *in, const ITensor *max, ITensor 
         {
             float32x4_t vec_elements = vld1q_f32(in_ptr);
             vec_elements             = vsubq_f32(vec_elements, vec_max);
+            vec_elements             = vmulq_n_f32(vec_elements, beta);
             vec_elements             = vexpq_f32(vec_elements);
 
             vst1q_f32(exp_ptr, vec_elements);
@@ -488,7 +635,7 @@ void logits_1d_shift_exp_sum_f32(const ITensor *in, const ITensor *max, ITensor 
         // Run remaining elements
         for(int i = 0; i < small_steps; ++i)
         {
-            float element = std::exp(in_ptr[i] - *max_ptr);
+            float element = std::exp((in_ptr[i] - *max_ptr) * beta);
             exp_ptr[i]    = element;
             sum += element;
         }
@@ -500,25 +647,20 @@ void logits_1d_shift_exp_sum_f32(const ITensor *in, const ITensor *max, ITensor 
 } //namespace
 
 NELogits1DShiftExpSumKernel::NELogits1DShiftExpSumKernel()
-    : _func(nullptr), _input(nullptr), _max(nullptr), _output(nullptr), _sum(nullptr)
+    : _func(nullptr), _input(nullptr), _max(nullptr), _output(nullptr), _sum(nullptr), _beta(1.0f)
 {
 }
 
-void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor *max, ITensor *output, ITensor *sum)
+void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor *max, ITensor *output, ITensor *sum, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(max, sum, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, sum, output);
 
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
     auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, max, sum);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output, max, sum);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(max, sum);
-
-    unsigned int num_elems_processed_per_iteration = input->info()->valid_region().shape.x();
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_1d_shift_exp_sum(input->info(), max->info(), output->info(), sum->info(), beta));
 
     switch(input->info()->data_type())
     {
@@ -532,10 +674,10 @@ void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor 
             _func = &logits_1d_shift_exp_sum_f32;
             break;
         case DataType::F16:
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             _func = &logits_1d_shift_exp_sum_f16;
             break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
             break;
@@ -545,20 +687,20 @@ void NELogits1DShiftExpSumKernel::configure(const ITensor *input, const ITensor 
     _max    = max;
     _output = output;
     _sum    = sum;
+    _beta   = beta;
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal max_access(max->info(), 0, 1);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal sum_access(sum->info(), 0, 1);
+    auto win_config = validate_and_configure_window_logits_1d_shift_exp_sum(input->info(), max->info(), output->info(), sum->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    update_window_and_padding(win, input_access, max_access, output_access, sum_access);
+Status NELogits1DShiftExpSumKernel::validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum, float beta)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_1d_shift_exp_sum(input, max, output, sum, beta));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_logits_1d_shift_exp_sum(input->clone().get(), max->clone().get(), output->clone().get(), sum->clone().get()).first);
 
-    output_access.set_valid_region(win, input->info()->valid_region());
-    sum_access.set_valid_region(win, ValidRegion(Coordinates(), sum->info()->tensor_shape()));
-
-    INEKernel::configure(win);
+    return Status{};
 }
 
 void NELogits1DShiftExpSumKernel::run(const Window &window, const ThreadInfo &info)
@@ -568,7 +710,7 @@ void NELogits1DShiftExpSumKernel::run(const Window &window, const ThreadInfo &in
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (*_func)(_input, _max, _output, _sum, window);
+    (*_func)(_input, _max, _output, _sum, window, _beta);
 }
 
 namespace
@@ -637,7 +779,7 @@ void logits_1d_norm_qs16(const ITensor *in, const ITensor *sum, ITensor *out, co
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
 }
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 void logits_1d_norm_f16(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window)
 {
     Window window_sum(window);
@@ -668,7 +810,7 @@ void logits_1d_norm_f16(const ITensor *in, const ITensor *sum, ITensor *out, con
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
 }
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 void logits_1d_norm_f32(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window)
 {
@@ -709,22 +851,17 @@ NELogits1DNormKernel::NELogits1DNormKernel()
 
 void NELogits1DNormKernel::configure(const ITensor *input, const ITensor *sum, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(sum, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
 
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, sum, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_1d_norm(input->info(), sum->info(), output->info()));
 
     _input  = input;
     _sum    = sum;
     _output = output;
-
-    // Configure kernel window
-    unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->info()->data_type());
 
     switch(input->info()->data_type())
     {
@@ -738,26 +875,27 @@ void NELogits1DNormKernel::configure(const ITensor *input, const ITensor *sum, I
             _func = &logits_1d_norm_f32;
             break;
         case DataType::F16:
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             _func = &logits_1d_norm_f16;
             break;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
             ARM_COMPUTE_ERROR("Unsupported data type.");
             break;
     }
 
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    // Configure kernel window
+    auto win_config = validate_and_configure_window_logits_1d_norm(input->info(), sum->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowStatic     sum_access(sum->info(), 0, 0, 1, sum->info()->dimension(1));
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+Status NELogits1DNormKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_1d_norm(input, sum, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_logits_1d_norm(input->clone().get(), sum->clone().get(), output->clone().get()).first);
 
-    update_window_and_padding(win, input_access, sum_access, output_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
-
-    INEKernel::configure(win);
+    return Status{};
 }
 
 void NELogits1DNormKernel::run(const Window &window, const ThreadInfo &info)
