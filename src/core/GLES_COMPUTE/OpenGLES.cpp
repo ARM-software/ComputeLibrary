@@ -128,15 +128,7 @@ private:
                 }
             }
 
-            if(glesv3_handle != nullptr)
-            {
-                dlclose(glesv3_handle);
-            }
-            if(glesv2_handle != nullptr)
-            {
-                dlclose(glesv2_handle);
-            }
-            dlclose(egl_handle);
+            //Don't call dlclose(handle) or all the symbols will be unloaded !
         }
     }
     bool _initialized = false;

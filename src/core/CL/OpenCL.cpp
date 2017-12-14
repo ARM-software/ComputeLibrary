@@ -110,7 +110,7 @@ bool CLSymbols::load(const std::string &library)
 
 #undef LOAD_FUNCTION_PTR
 
-    dlclose(handle);
+    //Don't call dlclose(handle) or all the symbols will be unloaded !
 
     // Disable default loading and set status to successful
     _loaded = std::make_pair(true, true);
