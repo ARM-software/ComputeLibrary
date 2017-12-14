@@ -142,7 +142,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             _memory_group.manage(&_workspace);
 
             // Configure matrix multiplication kernel
-            _mm_optimised_kernel->configure(a, b, d, &_workspace, alpha, 0.f);
+            _mm_optimised_kernel->configure(a, b, d, &_workspace, alpha, 0.f, false /* is_transposed_0 */, false /* is_transposed_1 */);
             _workspace.allocator()->allocate();
         }
         else

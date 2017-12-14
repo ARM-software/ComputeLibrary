@@ -38,7 +38,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 protected:
-    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;
+    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool is_transposed_0, bool is_transposed_1) override;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEHGEMMAARCH64FP16KERNEL_H__*/

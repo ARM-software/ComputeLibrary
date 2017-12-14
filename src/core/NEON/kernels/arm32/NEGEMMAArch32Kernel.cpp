@@ -50,20 +50,20 @@ namespace arm_compute
 
 namespace arm_compute
 {
-void NEGEMMAArch32Kernel::internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1)
+void NEGEMMAArch32Kernel::internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool is_transposed_0, bool is_transposed_1)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
 
-    _input0      = input0;
-    _input1      = input1;
-    _output      = output;
-    _workspace   = workspace;
-    _alpha       = alpha;
-    _beta        = beta;
-    _transform_0 = transform_0;
-    _transform_1 = transform_1;
+    _input0          = input0;
+    _input1          = input1;
+    _output          = output;
+    _workspace       = workspace;
+    _alpha           = alpha;
+    _beta            = beta;
+    _is_transposed_0 = is_transposed_0;
+    _is_transposed_1 = is_transposed_1;
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info());
@@ -104,7 +104,7 @@ void NEGEMMAArch32Kernel::run(const Window &window, const ThreadInfo &info)
     Iterator in0(_input0, window);
     Iterator out(_output, window);
 
-    GemmInterleaved<sgemm_8x6, float, float> gemm(&info.cpu_info, M, N, K, !_transform_0, !_transform_1);
+    GemmInterleaved<sgemm_8x6, float, float> gemm(&info.cpu_info, M, N, K, _is_transposed_0, _is_transposed_1);
     constexpr size_t alignment      = 4096;
     const size_t     offset         = (gemm.get_working_size() + alignment - 1) * info.thread_id;
     void            *workspace      = _workspace->buffer() + offset;
