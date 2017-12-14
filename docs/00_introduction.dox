@@ -19,6 +19,18 @@ In order to facilitate the work of the support team please provide the build inf
     $ strings android-armv7a-cl-asserts/libarm_compute.so | grep arm_compute_version
     arm_compute_version=v16.12 Build options: {'embed_kernels': '1', 'opencl': '1', 'arch': 'armv7a', 'neon': '0', 'asserts': '1', 'debug': '0', 'os': 'android', 'Werror': '1'} Git hash=f51a545d4ea12a9059fe4e598a092f1fd06dc858
 
+@section S0_2_prebuilt_binaries Pre-built binaries
+
+For each release we provide some pre-built binaries of the library [here](https://github.com/ARM-software/ComputeLibrary/releases)
+
+These binaries have been built using the following toolchains:
+            - Linux armv7a: gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux
+            - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
+            - Android armv7a: clang++ / gnustl NDK r14
+            - Android am64-v8a: clang++ / gnustl NDK r14
+
+@warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
+
 @section S1_file_organisation File organisation
 
 This archive contains:
@@ -102,6 +114,7 @@ You should have the following file organisation:
 	├── documentation.xhtml -> documentation/index.xhtml
 	├── examples
 	│   ├── cl_*.cpp --> OpenCL examples
+	│   ├── gc_*.cpp --> GLES compute shaders examples
 	│   ├── graph_*.cpp --> Graph examples
 	│   ├── neoncl_*.cpp --> NEON / OpenCL interoperability examples
 	│   └── neon_*.cpp --> NEON examples
@@ -109,16 +122,14 @@ You should have the following file organisation:
 	│   ├── CL
 	│   │   └── Khronos OpenCL C headers and C++ wrapper
 	│   ├── half --> FP16 library available from http://half.sourceforge.net
-	│   └── libnpy --> Library to load / write npy buffers, available from https://github.com/llohse/libnpy
+	│   ├── libnpy --> Library to load / write npy buffers, available from https://github.com/llohse/libnpy
+	│   └── linux --> Headers only needed for Linux builds
+	│       └── Khronos EGL and OpenGLES headers
 	├── opencl-1.2-stubs
-	│   └── opencl_stubs.c
-	├── opengles-3.1
-	│   ├── include
-	│   │   └── Khronos EGL and GLES C headers
-	│   ├── mali_include
-	│   │   └── EGL
-	│   │       └── fbdev_windows.h
-	│   └── stubs
+	│   └── opencl_stubs.c --> OpenCL stubs implementation
+	├── opengles-3.1-stubs
+	│   ├── EGL.c --> EGL stubs implementation
+	│   └── GLESv2.c --> GLESv2 stubs implementation
 	├── scripts
 	│   ├── caffe_data_extractor.py --> Basic script to export weights from Caffe to npy files
 	│   └── tensorflow_data_extractor.py --> Basic script to export weights from Tensor Flow to npy files
@@ -594,15 +605,23 @@ To cross compile an OpenCL example for Linux 64bit:
 
 	aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -larm_compute_core -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
 
+To cross compile a GLES example for Linux 32bit:
+
+	arm-linux-gnueabihf-g++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude/ -L. -larm_compute -larm_compute_core -std=c++11 -mfpu=neon -DARM_COMPUTE_GC -Iinclude/linux/ -o gc_absdiff
+
+To cross compile a GLES example for Linux 64bit:
+
+	aarch64-linux-gnu-g++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude/ -L. -larm_compute -larm_compute_core -std=c++11 -DARM_COMPUTE_GC -Iinclude/linux/ -o gc_absdiff
+
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
 
-To cross compile the examples with the Graph API, such as graph_lenet.cpp, you need to link the library arm_compute_graph.so also.
-(notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1)
+To cross compile the examples with the Graph API, such as graph_lenet.cpp, you need to link the examples against arm_compute_graph.so too.
+
+@note The compute library must currently be built with both neon and opencl enabled - neon=1 and opencl=1
 
 i.e. to cross compile the "graph_lenet" example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined
- -o graph_lenet
+	arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 
 i.e. to cross compile the "graph_lenet" example for Linux 64bit:
 
@@ -626,14 +645,18 @@ To compile natively (i.e directly on an ARM device) for OpenCL for Linux 32bit o
 
 	g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
 
-To compile natively (i.e directly on an ARM device) the examples with the Graph API, such as graph_lenet.cpp, you need to link the library arm_compute_graph.so also.
-(notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1)
+To compile natively (i.e directly on an ARM device) for GLES for Linux 32bit or Linux 64bit:
 
-i.e. to cross compile the "graph_lenet" example for Linux 32bit:
+	g++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude/ -L. -larm_compute -larm_compute_core -std=c++11 -DARM_COMPUTE_GC -Iinclude/linux/ -o gc_absdiff
+
+To compile natively the examples with the Graph API, such as graph_lenet.cpp, you need to link the examples against arm_compute_graph.so too.
+@note The compute library must currently be built with both neon and opencl enabled - neon=1 and opencl=1
+
+i.e. to natively compile the "graph_lenet" example for Linux 32bit:
 
 	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 
-i.e. to cross compile the "graph_lenet" example for Linux 64bit:
+i.e. to natively compile the "graph_lenet" example for Linux 64bit:
 
 	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 
@@ -651,13 +674,11 @@ or
 
 	LD_LIBRARY_PATH=build ./cl_convolution
 
-@note If you built the library with support for both OpenCL and NEON you will need to link against OpenCL even if your application only uses NEON.
-
 @subsection S3_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
- - arm-linux-androideabi-4.9 for armv7a (clang++)
- - aarch64-linux-android-4.9 for arm64-v8a (g++)
+ - NDK r14 arm-linux-androideabi-4.9 for armv7a (clang++)
+ - NDK r14 aarch64-linux-android-4.9 for arm64-v8a (clang++)
 
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 
@@ -669,7 +690,7 @@ Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-4.9 --stl gnustl --api 21
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-androideabi-4.9 --stl gnustl --api 21
 
-@attention Due to some NDK issues make sure you use g++ & gnustl for aarch64 and clang++ & gnustl for armv7
+@attention Due to some NDK issues make sure you use clang++ & gnustl
 
 @note Make sure to add the toolchains to your PATH: export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-4.9/bin:$MY_TOOLCHAINS/arm-linux-androideabi-4.9/bin
 
@@ -683,11 +704,11 @@ To cross-compile the library in debug mode, with NEON only support, for Android 
 
 To cross-compile the library in asserts mode, with OpenCL only support, for Android 64bit:
 
-	scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=android arch=arm64-v8a
+	CXX=clang++ CC=clang scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=android arch=arm64-v8a
 
 To cross-compile the library in asserts mode, with GLES_COMPUTE only support, for Android 64bit:
 
-	scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=0 gles_compute=1 embed_kernels=1 os=android arch=arm64-v8a
+	CXX=clang++ CC=clang scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=0 gles_compute=1 embed_kernels=1 os=android arch=arm64-v8a
 
 @subsubsection S3_3_2_examples How to manually build the examples ?
 
@@ -702,14 +723,20 @@ To cross compile a NEON example:
 	#32 bit:
 	arm-linux-androideabi-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o neon_convolution_arm -static-libstdc++ -pie
 	#64 bit:
-	aarch64-linux-android-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o neon_convolution_aarch64 -static-libstdc++ -pie
+	aarch64-linux-android-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o neon_convolution_aarch64 -static-libstdc++ -pie
 
 To cross compile an OpenCL example:
 
 	#32 bit:
 	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+	aarch64-linux-android-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+
+To cross compile a GLES example:
+	#32 bit:
+	arm-linux-androideabi-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_arm -static-libstdc++ -pie -DARM_COMPUTE_GC
+	#64 bit:
+	aarch64-linux-android-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_GC
 
 To cross compile the examples with the Graph API, such as graph_lenet.cpp, you need to link the library arm_compute_graph also.
 (notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1)
@@ -717,7 +744,7 @@ To cross compile the examples with the Graph API, such as graph_lenet.cpp, you n
 	#32 bit:
 	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+	aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 
 @note Due to some issues in older versions of the Mali OpenCL DDK (<= r13p0), we recommend to link arm_compute statically on Android.
 @note When linked statically the arm_compute_graph library currently needs the --whole-archive linker flag in order to work properly
@@ -726,23 +753,27 @@ Then you need to do is upload the executable and the shared library to the devic
 
 	adb push neon_convolution_arm /data/local/tmp/
 	adb push cl_convolution_arm /data/local/tmp/
+	adb push gc_absdiff_arm /data/local/tmp/
 	adb shell chmod 777 -R /data/local/tmp/
 
 And finally to run the example:
 
 	adb shell /data/local/tmp/neon_convolution_arm
 	adb shell /data/local/tmp/cl_convolution_arm
+	adb shell /data/local/tmp/gc_absdiff_arm
 
 For 64bit:
 
 	adb push neon_convolution_aarch64 /data/local/tmp/
 	adb push cl_convolution_aarch64 /data/local/tmp/
+	adb push gc_absdiff_aarch64 /data/local/tmp/
 	adb shell chmod 777 -R /data/local/tmp/
 
 And finally to run the example:
 
 	adb shell /data/local/tmp/neon_convolution_aarch64
 	adb shell /data/local/tmp/cl_convolution_aarch64
+	adb shell /data/local/tmp/gc_absdiff_aarch64
 
 @subsection S3_4_bare_metal Building for bare metal
 
@@ -806,7 +837,6 @@ To cross-compile the stub OpenCL library simply run:
 
 For example:
 
-	<target-prefix>-gcc -o libOpenCL.so -Iinclude opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
 	#Linux 32bit
 	arm-linux-gnueabihf-gcc -o libOpenCL.so -Iinclude opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
 	#Linux 64bit
@@ -814,5 +844,24 @@ For example:
 	#Android 32bit
 	arm-linux-androideabi-clang -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
 	#Android 64bit
-	aarch64-linux-android-gcc -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
+	aarch64-linux-android-clang -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
+
+@subsection S3_7_gles_stub_library The Linux OpenGLES and EGL stub libraries
+
+In the opengles-3.1-stubs folder you will find the sources to build stub EGL and OpenGLES libraries which then can be used to link your Linux application of arm_compute against.
+
+@note The stub libraries are only needed on Linux. For Android, the NDK toolchains already provide the meta-EGL and meta-GLES libraries.
+
+To cross-compile the stub OpenGLES and EGL libraries simply run:
+
+	<target-prefix>-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
+	<target-prefix>-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
+
+	#Linux 32bit
+	arm-linux-gnueabihf-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
+	arm-linux-gnueabihf-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
+
+	#Linux 64bit
+	aarch64-linux-gnu-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
+	aarch64-linux-gnu-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
 */
