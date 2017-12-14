@@ -81,7 +81,7 @@ protected:
     ITensor          *_phase;     /**< Destination tensor - Quantized phase */
 };
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** NEON kernel to perform Gradient computation
  */
 class NEGradientFP16Kernel : public NEGradientKernel
@@ -90,9 +90,9 @@ public:
     // Inherited methods overriden:
     void configure(const ITensor *gx, const ITensor *gy, ITensor *magnitude, ITensor *phase, int32_t norm_type) override;
 };
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 using NEGradientFP16Kernel = NEGradientKernel;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 /** NEON kernel to perform Non-Maxima suppression for Canny Edge.
  *

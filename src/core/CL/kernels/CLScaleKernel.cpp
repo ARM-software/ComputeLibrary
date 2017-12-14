@@ -44,7 +44,7 @@ BorderSize CLScaleKernel::border_size() const
     return BorderSize(1);
 }
 
-void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, bool border_undefined)
+void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
@@ -54,11 +54,14 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     _input  = input;
     _output = output;
 
-    /* Compute the ratio between source width/height and destination width/height */
+    // Compute the ratio between source width/height and destination width/height
     const auto wr = static_cast<float>(input->info()->dimension(0)) / static_cast<float>(output->info()->dimension(0));
     const auto hr = static_cast<float>(input->info()->dimension(1)) / static_cast<float>(output->info()->dimension(1));
 
-    /* Area interpolation behaves as Nearest Neighbour in case of up-sampling */
+    // Compute actual border size
+    BorderSize border = border_undefined ? BorderSize(0) : border_size();
+
+    // Area interpolation behaves as Nearest Neighbour in case of up-sampling
     if(policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
     {
         policy = InterpolationPolicy::NEAREST_NEIGHBOR;
@@ -69,11 +72,15 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     }
 
     // Create kernel
-    std::set<std::string> build_opts         = { ("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())) };
-    std::string           interpolation_name = string_from_interpolation_policy(policy);
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DBORDER_SIZE=" + support::cpp11::to_string(border.right));
+    build_opts.add_option_if_else(sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
+
+    std::string interpolation_name = string_from_interpolation_policy(policy);
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
     std::string kernel_name = "scale_" + interpolation_name;
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 4;
@@ -84,15 +91,18 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
 
     // Reads can occur within the valid region of the input
     AccessWindowStatic input_access(input->info(),
-                                    input_valid_region.anchor[0] - border_size().left, input_valid_region.anchor[1] - border_size().top,
-                                    input_valid_region.anchor[0] + input_valid_region.shape[0] + border_size().right,
-                                    input_valid_region.anchor[1] + input_valid_region.shape[1] + border_size().bottom);
+                                    input_valid_region.anchor[0] - border.left, input_valid_region.anchor[1] - border.top,
+                                    input_valid_region.anchor[0] + input_valid_region.shape[0] + border.right,
+                                    input_valid_region.anchor[1] + input_valid_region.shape[1] + border.bottom);
 
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, input_access, output_access);
 
-    output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()), output->info()->tensor_shape(), policy, border_size(),
+    output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()),
+                                                                     output->info()->tensor_shape(),
+                                                                     policy,
+                                                                     border,
                                                                      border_undefined));
 
     ICLKernel::configure(win);

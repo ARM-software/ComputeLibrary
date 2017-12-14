@@ -52,14 +52,16 @@ public:
      *
      * @param[in]  input  The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM]. Data type supported: F32.
      * @param[out] output The output tensor. Data type supported: same as @p input.
+     * @param[in]  biases (Optional) The input biases to add. Shape [IFM]. Data type supported: same as @p input.
      */
-    void configure(const ICLTensor *input, ICLTensor *output);
+    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *biases = nullptr);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
     const ICLTensor *_input;
+    const ICLTensor *_biases;
     ICLTensor       *_output;
 };
 } // arm_compute

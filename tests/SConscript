@@ -30,7 +30,8 @@ SConscript('./framework/SConscript', duplicate=0)
 # vars is imported from arm_compute:
 variables = [
     BoolVariable("validation_tests", "Build validation test programs", False),
-    BoolVariable("benchmark_tests", "Build benchmark test programs", False)
+    BoolVariable("benchmark_tests", "Build benchmark test programs", False),
+    ("test_filter", "Pattern to specify the tests' filenames to be compiled", "*.cpp")
 ]
 
 # We need a separate set of Variables for the Help message (Otherwise the global variables will get displayed twice)
@@ -73,34 +74,57 @@ common_objects = [test_env.StaticObject(f) for f in common_files]
 files_benchmark = Glob('benchmark/*.cpp')
 files_validation = Glob('validation/*.cpp')
 
-# Add unit tests
-files_validation += Glob('validation/UNIT/*.cpp')
-
 # Always compile reference for validation
-files_validation += Glob('validation/CPP/*.cpp')
+files_validation += Glob('validation/reference/*.cpp')
 
 # Add unit tests
 files_validation += Glob('validation/UNIT/*/*.cpp')
 files_validation += Glob('validation/UNIT/*.cpp')
 
+# Add CPP tests
+filter_pattern = test_env['test_filter']
+files_validation += Glob('validation/CPP/' + filter_pattern)
+
 if env['opencl']:
     Import('opencl')
+    filter_pattern = test_env['test_filter']
 
     test_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
     test_env.Append(LIBS = ["OpenCL"])
 
-    files_benchmark += Glob('benchmark/CL/*/*.cpp')
-    files_benchmark += Glob('benchmark/CL/*.cpp')
+    files_benchmark += Glob('benchmark/CL/*/' + filter_pattern)
+    files_benchmark += Glob('benchmark/CL/' + filter_pattern)
 
-    files_validation += Glob('validation/CL/*/*.cpp')
-    files_validation += Glob('validation/CL/*.cpp')
+    files_validation += Glob('validation/CL/*/' + filter_pattern)
+    files_validation += Glob('validation/CL/' + filter_pattern)
 
 if env['neon']:
-    files_benchmark += Glob('benchmark/NEON/*/*.cpp')
-    files_benchmark += Glob('benchmark/NEON/*.cpp')
+    filter_pattern = test_env['test_filter']
+    files_benchmark += Glob('benchmark/NEON/*/' + filter_pattern)
+    files_benchmark += Glob('benchmark/NEON/' + filter_pattern)
 
-    files_validation += Glob('validation/NEON/*/*.cpp')
-    files_validation += Glob('validation/NEON/*.cpp')
+    files_validation += Glob('validation/NEON/*/' + filter_pattern)
+    files_validation += Glob('validation/NEON/' + filter_pattern)
+
+if env['gles_compute']:
+    if env['os'] != 'android':
+        Import('egl')
+        Import('glesv2')
+
+        test_env.Append(LIBS = ["EGL", "GLESv2"])
+    else:
+        if env['arch'] != 'armv7a':
+            test_env.Append(LIBS = ["EGL", "GLESv3"])
+        else:
+            test_env.Append(LIBS = ["EGL", "GLESv2"])
+
+    test_env.Append(CPPDEFINES=['ARM_COMPUTE_GC'])
+
+    files_benchmark += Glob('benchmark/GLES_COMPUTE/*/*.cpp')
+    files_benchmark += Glob('benchmark/GLES_COMPUTE/*.cpp')
+
+    files_validation += Glob('validation/GLES_COMPUTE/*/*.cpp')
+    files_validation += Glob('validation/GLES_COMPUTE/*.cpp')
 
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
@@ -114,6 +138,9 @@ if test_env['benchmark_tests']:
 
     if env['opencl']:
         Depends(arm_compute_benchmark, opencl)
+    if env['gles_compute'] and env['os'] != 'android':
+        Depends(arm_compute_benchmark, egl)
+        Depends(arm_compute_benchmark, glesv2)
 
     Default(arm_compute_benchmark)
     Export('arm_compute_benchmark')
@@ -125,6 +152,9 @@ if test_env['validation_tests']:
 
     if env['opencl']:
         Depends(arm_compute_validation, opencl)
+    if env['gles_compute'] and env['os'] != 'android':
+        Depends(arm_compute_validation, egl)
+        Depends(arm_compute_validation, glesv2)
 
     Default(arm_compute_validation)
     Export('arm_compute_validation')

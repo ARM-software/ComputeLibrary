@@ -50,7 +50,7 @@
 
 #endif // FIXED_POINT_POSITION
 
-/** Apply cross map normalization.
+/** Apply cross-map normalization.
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size, e.g. -DVEC_SIZE=16
@@ -92,14 +92,13 @@ __kernel void normalization_layer_cross_map(TENSOR3D_DECLARATION(input),
     kappa_v = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))SQCVT_SAT(KAPPA);
 
     const int current_slice = get_global_id(2);
-
-    const int left_slice  = max(current_slice - (int)RADIUS, (int)0);
-    const int right_slice = min(current_slice + (int)RADIUS, (int)(NUM_SLICES - 1));
+    const int left_slice    = max(-(int)RADIUS, -current_slice);
+    const int right_slice   = min((int)RADIUS, (int)NUM_SLICES - 1 - current_slice);
 
     for(int i = left_slice; i <= right_slice; i++)
     {
         VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-        values = LOAD_OP(0, (__global DATA_TYPE *)tensor3D_offset(&in, 0, 0, i - current_slice));
+        values = LOAD_OP(0, (__global DATA_TYPE *)tensor3D_offset(&in, 0, 0, i));
         acc    = ADD_OP(acc, MUL_OP(values, values));
     }
 
@@ -112,7 +111,7 @@ __kernel void normalization_layer_cross_map(TENSOR3D_DECLARATION(input),
     STORE_OP(normalized_pixel, 0, (__global DATA_TYPE *)out.ptr);
 }
 
-/** Apply in map normalization.
+/** Apply in-map normalization.
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size, e.g. -DVEC_SIZE=16
@@ -137,8 +136,8 @@ __kernel void normalization_layer_cross_map(TENSOR3D_DECLARATION(input),
  * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
-__kernel void normalization_layer_in_map_1D(TENSOR3D_DECLARATION(input),
-                                            TENSOR3D_DECLARATION(output))
+__kernel void normalization_layer_in_map(TENSOR3D_DECLARATION(input),
+                                         TENSOR3D_DECLARATION(output))
 {
     Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(input);
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
@@ -152,17 +151,34 @@ __kernel void normalization_layer_in_map_1D(TENSOR3D_DECLARATION(input),
     const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     kappa_v = (VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))SQCVT_SAT(KAPPA);
 
-    const int current_pos = get_global_id(0) << 2;
+    const int current_col = get_global_id(0) << 2;
+    const int left_pos    = max(-(int)RADIUS, -3 - current_col);
+    const int right_pos   = min((int)RADIUS, (int)((get_global_size(0) << 2) + 3 - 1 - current_col));
 
-    const int left_pos  = max(current_pos - (int)RADIUS, -3);
-    const int right_pos = min(current_pos + (int)RADIUS, (int)((get_global_size(0) << 2) + 3 - 1));
+#if defined(IN_MAP_2D)
+    const int current_row = get_global_id(1);
+    const int first_row   = max(-(int)RADIUS, -current_row);
+    const int last_row    = min((int)RADIUS, (int)get_global_size(1) - 1 - current_row);
+#endif /* defined(IN_MAP_2D) */
 
-    for(int i = left_pos; i <= right_pos; i += 1)
+#if defined(IN_MAP_2D)
+    for(int j = first_row; j <= last_row; ++j)
     {
-        VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-        values = LOAD_OP(0, (__global DATA_TYPE *)tensor3D_offset(&in, i - current_pos, 0, 0));
-        acc    = ADD_OP(acc, MUL_OP(values, values));
+#endif /* defined(IN_MAP_2D) */
+        for(int i = left_pos; i <= right_pos; ++i)
+        {
+#if defined(IN_MAP_2D)
+            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+            values = LOAD_OP(0, (__global DATA_TYPE *)tensor3D_offset(&in, i, j, 0));
+#else  /* defined(IN_MAP_2D) */
+            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+            values = LOAD_OP(0, (__global DATA_TYPE *)tensor3D_offset(&in, i, 0, 0));
+#endif /* defined(IN_MAP_2D) */
+            acc = ADD_OP(acc, MUL_OP(values, values));
+        }
+#if defined(IN_MAP_2D)
     }
+#endif /* defined(IN_MAP_2D) */
 
     acc = ADD_OP(MUL_OP(acc, coeff_v), kappa_v);
     const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)

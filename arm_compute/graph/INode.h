@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_GRAPH_INODE_H__
 
 #include "arm_compute/graph/GraphContext.h"
+#include "arm_compute/graph/ITensorObject.h"
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -46,7 +47,7 @@ public:
      * @param[in] input  Input tensor of the node
      * @param[in] output Output tensor of the node
      */
-    virtual std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) = 0;
+    virtual std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) = 0;
     /** Override the existing target hint
      *
      * @note If the input is DONT_CARE then the method has to pick a technology,

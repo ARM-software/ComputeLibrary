@@ -286,7 +286,7 @@ void NESobel7x7HorKernel::run(const Window &window, const ThreadInfo &info)
                 }
             };
 
-            const int32x4x2_t out = compute_hor_sobel_x(data_s32);
+            const int32x4x2_t out = compute_hor_sobel_y(data_s32);
             vst1q_s32(reinterpret_cast<int32_t *>(output_y.ptr()), out.val[0]);
             vst1q_s32(reinterpret_cast<int32_t *>(output_y.ptr()) + 4, out.val[1]);
         },

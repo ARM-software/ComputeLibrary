@@ -56,7 +56,7 @@ template <typename T>
 using CLFixedPointFixture = FixedPointValidationFixture<CLTensor, CLAccessor, T>;
 
 TEST_SUITE(Exp)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::QS8)),
                                                                                                            framework::dataset::make("FixedPointOp", FixedPointOp::EXP)),
                                                                                                    framework::dataset::make("FractionalBits", 1, 6)))
@@ -67,7 +67,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFixedPointFixture<int8_t>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(Log)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::QS8)),
                                                                                                            framework::dataset::make("FixedPointOp", FixedPointOp::LOG)),
                                                                                                    framework::dataset::make("FractionalBits", 3, 6)))
@@ -78,7 +78,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFixedPointFixture<int8_t>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(Invsqrt)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShape(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::QS8)),
                                                                                                            framework::dataset::make("FixedPointOp", FixedPointOp::INV_SQRT)),
                                                                                                    framework::dataset::make("FractionalBits", 1, 6)))

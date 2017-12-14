@@ -35,9 +35,9 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/CPP/Utils.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/WarpAffineFixture.h"
+#include "tests/validation/reference/Utils.h"
 
 namespace arm_compute
 {

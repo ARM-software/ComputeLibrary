@@ -61,7 +61,6 @@ void CLPyramid::internal_init(const PyramidInfo &info, bool auto_padding)
     const bool  is_orb_scale = (SCALE_PYRAMID_ORB == _info.scale());
     TensorShape tensor_shape = _info.tensor_shape();
 
-    // Note: Look-up table used by the OpenVX sample implementation
     const std::array<float, 4> c_orbscale =
     {
         {

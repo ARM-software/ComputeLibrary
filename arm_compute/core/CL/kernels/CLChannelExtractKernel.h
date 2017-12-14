@@ -53,14 +53,14 @@ public:
     ~CLChannelExtractKernel() = default;
     /** Set the input and output of the kernel
      *
-     * @param[in]  input   Source tensor.
+     * @param[in]  input   Source tensor. Formats supported: RGB888/RGBA8888/YUYV422/UYVY422
      * @param[in]  channel Channel to extract.
      * @param[out] output  Destination tensor. Must be of U8 format.
      */
     void configure(const ICLTensor *input, Channel channel, ICLTensor *output);
     /** Set the input and output of the kernel
      *
-     * @param[in]  input   Multi-planar source image.
+     * @param[in]  input   Multi-planar source image. Formats supported: NV12/NV21/IYUV/YUV444
      * @param[in]  channel Channel to extract.
      * @param[out] output  Single-planar 2D destination image. Must be of U8 format.
      */

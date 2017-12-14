@@ -26,6 +26,8 @@
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
+#include "arm_compute/core/Error.h"
+
 namespace arm_compute
 {
 class ICLTensor;
@@ -51,11 +53,20 @@ public:
      *
      * @note QS8 and QS16 are supported only for pool sizes 3, 5 and 7
      *
-     * @param[in]  input     Source tensor. Data types supported: QS8/QS16/F16/F32.
+     * @param[in]  input     Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLPoolingLayerKernel
+     *
+     * @param[in] input     Source tensor info. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
+     * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

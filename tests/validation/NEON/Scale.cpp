@@ -30,6 +30,7 @@
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/BorderModeDataset.h"
 #include "tests/datasets/InterpolationPolicyDataset.h"
+#include "tests/datasets/SamplingPolicyDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -66,10 +67,11 @@ constexpr float tolerance_num_f32 = 0.01f;
 TEST_SUITE(NEON)
 TEST_SUITE(Scale)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), ScaleDataTypes),
-                                                                           framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                   datasets::BorderModes()),
-               shape, data_type, policy, border_mode)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), ScaleDataTypes),
+                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                           datasets::BorderModes()),
+                                                                   framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })),
+               shape, data_type, policy, border_mode, sampling_policy)
 {
     std::mt19937                          generator(library->seed());
     std::uniform_real_distribution<float> distribution_float(0.25, 2);
@@ -94,7 +96,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 
     // Create and configure function
     NEScale nescale;
-    nescale.configure(&src, &dst, policy, border_mode, constant_border_value);
+    nescale.configure(&src, &dst, policy, border_mode, constant_border_value, sampling_policy);
 
     // Validate valid region
     const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, BorderSize(1), (border_mode == BorderMode::UNDEFINED));
@@ -116,10 +118,11 @@ using NEScaleFixture = ScaleValidationFixture<Tensor, Accessor, NEScale, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                             DataType::F32)),
-                                                                                                     framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                             datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                     DataType::F32)),
+                                                                                                             framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                     datasets::BorderModes()),
+                                                                                             framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -128,10 +131,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)),
-                                                                                                         framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                 datasets::BorderModes()))
+                                                                                                                 framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                         datasets::BorderModes()),
+                                                                                                 framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -145,10 +149,11 @@ TEST_SUITE_END()
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                               DataType::U8)),
-                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                               datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                       DataType::U8)),
+                                                                                                               framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                       datasets::BorderModes()),
+                                                                                               framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -157,10 +162,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_u8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
-                                                                                                           framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                   datasets::BorderModes()))
+                                                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                           datasets::BorderModes()),
+                                                                                                   framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -171,10 +177,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode
 }
 TEST_SUITE_END()
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                               DataType::S16)),
-                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                               datasets::BorderModes()))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                       DataType::S16)),
+                                                                                                               framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                       datasets::BorderModes()),
+                                                                                               framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -183,10 +190,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_s16, tolerance_num_s16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::S16)),
-                                                                                                           framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                   datasets::BorderModes()))
+                                                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                           datasets::BorderModes()),
+                                                                                                   framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);

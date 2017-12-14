@@ -179,19 +179,19 @@ void vst1_qs16(qint16_t *addr, qint16x4_t b);
 void vst1q_qs8(qint8_t *addr, qint8x16_t b);
 
 /** Store a single 16 bit fixed point vector to memory (8 elements)
-*
-* @param[in] addr Memory address where the 16 bit fixed point vector should be stored
-* @param[in] b    16 bit fixed point vector to store
-*
-*/
+ *
+ * @param[in] addr Memory address where the 16 bit fixed point vector should be stored
+ * @param[in] b    16 bit fixed point vector to store
+ *
+ */
 void vst1q_qs16(qint16_t *addr, qint16x8_t b);
 
 /** Store two 16 bit fixed point vector to memory (8x2 elements)
-*
-* @param[in] addr Memory address where the 16 bit fixed point vectors should be stored
-* @param[in] b    16 bit fixed point vectors to store
-*
-*/
+ *
+ * @param[in] addr Memory address where the 16 bit fixed point vectors should be stored
+ * @param[in] b    16 bit fixed point vectors to store
+ *
+ */
 void vst2q_qs16(qint16_t *addr, qint16x8x2_t b);
 
 /** 16 bit fixed point vector saturating narrow (8 elements)

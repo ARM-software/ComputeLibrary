@@ -13,6 +13,6 @@ var benchmark_2_n_e_o_n_2_pooling_layer_8cpp =
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_pooling_layer_8cpp.xhtml#ad5101e30d9b5306231c7ed2ce71f350b", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_pooling_layer_8cpp.xhtml#ad0b2b0d1564cc6c5ac951a7b8e59bda8", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_pooling_layer_8cpp.xhtml#aa973f66482fdadbd2ab72cdb6face4b5", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_pooling_layer_8cpp.xhtml#a9adba78f24e5c87b2c95a1c5e23883e9", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_pooling_layer_8cpp.xhtml#afcaaee96f26340bdfe7a841f158453b8", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_pooling_layer_8cpp.xhtml#a03474ce6764bea95de0edb583d281017", null ]
 ];

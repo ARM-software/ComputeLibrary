@@ -30,8 +30,8 @@
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/HarrisCornerDetector.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/HarrisCornerDetector.h"
 
 namespace arm_compute
 {
@@ -51,7 +51,7 @@ public:
     {
         HarrisCornersParameters params = harris_corners_parameters();
 
-        _target    = compute_target(shape, gradient_size, block_size, border_mode, use_fp16, format, params);
+        _target = compute_target(shape, gradient_size, block_size, border_mode, use_fp16, format, params);
         _reference = compute_reference(shape, gradient_size, block_size, border_mode, format, params);
     }
 

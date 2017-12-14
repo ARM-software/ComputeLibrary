@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_GRAPH_TENSOR_H__
 
 #include "arm_compute/graph/ITensorAccessor.h"
+#include "arm_compute/graph/ITensorObject.h"
 #include "arm_compute/graph/Types.h"
 #include "support/ToolchainSupport.h"
 
@@ -35,7 +36,7 @@ namespace arm_compute
 namespace graph
 {
 /** Tensor class */
-class Tensor
+class Tensor final : public ITensorObject
 {
 public:
     /** Constructor
@@ -94,43 +95,28 @@ public:
      * @param[in] info TensorInfo to set
      */
     void set_info(TensorInfo &&info);
-    /** Calls accessor on tensor
-     *
-     * @return True if succeeds else false
-     */
-    bool call_accessor();
-    /** Sets target of the tensor
-     *
-     * @param[in] target Target where the tensor should be pinned in
-     *
-     * @return
-     */
-    ITensor *set_target(TargetHint target);
     /** Returns tensor's TensorInfo
      *
      * @return TensorInfo of the tensor
      */
     const TensorInfo &info() const;
-    /** Returns a pointer to the internal tensor
-     *
-     * @return Tensor
-     */
-    ITensor *tensor();
     /** Allocates and fills the tensor if needed */
     void allocate_and_fill_if_needed();
-    /** Allocates the tensor */
-    void allocate();
-    /** Return the target that this tensor is pinned on
-     *
-     * @return Target of the tensor
-     */
-    TargetHint target() const;
+
+    // Inherited methods overriden:
+    bool                  call_accessor() override;
+    bool                  has_accessor() const override;
+    arm_compute::ITensor *set_target(TargetHint target) override;
+    arm_compute::ITensor       *tensor() override;
+    const arm_compute::ITensor *tensor() const override;
+    TargetHint                  target() const override;
+    void                        allocate() override;
 
 private:
-    TargetHint                       _target;   /**< Target that this tensor is pinned on */
-    TensorInfo                       _info;     /**< Tensor metadata */
-    std::unique_ptr<ITensorAccessor> _accessor; /**< Tensor Accessor */
-    std::unique_ptr<ITensor>         _tensor;   /**< Tensor */
+    TargetHint                            _target;   /**< Target that this tensor is pinned on */
+    TensorInfo                            _info;     /**< Tensor metadata */
+    std::unique_ptr<ITensorAccessor>      _accessor; /**< Tensor Accessor */
+    std::unique_ptr<arm_compute::ITensor> _tensor;   /**< Tensor */
 };
 } // namespace graph
 } // namespace arm_compute

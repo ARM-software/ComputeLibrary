@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 
+#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLDirectConvolutionLayerKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
@@ -45,7 +46,17 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
     _direct_conv_kernel.configure(input, weights, biases, output, conv_info);
 
     // Configure border handler
-    _input_border_handler.configure(input, _direct_conv_kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
+    PixelValue &&zero_value(0.f);
+    if(is_data_type_quantized_asymmetric(input->info()->data_type()))
+    {
+        zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().offset));
+    }
+    _input_border_handler.configure(input, _direct_conv_kernel.border_size(), BorderMode::CONSTANT, zero_value);
+}
+
+Status CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+{
+    return CLDirectConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, CLScheduler::get().target());
 }
 
 void CLDirectConvolutionLayer::run()

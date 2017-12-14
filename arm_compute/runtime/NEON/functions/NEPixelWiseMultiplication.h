@@ -45,6 +45,18 @@ public:
      * @param[in]  rounding_policy Rounding policy.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEPixelWiseMultiplication
+     *
+     * @param[in] input1          First tensor info input. Data types supported: U8/QS8/S16/F32.
+     * @param[in] input2          Second tensor info input. Data types supported: U8/QS8/S16/F32.
+     * @param[in] output          Output tensor info. Data types supported: U8/QS8/S16/F32.
+     * @param[in] scale           Scale to apply after multiplication. Must be positive.
+     * @param[in] overflow_policy Overflow policy.
+     * @param[in] rounding_policy Rounding policy.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
 };
 }
 #endif /*__ARM_COMPUTE_NEPIXELWISEMULTIPLICATION_H__ */

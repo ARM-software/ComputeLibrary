@@ -1,4 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1traits_1_1is__contained.xhtml" title="is_contained\&lt; T, std\l::tuple\&lt; Ts...\&gt; \&gt;" alt="" coords="5,5,147,47"/>
-<area shape="rect" id="node2" href="$structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_01_u_00_01_ts_8_8_8_4_01_4.xhtml" title="is_contained\&lt; T, std\l::tuple\&lt; U, Ts...\&gt; \&gt;" alt="" coords="195,5,336,47"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1_i_lut_accessor.xhtml" title="Common interface to provide information and access to Lut like structures. " alt="" coords="5,56,145,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_c_l_lut_accessor.xhtml" title="Accessor implementation for CLLut objects. " alt="" coords="198,5,351,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1_lut_accessor.xhtml" title="Accessor implementation for Lut objects. " alt="" coords="206,56,343,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml" title="Accessor implementation for std::map&#45;lut objects. " alt="" coords="193,107,356,133"/>
 </map>

@@ -51,7 +51,7 @@ public:
 
     /** Resize array.
      *
-     *  @param[in] num The new array size in number of elements
+     * @param[in] num The new array size in number of elements
      */
     virtual void resize(size_t num) = 0;
 

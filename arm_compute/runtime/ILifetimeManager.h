@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
-#include <vector>
+#include <memory>
 
 namespace arm_compute
 {
@@ -58,6 +58,11 @@ public:
      * @param[in] size   Size of the given object at given time
      */
     virtual void end_lifetime(void *obj, void **handle, size_t size) = 0;
+    /** Checks if the lifetime of the registered object is complete
+     *
+     * @return True if all object lifetimes are finalized else false.
+     */
+    virtual bool are_all_finalized() const = 0;
     /** Creates a memory pool depending on the memory requirements
      *
      * @param allocator Allocator to use
@@ -65,16 +70,11 @@ public:
      * @return A memory pool
      */
     virtual std::unique_ptr<IMemoryPool> create_pool(IAllocator *allocator) = 0;
-    /** Checks if the lifetime of the registered object is complete
-     *
-     * @return True if all object lifetimes are finalized else false.
-     */
-    virtual bool are_all_finalized() const = 0;
     /** Returns the type of mappings that the lifetime manager returns
      *
      * @return Mapping type of the lifetime manager
      */
     virtual MappingType mapping_type() const = 0;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_ILIFETIMEMANAGER_H__ */

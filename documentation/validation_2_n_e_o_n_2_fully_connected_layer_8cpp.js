@@ -3,8 +3,6 @@ var validation_2_n_e_o_n_2_fully_connected_layer_8cpp =
     [ "NEFullyConnectedLayerFixedPointFixture", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a34729f17e601787674b9e1ba0b732af3", null ],
     [ "NEFullyConnectedLayerFixture", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a9cc6be64f8913024dcc18993181b066c", null ],
     [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a993ad7954889c7044c5d3ccd82243f6d", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a0facc74b3b18ca06447a43fde127dfa5", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a31a9fd36cc51b258eb8c0f961d134918", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a36e6031840dd2ee13e3942435811aeea", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#aebe70d0179ffb26d720aac0fe54fbc67", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#aee6c5239c6e59eb63f948030683be252", null ],

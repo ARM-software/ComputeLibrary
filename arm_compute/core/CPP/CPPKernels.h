@@ -27,6 +27,7 @@
 /* Header regrouping all the CPP kernels */
 #include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
+#include "arm_compute/core/CPP/kernels/CPPPermuteKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"
 
 #endif /* __ARM_COMPUTE_CPPKERNELS_H__ */

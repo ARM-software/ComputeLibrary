@@ -37,75 +37,14 @@
 using namespace arm_compute;
 
 BlobLifetimeManager::BlobLifetimeManager()
-    : _active_group(nullptr), _active_elements(), _finalized_groups(), _blobs()
+    : _blobs()
 {
-}
-
-void BlobLifetimeManager::register_group(IMemoryGroup *group)
-{
-    if(_active_group == nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON(group == nullptr);
-        _active_group = group;
-    }
-}
-
-void BlobLifetimeManager::start_lifetime(void *obj)
-{
-    ARM_COMPUTE_ERROR_ON(obj == nullptr);
-    ARM_COMPUTE_ERROR_ON_MSG(std::find_if(std::begin(_active_elements), std::end(_active_elements), [&obj](const Element & e)
-    {
-        return obj == e.id;
-    }) != std::end(_active_elements),
-    "Memory object is already registered!");
-
-    // Insert object in groups and mark its finalized state to false
-    _active_elements.emplace_back(obj);
-}
-
-void BlobLifetimeManager::end_lifetime(void *obj, void **handle, size_t size)
-{
-    ARM_COMPUTE_ERROR_ON(obj == nullptr);
-
-    // Find object
-    auto it = std::find_if(std::begin(_active_elements), std::end(_active_elements), [&obj](const Element & e)
-    {
-        return obj == e.id;
-    });
-    ARM_COMPUTE_ERROR_ON(it == std::end(_active_elements));
-
-    // Update object fields and mark object as complete
-    it->handle = handle;
-    it->size   = size;
-    it->status = true;
-
-    // Check if all object are finalized and reset active group
-    if(are_all_finalized())
-    {
-        // Update finalized groups
-        _finalized_groups[_active_group].insert(std::end(_finalized_groups[_active_group]), std::begin(_active_elements), std::end(_active_elements));
-
-        // Update blobs and group mappings
-        update_blobs_and_mappings();
-
-        // Reset state
-        _active_elements.clear();
-        _active_group = nullptr;
-    }
 }
 
 std::unique_ptr<IMemoryPool> BlobLifetimeManager::create_pool(IAllocator *allocator)
 {
     ARM_COMPUTE_ERROR_ON(allocator == nullptr);
     return support::cpp14::make_unique<BlobMemoryPool>(allocator, _blobs);
-}
-
-bool BlobLifetimeManager::are_all_finalized() const
-{
-    return !std::any_of(std::begin(_active_elements), std::end(_active_elements), [](const Element e)
-    {
-        return !e.status;
-    });
 }
 
 MappingType BlobLifetimeManager::mapping_type() const
@@ -118,7 +57,7 @@ void BlobLifetimeManager::update_blobs_and_mappings()
     ARM_COMPUTE_ERROR_ON(!are_all_finalized());
     ARM_COMPUTE_ERROR_ON(_active_group == nullptr);
 
-    // Sort active group requirements in descending order
+    // Sort active group requirements in descending order.
     std::sort(std::begin(_active_elements), std::end(_active_elements), [](const Element & a, const Element & b)
     {
         return a.size > b.size;

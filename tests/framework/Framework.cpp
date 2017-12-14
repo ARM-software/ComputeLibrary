@@ -30,6 +30,11 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
 
+#ifdef ARM_COMPUTE_GC
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
+#endif /* ARM_COMPUTE_GC */
+
 #include <chrono>
 #include <iostream>
 #include <sstream>
@@ -43,18 +48,30 @@ namespace framework
 {
 Framework::Framework()
 {
-    _available_instruments.emplace(InstrumentType::WALL_CLOCK_TIMER, Instrument::make_instrument<WallClockTimer>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimer, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_S>);
 #ifdef PMU_ENABLED
-    _available_instruments.emplace(InstrumentType::PMU, Instrument::make_instrument<PMUCounter>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::NONE), Instrument::make_instrument<PMUCounter, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::SCALE_1K), Instrument::make_instrument<PMUCounter, ScaleFactor::SCALE_1K>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::SCALE_1M), Instrument::make_instrument<PMUCounter, ScaleFactor::SCALE_1M>);
 #endif /* PMU_ENABLED */
 #ifdef MALI_ENABLED
-    _available_instruments.emplace(InstrumentType::MALI, Instrument::make_instrument<MaliCounter>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::NONE), Instrument::make_instrument<MaliCounter, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1K), Instrument::make_instrument<MaliCounter, ScaleFactor::SCALE_1K>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1M), Instrument::make_instrument<MaliCounter, ScaleFactor::SCALE_1M>);
 #endif /* MALI_ENABLED */
+#ifdef ARM_COMPUTE_CL
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::NONE), Instrument::make_instrument<OpenCLTimer, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_US), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_US>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_S>);
+#endif /* ARM_COMPUTE_CL */
 }
 
-std::set<InstrumentType> Framework::available_instruments() const
+std::set<InstrumentsDescription> Framework::available_instruments() const
 {
-    std::set<InstrumentType> types;
+    std::set<InstrumentsDescription> types;
 
     for(const auto &instrument : _available_instruments)
     {
@@ -82,13 +99,14 @@ Framework &Framework::get()
     return instance;
 }
 
-void Framework::init(const std::vector<InstrumentType> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter, LogLevel log_level)
+void Framework::init(const std::vector<framework::InstrumentsDescription> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter,
+                     LogLevel log_level)
 {
     _test_filter    = TestFilter(mode, name_filter, id_filter);
     _num_iterations = num_iterations;
     _log_level      = log_level;
 
-    _instruments = std::set<InstrumentType>(instruments.begin(), instruments.end());
+    _instruments = std::set<framework::InstrumentsDescription>(instruments.begin(), instruments.end());
 }
 
 std::string Framework::current_suite_name() const
@@ -134,11 +152,20 @@ void Framework::print_test_info(std::ostream &os) const
     }
 }
 
+template <typename F>
+void Framework::func_on_all_printers(F &&func)
+{
+    std::for_each(std::begin(_printers), std::end(_printers), func);
+}
+
 void Framework::log_test_start(const TestInfo &info)
 {
-    if(_printer != nullptr && _log_level >= LogLevel::TESTS)
+    if(_log_level >= LogLevel::TESTS)
     {
-        _printer->print_test_header(info);
+        func_on_all_printers([&](Printer * p)
+        {
+            p->print_test_header(info);
+        });
     }
 }
 
@@ -149,17 +176,20 @@ void Framework::log_test_skipped(const TestInfo &info)
 
 void Framework::log_test_end(const TestInfo &info)
 {
-    if(_printer != nullptr)
+    if(_log_level >= LogLevel::MEASUREMENTS)
     {
-        if(_log_level >= LogLevel::MEASUREMENTS)
+        func_on_all_printers([&](Printer * p)
         {
-            _printer->print_measurements(_test_results.at(info).measurements);
-        }
+            p->print_measurements(_test_results.at(info).measurements);
+        });
+    }
 
-        if(_log_level >= LogLevel::TESTS)
+    if(_log_level >= LogLevel::TESTS)
+    {
+        func_on_all_printers([](Printer * p)
         {
-            _printer->print_test_footer();
-        }
+            p->print_test_footer();
+        });
     }
 }
 
@@ -170,9 +200,12 @@ void Framework::log_failed_expectation(const TestError &error)
 
     const bool is_expected_failure = _current_test_info->status == TestCaseFactory::Status::EXPECTED_FAILURE;
 
-    if(_log_level >= error.level() && _printer != nullptr)
+    if(_log_level >= error.level())
     {
-        _printer->print_error(error, is_expected_failure);
+        func_on_all_printers([&](Printer * p)
+        {
+            p->print_error(error, is_expected_failure);
+        });
     }
 
     _current_test_result->status = TestResult::Status::FAILED;
@@ -180,9 +213,12 @@ void Framework::log_failed_expectation(const TestError &error)
 
 void Framework::log_info(const std::string &info)
 {
-    if(_log_level >= LogLevel::DEBUG && _printer != nullptr)
+    if(_log_level >= LogLevel::DEBUG)
     {
-        _printer->print_info(info);
+        func_on_all_printers([&](Printer * p)
+        {
+            p->print_info(info);
+        });
     }
 }
 
@@ -243,9 +279,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     _current_test_info   = &info;
     _current_test_result = &result;
 
-    if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+    if(_log_level >= LogLevel::ERRORS)
     {
-        _printer->print_errors_header();
+        func_on_all_printers([](Printer * p)
+        {
+            p->print_errors_header();
+        });
     }
 
     const bool is_expected_failure = info.status == TestCaseFactory::Status::EXPECTED_FAILURE;
@@ -260,7 +299,16 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 
             for(int i = 0; i < _num_iterations; ++i)
             {
-                profiler.start();
+                //Start the profiler if:
+                //- there is only one iteration
+                //- it's not the first iteration of a multi-iterations run.
+                //
+                //Reason: if the CLTuner is enabled then the first run will be really messy
+                //as each kernel will be executed several times, messing up the instruments like OpenCL timers.
+                if(_num_iterations == 1 || i != 0)
+                {
+                    profiler.start();
+                }
                 test_case->do_run();
 #ifdef ARM_COMPUTE_CL
                 if(opencl_is_available())
@@ -268,7 +316,16 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
                     CLScheduler::get().sync();
                 }
 #endif /* ARM_COMPUTE_CL */
-                profiler.stop();
+#ifdef ARM_COMPUTE_GC
+                if(opengles31_is_available())
+                {
+                    GCScheduler::get().sync();
+                }
+#endif /* ARM_COMPUTE_GC */
+                if(_num_iterations == 1 || i != 0)
+                {
+                    profiler.stop();
+                }
             }
 
             test_case->do_teardown();
@@ -283,10 +340,13 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         {
             if(_error_on_missing_assets)
             {
-                if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+                if(_log_level >= LogLevel::ERRORS)
                 {
                     TestError test_error(error.what(), LogLevel::ERRORS);
-                    _printer->print_error(test_error, is_expected_failure);
+                    func_on_all_printers([&](Printer * p)
+                    {
+                        p->print_error(test_error, is_expected_failure);
+                    });
                 }
 
                 result.status = TestResult::Status::FAILED;
@@ -298,9 +358,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
             }
             else
             {
-                if(_log_level >= LogLevel::DEBUG && _printer != nullptr)
+                if(_log_level >= LogLevel::DEBUG)
                 {
-                    _printer->print_info(error.what());
+                    func_on_all_printers([&](Printer * p)
+                    {
+                        p->print_info(error.what());
+                    });
                 }
 
                 result.status = TestResult::Status::NOT_RUN;
@@ -308,9 +371,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(const TestError &error)
         {
-            if(_log_level >= error.level() && _printer != nullptr)
+            if(_log_level >= error.level())
             {
-                _printer->print_error(error, is_expected_failure);
+                func_on_all_printers([&](Printer * p)
+                {
+                    p->print_error(error, is_expected_failure);
+                });
             }
 
             result.status = TestResult::Status::FAILED;
@@ -323,12 +389,15 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #ifdef ARM_COMPUTE_CL
         catch(const ::cl::Error &error)
         {
-            if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+            if(_log_level >= LogLevel::ERRORS)
             {
                 std::stringstream stream;
                 stream << "Error code: " << error.err();
                 TestError test_error(error.what(), LogLevel::ERRORS, stream.str());
-                _printer->print_error(test_error, is_expected_failure);
+                func_on_all_printers([&](Printer * p)
+                {
+                    p->print_error(test_error, is_expected_failure);
+                });
             }
 
             result.status = TestResult::Status::FAILED;
@@ -341,9 +410,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #endif /* ARM_COMPUTE_CL */
         catch(const std::exception &error)
         {
-            if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+            if(_log_level >= LogLevel::ERRORS)
             {
-                _printer->print_error(error, is_expected_failure);
+                func_on_all_printers([&](Printer * p)
+                {
+                    p->print_error(error, is_expected_failure);
+                });
             }
 
             result.status = TestResult::Status::CRASHED;
@@ -355,9 +427,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(...)
         {
-            if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+            if(_log_level >= LogLevel::ERRORS)
             {
-                _printer->print_error(TestError("Received unknown exception"), is_expected_failure);
+                func_on_all_printers([&](Printer * p)
+                {
+                    p->print_error(TestError("Received unknown exception"), is_expected_failure);
+                });
             }
 
             result.status = TestResult::Status::CRASHED;
@@ -370,9 +445,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     }
     catch(const std::exception &error)
     {
-        if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+        if(_log_level >= LogLevel::ERRORS)
         {
-            _printer->print_error(error, is_expected_failure);
+            func_on_all_printers([&](Printer * p)
+            {
+                p->print_error(error, is_expected_failure);
+            });
         }
 
         result.status = TestResult::Status::CRASHED;
@@ -384,9 +462,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
     }
     catch(...)
     {
-        if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+        if(_log_level >= LogLevel::ERRORS)
         {
-            _printer->print_error(TestError("Received unknown exception"), is_expected_failure);
+            func_on_all_printers([&](Printer * p)
+            {
+                p->print_error(TestError("Received unknown exception"), is_expected_failure);
+            });
         }
 
         result.status = TestResult::Status::CRASHED;
@@ -397,9 +478,12 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
     }
 
-    if(_log_level >= LogLevel::ERRORS && _printer != nullptr)
+    if(_log_level >= LogLevel::ERRORS)
     {
-        _printer->print_errors_footer();
+        func_on_all_printers([](Printer * p)
+        {
+            p->print_errors_footer();
+        });
     }
 
     _current_test_info   = nullptr;
@@ -432,9 +516,12 @@ bool Framework::run()
     // Clear old test results
     _test_results.clear();
 
-    if(_printer != nullptr && _log_level >= LogLevel::TESTS)
+    if(_log_level >= LogLevel::TESTS)
     {
-        _printer->print_run_header();
+        func_on_all_printers([](Printer * p)
+        {
+            p->print_run_header();
+        });
     }
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
@@ -456,9 +543,12 @@ bool Framework::run()
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
 
-    if(_printer != nullptr && _log_level >= LogLevel::TESTS)
+    if(_log_level >= LogLevel::TESTS)
     {
-        _printer->print_run_footer();
+        func_on_all_printers([](Printer * p)
+        {
+            p->print_run_footer();
+        });
     }
 
     auto runtime = std::chrono::duration_cast<std::chrono::seconds>(end - start);
@@ -505,13 +595,13 @@ Profiler Framework::get_profiler() const
     const bool all_instruments = std::any_of(
                                      _instruments.begin(),
                                      _instruments.end(),
-                                     [](InstrumentType type) -> bool { return type == InstrumentType::ALL; });
+                                     [](InstrumentsDescription type) -> bool { return type.first == InstrumentType::ALL; });
 
-    auto is_selected = [&](InstrumentType instrument) -> bool
+    auto is_selected = [&](InstrumentsDescription instrument) -> bool
     {
-        return std::find_if(_instruments.begin(), _instruments.end(), [&](InstrumentType type) -> bool {
-            const auto group = static_cast<InstrumentType>(static_cast<uint64_t>(type) & 0xFF00);
-            return group == instrument;
+        return std::find_if(_instruments.begin(), _instruments.end(), [&](InstrumentsDescription type) -> bool {
+            const auto group = static_cast<InstrumentType>(static_cast<uint64_t>(type.first) & 0xFF00);
+            return (group == instrument.first) && (instrument.second == type.second);
         })
         != _instruments.end();
     };
@@ -527,9 +617,9 @@ Profiler Framework::get_profiler() const
     return profiler;
 }
 
-void Framework::set_printer(Printer *printer)
+void Framework::add_printer(Printer *printer)
 {
-    _printer = printer;
+    _printers.push_back(printer);
 }
 
 std::vector<TestInfo> Framework::test_infos() const

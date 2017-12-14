@@ -31,7 +31,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/Box3x3.h"
+#include "tests/validation/reference/Box3x3.h"
 
 #include <random>
 
@@ -52,8 +52,9 @@ public:
         std::uniform_int_distribution<uint8_t> distribution(0, 255);
         const uint8_t                          constant_border_value = distribution(gen);
 
-        _target    = compute_target(shape, data_type, border_mode, constant_border_value);
-        _reference = compute_reference(shape, data_type, border_mode, constant_border_value);
+        _border_mode = border_mode;
+        _target      = compute_target(shape, data_type, border_mode, constant_border_value);
+        _reference   = compute_reference(shape, data_type, border_mode, constant_border_value);
     }
 
 protected:

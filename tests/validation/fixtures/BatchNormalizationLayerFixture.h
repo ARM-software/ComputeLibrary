@@ -31,8 +31,8 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/BatchNormalizationLayer.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/BatchNormalizationLayer.h"
 
 namespace arm_compute
 {

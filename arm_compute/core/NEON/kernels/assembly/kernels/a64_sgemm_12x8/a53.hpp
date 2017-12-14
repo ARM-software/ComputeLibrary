@@ -206,7 +206,7 @@ inline void a64_sgemm_asimd_12x8_a53(const float *Apanel, const float *Bpanel, f
 
                 // Branch here if K=1 or 2.  Do the right thing for odd/even at the end.
                 "4:\n"
-                "cbnz	%[oddk], 2f\n"
+                "cbnz	%w[oddk], 2f\n"
 
                 // Detached final iteration. (even K)
                 "ldr	%d[b2], [%[b_ptr], #32]\n"
@@ -360,8 +360,9 @@ inline void a64_sgemm_asimd_12x8_a53(const float *Apanel, const float *Bpanel, f
               [b0] "+w" (b0), [b1] "+w" (b1), [b2] "+w" (b2), [k] "+r" (k)
             : [oddk] "r" (oddk)
             : "x20", "x21", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18",
-              "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31"
+              "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "cc"
             );
         }
     }
 }
+                

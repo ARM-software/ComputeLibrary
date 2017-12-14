@@ -30,15 +30,15 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** OpenCL kernel to compute low precision matrix multiplication kernel
+/** OpenCL kernel to multiply matrices
  *
+ * @note @ref CLGEMMLowpMatrixMultiplyKernel low precision matrix product kernel
  *  This kernel performs the following computation:
- *  -# Convert a values from uint8 to int32 and add a_offset to each of them.
- *  -# Convert b values from uint8 to int32 and add b_offset to each of them.
- *  -# Compute the int32 matrix product of the resulting a * b.
- *  -# Add output_offset to each entry of the result.
- *  -# Multiply each entry of the result and round to the nearest integer
- *  -# Clamp the resulting int32 values to the [0..255] range and cast to uint8.
+ *
+ *  -# Convert a values from int8 to int32
+ *  -# Convert b values from int8 to int32
+ *  -# Compute the int32 matrix product of the resulting a * b and store the result as int32
+ *
  */
 class CLGEMMLowpMatrixMultiplyKernel : public ICLKernel
 {
@@ -55,19 +55,12 @@ public:
     CLGEMMLowpMatrixMultiplyKernel &operator=(CLGEMMLowpMatrixMultiplyKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * The input matrices @p input0 and @p input1 must be the output of the kernels: @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMTranspose1xWKernel.
-     * These two kernels change the layout of the original matrices to be more cache-friendly.
-     *
-     * @param[in]  input0          Input tensor containing the interleaved Matrix A. Data types supported: U8
-     * @param[in]  input1          Input tensor containing the transposed Matrix B. Data types supported: same as @p input0
-     * @param[out] output          Output tensor to store the result of matrix multiplication, Data types supported: same as @p input0
-     * @param[in]  a_offset        Offset to be added to each element of the matrix A.
-     * @param[in]  b_offset        Offset to be added to each element of the matrix B.
-     * @param[in]  output_offset   Offset to be added to each element of the output matrix
-     * @param[in]  output_mult_int Offset to be added to each element of the output matrix
-     * @param[in]  shift           Number of bits to shift right the result.
+     * @param[in]  input0                    Input tensor containing the interleaved Matrix A. Data type supported: QASYMM8
+     * @param[in]  input1                    Input tensor containing the transposed1xW Matrix B. Data type supported: same as @p input0
+     * @param[out] output                    Output tensor to store the result of matrix multiplication. Data type supported: S32
+     * @param[in]  is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMTranspose1xWKernel
      */
-    void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, int32_t a_offset, int32_t b_offset, int32_t output_offset, int32_t output_mult_int, int32_t shift);
+    void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, bool is_interleaved_transposed = true);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

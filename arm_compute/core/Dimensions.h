@@ -100,7 +100,20 @@ public:
      *
      * @return The size of the requested dimension.
      */
-    T operator[](size_t dimension) const
+    const T &operator[](size_t dimension) const
+    {
+        ARM_COMPUTE_ERROR_ON(dimension >= num_max_dimensions);
+        return _id[dimension];
+    }
+    /** Generic accessor to get the size of any dimension
+     *
+     * @note Precondition: dimension < Dimensions::num_max_dimensions
+     *
+     * @param[in] dimension Dimension of the wanted size
+     *
+     * @return The size of the requested dimension.
+     */
+    T &operator[](size_t dimension)
     {
         ARM_COMPUTE_ERROR_ON(dimension >= num_max_dimensions);
         return _id[dimension];
@@ -119,8 +132,8 @@ public:
 
     /** Collapse dimensions.
      *
-     * @param[in] first Dimensions into which the following @p n are collapsed.
      * @param[in] n     Number of dimensions to collapse into @p first.
+     * @param[in] first Dimensions into which the following @p n are collapsed.
      */
     void collapse(size_t n, size_t first = 0)
     {
@@ -139,6 +152,17 @@ public:
         _num_dimensions -= std::min(n, _num_dimensions) - 1;
         // Fill the now empty dimensions with zero
         std::fill(_id.begin() + _num_dimensions, _id.end(), 0);
+    }
+
+    /** Collapse dimensions starting from a given point
+     *
+     * @param[in] start Starting point of collapsing dimensions
+     */
+    void collapse_from(size_t start)
+    {
+        ARM_COMPUTE_ERROR_ON(start > num_dimensions());
+
+        collapse(num_dimensions() - start, start);
     }
 
     /** Returns a read/write iterator that points to the first element in the dimension array. */
@@ -179,5 +203,16 @@ protected:
     std::array<T, num_max_dimensions> _id;
     size_t _num_dimensions{ 0 };
 };
+
+template <typename T>
+inline bool operator==(const Dimensions<T> &lhs, const Dimensions<T> &rhs)
+{
+    return ((lhs.num_dimensions() == rhs.num_dimensions()) && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin()));
+}
+template <typename T>
+inline bool operator!=(const Dimensions<T> &lhs, const Dimensions<T> &rhs)
+{
+    return !(lhs == rhs);
+}
 }
 #endif /*__ARM_COMPUTE_DIMENSIONS_H__*/

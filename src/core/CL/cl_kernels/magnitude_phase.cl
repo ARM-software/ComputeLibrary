@@ -74,7 +74,7 @@ inline uchar16 phase_signed(VEC_DATA_TYPE(DATA_TYPE, 16) a, VEC_DATA_TYPE(DATA_T
     float16 arct = atan2pi(convert_float16(b), convert_float16(a));
     arct         = select(arct, arct + 2, arct < 0.0f);
 
-    return convert_uchar16(convert_int16(mad(arct, 128, 0.5f)) & 0xFFu);
+    return convert_uchar16(convert_int16(mad(arct, 128, 0.5f)) & (int16)0xFFu);
 }
 
 #if(1 == MAGNITUDE)

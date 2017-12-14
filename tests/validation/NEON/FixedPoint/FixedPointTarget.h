@@ -50,6 +50,7 @@ void compute_target_impl(const TensorShape &shape, DataType dt, FixedPointOp op,
             window                                                   = calculate_max_window(*src.info(), Steps(num_elems_processed_per_iteration));
             AccessWindowHorizontal input_access(src.info(), 0, num_elems_processed_per_iteration);
             AccessWindowHorizontal output_access(dst.info(), 0, num_elems_processed_per_iteration);
+            update_window_and_padding(window, input_access, output_access);
             break;
         }
         case DataType::QS16:
@@ -58,6 +59,7 @@ void compute_target_impl(const TensorShape &shape, DataType dt, FixedPointOp op,
             window                                                   = calculate_max_window(*src.info(), Steps(num_elems_processed_per_iteration));
             AccessWindowHorizontal input_access(src.info(), 0, num_elems_processed_per_iteration);
             AccessWindowHorizontal output_access(dst.info(), 0, num_elems_processed_per_iteration);
+            update_window_and_padding(window, input_access, output_access);
             break;
         }
         default:

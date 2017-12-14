@@ -27,6 +27,7 @@
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Strides.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 
 #include "tests/Types.h"
@@ -150,6 +151,21 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo 
     return os;
 }
 
+/** Formatted output of the QuantizationInfo type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &quantization_info)
+{
+    os << "Scale:" << quantization_info.scale << "~"
+       << "Offset:" << quantization_info.offset;
+    return os;
+}
+
+inline std::string to_string(const QuantizationInfo &quantization_info)
+{
+    std::stringstream str;
+    str << quantization_info;
+    return str.str();
+}
+
 inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
 {
     switch(op)
@@ -220,6 +236,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
             break;
         case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
             os << "LU_BOUNDED_RELU";
+            break;
         case ActivationLayerInfo::ActivationFunction::SQUARE:
             os << "SQUARE";
             break;
@@ -311,6 +328,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PoolingLayerInfo &in
     return os;
 }
 
+inline std::string to_string(const RoundingPolicy &rounding_policy)
+{
+    std::stringstream str;
+    str << rounding_policy;
+    return str.str();
+}
+
 /** Formatted output of the DataType type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
 {
@@ -324,6 +348,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
             break;
         case DataType::QS8:
             os << "QS8";
+            break;
+        case DataType::QASYMM8:
+            os << "QASYMM8";
             break;
         case DataType::S8:
             os << "S8";
@@ -546,6 +573,35 @@ inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy 
     return os;
 }
 
+/** Formatted output of the SamplingPolicy type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &policy)
+{
+    switch(policy)
+    {
+        case SamplingPolicy::CENTER:
+            os << "CENTER";
+            break;
+        case SamplingPolicy::TOP_LEFT:
+            os << "TOP_LEFT";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the TensorInfo type. */
+inline std::string to_string(const TensorInfo &info)
+{
+    std::stringstream str;
+    str << "{Shape=" << info.tensor_shape() << ","
+        << "Type=" << info.data_type() << ","
+        << "Channels=" << info.num_channels() << ","
+        << "FixedPointPos=" << info.fixed_point_position() << "}";
+    return str.str();
+}
+
 template <typename T>
 inline std::string to_string(const Dimensions<T> &dimensions)
 {
@@ -591,7 +647,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_s
 {
     os << pad_stride_info.stride().first << "," << pad_stride_info.stride().second;
     os << ";";
-    os << pad_stride_info.pad().first << "," << pad_stride_info.pad().second;
+    os << pad_stride_info.pad_left() << "," << pad_stride_info.pad_right() << ","
+       << pad_stride_info.pad_top() << "," << pad_stride_info.pad_bottom();
 
     return os;
 }
@@ -618,6 +675,13 @@ inline std::string to_string(const BorderSize &border)
 }
 
 inline std::string to_string(const InterpolationPolicy &policy)
+{
+    std::stringstream str;
+    str << policy;
+    return str.str();
+}
+
+inline std::string to_string(const SamplingPolicy &policy)
 {
     std::stringstream str;
     str << policy;
@@ -688,7 +752,15 @@ inline std::string to_string(const PoolingType &type)
 inline std::string to_string(const PoolingLayerInfo &info)
 {
     std::stringstream str;
-    str << info.pool_type();
+    str << "{Type=" << info.pool_type() << ","
+        << "IsGlobalPooling=" << info.is_global_pooling();
+    if(!info.is_global_pooling())
+    {
+        str << ","
+            << "PoolSize=" << info.pool_size() << ","
+            << "PadStride=" << info.pad_stride_info();
+    }
+    str << "}";
     return str.str();
 }
 
@@ -704,6 +776,84 @@ inline ::std::ostream &operator<<(::std::ostream &os, const KeyPoint &point)
        << "error=" << point.error << "}";
 
     return os;
+}
+
+/** Formatted output of the PhaseType type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const PhaseType &phase_type)
+{
+    switch(phase_type)
+    {
+        case PhaseType::SIGNED:
+            os << "SIGNED";
+            break;
+        case PhaseType::UNSIGNED:
+            os << "UNSIGNED";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const arm_compute::PhaseType &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
+/** Formatted output of the MagnitudeType type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const MagnitudeType &magnitude_type)
+{
+    switch(magnitude_type)
+    {
+        case MagnitudeType::L1NORM:
+            os << "L1NORM";
+            break;
+        case MagnitudeType::L2NORM:
+            os << "L2NORM";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const arm_compute::MagnitudeType &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
+/** Formatted output of the GradientDimension type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const GradientDimension &dim)
+{
+    switch(dim)
+    {
+        case GradientDimension::GRAD_X:
+            os << "GRAD_X";
+            break;
+        case GradientDimension::GRAD_Y:
+            os << "GRAD_Y";
+            break;
+        case GradientDimension::GRAD_XY:
+            os << "GRAD_XY";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const arm_compute::GradientDimension &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
 }
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

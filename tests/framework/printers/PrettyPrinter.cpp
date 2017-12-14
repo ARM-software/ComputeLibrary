@@ -108,38 +108,65 @@ void PrettyPrinter::print_error(const std::exception &error, bool expected)
     *_stream << begin_color("1") << prefix << error.what() << end_color() << "\n";
 }
 
+void PrettyPrinter::print_list_tests(const std::vector<TestInfo> &infos)
+{
+    for(auto info : infos)
+    {
+        *_stream << "[" << info.id << ", " << info.mode << ", " << info.status << "] " << info.name << "\n";
+    }
+}
 void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurements)
 {
     for(const auto &instrument : measurements)
     {
         *_stream << begin_color("3") << "  " << instrument.first << ":";
 
-        auto add_measurements = [](double a, const Measurement & b)
+        auto add_measurements = [](Measurement::Value a, const Measurement & b)
         {
-            return a + b.value;
+            return a + b.value();
         };
 
         auto cmp_measurements = [](const Measurement & a, const Measurement & b)
         {
-            return a.value < b.value;
+            return a.value() < b.value();
         };
 
-        double     sum_values    = std::accumulate(instrument.second.begin(), instrument.second.end(), 0., add_measurements);
-        int        num_values    = instrument.second.size();
-        const auto minmax_values = std::minmax_element(instrument.second.begin(), instrument.second.end(), cmp_measurements);
+        int                num_values    = instrument.second.size();
+        const auto         minmax_values = std::minmax_element(instrument.second.begin(), instrument.second.end(), cmp_measurements);
+        Measurement::Value sum_values    = std::accumulate(instrument.second.begin(), instrument.second.end(), Measurement::Value(minmax_values.first->value().is_floating_point), add_measurements);
+
+        // Calculate the median value
+        auto measurements = instrument.second;
+        std::nth_element(measurements.begin(), measurements.begin() + (num_values / 2), measurements.end(), cmp_measurements);
+        const auto median_value = measurements[num_values / 2];
+
+        // Calculate the relative standard deviation
+        auto                            mean_value = sum_values / num_values;
+        std::vector<Measurement::Value> diff(measurements.size(), minmax_values.first->value().is_floating_point);
+        std::transform(measurements.begin(), measurements.end(), diff.begin(), [mean_value](const Measurement & x)
+        {
+            return x.value() - mean_value;
+        });
+        auto sq_sum   = std::inner_product(diff.begin(), diff.end(), diff.begin(), Measurement::Value(minmax_values.first->value().is_floating_point));
+        auto variance = sq_sum / measurements.size();
+        auto rsd      = Measurement::Value::relative_standard_deviation(variance, mean_value);
 
         if(num_values > 2)
         {
-            sum_values -= minmax_values.first->value + minmax_values.second->value;
+            sum_values -= minmax_values.first->value() + minmax_values.second->value();
             num_values -= 2;
         }
 
-        Measurement avg{ sum_values / num_values, minmax_values.first->unit };
-
         *_stream << "    ";
-        *_stream << "AVG=" << avg << ", ";
-        *_stream << "MIN=" << *minmax_values.first << ", ";
-        *_stream << "MAX=" << *minmax_values.second << end_color() << "\n";
+        *_stream << "MEDIAN=" << median_value.value() << " " << median_value.unit() << ", ";
+        *_stream << "AVG=" << (sum_values / num_values) << " " << minmax_values.second->unit() << ", ";
+        *_stream << "STDDEV=" << arithmetic_to_string(rsd, 2) << " %, ";
+        if(num_values > 1)
+        {
+            *_stream << "MIN=" << *minmax_values.first << ", ";
+            *_stream << "MAX=" << *minmax_values.second;
+        }
+        *_stream << end_color() << "\n";
     }
 }
 } // namespace framework

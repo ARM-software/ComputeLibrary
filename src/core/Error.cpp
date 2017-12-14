@@ -28,25 +28,35 @@
 #include <iostream>
 #include <stdexcept>
 
-void arm_compute::error(const char *function, const char *file, const int line, const char *msg, ...)
-{
-    char    out[512];
-    va_list args;
-    va_start(args, msg);
-    int offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
-    vsnprintf(out + offset, sizeof(out) - offset, msg, args);
-    va_end(args);
+using namespace arm_compute;
 
-    throw std::runtime_error(std::string(out));
+Status arm_compute::create_error_va_list(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, va_list args)
+{
+    char out[512];
+    int  offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
+    vsnprintf(out + offset, sizeof(out) - offset, msg, args);
+
+    return Status(error_code, std::string(out));
 }
 
-void arm_compute::debug(const char *function, const char *file, const int line, const char *msg, ...)
+Status arm_compute::create_error(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, ...)
 {
-    char    out[512];
     va_list args;
     va_start(args, msg);
-    int offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
-    vsnprintf(out + offset, sizeof(out) - offset, msg, args);
+    auto err = create_error_va_list(error_code, function, file, line, msg, args);
     va_end(args);
-    std::cout << std::string(out) << std::endl;
+    return err;
+}
+
+void arm_compute::error(const char *function, const char *file, const int line, const char *msg, ...)
+{
+    va_list args;
+    va_start(args, msg);
+    auto err = create_error_va_list(ErrorCode::RUNTIME_ERROR, function, file, line, msg, args);
+    va_end(args);
+    throw std::runtime_error(err.error_description());
+}
+void Status::internal_throw_on_error()
+{
+    throw std::runtime_error(_error_description);
 }

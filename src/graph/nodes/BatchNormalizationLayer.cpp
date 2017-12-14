@@ -23,88 +23,82 @@
  */
 #include "arm_compute/graph/nodes/BatchNormalizationLayer.h"
 
-#include "arm_compute/core/Logger.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h"
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/graph/Error.h"
+#include "arm_compute/graph/NodeContext.h"
+#include "arm_compute/graph/OperationRegistry.h"
 #include "support/ToolchainSupport.h"
-#include "utils/TypePrinter.h"
 
 using namespace arm_compute::graph;
 
-namespace
+std::unique_ptr<arm_compute::IFunction> BatchNormalizationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
-template <typename BatchBatchNormalizationLayer, typename TensorType, TargetHint target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *output, Tensor &mean, Tensor &var, Tensor &beta, Tensor &gamma, float epsilon)
-{
-    auto norm = arm_compute::support::cpp14::make_unique<BatchBatchNormalizationLayer>();
-    norm->configure(
-        dynamic_cast<TensorType *>(input),
-        dynamic_cast<TensorType *>(output),
-        dynamic_cast<TensorType *>(mean.set_target(target_hint)),
-        dynamic_cast<TensorType *>(var.set_target(target_hint)),
-        dynamic_cast<TensorType *>(beta.set_target(target_hint)),
-        dynamic_cast<TensorType *>(gamma.set_target(target_hint)),
-        epsilon);
+    ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT(input, output);
 
-    return std::move(norm);
-}
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+    _target_hint              = ctx.hints().target_hint();
 
-template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *output, Tensor &mean, Tensor &var, Tensor &beta, Tensor &gamma, float epsilon);
-
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *output, Tensor &mean, Tensor &var, Tensor &beta, Tensor &gamma, float epsilon)
-{
-    return instantiate_function<arm_compute::CLBatchNormalizationLayer, arm_compute::ICLTensor, TargetHint::OPENCL>(input, output, mean, var, beta, gamma, epsilon);
-}
-
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *output, Tensor &mean, Tensor &var, Tensor &beta, Tensor &gamma, float epsilon)
-{
-    return instantiate_function<arm_compute::NEBatchNormalizationLayer, arm_compute::ITensor, TargetHint::NEON>(input, output, mean, var, beta, gamma, epsilon);
-}
-} // namespace
-
-std::unique_ptr<arm_compute::IFunction> BatchNormalizationLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
-{
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
-
-    unsigned int batch_norm_size = input->info()->dimension(2);
+    unsigned int batch_norm_size = in->info()->dimension(2);
     if(_mean.tensor() == nullptr)
     {
-        _mean.set_info(TensorInfo(TensorShape(batch_norm_size), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+        _mean.set_info(TensorInfo(TensorShape(batch_norm_size), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
     }
     if(_var.tensor() == nullptr)
     {
-        _var.set_info(TensorInfo(TensorShape(batch_norm_size), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+        _var.set_info(TensorInfo(TensorShape(batch_norm_size), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
     }
     if(_beta.tensor() == nullptr)
     {
-        _beta.set_info(TensorInfo(TensorShape(batch_norm_size), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+        _beta.set_info(TensorInfo(TensorShape(batch_norm_size), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
     }
     if(_gamma.tensor() == nullptr)
     {
-        _gamma.set_info(TensorInfo(TensorShape(batch_norm_size), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+        _gamma.set_info(TensorInfo(TensorShape(batch_norm_size), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
     }
 
-    if(_target_hint == TargetHint::OPENCL)
+    bool mean_is_loaded  = _mean.tensor() != nullptr;
+    bool var_is_loaded   = _var.tensor() != nullptr;
+    bool gamma_is_loaded = _gamma.tensor() != nullptr;
+    bool beta_is_loaded  = _beta.tensor() != nullptr;
+
+    // Set mean, var, gamma and beta target
+    _mean.set_target(_target_hint);
+    _var.set_target(_target_hint);
+    _gamma.set_target(_target_hint);
+    _beta.set_target(_target_hint);
+
+    // Create node context
+    NodeContext node_ctx(OperationType::BatchNormalizationLayer);
+    node_ctx.set_target(_target_hint);
+    node_ctx.add_input(in);
+    node_ctx.add_input(_mean.tensor());
+    node_ctx.add_input(_var.tensor());
+    node_ctx.add_input(_beta.tensor());
+    node_ctx.add_input(_gamma.tensor());
+    node_ctx.add_output(out);
+    node_ctx.add_parameter<float>("epsilon", _epsilon);
+
+    // Configure operation
+    auto func = OperationRegistry::get().find_operation(OperationType::BatchNormalizationLayer, _target_hint)->configure(node_ctx);
+
+    // Fill tensors
+    if(!mean_is_loaded)
     {
-        func = instantiate<TargetHint::OPENCL>(input, output, _mean, _var, _beta, _gamma, _epsilon);
-        ARM_COMPUTE_LOG("Instantiating CLBatchNormalizationLayer");
+        _mean.allocate_and_fill_if_needed();
     }
-    else
+    if(!var_is_loaded)
     {
-        func = instantiate<TargetHint::NEON>(input, output, _mean, _var, _beta, _gamma, _epsilon);
-        ARM_COMPUTE_LOG("Instantiating NEBatchNormalizationLayer");
+        _var.allocate_and_fill_if_needed();
+    }
+    if(!gamma_is_loaded)
+    {
+        _gamma.allocate_and_fill_if_needed();
+    }
+    if(!beta_is_loaded)
+    {
+        _beta.allocate_and_fill_if_needed();
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
-                    << " Input shape: " << input->info()->tensor_shape()
-                    << " Output shape: " << output->info()->tensor_shape()
-                    << std::endl);
-
+    // Get function
     return func;
 }

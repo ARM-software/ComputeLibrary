@@ -120,9 +120,15 @@ public:
     SmallFullyConnectedLayerDataset()
     {
         // Conv -> FC
+        add_config(TensorShape(1U, 1U, 1U, 3U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U, 3U));
+        // Conv -> FC
         add_config(TensorShape(9U, 5U, 7U), TensorShape(315U, 271U), TensorShape(271U), TensorShape(271U));
         // Conv -> FC (batched)
         add_config(TensorShape(9U, 5U, 7U, 3U), TensorShape(315U, 271U), TensorShape(271U), TensorShape(271U, 3U));
+        // FC -> FC
+        add_config(TensorShape(1U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U));
+        // FC -> FC (batched)
+        add_config(TensorShape(1U, 3U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U, 3U));
         // FC -> FC
         add_config(TensorShape(201U), TensorShape(201U, 529U), TensorShape(529U), TensorShape(529U));
         // FC -> FC (batched)
@@ -145,6 +151,7 @@ public:
         add_config(TensorShape(9U, 5U, 257U, 2U, 3U), TensorShape(11565U, 2123U), TensorShape(2123U), TensorShape(2123U, 2U, 3U));
     }
 };
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

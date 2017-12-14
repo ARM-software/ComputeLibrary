@@ -29,9 +29,6 @@
  * - Determinant less than DETERMINANT_THR
  * - or minimum eigenvalue is smaller then EIGENVALUE_THR
  *
- * The thresholds for the determinant and the minimum eigenvalue is
- * defined by the OpenVX spec
- *
  * Note: Also lost tracking happens when the point tracked coordinate is outside
  * the image coordinates
  *
@@ -268,7 +265,7 @@ void __kernel lktracker_stage0(
 
     float4 w;
     w    = round(w_scharr * (float4)D0);
-    w.s3 = D0 - w.s0 - w.s1 - w.s2; // Added for matching VX implementation
+    w.s3 = D0 - w.s0 - w.s1 - w.s2;
 
     // G.s0 = A11, G.s1 = A12, G.s2 = A22, G.s3 = min_eig
     int4 iG = (int4)0;
@@ -309,7 +306,7 @@ void __kernel lktracker_stage0(
             // Compute bilinear interpolation for iyval
             old_i.s2 = dot(px, w_scharr);
 
-            // Rounding (it could be omitted. Used just for matching the VX implementation)
+            // Rounding (it could be omitted)
             int4 iold = convert_int4(round(old_i));
 
             // Accumulate values in the Spatial Gradient Matrix
@@ -352,8 +349,8 @@ void __kernel lktracker_stage0(
  * @param[in]      border_limits                           It stores the right border limit (width - window_dimension - 1, height - window_dimension - 1,)
  * @param[in]      eig_const                               1.0f / (float)(2.0f * window_dimension * window_dimension)
  * @param[in]      level0                                  It is set to 1 if level of pyramid = 0
- * @param[in]      term_iteration                          It is set to 1 if termination = VX_TERM_CRITERIA_ITERATIONS
- * @param[in]      term_epsilon                            It is set to 1 if termination = VX_TERM_CRITERIA_EPSILON
+ * @param[in]      term_iteration                          It is set to 1 if termination = TERM_CRITERIA_ITERATIONS
+ * @param[in]      term_epsilon                            It is set to 1 if termination = TERM_CRITERIA_EPSILON
  */
 void __kernel lktracker_stage1(
     IMAGE_DECLARATION(new_image),

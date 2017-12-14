@@ -44,9 +44,9 @@ namespace validation
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif                                                   /* ARM_COMPUTE_ENABLE_FP16 */
+#endif                                                   /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 constexpr AbsoluteTolerance<float> tolerance_qs8(3.0f);  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
 constexpr AbsoluteTolerance<float> tolerance_qs16(6.0f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS16 */
 } // namespace
@@ -61,7 +61,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Ran
                shape0, shape1, epsilon, dt)
 {
     // Set fixed point position data type allowed
-    int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
+    const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
     Tensor src   = create_tensor<Tensor>(shape0, dt, 1, fixed_point_position);
@@ -80,6 +80,52 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Ran
     validate(dst.info()->valid_region(), valid_region);
 }
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Window shrink
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Invalid mean/var/beta/gamma shape
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2), // Mismatching fixed point position
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                       TensorInfo(),
+                                                     })),
+               framework::dataset::make("MVBGInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F16),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(5U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                   })),
+               framework::dataset::make("Expected", { true, false, false, false, false, false, true, true})),
+               input_info, output_info, mvbg_info, expected)
+{
+    const auto &mean_info = mvbg_info;
+    const auto &var_info = mvbg_info;
+    const auto &beta_info = mvbg_info;
+    const auto &gamma_info = mvbg_info;
+    bool has_error = bool(NEBatchNormalizationLayer::validate(
+            &input_info.clone()->set_is_resizable(false), output_info.total_size() ? &output_info.clone()->set_is_resizable(false) : nullptr,
+            &mean_info.clone()->set_is_resizable(false), &var_info.clone()->set_is_resizable(false),
+            &beta_info.clone()->set_is_resizable(false), &gamma_info.clone()->set_is_resizable(false), 1.f));
+    ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 TEST_SUITE(Float)
 FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomBatchNormalizationLayerDataset(),
                                                                                                                    framework::dataset::make("DataType", DataType::F32)))
@@ -89,7 +135,7 @@ FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<float>, framewor
 }
 TEST_SUITE_END()
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(Float16)
 FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomBatchNormalizationLayerDataset(),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)))
@@ -98,7 +144,7 @@ FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework
     validate(Accessor(_target), _reference, tolerance_f16, 0);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(Quantized)
 template <typename T>

@@ -43,8 +43,10 @@ CLGEMMInterleave4x4Kernel::CLGEMMInterleave4x4Kernel()
 
 void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::U16, DataType::S16, DataType::QS16, DataType::U32, DataType::S32, DataType::F16,
-                                                  DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,
+                                                  DataType::U16, DataType::S16, DataType::QS16,
+                                                  DataType::U32, DataType::S32,
+                                                  DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     TensorShape output_shape = input->info()->tensor_shape();
@@ -52,7 +54,7 @@ void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *out
     output_shape.set(1, std::ceil(input->info()->dimension(1) / 4.0f));
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -62,9 +64,8 @@ void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *out
     _output = output;
 
     // Create kernel
-    std::string data_type_name;
-    data_type_name = support::cpp11::to_string(input->info()->element_size() * 8) + "bit";
-    _kernel        = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_interleave4x4_" + data_type_name));
+    std::string kernel_name = "gemm_interleave4x4_" + support::cpp11::to_string(input->info()->element_size() * 8) + "bit";
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure kernel window
     const unsigned int     num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input->info()->data_type());
@@ -117,7 +118,7 @@ void CLGEMMInterleave4x4Kernel::run(const Window &window, cl::CommandQueue &queu
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, in_slice);
         add_2D_tensor_argument(idx, _output, out_slice);
-        enqueue(queue, *this, in_slice);
+        enqueue(queue, *this, in_slice, _lws_hint);
     }
     while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
 }

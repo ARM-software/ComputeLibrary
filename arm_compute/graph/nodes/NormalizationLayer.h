@@ -26,6 +26,7 @@
 
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/INode.h"
+#include "arm_compute/graph/ITensorObject.h"
 #include "arm_compute/graph/Types.h"
 
 namespace arm_compute
@@ -43,7 +44,7 @@ public:
     explicit NormalizationLayer(const NormalizationLayerInfo norm_info);
 
     // Inherited methods overriden:
-    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
+    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) override;
 
 private:
     const NormalizationLayerInfo _norm_info; /**< Normalization layer information */

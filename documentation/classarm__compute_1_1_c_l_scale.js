@@ -1,4 +1,4 @@
 var classarm__compute_1_1_c_l_scale =
 [
-    [ "configure", "classarm__compute_1_1_c_l_scale.xhtml#a678879757617483da15b34c7b9d58279", null ]
+    [ "configure", "classarm__compute_1_1_c_l_scale.xhtml#aa5f9a9b25bd6f529c29939f6269d59f5", null ]
 ];

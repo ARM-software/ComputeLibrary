@@ -42,7 +42,7 @@ class MaliCounter : public Instrument
 {
 public:
     /** Default constructor. */
-    MaliCounter();
+    MaliCounter(ScaleFactor scale_factor);
 
     MaliCounter(const MaliCounter &) = delete;
     MaliCounter &operator=(const MaliCounter &) = delete;
@@ -65,7 +65,7 @@ private:
     const uint32_t *get_counters(mali_userspace::MaliCounterBlockName block, int core = -1) const;
     int find_counter_index_by_name(mali_userspace::MaliCounterBlockName block, const char *name);
 
-    std::map<std::string, TypedMeasurement<uint64_t>> _counters{};
+    std::map<std::string, Measurement> _counters{};
 
     struct core_counters
     {
@@ -95,6 +95,7 @@ private:
     std::vector<unsigned int> _core_index_remap{};
     int                       _fd{ -1 };
     int                       _hwc_fd{ -1 };
+    int                       _scale_factor{};
 };
 } // namespace framework
 } // namespace test

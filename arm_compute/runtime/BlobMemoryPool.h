@@ -79,5 +79,5 @@ private:
     std::vector<void *> _blobs;      /**< Vector holding all the memory blobs */
     std::vector<size_t> _blob_sizes; /**< Sizes of each blob */
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_BLOBMEMORYPOOL_H__ */

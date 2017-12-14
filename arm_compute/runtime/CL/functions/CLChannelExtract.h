@@ -39,14 +39,14 @@ class CLChannelExtract : public ICLSimpleFunction
 public:
     /** Initialize the function's source, destination
      *
-     * @param[in]  input   The input tensor to extract the channel from. Formats supported: Any single planar.
+     * @param[in]  input   The input tensor to extract the channel from. Formats supported: RGB888/RGBA8888/YUYV422/UYVY422
      * @param[in]  channel The channel to extract.
      * @param[out] output  The extracted channel. Must be of U8 format.
      */
     void configure(const ICLTensor *input, Channel channel, ICLTensor *output);
     /** Initialize the function's source, destination
      *
-     * @param[in]  input   The multi-planar input image to extract channel from.
+     * @param[in]  input   The multi-planar input image to extract channel from. Formats supported: NV12/NV21/IYUV/YUV444
      * @param[in]  channel The channel to extract.
      * @param[out] output  The extracted 2D channel. Must be of U8 format.
      */

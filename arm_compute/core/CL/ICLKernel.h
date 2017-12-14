@@ -180,6 +180,13 @@ public:
      * @return The maximum workgroup size value.
      */
     size_t get_max_workgroup_size();
+    /** Get the global work size given an execution window
+     *
+     * @param[in] window Execution window
+     *
+     * @return Global work size of the given execution window
+     */
+    static cl::NDRange gws_from_window(const Window &window);
 
 private:
     /** Add the passed array's parameters to the object's kernel's arguments starting from the index idx.

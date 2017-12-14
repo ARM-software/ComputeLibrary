@@ -65,8 +65,8 @@ Instrument::MeasurementsMap PMUCounter::measurements() const
 {
     return MeasurementsMap
     {
-        { "CPU cycles", Measurement(_cycles, "cycles") },
-        { "CPU instructions", Measurement(_instructions, "instructions") },
+        { "CPU cycles", Measurement(_cycles / _scale_factor, _unit + "cycles") },
+        { "CPU instructions", Measurement(_instructions / _scale_factor, _unit + "instructions") },
     };
 }
 } // namespace framework

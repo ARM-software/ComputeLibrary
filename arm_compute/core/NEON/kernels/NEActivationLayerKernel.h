@@ -26,10 +26,11 @@
 
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/QAsymm8.h"
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #include <arm_fp16.h>
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 namespace arm_compute
 {
@@ -59,6 +60,16 @@ public:
      * @param[in]      activation_info Activation layer information.
      */
     void configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEActivationLayerKernel
+     *
+     * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result
+     *                     of the activation function. Data types supported: QS8/QS16/F16/F32.
+     * @param[in] output   Destination tensor info. Data type supported: same as @p input
+     * @param[in] act_info Activation layer information.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -72,27 +83,33 @@ private:
     using ActivationFunctionExecutorPtr = void (NEActivationLayerKernel::*)(const Window &window);
     /** Function to apply an activation function on a tensor.
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, float>::value, void>::type activation(const Window &window);
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     /** Function to apply an activation function on a tensor.
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, float16_t>::value, void>::type activation(const Window &window);
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     /** Function to apply an activation function on a tensor.
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, qint8_t>::value, void>::type activation(const Window &window);
     /** Function to apply an activation function on a tensor.
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
+     */
+    template <ActivationLayerInfo::ActivationFunction F, typename T>
+    typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type activation(const Window &window);
+    /** Function to apply an activation function on a tensor.
+     *
+     * @param[in] window Region on which to execute the kernel
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, qint16_t>::value, void>::type activation(const Window &window);

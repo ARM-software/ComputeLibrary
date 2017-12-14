@@ -27,7 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLPyramid.h"
 #include "arm_compute/runtime/CL/functions/CLArithmeticAddition.h"
-#include "arm_compute/runtime/CL/functions/CLDepthConvert.h"
+#include "arm_compute/runtime/CL/functions/CLDepthConvertLayer.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -43,7 +43,7 @@ using ICLImage = ICLTensor;
  *
  * -# @ref CLArithmeticAddition
  * -# @ref CLScale
- * -# @ref CLDepthConvert
+ * -# @ref CLDepthConvertLayer
  *
  * This function reconstructs the original image from a Laplacian Image Pyramid.
  *
@@ -85,7 +85,7 @@ private:
     CLPyramid                               _tmp_pyr;
     std::unique_ptr<CLArithmeticAddition[]> _addf;
     std::unique_ptr<CLScale[]>              _scalef;
-    CLDepthConvert                          _depthf;
+    CLDepthConvertLayer                     _depthf;
 };
 }
 #endif /*__ARM_COMPUTE_CLLAPLACIANRECONSTRUCT_H__ */

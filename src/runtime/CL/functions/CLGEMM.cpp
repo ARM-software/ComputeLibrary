@@ -65,6 +65,9 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     const ICLTensor *matrix_a = a;
     const ICLTensor *matrix_b = b;
 
+    // Set the target for the matrix multiply kernel
+    _mm_kernel.set_target(CLScheduler::get().target());
+
     if(_is_interleaved_transposed)
     {
         matrix_a = &_tmp_a;
@@ -95,9 +98,6 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 
         // Configure transpose kernel
         _transpose_kernel.configure(b, &_tmp_b);
-
-        // Configure matrix multiply kernel
-        _mm_kernel.set_target(CLScheduler::get().target());
     }
 
     _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed);

@@ -32,7 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/Sobel.h"
+#include "tests/validation/reference/Sobel.h"
 
 #include <memory>
 
@@ -102,7 +102,7 @@ class SobelValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, BorderMode border_mode, Format format)
+    void setup(TensorShape shape, BorderMode border_mode, Format format, GradientDimension gradient_dimension)
     {
         // Generate a random constant value
         std::mt19937                           gen(library->seed());
@@ -110,8 +110,8 @@ public:
         const uint8_t                          constant_border_value = int_dist(gen);
 
         _border_mode = border_mode;
-        _target      = compute_target(shape, border_mode, format, constant_border_value);
-        _reference   = compute_reference(shape, info<FunctionType>::filter_size, border_mode, format, constant_border_value);
+        _target      = compute_target(shape, border_mode, format, constant_border_value, gradient_dimension);
+        _reference   = compute_reference(shape, info<FunctionType>::filter_size, border_mode, format, constant_border_value, gradient_dimension);
     }
 
 protected:
@@ -121,7 +121,7 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    std::pair<TensorType, TensorType> compute_target(const TensorShape &shape, BorderMode border_mode, Format format, uint8_t constant_border_value)
+    std::pair<TensorType, TensorType> compute_target(const TensorShape &shape, BorderMode border_mode, Format format, uint8_t constant_border_value, GradientDimension gradient_dimension)
     {
         // Create tensors
         TensorType src   = create_tensor<TensorType>(shape, data_type_from_format(format));
@@ -133,7 +133,21 @@ protected:
         dst_y.info()->set_format(info<FunctionType>::dst_format);
 
         FunctionType sobel;
-        sobel.configure(&src, &dst_x, &dst_y, border_mode, constant_border_value);
+
+        switch(gradient_dimension)
+        {
+            case GradientDimension::GRAD_X:
+                sobel.configure(&src, &dst_x, nullptr, border_mode, constant_border_value);
+                break;
+            case GradientDimension::GRAD_Y:
+                sobel.configure(&src, nullptr, &dst_y, border_mode, constant_border_value);
+                break;
+            case GradientDimension::GRAD_XY:
+                sobel.configure(&src, &dst_x, &dst_y, border_mode, constant_border_value);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Gradient dimension not supported");
+        }
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst_x.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -157,7 +171,8 @@ protected:
         return std::make_pair(std::move(dst_x), std::move(dst_y));
     }
 
-    std::pair<SimpleTensor<U>, SimpleTensor<U>> compute_reference(const TensorShape &shape, int filter_size, BorderMode border_mode, Format format, uint8_t constant_border_value)
+    std::pair<SimpleTensor<U>, SimpleTensor<U>> compute_reference(const TensorShape &shape, int filter_size, BorderMode border_mode, Format format, uint8_t constant_border_value,
+                                                                  GradientDimension gradient_dimension)
     {
         // Create reference
         SimpleTensor<T> src{ shape, format };
@@ -165,7 +180,7 @@ protected:
         // Fill reference
         fill(src);
 
-        return reference::sobel<U>(src, filter_size, border_mode, constant_border_value);
+        return reference::sobel<U>(src, filter_size, border_mode, constant_border_value, gradient_dimension);
     }
 
     BorderMode _border_mode{ BorderMode::UNDEFINED };

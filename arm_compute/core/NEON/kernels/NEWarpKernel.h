@@ -66,17 +66,17 @@ public:
 protected:
     /** function to perform warp affine or warp perspective on the given window when border mode == UNDEFINED
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     virtual void warp_undefined(const Window &window) = 0;
     /** function to perform warp affine or warp perspective on the given window when border mode == CONSTANT
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     virtual void warp_constant(const Window &window) = 0;
     /** function to perform warp affine or warp perspective on the given window when border mode == REPLICATE
      *
-     *  @param[in] window Region on which to execute the kernel
+     * @param[in] window Region on which to execute the kernel
      */
     virtual void warp_replicate(const Window &window) = 0;
     /** Common signature for all the specialised warp functions

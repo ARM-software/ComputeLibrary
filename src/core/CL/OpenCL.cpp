@@ -71,39 +71,46 @@ bool CLSymbols::load(const std::string &library)
         return false;
     }
 
-    clBuildProgram            = reinterpret_cast<clBuildProgram_func>(dlsym(handle, "clBuildProgram"));
-    clEnqueueNDRangeKernel    = reinterpret_cast<clEnqueueNDRangeKernel_func>(dlsym(handle, "clEnqueueNDRangeKernel"));
-    clSetKernelArg            = reinterpret_cast<clSetKernelArg_func>(dlsym(handle, "clSetKernelArg"));
-    clReleaseKernel           = reinterpret_cast<clReleaseKernel_func>(dlsym(handle, "clReleaseKernel"));
-    clCreateProgramWithSource = reinterpret_cast<clCreateProgramWithSource_func>(dlsym(handle, "clCreateProgramWithSource"));
-    clCreateBuffer            = reinterpret_cast<clCreateBuffer_func>(dlsym(handle, "clCreateBuffer"));
-    clRetainKernel            = reinterpret_cast<clRetainKernel_func>(dlsym(handle, "clRetainKernel"));
-    clCreateKernel            = reinterpret_cast<clCreateKernel_func>(dlsym(handle, "clCreateKernel"));
-    clGetProgramInfo          = reinterpret_cast<clGetProgramInfo_func>(dlsym(handle, "clGetProgramInfo"));
-    clFlush                   = reinterpret_cast<clFlush_func>(dlsym(handle, "clFlush"));
-    clFinish                  = reinterpret_cast<clFinish_func>(dlsym(handle, "clFinish"));
-    clReleaseProgram          = reinterpret_cast<clReleaseProgram_func>(dlsym(handle, "clReleaseProgram"));
-    clRetainContext           = reinterpret_cast<clRetainContext_func>(dlsym(handle, "clRetainContext"));
-    clCreateProgramWithBinary = reinterpret_cast<clCreateProgramWithBinary_func>(dlsym(handle, "clCreateProgramWithBinary"));
-    clReleaseCommandQueue     = reinterpret_cast<clReleaseCommandQueue_func>(dlsym(handle, "clReleaseCommandQueue"));
-    clEnqueueMapBuffer        = reinterpret_cast<clEnqueueMapBuffer_func>(dlsym(handle, "clEnqueueMapBuffer"));
-    clRetainProgram           = reinterpret_cast<clRetainProgram_func>(dlsym(handle, "clRetainProgram"));
-    clGetProgramBuildInfo     = reinterpret_cast<clGetProgramBuildInfo_func>(dlsym(handle, "clGetProgramBuildInfo"));
-    clEnqueueReadBuffer       = reinterpret_cast<clEnqueueReadBuffer_func>(dlsym(handle, "clEnqueueReadBuffer"));
-    clEnqueueWriteBuffer      = reinterpret_cast<clEnqueueWriteBuffer_func>(dlsym(handle, "clEnqueueWriteBuffer"));
-    clReleaseEvent            = reinterpret_cast<clReleaseEvent_func>(dlsym(handle, "clReleaseEvent"));
-    clReleaseContext          = reinterpret_cast<clReleaseContext_func>(dlsym(handle, "clReleaseContext"));
-    clRetainCommandQueue      = reinterpret_cast<clRetainCommandQueue_func>(dlsym(handle, "clRetainCommandQueue"));
-    clEnqueueUnmapMemObject   = reinterpret_cast<clEnqueueUnmapMemObject_func>(dlsym(handle, "clEnqueueUnmapMemObject"));
-    clRetainMemObject         = reinterpret_cast<clRetainMemObject_func>(dlsym(handle, "clRetainMemObject"));
-    clReleaseMemObject        = reinterpret_cast<clReleaseMemObject_func>(dlsym(handle, "clReleaseMemObject"));
-    clGetDeviceInfo           = reinterpret_cast<clGetDeviceInfo_func>(dlsym(handle, "clGetDeviceInfo"));
-    clGetDeviceIDs            = reinterpret_cast<clGetDeviceIDs_func>(dlsym(handle, "clGetDeviceIDs"));
-    clRetainEvent             = reinterpret_cast<clRetainEvent_func>(dlsym(handle, "clRetainEvent"));
-    clGetPlatformIDs          = reinterpret_cast<clGetPlatformIDs_func>(dlsym(handle, "clGetPlatformIDs"));
-    clGetKernelWorkGroupInfo  = reinterpret_cast<clGetKernelWorkGroupInfo_func>(dlsym(handle, "clGetKernelWorkGroupInfo"));
+#define LOAD_FUNCTION_PTR(func_name, handle) \
+    func_name##_ptr = reinterpret_cast<decltype(func_name) *>(dlsym(handle, #func_name));
 
-    dlclose(handle);
+    LOAD_FUNCTION_PTR(clBuildProgram, handle);
+    LOAD_FUNCTION_PTR(clEnqueueNDRangeKernel, handle);
+    LOAD_FUNCTION_PTR(clBuildProgram, handle);
+    LOAD_FUNCTION_PTR(clEnqueueNDRangeKernel, handle);
+    LOAD_FUNCTION_PTR(clSetKernelArg, handle);
+    LOAD_FUNCTION_PTR(clReleaseKernel, handle);
+    LOAD_FUNCTION_PTR(clCreateProgramWithSource, handle);
+    LOAD_FUNCTION_PTR(clCreateBuffer, handle);
+    LOAD_FUNCTION_PTR(clRetainKernel, handle);
+    LOAD_FUNCTION_PTR(clCreateKernel, handle);
+    LOAD_FUNCTION_PTR(clGetProgramInfo, handle);
+    LOAD_FUNCTION_PTR(clFlush, handle);
+    LOAD_FUNCTION_PTR(clFinish, handle);
+    LOAD_FUNCTION_PTR(clReleaseProgram, handle);
+    LOAD_FUNCTION_PTR(clRetainContext, handle);
+    LOAD_FUNCTION_PTR(clCreateProgramWithBinary, handle);
+    LOAD_FUNCTION_PTR(clReleaseCommandQueue, handle);
+    LOAD_FUNCTION_PTR(clEnqueueMapBuffer, handle);
+    LOAD_FUNCTION_PTR(clRetainProgram, handle);
+    LOAD_FUNCTION_PTR(clGetProgramBuildInfo, handle);
+    LOAD_FUNCTION_PTR(clEnqueueReadBuffer, handle);
+    LOAD_FUNCTION_PTR(clEnqueueWriteBuffer, handle);
+    LOAD_FUNCTION_PTR(clReleaseEvent, handle);
+    LOAD_FUNCTION_PTR(clReleaseContext, handle);
+    LOAD_FUNCTION_PTR(clRetainCommandQueue, handle);
+    LOAD_FUNCTION_PTR(clEnqueueUnmapMemObject, handle);
+    LOAD_FUNCTION_PTR(clRetainMemObject, handle);
+    LOAD_FUNCTION_PTR(clReleaseMemObject, handle);
+    LOAD_FUNCTION_PTR(clGetDeviceInfo, handle);
+    LOAD_FUNCTION_PTR(clGetDeviceIDs, handle);
+    LOAD_FUNCTION_PTR(clRetainEvent, handle);
+    LOAD_FUNCTION_PTR(clGetPlatformIDs, handle);
+    LOAD_FUNCTION_PTR(clGetKernelWorkGroupInfo, handle);
+
+#undef LOAD_FUNCTION_PTR
+
+    //Don't call dlclose(handle) or all the symbols will be unloaded !
 
     // Disable default loading and set status to successful
     _loaded = std::make_pair(true, true);
@@ -114,7 +121,7 @@ bool CLSymbols::load(const std::string &library)
 bool opencl_is_available()
 {
     CLSymbols::get().load_default();
-    return CLSymbols::get().clBuildProgram != nullptr;
+    return CLSymbols::get().clBuildProgram_ptr != nullptr;
 }
 } // namespace arm_compute
 
@@ -127,7 +134,7 @@ cl_int clBuildProgram(
     void *user_data)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clBuildProgram;
+    auto func = arm_compute::CLSymbols::get().clBuildProgram_ptr;
     if(func != nullptr)
     {
         return func(program, num_devices, device_list, options, pfn_notify, user_data);
@@ -150,7 +157,7 @@ cl_int clEnqueueNDRangeKernel(
     cl_event        *event)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clEnqueueNDRangeKernel;
+    auto func = arm_compute::CLSymbols::get().clEnqueueNDRangeKernel_ptr;
     if(func != nullptr)
     {
         return func(command_queue, kernel, work_dim, global_work_offset, global_work_size, local_work_size, num_events_in_wait_list, event_wait_list, event);
@@ -168,7 +175,7 @@ cl_int clSetKernelArg(
     const void *arg_value)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clSetKernelArg;
+    auto func = arm_compute::CLSymbols::get().clSetKernelArg_ptr;
     if(func != nullptr)
     {
         return func(kernel, arg_index, arg_size, arg_value);
@@ -182,7 +189,7 @@ cl_int clSetKernelArg(
 cl_int clRetainMemObject(cl_mem memobj)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clRetainMemObject;
+    auto func = arm_compute::CLSymbols::get().clRetainMemObject_ptr;
     if(func != nullptr)
     {
         return func(memobj);
@@ -196,7 +203,7 @@ cl_int clRetainMemObject(cl_mem memobj)
 cl_int clReleaseMemObject(cl_mem memobj)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clReleaseMemObject;
+    auto func = arm_compute::CLSymbols::get().clReleaseMemObject_ptr;
     if(func != nullptr)
     {
         return func(memobj);
@@ -216,7 +223,7 @@ cl_int clEnqueueUnmapMemObject(
     cl_event        *event)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clEnqueueUnmapMemObject;
+    auto func = arm_compute::CLSymbols::get().clEnqueueUnmapMemObject_ptr;
     if(func != nullptr)
     {
         return func(command_queue, memobj, mapped_ptr, num_events_in_wait_list, event_wait_list, event);
@@ -230,7 +237,7 @@ cl_int clEnqueueUnmapMemObject(
 cl_int clRetainCommandQueue(cl_command_queue command_queue)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clRetainCommandQueue;
+    auto func = arm_compute::CLSymbols::get().clRetainCommandQueue_ptr;
     if(func != nullptr)
     {
         return func(command_queue);
@@ -244,7 +251,7 @@ cl_int clRetainCommandQueue(cl_command_queue command_queue)
 cl_int clReleaseContext(cl_context context)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clReleaseContext;
+    auto func = arm_compute::CLSymbols::get().clReleaseContext_ptr;
     if(func != nullptr)
     {
         return func(context);
@@ -257,7 +264,7 @@ cl_int clReleaseContext(cl_context context)
 cl_int clReleaseEvent(cl_event event)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clReleaseEvent;
+    auto func = arm_compute::CLSymbols::get().clReleaseEvent_ptr;
     if(func != nullptr)
     {
         return func(event);
@@ -280,7 +287,7 @@ cl_int clEnqueueWriteBuffer(
     cl_event        *event)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clEnqueueWriteBuffer;
+    auto func = arm_compute::CLSymbols::get().clEnqueueWriteBuffer_ptr;
     if(func != nullptr)
     {
         return func(command_queue, buffer, blocking_write, offset, size, ptr, num_events_in_wait_list, event_wait_list, event);
@@ -303,7 +310,7 @@ cl_int clEnqueueReadBuffer(
     cl_event        *event)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clEnqueueReadBuffer;
+    auto func = arm_compute::CLSymbols::get().clEnqueueReadBuffer_ptr;
     if(func != nullptr)
     {
         return func(command_queue, buffer, blocking_read, offset, size, ptr, num_events_in_wait_list, event_wait_list, event);
@@ -323,7 +330,7 @@ cl_int clGetProgramBuildInfo(
     size_t               *param_value_size_ret)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clGetProgramBuildInfo;
+    auto func = arm_compute::CLSymbols::get().clGetProgramBuildInfo_ptr;
     if(func != nullptr)
     {
         return func(program, device, param_name, param_value_size, param_value, param_value_size_ret);
@@ -337,7 +344,7 @@ cl_int clGetProgramBuildInfo(
 cl_int clRetainProgram(cl_program program)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clRetainProgram;
+    auto func = arm_compute::CLSymbols::get().clRetainProgram_ptr;
     if(func != nullptr)
     {
         return func(program);
@@ -361,7 +368,7 @@ void *clEnqueueMapBuffer(
     cl_int          *errcode_ret)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clEnqueueMapBuffer;
+    auto func = arm_compute::CLSymbols::get().clEnqueueMapBuffer_ptr;
     if(func != nullptr)
     {
         return func(command_queue, buffer, blocking_map, map_flags, offset, size, num_events_in_wait_list, event_wait_list, event, errcode_ret);
@@ -379,7 +386,7 @@ void *clEnqueueMapBuffer(
 cl_int clReleaseCommandQueue(cl_command_queue command_queue)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clReleaseCommandQueue;
+    auto func = arm_compute::CLSymbols::get().clReleaseCommandQueue_ptr;
     if(func != nullptr)
     {
         return func(command_queue);
@@ -400,7 +407,7 @@ cl_program clCreateProgramWithBinary(
     cl_int               *errcode_ret)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clCreateProgramWithBinary;
+    auto func = arm_compute::CLSymbols::get().clCreateProgramWithBinary_ptr;
     if(func != nullptr)
     {
         return func(context, num_devices, device_list, lengths, binaries, binary_status, errcode_ret);
@@ -418,7 +425,7 @@ cl_program clCreateProgramWithBinary(
 cl_int clRetainContext(cl_context context)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clRetainContext;
+    auto func = arm_compute::CLSymbols::get().clRetainContext_ptr;
     if(func != nullptr)
     {
         return func(context);
@@ -432,7 +439,7 @@ cl_int clRetainContext(cl_context context)
 cl_int clReleaseProgram(cl_program program)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clReleaseProgram;
+    auto func = arm_compute::CLSymbols::get().clReleaseProgram_ptr;
     if(func != nullptr)
     {
         return func(program);
@@ -446,7 +453,7 @@ cl_int clReleaseProgram(cl_program program)
 cl_int clFlush(cl_command_queue command_queue)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clFlush;
+    auto func = arm_compute::CLSymbols::get().clFlush_ptr;
     if(func != nullptr)
     {
         return func(command_queue);
@@ -460,7 +467,7 @@ cl_int clFlush(cl_command_queue command_queue)
 cl_int clFinish(cl_command_queue command_queue)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clFinish;
+    auto func = arm_compute::CLSymbols::get().clFinish_ptr;
     if(func != nullptr)
     {
         return func(command_queue);
@@ -479,7 +486,7 @@ cl_int clGetProgramInfo(
     size_t         *param_value_size_ret)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clGetProgramInfo;
+    auto func = arm_compute::CLSymbols::get().clGetProgramInfo_ptr;
     if(func != nullptr)
     {
         return func(program, param_name, param_value_size, param_value, param_value_size_ret);
@@ -496,7 +503,7 @@ cl_kernel clCreateKernel(
     cl_int     *errcode_ret)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clCreateKernel;
+    auto func = arm_compute::CLSymbols::get().clCreateKernel_ptr;
     if(func != nullptr)
     {
         return func(program, kernel_name, errcode_ret);
@@ -514,7 +521,7 @@ cl_kernel clCreateKernel(
 cl_int clRetainKernel(cl_kernel kernel)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clRetainKernel;
+    auto func = arm_compute::CLSymbols::get().clRetainKernel_ptr;
     if(func != nullptr)
     {
         return func(kernel);
@@ -533,7 +540,7 @@ cl_mem clCreateBuffer(
     cl_int      *errcode_ret)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clCreateBuffer;
+    auto func = arm_compute::CLSymbols::get().clCreateBuffer_ptr;
     if(func != nullptr)
     {
         return func(context, flags, size, host_ptr, errcode_ret);
@@ -556,7 +563,7 @@ cl_program clCreateProgramWithSource(
     cl_int       *errcode_ret)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clCreateProgramWithSource;
+    auto func = arm_compute::CLSymbols::get().clCreateProgramWithSource_ptr;
     if(func != nullptr)
     {
         return func(context, count, strings, lengths, errcode_ret);
@@ -574,7 +581,7 @@ cl_program clCreateProgramWithSource(
 cl_int clReleaseKernel(cl_kernel kernel)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clReleaseKernel;
+    auto func = arm_compute::CLSymbols::get().clReleaseKernel_ptr;
     if(func != nullptr)
     {
         return func(kernel);
@@ -592,7 +599,7 @@ cl_int clGetDeviceIDs(cl_platform_id platform,
                       cl_uint       *num_devices)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clGetDeviceIDs;
+    auto func = arm_compute::CLSymbols::get().clGetDeviceIDs_ptr;
     if(func != nullptr)
     {
         return func(platform, device_type, num_entries, devices, num_devices);
@@ -610,7 +617,7 @@ cl_int clGetDeviceInfo(cl_device_id   device,
                        size_t        *param_value_size_ret)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clGetDeviceInfo;
+    auto func = arm_compute::CLSymbols::get().clGetDeviceInfo_ptr;
     if(func != nullptr)
     {
         return func(device, param_name, param_value_size, param_value, param_value_size_ret);
@@ -624,7 +631,7 @@ cl_int clGetDeviceInfo(cl_device_id   device,
 cl_int clRetainEvent(cl_event event)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clRetainEvent;
+    auto func = arm_compute::CLSymbols::get().clRetainEvent_ptr;
     if(func != nullptr)
     {
         return func(event);
@@ -638,7 +645,7 @@ cl_int clRetainEvent(cl_event event)
 cl_int clGetPlatformIDs(cl_uint num_entries, cl_platform_id *platforms, cl_uint *num_platforms)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clGetPlatformIDs;
+    auto func = arm_compute::CLSymbols::get().clGetPlatformIDs_ptr;
     if(func != nullptr)
     {
         return func(num_entries, platforms, num_platforms);
@@ -658,7 +665,7 @@ clGetKernelWorkGroupInfo(cl_kernel                 kernel,
                          size_t                   *param_value_size_ret)
 {
     arm_compute::CLSymbols::get().load_default();
-    auto func = arm_compute::CLSymbols::get().clGetKernelWorkGroupInfo;
+    auto func = arm_compute::CLSymbols::get().clGetKernelWorkGroupInfo_ptr;
     if(func != nullptr)
     {
         return func(kernel, device, param_name, param_value_size, param_value, param_value_size_ret);

@@ -56,8 +56,9 @@ public:
      *                         while every dimension above 3 represents a batch. Data types supported: Same as @p input
      * @param[in]  kernel_dims The kernel dimensions (width and height).
      * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  has_bias    Boolean that specifies if the depthwise convolution has bias.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info);
+    void configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias = false);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -35,7 +35,7 @@ class ITensor;
 
 /** Basic function to run @ref NEROIPoolingLayerKernel.
  *
- * This function calls the following OpenCL kernels:
+ * This function calls the following NEON kernels:
  * -# @ref NEROIPoolingLayerKernel
  *
  */

@@ -57,6 +57,16 @@ public:
      *                         Data type supported: Same as @p input
      */
     void configure(ITensor *input, const ITensor *bias, ITensor *output = nullptr);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDirectConvolutionLayerBiasAccumulateKernel
+     *
+     * @param[in] input  Input to add the bias to. If @p output is not specified then accumulation is done in-place.
+     *                   Data type supported: QS8/QS16/F16/F32
+     * @param[in] bias   The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
+     * @param[in] output (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
+     *                         Data type supported: Same as @p input
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output = nullptr);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

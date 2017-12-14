@@ -11,14 +11,14 @@
 <polygon fill="white" stroke="none" points="-4,4 -4,-136 50,-136 50,4 -4,4"/>
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
-<polygon fill="#bfbfbf" stroke="black" points="1.5,-0.5 1.5,-19.5 44.5,-19.5 44.5,-0.5 1.5,-0.5"/>
-<text text-anchor="middle" x="23" y="-7.5" font-family="Helvetica" font-size="10.00">CLLut</text>
+<polygon fill="#bfbfbf" stroke="black" points="1,-0.5 1,-19.5 45,-19.5 45,-0.5 1,-0.5"/>
+<text text-anchor="middle" x="23" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">CLLut</text>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
 <g id="a_node2"><a xlink:href="classarm__compute_1_1_i_c_l_lut.xhtml" target="_top" xlink:title="Interface for OpenCL LUT. ">
 <polygon fill="white" stroke="black" points="0,-56.5 0,-75.5 46,-75.5 46,-56.5 0,-56.5"/>
-<text text-anchor="middle" x="23" y="-63.5" font-family="Helvetica" font-size="10.00">ICLLut</text>
+<text text-anchor="middle" x="23" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">ICLLut</text>
 </a>
 </g>
 </g>
@@ -30,8 +30,8 @@
 <!-- Node3 -->
 <g id="node3" class="node"><title>Node3</title>
 <g id="a_node3"><a xlink:href="classarm__compute_1_1_i_lut.xhtml" target="_top" xlink:title="Lookup Table object interface. ">
-<polygon fill="white" stroke="black" points="6.5,-112.5 6.5,-131.5 39.5,-131.5 39.5,-112.5 6.5,-112.5"/>
-<text text-anchor="middle" x="23" y="-119.5" font-family="Helvetica" font-size="10.00">ILut</text>
+<polygon fill="white" stroke="black" points="6,-112.5 6,-131.5 40,-131.5 40,-112.5 6,-112.5"/>
+<text text-anchor="middle" x="23" y="-119.5" font-family="Helvetica,sans-Serif" font-size="10.00">ILut</text>
 </a>
 </g>
 </g>

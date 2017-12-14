@@ -38,7 +38,6 @@
 #include "arm_compute/core/Window.h"
 
 #include <set>
-#include <sstream>
 #include <string>
 
 using namespace arm_compute;
@@ -53,7 +52,6 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
-
     if(!is_interleaved_transposed)
     {
         ARM_COMPUTE_ERROR_ON(input0->info()->dimension(0) != input1->info()->dimension(1));
@@ -63,7 +61,19 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     _input1 = input1;
     _output = output;
 
-    if(output->info()->dimension(1) == 196)
+    const DataType data_type = input0->info()->data_type();
+    const int      fp_pos    = input0->info()->fixed_point_position();
+
+    // Get target architecture
+    GPUTarget arch_target = get_arch_from_target(get_target());
+
+    // Configure LWS hint
+    if(arch_target == GPUTarget::BIFROST && input1->info()->dimension(1) == 24)
+    {
+        // LWS optimized for the 11x11 AlexNet convolution on Bifrost.
+        _lws_hint = cl::NDRange(2, 2);
+    }
+    else if(output->info()->dimension(1) == 196)
     {
         _lws_hint = cl::NDRange(1, 7);
     }
@@ -72,40 +82,35 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         _lws_hint = cl::NDRange(8, 8);
     }
 
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DCOLS_A=" + support::cpp11::to_string(input0->info()->dimension(0))));
-    build_opts.emplace(("-DCOLS_B=" + support::cpp11::to_string(input1->info()->dimension(0))));
+    // Create build options
+    CLBuildOptions build_opts;
+    build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(fp_pos));
 
-    if(is_data_type_fixed_point(input0->info()->data_type()))
-    {
-        build_opts.emplace(("-DALPHA=" + support::cpp11::to_string((input0->info()->data_type() == DataType::QS8 ?
-                                                                    sqcvt_qs8_f32(alpha, input0->info()->fixed_point_position()) :
-                                                                    sqcvt_qs16_f32(alpha, input0->info()->fixed_point_position())))));
+    const bool multiply_alpha = std::abs(1.0f - alpha) > 0.00001f;
 
-        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input0->info()->fixed_point_position())));
-    }
-    else
+    // Only define ALPHA when alpha is not 1.0f. This avoids performing unnecessary multiplications.
+    if(multiply_alpha)
     {
-        build_opts.emplace(("-DALPHA=" + float_to_string_with_full_precision(alpha)));
+        build_opts.add_option_if_else(is_data_type_fixed_point(data_type),
+                                      "-DALPHA=" + support::cpp11::to_string((data_type == DataType::QS8 ? sqcvt_qs8_f32(alpha, fp_pos) : sqcvt_qs16_f32(alpha, fp_pos))),
+                                      "-DALPHA=" + float_to_string_with_full_precision(alpha));
     }
 
+    std::string kernel_name;
     if(is_interleaved_transposed)
     {
-        // Create kernel
-        std::string data_type_name = lower_string(string_from_data_type(input0->info()->data_type()));
-
-        if(data_type_name == "f32")
+        build_opts.add_option("-DCOLS_B=" + support::cpp11::to_string(input1->info()->dimension(0)));
+        if(data_type == DataType::F32)
         {
-            GPUTarget arch_target = get_arch_from_target(get_target());
-            _kernel               = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_mm_interleaved_transposed_f32_" + string_from_target(arch_target), build_opts));
+            kernel_name = "gemm_mm_interleaved_transposed_f32_" + string_from_target(arch_target);
         }
         else
         {
-            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_mm_interleaved_transposed_" + data_type_name, build_opts));
+            kernel_name = "gemm_mm_interleaved_transposed_" + lower_string(string_from_data_type(data_type));
         }
 
-        // Configure window kernel
-        const unsigned int     num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input0->info()->data_type());
+        // Configure kernel window
+        const unsigned int     num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(data_type);
         constexpr unsigned int num_elems_processed_per_iteration_y = 4;
 
         Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
@@ -122,28 +127,47 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     }
     else // The input tensors have not been reshaped
     {
-        ARM_COMPUTE_ERROR_ON(input0->info()->dimension(0) != input1->info()->dimension(1));
+        build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(input0->info()->dimension(0)));
 
-        // Special case for 1xN, 2xN, 3xN and 4xN input0 tensor
-        const unsigned int num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input0->info()->data_type());
+        // Special case for 1xN, 2xN, 3xN and 4xN input0 tensor. num_elems_processed_per_iteration_x is set up for the default case.
+        unsigned int       num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(data_type);
         const unsigned int num_elems_processed_per_iteration_y = std::min(static_cast<int>(output->info()->dimension(1)), 4);
 
-        build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type())));
-        build_opts.emplace(("-DNUM_ELEMS_PROCESSED_PER_THREAD_X=" + support::cpp11::to_string(num_elems_processed_per_iteration_x)));
-        build_opts.emplace(("-DNUM_ELEMS_PROCESSED_PER_THREAD_Y=" + support::cpp11::to_string(num_elems_processed_per_iteration_y)));
-
-        // Create kernel
-        if(is_data_type_fixed_point(input0->info()->data_type()))
+        // Create kernels according to the architecture, data type and input size.
+        if(arch_target == GPUTarget::BIFROST && data_type == DataType::F32)
         {
-            std::string kernel_name = "gemm_mm_" + lower_string(string_from_data_type(input0->info()->data_type()));
-            _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel((kernel_name), build_opts));
+            // The first kernel is optimized for the case of 1000 or less output elements (e.g. FC8 of AlexNet and VGG-16, and
+            // FC1 of Inception v3). The second kernel is optimized for the case of greater than 1000 output elements (e.g.
+            // FC6 and FC7 of AlexNet and VGG-16).
+            if(input1->info()->dimension(0) <= 1000)
+            {
+                // Each work-item processes 2 elements in the X dimension.
+                num_elems_processed_per_iteration_x = 2;
+                kernel_name                         = "gemm_mm_floating_point_f32_bifrost_1000";
+            }
+            else
+            {
+                // Each work-item processes 4 elements in the X dimension (as in the default case).
+                num_elems_processed_per_iteration_x = 4;
+                kernel_name                         = "gemm_mm_floating_point_f32_bifrost";
+            }
+            // The work-group size equal to the Bifrost quad size has been proved to be optimal for these kernels
+            // via exhaustive autotuning over a range of representative layer configurations.
+            _lws_hint = cl::NDRange(4);
         }
-        else
+        else if(is_data_type_fixed_point(data_type))
         {
-            std::string kernel_name = "gemm_mm_floating_point";
-            _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel((kernel_name), build_opts));
+            kernel_name = "gemm_mm_" + lower_string(string_from_data_type(data_type));
         }
+        else // (MIDGARD and F32) or (F16)
+        {
+            build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+            kernel_name = "gemm_mm_floating_point";
+        }
+        build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_Y=" + support::cpp11::to_string(num_elems_processed_per_iteration_y));
+        build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_X=" + support::cpp11::to_string(num_elems_processed_per_iteration_x));
 
+        // Configure window
         Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
         AccessWindowStatic    input0_access(input0->info(), 0, 0, input0->info()->dimension(0), ceil_to_multiple(input0->info()->dimension(1), num_elems_processed_per_iteration_y));
@@ -157,18 +181,21 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         output_access.set_valid_region(win, ValidRegion(coord, output->info()->tensor_shape()));
 
         ICLKernel::configure(win);
-
-        // Set config_id for enabling LWS tuning
-        _config_id = "gemm_";
-        _config_id += (is_interleaved_transposed ? "reshaped_" : "");
-        _config_id += lower_string(string_from_data_type(input0->info()->data_type()));
-        _config_id += "_";
-        _config_id += support::cpp11::to_string(output->info()->dimension(1));
-        _config_id += "_";
-        _config_id += support::cpp11::to_string(output->info()->dimension(0));
-        _config_id += "_";
-        _config_id += (is_interleaved_transposed ? support::cpp11::to_string(input1->info()->dimension(0)) : support::cpp11::to_string(input1->info()->dimension(1)));
     }
+
+    // Create kernel
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "gemm_";
+    _config_id += (is_interleaved_transposed ? "reshaped_" : "");
+    _config_id += lower_string(string_from_data_type(input0->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += (is_interleaved_transposed ? support::cpp11::to_string(input1->info()->dimension(0)) : support::cpp11::to_string(input1->info()->dimension(1)));
 }
 
 void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &queue)

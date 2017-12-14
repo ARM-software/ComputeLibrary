@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['targethint',['TargetHint',['../namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b',1,'arm_compute::graph']]],
-  ['termination',['Termination',['../namespacearm__compute.xhtml#a08c1503414e23f5dd10ff83492685453',1,'arm_compute']]],
-  ['thresholdtype',['ThresholdType',['../namespacearm__compute.xhtml#a3e6b23e675649b83240691abbc42a649',1,'arm_compute']]],
-  ['type',['Type',['../classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7',1,'arm_compute::Scheduler']]]
+  ['samplingpolicy',['SamplingPolicy',['../namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7b',1,'arm_compute']]],
+  ['scalefactor',['ScaleFactor',['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100',1,'arm_compute::test::framework']]],
+  ['status',['Status',['../classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70b',1,'arm_compute::test::framework::TestCaseFactory::Status()'],['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70b',1,'arm_compute::test::framework::TestResult::Status()']]]
 ];

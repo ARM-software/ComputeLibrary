@@ -44,23 +44,67 @@ namespace validation
 namespace
 {
 /** Input data set for float data types */
-const auto PoolingLayerDatasetFP = combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { 2, 3, 7, 9 })),
-                                           framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) }));
+const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { 2, 3, 7, 9 })),
+                                                   framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
+                                           framework::dataset::make("ExcludePadding", { true, false }));
 
 /** Input data set for quantized data types */
-const auto PoolingLayerDatasetQS = combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3 })),
-                                           framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) }));
+const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3 })),
+                                                   framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
+                                           framework::dataset::make("ExcludePadding", { false }));
 
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for float types */
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for float types */
-#endif                                                   /* ARM_COMPUTE_ENABLE_FP16 */
+#endif                                                   /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 constexpr AbsoluteTolerance<float> tolerance_qs8(0);     /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
 constexpr AbsoluteTolerance<float> tolerance_qs16(0);    /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(PoolingLayer)
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Mismatching data type
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Window shrink
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4),     // Mismatching fixed point position
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS16, 11),   // Window shrink
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
+                                            TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32, 0),     // Non-rectangular Global Pooling
+                                            TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0),     // Invalid output Global Pooling
+                                            TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0),
+                                          }),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0),
+                                            TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::QS8, 5),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::QS16, 11),
+                                            TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(2U, 2U, 5U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 0),
+                                          })),
+    framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 2, 0)),
+                                            PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 0, 2)),
+                                            PoolingLayerInfo(PoolingType::AVG),
+                                            PoolingLayerInfo(PoolingType::MAX),
+                                            PoolingLayerInfo(PoolingType::AVG),
+                                           })),
+    framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, true })),
+    input_info, output_info, pool_info, expected)
+{
+    bool is_valid = bool(NEPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 template <typename T>
 using NEPoolingLayerFixture = PoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, T>;
@@ -81,7 +125,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixture<float>, framework::Datase
 }
 TEST_SUITE_END()
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP,
                                                                                                    framework::dataset::make("DataType", DataType::F16))))
@@ -96,7 +140,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixture<half>, framework::Dataset
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END()
 
 template <typename T>
