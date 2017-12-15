@@ -40,6 +40,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 using NELeNet5Fixture = LeNet5Fixture<Tensor,
       Accessor,
       NEActivationLayer,
@@ -56,5 +58,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5, NELeNet5Fixture, framework::DatasetMode:
 
 TEST_SUITE_END()
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

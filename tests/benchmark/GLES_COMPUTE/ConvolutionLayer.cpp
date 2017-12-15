@@ -43,6 +43,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 namespace
 {
 const auto data_types = framework::dataset::make("DataType", { DataType::F16 });
@@ -115,5 +117,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ConvolutionLayer, GCConvolutionLayerFixtur
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 TEST_SUITE_END()
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

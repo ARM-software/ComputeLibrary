@@ -37,6 +37,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 namespace
 {
 const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
@@ -53,5 +55,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(SoftmaxLayerLarge, NESoftmaxLayerFixture, framew
                                 framework::dataset::combine(datasets::SoftmaxLayerLargeShapes(), data_types));
 
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

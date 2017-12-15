@@ -34,6 +34,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 /** Fixture that can be used for NEON and CL */
 template <typename TensorType, typename Function, typename Accessor>
 class BatchNormalizationLayerFixture : public framework::Fixture
@@ -96,6 +98,7 @@ private:
     TensorType gamma{};
     Function   batch_norm_layer{};
 };
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_BATCHNORMALIZATIONLAYERFIXTURE */

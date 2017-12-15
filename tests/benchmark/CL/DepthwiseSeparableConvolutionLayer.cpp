@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 const auto data_types                             = framework::dataset::make("DataType", { DataType::F32 });
 using CLDepthwiseSeparableConvolutionLayerFixture = DepthwiseSeparableConvolutionLayerFixture<CLTensor, CLDepthwiseSeparableConvolutionLayer, CLAccessor>;
 
@@ -47,5 +49,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetDepthwiseSeparableConvolutionLayer, CLD
                                                             framework::dataset::make("Batches", { 1 })));
 
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

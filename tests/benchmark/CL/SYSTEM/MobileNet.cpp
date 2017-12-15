@@ -41,6 +41,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 using CLMobileNetFixture = MobileNetFixture<CLTensor,
       CLAccessor,
       CLActivationLayer,
@@ -58,5 +60,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(MobileNet, CLMobileNetFixture, framework::Datase
 
 TEST_SUITE_END()
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

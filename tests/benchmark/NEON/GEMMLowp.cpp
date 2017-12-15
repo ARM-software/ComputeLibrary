@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 using NEGEMMLowpFixture = GEMMLowpMatrixMultiplyCoreFixture<Tensor, NEGEMMLowpMatrixMultiplyCore, Accessor>;
 
 TEST_SUITE(NEON)
@@ -48,5 +50,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMMLowp, NEGEMMLowpFixture, frame
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMMLowp, NEGEMMLowpFixture, framework::DatasetMode::NIGHTLY, datasets::GoogleNetGEMMDataset());
 
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

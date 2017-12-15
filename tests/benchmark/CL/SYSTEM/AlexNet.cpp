@@ -43,6 +43,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 using CLAlexNetFixture = AlexNetFixture<ICLTensor,
       CLTensor,
       CLSubTensor,
@@ -64,5 +66,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, CLAlexNetFixture, framework::DatasetMod
 
 TEST_SUITE_END()
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

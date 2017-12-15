@@ -43,6 +43,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 namespace
 {
 // Special data types for networks that need 5x5 direct convolution, which does not support Fixed Point
@@ -100,5 +102,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2DirectConvolutionLayer, NEConvolutionLayer
 
 TEST_SUITE_END()
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

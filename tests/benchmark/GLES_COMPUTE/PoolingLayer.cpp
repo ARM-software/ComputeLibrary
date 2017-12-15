@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,8 @@
 namespace arm_compute
 {
 namespace test
+{
+namespace benchmark
 {
 namespace
 {
@@ -124,5 +126,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2PoolingLayer, GCPoolingLayerFixture, frame
                                                             framework::dataset::make("Batches", { 4, 8 })));
 TEST_SUITE_END()
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
