@@ -74,7 +74,7 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
 #endif /* __aarch64__ */
 
 #ifdef ARM_COMPUTE_AARCH64_V8_2
-    if(ci.CPU == CPUTarget::A75_DOT)
+    if(ci.CPU == CPUTarget::A75_DOT || ci.CPU == CPUTarget::A55_DOT)
     {
         // Configure matrix multiply kernel
         GemmInterleaved<gemm_s8_12x8, int8_t, int32_t> gemm(&ci, M, N, K, false, false);
@@ -86,10 +86,6 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
         k->configure(a, b, output, &_workspace, 1.f, 1.f);
         _mm_kernel = std::move(k);
         _workspace.allocator()->allocate();
-    }
-    else if(ci.CPU == CPUTarget::A55_DOT)
-    {
-        ARM_COMPUTE_ERROR_ON("WIP");
     }
     else
 #elif defined(ARM_COMPUTE_AARCH64_V8A)
