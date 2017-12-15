@@ -444,8 +444,8 @@ To see the build options available simply run ```scons -h```:
 		actual: False
 
 	embed_kernels: Embed OpenCL kernels and OpenGL ES compute shader in library binary (yes|no)
-		default: False
-		actual: False
+		default: True
+		actual: True
 
 	set_soname: Set the library's soname and shlibversion (requires SCons 2.4 or above) (yes|no)
 		default: False
@@ -733,6 +733,7 @@ To cross compile an OpenCL example:
 	aarch64-linux-android-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 
 To cross compile a GLES example:
+
 	#32 bit:
 	arm-linux-androideabi-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_arm -static-libstdc++ -pie -DARM_COMPUTE_GC
 	#64 bit:
