@@ -1,0 +1,6 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_scheduler.xhtml" title="Scheduler interface to run kernels. " alt="" coords="5,56,95,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_p_p_scheduler.xhtml" title="C++11 implementation of a pool of threads to automatically split a kernel&#39;s execution among several t..." alt="" coords="172,5,283,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_o_m_p_scheduler.xhtml" title="Pool of threads to automatically split a kernel&#39;s execution among several threads. " alt="" coords="170,56,285,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_single_thread_scheduler.xhtml" title="Pool of threads to automatically split a kernel&#39;s execution among several threads. " alt="" coords="143,107,312,133"/>
+</map>

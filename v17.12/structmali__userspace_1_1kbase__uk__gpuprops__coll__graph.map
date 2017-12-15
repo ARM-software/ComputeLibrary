@@ -1,0 +1,11 @@
+<map id="kbase_uk_gpuprops" name="kbase_uk_gpuprops">
+<area shape="rect" id="node2" href="$unionmali__userspace_1_1uk__header.xhtml" title="uk_header" alt="" coords="645,113,735,139"/>
+<area shape="rect" id="node3" href="$structmali__userspace_1_1mali__base__gpu__props.xhtml" title="mali_base_gpu_props" alt="" coords="609,163,771,190"/>
+<area shape="rect" id="node4" href="$structmali__userspace_1_1mali__base__gpu__thread__props.xhtml" title="mali_base_gpu_thread\l_props" alt="" coords="285,5,452,47"/>
+<area shape="rect" id="node5" href="$structmali__userspace_1_1gpu__raw__gpu__props.xhtml" title="gpu_raw_gpu_props" alt="" coords="294,71,443,98"/>
+<area shape="rect" id="node6" href="$structmali__userspace_1_1mali__base__gpu__tiler__props.xhtml" title="mali_base_gpu_tiler\l_props" alt="" coords="294,123,443,164"/>
+<area shape="rect" id="node7" href="$structmali__userspace_1_1mali__base__gpu__l2__cache__props.xhtml" title="mali_base_gpu_l2_cache\l_props" alt="" coords="278,188,459,229"/>
+<area shape="rect" id="node8" href="$structmali__userspace_1_1mali__base__gpu__coherent__group__info.xhtml" title="mali_base_gpu_coherent\l_group_info" alt="" coords="277,253,460,295"/>
+<area shape="rect" id="node9" href="$structmali__userspace_1_1mali__base__gpu__coherent__group.xhtml" title="mali_base_gpu_coherent\l_group" alt="" coords="5,253,188,295"/>
+<area shape="rect" id="node10" href="$structmali__userspace_1_1mali__base__gpu__core__props.xhtml" title="mali_base_gpu_core\l_props" alt="" coords="292,319,445,360"/>
+</map>

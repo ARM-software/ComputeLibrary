@@ -1,0 +1,4 @@
+<map id="BatchNormalizationLayerValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;" name="BatchNormalizationLayerValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;">
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1validation_1_1_batch_normalization_layer_validation_fixed_point_fixture.xhtml" title="BatchNormalizationLayerValidation\lFixedPointFixture\&lt; TensorType,\l AccessorType, FunctionType, T \&gt;" alt="" coords="117,5,363,61"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml" title="Abstract fixture class. " alt="" coords="5,20,69,47"/>
+</map>

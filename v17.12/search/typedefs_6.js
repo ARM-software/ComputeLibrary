@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['gcactivationlayerfixture',['GCActivationLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a42983f20765326d857fabecb8dfa1a18',1,'arm_compute::test::validation']]],
+  ['gcbatchnormalizationlayerfixture',['GCBatchNormalizationLayerFixture',['../namespacearm__compute_1_1test.xhtml#a8b4153be3e745d94aa922b3ae6a6d178',1,'arm_compute::test::GCBatchNormalizationLayerFixture()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a2328d9a73a8dccd9ef5b483b64ff7a1f',1,'arm_compute::test::validation::GCBatchNormalizationLayerFixture()']]],
+  ['gcconvolutionlayerfixture',['GCConvolutionLayerFixture',['../namespacearm__compute_1_1test.xhtml#afb74db03ceee9fb272663c68133771f2',1,'arm_compute::test']]],
+  ['gcdepthconcatenatelayerfixture',['GCDepthConcatenateLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#acce611b053cf3586304454edaba6fe25',1,'arm_compute::test::validation']]],
+  ['gcdirectconvolutionlayer1x1kernel',['GCDirectConvolutionLayer1x1Kernel',['../namespacearm__compute.xhtml#a10f3af894ca8b0479a5e6bc296083314',1,'arm_compute']]],
+  ['gcdirectconvolutionlayer3x3kernel',['GCDirectConvolutionLayer3x3Kernel',['../namespacearm__compute.xhtml#a35ccf8834da8b67bfb9c61fbc5e5f1e6',1,'arm_compute']]],
+  ['gcdirectconvolutionlayer5x5kernel',['GCDirectConvolutionLayer5x5Kernel',['../namespacearm__compute.xhtml#a227e525a4d0a4da25040cfdf8a3cf06b',1,'arm_compute']]],
+  ['gcdirectconvolutionlayerfixture',['GCDirectConvolutionLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a4e8deadc4ef208b6e4e86a61697ed6c3',1,'arm_compute::test::validation']]],
+  ['gcfullyconnectedlayerfixture',['GCFullyConnectedLayerFixture',['../namespacearm__compute_1_1test.xhtml#a24e2d47432cc0b346147bbbc3964e6c8',1,'arm_compute::test::GCFullyConnectedLayerFixture()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a009146367d961eaaf64f75df25d8c2a4',1,'arm_compute::test::validation::GCFullyConnectedLayerFixture()']]],
+  ['gcgemmfixture',['GCGEMMFixture',['../namespacearm__compute_1_1test.xhtml#a6991a2c9303e8c258547b6be1b30ae5d',1,'arm_compute::test::GCGEMMFixture()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a3da60eb836a3383cbed0248fb6d580fa',1,'arm_compute::test::validation::GCGEMMFixture()']]],
+  ['gcglobalpoolinglayerfixture',['GCGlobalPoolingLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#acb53c0cbb941818c096cc9ba6cd6dfe5',1,'arm_compute::test::validation']]],
+  ['gcimage',['GCImage',['../namespacearm__compute.xhtml#a0b1d72d612fb6f33393ea6cd6cbcf523',1,'arm_compute']]],
+  ['gcnormalizationlayerfixture',['GCNormalizationLayerFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a1fefec9092294491e98390796f4adb12',1,'arm_compute::test::validation']]],
+  ['gcpoolinglayerfixture',['GCPoolingLayerFixture',['../namespacearm__compute_1_1test.xhtml#a1221a94382ab38693543c527d6cf6827',1,'arm_compute::test']]],
+  ['gcsoftmaxlayerfixture',['GCSoftmaxLayerFixture',['../namespacearm__compute_1_1test.xhtml#a1227db70d61e996287ff23ac4ffcdf0a',1,'arm_compute::test::GCSoftmaxLayerFixture()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a859d5c83156a8ef2eb8ed3a6028b4316',1,'arm_compute::test::validation::GCSoftmaxLayerFixture()']]],
+  ['gctransposefixture',['GCTransposeFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a8f85dbf11d657c145ce52a1f5af88822',1,'arm_compute::test::validation']]],
+  ['groupmappings',['GroupMappings',['../namespacearm__compute.xhtml#ad2398d0f2ce77c10bbebf1f85317dde5',1,'arm_compute']]]
+];

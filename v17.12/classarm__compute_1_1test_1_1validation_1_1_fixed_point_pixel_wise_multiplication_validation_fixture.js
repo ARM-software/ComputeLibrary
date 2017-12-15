@@ -1,0 +1,4 @@
+var classarm__compute_1_1test_1_1validation_1_1_fixed_point_pixel_wise_multiplication_validation_fixture =
+[
+    [ "setup", "classarm__compute_1_1test_1_1validation_1_1_fixed_point_pixel_wise_multiplication_validation_fixture.xhtml#ae37307bac21551e8b9374590e6d423bc", null ]
+];

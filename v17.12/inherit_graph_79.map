@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_allocator.xhtml" title="Allocator interface. " alt="" coords="5,31,87,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_allocator.xhtml" title="Default malloc allocator implementation. " alt="" coords="161,5,240,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_buffer_allocator.xhtml" title="Default OpenCL cl buffer allocator implementation. " alt="" coords="135,56,267,83"/>
+</map>

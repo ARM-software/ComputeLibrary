@@ -1,0 +1,5 @@
+<map id="GlobalPoolingShapes" name="GlobalPoolingShapes">
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset.xhtml" title="Implementation of a dataset created from a container. " alt="" coords="26,155,141,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_named_dataset.xhtml" title="Abstract implementation of a named dataset. " alt="" coords="23,80,143,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_dataset.xhtml" title="Abstract dataset base class. " alt="" coords="47,5,120,32"/>
+</map>
