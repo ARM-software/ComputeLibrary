@@ -108,30 +108,25 @@ size_t NEWinogradLayerKernel::get_kernel_transform_working_size(const KernelShap
 }
 
 NEWinogradLayerKernel::NEWinogradLayerKernel()
-    : _convolver(nullptr), _output(nullptr)
+    : _convolver(nullptr)
 {
 }
 
-void NEWinogradLayerKernel::configure(ITensor *output, Winograd3x3F32 *convolver)
+void NEWinogradLayerKernel::configure(Winograd3x3F32 *convolver)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(convolver);
     _convolver = convolver;
-    Window win = calculate_max_window(*output->info());
+    Window win;
+    win.set(Window::DimX, Window::Dimension(0, 15, 1));
     INEKernel::configure(win);
 }
 
 void NEWinogradLayerKernel::run(const Window &window, const ThreadInfo &info)
 {
-    ARM_COMPUTE_UNUSED(window);
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(info.num_threads < 1);
-    const size_t tid                  = info.thread_id;
-    const size_t num_threads          = std::min(info.num_threads, 16);
-    const size_t num_gemms_per_thread = 16 / num_threads;
-    const size_t first_gemm           = tid * num_gemms_per_thread;
-    const size_t last_gemm            = (tid == (num_threads - 1)) ? 15 : first_gemm + num_gemms_per_thread - 1;
+    const size_t first_gemm = window.x().start();
+    const size_t last_gemm  = window.x().end();
     _convolver->_pimpl->convolver.execute(first_gemm, last_gemm);
 }
 } // namespace arm_compute

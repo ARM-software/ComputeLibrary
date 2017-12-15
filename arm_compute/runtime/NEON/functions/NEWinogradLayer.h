@@ -28,6 +28,7 @@
 
 #include "arm_compute/core/NEON/kernels/NEWinogradLayerKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -69,9 +70,14 @@ public:
 private:
     MemoryGroup                     _memory_group;
     NEWinogradLayerKernel           _winograd_kernel;
-    Tensor                          _weights_workspace;
+    CPPPermute                      _permute_input;
+    CPPPermute                      _permute_weights;
+    CPPPermute                      _permute_output;
     Tensor                          _workspace;
     Tensor                          _kernel_storage;
+    Tensor                          _input_nhwc;
+    Tensor                          _output_nhwc;
+    Tensor                          _weights_hwio;
     const ITensor                  *_input;
     const ITensor                  *_weights;
     ITensor                        *_output;

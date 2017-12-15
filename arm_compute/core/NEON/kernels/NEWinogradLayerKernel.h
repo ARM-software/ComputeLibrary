@@ -31,6 +31,7 @@ namespace arm_compute
 {
 class ITensor;
 class NEWinogradLayerKernel;
+
 class Winograd3x3F32
 {
 public:
@@ -68,10 +69,9 @@ public:
 
     /** Initialise the kernel
      *
-     * @param[in,out] output    Output tensor to store the result of matrix multiplication. Data type supported: F32.
-     * @param[in]     convolver A pointer to the winograd convolver, this object must have been configured and is ready to execute 16 GEMMS .
+     * @param[in] convolver A pointer to the winograd convolver, this object must have been configured and is ready to execute 16 GEMMS .
      */
-    void configure(ITensor *output, Winograd3x3F32 *convolver);
+    void configure(Winograd3x3F32 *convolver);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -90,7 +90,6 @@ public:
 
 protected:
     Winograd3x3F32 *_convolver;
-    ITensor        *_output;
 };
 
 } // namespace arm_compute

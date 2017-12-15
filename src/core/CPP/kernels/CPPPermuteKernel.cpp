@@ -51,13 +51,18 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() < 3, "Invalid input size!");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(perm.num_dimensions() != 3 && ((perm[0] != 2 && perm[1] != 0 && perm[2] != 1) || (perm[0] != 1 && perm[1] != 2 && perm[2] != 0)),
-                                    "Only [2, 0, 1] and [1, 2, 0] permutation is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        (perm.num_dimensions() != 3 && ((perm[0] != 2 && perm[1] != 0 && perm[2] != 1) || (perm[0] != 1 && perm[1] != 2 && perm[2] != 0))) && (perm.num_dimensions() != 4 && ((perm[0] != 2 && perm[1] != 0
+                && perm[2] != 1)
+                || (perm[0] != 1 && perm[1] != 2 && perm[2] != 0))),
+        "Only [2, 0, 1],[1, 2, 0] and [3, 2, 0, 1] permutation is supported");
+
+    const TensorShape output_shape = get_output_shape(input, perm);
 
     // Validate configured output
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), get_output_shape(input, perm));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
@@ -72,11 +77,13 @@ void CPPPermuteKernel::run_permute(const Window &window)
     const int output_stride_x = _output->info()->strides_in_bytes().x();
     const int output_stride_y = _output->info()->strides_in_bytes().y();
     const int output_stride_z = _output->info()->strides_in_bytes().z();
+    const int output_stride_w = _output->info()->strides_in_bytes()[3];
 
     Window window_out(window);
     window_out.set(Window::DimX, Window::Dimension(0, 0, 0));
     window_out.set(Window::DimY, Window::Dimension(0, 0, 0));
     window_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
+    window_out.set(3, Window::Dimension(0, 0, 0));
 
     // Create iterators
     Iterator in(_input, window);
@@ -87,20 +94,34 @@ void CPPPermuteKernel::run_permute(const Window &window)
     {
         execute_window_loop(window, [&](const Coordinates & id)
         {
-            const int idx                             = id.y() * output_stride_z + id.x() * output_stride_y + id.z() * output_stride_x;
+            const int idx                             = id[3] * output_stride_w + id.y() * output_stride_z + id.x() * output_stride_y + id.z() * output_stride_x;
             *(reinterpret_cast<T *>(out.ptr() + idx)) = *(reinterpret_cast<const T *>(in.ptr()));
         },
         in, out);
     }
     // Run [1, 2, 0] permute
-    else
+    else if(_perm[0] == 1 && _perm[1] == 2 && _perm[2] == 0)
     {
         execute_window_loop(window, [&](const Coordinates & id)
         {
-            const int idx                             = id.x() * output_stride_z + id.z() * output_stride_y + id.y() * output_stride_x;
+            const int idx                             = id[3] * output_stride_w + id.x() * output_stride_z + id.z() * output_stride_y + id.y() * output_stride_x;
             *(reinterpret_cast<T *>(out.ptr() + idx)) = *(reinterpret_cast<const T *>(in.ptr()));
         },
         in, out);
+    }
+    // Run [3, 2, 0, 1] permute
+    else if(_perm[0] == 3 && _perm[1] == 2 && _perm[2] == 0 && _perm[3] == 1)
+    {
+        execute_window_loop(window, [&](const Coordinates & id)
+        {
+            const int idx                             = id[3] * output_stride_x + id[2] * output_stride_y + id[0] * output_stride_z + id[1] * output_stride_w;
+            *(reinterpret_cast<T *>(out.ptr() + idx)) = *(reinterpret_cast<const T *>(in.ptr()));
+        },
+        in, out);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Not supported.");
     }
 }
 
@@ -112,9 +133,9 @@ CPPPermuteKernel::CPPPermuteKernel()
 void CPPPermuteKernel::configure(const ITensor *input, ITensor *output, const PermutationVector &perm)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
+    const TensorShape output_shape = get_output_shape(input->info(), perm);
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(get_output_shape(input->info(), perm)));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), perm));
