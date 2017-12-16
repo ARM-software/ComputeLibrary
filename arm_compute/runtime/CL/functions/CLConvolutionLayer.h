@@ -138,10 +138,9 @@ private:
     CLTensor _gemm_output;
     CLTensor _tmp_output;
 
-    bool _append_bias;
-    bool _is_fully_connected_convolution;
     bool _are_weights_reshaped;
     bool _is_quantized;
+    bool _is_interleaved_transposed;
 };
 }
 #endif /* __ARM_COMPUTE_CLCONVOLUTIONLAYER_H__ */

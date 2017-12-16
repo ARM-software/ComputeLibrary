@@ -95,7 +95,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         // Create kernels according to the architecture, data type and input size.
         if(gpu_target == GPUTarget::BIFROST && data_type == DataType::F32)
         {
-            num_elems_processed_per_iteration_x = (input1->dimension(0) <= 1000) ? 2 : 4;
+            num_elems_processed_per_iteration_x = (input1->dimension(0) <= 1000 && input0->num_dimensions() == 1) ? 2 : 4;
         }
 
         // Configure window
@@ -196,7 +196,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
             // The first kernel is optimized for the case of 1000 or less output elements (e.g. FC8 of AlexNet and VGG-16, and
             // FC1 of Inception v3). The second kernel is optimized for the case of greater than 1000 output elements (e.g.
             // FC6 and FC7 of AlexNet and VGG-16).
-            kernel_name = (input1->info()->dimension(0) <= 1000) ? "gemm_mm_floating_point_f32_bifrost_1000" : "gemm_mm_floating_point_f32_bifrost";
+            kernel_name = (input1->info()->dimension(0) <= 1000 && input0->info()->num_dimensions() == 1) ? "gemm_mm_floating_point_f32_bifrost_1000" : "gemm_mm_floating_point_f32_bifrost";
 
             // The work-group size equal to the Bifrost quad size has been proved to be optimal for these kernels
             // via exhaustive autotuning over a range of representative layer configurations.

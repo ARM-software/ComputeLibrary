@@ -43,9 +43,6 @@ CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights(std::shared_p
 
 void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose1xW)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(weights, output);
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
 
     if(biases != nullptr)
@@ -82,6 +79,8 @@ void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const
     {
         _weights_reshape_kernel.configure(weights, biases_to_use, output);
     }
+
+    output->info()->set_quantization_info(weights->info()->quantization_info());
 }
 
 void CLConvolutionLayerReshapeWeights::run()
@@ -100,8 +99,8 @@ void CLConvolutionLayerReshapeWeights::run()
 
 CLConvolutionLayer::CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _reshape_weights(), _input_im2col_kernel(), _input_interleave_kernel(), _mm_kernel(), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _output_col2im_kernel(),
-      _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _append_bias(false), _is_fully_connected_convolution(false),
-      _are_weights_reshaped(false), _is_quantized(false)
+      _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _are_weights_reshaped(false), _is_quantized(false),
+      _is_interleaved_transposed(false)
 {
 }
 
@@ -157,14 +156,16 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
 
     const DataType dt = input->info()->data_type();
 
-    // Set the GPU target for matrix multiply
+    // Set the GPU target for matrix multiply and im2col and col2im
     _mm_kernel.set_target(CLScheduler::get().target());
+    _input_im2col_kernel.set_target(CLScheduler::get().target());
+    _output_col2im_kernel.set_target(CLScheduler::get().target());
 
-    _append_bias          = (biases != nullptr) && (!_is_quantized);
-    _are_weights_reshaped = weights_info.are_reshaped();
+    const bool append_bias = (biases != nullptr) && (!_is_quantized);
+    _are_weights_reshaped  = weights_info.are_reshaped();
 
-    const unsigned   bias_element  = (_append_bias) ? 1 : 0;
-    const ICLTensor *biases_to_use = (_append_bias) ? biases : nullptr;
+    const unsigned   bias_element  = (append_bias) ? 1 : 0;
+    const ICLTensor *biases_to_use = (append_bias) ? biases : nullptr;
 
     // Get parameters from conv_info
     unsigned int stride_x = 0;
@@ -181,8 +182,8 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
                                                  conv_info);
 
     // Check if its a "fully connected" convolution
-    _is_fully_connected_convolution = ((conv_w == 1) && (conv_h == 1));
-    const bool run_interleaved      = (!_is_fully_connected_convolution && !_is_quantized);
+    const bool is_fully_connected_convolution = ((conv_w == 1) && (conv_h == 1));
+    _is_interleaved_transposed                = (!is_fully_connected_convolution && !_is_quantized);
 
     unsigned int mat_weights_cols = weights->info()->dimension(3);
     unsigned int mat_weights_rows = weights->info()->dimension(0) * weights->info()->dimension(1) * weights->info()->dimension(2) + bias_element;
@@ -190,7 +191,7 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     // Reshape weights if needed
     if(_are_weights_reshaped)
     {
-        if(_is_fully_connected_convolution || _is_quantized)
+        if(is_fully_connected_convolution || _is_quantized)
         {
             mat_weights_cols = weights->info()->dimension(0);
             mat_weights_rows = weights->info()->dimension(1);
@@ -204,22 +205,9 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     }
     else
     {
-        if(_is_fully_connected_convolution || _is_quantized)
-        {
-            // Create tensor to store the reshaped weights
-            TensorShape shape_wr(mat_weights_cols, mat_weights_rows);
-            _weights_reshaped.allocator()->init(weights->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_wr));
-            _reshape_weights.configure(weights, biases_to_use, &_weights_reshaped, false /* 1xW transpose */);
-        }
-        else
-        {
-            // Create tensor to store transposed weights
-            const float transpose_width = 16.0f / input->info()->element_size();
-            TensorShape shape_wt(mat_weights_rows * static_cast<unsigned int>(transpose_width), static_cast<unsigned int>(std::ceil(mat_weights_cols / transpose_width)));
-            _weights_reshaped.allocator()->init(weights->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_wt));
-            _reshape_weights.configure(weights, biases_to_use, &_weights_reshaped, true /* 1xW transpose */);
-        }
-        _weights_reshaped.info()->set_quantization_info(weights->info()->quantization_info());
+        // _weights_reshaped will be auto configured in the kernel
+        _reshape_weights.configure(weights, biases_to_use, &_weights_reshaped, _is_interleaved_transposed /* 1xW transpose */);
+
         weights = &_weights_reshaped;
     }
 
@@ -236,19 +224,6 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     _input_im2col_reshaped.allocator()->init(im2col_reshaped_info);
     _memory_group.manage(&_input_im2col_reshaped);
 
-    // Create tensor (interleave) to prepare input tensor for GEMM
-    if(run_interleaved)
-    {
-        TensorShape shape_interleaved = shape_im2col;
-        shape_interleaved.set(0, shape_interleaved.x() * 4);
-        shape_interleaved.set(1, std::ceil(shape_interleaved.y() / 4.f));
-        // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
-        TensorInfo interleaved_info(shape_interleaved, 1, dt, input->info()->fixed_point_position());
-        interleaved_info.set_quantization_info(input->info()->quantization_info());
-        _input_interleaved_reshaped.allocator()->init(interleaved_info);
-        _memory_group.manage(&_input_interleaved_reshaped);
-    }
-
     // Create GEMM output tensor
     TensorShape shape_gemm = _input_im2col_reshaped.info()->tensor_shape();
     shape_gemm.set(0, mat_weights_cols);
@@ -261,14 +236,17 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     _gemm_output.allocator()->init(info_gemm);
     _memory_group.manage(&_gemm_output);
 
-    // Configure kernels
-    _input_im2col_kernel.set_target(CLScheduler::get().target());
-    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _append_bias);
+    // Configure im2col
+    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, append_bias);
 
     // Configure matrix multiply
-    if(run_interleaved)
+    if(_is_interleaved_transposed)
     {
+        // Configure GEMMInterleave4x4. _input_interleaved_reshaped will be auto configured in the kernel
         _input_interleave_kernel.configure(&_input_im2col_reshaped, &_input_interleaved_reshaped);
+        _memory_group.manage(&_input_interleaved_reshaped);
+
+        // Configure GEMM
         configure_mm(&_input_interleaved_reshaped, weights, &_gemm_output);
         _input_interleaved_reshaped.allocator()->allocate();
     }
@@ -289,7 +267,6 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     }
 
     // Configure Col2Im
-    _output_col2im_kernel.set_target(CLScheduler::get().target());
     _output_col2im_kernel.configure(_is_quantized ? &_tmp_output : &_gemm_output, output, std::make_pair(conv_w, conv_h));
     if(_is_quantized)
     {
@@ -323,7 +300,7 @@ void CLConvolutionLayer::run()
     // Run im2col
     CLScheduler::get().enqueue(_input_im2col_kernel);
 
-    if(!_is_fully_connected_convolution && !_is_quantized)
+    if(_is_interleaved_transposed)
     {
         // Run interleave4x4
         CLScheduler::get().enqueue(_input_interleave_kernel);
