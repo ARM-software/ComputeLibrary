@@ -106,7 +106,7 @@ void GCGEMMMatrixMultiplyKernel::configure(const IGCTensor *input0, const IGCTen
 
         update_window_and_padding(win, input0_access, input1_access, output_access);
 
-        output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
     }
     else
     {

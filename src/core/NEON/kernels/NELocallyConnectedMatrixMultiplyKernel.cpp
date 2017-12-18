@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -333,7 +333,7 @@ void NELocallyConnectedMatrixMultiplyKernel::configure(const ITensor *input0, co
                               AccessWindowHorizontal(input1->info(), 0, num_elems_processed_per_iteration_x),
                               output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }

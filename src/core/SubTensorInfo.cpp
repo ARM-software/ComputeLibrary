@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,9 +46,7 @@ SubTensorInfo::SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coor
     }
 
     // Initialize valid region
-    Coordinates coordinates;
-    coordinates.set_num_dimensions(_tensor_shape.num_dimensions());
-    _valid_region = ValidRegion{ coordinates, _tensor_shape };
+    _valid_region = ValidRegion{ Coordinates(), _tensor_shape };
 }
 
 std::unique_ptr<ITensorInfo> SubTensorInfo::clone() const
