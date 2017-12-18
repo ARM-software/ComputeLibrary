@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ public:
      * @param[out] output Output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16/F32.
      * @param[in]  policy Policy to use to handle overflow.
      */
-    void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ConvertPolicy policy);
+    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticAddition
      *
      * @param[in] input1 First tensor input info. Data types supported: U8/QS8/QS16/S16/F16/F32.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -255,6 +255,25 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<float>, framework::
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLArithmeticAdditionFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticAdditionFP32Dataset),
                                                                                                               framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+template <typename T>
+using CLArithmeticAdditionBroadcastFixture = ArithmeticAdditionBroadcastValidationFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLArithmeticAdditionBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapesBroadcast(),
+                       ArithmeticAdditionFP32Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, CLArithmeticAdditionBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapesBroadcast(),
+                       ArithmeticAdditionFP32Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

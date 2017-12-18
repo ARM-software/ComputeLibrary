@@ -104,6 +104,14 @@ public:
         {
             _step = step;
         }
+        /** Set the dimension's end
+         *
+         * @param[in] end The new end
+         */
+        void set_end(int end)
+        {
+            _end = end;
+        }
 
     private:
         int _start; /**< Start of the dimension */
@@ -302,27 +310,64 @@ public:
         return slide_window_slice<4>(slice);
     }
 
+    /* Collapse the dimensions between @p first and @p last if possible.
+     *
+     * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
+     *
+     * @param[in]  full_window   Full window @p window has been created from.
+     * @param[in]  first         Start dimension into which the following are collapsed.
+     * @param[in]  last          End (exclusive) dimension to collapse.
+     * @param[out] has_collapsed (Optional) Whether the window was collapsed.
+     *
+     * @return Collapsed window.
+     */
+    Window collapse_if_possible(const Window &full_window, size_t first, size_t last, bool *has_collapsed = nullptr) const;
+
     /* Collapse the dimensions higher than @p first if possible.
      *
      * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
      *
-     * @param[in] full_window Full window @p window has been created from.
-     * @param[in] first       Dimensions into which the following are collapsed.
+     * @param[in]  full_window   Full window @p window has been created from.
+     * @param[in]  first         Start dimension into which the following are collapsed.
+     * @param[out] has_collapsed (Optional) Whether the window was collapsed.
      *
      * @return Collapsed window.
      */
-    Window collapse_if_possible(const Window &full_window, size_t first) const;
+    Window collapse_if_possible(const Window &full_window, size_t first, bool *has_collapsed = nullptr) const
+    {
+        return collapse_if_possible(full_window, first, Coordinates::num_max_dimensions, has_collapsed);
+    }
 
-    /* Collapse the dimensions higher than @p first.
+    /* Collapse the dimensions between @p first and @p last.
      *
      * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
      *
      * @param[in] full_window Full window @p window has been created from.
-     * @param[in] first       Dimensions into which the following are collapsed.
+     * @param[in] first       Start dimension into which the following are collapsed.
+     * @param[in] last        End (exclusive) dimension to collapse.
      *
      * @return Collapsed window if successful.
      */
-    Window collapse(const Window &full_window, size_t first) const;
+    Window collapse(const Window &full_window, size_t first, size_t last = Coordinates::num_max_dimensions) const;
+
+    /* Don't advance in the dimension where @p shape is less equal to 1.
+     *
+     * @param[in] shape A TensorShape.
+     *
+     * @return Broadcast window.
+     */
+    Window broadcast_if_dimension_le_one(const TensorShape &shape) const;
+
+    /* Don't advance in the dimension where shape of @p info is less equal to 1.
+     *
+     * @param[in] info An ITensorInfo.
+     *
+     * @return Broadcast window.
+     */
+    Window broadcast_if_dimension_le_one(const ITensorInfo &info) const
+    {
+        return broadcast_if_dimension_le_one(info.tensor_shape());
+    }
 
 private:
     /** First slice of the window

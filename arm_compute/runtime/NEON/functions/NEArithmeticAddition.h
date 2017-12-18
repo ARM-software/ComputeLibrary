@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ public:
      * @param[out] output Output tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
      * @param[in]  policy Policy to use to handle overflow.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
+    void configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAddition
      *
      * @param[in] input1 First tensor input. Data types supported: U8/QS8/QS16/S16/F16/F32

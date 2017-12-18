@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,27 +35,72 @@ namespace validation
 {
 namespace reference
 {
+namespace
+{
+template <typename T>
+T add(T src1, T src2, ConvertPolicy convert_policy)
+{
+    using intermediate_type = typename common_promoted_signed_type<T>::intermediate_type;
+
+    intermediate_type val = static_cast<intermediate_type>(src1) + static_cast<intermediate_type>(src2);
+
+    T result = (convert_policy == ConvertPolicy::SATURATE) ? saturate_cast<T>(val) : static_cast<T>(val);
+
+    return result;
+}
+
+template <size_t dim>
+struct BroadcastUnroll
+{
+    template <typename T>
+    static void unroll(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst,
+                       ConvertPolicy convert_policy, Coordinates &id_src1, Coordinates &id_src2, Coordinates &id_dst)
+    {
+        const bool src1_is_broadcast = (src1.shape()[dim - 1] != dst.shape()[dim - 1]);
+        const bool src2_is_broadcast = (src2.shape()[dim - 1] != dst.shape()[dim - 1]);
+
+        id_src1.set(dim - 1, 0);
+        id_src2.set(dim - 1, 0);
+        id_dst.set(dim - 1, 0);
+
+        for(size_t i = 0; i < dst.shape()[dim - 1]; ++i, ++id_dst[dim - 1])
+        {
+            BroadcastUnroll < dim - 1 >::unroll(src1, src2, dst, convert_policy, id_src1, id_src2, id_dst);
+
+            id_src1[dim - 1] += !src1_is_broadcast;
+            id_src2[dim - 1] += !src2_is_broadcast;
+        }
+    }
+};
+
+template <>
+struct BroadcastUnroll<0>
+{
+    template <typename T>
+    static void unroll(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst,
+                       ConvertPolicy convert_policy, Coordinates &id_src1, Coordinates &id_src2, Coordinates &id_dst)
+    {
+        dst[coord2index(dst.shape(), id_dst)] = add(src1[coord2index(src1.shape(), id_src1)], src2[coord2index(src2.shape(), id_src2)], convert_policy);
+    }
+};
+} // namespace
+
 template <typename T>
 SimpleTensor<T> arithmetic_addition(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy)
 {
-    SimpleTensor<T> result(src1.shape(), dst_data_type);
+    SimpleTensor<T> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
 
-    using intermediate_type = typename common_promoted_signed_type<T>::intermediate_type;
+    Coordinates id_src1, id_src2, id_dst;
 
-    for(int i = 0; i < src1.num_elements(); ++i)
-    {
-        intermediate_type val = static_cast<intermediate_type>(src1[i]) + static_cast<intermediate_type>(src2[i]);
-        result[i]             = (convert_policy == ConvertPolicy::SATURATE) ? saturate_cast<T>(val) : static_cast<T>(val);
-    }
+    BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(src1, src2, dst, convert_policy, id_src1, id_src2, id_dst);
 
-    return result;
+    return dst;
 }
 
 template SimpleTensor<uint8_t> arithmetic_addition(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<int16_t> arithmetic_addition(const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<int8_t> arithmetic_addition(const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
-template SimpleTensor<half> arithmetic_addition(const SimpleTensor<half> &src1, const SimpleTensor<half> &src2, DataType dst_data_type,
-                                                ConvertPolicy convert_policy);
+template SimpleTensor<half> arithmetic_addition(const SimpleTensor<half> &src1, const SimpleTensor<half> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<float> arithmetic_addition(const SimpleTensor<float> &src1, const SimpleTensor<float> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 } // namespace reference
 } // namespace validation

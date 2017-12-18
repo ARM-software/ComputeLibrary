@@ -117,6 +117,34 @@ public:
     }
 };
 
+/** Data set containing pairs of small tensor shapes that are broadcast compatible. */
+class SmallShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
+{
+public:
+    SmallShapesBroadcast()
+        : ZipDataset<ShapeDataset, ShapeDataset>(
+              ShapeDataset("Shape0",
+    {
+        TensorShape{ 9U, 9U },
+                     TensorShape{ 27U, 13U, 2U },
+                     TensorShape{ 128U, 1U, 5U, 3U },
+                     TensorShape{ 9U, 9U, 3U, 4U },
+                     TensorShape{ 27U, 13U, 2U, 4U },
+                     TensorShape{ 1U, 1U, 1U, 5U }
+    }),
+    ShapeDataset("Shape1",
+    {
+        TensorShape{ 9U, 1U, 2U },
+        TensorShape{ 1U, 13U, 2U },
+        TensorShape{ 128U, 64U, 1U, 3U },
+        TensorShape{ 9U, 1U, 3U },
+        TensorShape{ 1U },
+        TensorShape{ 9U, 9U, 3U, 5U }
+    }))
+    {
+    }
+};
+
 /** Data set containing medium tensor shapes. */
 class MediumShapes final : public ShapeDataset
 {
@@ -168,6 +196,30 @@ public:
                      // Batch size 4
                      TensorShape{ 799U, 595U, 1U, 4U },
     })
+    {
+    }
+};
+
+/** Data set containing pairs of large tensor shapes that are broadcast compatible. */
+class LargeShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
+{
+public:
+    LargeShapesBroadcast()
+        : ZipDataset<ShapeDataset, ShapeDataset>(
+              ShapeDataset("Shape0",
+    {
+        TensorShape{ 1921U, 541U },
+                     TensorShape{ 1U, 485U, 2U, 3U },
+                     TensorShape{ 4159U, 1U },
+                     TensorShape{ 799U }
+    }),
+    ShapeDataset("Shape1",
+    {
+        TensorShape{ 1921U, 1U, 2U },
+        TensorShape{ 641U, 1U, 2U, 3U },
+        TensorShape{ 1U, 127U, 25U },
+        TensorShape{ 799U, 595U, 1U, 4U }
+    }))
     {
     }
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,7 +76,7 @@ public:
      * @param[in]  constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      *
      */
-    void configure(const IPyramid *pyramid, const ITensor *input, ITensor *output, BorderMode border_mode, uint8_t constant_border_value);
+    void configure(const IPyramid *pyramid, ITensor *input, ITensor *output, BorderMode border_mode, uint8_t constant_border_value);
 
     // Inherited methods overridden:
     void run() override;

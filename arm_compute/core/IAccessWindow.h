@@ -139,8 +139,8 @@ public:
     }
 
     AccessWindowRectangle(const AccessWindowRectangle &) = delete;
+    AccessWindowRectangle(AccessWindowRectangle &&)      = delete;
     AccessWindowRectangle &operator=(const AccessWindowRectangle &) = delete;
-    AccessWindowRectangle(AccessWindowRectangle &&)                 = default;
     AccessWindowRectangle &operator=(AccessWindowRectangle &&) = default;
     ~AccessWindowRectangle()                                   = default;
 

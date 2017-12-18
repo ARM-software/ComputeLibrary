@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -123,6 +123,11 @@ inline void execute_window_loop(const Window &w, L &&lambda_function, Ts &&... i
 {
     w.validate();
 
+    for(unsigned int i = 0; i < Coordinates::num_max_dimensions; ++i)
+    {
+        ARM_COMPUTE_ERROR_ON(w[i].step() == 0);
+    }
+
     Coordinates id;
     ForEachDimension<Coordinates::num_max_dimensions>::unroll(w, id, std::forward<L>(lambda_function), std::forward<Ts>(iterators)...);
 }
@@ -136,9 +141,10 @@ inline Iterator::Iterator(const ITensor *tensor, const Window &win)
     : Iterator()
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
-    const ITensorInfo *info = tensor->info();
-    ARM_COMPUTE_ERROR_ON(info == nullptr);
-    const Strides &strides = info->strides_in_bytes();
+    ARM_COMPUTE_ERROR_ON(tensor->info() == nullptr);
+
+    const ITensorInfo *info    = tensor->info();
+    const Strides     &strides = info->strides_in_bytes();
 
     _ptr = tensor->buffer() + info->offset_first_element_in_bytes();
 

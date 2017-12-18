@@ -207,8 +207,8 @@ bool AccessWindowRectangle::update_padding_if_needed(const Window &window)
         return false;
     }
 
-    ARM_COMPUTE_ERROR_ON(window.x().step() * _scale_x == 0);
-    ARM_COMPUTE_ERROR_ON(window.y().step() * _scale_y == 0);
+    ARM_COMPUTE_ERROR_ON(_scale_x == 0);
+    ARM_COMPUTE_ERROR_ON(_scale_y == 0);
 
     const int min_x = window.x().start() * _scale_x + _x;
     const int max_x = (window.x().end() - window.x().step()) * _scale_x + _x + _width;

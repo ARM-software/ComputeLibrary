@@ -106,10 +106,10 @@ void CLPermuteKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
-    Window slice_in = window.first_slice_window_4D();
-    Window slice_out(slice_in);
+    Window slice_in = window.first_slice_window_4D().collapse(ICLKernel::window(), 2, 4);
 
     // Setup output slice
+    Window slice_out(slice_in);
     slice_out.set(Window::DimX, Window::Dimension(0, 0, 0));
     slice_out.set(Window::DimY, Window::Dimension(0, 0, 0));
     slice_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
@@ -117,12 +117,10 @@ void CLPermuteKernel::run(const Window &window, cl::CommandQueue &queue)
 
     do
     {
-        auto         collapsed_slice_in  = slice_in.collapse(ICLKernel::window(), 2);
-        auto         collapsed_slice_out = slice_out.collapse(ICLKernel::window(), 2);
-        unsigned int idx                 = 0;
-        add_4D_tensor_argument(idx, _input, collapsed_slice_in);
-        add_4D_tensor_argument(idx, _output, collapsed_slice_out);
-        enqueue(queue, *this, collapsed_slice_in);
+        unsigned int idx = 0;
+        add_4D_tensor_argument(idx, _input, slice_in);
+        add_4D_tensor_argument(idx, _output, slice_out);
+        enqueue(queue, *this, slice_in);
     }
     while(window.slide_window_slice_4D(slice_in) && window.slide_window_slice_4D(slice_out));
 }

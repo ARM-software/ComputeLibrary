@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,7 +82,7 @@ arm_compute::Status arm_compute::error_on_window_dimensions_gte(const char *func
 {
     for(unsigned int i = max_dim; i < arm_compute::Coordinates::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(win[i].start() != 0 || win[i].end() != win[i].step(),
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((win[i].start() != 0) || (win[i].end() != win[i].step()),
                                             function, file, line,
                                             "Maximum number of dimensions expected %u but dimension %u is not empty", max_dim, i);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,15 +41,14 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionValidationFixedPointFixture : public framework::Fixture
+class ArithmeticAdditionBroadcastValidationFixedPointFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fractional_bits)
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fractional_bits)
     {
-        _fractional_bits = fractional_bits;
-        _target          = compute_target(shape, data_type0, data_type1, output_data_type, convert_policy, fractional_bits);
-        _reference       = compute_reference(shape, data_type0, data_type1, output_data_type, convert_policy, fractional_bits);
+        _target    = compute_target(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, fractional_bits);
+        _reference = compute_reference(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, fractional_bits);
     }
 
 protected:
@@ -59,12 +58,13 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fixed_point_position)
+    TensorType compute_target(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
+                              int fixed_point_position)
     {
         // Create tensors
-        TensorType ref_src1 = create_tensor<TensorType>(shape, data_type0, 1, fixed_point_position);
-        TensorType ref_src2 = create_tensor<TensorType>(shape, data_type1, 1, fixed_point_position);
-        TensorType dst      = create_tensor<TensorType>(shape, output_data_type, 1, fixed_point_position);
+        TensorType ref_src1 = create_tensor<TensorType>(shape0, data_type0, 1, fixed_point_position);
+        TensorType ref_src2 = create_tensor<TensorType>(shape1, data_type1, 1, fixed_point_position);
+        TensorType dst      = create_tensor<TensorType>(TensorShape::broadcast_shape(shape0, shape1), output_data_type, 1, fixed_point_position);
 
         // Create and configure function
         FunctionType add;
@@ -93,11 +93,12 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fixed_point_position)
+    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
+                                      int fixed_point_position)
     {
         // Create reference
-        SimpleTensor<T> ref_src1{ shape, data_type0, 1, fixed_point_position };
-        SimpleTensor<T> ref_src2{ shape, data_type1, 1, fixed_point_position };
+        SimpleTensor<T> ref_src1{ shape0, data_type0, 1, fixed_point_position };
+        SimpleTensor<T> ref_src2{ shape1, data_type1, 1, fixed_point_position };
 
         // Fill reference
         fill(ref_src1, 0);
@@ -108,14 +109,36 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-    int             _fractional_bits{};
 };
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ArithmeticAdditionBroadcastValidationFixture : public ArithmeticAdditionBroadcastValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
+    {
+        ArithmeticAdditionBroadcastValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, 0);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ArithmeticAdditionValidationFixedPointFixture : public ArithmeticAdditionBroadcastValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fractional_bits)
+    {
+        ArithmeticAdditionBroadcastValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type0, data_type1, output_data_type, convert_policy, fractional_bits);
+    }
+};
+
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ArithmeticAdditionValidationFixture : public ArithmeticAdditionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
+    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
         ArithmeticAdditionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type0, data_type1, output_data_type, convert_policy, 0);
     }

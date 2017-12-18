@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLArithmeticAddition.h"
 
+#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
 #include "support/ToolchainSupport.h"
 
@@ -30,11 +31,21 @@
 
 using namespace arm_compute;
 
-void CLArithmeticAddition::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ConvertPolicy policy)
+void CLArithmeticAddition::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticAdditionKernel>();
     k->configure(input1, input2, output, policy);
     _kernel = std::move(k);
+
+    if(output->info()->dimension(0) > 1)
+    {
+        ICLTensor *broadcasted_info = (input1->info()->dimension(0) == 1) ? input1 : input2;
+
+        if(broadcasted_info->info()->dimension(0) == 1)
+        {
+            _border_handler.configure(broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+        }
+    }
 }
 
 Status CLArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)

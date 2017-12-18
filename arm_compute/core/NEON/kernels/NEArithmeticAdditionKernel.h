@@ -85,6 +85,7 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
+    BorderSize border_size() const override;
 
 private:
     /** Common signature for all the specialised add functions

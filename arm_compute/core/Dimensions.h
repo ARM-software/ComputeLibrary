@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -135,23 +135,24 @@ public:
      * @param[in] n     Number of dimensions to collapse into @p first.
      * @param[in] first Dimensions into which the following @p n are collapsed.
      */
-    void collapse(size_t n, size_t first = 0)
+    void collapse(const size_t n, const size_t first = 0)
     {
         ARM_COMPUTE_ERROR_ON(first + n > _id.size());
 
-        if(n == 0)
-        {
-            return;
-        }
+        const size_t last = std::min(_num_dimensions, first + n);
 
-        // Collapse dimensions into the first
-        _id[first] = std::accumulate(_id.cbegin() + first, _id.cbegin() + first + n, 1, std::multiplies<T>());
-        // Shift the remaining dimensions down
-        std::copy(_id.begin() + first + n, _id.end(), _id.begin() + first + 1);
-        // Reduce the number of dimensions
-        _num_dimensions -= std::min(n, _num_dimensions) - 1;
-        // Fill the now empty dimensions with zero
-        std::fill(_id.begin() + _num_dimensions, _id.end(), 0);
+        if(last > (first + 1))
+        {
+            // Collapse dimensions into the first
+            _id[first] = std::accumulate(&_id[first], &_id[last], 1, std::multiplies<T>());
+            // Shift the remaining dimensions down
+            std::copy(&_id[last], &_id[_num_dimensions], &_id[first + 1]);
+            // Reduce the number of dimensions
+            const size_t old_num_dimensions = _num_dimensions;
+            _num_dimensions -= last - first - 1;
+            // Fill the now empty dimensions with zero
+            std::fill(&_id[_num_dimensions], &_id[old_num_dimensions], 0);
+        }
     }
 
     /** Collapse dimensions starting from a given point
