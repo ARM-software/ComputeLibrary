@@ -80,17 +80,12 @@ struct IncrementIterators
     template <typename T, typename... Ts>
     static void unroll(T &&it, Ts &&... iterators)
     {
-        it.increment(dimension);
-        IncrementIterators<dimension>::unroll<Ts...>(std::forward<Ts>(iterators)...);
+        auto increment = [](T && it)
+        {
+            it.increment(dimension);
+        };
+        utility::for_each(increment, std::forward<T>(it), std::forward<Ts>(iterators)...);
     }
-
-    template <typename T>
-    static void unroll(T &&it)
-    {
-        it.increment(dimension);
-        // End of recursion
-    }
-
     static void unroll()
     {
         // End of recursion

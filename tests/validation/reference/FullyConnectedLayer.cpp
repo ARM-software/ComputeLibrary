@@ -138,7 +138,7 @@ void vector_matrix_multiply(const SimpleTensor<uint8_t> &src, const SimpleTensor
 
         acc = asymm_rounding_divide_by_pow2(asymm_int_mult(acc, output_multiplier), output_shift);
         acc += output_offset;
-        acc = clamp<int32_t>(acc, 0, 255);
+        acc = utility::clamp<int32_t>(acc, 0, 255);
 
         // Store the result
         dst_ptr[y] = static_cast<uint8_t>(acc);

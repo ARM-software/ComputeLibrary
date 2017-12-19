@@ -22,10 +22,9 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/Helpers.h"
-
 #include "Scale.h"
 #include "Utils.h"
+#include "arm_compute/core/utils/misc/utility.h"
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute
@@ -119,8 +118,8 @@ SimpleTensor<T> scale(const SimpleTensor<T> &in, float scale_x, float scale_y, I
                     }
                     else if(border_mode == BorderMode::REPLICATE)
                     {
-                        id.set(0, clamp(static_cast<int>(x_src), 0, width - 1));
-                        id.set(1, clamp(static_cast<int>(y_src), 0, height - 1));
+                        id.set(0, utility::clamp<int>(x_src, 0, width - 1));
+                        id.set(1, utility::clamp<int>(y_src, 0, height - 1));
                         out[element_idx] = in[coord2index(in.shape(), id)];
                     }
                 }

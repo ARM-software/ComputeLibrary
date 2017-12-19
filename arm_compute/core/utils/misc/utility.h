@@ -67,6 +67,62 @@ std::array<typename std::iterator_traits<Iterator>::value_type, N> make_array(It
 {
     return detail::make_array(first, index_sequence_t<N> {});
 }
-} // namespace misc
+
+/** Performs clamping among a lower and upper value.
+ *
+ * @param[in] n     Value to clamp.
+ * @param[in] lower Lower threshold.
+ * @param[in] upper Upper threshold.
+ *
+ *  @return Clamped value.
+ */
+template <typename T>
+inline T clamp(const T &n, const T &lower, const T &upper)
+{
+    return std::max(lower, std::min(n, upper));
+}
+
+/** Base case of for_each. Does nothing. */
+template <typename F>
+inline void for_each(F &&)
+{
+}
+
+/** Call the function for each of the arguments
+ *
+ * @param[in] func Function to be called
+ * @param[in] arg  Argument passed to the function
+ * @param[in] args Remaining arguments
+ */
+template <typename F, typename T, typename... Ts>
+inline void for_each(F &&func, T &&arg, Ts &&... args)
+{
+    func(std::forward<T>(arg));
+    for_each(std::forward<F>(func), std::forward<Ts>(args)...);
+}
+
+/** Base case of foldl.
+ *
+ * @return value.
+ */
+template <typename F, typename T>
+inline T &&foldl(F &&, T &&value)
+{
+    return std::forward<T>(value);
+}
+
+/** Fold left.
+ *
+ * @param[in] func    Function to be called
+ * @param[in] initial Initial value
+ * @param[in] value   Argument passed to the function
+ * @param[in] values  Remaining arguments
+ */
+template <typename F, typename T, typename U, typename... Us>
+inline auto foldl(F &&func, T &&initial, U &&value, Us &&... values) -> decltype(func(std::forward<T>(initial), std::forward<U>(value)))
+{
+    return foldl(std::forward<F>(func), func(std::forward<T>(initial), std::forward<U>(value)), std::forward<Us>(values)...);
+}
+} // namespace utility
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_MISC_UTILITY_H__ */

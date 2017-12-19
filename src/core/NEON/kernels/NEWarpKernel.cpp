@@ -287,10 +287,10 @@ void NEWarpAffineKernel<interpolation>::warp_constant(const Window &window)
                     break;
                 case InterpolationPolicy::BILINEAR:
                 {
-                    const auto xi   = clamp<int>(std::floor(x0), min_x - 1, max_x);
-                    const auto yi   = clamp<int>(std::floor(y0), min_y - 1, max_y);
-                    const auto xi_1 = clamp<int>(std::floor(x0 + 1), min_x - 1, max_x);
-                    const auto yi_1 = clamp<int>(std::floor(y0 + 1), min_y - 1, max_y);
+                    const auto xi   = utility::clamp<int>(std::floor(x0), min_x - 1, max_x);
+                    const auto yi   = utility::clamp<int>(std::floor(y0), min_y - 1, max_y);
+                    const auto xi_1 = utility::clamp<int>(std::floor(x0 + 1), min_x - 1, max_x);
+                    const auto yi_1 = utility::clamp<int>(std::floor(y0 + 1), min_y - 1, max_y);
 
                     const float dx  = x0 - std::floor(x0);
                     const float dy  = y0 - std::floor(y0);
@@ -396,8 +396,8 @@ void NEWarpAffineKernel<interpolation>::warp_replicate(const Window &window)
         else
         {
             // Clamp coordinates
-            const auto xi = clamp<int>(std::floor(x0), min_x, max_x - 1);
-            const auto yi = clamp<int>(std::floor(y0), min_y, max_y - 1);
+            const auto xi = utility::clamp<int>(std::floor(x0), min_x, max_x - 1);
+            const auto yi = utility::clamp<int>(std::floor(y0), min_y, max_y - 1);
             switch(interpolation)
             {
                 case InterpolationPolicy::NEAREST_NEIGHBOR:
@@ -405,8 +405,8 @@ void NEWarpAffineKernel<interpolation>::warp_replicate(const Window &window)
                     break;
                 case InterpolationPolicy::BILINEAR:
                 {
-                    const auto xi_1 = clamp<int>(std::floor(x0 + 1), min_x, max_x - 1);
-                    const auto yi_1 = clamp<int>(std::floor(y0 + 1), min_y, max_y - 1);
+                    const auto xi_1 = utility::clamp<int>(std::floor(x0 + 1), min_x, max_x - 1);
+                    const auto yi_1 = utility::clamp<int>(std::floor(y0 + 1), min_y, max_y - 1);
 
                     const float dx  = x0 - std::floor(x0);
                     const float dy  = y0 - std::floor(y0);
@@ -636,10 +636,10 @@ void NEWarpPerspectiveKernel<interpolation>::warp_constant(const Window &window)
                     break;
                 case InterpolationPolicy::BILINEAR:
                 {
-                    const auto xi   = clamp<int>(std::floor(xn), min_x - 1, max_x);
-                    const auto yi   = clamp<int>(std::floor(yn), min_y - 1, max_y);
-                    const auto xi_1 = clamp<int>(std::floor(xn + 1), min_x - 1, max_x);
-                    const auto yi_1 = clamp<int>(std::floor(yn + 1), min_y - 1, max_y);
+                    const auto xi   = utility::clamp<int>(std::floor(xn), min_x - 1, max_x);
+                    const auto yi   = utility::clamp<int>(std::floor(yn), min_y - 1, max_y);
+                    const auto xi_1 = utility::clamp<int>(std::floor(xn + 1), min_x - 1, max_x);
+                    const auto yi_1 = utility::clamp<int>(std::floor(yn + 1), min_y - 1, max_y);
 
                     const float dx  = xn - std::floor(xn);
                     const float dy  = yn - std::floor(yn);
@@ -762,8 +762,8 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
         else
         {
             // Clamp coordinates
-            const auto xi = clamp<int>(std::floor(xn), min_x, max_x - 1);
-            const auto yi = clamp<int>(std::floor(yn), min_y, max_y - 1);
+            const auto xi = utility::clamp<int>(std::floor(xn), min_x, max_x - 1);
+            const auto yi = utility::clamp<int>(std::floor(yn), min_y, max_y - 1);
             switch(interpolation)
             {
                 case InterpolationPolicy::NEAREST_NEIGHBOR:
@@ -771,8 +771,8 @@ void NEWarpPerspectiveKernel<interpolation>::warp_replicate(const Window &window
                     break;
                 case InterpolationPolicy::BILINEAR:
                 {
-                    const auto xi_1 = clamp<int>(std::floor(xn + 1), min_x, max_x - 1);
-                    const auto yi_1 = clamp<int>(std::floor(yn + 1), min_y, max_y - 1);
+                    const auto xi_1 = utility::clamp<int>(std::floor(xn + 1), min_x, max_x - 1);
+                    const auto yi_1 = utility::clamp<int>(std::floor(yn + 1), min_y, max_y - 1);
 
                     const float dx  = xn - std::floor(xn);
                     const float dy  = yn - std::floor(yn);
