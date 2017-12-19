@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -148,6 +148,9 @@ __kernel void combine_gradients_L2(
     vstore4(convert_uchar4_sat_rte(p), 0, angle.ptr);
 }
 
+#define EDGE 255
+#define NO_EDGE 0
+
 /** Array that holds the relative coordinates offset for the neighbouring pixels.
  */
 __constant short4 neighbours_coords[] =
@@ -203,6 +206,7 @@ __kernel void suppress_non_maximum(
     DATA_TYPE_IN gradient = *((__global DATA_TYPE_IN *)grad.ptr);
     uchar an              = convert_ushort(*angle.ptr);
 
+    // Early return if not greater than lower threshold
     if(gradient <= lower_thr)
     {
         return;
@@ -224,7 +228,6 @@ __kernel void suppress_non_maximum(
     }
 }
 
-#define EDGE 255
 #define hysteresis_local_stack_L1 8  // The size of level 1 stack. This has to agree with the host side
 #define hysteresis_local_stack_L2 16 // The size of level 2 stack, adjust this can impact the match rate with VX implementation
 
@@ -333,7 +336,7 @@ kernel void hysteresis(
     // If less than upper threshold set to NO_EDGE and return
     if(val <= up_thr)
     {
-        *offset(&out, x, y) = 0;
+        *offset(&out, x, y) = NO_EDGE;
         return;
     }
 
@@ -372,7 +375,7 @@ kernel void hysteresis(
         // Get direction pixel indices
         int N = max(y - 1, 0), S = min(y + 1, height - 2), W = max(x - 1, 0), E = min(x + 1, width - 2);
 
-        // Check 8 pixels around for week edges where low_thr < val <= up_thr
+        // Check 8 pixels around for weak edges where low_thr < val <= up_thr
         x_tmp = vload4(0, (__global DATA_TYPE_IN *)offset(&src, W, N));
         v_tmp = vload4(0, (__global uint *)offset(&visited, W, N));
         check_pixel(((x_tmp.s0 <= low_thr) || v_tmp.s0 || (x_tmp.s0 > up_thr)), W, N, x, y); // NW

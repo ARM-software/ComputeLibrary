@@ -131,6 +131,22 @@ HarrisCornersParameters harris_corners_parameters()
     return params;
 }
 
+CannyEdgeParameters canny_edge_parameters()
+{
+    CannyEdgeParameters params;
+
+    std::mt19937                           gen(library->seed());
+    std::uniform_int_distribution<uint8_t> int_dist(0, 255);
+    std::uniform_int_distribution<uint8_t> threshold_dist(1, 255);
+
+    params.constant_border_value = int_dist(gen);
+    params.upper_thresh          = threshold_dist(gen); // upper_threshold >= 1
+    threshold_dist               = std::uniform_int_distribution<uint8_t>(0, params.upper_thresh);
+    params.lower_thresh          = threshold_dist(gen);
+
+    return params;
+}
+
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
 {
     const QuantizationInfo &quantization_info = src.quantization_info();

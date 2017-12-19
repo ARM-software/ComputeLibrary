@@ -168,6 +168,17 @@ struct HarrisCornersParameters
 /** Generate parameters for Harris Corners algorithm. */
 HarrisCornersParameters harris_corners_parameters();
 
+/** Parameters of Canny edge algorithm. */
+struct CannyEdgeParameters
+{
+    int32_t upper_thresh{ 255 };
+    int32_t lower_thresh{ 0 };
+    uint8_t constant_border_value{ 0 };
+};
+
+/** Generate parameters for Canny edge algorithm. */
+CannyEdgeParameters canny_edge_parameters();
+
 /** Helper function to fill the Lut random by a ILutAccessor.
  *
  * @param[in,out] table Accessor at the Lut.

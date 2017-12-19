@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,10 @@ class CLCannyEdge : public IFunction
 public:
     /** Constructor */
     CLCannyEdge(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLCannyEdge(const CLCannyEdge &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLCannyEdge &operator=(const CLCannyEdge &) = delete;
     /** Initialise the function's source, destination, thresholds, gradient size, normalization type and border mode.
      *
      * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for border_mode != UNDEFINED)
@@ -63,8 +67,8 @@ public:
      * @param[in]     border_mode           Border mode to use for the convolution.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
-    void configure(ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type,
-                   BorderMode border_mode, uint8_t constant_border_value = 0);
+    void configure(ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode,
+                   uint8_t constant_border_value = 0);
 
     // Inherited methods overridden:
     virtual void run() override;
@@ -82,6 +86,7 @@ private:
     CLImage                       _phase;                                           /**< Source tensor - Phase. */
     CLImage                       _nonmax;                                          /**< Source tensor - Non-Maxima suppressed. */
     CLImage                       _visited, _recorded, _l1_list_counter, _l1_stack; /**< Temporary tensors */
+    ICLTensor                    *_output;                                          /**< Output tensor provided by the user. */
 };
 }
 
