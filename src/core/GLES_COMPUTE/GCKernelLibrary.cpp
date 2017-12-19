@@ -221,6 +221,7 @@ const std::map<std::string, std::string> GCKernelLibrary::_shader_program_map =
     { "concatenate_depth", "concatenate.cs" },
     { "dropout", "dropout.cs" },
     { "normalize_planar_yuv_layer", "normalize_planar_yuv_layer.cs" },
+    { "scale_nearest_neighbour", "scale.cs" },
 };
 
 const std::map<std::string, std::string> GCKernelLibrary::_program_source_map =
@@ -293,6 +294,10 @@ const std::map<std::string, std::string> GCKernelLibrary::_program_source_map =
     {
         "normalize_planar_yuv_layer.cs",
 #include "./cs_shaders/normalize_planar_yuv_layer.csembed"
+    },
+    {
+        "scale.cs",
+#include "./cs_shaders/scale.csembed"
     },
 #endif /* EMBEDDED_KERNELS */
 };
