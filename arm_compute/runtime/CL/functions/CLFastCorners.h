@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,7 +69,7 @@ public:
      * @param[in]     border_mode           Strategy to use for borders.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
-    void configure(const ICLImage *input, float threshold, bool nonmax_suppression, CLKeyPointArray *corners, unsigned int *num_corners,
+    void configure(const ICLImage *input, float threshold, bool nonmax_suppression, ICLKeyPointArray *corners, unsigned int *num_corners,
                    BorderMode border_mode, uint8_t constant_border_value = 0);
     // Inherited methods overridden:
     void run() override;
@@ -85,7 +85,7 @@ private:
     bool                      _non_max;
     unsigned int             *_num_corners;
     cl::Buffer                _num_buffer;
-    CLKeyPointArray          *_corners;
+    ICLKeyPointArray         *_corners;
     uint8_t                   _constant_border_value;
 };
 }
