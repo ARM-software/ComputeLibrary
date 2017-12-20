@@ -21,64 +21,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYERBIASACCUMULATEKERNEL_H__
-#define __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYERBIASACCUMULATEKERNEL_H__
+#ifndef __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYEROUTPUTSTAGEKERNEL_H__
+#define __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYEROUTPUTSTAGEKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
 namespace arm_compute
 {
 class ITensor;
-/** NEON kernel to accumulate the biases to each element of the input tensor
+/** NEON kernel to accumulate the biases, if provided, or downscale in case of quantized input.
  *
  * @note We assume bias to be shared
  */
-class NEDirectConvolutionLayerBiasAccumulateKernel : public INEKernel
+class NEDirectConvolutionLayerOutputStageKernel : public INEKernel
 {
 public:
     /** Default constructor */
-    NEDirectConvolutionLayerBiasAccumulateKernel();
+    NEDirectConvolutionLayerOutputStageKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDirectConvolutionLayerBiasAccumulateKernel(const NEDirectConvolutionLayerBiasAccumulateKernel &) = delete;
+    NEDirectConvolutionLayerOutputStageKernel(const NEDirectConvolutionLayerOutputStageKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDirectConvolutionLayerBiasAccumulateKernel &operator=(const NEDirectConvolutionLayerBiasAccumulateKernel &) = delete;
+    NEDirectConvolutionLayerOutputStageKernel &operator=(const NEDirectConvolutionLayerOutputStageKernel &) = delete;
     /** Allow instances of this class to be moved */
-    NEDirectConvolutionLayerBiasAccumulateKernel(NEDirectConvolutionLayerBiasAccumulateKernel &&) = default;
+    NEDirectConvolutionLayerOutputStageKernel(NEDirectConvolutionLayerOutputStageKernel &&) = default;
     /** Allow instances of this class to be moved */
-    NEDirectConvolutionLayerBiasAccumulateKernel &operator=(NEDirectConvolutionLayerBiasAccumulateKernel &&) = default;
+    NEDirectConvolutionLayerOutputStageKernel &operator=(NEDirectConvolutionLayerOutputStageKernel &&) = default;
     /** Default destructor */
-    ~NEDirectConvolutionLayerBiasAccumulateKernel() = default;
+    ~NEDirectConvolutionLayerOutputStageKernel() = default;
     /** Set the accumulate buffer and the biases of the kernel.
      *
      * @param[in, out] input  Input to add the bias to. If @p output is not specified then accumulation is done in-place.
-     *                        Data type supported: QS8/QS16/F16/F32
-     * @param[in]      bias   The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
+     *                        Data type supported: QS16/QS32/F16/F32
+     * @param[in]      bias   (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
      * @param[out]     output (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
-     *                         Data type supported: Same as @p input
+     *                         Data type supported: QS8/QS16/F16/F32
      */
-    void configure(ITensor *input, const ITensor *bias, ITensor *output = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEDirectConvolutionLayerBiasAccumulateKernel
+    void configure(ITensor *input, const ITensor *bias = nullptr, ITensor *output = nullptr);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDirectConvolutionLayerOutputStageKernel
      *
      * @param[in] input  Input to add the bias to. If @p output is not specified then accumulation is done in-place.
-     *                   Data type supported: QS8/QS16/F16/F32
-     * @param[in] bias   The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
+     *                   Data type supported: QS16/QS32/F16/F32
+     * @param[in] bias   (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
      * @param[in] output (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
-     *                         Data type supported: Same as @p input
+     *                         Data type supported: QS8/QS16/F16/F32
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output = nullptr);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias = nullptr, const ITensorInfo *output = nullptr);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    using BiasAccumulateKernel = void(ITensor *input, const ITensor *bias, const Window window, ITensor *output);
+    using OutputStageKernel = void(ITensor *input, const ITensor *bias, const Window window, ITensor *output);
 
 private:
-    BiasAccumulateKernel *_func;
-    ITensor              *_input;
-    const ITensor        *_bias;
-    ITensor              *_output;
+    OutputStageKernel *_func;
+    ITensor           *_input;
+    const ITensor     *_bias;
+    ITensor           *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYERBIASACCUMULATEKERNEL_H__ */
+#endif /*__ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYEROUTPUTSTAGEKERNEL_H__ */

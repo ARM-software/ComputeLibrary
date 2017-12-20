@@ -58,7 +58,7 @@ public:
      *                       The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                       Data type supported:Same as @p input.
      * @param[out] output    Output tensor.
-     *                       The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
+     *                       The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: QS16/QS32/F16/F32
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      */
     void configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info);
@@ -70,7 +70,7 @@ public:
      *                      The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                      Data type supported:Same as @p input.
      * @param[in] output    Output tensor.
-     *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
+     *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: QS16/QS32/F16/F32
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
      *
      * @return a status

@@ -28,7 +28,7 @@
 #include "arm_compute/core/NEON/kernels/NEDepthwiseIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseVectorToTensorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseWeightsReshapeKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerBiasAccumulateKernel.h"
+#include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/Types.h"
@@ -67,10 +67,10 @@ public:
     void run() override;
 
 private:
-    NEDepthwiseConvolutionLayer3x3Kernel         _kernel;
-    NEDirectConvolutionLayerBiasAccumulateKernel _bias_kernel;
-    NEFillBorderKernel                           _border_handler;
-    bool                                         _has_bias;
+    NEDepthwiseConvolutionLayer3x3Kernel      _kernel;
+    NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
+    NEFillBorderKernel                        _border_handler;
+    bool                                      _has_bias;
 };
 
 /** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernels:

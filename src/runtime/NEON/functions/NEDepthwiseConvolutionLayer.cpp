@@ -32,7 +32,7 @@
 using namespace arm_compute;
 
 NEDepthwiseConvolutionLayer3x3::NEDepthwiseConvolutionLayer3x3()
-    : _kernel(), _bias_kernel(), _border_handler(), _has_bias(false)
+    : _kernel(), _output_stage_kernel(), _border_handler(), _has_bias(false)
 {
 }
 
@@ -46,7 +46,7 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
     _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
     if(biases != nullptr)
     {
-        _bias_kernel.configure(output, biases);
+        _output_stage_kernel.configure(output, biases);
         _has_bias = true;
     }
 }
@@ -57,7 +57,7 @@ void NEDepthwiseConvolutionLayer3x3::run()
     NEScheduler::get().schedule(&_kernel, Window::DimX);
     if(_has_bias)
     {
-        NEScheduler::get().schedule(&_bias_kernel, Window::DimX);
+        NEScheduler::get().schedule(&_output_stage_kernel, Window::DimX);
     }
 }
 
