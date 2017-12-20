@@ -476,6 +476,24 @@ inline T create_tensor(const TensorShape &shape, DataType data_type, int num_cha
     return tensor;
 }
 
+/** Create and initialize a tensor of the given type.
+ *
+ * @param[in] shape  Tensor shape.
+ * @param[in] format Format type.
+ *
+ * @return Initialized tensor of given type.
+ */
+template <typename T>
+inline T create_tensor(const TensorShape &shape, Format format)
+{
+    TensorInfo info(shape, format);
+
+    T tensor;
+    tensor.allocator()->init(info);
+
+    return tensor;
+}
+
 /** Create a vector of random ROIs.
  *
  * @param[in] shape     The shape of the input tensor.

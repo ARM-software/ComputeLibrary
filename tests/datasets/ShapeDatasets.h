@@ -337,6 +337,35 @@ public:
     }
 };
 
+/** Data set containing 2D tensor shapes relative to an image size. */
+class SmallImageShapes final : public ShapeDataset
+{
+public:
+    SmallImageShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 640U, 480U },
+                     TensorShape{ 800U, 600U },
+                     TensorShape{ 1200U, 800U }
+    })
+    {
+    }
+};
+
+/** Data set containing 2D tensor shapes relative to an image size. */
+class LargeImageShapes final : public ShapeDataset
+{
+public:
+    LargeImageShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1920U, 1080U },
+                     TensorShape{ 2560U, 1536U },
+                     TensorShape{ 3584U, 2048U }
+    })
+    {
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
