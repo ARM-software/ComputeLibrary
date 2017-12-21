@@ -6,7 +6,7 @@ import re
 import sys
 
 def get_list_includes():
-    return "opengles-3.1/include opengles-3.1/mali_include include . 3rdparty/include kernels computer_vision".split()
+    return "include/linux include . 3rdparty/include kernels computer_vision".split()
 
 def get_list_flags( filename, arch):
     assert arch in ["armv7", "aarch64"]
