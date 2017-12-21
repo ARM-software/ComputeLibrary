@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -184,14 +184,17 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
     // Set weights and biases info
     if(_weights.tensor() == nullptr)
     {
-        _weights.set_info(TensorInfo(TensorShape(_conv_width, _conv_height, in->info()->dimension(2) / _num_groups, _ofm),
+        TensorInfo info = TensorInfo(TensorShape(_conv_width, _conv_height, in->info()->dimension(2) / _num_groups, _ofm),
                                      in->info()->num_channels(),
                                      in->info()->data_type(),
-                                     in->info()->fixed_point_position()));
+                                     in->info()->fixed_point_position());
+        info.set_quantization_info(_weights_quant_info);
+        _weights.set_info(std::move(info));
     }
     if(_biases.has_accessor() && _biases.tensor() == nullptr)
     {
-        _biases.set_info(TensorInfo(TensorShape(_ofm), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
+        DataType dt = in->info()->data_type();
+        _biases.set_info(TensorInfo(TensorShape(_ofm), in->info()->num_channels(), is_data_type_quantized_asymmetric(dt) ? DataType::S32 : dt, in->info()->fixed_point_position()));
     }
 
     std::unique_ptr<arm_compute::IFunction> func;
@@ -213,7 +216,8 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
     TensorShape output_shape = calculate_convolution_layer_output_shape(in->info()->tensor_shape(), _weights.info().tensor_shape(), _conv_info);
 
     // Output auto inizialitation if not yet initialized
-    arm_compute::auto_init_if_empty(*out->info(), output_shape, 1, in->info()->data_type(), in->info()->fixed_point_position());
+    arm_compute::auto_init_if_empty(*out->info(), output_shape, 1, in->info()->data_type(), in->info()->fixed_point_position(),
+                                    (_out_quant_info.empty()) ? in->info()->quantization_info() : _out_quant_info);
 
     // Create appropriate convolution function
     if(_num_groups == 1)

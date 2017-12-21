@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,24 +44,28 @@ class ConvolutionLayer final : public INode
 public:
     /** Default Constructor
      *
-     * @param[in] conv_width   Convolution width
-     * @param[in] conv_height  Convolution height
-     * @param[in] ofm          Output feature map
-     * @param[in] weights      Weights of the convolution layer
-     * @param[in] biases       Bias of the convolution layer
-     * @param[in] conv_info    Convolution information
-     * @param[in] num_groups   (Optional) Number of groups, default = 1
-     * @param[in] weights_info (Optional) Weights information
+     * @param[in] conv_width         Convolution width
+     * @param[in] conv_height        Convolution height
+     * @param[in] ofm                Output feature map
+     * @param[in] weights            Weights of the convolution layer
+     * @param[in] biases             Bias of the convolution layer
+     * @param[in] conv_info          Convolution information
+     * @param[in] num_groups         (Optional) Number of groups, default = 1
+     * @param[in] weights_info       (Optional) Weights information
+     * @param[in] weights_quant_info (Optional) Weights quantization information
+     * @param[in] out_quant_info     (Optional) Output quantization info
      */
     template <typename AccessorTypeWeights, typename AccessorTypeBiases>
-    ConvolutionLayer(unsigned int          conv_width,
-                     unsigned int          conv_height,
-                     unsigned int          ofm,
+    ConvolutionLayer(unsigned int           conv_width,
+                     unsigned int           conv_height,
+                     unsigned int           ofm,
                      AccessorTypeWeights &&weights,
-                     AccessorTypeBiases &&biases,
-                     const PadStrideInfo   conv_info,
-                     unsigned int          num_groups   = 1,
-                     const WeightsInfo     weights_info = WeightsInfo())
+                     AccessorTypeBiases   &&biases,
+                     const PadStrideInfo    conv_info,
+                     unsigned int           num_groups         = 1,
+                     const WeightsInfo      weights_info       = WeightsInfo(),
+                     const QuantizationInfo weights_quant_info = QuantizationInfo(),
+                     const QuantizationInfo out_quant_info     = QuantizationInfo())
         : _conv_width(conv_width),
           _conv_height(conv_height),
           _ofm(ofm),
@@ -70,6 +74,8 @@ public:
           _conv_info(std::move(conv_info)),
           _num_groups(num_groups),
           _weights_info(std::move(weights_info)),
+          _weights_quant_info(std::move(weights_quant_info)),
+          _out_quant_info(std::move(out_quant_info)),
           _is(nullptr),
           _os(nullptr),
           _ws(nullptr),
@@ -101,14 +107,16 @@ private:
     std::unique_ptr<arm_compute::IFunction> instantiate_grouped_convolution(ITensor *input, ITensor *output, ConvolutionMethodHint conv_method_hint);
 
 private:
-    unsigned int        _conv_width;   /**< Convolution width */
-    unsigned int        _conv_height;  /**< Convolution height */
-    unsigned int        _ofm;          /**< Output feature maps */
-    Tensor              _weights;      /**< Weights tensor */
-    Tensor              _biases;       /**< Biases tensor */
-    const PadStrideInfo _conv_info;    /**< Convolution layer information */
-    unsigned int        _num_groups;   /**< Number of groups */
-    const WeightsInfo   _weights_info; /**< Convolution layer weights information */
+    unsigned int           _conv_width;         /**< Convolution width */
+    unsigned int           _conv_height;        /**< Convolution height */
+    unsigned int           _ofm;                /**< Output feature maps */
+    Tensor                 _weights;            /**< Weights tensor */
+    Tensor                 _biases;             /**< Biases tensor */
+    const PadStrideInfo    _conv_info;          /**< Convolution layer information */
+    unsigned int           _num_groups;         /**< Number of groups */
+    const WeightsInfo      _weights_info;       /**< Convolution layer weights information */
+    const QuantizationInfo _weights_quant_info; /**< Output quantization information */
+    const QuantizationInfo _out_quant_info;     /**< Output quantization information */
 
     std::unique_ptr<SubTensor[]> _is; /**< Input tensor sub-tensors used for grouped convolution */
     std::unique_ptr<SubTensor[]> _os; /**< Output tensor sub-tensors used for grouped convolution */

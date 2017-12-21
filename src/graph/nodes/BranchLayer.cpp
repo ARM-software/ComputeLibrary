@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,7 @@ void depth_concatenate_output_info(ITensorInfo *info, ITensorInfo *sub_tensor_in
         arm_compute::auto_init_if_empty(*info,
                                         sub_tensor_info->tensor_shape(),
                                         sub_tensor_info->num_channels(),
-                                        sub_tensor_info->data_type(), sub_tensor_info->fixed_point_position());
+                                        sub_tensor_info->data_type(), sub_tensor_info->fixed_point_position(), sub_tensor_info->quantization_info());
         info->set_valid_region(sub_tensor_info->valid_region());
     }
     else
@@ -170,7 +170,8 @@ std::unique_ptr<arm_compute::IFunction> BranchLayer::instantiate_node(GraphConte
                                     out_info.tensor_shape(),
                                     out_info.num_channels(),
                                     out_info.data_type(),
-                                    out_info.fixed_point_position());
+                                    out_info.fixed_point_position(),
+                                    out_info.quantization_info());
 
     return std::move(func);
 }

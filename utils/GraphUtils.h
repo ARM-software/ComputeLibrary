@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -128,6 +128,9 @@ public:
     bool access_tensor(ITensor &tensor) override;
 
 private:
+    template <typename T>
+    void access_predictions_tensor(ITensor &tensor);
+
     std::vector<std::string> _labels;
     std::ostream            &_output_stream;
     size_t                   _top_n;

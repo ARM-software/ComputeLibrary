@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -138,6 +138,7 @@ inline std::string get_typestring(DataType data_type)
     switch(data_type)
     {
         case DataType::U8:
+        case DataType::QASYMM8:
             return no_endianness + "u" + support::cpp11::to_string(sizeof(uint8_t));
         case DataType::S8:
             return no_endianness + "i" + support::cpp11::to_string(sizeof(int8_t));

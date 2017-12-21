@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -140,16 +140,14 @@ TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path,
     }
 }
 
-bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
+template <typename T>
+void TopNPredictionsAccessor::access_predictions_tensor(ITensor &tensor)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON(_labels.size() != tensor.info()->dimension(0));
-
     // Get the predicted class
-    std::vector<float>  classes_prob;
+    std::vector<T>      classes_prob;
     std::vector<size_t> index;
 
-    const auto   output_net  = reinterpret_cast<float *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
+    const auto   output_net  = reinterpret_cast<T *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
     const size_t num_classes = tensor.info()->dimension(0);
 
     classes_prob.resize(num_classes);
@@ -170,9 +168,27 @@ bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
     for(size_t i = 0; i < _top_n; ++i)
     {
         _output_stream << std::fixed << std::setprecision(4)
-                       << classes_prob[index.at(i)]
+                       << +classes_prob[index.at(i)]
                        << " - [id = " << index.at(i) << "]"
                        << ", " << _labels[index.at(i)] << std::endl;
+    }
+}
+
+bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32, DataType::QASYMM8);
+    ARM_COMPUTE_ERROR_ON(_labels.size() != tensor.info()->dimension(0));
+
+    switch(tensor.info()->data_type())
+    {
+        case DataType::QASYMM8:
+            access_predictions_tensor<uint8_t>(tensor);
+            break;
+        case DataType::F32:
+            access_predictions_tensor<float>(tensor);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
 
     return false;

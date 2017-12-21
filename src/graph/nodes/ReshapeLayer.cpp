@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ std::unique_ptr<arm_compute::IFunction> ReshapeLayer::instantiate_node(GraphCont
     arm_compute::ITensor *out = output->tensor();
 
     // Auto configure output
-    arm_compute::auto_init_if_empty(*out->info(), _shape, 1, in->info()->data_type(), in->info()->fixed_point_position());
+    arm_compute::auto_init_if_empty(*out->info(), _shape, 1, in->info()->data_type(), in->info()->fixed_point_position(), in->info()->quantization_info());
 
     // Create node context
     NodeContext node_ctx(OperationType::ReshapeLayer);
