@@ -27,6 +27,7 @@
 /* Header regrouping all the GLES compute kernels */
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCAbsoluteDifferenceKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCActivationLayerKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCArithmeticAdditionKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCBatchNormalizationLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCCol2ImKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDepthConcatenateLayerKernel.h"

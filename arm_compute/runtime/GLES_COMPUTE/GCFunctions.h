@@ -27,6 +27,7 @@
 /* Header regrouping all the GLES compute functions */
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCAbsoluteDifference.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCArithmeticAddition.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCBatchNormalizationLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenateLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDirectConvolutionLayer.h"
