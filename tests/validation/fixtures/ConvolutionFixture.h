@@ -46,7 +46,7 @@ class ConvolutionValidationFixture : public framework::Fixture
 {
 protected:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type, BorderMode border_mode, const unsigned int width, const unsigned int height)
+    void setup(TensorShape shape, DataType data_type, BorderMode border_mode, const unsigned int width, const unsigned int height, const bool is_separable = false)
     {
         std::mt19937                           gen(library->seed());
         std::uniform_int_distribution<uint8_t> distribution(0, 255);
@@ -60,10 +60,19 @@ protected:
         ARM_COMPUTE_ERROR_ON(3 != height && 5 != height && 7 != height && 9 != height);
 
         int16_t conv[width * height];
-        create_conv(conv);
 
-        _width     = width;
-        _height    = height;
+        _width  = width;
+        _height = height;
+
+        if(is_separable)
+        {
+            create_separable_conv(conv);
+        }
+        else
+        {
+            create_conv(conv);
+        }
+
         _target    = compute_target(shape, data_type, conv, scale, border_mode, constant_border_value);
         _reference = compute_reference(shape, data_type, conv, scale, border_mode, constant_border_value);
     }
@@ -77,6 +86,33 @@ protected:
         for(unsigned int i = 0; i < _width * _height; ++i)
         {
             conv[i] = distribution_int16(gen);
+        }
+    }
+
+    void
+    create_separable_conv(int16_t *conv)
+    {
+        std::mt19937 gen(library->seed());
+        // Set it between -128 and 127 to ensure the matrix does not overflow
+        std::uniform_int_distribution<int16_t> distribution_int16(-128, 127);
+
+        int16_t conv_row[_width];
+        int16_t conv_col[_height];
+
+        conv_row[0] = conv_col[0] = 1;
+        for(unsigned int i = 1; i < _width; ++i)
+        {
+            conv_row[i] = distribution_int16(gen);
+            conv_col[i] = distribution_int16(gen);
+        }
+
+        // Multiply two matrices
+        for(unsigned int i = 0; i < _width; ++i)
+        {
+            for(unsigned int j = 0; j < _height; ++j)
+            {
+                conv[i * _width + j] = conv_col[i] * conv_row[j];
+            }
         }
     }
 
@@ -117,6 +153,48 @@ public:
     void setup(TensorShape shape, DataType data_type, BorderMode border_mode, const unsigned int width)
     {
         ConvolutionValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, border_mode, width, width);
+    }
+
+protected:
+    TensorType compute_target(const TensorShape &shape, DataType data_type, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
+    {
+        // Create tensors
+        TensorType src = create_tensor<TensorType>(shape, data_type);
+        TensorType dst = create_tensor<TensorType>(shape, data_type);
+
+        // Create and configure function
+        FunctionType convolution;
+        convolution.configure(&src, &dst, conv, scale, border_mode, constant_border_value);
+
+        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        src.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        this->fill(AccessorType(src), 0);
+        this->fill(AccessorType(dst), 1);
+
+        // Compute function
+        convolution.run();
+
+        return dst;
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ConvolutionSeparableValidationFixture : public ConvolutionValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, DataType data_type, BorderMode border_mode, const unsigned int width)
+    {
+        ConvolutionValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, border_mode, width, width, true);
     }
 
 protected:
