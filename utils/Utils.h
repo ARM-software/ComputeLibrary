@@ -833,7 +833,7 @@ void load_trained_data(T &tensor, const std::string &filename)
 
         if(!fs.good())
         {
-#ifndef ARM_NO_COMPUTE_EXCEPTIONS
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
             throw std::runtime_error("Could not load binary data: " + filename);
 #else
             std::cerr << "Could not load binary data: " << filename << std::endl;
