@@ -255,7 +255,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const std::st
 {
     if(labels_path.empty())
     {
-        return arm_compute::support::cpp14::make_unique<DummyAccessor>();
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>(0);
     }
     else
     {
