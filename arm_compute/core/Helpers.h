@@ -33,7 +33,6 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/utility.h"
 
 #include <array>
 #include <cstddef>

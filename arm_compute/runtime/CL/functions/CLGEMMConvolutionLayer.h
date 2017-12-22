@@ -49,13 +49,12 @@ class ICLTensor;
 
 /** Function to reshape and transpose the weights. This function calls the following kernels:
  * -# @ref CLWeightsReshapeKernel
- * -# @ref CLGEMMTranspose1xWKernel
  */
 class CLConvolutionLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    CLConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    CLConvolutionLayerReshapeWeights();
     /** Set the input and output tensors.
      *
      * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
@@ -78,10 +77,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup            _memory_group;
-    CLWeightsReshapeKernel   _weights_reshape_kernel;
-    CLGEMMTranspose1xWKernel _weights_transposed_kernel;
-    CLTensor                 _weights_reshaped;
+    CLWeightsReshapeKernel _weights_reshape_kernel;
 };
 
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
@@ -169,9 +165,7 @@ private:
     CLCol2ImKernel                                      _col2im_kernel;
 
     CLTensor _im2col_output;
-    CLTensor _interleave_output;
     CLTensor _weights_reshaped;
-    CLTensor _weights_transposed;
     CLTensor _gemm_output;
     CLTensor _tmp_output;
 

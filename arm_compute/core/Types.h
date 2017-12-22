@@ -1076,5 +1076,5 @@ enum class ConvolutionMethod
     DIRECT,  /**< Direct convolution */
     WINOGRAD /**< Convolution using Winograd */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_TYPES_H__ */

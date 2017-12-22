@@ -21,8 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/Nodes.h"
+#include "arm_compute/graph2.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
@@ -30,7 +29,7 @@
 #include <cstdlib>
 
 using namespace arm_compute::utils;
-using namespace arm_compute::graph;
+using namespace arm_compute::graph2::frontend;
 using namespace arm_compute::graph_utils;
 
 namespace
@@ -41,9 +40,9 @@ namespace
  *
  * @return The convolution layer hint
  */
-ConvolutionMethodHint convolution_hint_vgg16(size_t size_in_bytes)
+ConvolutionMethod convolution_hint_vgg16(size_t size_in_bytes)
 {
-    return ((get_mem_free_from_meminfo() * 1024) >= size_in_bytes) ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
+    return ((get_mem_free_from_meminfo() * 1024) >= size_in_bytes) ? ConvolutionMethod::GEMM : ConvolutionMethod::DIRECT;
 }
 } // namespace
 
@@ -66,12 +65,14 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        TargetHint target_hint     = set_target_hint(int_target_hint);
+        const int target                   = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target    target_hint              = set_target_hint2(target);
+        bool      enable_tuning            = (target == 2);
+        bool      enable_memory_management = true;
 
         // Check if we can use GEMM-based convolutions evaluating if the platform has at least 1.8 GB of available memory
-        const size_t          memory_required  = 1932735283L;
-        ConvolutionMethodHint convolution_hint = convolution_hint_vgg16(memory_required);
+        const size_t      memory_required  = 1932735283L;
+        ConvolutionMethod convolution_hint = convolution_hint_vgg16(memory_required);
 
         // Parse arguments
         if(argc < 2)
@@ -107,8 +108,8 @@ public:
 
         graph << target_hint
               << convolution_hint
-              << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image, std::move(preprocessor)))
+              << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
+                            get_input_accessor(image, std::move(preprocessor)))
               // Layer 1
               << ConvolutionLayer(
                   3U, 3U, 64U,
@@ -224,10 +225,10 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/fc8_b.npy"))
               // Softmax
               << SoftmaxLayer()
-              << Tensor(get_output_accessor(label, 5));
+              << OutputLayer(get_output_accessor(label, 5));
 
-        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
-        graph.graph_init(int_target_hint == 2);
+        // Finalize graph
+        graph.finalize(target_hint, enable_tuning, enable_memory_management);
     }
     void do_run() override
     {
@@ -236,7 +237,7 @@ public:
     }
 
 private:
-    Graph graph{};
+    Stream graph{ 0, "VGG16" };
 };
 
 /** Main program for VGG16

@@ -38,8 +38,8 @@
 using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
-CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _weights_reshape_kernel(), _weights_transposed_kernel(), _weights_reshaped()
+CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights()
+    : _weights_reshape_kernel()
 {
 }
 
@@ -86,16 +86,12 @@ Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, co
 
 void CLConvolutionLayerReshapeWeights::run()
 {
-    _memory_group.acquire();
-
     CLScheduler::get().enqueue(_weights_reshape_kernel);
-
-    _memory_group.release();
 }
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _col2im_kernel(), _im2col_output(),
-      _interleave_output(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _is_quantized(false), _is_first_run(true)
+      _weights_reshaped(), _gemm_output(), _tmp_output(), _is_quantized(false), _is_first_run(true)
 {
 }
 

@@ -21,8 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/Nodes.h"
+#include "arm_compute/graph2.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
@@ -30,7 +29,7 @@
 #include <cstdlib>
 
 using namespace arm_compute::utils;
-using namespace arm_compute::graph;
+using namespace arm_compute::graph2::frontend;
 using namespace arm_compute::graph_utils;
 
 /** Example demonstrating how to implement Microsoft's ResNet50 network using the Compute Library's graph API
@@ -53,8 +52,10 @@ public:
                                                                                                                    false /* Do not convert to BGR */);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        TargetHint target_hint     = set_target_hint(int_target_hint);
+        const int target                   = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target    target_hint              = set_target_hint2(target);
+        bool      enable_tuning            = (target == 2);
+        bool      enable_memory_management = true;
 
         // Parse arguments
         if(argc < 2)
@@ -89,8 +90,8 @@ public:
         }
 
         graph << target_hint
-              << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image, std::move(preprocessor), false /* Do not convert to BGR */))
+              << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
+                            get_input_accessor(image, std::move(preprocessor), false /* Do not convert to BGR */))
               << ConvolutionLayer(
                   7U, 7U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_weights.npy"),
@@ -118,11 +119,12 @@ public:
                   PadStrideInfo(1, 1, 0, 0))
               << FlattenLayer()
               << SoftmaxLayer()
-              << Tensor(get_output_accessor(label, 5));
+              << OutputLayer(get_output_accessor(label, 5));
 
-        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
-        graph.graph_init(int_target_hint == 2);
+        // Finalize graph
+        graph.finalize(target_hint, enable_tuning, enable_memory_management);
     }
+
     void do_run() override
     {
         // Run graph
@@ -130,7 +132,7 @@ public:
     }
 
 private:
-    Graph graph{};
+    Stream graph{ 0, "ResNet50" };
 
     void add_residual_block(const std::string &data_path, const std::string &name, unsigned int base_depth, unsigned int num_units, unsigned int stride)
     {
@@ -147,7 +149,7 @@ private:
                 middle_stride = stride;
             }
 
-            SubGraph right;
+            SubStream right(graph);
             right << ConvolutionLayer(
                       1U, 1U, base_depth,
                       get_weights_accessor(data_path, unit_name + "conv1_weights.npy"),
@@ -188,7 +190,7 @@ private:
 
             if(i == 0)
             {
-                SubGraph left;
+                SubStream left(graph);
                 left << ConvolutionLayer(
                          1U, 1U, base_depth * 4,
                          get_weights_accessor(data_path, unit_name + "shortcut_weights.npy"),
@@ -201,20 +203,19 @@ private:
                          get_weights_accessor(data_path, unit_name + "shortcut_BatchNorm_beta.npy"),
                          0.0000100099996416f);
 
-                graph << ResidualLayer(std::move(left), std::move(right));
+                graph << BranchLayer(BranchMergeMethod::ADD, std::move(left), std::move(right));
             }
             else if(middle_stride > 1)
             {
-                SubGraph left;
-                left << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 1, PadStrideInfo(middle_stride, middle_stride, 0, 0), true))
-                     // TODO (alegil01) : Remove once we understand why a single node graph does not run in CL
-                     << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f, 0.f));
+                SubStream left(graph);
+                left << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 1, PadStrideInfo(middle_stride, middle_stride, 0, 0), true));
 
-                graph << ResidualLayer(std::move(left), std::move(right));
+                graph << BranchLayer(BranchMergeMethod::ADD, std::move(left), std::move(right));
             }
             else
             {
-                graph << ResidualLayer(std::move(right));
+                SubStream left(graph);
+                graph << BranchLayer(BranchMergeMethod::ADD, std::move(left), std::move(right));
             }
 
             graph << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));

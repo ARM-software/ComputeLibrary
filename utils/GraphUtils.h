@@ -29,6 +29,10 @@
 #include "arm_compute/graph/ITensorAccessor.h"
 #include "arm_compute/graph/Types.h"
 
+#include "arm_compute/core/CL/OpenCL.h"
+
+#include "arm_compute/graph2/Types.h"
+
 #include <array>
 #include <random>
 #include <string>
@@ -306,6 +310,26 @@ inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const std::st
     else
     {
         return arm_compute::support::cpp14::make_unique<TopNPredictionsAccessor>(labels_path, top_n, output_stream);
+    }
+}
+
+/** Utility function to return the TargetHint
+ *
+ * @param[in] target Integer value which expresses the selected target. Must be 0 for NEON or 1 for OpenCL or 2 (OpenCL with Tuner)
+ *
+ * @return the TargetHint
+ */
+inline graph2::Target set_target_hint2(int target)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(target > 2, "Invalid target. Target must be 0 (NEON) or 1 (OpenCL)");
+    if((target == 1 || target == 2) && arm_compute::opencl_is_available())
+    {
+        // If type of target is OpenCL, check if OpenCL is available and initialize the scheduler
+        return graph2::Target::CL;
+    }
+    else
+    {
+        return graph2::Target::NEON;
     }
 }
 } // namespace graph_utils

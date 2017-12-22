@@ -29,6 +29,16 @@
 
 namespace arm_compute
 {
+/** Ignores unused arguments
+ *
+ * @tparam T Argument types
+ */
+template <typename... T>
+inline void ignore_unused(T &&...)
+{
+}
+
+/** Available error codes */
 enum class ErrorCode
 {
     OK,           /**< No error */
@@ -142,9 +152,9 @@ Status create_error(ErrorCode error_code, const char *function, const char *file
  * This is useful if for example a variable is only used
  * in debug builds and generates a warning in release builds.
  *
- * @param[in] var Variable which is unused.
+ * @param[in] ... Variables which are unused.
  */
-#define ARM_COMPUTE_UNUSED(var) (void)(var)
+#define ARM_COMPUTE_UNUSED(...) ignore_unused(__VA_ARGS__) // NOLINT
 
 /** Creates an error with a given message
  *

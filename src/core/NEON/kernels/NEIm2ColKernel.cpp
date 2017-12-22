@@ -319,8 +319,7 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
-    ARM_COMPUTE_UNUSED(is_fully_connected);
-    ARM_COMPUTE_UNUSED(is_flatten);
+    ARM_COMPUTE_UNUSED(is_fully_connected, is_flatten);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten));
 
     _input          = input;

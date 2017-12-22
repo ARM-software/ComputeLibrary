@@ -164,7 +164,6 @@ std::vector<size_t> sort_indices(const std::vector<T> &v)
 
     return idx;
 }
-
 } // namespace utility
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_MISC_UTILITY_H__ */

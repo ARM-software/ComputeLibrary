@@ -30,7 +30,7 @@
 #include "arm_compute/graph/SubGraph.h"
 #include "arm_compute/graph/Types.h"
 
-#include "arm_compute/core/utils/misc/utility.h"
+#include "arm_compute/core/utils/misc/Utility.h"
 
 #include <vector>
 

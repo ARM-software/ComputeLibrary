@@ -138,8 +138,10 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 
         // Manage intermediate buffers
         _memory_group.manage(&_tmp_a);
-        _memory_group.manage(&_tmp_b);
-
+        if(_reshape_b_only_on_first_run)
+        {
+            _memory_group.manage(&_tmp_b);
+        }
         // _tmp_a and _tmp_b will be auto configured in _interleave_kernel and in _transpose_kernel
 
         // Configure interleave kernel

@@ -21,8 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/Nodes.h"
+#include "arm_compute/graph2.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
@@ -30,7 +29,7 @@
 #include <cstdlib>
 
 using namespace arm_compute::utils;
-using namespace arm_compute::graph;
+using namespace arm_compute::graph2::frontend;
 using namespace arm_compute::graph_utils;
 
 /** Example demonstrating how to implement MobileNet's network using the Compute Library's graph API
@@ -51,9 +50,12 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>();
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int             int_target_hint  = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        TargetHint            target_hint      = set_target_hint(int_target_hint);
-        ConvolutionMethodHint convolution_hint = ConvolutionMethodHint::GEMM;
+        const int                  target                     = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target                     target_hint                = set_target_hint2(target);
+        ConvolutionMethod          convolution_hint           = ConvolutionMethod::GEMM;
+        DepthwiseConvolutionMethod depthwise_convolution_hint = DepthwiseConvolutionMethod::OPTIMIZED_3x3;
+        bool                       enable_tuning              = (target == 2);
+        bool                       enable_memory_management   = true;
 
         // Set model to execute. 0 (MobileNetV1_1.0_224), 1 (MobileNetV1_0.75_160)
         int model_id = (argc > 2) ? std::strtol(argv[2], nullptr, 10) : 0;
@@ -109,8 +111,9 @@ public:
 
         graph << target_hint
               << convolution_hint
-              << Tensor(TensorInfo(TensorShape(spatial_size, spatial_size, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image, std::move(preprocessor), false))
+              << depthwise_convolution_hint
+              << InputLayer(TensorDescriptor(TensorShape(spatial_size, spatial_size, 3U, 1U), DataType::F32),
+                            get_input_accessor(image, std::move(preprocessor), false))
               << ConvolutionLayer(
                   3U, 3U, 32U * depth_scale,
                   get_weights_accessor(data_path, "Conv2d_0_weights.npy"),
@@ -121,7 +124,8 @@ public:
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_variance.npy"),
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_gamma.npy"),
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_beta.npy"),
-                  0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
+                  0.001f)
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
               << get_dwsc_node(data_path, "Conv2d_1", 64 * depth_scale, PadStrideInfo(1, 1, 1, 1), PadStrideInfo(1, 1, 0, 0))
               << get_dwsc_node(data_path, "Conv2d_2", 128 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0))
               << get_dwsc_node(data_path, "Conv2d_3", 128 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0))
@@ -143,10 +147,10 @@ public:
                   PadStrideInfo(1, 1, 0, 0))
               << ReshapeLayer(TensorShape(1001U))
               << SoftmaxLayer()
-              << Tensor(get_output_accessor(label, 5));
+              << OutputLayer(get_output_accessor(label, 5));
 
-        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
-        graph.graph_init(int_target_hint == 2);
+        // Finalize graph
+        graph.finalize(target_hint, enable_tuning, enable_memory_management);
     }
     void do_run() override
     {
@@ -155,26 +159,26 @@ public:
     }
 
 private:
-    Graph graph{};
+    Stream graph{ 0, "MobileNetV1" };
 
     BranchLayer get_dwsc_node(const std::string &data_path, std::string &&param_path,
                               unsigned int  conv_filt,
                               PadStrideInfo dwc_pad_stride_info, PadStrideInfo conv_pad_stride_info)
     {
         std::string total_path = param_path + "_";
-        SubGraph    sg;
+        SubStream   sg(graph);
         sg << DepthwiseConvolutionLayer(
                3U, 3U,
                get_weights_accessor(data_path, total_path + "depthwise_depthwise_weights.npy"),
                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
-               dwc_pad_stride_info,
-               true)
+               dwc_pad_stride_info)
            << BatchNormalizationLayer(
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_mean.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_variance.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_gamma.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_beta.npy"),
-               0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
+               0.001f)
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
            << ConvolutionLayer(
                1U, 1U, conv_filt,
                get_weights_accessor(data_path, total_path + "pointwise_weights.npy"),
@@ -185,7 +189,8 @@ private:
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_variance.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_gamma.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_beta.npy"),
-               0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f));
+               0.001f)
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f));
 
         return BranchLayer(std::move(sg));
     }

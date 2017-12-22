@@ -21,9 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/Nodes.h"
-#include "arm_compute/graph/SubGraph.h"
+#include "arm_compute/graph2.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
@@ -32,7 +30,7 @@
 #include <tuple>
 
 using namespace arm_compute::utils;
-using namespace arm_compute::graph;
+using namespace arm_compute::graph2::frontend;
 using namespace arm_compute::graph_utils;
 
 /** Example demonstrating how to implement Googlenet's network using the Compute Library's graph API
@@ -54,9 +52,11 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int             int_target_hint  = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        TargetHint            target_hint      = set_target_hint(int_target_hint);
-        ConvolutionMethodHint convolution_hint = ConvolutionMethodHint::GEMM;
+        const int         target                   = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target            target_hint              = set_target_hint2(target);
+        ConvolutionMethod convolution_hint         = ConvolutionMethod::GEMM;
+        bool              enable_tuning            = (target == 2);
+        bool              enable_memory_management = true;
 
         // Parse arguments
         if(argc < 2)
@@ -91,8 +91,8 @@ public:
         }
 
         graph << target_hint
-              << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image, std::move(preprocessor)))
+              << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
+                            get_input_accessor(image, std::move(preprocessor)))
               << ConvolutionLayer(
                   7U, 7U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv1/conv1_7x7_s2_w.npy"),
@@ -133,10 +133,10 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/loss3/loss3_classifier_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/loss3/loss3_classifier_b.npy"))
               << SoftmaxLayer()
-              << Tensor(get_output_accessor(label, 5));
+              << OutputLayer(get_output_accessor(label, 5));
 
-        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
-        graph.graph_init(int_target_hint == 2);
+        // Finalize graph
+        graph.finalize(target_hint, enable_tuning, enable_memory_management);
     }
     void do_run() override
     {
@@ -145,7 +145,7 @@ public:
     }
 
 private:
-    Graph graph{};
+    Stream graph{ 0, "GoogleNet" };
 
     BranchLayer get_inception_node(const std::string &data_path, std::string &&param_path,
                                    unsigned int a_filt,
@@ -154,7 +154,7 @@ private:
                                    unsigned int d_filt)
     {
         std::string total_path = "/cnn_data/googlenet_model/" + param_path + "/" + param_path + "_";
-        SubGraph    i_a;
+        SubStream   i_a(graph);
         i_a << ConvolutionLayer(
                 1U, 1U, a_filt,
                 get_weights_accessor(data_path, total_path + "1x1_w.npy"),
@@ -162,7 +162,7 @@ private:
                 PadStrideInfo(1, 1, 0, 0))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        SubGraph i_b;
+        SubStream i_b(graph);
         i_b << ConvolutionLayer(
                 1U, 1U, std::get<0>(b_filters),
                 get_weights_accessor(data_path, total_path + "3x3_reduce_w.npy"),
@@ -176,7 +176,7 @@ private:
                 PadStrideInfo(1, 1, 1, 1))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        SubGraph i_c;
+        SubStream i_c(graph);
         i_c << ConvolutionLayer(
                 1U, 1U, std::get<0>(c_filters),
                 get_weights_accessor(data_path, total_path + "5x5_reduce_w.npy"),
@@ -190,7 +190,7 @@ private:
                 PadStrideInfo(1, 1, 2, 2))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        SubGraph i_d;
+        SubStream i_d(graph);
         i_d << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)))
             << ConvolutionLayer(
                 1U, 1U, d_filt,

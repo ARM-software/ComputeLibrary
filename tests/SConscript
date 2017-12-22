@@ -1,4 +1,4 @@
-# Copyright (c) 2017 ARM Limited.
+# Copyright (c) 2017, 2018 ARM Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -58,13 +58,15 @@ Import("arm_compute_test_framework")
 test_env.Append(LIBS = arm_compute_test_framework)
 
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
+    Import("arm_compute_graph2_a")
     Import("arm_compute_a")
     Import("arm_compute_core_a")
-    test_env.Append(LIBS = [arm_compute_a, arm_compute_core_a])
+    test_env.Append(LIBS = [arm_compute_graph2_a, arm_compute_a, arm_compute_core_a])
     arm_compute_lib = arm_compute_a
 else:
+    Import("arm_compute_graph2_so")
     Import("arm_compute_so")
-    test_env.Append(LIBS = ["arm_compute", "arm_compute_core"])
+    test_env.Append(LIBS = ["arm_compute_graph2", "arm_compute", "arm_compute_core"])
     arm_compute_lib = arm_compute_so
 
 #FIXME Delete before release
@@ -231,10 +233,12 @@ if test_env['benchmark_examples']:
         if test_env['opencl'] and test_env['neon']:
             if env['os'] == 'android':
                 Import('arm_compute_graph_a')
-                graph_dependency = arm_compute_graph_a
+                Import("arm_compute_graph2_a")
+                graph_dependency = [arm_compute_graph_a, arm_compute_graph2_a]
             else:
                 Import('arm_compute_graph_so')
-                graph_dependency = arm_compute_graph_so
+                Import('arm_compute_graph2_so')
+                graph_dependency = [arm_compute_graph_so, arm_compute_graph2_so]
 
             graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
             for file in Glob("../examples/graph_*.cpp"):
@@ -245,7 +249,7 @@ if test_env['benchmark_examples']:
                     arm_compute_benchmark_examples += [ prog ]
                 else:
                     #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
-                    prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+                    prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph", "arm_compute_graph2"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
                     Depends(prog, graph_dependency)
                     arm_compute_benchmark_examples += [ prog ]
     Depends(arm_compute_benchmark_examples, arm_compute_test_framework)

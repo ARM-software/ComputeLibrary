@@ -57,15 +57,17 @@ if env['opencl'] and env['neon']:
         alias = examples_env.Alias(example, prog)
         Default(alias)
     if env['os'] == 'android':
+        Import('arm_compute_graph2_a')
         Import('arm_compute_graph_a')
         Import('arm_compute_core_a')
         Import('arm_compute_a')
         arm_compute_graph_libs = [ arm_compute_a, arm_compute_core_a, "OpenCL"]
-        graph_dependency = arm_compute_graph_a
+        graph_dependency = [arm_compute_graph_a, arm_compute_graph2_a]
     else:
+        Import('arm_compute_graph2_so')
         Import('arm_compute_graph_so')
-        arm_compute_graph_libs = ["arm_compute_graph", "arm_compute", "arm_compute_core"]
-        graph_dependency = arm_compute_graph_so
+        arm_compute_graph_libs = ["arm_compute_graph2", "arm_compute_graph", "arm_compute", "arm_compute_core"]
+        graph_dependency = [arm_compute_graph_so, arm_compute_graph2_so]
 
     graph_utils = examples_env.Object("../utils/GraphUtils.cpp")
     for file in Glob("./graph_*.cpp"):

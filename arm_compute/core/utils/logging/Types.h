@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,7 @@ enum class LogLevel : unsigned int
     VERBOSE, /**< All logging messages */
     INFO,    /**< Information log level */
     WARN,    /**< Warning log level */
+    ERROR,   /**< Error log level */
     OFF      /**< No logging */
 };
 

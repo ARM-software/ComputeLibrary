@@ -170,6 +170,10 @@ runtime_files += Glob('src/runtime/CPP/functions/*.cpp')
 # CLHarrisCorners uses the Scheduler to run CPP kernels
 runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
 
+# FIXME : Rename graph2 -> graph
+graph2_files = Glob('src/graph2/*.cpp')
+graph2_files += Glob('src/graph2/*/*.cpp')
+
 if env['cppthreads']:
      runtime_files += Glob('src/runtime/CPP/CPPScheduler.cpp')
 
@@ -183,6 +187,9 @@ if env['opencl']:
     runtime_files += Glob('src/runtime/CL/*.cpp')
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
 
+    graph2_files += Glob('src/graph2/backends/CL/*.cpp')
+
+
 if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
@@ -191,6 +198,8 @@ if env['neon']:
     core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
     core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
     arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/winograd/", "arm_compute/core/NEON/kernels/assembly/"])
+
+    graph2_files += Glob('src/graph2/backends/NEON/*.cpp')
 
     if env['arch'] == "armv7a":
         core_files += Glob('src/core/NEON/kernels/arm32/*.cpp')
@@ -225,6 +234,14 @@ if env['os'] != 'bare_metal' and not env['standalone']:
     arm_compute_so = build_library('arm_compute', runtime_files, static=False, libs = [ "arm_compute_core" ])
     Depends(arm_compute_so, arm_compute_core_so)
     Export('arm_compute_so')
+
+arm_compute_graph2_a = build_library('arm_compute_graph2-static', graph2_files, static=True, libs = [ arm_compute_a])
+Export('arm_compute_graph2_a')
+
+if env['os'] != 'bare_metal' and not env['standalone']:
+    arm_compute_graph2_so = build_library('arm_compute_graph2', graph2_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
+    Depends(arm_compute_graph2_so, arm_compute_so)
+    Export('arm_compute_graph2_so')
 
 if env['neon'] and env['opencl']:
     Import('opencl')

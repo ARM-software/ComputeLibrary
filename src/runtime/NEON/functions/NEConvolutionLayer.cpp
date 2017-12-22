@@ -30,6 +30,7 @@
 
 #include <cmath>
 #include <tuple>
+#include <utility>
 
 namespace arm_compute
 {
