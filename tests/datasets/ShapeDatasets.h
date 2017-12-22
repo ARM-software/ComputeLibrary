@@ -35,18 +35,21 @@ namespace test
 {
 namespace datasets
 {
-/** Data set containing 1D tensor shapes. */
-class Small1DShape final : public framework::dataset::SingletonDataset<TensorShape>
+/** Parent type for all for shape datasets. */
+using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
+
+/** Data set containing small 1D tensor shapes. */
+class Small1DShapes final : public ShapeDataset
 {
 public:
-    Small1DShape()
-        : SingletonDataset("Shape", TensorShape{ 256U })
+    Small1DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 256U }
+    })
     {
     }
 };
-
-/** Parent type for all for shape datasets. */
-using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
 
 /** Data set containing small 2D tensor shapes. */
 class Small2DShapes final : public ShapeDataset
@@ -135,6 +138,22 @@ public:
     }
 };
 
+/** Data set containing medium 2D tensor shapes. */
+class Medium2DShapes final : public ShapeDataset
+{
+public:
+    Medium2DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 42U, 37U },
+                     TensorShape{ 57U, 60U },
+                     TensorShape{ 128U, 64U },
+                     TensorShape{ 83U, 72U }
+    })
+    {
+    }
+};
+
 /** Data set containing large tensor shapes. */
 class LargeShapes final : public ShapeDataset
 {
@@ -143,11 +162,26 @@ public:
         : ShapeDataset("Shape",
     {
         // Batch size 1
-        TensorShape{ 1920U, 1080U },
-                     TensorShape{ 640U, 480U, 2U, 3U },
-                     TensorShape{ 4160U, 3120U },
+        TensorShape{ 1921U, 1083U },
+                     TensorShape{ 641U, 485U, 2U, 3U },
+                     TensorShape{ 4159U, 3117U },
                      // Batch size 4
-                     TensorShape{ 800U, 600U, 1U, 4U },
+                     TensorShape{ 799U, 595U, 1U, 4U },
+    })
+    {
+    }
+};
+
+/** Data set containing large 1D tensor shapes. */
+class Large1DShapes final : public ShapeDataset
+{
+public:
+    Large1DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1921U },
+                     TensorShape{ 1245U },
+                     TensorShape{ 4160U }
     })
     {
     }
@@ -198,6 +232,21 @@ public:
     }
 };
 
+/** Data set containing small tensor shapes for deconvolution. */
+class SmallDeconvolutionShapes final : public ShapeDataset
+{
+public:
+    SmallDeconvolutionShapes()
+        : ShapeDataset("InputShape",
+    {
+        TensorShape{ 2U, 3U, 3U, 2U },
+                     TensorShape{ 5U, 5U, 3U },
+                     TensorShape{ 11U, 13U, 4U, 3U }
+    })
+    {
+    }
+};
+
 /** Data set containing small tensor shapes for direct convolution. */
 class SmallDirectConvolutionShapes final : public ShapeDataset
 {
@@ -220,11 +269,11 @@ public:
     }
 };
 
-/** Data set containing 2D tensor shapes for DepthConcatenate. */
-class DepthConcatenateShapes final : public ShapeDataset
+/** Data set containing 2D tensor shapes for DepthConcatenateLayer. */
+class DepthConcatenateLayerShapes final : public ShapeDataset
 {
 public:
-    DepthConcatenateShapes()
+    DepthConcatenateLayerShapes()
         : ShapeDataset("Shape",
     {
         TensorShape{ 322U, 243U },
@@ -249,6 +298,40 @@ public:
                      // Batch size 4
                      TensorShape{ 31U, 31U, 3U, 4U },
                      TensorShape{ 34U, 34U, 2U, 4U }
+    })
+    {
+    }
+};
+
+/** Data set containing small softmax layer shapes. */
+class SoftmaxLayerSmallShapes final : public ShapeDataset
+{
+public:
+    SoftmaxLayerSmallShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 9U, 9U },
+                     TensorShape{ 256U, 10U, 2U },
+                     TensorShape{ 353U, 8U, 2U, 2U },
+                     TensorShape{ 512U, 7U, 2U, 2U },
+                     TensorShape{ 633U, 10U, 1U, 2U },
+                     TensorShape{ 781U, 5U, 2U },
+    })
+    {
+    }
+};
+
+/** Data set containing large softmax layer shapes. */
+class SoftmaxLayerLargeShapes final : public ShapeDataset
+{
+public:
+    SoftmaxLayerLargeShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1000U, 10U },
+                     TensorShape{ 3989U, 10U, 2U },
+                     TensorShape{ 4098U, 8U, 1U, 2U },
+                     TensorShape{ 7339U, 11U },
     })
     {
     }

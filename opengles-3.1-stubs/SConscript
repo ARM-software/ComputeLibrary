@@ -1,0 +1,11 @@
+Import("env")
+
+egl = env.SharedLibrary("EGL", "EGL.c")
+alias = Alias("egl", egl)
+Default(alias)
+Export("egl")
+
+glesv2 = env.SharedLibrary("GLESv2", "GLESv2.c")
+alias = Alias("glesv2", glesv2)
+Default(alias)
+Export("glesv2")

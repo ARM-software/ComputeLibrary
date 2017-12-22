@@ -67,6 +67,9 @@ public:
     /** Number of bits for the fractional part. */
     virtual int fixed_point_position() const = 0;
 
+    /** Quantization info in case of asymmetric quantized type */
+    virtual QuantizationInfo quantization_info() const = 0;
+
     /** Read only access to the specified element.
      *
      * @param[in] coord Coordinates of the desired element.

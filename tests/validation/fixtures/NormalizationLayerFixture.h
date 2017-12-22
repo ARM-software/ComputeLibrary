@@ -32,7 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/NormalizationLayer.h"
+#include "tests/validation/reference/NormalizationLayer.h"
 
 #include <random>
 
@@ -47,10 +47,10 @@ class NormalizationValidationFixedPointFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, DataType data_type, int fractional_bits)
+    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type, int fractional_bits)
     {
         _fractional_bits = fractional_bits;
-        NormalizationLayerInfo info(norm_type, norm_size, 5, beta);
+        NormalizationLayerInfo info(norm_type, norm_size, 5, beta, 1.f, is_scaled);
 
         _target    = compute_target(shape, info, data_type, fractional_bits);
         _reference = compute_reference(shape, info, data_type, fractional_bits);
@@ -122,9 +122,9 @@ class NormalizationValidationFixture : public NormalizationValidationFixedPointF
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, DataType data_type)
+    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type)
     {
-        NormalizationValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, norm_type, norm_size, beta, data_type, 0);
+        NormalizationValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, norm_type, norm_size, beta, is_scaled, data_type, 0);
     }
 };
 } // namespace validation

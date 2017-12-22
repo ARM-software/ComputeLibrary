@@ -11,7 +11,7 @@ var _n_e_o_n_2_min_max_location_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_min_max_location_8cpp.xhtml#a1daf2796ffd117f6effc98aabd9da3a8", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_min_max_location_8cpp.xhtml#aae8ca77224eb2240d02268a2722380a9", null ],
     [ "info", "_n_e_o_n_2_min_max_location_8cpp.xhtml#a096668313a9a819d54a2e65ec21ff0cc", null ],
-    [ "TEST_SUITE_END", "_n_e_o_n_2_min_max_location_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_n_e_o_n_2_min_max_location_8cpp.xhtml#af77b34bd2ffc2b5b0b87daa9b5e63ea8", null ],
     [ "validate_configuration", "_n_e_o_n_2_min_max_location_8cpp.xhtml#af8115bb60734e2ad3cc20b8f73b74cd8", null ],
     [ "validate_configuration", "_n_e_o_n_2_min_max_location_8cpp.xhtml#a8b99c68730dc9d3b6f5d856864c1888a", null ]
 ];

@@ -39,14 +39,14 @@ class NEChannelExtract : public INESimpleFunction
 public:
     /** Initialize the function's source, destination
      *
-     * @param[in]  input   The input tensor to extract the channel from. Formats supported: Any single planar.
+     * @param[in]  input   The input tensor to extract the channel from. Formats supported: Formats supported: RGB888/RGBA8888/YUYV422/UYVY422
      * @param[in]  channel The channel to extract.
      * @param[out] output  The extracted channel. Format supported: U8
      */
     void configure(const ITensor *input, Channel channel, ITensor *output);
     /** Initialize the function's source, destination
      *
-     * @param[in]  input   The multi-planar input image to extract channel from.
+     * @param[in]  input   The multi-planar input image to extract channel from. Formats supported: NV12/NV21/IYUV/YUV444
      * @param[in]  channel The channel to extract.
      * @param[out] output  The extracted channel. Format supported: U8
      */

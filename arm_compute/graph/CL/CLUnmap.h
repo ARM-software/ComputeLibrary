@@ -29,11 +29,11 @@
 
 namespace arm_compute
 {
-class CLTensor;
+class ICLTensor;
 
 namespace graph
 {
-class Tensor;
+class ITensorObject;
 /** OpenCL un-map function */
 class CLUnmap : public arm_compute::IFunction
 {
@@ -42,7 +42,7 @@ public:
      *
      * @param[in] tensor Tensor to un-map
      */
-    CLUnmap(Tensor *tensor);
+    CLUnmap(ITensorObject *tensor);
     /** Prevent instances from being copy constructed */
     CLUnmap(const CLUnmap &) = delete;
     /** Prevent instances from being copy assigned */
@@ -56,7 +56,7 @@ public:
     void run() override;
 
 private:
-    arm_compute::CLTensor *_tensor; /**< Tensor */
+    arm_compute::ICLTensor *_tensor; /**< Tensor */
 };
 } // namespace graph
 } // namespace arm_compute

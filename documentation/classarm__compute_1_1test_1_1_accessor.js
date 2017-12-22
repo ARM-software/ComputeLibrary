@@ -16,6 +16,7 @@ var classarm__compute_1_1test_1_1_accessor =
     [ "operator=", "classarm__compute_1_1test_1_1_accessor.xhtml#a75dae34a374af1dc690c73cda2605586", null ],
     [ "operator=", "classarm__compute_1_1test_1_1_accessor.xhtml#a2abf258677dd2dbe5821945c961584bc", null ],
     [ "padding", "classarm__compute_1_1test_1_1_accessor.xhtml#a79e20eacb1e963e24a21ebd7369effd7", null ],
+    [ "quantization_info", "classarm__compute_1_1test_1_1_accessor.xhtml#ac74736e3863207232a23b7181c1d0f44", null ],
     [ "shape", "classarm__compute_1_1test_1_1_accessor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba", null ],
     [ "size", "classarm__compute_1_1test_1_1_accessor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16", null ]
 ];

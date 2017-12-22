@@ -1,5 +1,6 @@
 var arm__compute_2core_2_types_8h =
 [
+    [ "QuantizationInfo", "structarm__compute_1_1_quantization_info.xhtml", "structarm__compute_1_1_quantization_info" ],
     [ "ValidRegion", "structarm__compute_1_1_valid_region.xhtml", "structarm__compute_1_1_valid_region" ],
     [ "BorderSize", "structarm__compute_1_1_border_size.xhtml", "structarm__compute_1_1_border_size" ],
     [ "KeyPoint", "structarm__compute_1_1_key_point.xhtml", "structarm__compute_1_1_key_point" ],
@@ -14,10 +15,12 @@ var arm__compute_2core_2_types_8h =
     [ "ActivationLayerInfo", "classarm__compute_1_1_activation_layer_info.xhtml", "classarm__compute_1_1_activation_layer_info" ],
     [ "NormalizationLayerInfo", "classarm__compute_1_1_normalization_layer_info.xhtml", "classarm__compute_1_1_normalization_layer_info" ],
     [ "WeightsInfo", "classarm__compute_1_1_weights_info.xhtml", "classarm__compute_1_1_weights_info" ],
+    [ "GEMMInfo", "classarm__compute_1_1_g_e_m_m_info.xhtml", "classarm__compute_1_1_g_e_m_m_info" ],
     [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", "structarm__compute_1_1_i_o_format_info" ],
     [ "half", "arm__compute_2core_2_types_8h.xhtml#a73e2825fd61d349c5ca2f5313e3c8ea1", null ],
     [ "InternalKeypoint", "arm__compute_2core_2_types_8h.xhtml#a2ab89a5d0959531aac270879cdd3ed78", null ],
     [ "PaddingSize", "arm__compute_2core_2_types_8h.xhtml#a4467b302fc9ec312c40580336ab783da", null ],
+    [ "PermutationVector", "arm__compute_2core_2_types_8h.xhtml#a33e65be485104e2e9e69fca551d6f492", null ],
     [ "BilinearInterpolation", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202", [
       [ "BILINEAR_OLD_NEW", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202a856d68c521c4c85363f54d95a33b7532", null ],
       [ "BILINEAR_SCHARR", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202a731cb35d2d520920db9ab20dfc5edc64", null ]
@@ -50,6 +53,7 @@ var arm__compute_2core_2_types_8h =
       [ "U8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a6669348b484e3008dca2bfa8e85e40b5", null ],
       [ "S8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aafb0fced528eaac5fe170b763cda5975", null ],
       [ "QS8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a11cde4d3551db3f9498d339a67189543", null ],
+      [ "QASYMM8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6af14462d71aa842202c3e4b272c7ec924", null ],
       [ "U16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aef9ef3ebca4d2b64b6ec83808bafa5f2", null ],
       [ "S16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a6e0b0886efb94aec797f6b830329b72c", null ],
       [ "QS16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a48d877702a2957f5a932c43a357866f9", null ],
@@ -129,10 +133,9 @@ var arm__compute_2core_2_types_8h =
       [ "SUM_SQUARE", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba2ce6e134b828b72fad160fa17c8d1b64", null ],
       [ "SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a", null ]
     ] ],
-    [ "RoundingPolicy", "arm__compute_2core_2_types_8h.xhtml#add6426cbf2e057a195846d4ba09a50be", [
-      [ "TO_ZERO", "arm__compute_2core_2_types_8h.xhtml#add6426cbf2e057a195846d4ba09a50bea5631ad8e27788edfca7e13535d862c06", null ],
-      [ "TO_NEAREST_UP", "arm__compute_2core_2_types_8h.xhtml#add6426cbf2e057a195846d4ba09a50bea8c0084566b290fa9e5e429f4ae241f95", null ],
-      [ "TO_NEAREST_EVEN", "arm__compute_2core_2_types_8h.xhtml#add6426cbf2e057a195846d4ba09a50bea02ff1fff1812f84c89547fcd6c176150", null ]
+    [ "SamplingPolicy", "arm__compute_2core_2_types_8h.xhtml#a16a59381d4d74d17d86d69eb4d286d7b", [
+      [ "CENTER", "arm__compute_2core_2_types_8h.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e", null ],
+      [ "TOP_LEFT", "arm__compute_2core_2_types_8h.xhtml#a16a59381d4d74d17d86d69eb4d286d7ba747385047b85ae751f83adb36435a3c1", null ]
     ] ],
     [ "Termination", "arm__compute_2core_2_types_8h.xhtml#a08c1503414e23f5dd10ff83492685453", [
       [ "TERM_CRITERIA_EPSILON", "arm__compute_2core_2_types_8h.xhtml#a08c1503414e23f5dd10ff83492685453a5a2e12b6baf7ad91a2ce32f19c36bd1b", null ],

@@ -43,14 +43,14 @@ public:
     virtual const MultiImageInfo *info() const = 0;
     /** Return a pointer to the requested plane of the image.
      *
-     *  @param[in] index The index of the wanted planed.
+     * @param[in] index The index of the wanted planed.
      *
      *  @return A pointer pointed to the plane
      */
     virtual IImage *plane(unsigned int index) = 0;
     /** Return a constant pointer to the requested plane of the image.
      *
-     *  @param[in] index The index of the wanted planed.
+     * @param[in] index The index of the wanted planed.
      *
      *  @return A constant pointer pointed to the plane
      */

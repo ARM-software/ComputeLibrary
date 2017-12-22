@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_UTILS_H__
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Rounding.h"
 #include "arm_compute/core/Types.h"
 
 #include <algorithm>
@@ -92,6 +93,7 @@ inline size_t data_size_from_type(DataType data_type)
         case DataType::U8:
         case DataType::S8:
         case DataType::QS8:
+        case DataType::QASYMM8:
             return 1;
         case DataType::U16:
         case DataType::S16:
@@ -166,6 +168,7 @@ inline size_t element_size_from_data_type(DataType dt)
         case DataType::S8:
         case DataType::U8:
         case DataType::QS8:
+        case DataType::QASYMM8:
             return 1;
         case DataType::U16:
         case DataType::S16:
@@ -344,15 +347,52 @@ inline size_t num_channels_from_format(Format format)
     }
 }
 
+/** Return the promoted data type of a given data type.
+ *
+ * @note If promoted data type is not supported an error will be thrown
+ *
+ * @param[in] dt Data type to get the promoted type of.
+ *
+ * @return Promoted data type
+ */
+inline DataType get_promoted_data_type(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+            return DataType::U16;
+        case DataType::S8:
+            return DataType::S16;
+        case DataType::QS8:
+            return DataType::QS16;
+        case DataType::U16:
+            return DataType::U32;
+        case DataType::S16:
+            return DataType::S32;
+        case DataType::QS16:
+            return DataType::QS32;
+        case DataType::QASYMM8:
+        case DataType::F16:
+        case DataType::U32:
+        case DataType::S32:
+        case DataType::F32:
+        case DataType::QS32:
+            ARM_COMPUTE_ERROR("Unsupported data type promotions!");
+        default:
+            ARM_COMPUTE_ERROR("Undefined data type!");
+    }
+    return DataType::UNKNOWN;
+}
+
 /** Separate a 2D convolution into two 1D convolutions
-*
-* @param[in]  conv     2D convolution
-* @param[out] conv_col 1D vertical convolution
-* @param[out] conv_row 1D horizontal convolution
-* @param[in]  size     Size of the 2D convolution
-*
-* @return true if the separation was successful
-*/
+ *
+ * @param[in]  conv     2D convolution
+ * @param[out] conv_col 1D vertical convolution
+ * @param[out] conv_row 1D horizontal convolution
+ * @param[in]  size     Size of the 2D convolution
+ *
+ * @return true if the separation was successful
+ */
 inline bool separate_matrix(const int16_t *conv, int16_t *conv_col, int16_t *conv_row, uint8_t size)
 {
     int32_t min_col     = -1;
@@ -562,6 +602,38 @@ inline DataType data_type_for_convolution_matrix(const int16_t *conv, size_t siz
     }
 }
 
+/** Returns expected shape for the deconvolution output tensor.
+ *
+ * @param[in] out_dims widht and height of the output tensor, these values can be obtained with the function deconvolution_output_dimensions.
+ * @param[in] input    Shape of the input tensor.
+ * @param[in] weights  Shape of the weights tensor.
+ *
+ * @return Deconvolution output tensor shape.
+ */
+TensorShape deconvolution_output_shape(const std::pair<unsigned int, unsigned int> &out_dims, TensorShape input, TensorShape weights);
+
+/** Returns expected width and height of the deconvolution's output tensor.
+ *
+ * @param[in] in_width      Width of input tensor (Number of columns)
+ * @param[in] in_height     Height of input tensor (Number of rows)
+ * @param[in] kernel_width  Kernel width.
+ * @param[in] kernel_height Kernel height.
+ * @param[in] padx          X axis padding.
+ * @param[in] pady          Y axis padding.
+ * @param[in] ax            The number of zeros added to right edge of the input.
+ * @param[in] ay            The number of zeros added to top edge of the input.
+ * @param[in] upscalex      How much to scale the X axis.
+ * @param[in] upscaley      How much to scale the Y axis.
+ * @param[in] round         Rounding policy to be used when computing the output's dimensions.
+ *
+ * @return A pair with the new width in the first position and the new height in the second.
+ */
+
+const std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
+                                                                            unsigned int kernel_width, unsigned int kernel_height,
+                                                                            unsigned int padx, unsigned int pady, unsigned int ax, unsigned int ay,
+                                                                            float upscalex, float upscaley, DimensionRoundingType round);
+
 /** Returns expected width and height of output scaled tensor depending on dimensions rounding mode.
  *
  * @param[in] width           Width of input tensor (Number of columns)
@@ -674,6 +746,28 @@ inline bool is_data_type_float(DataType dt)
     }
 }
 
+/** Check if a given data type is of quantized type
+ *
+ * @note Quantized is considered a super-set of fixed-point and asymmetric data types.
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of quantized type, else false.
+ */
+inline bool is_data_type_quantized(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QS8:
+        case DataType::QASYMM8:
+        case DataType::QS16:
+        case DataType::QS32:
+            return true;
+        default:
+            return false;
+    }
+}
+
 /** Check if a given data type is of fixed point type
  *
  * @param[in] dt Input data type.
@@ -687,6 +781,23 @@ inline bool is_data_type_fixed_point(DataType dt)
         case DataType::QS8:
         case DataType::QS16:
         case DataType::QS32:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/** Check if a given data type is of asymmetric quantized type
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of symmetric quantized type, else false.
+ */
+inline bool is_data_type_quantized_asymmetric(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QASYMM8:
             return true;
         default:
             return false;
@@ -727,7 +838,16 @@ void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int
         {
             s.width(stream_width);
         }
-        s << std::right << static_cast<print_type>(ptr[i]) << element_delim;
+
+        if(std::is_same<typename std::decay<T>::type, half>::value)
+        {
+            // We use T instead of print_type here is because the std::is_floating_point<half> returns false and then the print_type becomes int.
+            s << std::right << static_cast<T>(ptr[i]) << element_delim;
+        }
+        else
+        {
+            s << std::right << static_cast<print_type>(ptr[i]) << element_delim;
+        }
     }
 }
 
@@ -749,7 +869,17 @@ int max_consecutive_elements_display_width_impl(std::ostream &s, const T *ptr, u
     {
         std::stringstream ss;
         ss.copyfmt(s);
-        ss << static_cast<print_type>(ptr[i]);
+
+        if(std::is_same<typename std::decay<T>::type, half>::value)
+        {
+            // We use T instead of print_type here is because the std::is_floating_point<half> returns false and then the print_type becomes int.
+            ss << static_cast<T>(ptr[i]);
+        }
+        else
+        {
+            ss << static_cast<print_type>(ptr[i]);
+        }
+
         max_width = std::max<int>(max_width, ss.str().size());
     }
     return max_width;

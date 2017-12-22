@@ -10,6 +10,7 @@ var classarm__compute_1_1test_1_1_i_accessor =
     [ "operator()", "classarm__compute_1_1test_1_1_i_accessor.xhtml#a583a35e4fd72f072a6b76ce58c2e3998", null ],
     [ "operator()", "classarm__compute_1_1test_1_1_i_accessor.xhtml#a9fd1359f2b5ea45a31bd79b381281eb4", null ],
     [ "padding", "classarm__compute_1_1test_1_1_i_accessor.xhtml#a07b929c34ad1dc823d8315876aa403ce", null ],
+    [ "quantization_info", "classarm__compute_1_1test_1_1_i_accessor.xhtml#a3f3e1a3200223e6a304a533b1016e749", null ],
     [ "shape", "classarm__compute_1_1test_1_1_i_accessor.xhtml#a1c5e120ea2712b21296aa8f62421d3c1", null ],
     [ "size", "classarm__compute_1_1test_1_1_i_accessor.xhtml#aa983ddaeded5756189f46428be79c631", null ]
 ];

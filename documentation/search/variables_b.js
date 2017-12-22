@@ -10,6 +10,6 @@ var searchData=
   ['log2_5fcache_5fsize',['log2_cache_size',['../structmali__userspace_1_1mali__base__gpu__l2__cache__props.xhtml#a02e11ef7261377c49ecd08c05e552a46',1,'mali_userspace::mali_base_gpu_l2_cache_props']]],
   ['log2_5fline_5fsize',['log2_line_size',['../structmali__userspace_1_1mali__base__gpu__l2__cache__props.xhtml#ac2c3f9fcb566aea0271e84655e5473b8',1,'mali_userspace::mali_base_gpu_l2_cache_props']]],
   ['log2_5fprogram_5fcounter_5fsize',['log2_program_counter_size',['../structmali__userspace_1_1mali__base__gpu__core__props.xhtml#a507618a0efdab12eecea9dc29e32e84c',1,'mali_userspace::mali_base_gpu_core_props']]],
-  ['log_5ftab',['log_tab',['../namespacearm__compute.xhtml#a48fb9cf404e8f7043235bf14105c9793',1,'arm_compute']]],
-  ['log_5ftab_5ff16',['log_tab_f16',['../namespacearm__compute.xhtml#a0a8b2a577b2f9370e7b1c4735f007be1',1,'arm_compute']]]
+  ['log_5flevel_5f',['log_level_',['../structarm__compute_1_1logging_1_1_log_msg.xhtml#aef281b5a0efe131f21a1d5b6cbdf0d58',1,'arm_compute::logging::LogMsg']]],
+  ['log_5ftab',['log_tab',['../namespacearm__compute.xhtml#a48fb9cf404e8f7043235bf14105c9793',1,'arm_compute']]]
 ];

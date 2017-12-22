@@ -1,6 +1,0 @@
-<map id="arm_compute/core/NEON/kernels/assembly/kernels" name="arm_compute/core/NEON/kernels/assembly/kernels">
-<area shape="rect" id="node2" href="dir_f6f8c5419486b5044a62bf7e8849acdb.xhtml" title="a32_sgemm_8x6" alt="" coords="190,63,311,111"/>
-<area shape="rect" id="node3" href="dir_cb46ed42275bf053bc487c8ce92df255.xhtml" title="a64_sgemm_12x8" alt="" coords="37,63,165,111"/>
-<area shape="rect" id="clust2" href="dir_2a71d41a0578a3ab28811897b4713112.xhtml" alt="" coords="27,52,419,121"/>
-<area shape="rect" id="clust1" href="dir_de5c25a0a26af4ac1cdfe0fae1db6671.xhtml" title="assembly" alt="" coords="16,16,429,132"/>
-</map>

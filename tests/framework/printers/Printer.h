@@ -102,6 +102,11 @@ public:
     /** Print footer after errors. */
     virtual void print_errors_footer() = 0;
 
+    /** Print the list of all the tests
+     *
+     * @param[in] infos List of tests to print
+     */
+    virtual void print_list_tests(const std::vector<TestInfo> &infos) = 0;
     /** Print test error.
      *
      * @param[in] error    Description of the error.

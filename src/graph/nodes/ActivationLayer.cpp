@@ -23,73 +23,33 @@
  */
 #include "arm_compute/graph/nodes/ActivationLayer.h"
 
-#include "arm_compute/core/Logger.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/graph/Error.h"
+#include "arm_compute/graph/NodeContext.h"
+#include "arm_compute/graph/OperationRegistry.h"
 #include "support/ToolchainSupport.h"
-#include "utils/TypePrinter.h"
 
 using namespace arm_compute::graph;
-
-namespace
-{
-template <typename ActivationType, typename TensorType, TargetHint target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
-{
-    auto activation = arm_compute::support::cpp14::make_unique<ActivationType>();
-    activation->configure(
-        dynamic_cast<TensorType *>(input),
-        dynamic_cast<TensorType *>(output),
-        activation_info);
-
-    return std::move(activation);
-}
-
-template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info);
-
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
-{
-    return instantiate_function<arm_compute::CLActivationLayer, arm_compute::CLTensor, TargetHint::OPENCL>(input, output, activation_info);
-}
-
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *output, const ActivationLayerInfo &activation_info)
-{
-    return instantiate_function<arm_compute::NEActivationLayer, arm_compute::Tensor, TargetHint::NEON>(input, output, activation_info);
-}
-} // namespace
 
 ActivationLayer::ActivationLayer(const ActivationLayerInfo activation_info)
     : _activation_info(activation_info)
 {
 }
 
-std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
+    ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT(input, output);
 
-    if(_target_hint == TargetHint::OPENCL)
-    {
-        func = instantiate<TargetHint::OPENCL>(input, output, _activation_info);
-        ARM_COMPUTE_LOG("Instantiating CLActivationLayer");
-    }
-    else
-    {
-        func = instantiate<TargetHint::NEON>(input, output, _activation_info);
-        ARM_COMPUTE_LOG("Instantiating NEActivationLayer");
-    }
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+    _target_hint              = ctx.hints().target_hint();
 
-    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
-                    << " Input shape: " << input->info()->tensor_shape()
-                    << " Output shape: " << output->info()->tensor_shape()
-                    << " Activation function: " << _activation_info.activation()
-                    << " a: " << _activation_info.a()
-                    << " b: " << _activation_info.b()
-                    << std::endl);
-    return func;
+    // Create node context
+    NodeContext node_ctx(OperationType::ActivationLayer);
+    node_ctx.set_target(_target_hint);
+    node_ctx.add_input(in);
+    node_ctx.add_output(out);
+    node_ctx.add_parameter<ActivationLayerInfo>("ActivationLayerInfo", _activation_info);
+
+    // Get function
+    return OperationRegistry::get().find_operation(OperationType::ActivationLayer, _target_hint)->configure(node_ctx);
 }

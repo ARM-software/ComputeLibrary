@@ -23,108 +23,88 @@
  */
 #include "arm_compute/core/Validate.h"
 
-void arm_compute::error_on_mismatching_windows(const char *function, const char *file, const int line,
-                                               const arm_compute::Window &full, const arm_compute::Window &win)
+arm_compute::Status arm_compute::error_on_mismatching_windows(const char *function, const char *file, const int line,
+                                                              const arm_compute::Window &full, const arm_compute::Window &win)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-
     full.validate();
     win.validate();
 
     for(size_t i = 0; i < arm_compute::Coordinates::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_ERROR_ON_LOC(full[i].start() != win[i].start(), function, file, line);
-        ARM_COMPUTE_ERROR_ON_LOC(full[i].end() != win[i].end(), function, file, line);
-        ARM_COMPUTE_ERROR_ON_LOC(full[i].step() != win[i].step(), function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[i].start() != win[i].start(), function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[i].end() != win[i].end(), function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[i].step() != win[i].step(), function, file, line);
     }
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_invalid_subwindow(const char *function, const char *file, const int line,
-                                             const arm_compute::Window &full, const arm_compute::Window &sub)
+arm_compute::Status arm_compute::error_on_invalid_subwindow(const char *function, const char *file, const int line,
+                                                            const arm_compute::Window &full, const arm_compute::Window &sub)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-
     full.validate();
     sub.validate();
 
     for(size_t i = 0; i < arm_compute::Coordinates::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_ERROR_ON_LOC(full[i].start() > sub[i].start(), function, file, line);
-        ARM_COMPUTE_ERROR_ON_LOC(full[i].end() < sub[i].end(), function, file, line);
-        ARM_COMPUTE_ERROR_ON_LOC(full[i].step() != sub[i].step(), function, file, line);
-        ARM_COMPUTE_ERROR_ON_LOC((sub[i].start() - full[i].start()) % sub[i].step(), function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[i].start() > sub[i].start(), function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[i].end() < sub[i].end(), function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[i].step() != sub[i].step(), function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC((sub[i].start() - full[i].start()) % sub[i].step(), function, file, line);
     }
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_window_not_collapsable_at_dimension(const char *function, const char *file, const int line,
-                                                               const arm_compute::Window &full, const arm_compute::Window &window, const int dim)
+arm_compute::Status arm_compute::error_on_window_not_collapsable_at_dimension(const char *function, const char *file, const int line,
+                                                                              const arm_compute::Window &full, const arm_compute::Window &window, const int dim)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-    ARM_COMPUTE_UNUSED(dim);
-
     full.validate();
     window.validate();
 
-    ARM_COMPUTE_ERROR_ON_LOC(window[dim].start() != 0, function, file, line);
-    ARM_COMPUTE_ERROR_ON_LOC(window[dim].start() != full[dim].start(), function, file, line);
-    ARM_COMPUTE_ERROR_ON_LOC(full[dim].end() != window[dim].end(), function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(window[dim].start() != 0, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(window[dim].start() != full[dim].start(), function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(full[dim].end() != window[dim].end(), function, file, line);
+
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_coordinates_dimensions_gte(const char *function, const char *file, const int line,
-                                                      const arm_compute::Coordinates &pos, unsigned int max_dim)
+arm_compute::Status arm_compute::error_on_coordinates_dimensions_gte(const char *function, const char *file, const int line,
+                                                                     const arm_compute::Coordinates &pos, unsigned int max_dim)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-    ARM_COMPUTE_UNUSED(pos);
-
     for(unsigned int i = max_dim; i < arm_compute::Coordinates::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_ERROR_ON_LOC(pos[i] != 0, function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC(pos[i] != 0, function, file, line);
     }
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_window_dimensions_gte(const char *function, const char *file, const int line,
-                                                 const arm_compute::Window &win, unsigned int max_dim)
+arm_compute::Status arm_compute::error_on_window_dimensions_gte(const char *function, const char *file, const int line,
+                                                                const arm_compute::Window &win, unsigned int max_dim)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-    ARM_COMPUTE_UNUSED(win);
-
     for(unsigned int i = max_dim; i < arm_compute::Coordinates::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_ERROR_ON_LOC_MSG(win[i].start() != 0 || win[i].end() != win[i].step(),
-                                     function, file, line,
-                                     "Maximum number of dimensions expected %u but dimension %u is not empty", max_dim, i);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(win[i].start() != 0 || win[i].end() != win[i].step(),
+                                            function, file, line,
+                                            "Maximum number of dimensions expected %u but dimension %u is not empty", max_dim, i);
     }
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_tensor_not_2d(const char *function, const char *file, const int line,
-                                         const arm_compute::ITensor *tensor)
+arm_compute::Status arm_compute::error_on_tensor_not_2d(const char *function, const char *file, const int line,
+                                                        const arm_compute::ITensor *tensor)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-    ARM_COMPUTE_UNUSED(tensor);
-
-    ARM_COMPUTE_ERROR_ON_LOC(tensor == nullptr, function, file, line);
-    ARM_COMPUTE_ERROR_ON_LOC_MSG(tensor->info()->num_dimensions() != 2,
-                                 function, file, line,
-                                 "Only 2D Tensors are supported by this kernel (%d passed)", tensor->info()->num_dimensions());
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor->info() == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(tensor->info()->num_dimensions() != 2,
+                                        function, file, line,
+                                        "Only 2D Tensors are supported by this kernel (%d passed)", tensor->info()->num_dimensions());
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_channel_not_in_known_format(const char *function, const char *file, const int line,
-                                                       arm_compute::Format fmt, arm_compute::Channel cn)
+arm_compute::Status arm_compute::error_on_channel_not_in_known_format(const char *function, const char *file, const int line,
+                                                                      arm_compute::Format fmt, arm_compute::Channel cn)
 {
-    ARM_COMPUTE_ERROR_ON_LOC(fmt == arm_compute::Format::UNKNOWN, function, file, line);
-    ARM_COMPUTE_ERROR_ON_LOC(cn == arm_compute::Channel::UNKNOWN, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(fmt == arm_compute::Format::UNKNOWN, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(cn == arm_compute::Channel::UNKNOWN, function, file, line);
 
     switch(fmt)
     {
@@ -148,84 +128,68 @@ void arm_compute::error_on_channel_not_in_known_format(const char *function, con
         default:
             ARM_COMPUTE_ERROR_LOC(function, file, line, "Not supported format.");
     }
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_invalid_multi_hog(const char *function, const char *file, const int line,
-                                             const arm_compute::IMultiHOG *multi_hog)
+arm_compute::Status arm_compute::error_on_invalid_multi_hog(const char *function, const char *file, const int line,
+                                                            const arm_compute::IMultiHOG *multi_hog)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-
-    ARM_COMPUTE_ERROR_ON_LOC(nullptr == multi_hog, function, file, line);
-    ARM_COMPUTE_ERROR_ON_LOC(0 == multi_hog->num_models(), function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(nullptr == multi_hog, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(0 == multi_hog->num_models(), function, file, line);
 
     for(size_t i = 1; i < multi_hog->num_models(); ++i)
     {
-        ARM_COMPUTE_ERROR_ON_LOC_MSG(multi_hog->model(0)->info()->phase_type() != multi_hog->model(i)->info()->phase_type(),
-                                     function, file, line,
-                                     "All HOG parameters must have the same phase type");
-        ARM_COMPUTE_ERROR_ON_LOC_MSG(multi_hog->model(0)->info()->normalization_type() != multi_hog->model(i)->info()->normalization_type(),
-                                     function, file, line,
-                                     "All HOG parameters must have the same normalization type");
-        ARM_COMPUTE_ERROR_ON_LOC_MSG((multi_hog->model(0)->info()->l2_hyst_threshold() != multi_hog->model(i)->info()->l2_hyst_threshold())
-                                     && (multi_hog->model(0)->info()->normalization_type() == arm_compute::HOGNormType::L2HYS_NORM),
-                                     function, file, line,
-                                     "All HOG parameters must have the same l2 hysteresis threshold if you use L2 hysteresis normalization type");
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(multi_hog->model(0)->info()->phase_type() != multi_hog->model(i)->info()->phase_type(),
+                                            function, file, line,
+                                            "All HOG parameters must have the same phase type");
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(multi_hog->model(0)->info()->normalization_type() != multi_hog->model(i)->info()->normalization_type(),
+                                            function, file, line,
+                                            "All HOG parameters must have the same normalization type");
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((multi_hog->model(0)->info()->l2_hyst_threshold() != multi_hog->model(i)->info()->l2_hyst_threshold())
+                                            && (multi_hog->model(0)->info()->normalization_type() == arm_compute::HOGNormType::L2HYS_NORM),
+                                            function, file, line,
+                                            "All HOG parameters must have the same l2 hysteresis threshold if you use L2 hysteresis normalization type");
     }
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_unconfigured_kernel(const char *function, const char *file, const int line,
-                                               const arm_compute::IKernel *kernel)
+arm_compute::Status arm_compute::error_on_unconfigured_kernel(const char *function, const char *file, const int line,
+                                                              const arm_compute::IKernel *kernel)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-    ARM_COMPUTE_UNUSED(kernel);
-
-    ARM_COMPUTE_ERROR_ON_LOC(kernel == nullptr, function, file, line);
-    ARM_COMPUTE_ERROR_ON_LOC_MSG((kernel->window().x().start() == kernel->window().x().end()) && (kernel->window().x().end() == 0) && (kernel->window().x().step() == 0),
-                                 function, file, line,
-                                 "This kernel hasn't been configured.");
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(kernel == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((kernel->window().x().start() == kernel->window().x().end()) && (kernel->window().x().end() == 0) && (kernel->window().x().step() == 0),
+                                        function, file, line,
+                                        "This kernel hasn't been configured.");
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_invalid_subtensor(const char *function, const char *file, const int line,
-                                             const TensorShape &parent_shape, const Coordinates &coords, const TensorShape &shape)
+arm_compute::Status arm_compute::error_on_invalid_subtensor(const char *function, const char *file, const int line,
+                                                            const TensorShape &parent_shape, const Coordinates &coords, const TensorShape &shape)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-    ARM_COMPUTE_UNUSED(parent_shape);
-    ARM_COMPUTE_UNUSED(coords);
-    ARM_COMPUTE_UNUSED(shape);
-
     // Subtensor should not index in x, y dimensions.
-    ARM_COMPUTE_ERROR_ON_LOC(((coords.x() != 0) && (coords.y() != 0)), function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(((coords.x() != 0) && (coords.y() != 0)), function, file, line);
     // Subtensor shape should match parent tensor in x, y dimensions.
-    ARM_COMPUTE_ERROR_ON_LOC(((parent_shape.x() != shape.x()) && (parent_shape.y() != parent_shape.y())), function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(((parent_shape.x() != shape.x()) && (parent_shape.y() != parent_shape.y())), function, file, line);
 
     // Check dimensions
     for(unsigned int i = 0; i < TensorShape::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_ERROR_ON_LOC(((coords[i] >= static_cast<int>(parent_shape[i])) || (coords[i] + static_cast<int>(shape[i]) > static_cast<int>(parent_shape[i]))),
-                                 function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC(((coords[i] >= static_cast<int>(parent_shape[i])) || (coords[i] + static_cast<int>(shape[i]) > static_cast<int>(parent_shape[i]))),
+                                        function, file, line);
     }
+    return arm_compute::Status{};
 }
 
-void arm_compute::error_on_invalid_subtensor_valid_region(const char *function, const char *file, const int line,
-                                                          const ValidRegion &parent_valid_region, const ValidRegion &valid_region)
+arm_compute::Status arm_compute::error_on_invalid_subtensor_valid_region(const char *function, const char *file, const int line,
+                                                                         const ValidRegion &parent_valid_region, const ValidRegion &valid_region)
 {
-    ARM_COMPUTE_UNUSED(function);
-    ARM_COMPUTE_UNUSED(file);
-    ARM_COMPUTE_UNUSED(line);
-    ARM_COMPUTE_UNUSED(parent_valid_region);
-    ARM_COMPUTE_UNUSED(valid_region);
-
     // Check valid regions
     for(unsigned int d = 0; d < TensorShape::num_max_dimensions; ++d)
     {
-        ARM_COMPUTE_ERROR_ON_LOC((parent_valid_region.anchor[d] > valid_region.anchor[d]), function, file, line);
-        ARM_COMPUTE_ERROR_ON_LOC((parent_valid_region.anchor[d] + static_cast<int>(parent_valid_region.shape[d])) < (valid_region.anchor[d] + static_cast<int>(valid_region.shape[d])),
-                                 function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC((parent_valid_region.anchor[d] > valid_region.anchor[d]), function, file, line);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC((parent_valid_region.anchor[d] + static_cast<int>(parent_valid_region.shape[d])) < (valid_region.anchor[d] + static_cast<int>(valid_region.shape[d])),
+                                        function, file, line);
     }
+
+    return arm_compute::Status{};
 }

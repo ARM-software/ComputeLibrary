@@ -33,6 +33,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/utility.h"
 
 #include <array>
 #include <cstddef>
@@ -116,6 +117,57 @@ inline T delta_bilinear_c1(const T *pixel_ptr, size_t stride, float dx, float dy
     return static_cast<T>(a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4);
 }
 
+/** Computes linear interpolation using the pointer to the top pixel and the pixel's distance between
+ * the real coordinates and the smallest following integer coordinates. Input must be in single channel format.
+ *
+ * @param[in] pixel_ptr Pointer to the top pixel value of a single channel input.
+ * @param[in] stride    Stride to access the bottom pixel value
+ * @param[in] dy        Pixel's distance between the Y real coordinate and the smallest Y following integer
+ *
+ * @note dy must be in the range [0, 1.0]
+ *
+ * @return The linear interpolated pixel value
+ */
+template <typename T>
+inline T delta_linear_c1_y(const T *pixel_ptr, size_t stride, float dy)
+{
+    ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
+
+    const float dy1 = 1.0f - dy;
+
+    const T a00 = *pixel_ptr;
+    const T a10 = *(pixel_ptr + stride);
+
+    const float w1 = dy1;
+    const float w3 = dy;
+
+    return static_cast<T>(a00 * w1 + a10 * w3);
+}
+/** Computes linear interpolation using the pointer to the left pixel and the pixel's distance between
+ * the real coordinates and the smallest following integer coordinates. Input must be in single channel format.
+ *
+ * @param[in] pixel_ptr Pointer to the left pixel value of a single channel input.
+ * @param[in] dx        Pixel's distance between the X real coordinate and the smallest X following integer
+ *
+ * @note dx must be in the range [0, 1.0]
+ *
+ * @return The linear interpolated pixel value
+ */
+template <typename T>
+inline T delta_linear_c1_x(const T *pixel_ptr, float dx)
+{
+    ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
+
+    const T a00 = *pixel_ptr;
+    const T a01 = *(pixel_ptr + 1);
+
+    const float dx1 = 1.0f - dx;
+
+    const float w1 = dx1;
+    const float w2 = dx;
+
+    return static_cast<T>(a00 * w1 + a01 * w2);
+}
 /** Return the pixel at (x,y) using bilinear interpolation.
  *
  * @warning Only works if the iterator was created with an IImage
@@ -168,6 +220,18 @@ inline uint8_t pixel_bilinear_c1_clamp(const T *first_pixel_ptr, size_t stride, 
     const float dx = x - xi;
     const float dy = y - yi;
 
+    if(dx == 0.0f)
+    {
+        if(dy == 0.0f)
+        {
+            return static_cast<T>(first_pixel_ptr[static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride]);
+        }
+        return delta_linear_c1_y(first_pixel_ptr + static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride, stride, dy);
+    }
+    if(dy == 0.0f)
+    {
+        return delta_linear_c1_x(first_pixel_ptr + static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride, dx);
+    }
     return delta_bilinear_c1(first_pixel_ptr + static_cast<int32_t>(xi) + static_cast<int32_t>(yi) * stride, stride, dx, dy);
 }
 
@@ -459,6 +523,23 @@ inline Strides compute_strides(const ITensorInfo &info)
     return compute_strides(info, info.element_size());
 }
 
+/** Permutes given Dimensions according to a permutation vector
+ *
+ * @warning Validity of permutation is not checked
+ *
+ * @param[in, out] dimensions Dimensions to permute
+ * @param[in]      perm       Permutation vector
+ */
+template <typename T>
+inline void permute(Dimensions<T> &dimensions, const PermutationVector &perm)
+{
+    auto copy_dimensions = utility::make_array<Dimensions<T>::num_max_dimensions>(dimensions.begin(), dimensions.end());
+    for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
+    {
+        dimensions[i] = copy_dimensions[perm[i]];
+    }
+}
+
 /* Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.
  *
  * @param[in,out] info                 Tensor info used to check and assign.
@@ -466,10 +547,24 @@ inline Strides compute_strides(const ITensorInfo &info)
  * @param[in]     num_channels         New number of channels.
  * @param[in]     data_type            New data type
  * @param[in]     fixed_point_position New fixed point position
+ * @param[in]     quantization_info    (Optional) New quantization info
  *
  * @return True if the tensor info has been initialized
  */
-bool auto_init_if_empty(ITensorInfo &info, const TensorShape &shape, int num_channels, DataType data_type, int fixed_point_position);
+bool auto_init_if_empty(ITensorInfo       &info,
+                        const TensorShape &shape,
+                        int num_channels, DataType data_type,
+                        int              fixed_point_position,
+                        QuantizationInfo quantization_info = QuantizationInfo());
+
+/** Auto initialize the tensor info using another tensor info.
+ *
+ * @param info_sink   Tensor info used to check and assign
+ * @param info_source Tensor info used to assign
+ *
+ * @return True if the tensor info has been initialized
+ */
+bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source);
 
 /* Set the shape to the specified value if the current assignment is empty.
  *
@@ -509,6 +604,17 @@ bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
  * @return True if the fixed point position has been changed.
  */
 bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position);
+
+/* Set the quantization info to the specified value if
+ * the current quantization info is empty and the data type of asymmetric quantized type
+ *
+ * @param[in,out] info              Tensor info used to check and assign.
+ * @param[in]     quantization_info Quantization info
+ *
+ * @return True if the quantization info has been changed.
+ */
+bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo quantization_info);
+
 /** Helper function to calculate the Valid Region for Scale.
  *
  * @param[in] src_info         Input tensor info used to check.
@@ -520,6 +626,7 @@ bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_positio
  * @return The corrispondent valid region
  */
 ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined);
+
 /** Convert a linear index into n-dimensional coordinates.
  *
  * @param[in] shape Shape of the n-dimensional tensor.
@@ -528,6 +635,7 @@ ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const Tens
  * @return n-dimensional coordinates.
  */
 inline Coordinates index2coords(const TensorShape &shape, int index);
+
 /** Convert n-dimensional coordinates into a linear index.
  *
  * @param[in] shape Shape of the n-dimensional tensor.

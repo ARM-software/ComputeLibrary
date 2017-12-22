@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "support/ToolchainSupport.h"
 
 #include <cstddef>
 
@@ -65,28 +66,23 @@ bool validate_subtensor_shape(const TensorInfo &parent_info, const TensorInfo &c
 } // namespace
 
 TensorAllocator::TensorAllocator(Tensor *owner)
-    : _associated_memory_group(nullptr), _buffer(nullptr), _owner(owner)
+    : _associated_memory_group(nullptr), _memory(), _owner(owner)
 {
 }
 
 TensorAllocator::~TensorAllocator()
 {
-    if((_associated_memory_group == nullptr) && (_buffer != nullptr))
-    {
-        delete[] _buffer;
-        _buffer = nullptr;
-        info().set_is_resizable(true);
-    }
+    info().set_is_resizable(true);
 }
 
 TensorAllocator::TensorAllocator(TensorAllocator &&o) noexcept
     : ITensorAllocator(std::move(o)),
       _associated_memory_group(o._associated_memory_group),
-      _buffer(o._buffer),
+      _memory(std::move(o._memory)),
       _owner(o._owner)
 {
     o._associated_memory_group = nullptr;
-    o._buffer                  = nullptr;
+    o._memory                  = Memory();
     o._owner                   = nullptr;
 }
 
@@ -97,8 +93,8 @@ TensorAllocator &TensorAllocator::operator=(TensorAllocator &&o) noexcept
         _associated_memory_group   = o._associated_memory_group;
         o._associated_memory_group = nullptr;
 
-        _buffer   = o._buffer;
-        o._buffer = nullptr;
+        _memory   = std::move(o._memory);
+        o._memory = Memory();
 
         _owner   = o._owner;
         o._owner = nullptr;
@@ -118,7 +114,7 @@ void TensorAllocator::init(const TensorAllocator &allocator, const Coordinates &
     ARM_COMPUTE_UNUSED(validate_subtensor_shape);
 
     // Copy pointer to buffer
-    _buffer = allocator._buffer;
+    _memory = Memory(allocator._memory.buffer());
 
     // Init tensor info with new dimensions
     size_t total_size = parent_info.offset_element_in_bytes(coords) + sub_info.total_size() - sub_info.offset_first_element_in_bytes();
@@ -130,44 +126,53 @@ void TensorAllocator::init(const TensorAllocator &allocator, const Coordinates &
 
 uint8_t *TensorAllocator::data() const
 {
-    return _buffer;
+    return _memory.buffer();
 }
 
 void TensorAllocator::allocate()
 {
-    ARM_COMPUTE_ERROR_ON(_buffer != nullptr);
+    ARM_COMPUTE_ERROR_ON(_memory.buffer() != nullptr);
     if(_associated_memory_group == nullptr)
     {
-        _buffer = new uint8_t[info().total_size()]();
+        _memory = Memory(std::shared_ptr<uint8_t>(new uint8_t[info().total_size()](), [](uint8_t *ptr)
+        {
+            delete[] ptr;
+        }));
     }
     else
     {
-        _associated_memory_group->finalize_memory(_owner, reinterpret_cast<void **>(&_buffer), info().total_size());
+        _associated_memory_group->finalize_memory(_owner, reinterpret_cast<void **>(_memory.handle()), info().total_size());
     }
     info().set_is_resizable(false);
 }
 
 void TensorAllocator::free()
 {
-    if((_associated_memory_group == nullptr) && (_buffer != nullptr))
-    {
-        delete[] _buffer;
-        _buffer = nullptr;
-        info().set_is_resizable(true);
-    }
+    _memory = Memory();
+    info().set_is_resizable(true);
+}
+
+arm_compute::Status TensorAllocator::import_memory(Memory memory)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON(memory.buffer() == nullptr);
+    ARM_COMPUTE_RETURN_ERROR_ON(_associated_memory_group != nullptr);
+    _memory = memory;
+    info().set_is_resizable(false);
+
+    return Status{};
 }
 
 void TensorAllocator::set_associated_memory_group(MemoryGroup *associated_memory_group)
 {
     ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
     ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr);
-    ARM_COMPUTE_ERROR_ON(_buffer != nullptr);
+    ARM_COMPUTE_ERROR_ON(_memory.buffer() != nullptr);
     _associated_memory_group = associated_memory_group;
 }
 
 uint8_t *TensorAllocator::lock()
 {
-    return _buffer;
+    return _memory.buffer();
 }
 
 void TensorAllocator::unlock()

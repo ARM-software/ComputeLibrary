@@ -38,12 +38,13 @@ namespace datasets
 class DepthwiseSeparableConvolutionLayerDataset
 {
 public:
-    using type = std::tuple<TensorShape, TensorShape, TensorShape, TensorShape, TensorShape, TensorShape, PadStrideInfo, PadStrideInfo>;
+    using type = std::tuple<TensorShape, TensorShape, TensorShape, TensorShape, TensorShape, TensorShape, TensorShape, PadStrideInfo, PadStrideInfo>;
 
     struct iterator
     {
         iterator(std::vector<TensorShape>::const_iterator   src_it,
                  std::vector<TensorShape>::const_iterator   filter_it,
+                 std::vector<TensorShape>::const_iterator   filter_biases_it,
                  std::vector<TensorShape>::const_iterator   depthwise_out_it,
                  std::vector<TensorShape>::const_iterator   weights_it,
                  std::vector<TensorShape>::const_iterator   biases_it,
@@ -52,6 +53,7 @@ public:
                  std::vector<PadStrideInfo>::const_iterator pointwise_infos_it)
             : _src_it{ std::move(src_it) },
               _filter_it{ std::move(filter_it) },
+              _filter_biases_it{ std::move(filter_biases_it) },
               _depthwise_out_it{ std::move(depthwise_out_it) },
               _weights_it{ std::move(weights_it) },
               _biases_it{ std::move(biases_it) },
@@ -66,6 +68,7 @@ public:
             std::stringstream description;
             description << "In=" << *_src_it << ":";
             description << "Filter=" << *_filter_it << ":";
+            description << "FilterBiases=" << *_filter_biases_it << ":";
             description << "DepthwiseOut=" << *_depthwise_out_it << ":";
             description << "Weights=" << *_weights_it << ":";
             description << "Biases=" << *_biases_it << ":";
@@ -77,13 +80,14 @@ public:
 
         DepthwiseSeparableConvolutionLayerDataset::type operator*() const
         {
-            return std::make_tuple(*_src_it, *_filter_it, *_depthwise_out_it, *_weights_it, *_biases_it, *_dst_it, *_depthwise_infos_it, *_pointwise_infos_it);
+            return std::make_tuple(*_src_it, *_filter_it, *_filter_biases_it, *_depthwise_out_it, *_weights_it, *_biases_it, *_dst_it, *_depthwise_infos_it, *_pointwise_infos_it);
         }
 
         iterator &operator++()
         {
             ++_src_it;
             ++_filter_it;
+            ++_filter_biases_it;
             ++_depthwise_out_it;
             ++_weights_it;
             ++_biases_it;
@@ -97,6 +101,7 @@ public:
     private:
         std::vector<TensorShape>::const_iterator   _src_it;
         std::vector<TensorShape>::const_iterator   _filter_it;
+        std::vector<TensorShape>::const_iterator   _filter_biases_it;
         std::vector<TensorShape>::const_iterator   _depthwise_out_it;
         std::vector<TensorShape>::const_iterator   _weights_it;
         std::vector<TensorShape>::const_iterator   _biases_it;
@@ -107,20 +112,24 @@ public:
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _filter_shapes.begin(), _depthwise_out_shapes.begin(), _weight_shapes.begin(), _bias_shapes.begin(), _dst_shapes.begin(), _depthwise_infos.begin(),
+        return iterator(_src_shapes.begin(), _filter_shapes.begin(), _filter_biases_shapes.begin(), _depthwise_out_shapes.begin(), _weight_shapes.begin(), _bias_shapes.begin(), _dst_shapes.begin(),
+                        _depthwise_infos.begin(),
                         _pointwise_infos.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_filter_shapes.size(), std::min(_depthwise_out_shapes.size(), std::min(_weight_shapes.size(), std::min(_bias_shapes.size(), std::min(_dst_shapes.size(),
-                                                                                                                            std::min(_depthwise_infos.size(), _pointwise_infos.size())))))));
+        return std::min(_src_shapes.size(), std::min(_filter_shapes.size(), std::min(_filter_biases_shapes.size(), std::min(_depthwise_out_shapes.size(), std::min(_weight_shapes.size(),
+                                                                                                                            std::min(_bias_shapes.size(), std::min(_dst_shapes.size(),
+                                                                                                                                    std::min(_depthwise_infos.size(), _pointwise_infos.size()))))))));
     }
 
-    void add_config(TensorShape src, TensorShape filter, TensorShape depthwise_out, TensorShape weights, TensorShape biases, TensorShape dst, PadStrideInfo depthwise_info, PadStrideInfo pointwise_info)
+    void add_config(TensorShape src, TensorShape filter, TensorShape filter_bias, TensorShape depthwise_out, TensorShape weights, TensorShape biases, TensorShape dst, PadStrideInfo depthwise_info,
+                    PadStrideInfo pointwise_info)
     {
         _src_shapes.emplace_back(std::move(src));
         _filter_shapes.emplace_back(std::move(filter));
+        _filter_biases_shapes.emplace_back(std::move(filter_bias));
         _depthwise_out_shapes.emplace_back(std::move(depthwise_out));
         _weight_shapes.emplace_back(std::move(weights));
         _bias_shapes.emplace_back(std::move(biases));
@@ -136,6 +145,7 @@ protected:
 private:
     std::vector<TensorShape>   _src_shapes{};
     std::vector<TensorShape>   _filter_shapes{};
+    std::vector<TensorShape>   _filter_biases_shapes{};
     std::vector<TensorShape>   _depthwise_out_shapes{};
     std::vector<TensorShape>   _weight_shapes{};
     std::vector<TensorShape>   _bias_shapes{};

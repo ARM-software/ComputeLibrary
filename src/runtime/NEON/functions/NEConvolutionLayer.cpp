@@ -136,10 +136,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     // Get parameters from conv_info
     unsigned int stride_x = 0;
     unsigned int stride_y = 0;
-    unsigned int pad_x    = 0;
-    unsigned int pad_y    = 0;
     std::tie(stride_x, stride_y) = conv_info.stride();
-    std::tie(pad_x, pad_y)       = conv_info.pad();
 
     // Get convolved dimensions
     unsigned int conv_w = 0;
@@ -190,9 +187,17 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     {
         if(_are_weights_reshaped)
         {
-            const unsigned int transpose_width = 16 / input->info()->element_size();
-            mat_weights_cols                   = weights_info.num_kernels();
-            mat_weights_rows                   = weights->info()->dimension(0) / transpose_width + (_has_bias ? 1 : 0);
+            if(_is_fully_connected_convolution)
+            {
+                mat_weights_cols = weights_info.num_kernels();
+                mat_weights_rows = weights->info()->dimension(1);
+            }
+            else
+            {
+                const unsigned int transpose_width = 16 / input->info()->element_size();
+                mat_weights_cols                   = weights_info.num_kernels();
+                mat_weights_rows                   = weights->info()->dimension(0) / transpose_width + (_has_bias ? 1 : 0);
+            }
         }
         else
         {
@@ -270,7 +275,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         // Configure matrix multiplication kernel
         if(_is_fully_connected_convolution)
         {
-            _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace, 1.f, 0.f, false, false);
+            _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace, 1.f, 0.f);
         }
         else
         {
@@ -295,7 +300,7 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     }
 
     _input_im2col_reshaped.allocator()->allocate();
-    _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
+    _output_col2im_kernel.configure(&_gemm_output, output, Size2D(conv_w, conv_h));
     _gemm_output.allocator()->allocate();
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");

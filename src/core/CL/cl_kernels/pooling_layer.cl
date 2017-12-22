@@ -186,10 +186,14 @@
 DATA_TYPE calculate_avg_scale(const int pool_size, const int upper_bound_w, const int upper_bound_h,
                               const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
-    const int start_x = get_global_id(0) * stride_x - pad_x;
-    const int start_y = get_global_id(1) * stride_y - pad_y;
+    int       start_x = get_global_id(0) * stride_x - pad_x;
+    int       start_y = get_global_id(1) * stride_y - pad_y;
     const int end_x   = min(start_x + pool_size, upper_bound_w);
     const int end_y   = min(start_y + pool_size, upper_bound_h);
+#if defined(EXCLUDE_PADDING)
+    start_x = max(0, start_x);
+    start_y = max(0, start_y);
+#endif /* defined(EXCLUDE_PADDING) */
     return ((end_y - start_y) * (end_x - start_x));
 }
 
@@ -334,10 +338,14 @@ VEC_DATA_TYPE(DATA_TYPE, 4)
 calculate_avg_scale4(const int pool_size, const int upper_bound_w, const int upper_bound_h,
                      const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
-    const int4 start_x = ((int4)get_global_id(0) * 4 + (int4)(0, 1, 2, 3)) * (int4)stride_x - (int4)pad_x;
-    const int  start_y = get_global_id(1) * stride_y - pad_y;
+    int4       start_x = ((int4)get_global_id(0) * 4 + (int4)(0, 1, 2, 3)) * (int4)stride_x - (int4)pad_x;
+    int        start_y = get_global_id(1) * stride_y - pad_y;
     const int4 end_x   = min(start_x + (int4)pool_size, (int4)upper_bound_w);
     const int  end_y   = min(start_y + pool_size, upper_bound_h);
+#if defined(EXCLUDE_PADDING)
+    start_x = max((int4)0, start_x);
+    start_y = max(0, start_y);
+#endif /* defined(EXCLUDE_PADDING) */
     return (VEC_DATA_TYPE(DATA_TYPE, 4))(1.f) / CONVERT_VECTOR4(DATA_TYPE)(((int4)(end_y - start_y)) * (end_x - start_x));
 }
 
@@ -367,7 +375,7 @@ calculate_avg_scale4(const int pool_size, const int upper_bound_w, const int upp
  * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
  */
-__kernel void pooling_layer_3_optimized(
+__kernel void pooling_layer_optimized_3(
     TENSOR3D_DECLARATION(input),
     TENSOR3D_DECLARATION(output))
 {
@@ -395,103 +403,6 @@ __kernel void pooling_layer_3_optimized(
 }
 #endif // defined(POOLING3x3) && !defined(FIXED_POINT_POSITION)
 
-/** Performs a pooling function of pool size equal to 7.
- *
- * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
- * @note In case of average pooling the following information must be passed at compile time:
- *       -DPOOL_AVG or -DPOOL_L2 must be provided otherwise max pooling will be performed.
- *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
- *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
- *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
- *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QS8/QS16/F16/F32
- * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
- * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
- * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the source image
- * @param[out] output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]  output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]  output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
- */
-__kernel void pooling_layer_7(
-    TENSOR3D_DECLARATION(input),
-    TENSOR3D_DECLARATION(output))
-{
-    // Get pixels pointer
-    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
-
-    // Load data
-    VEC_DATA_TYPE(DATA_TYPE, 8)
-    data0 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, 0));
-    VEC_DATA_TYPE(DATA_TYPE, 8)
-    data1 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 1, 0));
-    VEC_DATA_TYPE(DATA_TYPE, 8)
-    data2 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 2, 0));
-    VEC_DATA_TYPE(DATA_TYPE, 8)
-    data3 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 3, 0));
-    VEC_DATA_TYPE(DATA_TYPE, 8)
-    data4 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 4, 0));
-    VEC_DATA_TYPE(DATA_TYPE, 8)
-    data5 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 5, 0));
-    VEC_DATA_TYPE(DATA_TYPE, 8)
-    data6 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 6, 0));
-
-#if defined(POOL_L2)
-    // Raise to power of 2 for L2 Pooling
-    data0 = POW2_OP(data0, 8);
-    data1 = POW2_OP(data1, 8);
-    data2 = POW2_OP(data2, 8);
-    data3 = POW2_OP(data3, 8);
-    data4 = POW2_OP(data4, 8);
-    data5 = POW2_OP(data5, 8);
-    data6 = POW2_OP(data6, 8);
-#endif /* defined(POOL_L2) */
-
-    // Pool operation of all rows
-    data0 = POOL_OP(data0, data1);
-    data2 = POOL_OP(data2, data3);
-    data4 = POOL_OP(data4, data5);
-    data0 = POOL_OP(data0, data2);
-    data4 = POOL_OP(data4, data6);
-    data0 = POOL_OP(data0, data4);
-
-    // Set last element
-#if defined(POOL_AVG) || defined(POOL_L2)
-    data0.s7 = 0;
-#else  /* defined(POOL_AVG) || defined(POOL_L2) */
-    data0.s7 = data0.s6;
-#endif /* defined(POOL_AVG) || defined(POOL_L2) */
-
-    // Reduce result
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    reduce4 = POOL_OP(data0.s0123, data0.s4567);
-    VEC_DATA_TYPE(DATA_TYPE, 2)
-    reduce2       = POOL_OP(reduce4.s01, reduce4.s23);
-    DATA_TYPE res = POOL_OP(reduce2.s0, reduce2.s1);
-
-#if defined(POOL_AVG) || defined(POOL_L2)
-    // Divide by pool region in case of average pooling
-    res = DIV_OP(res, calculate_avg_scale(7, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
-#endif /* defined(POOL_AVG) || defined(POOL_L2) */
-
-#if defined(POOL_L2)
-    // Take square root of the result in L2 pooling
-    res = SQRT_OP(res);
-#endif /* defined(POOL_L2) */
-
-    // Store result
-    *(__global DATA_TYPE *)output.ptr = res;
-}
-
 #if defined(POOL_SIZE)
 
 // Set the initial value for the pooling operation accordingly with the data type
@@ -502,7 +413,6 @@ __kernel void pooling_layer_7(
 #define MIN_VAL_EXPAND(type) type##_MIN
 #define MIN_VAL(type) MIN_VAL_EXPAND(type)
 #define INITIAL_VALUE MIN_VAL(DATA_TYPE)
-#define INITIAL_VALUE 0
 #else // FIXED_POINT_POSITION
 #if FP16
 #define INITIAL_VALUE -HALF_MAX
@@ -515,7 +425,7 @@ __kernel void pooling_layer_7(
 
 /** Performs a pooling function of pool size equal to N
  *
- * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16/F32;
+ * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note -DFP16 must be passed at compile time if half float data type is used
  * @note Pool size must be passed using -DPOOL_SIZE e.g. -DPOOL_SIZE=13;
  * @note In case of average pooling the following information must be passed at compile time:
@@ -524,7 +434,7 @@ __kernel void pooling_layer_7(
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QS8/QS16/F16/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)

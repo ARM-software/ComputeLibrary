@@ -103,11 +103,11 @@ TYPE_ALIAS(int, qs32)
 #define CONVERT_SAT(x, type) CONVERT_SAT_STR(x, type)
 
 /** Computes saturating absolute value of fixed point vector.
-  *
-  * @param[in] type the actual data type.
-  *
-  * @return The result of the fixed point absolute value.
-  */
+ *
+ * @param[in] type the actual data type.
+ *
+ * @return The result of the fixed point absolute value.
+ */
 #define ABSQ_SAT_IMPL(type)                  \
     inline type abs_##type##_sat(type VopA)  \
     {                                        \
@@ -121,11 +121,11 @@ ABSQ_SAT_IMPL(qs16x8)
 #define ABS_SAT_OP_EXPAND(a, type, size) ABS_SAT_OP_EXPAND_STR(a, type, size)
 
 /** Computes max of fixed point types.
-  *
-  * @param[in] type the actual data type.
-  *
-  * @return The result of the fixed point maximum.
-  */
+ *
+ * @param[in] type the actual data type.
+ *
+ * @return The result of the fixed point maximum.
+ */
 #define MAXQ_IMPL(type)                          \
     inline type max_##type(type VopA, type VopB) \
     {                                            \
@@ -147,11 +147,11 @@ MAXQ_IMPL(qs16x16)
 #define MAX_OP_EXPAND(a, b, type, size) MAX_OP_EXPAND_STR(a, b, type, size)
 
 /** Computes saturated addition of fixed point types.
-  *
-  * @param[in] type the actual data type.
-  *
-  * @return The result of the fixed point addition. The result is saturated in case of overflow
-  */
+ *
+ * @param[in] type the actual data type.
+ *
+ * @return The result of the fixed point addition. The result is saturated in case of overflow
+ */
 #define ADDQ_SAT_IMPL(type)                          \
     inline type add_sat_##type(type VopA, type VopB) \
     {                                                \
@@ -178,11 +178,11 @@ ADDQ_SAT_IMPL(qs32x16)
 #define ADD_SAT_OP_EXPAND(a, b, type, size) ADD_SAT_OP_EXPAND_STR(a, b, type, size)
 
 /** Computes saturated subtraction of fixed point types.
-  *
-  * @param[in] type the actual data type.
-  *
-  * @return The result of the fixed point subtraction. The result is saturated in case of overflow
-  */
+ *
+ * @param[in] type the actual data type.
+ *
+ * @return The result of the fixed point subtraction. The result is saturated in case of overflow
+ */
 #define SUBQ_SAT_IMPL(type)                          \
     inline type sub_sat_##type(type VopA, type VopB) \
     {                                                \
@@ -258,12 +258,12 @@ MULQ_SAT_IMPL(qs16x16, qs32x16)
 #define MUL_SAT_OP_EXPAND(a, b, type, size, position) MUL_SAT_OP_EXPAND_STR(a, b, type, size, position)
 
 /** Saturate multiply-accumulate
-  *
-  * @param[in] type  the actual data type.
-  * @param[in] itype the intermediate data type.
-  *
-  * @return The result of the fixed point multiply-accumulate. The result is saturated in case of overflow
-  */
+ *
+ * @param[in] type  the actual data type.
+ * @param[in] itype the intermediate data type.
+ *
+ * @return The result of the fixed point multiply-accumulate. The result is saturated in case of overflow
+ */
 #define MLAQ_SAT_IMPL(type, itype)                                                                                 \
     type mla_sat_##type(type VopA, type VopB, type VopC, int fixed_point_position)                                 \
     {                                                                                                              \
@@ -279,12 +279,12 @@ MLAQ_SAT_IMPL(qs16x8, qs32x8)
 #define MLA_SAT_OP_EXPAND(a, b, c, type, size, position) MLA_SAT_OP_EXPAND_STR(a, b, c, type, size, position)
 
 /** Saturate multiply-accumulate long
-  *
-  * @param[in] type  the actual data type.
-  * @param[in] itype the intermediate data type.
-  *
-  * @return The result of the fixed point multiply-accumulate long. The result is saturated in case of overflow
-  */
+ *
+ * @param[in] type  the actual data type.
+ * @param[in] itype the intermediate data type.
+ *
+ * @return The result of the fixed point multiply-accumulate long. The result is saturated in case of overflow
+ */
 #define MLALQ_SAT_IMPL(type, itype)                                                                                \
     itype mlal_sat_##type(itype VopA, type VopB, type VopC, int fixed_point_position)                              \
     {                                                                                                              \
@@ -299,13 +299,13 @@ MLALQ_SAT_IMPL(qs16x8, qs32x8)
 #define MLAL_SAT_OP_EXPAND(a, b, c, type, size, position) MLAL_SAT_OP_EXPAND_STR(a, b, c, type, size, position)
 
 /** Saturate division of two fixed point vectors
-  *
-  * @param[in] stype the actual scalar data type.
-  * @param[in] type  the actual data type.
-  * @param[in] itype the intermediate data type.
-  *
-  * @return The result of the fixed point division. The result is saturated in case of overflow
-  */
+ *
+ * @param[in] stype the actual scalar data type.
+ * @param[in] type  the actual data type.
+ * @param[in] itype the intermediate data type.
+ *
+ * @return The result of the fixed point division. The result is saturated in case of overflow
+ */
 #define DIVQ_SAT_IMPL(stype, type, itype)                                                                                                                                           \
     inline type div_sat_##type(type VopA, type VopB, int fixed_point_position)                                                                                                      \
     {                                                                                                                                                                               \
@@ -329,15 +329,15 @@ DIVQ_SAT_IMPL(qs16, qs16, qs32)
 #define DIV_SAT_OP_VEC_EXPAND(a, b, type, size, position) DIV_SAT_OP_VEC_EXPAND_STR(a, b, type, size, position)
 
 /** Saturate exponential of a fixed point vector
-  *
-  * @note Implemented approach uses taylor polynomial to approximate the exponential function.
-  *
-  * @param[in] stype the actual scalar data type.
-  * @param[in] type  the actual data type.
-  * @param[in] size  the number of the calculated elements.
-  *
-  * @return The result of the fixed point exponential. The result is saturated in case of overflow
-  */
+ *
+ * @note Implemented approach uses taylor polynomial to approximate the exponential function.
+ *
+ * @param[in] stype the actual scalar data type.
+ * @param[in] type  the actual data type.
+ * @param[in] size  the number of the calculated elements.
+ *
+ * @return The result of the fixed point exponential. The result is saturated in case of overflow
+ */
 #define EXPQ_IMPL(stype, type, size)                                                                                                              \
     inline type exp_sat_##type(type VopA, int fixed_point_position)                                                                               \
     {                                                                                                                                             \
@@ -359,7 +359,12 @@ DIVQ_SAT_IMPL(qs16, qs16, qs32)
         return select((type)stype##_MAX, select(sum << dec_m, sum >> -dec_m, dec_m < (type)0), clz(sum) > dec_m); /* Saturate result if needed */ \
     }
 
+EXPQ_IMPL(qs8, qs8x2, 2)
+EXPQ_IMPL(qs8, qs8x4, 4)
+EXPQ_IMPL(qs8, qs8x8, 8)
 EXPQ_IMPL(qs8, qs8x16, 16)
+EXPQ_IMPL(qs16, qs16x2, 2)
+EXPQ_IMPL(qs16, qs16x4, 4)
 EXPQ_IMPL(qs16, qs16x8, 8)
 EXPQ_IMPL(qs16, qs16x16, 16)
 
@@ -367,15 +372,15 @@ EXPQ_IMPL(qs16, qs16x16, 16)
 #define EXP_OP_EXPAND(a, type, size, position) EXP_OP_EXPAND_STR(a, type, size, position)
 
 /** Saturate logarithm of a fixed point vector
-  *
-  * @note Implemented approach uses taylor polynomial to approximate the logarithm function.
-  *
-  * @param[in] stype the actual scalar data type.
-  * @param[in] type  the actual data type.
-  * @param[in] size  the number of the calculated elements.
-  *
-  * @return The result of the fixed point logarithm. The result is saturated in case of overflow
-  */
+ *
+ * @note Implemented approach uses taylor polynomial to approximate the logarithm function.
+ *
+ * @param[in] stype the actual scalar data type.
+ * @param[in] type  the actual data type.
+ * @param[in] size  the number of the calculated elements.
+ *
+ * @return The result of the fixed point logarithm. The result is saturated in case of overflow
+ */
 #define LOGQ_IMPL(stype, type, size)                                                                                                       \
     inline type log_sat_##type(type VopA, int fixed_point_position)                                                                        \
     {                                                                                                                                      \
@@ -405,15 +410,15 @@ LOGQ_IMPL(qs16, qs16x16, 16)
 #define LOG_OP_EXPAND(a, type, size, position) LOG_OP_EXPAND_STR(a, type, size, position)
 
 /** Saturate inverse square root of a fixed point vector
-  *
-  * @note Implemented approach uses Newton's method to approximate the inverse square root function.
-  *
-  * @param[in] stype the actual scalar data type.
-  * @param[in] type  the actual data type.
-  * @param[in] size  the number of the calculated elements.
-  *
-  * @return The result of the fixed point inverse square root. The result is saturated in case of overflow
-  */
+ *
+ * @note Implemented approach uses Newton's method to approximate the inverse square root function.
+ *
+ * @param[in] stype the actual scalar data type.
+ * @param[in] type  the actual data type.
+ * @param[in] size  the number of the calculated elements.
+ *
+ * @return The result of the fixed point inverse square root. The result is saturated in case of overflow
+ */
 #define INVSQRTQ_IMPL(stype, type, size)                                                                                                                                                                                               \
     inline type invsqrt_sat_##type(type VopA, int fixed_point_position)                                                                                                                                                                \
     {                                                                                                                                                                                                                                  \
@@ -442,15 +447,15 @@ INVSQRTQ_IMPL(qs16, qs16x8, 8)
 #define INVSQRT_OP_EXPAND(a, type, size, position) INVSQRT_OP_EXPAND_STR(a, type, size, position)
 
 /** Saturate hyperbolic tangent of a fixed point vector
-  *
-  * tanh(x) = (e^2x - 1)/(e^2x + 1)
-  *
-  * @param[in] stype the actual scalar data type.
-  * @param[in] type  the actual data type.
-  * @param[in] size  the number of the calculated elements.
-  *
-  * @return The result of the fixed point hyperbolic tangent. The result is saturated in case of overflow
-  */
+ *
+ * tanh(x) = (e^2x - 1)/(e^2x + 1)
+ *
+ * @param[in] stype the actual scalar data type.
+ * @param[in] type  the actual data type.
+ * @param[in] size  the number of the calculated elements.
+ *
+ * @return The result of the fixed point hyperbolic tangent. The result is saturated in case of overflow
+ */
 #define TANHQ_IMPL(stype, type, size)                                                                                                             \
     inline type tanh_sat_##type(type VopA, int fixed_point_position)                                                                              \
     {                                                                                                                                             \

@@ -35,12 +35,12 @@ CLDepthwiseSeparableConvolutionLayer::CLDepthwiseSeparableConvolutionLayer()
 {
 }
 
-void CLDepthwiseSeparableConvolutionLayer::configure(ICLTensor *input, const ICLTensor *depthwise_weights, ICLTensor *depthwise_out, const ICLTensor *pointwise_weights, const ICLTensor *biases,
-                                                     ICLTensor           *output,
+void CLDepthwiseSeparableConvolutionLayer::configure(ICLTensor *input, const ICLTensor *depthwise_weights, const ICLTensor *depthwise_biases, ICLTensor *depthwise_out,
+                                                     const ICLTensor *pointwise_weights, const ICLTensor *pointwise_biases, ICLTensor *output,
                                                      const PadStrideInfo &depthwise_conv_info, const PadStrideInfo &pointwise_conv_info)
 {
-    _depthwise_conv.configure(input, depthwise_out, depthwise_weights, depthwise_conv_info);
-    _pointwise_conv.configure(depthwise_out, pointwise_weights, biases, output, pointwise_conv_info);
+    _depthwise_conv.configure(input, depthwise_weights, depthwise_biases, depthwise_out, depthwise_conv_info);
+    _pointwise_conv.configure(depthwise_out, pointwise_weights, pointwise_biases, output, pointwise_conv_info);
 }
 
 void CLDepthwiseSeparableConvolutionLayer::run()

@@ -50,7 +50,7 @@ void WallClockTimer::stop()
 Instrument::MeasurementsMap WallClockTimer::measurements() const
 {
     const auto delta = std::chrono::duration_cast<std::chrono::microseconds>(_stop - _start);
-    return MeasurementsMap{ { "Wall clock time", Measurement(delta.count(), "us") } };
+    return MeasurementsMap{ { "Wall clock time", Measurement(delta.count() / _scale_factor, _unit) } };
 }
 } // namespace framework
 } // namespace test

@@ -26,12 +26,19 @@
 
 #include "arm_compute/graph/nodes/ActivationLayer.h"
 #include "arm_compute/graph/nodes/BatchNormalizationLayer.h"
+#include "arm_compute/graph/nodes/BranchLayer.h"
 #include "arm_compute/graph/nodes/ConvolutionLayer.h"
+#include "arm_compute/graph/nodes/DepthConvertLayer.h"
+#include "arm_compute/graph/nodes/DepthwiseConvolutionLayer.h"
+#include "arm_compute/graph/nodes/DequantizationLayer.h"
+#include "arm_compute/graph/nodes/FlattenLayer.h"
 #include "arm_compute/graph/nodes/FloorLayer.h"
 #include "arm_compute/graph/nodes/FullyConnectedLayer.h"
 #include "arm_compute/graph/nodes/L2NormalizeLayer.h"
 #include "arm_compute/graph/nodes/NormalizationLayer.h"
 #include "arm_compute/graph/nodes/PoolingLayer.h"
+#include "arm_compute/graph/nodes/QuantizationLayer.h"
+#include "arm_compute/graph/nodes/ReshapeLayer.h"
 #include "arm_compute/graph/nodes/SoftmaxLayer.h"
 
 #endif /* __ARM_COMPUTE_GRAPH_NODES_H__ */

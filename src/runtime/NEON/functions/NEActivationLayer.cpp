@@ -34,3 +34,8 @@ void NEActivationLayer::configure(ITensor *input, ITensor *output, ActivationLay
     k->configure(input, output, activation_info);
     _kernel = std::move(k);
 }
+
+Status NEActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+{
+    return NEActivationLayerKernel::validate(input, output, act_info);
+}

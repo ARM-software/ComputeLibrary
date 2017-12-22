@@ -43,9 +43,9 @@ namespace
 {
 const auto data_types = framework::dataset::make("DataType",
 {
-#if ARM_COMPUTE_ENABLE_FP16
+#if __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     DataType::F16,
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     DataType::F32,
     DataType::QS8
 });

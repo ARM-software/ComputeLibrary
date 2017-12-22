@@ -354,7 +354,7 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
 {
     std::lock_guard<std::mutex> guard(_format_lock);
 
-    const RawTensor *ptr = _cache.find(std::make_tuple(name, format));
+    const RawTensor *ptr = _cache.find(std::forward_as_tuple(name, format));
 
     if(ptr != nullptr)
     {
@@ -370,14 +370,14 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
         raw = std::move(dst);
     }
 
-    return _cache.add(std::make_tuple(name, format), std::move(raw));
+    return _cache.add(std::forward_as_tuple(name, format), std::move(raw));
 }
 
 const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &name, Format format, Channel channel) const
 {
     std::lock_guard<std::mutex> guard(_channel_lock);
 
-    const RawTensor *ptr = _cache.find(std::make_tuple(name, format, channel));
+    const RawTensor *ptr = _cache.find(std::forward_as_tuple(name, format, channel));
 
     if(ptr != nullptr)
     {
@@ -385,11 +385,11 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
     }
 
     const RawTensor &src = get(name, format);
-    RawTensor        dst(src.shape(), get_channel_format(channel));
+    RawTensor dst(src.shape(), get_channel_format(channel));
 
     (*get_extractor(format, channel))(src, dst);
 
-    return _cache.add(std::make_tuple(name, format, channel), std::move(dst));
+    return _cache.add(std::forward_as_tuple(name, format, channel), std::move(dst));
 }
 
 TensorShape AssetsLibrary::get_image_shape(const std::string &name)

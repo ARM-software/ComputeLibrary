@@ -32,9 +32,9 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/ConvolutionLayer.h"
-#include "tests/validation/CPP/Utils.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/ConvolutionLayer.h"
+#include "tests/validation/reference/Utils.h"
 
 #include <random>
 
@@ -47,17 +47,24 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ConvolutionValidationFixedPointFixture : public framework::Fixture
+class ConvolutionValidationGenericFixture : public framework::Fixture
 {
 public:
-    template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, bool reshape_weights, DataType data_type, int fractional_bits)
-    {
-        _fractional_bits = fractional_bits;
-        _data_type       = data_type;
+    using TBias = typename std::conditional<std::is_same<typename std::decay<T>::type, uint8_t>::value, int32_t, T>::type;
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, data_type, fractional_bits);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, fractional_bits);
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, bool reshape_weights,
+               DataType data_type, int fractional_bits, QuantizationInfo quantization_info)
+    {
+        _data_type         = data_type;
+        _is_quantized      = is_data_type_quantized_asymmetric(data_type);
+        _bias_data_type    = _is_quantized ? DataType::S32 : data_type;
+        _fractional_bits   = fractional_bits;
+        _quantization_info = quantization_info;
+
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info);
     }
 
 protected:
@@ -66,6 +73,18 @@ protected:
     {
         switch(tensor.data_type())
         {
+            case DataType::QASYMM8:
+            {
+                std::uniform_int_distribution<uint8_t> distribution(0, 3);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            case DataType::S32:
+            {
+                std::uniform_int_distribution<int32_t> distribution(-100, 100);
+                library->fill(tensor, distribution, i);
+                break;
+            }
             case DataType::F16:
             case DataType::F32:
             {
@@ -79,7 +98,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                              bool reshape_weights, DataType data_type, int fixed_point_position)
+                              bool reshape_weights)
     {
         WeightsInfo weights_info(!reshape_weights, weights_shape.x(), weights_shape.y(), weights_shape[3]);
         TensorShape reshaped_weights_shape(weights_shape);
@@ -90,15 +109,16 @@ protected:
             const bool is_fully_connected_convolution = (output_shape.x() == 1 && output_shape.y() == 1);
             bool       is_optimised                   = false;
 #if defined(__arm__)
-            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && data_type == DataType::F32;
+            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && _data_type == DataType::F32;
 #elif defined(__aarch64__)
-            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && data_type == DataType::F32;
+            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && _data_type == DataType::F32;
 #endif /* defined(__arm__) || defined(__aarch64__) */
 
             reshaped_weights_shape.collapse(3);
 
-            if(bias_shape.total_size() > 0)
+            if(bias_shape.total_size() > 0 && !_is_quantized)
             {
+                // Add bias to the weights reshaped matrix
                 reshaped_weights_shape.set(0, reshaped_weights_shape.x() + 1);
             }
 
@@ -110,17 +130,17 @@ protected:
             }
             else
             {
-                const int interleave_width = 16 / data_size_from_type(data_type);
+                const int interleave_width = 16 / data_size_from_type(_data_type);
                 reshaped_weights_shape.set(0, reshaped_weights_shape.x() * interleave_width);
                 reshaped_weights_shape.set(1, static_cast<unsigned int>(std::ceil(reshaped_weights_shape.y() / static_cast<float>(interleave_width))));
             }
         }
 
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, fixed_point_position);
-        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, data_type, 1, fixed_point_position);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1, fixed_point_position);
-        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, fixed_point_position);
+        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _fractional_bits, _quantization_info);
+        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _data_type, 1, _fractional_bits, _quantization_info);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info);
+        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _fractional_bits, _quantization_info);
 
         // Create and configure function
         FunctionType conv;
@@ -150,20 +170,28 @@ protected:
             const bool is_fully_connected_convolution = (output_shape.x() == 1 && output_shape.y() == 1);
             bool       is_optimised                   = false;
 #if defined(__arm__)
-            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && data_type == DataType::F32;
+            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && _data_type == DataType::F32;
 #elif defined(__aarch64__)
-            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && data_type == DataType::F32;
+            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && _data_type == DataType::F32;
 #endif /* defined(__arm__) || defined(__aarch64__) */
 
             TensorShape     tmp_weights_shape(weights_shape);
-            SimpleTensor<T> tmp_weights(tmp_weights_shape, data_type, 1, fixed_point_position);
-            SimpleTensor<T> tmp_bias(bias_shape, data_type, 1, fixed_point_position);
+            SimpleTensor<T> tmp_weights(tmp_weights_shape, _data_type, 1, _fractional_bits, _quantization_info);
 
             // Fill with original shape
             fill(tmp_weights, 1);
-            fill(tmp_bias, 2);
 
-            tmp_weights = linearise_weights(tmp_weights, &tmp_bias);
+            if(_is_quantized)
+            {
+                fill(AccessorType(bias), 2);
+                tmp_weights = linearise_weights(tmp_weights);
+            }
+            else
+            {
+                SimpleTensor<T> tmp_bias(bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info);
+                fill(tmp_bias, 2);
+                tmp_weights = linearise_weights(tmp_weights, &tmp_bias);
+            }
 
             if(!is_fully_connected_convolution && !is_optimised)
             {
@@ -192,13 +220,12 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                                      DataType data_type, int fixed_point_position)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, fixed_point_position };
-        SimpleTensor<T> weights{ weights_shape, data_type, 1, fixed_point_position };
-        SimpleTensor<T> bias{ bias_shape, data_type, 1, fixed_point_position };
+        SimpleTensor<T>     src{ input_shape, _data_type, 1, _fractional_bits, _quantization_info };
+        SimpleTensor<T>     weights{ weights_shape, _data_type, 1, _fractional_bits, _quantization_info };
+        SimpleTensor<TBias> bias{ bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info };
 
         // Fill reference
         fill(src, 0);
@@ -208,10 +235,13 @@ protected:
         return reference::convolution_layer<T>(src, weights, bias, output_shape, info);
     }
 
-    TensorType      _target{};
-    SimpleTensor<T> _reference{};
-    int             _fractional_bits{};
-    DataType        _data_type{};
+    TensorType       _target{};
+    SimpleTensor<T>  _reference{};
+    DataType         _data_type{};
+    DataType         _bias_data_type{};
+    int              _fractional_bits{};
+    QuantizationInfo _quantization_info{};
+    bool             _is_quantized = false;
 
 private:
     template <typename U>
@@ -241,7 +271,6 @@ private:
 
             dst[dst_idx] = weights[weights_idx];
         }
-
         if(biases != nullptr)
         {
             // Fill last row with biases
@@ -260,13 +289,37 @@ private:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ConvolutionValidationFixture : public ConvolutionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
+class ConvolutionValidationFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, bool reshape_weights, DataType data_type)
     {
-        ConvolutionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, data_type, 0);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, data_type, 0, QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ConvolutionValidationFixedPointFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, bool reshape_weights, DataType data_type, int fractional_bits)
+    {
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, data_type, fractional_bits,
+                                                                                              QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ConvolutionValidationQuantizedFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, bool reshape_weights, DataType data_type,
+               QuantizationInfo quantization_info)
+    {
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, data_type, 0, quantization_info);
     }
 };
 } // namespace validation

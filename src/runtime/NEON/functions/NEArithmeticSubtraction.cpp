@@ -36,3 +36,7 @@ void NEArithmeticSubtraction::configure(const ITensor *input1, const ITensor *in
     k->configure(input1, input2, output, policy);
     _kernel = std::move(k);
 }
+Status NEArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+{
+    return NEArithmeticSubtractionKernel::validate(input1, input2, output, policy);
+}

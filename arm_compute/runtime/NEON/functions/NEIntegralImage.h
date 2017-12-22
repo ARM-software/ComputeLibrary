@@ -35,10 +35,10 @@ class NEIntegralImage : public INESimpleFunction
 {
 public:
     /** Initialise the function's source, destinations and border mode.
-        *
-        * @param[in]  input  Source tensor. Data type supported: U8.
-        * @param[out] output Destination tensor. Data type supported: U32.
-        */
+     *
+     * @param[in]  input  Source tensor. Data type supported: U8.
+     * @param[out] output Destination tensor. Data type supported: U32.
+     */
     void configure(const ITensor *input, ITensor *output);
 };
 }

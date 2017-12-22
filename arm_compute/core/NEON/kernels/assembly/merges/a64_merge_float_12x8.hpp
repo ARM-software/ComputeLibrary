@@ -226,7 +226,7 @@ inline void MergeResults<12, 8>(float *out, const float *in, const int ldout, co
                   [outptr4] "+r" (outptr4), [outptr5] "+r" (outptr5), [outptr6] "+r" (outptr6), [outptr7] "+r" (outptr7),
                   [inptr] "+r" (inptr)
                 : [av] "w" (av), [bv] "w" (bv)
-                : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q16", "q17", "q18", "q19", "q20", "q21"
+                : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v16", "v17", "v18", "v19", "v20", "v21"
                 );
             }
         }

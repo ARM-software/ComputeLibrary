@@ -49,7 +49,7 @@ public:
      * @param[in]      border_mode           Border mode to use for the convolution.
      * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
-    void configure(ITensor *input, ITensor *output, BorderMode border_mode, uint8_t constant_border_value);
+    void configure(ITensor *input, ITensor *output, BorderMode border_mode, uint8_t constant_border_value = 0);
 };
 }
 #endif /*__ARM_COMPUTE_NEERODE_H__ */

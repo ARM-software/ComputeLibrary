@@ -152,6 +152,24 @@ inline std::string tolower(std::string string)
     });
     return string;
 }
+
+/** Create a string with the arithmetic value in full precision.
+ *
+ * @param val            Arithmetic value
+ * @param decimal_places How many decimal places to show
+ *
+ * @return String with the arithmetic value.
+ */
+template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
+inline std::string arithmetic_to_string(T val, int decimal_places = 0)
+{
+    std::stringstream ss;
+    ss << std::fixed;
+    ss.precision((decimal_places) ? decimal_places : std::numeric_limits<T>::digits10 + 1);
+    ss << val;
+    return ss.str();
+}
+
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

@@ -32,7 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/ReductionOperation.h"
+#include "tests/validation/reference/ReductionOperation.h"
 
 namespace arm_compute
 {

@@ -49,6 +49,8 @@ constexpr float                     tolerance_num = 0.07f; /**< Tolerance number
 
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<float> tolerance_fixed_point(1.f);
+/** Tolerance for quantized asymmetric operations */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -57,6 +59,7 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F32,
     DataType::QS8,
     DataType::QS16,
+    DataType::QASYMM8,
 });
 
 const auto FullyConnectedParameters = combine(framework::dataset::make("TransposeWeights", { false, true }), framework::dataset::make("ReshapeWeights", { false, true }));
@@ -71,7 +74,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                src_shape, weights_shape, bias_shape, dst_shape, transpose_weights, reshape_weights, data_type)
 {
     // Set fixed point position data type allowed
-    int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
+    const int              fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
+    const DataType         bias_data_type       = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
+    const QuantizationInfo quantization_info    = is_data_type_quantized_asymmetric(data_type) ? QuantizationInfo(2.f / 255.f, 127) : QuantizationInfo();
 
     TensorShape ws(weights_shape);
 
@@ -84,15 +89,18 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     }
 
     // Create tensors
-    CLTensor src     = create_tensor<CLTensor>(src_shape, data_type, 1, fixed_point_position);
-    CLTensor weights = create_tensor<CLTensor>(ws, data_type, 1, fixed_point_position);
-    CLTensor bias    = create_tensor<CLTensor>(bias_shape, data_type, 1, fixed_point_position);
-    CLTensor dst     = create_tensor<CLTensor>(dst_shape, data_type, 1, fixed_point_position);
+    CLTensor src     = create_tensor<CLTensor>(src_shape, data_type, 1, fixed_point_position, quantization_info);
+    CLTensor weights = create_tensor<CLTensor>(ws, data_type, 1, fixed_point_position, quantization_info);
+    CLTensor bias    = create_tensor<CLTensor>(bias_shape, bias_data_type, 1, fixed_point_position, quantization_info);
+    CLTensor dst     = create_tensor<CLTensor>(dst_shape, data_type, 1, fixed_point_position, quantization_info);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    const QuantizationInfo src_quantization_info     = src.info()->quantization_info();
+    const QuantizationInfo weights_quantization_info = weights.info()->quantization_info();
 
     // Create and configure function.
     CLFullyConnectedLayer fc;
@@ -101,6 +109,10 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);
     validate(dst.info()->valid_region(), dst_valid_region);
+
+    // Validate QuantizationInfo
+    ARM_COMPUTE_EXPECT(src.info()->quantization_info() == src_quantization_info, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
 }
 
 template <typename T>
@@ -143,7 +155,7 @@ TEST_SUITE_END()
 template <typename T>
 using CLFullyConnectedLayerFixedPointFixture = FullyConnectedLayerValidationFixedPointFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T, false>;
 
-TEST_SUITE(Quantized)
+TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
@@ -185,6 +197,32 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixedPointFixture<int16_t>
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed_point);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using CLFullyConnectedLayerQuantizedFixture = FullyConnectedLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T, false>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(
+                           combine(datasets::SmallFullyConnectedLayerDataset(),
+                                   FullyConnectedParameters),
+                           framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(
+                           combine(datasets::LargeFullyConnectedLayerDataset(),
+                                   FullyConnectedParameters),
+                           framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 256.f, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

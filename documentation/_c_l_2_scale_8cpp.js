@@ -1,13 +1,13 @@
 var _c_l_2_scale_8cpp =
 [
     [ "CLScaleFixture", "_c_l_2_scale_8cpp.xhtml#a7c041e59e49d4ca416b7e060f0907c33", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#aac5ebbe30a422715cbafb5eeeea9a019", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a8e0e3d1580a984ca55ae386fab4713da", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a8e40d7e8a1f9c6b7b82c48fe7791ca0e", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#ad56b7cbd5d67850e86cda068bbee8b68", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a874ec98b8ddc27a6f5320715f957e33e", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#ae2f9dfd2349b1d6f47846b7033cdae1c", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#aafdc230053dc499036b513f6d1df135e", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a0448932f50ac480587cc68499c5cf840", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a99b2f82c44855f6d5511072f8b8a6af8", null ]
+    [ "DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a8faa3a9f1711901fe067c566a1a09f7b", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a593994b1b5e384509b5cadadc71806ed", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#acbcf9329d62199f70eae5c18b7ba124b", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#ac12f413cb3ef0e503b3c7b484ba16323", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#aed4fea76ee6b2a8eede8dcacd2ac6c43", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#abcbc211d8c78202a53bfd54b36218f31", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a66b76e66895fab177f0d32c591965ae4", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a4cc367819f108c05184cf5a251f6ac1a", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_scale_8cpp.xhtml#a16a8a33096dbfc74938a89ace32da707", null ]
 ];

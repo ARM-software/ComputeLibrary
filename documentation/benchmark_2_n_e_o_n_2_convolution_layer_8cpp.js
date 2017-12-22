@@ -11,6 +11,6 @@ var benchmark_2_n_e_o_n_2_convolution_layer_8cpp =
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a3df552423cbf598c725b9dc615f06315", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a4470fc8180788f756fccdb77f9a25886", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a029d80ad64be335749e827cc64efd88c", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a68166bcb788035f5a6c17fe0c68ae730", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a07da1bf46f895627de5c87fddea485e2", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a0ca04d4de125be45c16b579b43d53835", null ]
 ];

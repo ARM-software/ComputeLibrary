@@ -1,7 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml" title="Tensor accessor interface. " alt="" coords="5,81,127,108"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml" title="Dummy accessor class. " alt="" coords="177,5,299,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml" title="Numpy Binary loader class. " alt="" coords="176,56,300,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1graph__utils_1_1_p_p_m_writer.xhtml" title="PPM writer class. " alt="" coords="195,107,281,133"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1graph__utils_1_1_random_accessor.xhtml" title="Random accessor class. " alt="" coords="175,157,301,184"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_multi_image.xhtml" title="Interface for multi&#45;planar images. " alt="" coords="5,31,100,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_multi_image.xhtml" title="Interface for OpenCL multi&#45;planar images. " alt="" coords="148,5,259,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_multi_image.xhtml" title="Basic implementation of the multi&#45;planar image interface. " alt="" coords="157,56,249,83"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_multi_image.xhtml" title="Basic implementation of the CL multi&#45;planar image interface. " alt="" coords="307,5,415,32"/>
 </map>

@@ -51,7 +51,7 @@ constexpr float COEFF1       = 0.0663f;
 constexpr float COEFF2       = 0.2447f;
 } // namespace
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 namespace fp16
 {
 inline float16x8_t inv(float16x8_t x)
@@ -143,7 +143,7 @@ inline float32x4_t sqrtv(float32x4_t x)
 
 inline int16x8_t magnitude_l1(int16x8_t input1, int16x8_t input2)
 {
-    return vqaddq_s16(vabsq_s16(input1), vabsq_s16(input2));
+    return vqaddq_s16(vqabsq_s16(input1), vqabsq_s16(input2));
 }
 
 inline int16x8_t magnitude_l2(int16x8_t input1, int16x8_t input2)
@@ -429,7 +429,7 @@ template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L1NORM, Ph
 template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L2NORM, PhaseType::SIGNED>;
 template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L1NORM, PhaseType::UNSIGNED>;
 template class arm_compute::NEMagnitudePhaseFP16Kernel<MagnitudeType::L2NORM, PhaseType::UNSIGNED>;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 namespace
 {
@@ -575,11 +575,8 @@ inline int16x8_t magnitude_l2(int16x8_t input1, int16x8_t input2)
 
 inline int16x8_t magnitude_l1(int16x8_t input1, int16x8_t input2)
 {
-    int16x8_t gx_abs = vabsq_s16(input1);
-    int16x8_t gy_abs = vabsq_s16(input2);
-
     /* Saturating add */
-    return vqaddq_s16(gx_abs, gy_abs);
+    return vqaddq_s16(vqabsq_s16(input1), vqabsq_s16(input2));
 }
 
 inline uint8x8_t phase_signed(int16x8_t input1, int16x8_t input2)

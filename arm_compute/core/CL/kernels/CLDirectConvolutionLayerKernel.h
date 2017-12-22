@@ -56,22 +56,37 @@ public:
      *        5x5 convolution with stride_x = 1/2, stride_y = 1/2
      *
      * @param[in]  input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
-     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/F16/F32.
+     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/QS8/QS16/F16/F32.
      * @param[in]  weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
      *                       The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                       Data type supported:Same as @p input.
-     * @param[in]  biases    Biases tensor. Biases are 1D tensor with dimension [OFM]. Data type supported: Same as @p input.
+     * @param[in]  biases    Biases tensor. Biases are 1D tensor with dimension [OFM].
+     *                       Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type
      * @param[out] output    Output tensor.
      *                       The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
-
-    // Inherited methods overridden:
-    BorderSize border_size() const override;
+    /** Static function to check if given info will lead to a valid configuration of @ref CLDirectConvolutionLayerKernel
+     *
+     * @param[in] input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
+     *                      while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                      The 3rd dimension must be the same as the input's volume 3rd dimension.
+     *                      Data type supported:Same as @p input.
+     * @param[in] biases    Biases tensor. Biases are 1D tensor with dimension [OFM]. Data type supported: Same as @p input.
+     * @param[in] output    Output tensor.
+     *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
+     * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in] target    Target GPU architecture.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, const GPUTarget target);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
+    BorderSize border_size() const override;
 
 private:
     const ICLTensor *_input;
@@ -79,8 +94,6 @@ private:
     const ICLTensor *_weights;
     ICLTensor       *_output;
     BorderSize       _border_size;
-    int              _conv_pad_x;
-    int              _conv_pad_y;
     int              _conv_stride_x;
     int              _conv_stride_y;
 };

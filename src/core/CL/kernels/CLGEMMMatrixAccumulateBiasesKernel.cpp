@@ -51,18 +51,23 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
     _biases = biases;
     _accum  = accum;
 
-    std::set<std::string> build_opts;
-    build_opts.insert(("-DDATA_TYPE=" + get_cl_type_from_data_type(accum->info()->data_type())));
-    if(is_data_type_fixed_point(accum->info()->data_type()))
-    {
-        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(accum->info()->fixed_point_position()));
-    }
+    // Get the target architecture
+    GPUTarget arch_target = get_arch_from_target(get_target());
+    // Select the vector size to use (8 for Bifrost; 16 for Midgard).
+    const unsigned int vector_size = (arch_target == GPUTarget::BIFROST) ? 8 : 16;
+
+    // Add build options
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(accum->info()->data_type()));
+    build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
+    build_opts.add_option_if(is_data_type_fixed_point(accum->info()->data_type()),
+                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(accum->info()->fixed_point_position()));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_accumulate_biases", build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_accumulate_biases", build_opts.options()));
 
     // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = 16;
+    const unsigned int num_elems_processed_per_iteration = vector_size;
 
     Window win = calculate_max_window(*_accum->info(), Steps(num_elems_processed_per_iteration));
 
@@ -92,7 +97,7 @@ void CLGEMMMatrixAccumulateBiasesKernel::run(const Window &window, cl::CommandQu
         add_2D_tensor_argument(idx, _accum, accum_slice);
         add_1D_tensor_argument(idx, _biases, biases_slice);
 
-        enqueue(queue, *this, accum_slice);
+        enqueue(queue, *this, accum_slice, _lws_hint);
     }
     while(window.slide_window_slice_2D(accum_slice));
 }

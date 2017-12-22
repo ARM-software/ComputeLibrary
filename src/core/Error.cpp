@@ -28,29 +28,44 @@
 #include <iostream>
 #include <stdexcept>
 
-void arm_compute::error(const char *function, const char *file, const int line, const char *msg, ...)
+using namespace arm_compute;
+
+Status arm_compute::create_error_va_list(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, va_list args)
 {
-    char    out[512];
+    char out[512];
+    int  offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
+    vsnprintf(out + offset, sizeof(out) - offset, msg, args);
+
+    return Status(error_code, std::string(out));
+}
+
+Status arm_compute::create_error(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, ...)
+{
     va_list args;
     va_start(args, msg);
-    int offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
-    vsnprintf(out + offset, sizeof(out) - offset, msg, args);
+    auto err = create_error_va_list(error_code, function, file, line, msg, args);
     va_end(args);
+    return err;
+}
 
+void arm_compute::error(const char *function, const char *file, const int line, const char *msg, ...)
+{
+    va_list args;
+    va_start(args, msg);
+    auto err = create_error_va_list(ErrorCode::RUNTIME_ERROR, function, file, line, msg, args);
+    va_end(args);
 #ifndef ARM_NO_EXCEPTIONS
-    throw std::runtime_error(std::string(out));
+    throw std::runtime_error(err.error_description());
 #else
-    std::cout << std::string(out) << std::endl;
+    std::cout << err.error_description() << std::endl;
 #endif // ARM_NO_EXCEPTIONS
 }
 
-void arm_compute::debug(const char *function, const char *file, const int line, const char *msg, ...)
+void Status::internal_throw_on_error()
 {
-    char    out[512];
-    va_list args;
-    va_start(args, msg);
-    int offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
-    vsnprintf(out + offset, sizeof(out) - offset, msg, args);
-    va_end(args);
-    std::cout << std::string(out) << std::endl;
+#ifndef ARM_NO_EXCEPTIONS
+    throw std::runtime_error(_error_description);
+#else
+    std::cout << _error_description << std::endl;
+#endif // ARM_NO_EXCEPTIONS
 }

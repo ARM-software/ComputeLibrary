@@ -19,6 +19,8 @@ var _validation_8h =
     [ "validate", "_validation_8h.xhtml#a47bc8966b6ed3446daaf27aa413047c1", null ],
     [ "validate", "_validation_8h.xhtml#a6c19347e16069660a1a3ae62e1d607ee", null ],
     [ "validate", "_validation_8h.xhtml#a6c4e463dd04d06dc641fe48308e13334", null ],
-    [ "validate_keypoints", "_validation_8h.xhtml#a57d896840ba5d9a4cf57131b6ba02667", null ],
-    [ "validate_min_max_loc", "_validation_8h.xhtml#a5c338bd61fcc9acab23cf1bb8bb57539", null ]
+    [ "validate_keypoints", "_validation_8h.xhtml#a7f99d2d87d24921c41c66388243f27c1", null ],
+    [ "validate_min_max_loc", "_validation_8h.xhtml#a5c338bd61fcc9acab23cf1bb8bb57539", null ],
+    [ "validate_wrap", "_validation_8h.xhtml#a1ee57e5e1f775f2c270c4adf0b4940a7", null ],
+    [ "validate_wrap", "_validation_8h.xhtml#ad942ec0b881182d0771083c811822bb8", null ]
 ];

@@ -8,7 +8,7 @@ var benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp =
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a4b45a5a8afe0c81a4aafef1ba2ba96e8", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a4325316dca63988d0c63c8e761143557", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a4ecb06077e2a789221648d0479e61809", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#adeee41f0a436718ca296fc99f2e2a151", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a5ae8d8668836305ebff7acd820dc4aa2", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#af5e14e7ca5ce517a75fb019b02108797", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml#a1d77d86fcdca1b8578756eae70fcac85", null ]
 ];

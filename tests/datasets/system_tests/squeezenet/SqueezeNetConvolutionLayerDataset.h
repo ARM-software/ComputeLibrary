@@ -37,6 +37,22 @@ namespace test
 {
 namespace datasets
 {
+class SqueezeNetWinogradLayerDataset final : public ConvolutionLayerDataset
+{
+public:
+    SqueezeNetWinogradLayerDataset()
+    {
+        // fire2/expand3x3, fire3/expand3x3
+        add_config(TensorShape(55U, 55U, 16U), TensorShape(3U, 3U, 16U, 64U), TensorShape(64U), TensorShape(55U, 55U, 64U), PadStrideInfo(1, 1, 1, 1));
+        // fire4/expand3x3, fire5/expand3x3
+        add_config(TensorShape(27U, 27U, 32U), TensorShape(3U, 3U, 32U, 128U), TensorShape(128U), TensorShape(27U, 27U, 128U), PadStrideInfo(1, 1, 1, 1));
+        // fire6/expand3x3, fire7/expand3x3
+        add_config(TensorShape(13U, 13U, 48U), TensorShape(3U, 3U, 48U, 192U), TensorShape(192U), TensorShape(13U, 13U, 192U), PadStrideInfo(1, 1, 1, 1));
+        // fire8/expand3x3, fire9/expand3x3
+        add_config(TensorShape(13U, 13U, 64U), TensorShape(3U, 3U, 64U, 256U), TensorShape(256U), TensorShape(13U, 13U, 256U), PadStrideInfo(1, 1, 1, 1));
+    }
+};
+
 class SqueezeNetConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:

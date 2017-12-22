@@ -87,8 +87,8 @@ void NEHistogramKernel::histogram_U8(Window win, const ThreadInfo &info)
         }
     };
 
-    const unsigned int x_start = win.x().start();
-    const unsigned int x_end   = win.x().end();
+    const int x_start = win.x().start();
+    const int x_end   = win.x().end();
 
     // Handle X dimension manually to split into two loops
     // First one will use vector operations, second one processes the left over
@@ -100,7 +100,7 @@ void NEHistogramKernel::histogram_U8(Window win, const ThreadInfo &info)
     // Calculate local histogram
     execute_window_loop(win, [&](const Coordinates &)
     {
-        unsigned int x = x_start;
+        int x = x_start;
 
         // Vector loop
         for(; x <= x_end - 8; x += 8)
@@ -136,8 +136,8 @@ void NEHistogramKernel::histogram_fixed_U8(Window win, const ThreadInfo &info)
 
     std::array<uint32_t, _max_range_size> local_hist{ { 0 } };
 
-    const unsigned int x_start = win.x().start();
-    const unsigned int x_end   = win.x().end();
+    const int x_start = win.x().start();
+    const int x_end   = win.x().end();
 
     // Handle X dimension manually to split into two loops
     // First one will use vector operations, second one processes the left over
@@ -149,7 +149,7 @@ void NEHistogramKernel::histogram_fixed_U8(Window win, const ThreadInfo &info)
     // Calculate local histogram
     execute_window_loop(win, [&](const Coordinates &)
     {
-        unsigned int x = x_start;
+        int x = x_start;
 
         // Vector loop
         for(; x <= x_end - 8; x += 8)

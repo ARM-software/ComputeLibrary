@@ -27,7 +27,7 @@
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/MeanStdDev.h"
+#include "tests/validation/reference/MeanStdDev.h"
 
 namespace arm_compute
 {

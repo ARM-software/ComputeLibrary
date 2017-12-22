@@ -26,6 +26,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -34,11 +35,15 @@ SubTensorInfo::SubTensorInfo()
 {
 }
 
-SubTensorInfo::SubTensorInfo(ITensorInfo *parent, const TensorShape &tensor_shape, const Coordinates &coords)
+SubTensorInfo::SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coordinates coords)
     : _parent(parent), _tensor_shape(tensor_shape), _coords(coords), _valid_region{ Coordinates(), _tensor_shape }
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(parent->tensor_shape(), coords, tensor_shape);
+    // Check if subtensor is valid if parent is configured
+    if(parent->tensor_shape().total_size() != 0)
+    {
+        ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(parent->tensor_shape(), coords, tensor_shape);
+    }
 
     // Initialize valid region
     Coordinates coordinates;
@@ -46,11 +51,27 @@ SubTensorInfo::SubTensorInfo(ITensorInfo *parent, const TensorShape &tensor_shap
     _valid_region = ValidRegion{ coordinates, _tensor_shape };
 }
 
-void SubTensorInfo::set_tensor_shape(TensorShape shape)
+std::unique_ptr<ITensorInfo> SubTensorInfo::clone() const
+{
+    // Clone creates a TensorInfo object from SubTensorInfo's parent which will conclude to a TensorInfo
+    // For now it does not make sense to copy a SubTensorInfo explicitly
+    ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+    auto clone_obj = _parent->clone();
+    clone_obj->set_tensor_shape(_tensor_shape);
+    clone_obj->set_valid_region(_valid_region);
+    return clone_obj;
+}
+
+ITensorInfo &SubTensorInfo::set_tensor_shape(TensorShape shape)
 {
     ARM_COMPUTE_ERROR_ON(_parent == nullptr);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(_parent->tensor_shape(), _coords, shape);
+    // Check if subtensor is valid if parent is configured
+    if(_parent->tensor_shape().total_size() != 0)
+    {
+        ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(_parent->tensor_shape(), _coords, shape);
+    }
     _tensor_shape = shape;
+    return *this;
 }
 
 bool SubTensorInfo::extend_padding(const PaddingSize &padding)

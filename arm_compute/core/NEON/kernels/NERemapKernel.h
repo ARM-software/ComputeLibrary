@@ -60,6 +60,7 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
+    BorderSize border_size() const override;
 
 private:
     /** function to perform nearest interpolation on the given window */

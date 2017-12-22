@@ -49,12 +49,22 @@ inline const float8 transform_nearest(const float2 coord, const float2 scale)
 inline const float8 transform_bilinear(const float2 coord, const float2 scale)
 {
     const float4 in_x_coords = (float4)(coord.s0, 1 + coord.s0, 2 + coord.s0, 3 + coord.s0);
-    const float4 new_x       = (in_x_coords + ((float4)(0.5f))) * (float4)(scale.s0) - (float4)(0.5f);
-    const float4 new_y       = (float4)((coord.s1 + 0.5f) * scale.s1 - 0.5f);
+#ifdef SAMPLING_POLICY_TOP_LEFT
+    const float4 new_x = in_x_coords * (float4)(scale.s0);
+    const float4 new_y = (float4)(coord.s1 * scale.s1);
     return (float8)(new_x.s0, new_y.s0, new_x.s1, new_y.s1, new_x.s2, new_y.s2, new_x.s3, new_y.s3);
+#elif SAMPLING_POLICY_CENTER
+    const float4 new_x = (in_x_coords + ((float4)(0.5f))) * (float4)(scale.s0) - (float4)(0.5f);
+    const float4 new_y = (float4)((coord.s1 + 0.5f) * scale.s1 - 0.5f);
+    return (float8)(new_x.s0, new_y.s0, new_x.s1, new_y.s1, new_x.s2, new_y.s2, new_x.s3, new_y.s3);
+#else /* SAMPLING_POLICY */
+#error("Unsupported sampling policy");
+#endif /* SAMPLING_POLICY */
 }
 
 /** Performs an affine transformation on an image interpolating with the NEAREAST NEIGHBOUR method. Input and output are single channel U8 or S16.
+ *
+ * @note Sampling policy to used is passed as -DSAMPLING_POLICY_(TYPE) e.g. -DSAMPLING_POLICY_TOP_LEFT
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8, S16.
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -84,11 +94,13 @@ __kernel void scale_nearest_neighbour(
     Image        in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
     Image        out = CONVERT_TO_IMAGE_STRUCT(out);
     const float2 r   = (float2)(scale_x, scale_y);
-    const float8 tc  = clamp_to_border(transform_nearest(get_current_coords(), r), input_width, input_height);
+    const float8 tc  = clamp_to_border_with_size(transform_nearest(get_current_coords(), r), input_width, input_height, BORDER_SIZE);
     vstore4(read_texels4(&in, convert_int8(tc)), 0, (__global DATA_TYPE *)out.ptr);
 }
 
 /** Performs an affine transformation on an image interpolating with the BILINEAR method.
+ *
+ * @note Sampling policy to used is passed as -DSAMPLING_POLICY_(TYPE) e.g. -DSAMPLING_POLICY_TOP_LEFT
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8, S16.
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -119,5 +131,5 @@ __kernel void scale_bilinear(
     Image        out = CONVERT_TO_IMAGE_STRUCT(out);
     const float2 r   = (float2)(scale_x, scale_y);
     const float8 tc  = transform_bilinear(get_current_coords(), r);
-    vstore4(bilinear_interpolate(&in, tc, input_width, input_height), 0, (__global DATA_TYPE *)out.ptr);
+    vstore4(bilinear_interpolate_with_border(&in, tc, input_width, input_height, BORDER_SIZE), 0, (__global DATA_TYPE *)out.ptr);
 }

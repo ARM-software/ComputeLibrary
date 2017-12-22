@@ -46,15 +46,16 @@ public:
     Accessor(Accessor &&)                 = default;
     Accessor &operator=(Accessor &&) = default;
 
-    TensorShape shape() const override;
-    size_t      element_size() const override;
-    size_t      size() const override;
-    Format      format() const override;
-    DataType    data_type() const override;
-    int         num_channels() const override;
-    int         num_elements() const override;
-    PaddingSize padding() const override;
-    int         fixed_point_position() const override;
+    TensorShape      shape() const override;
+    size_t           element_size() const override;
+    size_t           size() const override;
+    Format           format() const override;
+    DataType         data_type() const override;
+    int              num_channels() const override;
+    int              num_elements() const override;
+    PaddingSize      padding() const override;
+    int              fixed_point_position() const override;
+    QuantizationInfo quantization_info() const override;
     const void *operator()(const Coordinates &coord) const override;
     void *operator()(const Coordinates &coord) override;
     const void *data() const;
@@ -112,6 +113,11 @@ inline PaddingSize Accessor::padding() const
 inline int Accessor::fixed_point_position() const
 {
     return _tensor.info()->fixed_point_position();
+}
+
+inline QuantizationInfo Accessor::quantization_info() const
+{
+    return _tensor.info()->quantization_info();
 }
 
 inline const void *Accessor::data() const

@@ -42,9 +42,11 @@ using namespace arm_compute;
 
 namespace
 {
-void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float wr, float hr, size_t input_element_size)
+void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float wr, float hr, size_t input_element_size, SamplingPolicy sampling_policy)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == offsets);
+    ARM_COMPUTE_ERROR_ON(sampling_policy != SamplingPolicy::CENTER);
+    ARM_COMPUTE_UNUSED(sampling_policy);
 
     Window win;
     win.set(Window::DimX, Window::Dimension(0, offsets->info()->dimension(0), 1));
@@ -95,7 +97,7 @@ NEScale::NEScale() // NOLINT
 {
 }
 
-void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value)
+void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == input);
     ARM_COMPUTE_ERROR_ON(nullptr == output);
@@ -131,13 +133,13 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             TensorInfo tensor_info_offsets(shape, Format::S32);
             _offsets.allocator()->init(tensor_info_offsets);
 
-            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_undefined);
+            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_undefined, sampling_policy);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
 
             // Pre-compute offsets for nearest interpolation
-            precompute_dx_dy_offsets(nullptr, nullptr, &_offsets, wr, hr, input_element_size);
+            precompute_dx_dy_offsets(nullptr, nullptr, &_offsets, wr, hr, input_element_size, sampling_policy);
             break;
         }
         case InterpolationPolicy::BILINEAR:
@@ -149,7 +151,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dx.allocator()->init(tensor_info_dxdy);
             _dy.allocator()->init(tensor_info_dxdy);
 
-            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_undefined);
+            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_undefined, sampling_policy);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -157,7 +159,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dy.allocator()->allocate();
 
             // Pre-compute dx, dy and offsets for bilinear interpolation
-            precompute_dx_dy_offsets(&_dx, &_dy, &_offsets, wr, hr, input_element_size);
+            precompute_dx_dy_offsets(&_dx, &_dy, &_offsets, wr, hr, input_element_size, sampling_policy);
             break;
         }
         case InterpolationPolicy::AREA:

@@ -131,6 +131,9 @@ IScheduler::IScheduler()
 {
     switch(get_cpu_impl())
     {
+        case 0xd0f:
+            _info.CPU = CPUTarget::A55_DOT;
+            break;
         case 0xd03:
             _info.CPU = CPUTarget::A53;
             break;

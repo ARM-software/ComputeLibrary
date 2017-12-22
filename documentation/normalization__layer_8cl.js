@@ -8,5 +8,5 @@ var normalization__layer_8cl =
     [ "SQCVT_SAT", "normalization__layer_8cl.xhtml#a107d847044e677b01e9bd3d5251b39d9", null ],
     [ "STORE_OP", "normalization__layer_8cl.xhtml#ac59caf44b60378c02032aab994ad5ac1", null ],
     [ "normalization_layer_cross_map", "normalization__layer_8cl.xhtml#a7db22b7ddf8f433e02ede3bd9c56d9d9", null ],
-    [ "normalization_layer_in_map_1D", "normalization__layer_8cl.xhtml#a343b43eb8e2bf7077793c801642c7d65", null ]
+    [ "normalization_layer_in_map", "normalization__layer_8cl.xhtml#a98051a32b8ae24598346306c1b131b2c", null ]
 ];

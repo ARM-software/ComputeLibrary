@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/IMemoryGroup.h"
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IMemoryPool.h"
 
