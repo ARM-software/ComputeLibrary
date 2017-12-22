@@ -199,6 +199,9 @@ private:
      */
     cl::NDRange tune_kernel(ICLKernel &kernel);
 
+    /** Flag to ensure symbols initialisation is happening before Scheduler creation */
+    static std::once_flag _initialize_symbols;
+
     cl::Context      _context;
     cl::CommandQueue _queue;
     GPUTarget        _target;

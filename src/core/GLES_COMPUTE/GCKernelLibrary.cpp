@@ -298,7 +298,7 @@ const std::map<std::string, std::string> GCKernelLibrary::_program_source_map =
 };
 
 GCKernelLibrary::GCKernelLibrary()
-    : _display(EGL_NO_DISPLAY), _context(EGL_NO_CONTEXT), _frame_buffer(0), _tex_rt(0), _own_context(false), _shader_path("./"), _programs_map(), _built_programs_map()
+    : _display(EGL_NO_DISPLAY), _context(EGL_NO_CONTEXT), _frame_buffer(0), _tex_rt(0), _shader_path("./"), _programs_map(), _built_programs_map()
 {
 }
 
@@ -632,59 +632,6 @@ const GCProgram &GCKernelLibrary::load_program(const std::string &program_name) 
     return new_program.first->second;
 }
 
-void GCKernelLibrary::setup_context()
-{
-    EGLBoolean res;
-    _display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
-    ARM_COMPUTE_ERROR_ON_MSG(_display == EGL_NO_DISPLAY, "Failed to get display: 0x%x.", eglGetError());
-
-    res = eglInitialize(_display, nullptr, nullptr);
-
-    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to initialize egl: 0x%x.", eglGetError());
-    ARM_COMPUTE_UNUSED(res);
-
-    const char *egl_extension_st = eglQueryString(_display, EGL_EXTENSIONS);
-    ARM_COMPUTE_ERROR_ON_MSG((strstr(egl_extension_st, "EGL_KHR_create_context") == nullptr), "Failed to query EGL_KHR_create_context");
-    ARM_COMPUTE_ERROR_ON_MSG((strstr(egl_extension_st, "EGL_KHR_surfaceless_context") == nullptr), "Failed to query EGL_KHR_surfaceless_context");
-    ARM_COMPUTE_UNUSED(egl_extension_st);
-
-    const EGLint config_attribs[] =
-    {
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
-        EGL_NONE
-    };
-    EGLConfig cfg;
-    EGLint    count;
-
-    res = eglChooseConfig(_display, config_attribs, &cfg, 1, &count);
-
-    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to choose config: 0x%x.", eglGetError());
-    ARM_COMPUTE_UNUSED(res);
-
-    res = eglBindAPI(EGL_OPENGL_ES_API);
-
-    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to bind api: 0x%x.", eglGetError());
-
-    const EGLint attribs[] =
-    {
-        EGL_CONTEXT_CLIENT_VERSION, 3,
-        EGL_NONE
-    };
-    _context = eglCreateContext(_display,
-                                cfg,
-                                EGL_NO_CONTEXT,
-                                attribs);
-
-    ARM_COMPUTE_ERROR_ON_MSG(_context == EGL_NO_CONTEXT, "Failed to create context: 0x%x.", eglGetError());
-    ARM_COMPUTE_UNUSED(res);
-
-    res = eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, _context);
-
-    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to make current: 0x%x.", eglGetError());
-    ARM_COMPUTE_UNUSED(res);
-}
-
 void GCKernelLibrary::setup_dummy_fbo()
 {
     ARM_COMPUTE_GL_CHECK(glGenFramebuffers(1, &_frame_buffer));
@@ -706,15 +653,6 @@ GCKernelLibrary::~GCKernelLibrary()
     ARM_COMPUTE_GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
     ARM_COMPUTE_GL_CHECK(glDeleteTextures(1, &_tex_rt));
     ARM_COMPUTE_GL_CHECK(glDeleteFramebuffers(1, &_frame_buffer));
-
-    if(_own_context)
-    {
-        eglDestroyContext(_display, _context);
-        eglTerminate(_display);
-
-        _context = EGL_NO_CONTEXT;
-        _display = EGL_NO_DISPLAY;
-    }
 }
 
 std::string GCKernelLibrary::stringify_set(const StringSet &s) const

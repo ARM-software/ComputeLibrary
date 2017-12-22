@@ -28,6 +28,8 @@
 
 using namespace arm_compute;
 
+std::once_flag CLScheduler::_initialize_symbols;
+
 CLScheduler::CLScheduler()
     : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner()
 {
@@ -35,6 +37,7 @@ CLScheduler::CLScheduler()
 
 CLScheduler &CLScheduler::get()
 {
+    std::call_once(_initialize_symbols, opencl_is_available);
     static CLScheduler scheduler;
     return scheduler;
 }
