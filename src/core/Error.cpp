@@ -54,18 +54,10 @@ void arm_compute::error(const char *function, const char *file, const int line, 
     va_start(args, msg);
     auto err = create_error_va_list(ErrorCode::RUNTIME_ERROR, function, file, line, msg, args);
     va_end(args);
-#ifndef ARM_NO_EXCEPTIONS
     throw std::runtime_error(err.error_description());
-#else
-    std::cout << err.error_description() << std::endl;
-#endif // ARM_NO_EXCEPTIONS
 }
 
 void Status::internal_throw_on_error()
 {
-#ifndef ARM_NO_EXCEPTIONS
     throw std::runtime_error(_error_description);
-#else
-    std::cout << _error_description << std::endl;
-#endif // ARM_NO_EXCEPTIONS
 }

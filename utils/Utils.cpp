@@ -70,15 +70,12 @@ int run_example(int argc, const char **argv, example &func)
 {
     std::cout << "\n"
               << argv[0] << "\n\n";
-#ifndef ARM_NO_EXCEPTIONS
     try
     {
-#endif // ARM_NO_EXCEPTIONS
         func(argc, argv);
 
         std::cout << "\nTest passed\n";
         return 0;
-#ifndef ARM_NO_EXCEPTIONS
     }
 #ifdef ARM_COMPUTE_CL
     catch(cl::Error &err)
@@ -100,7 +97,6 @@ int run_example(int argc, const char **argv, example &func)
     std::cout << "\nTest FAILED\n";
 
     return -1;
-#endif // ARM_NO_EXCEPTIONS
 }
 
 void draw_detection_rectangle(ITensor *tensor, const DetectionWindow &rect, uint8_t r, uint8_t g, uint8_t b)

@@ -105,12 +105,9 @@ Program::operator cl::Program() const
 
 bool Program::build(const cl::Program &program, const std::string &build_options)
 {
-#ifndef ARM_NO_EXCEPTIONS
     try
     {
-#endif // ARM_NO_EXCEPTIONS
         return program.build(build_options.c_str()) == CL_SUCCESS;
-#ifndef ARM_NO_EXCEPTIONS
     }
     catch(const cl::Error &e)
     {
@@ -124,7 +121,6 @@ bool Program::build(const cl::Program &program, const std::string &build_options
 
         return false;
     }
-#endif // ARM_NO_EXCEPTIONS
 }
 
 cl::Program Program::build(const std::string &build_options) const

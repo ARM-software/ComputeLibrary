@@ -248,10 +248,10 @@ public:
     void open(const std::string &ppm_filename)
     {
         ARM_COMPUTE_ERROR_ON(is_open());
-#ifndef ARM_NO_EXCEPTIONS
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         try
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
         {
-#endif // ARM_NO_EXCEPTIONS
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _fs.open(ppm_filename, std::ios::in | std::ios::binary);
 
@@ -259,13 +259,13 @@ public:
             std::tie(_width, _height, max_val) = parse_ppm_header(_fs);
 
             ARM_COMPUTE_ERROR_ON_MSG(max_val >= 256, "2 bytes per colour channel not supported in file %s", ppm_filename.c_str());
-#ifndef ARM_NO_EXCEPTIONS
         }
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         catch(const std::ifstream::failure &e)
         {
             ARM_COMPUTE_ERROR("Accessing %s: %s", ppm_filename.c_str(), e.what());
         }
-#endif // ARM_NO_EXCEPTIONS
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
     }
     /** Return true if a PPM file is currently open
          */
@@ -302,10 +302,10 @@ public:
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON(image.info()->dimension(0) != _width || image.info()->dimension(1) != _height);
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&image, arm_compute::Format::U8, arm_compute::Format::RGB888);
-#ifndef ARM_NO_EXCEPTIONS
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         try
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
         {
-#endif // ARM_NO_EXCEPTIONS
             // Map buffer if creating a CLTensor/GCTensor
             map(image, true);
 
@@ -371,13 +371,13 @@ public:
 
             // Unmap buffer if creating a CLTensor/GCTensor
             unmap(image);
-#ifndef ARM_NO_EXCEPTIONS
         }
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         catch(const std::ifstream::failure &e)
         {
             ARM_COMPUTE_ERROR("Loading PPM file: %s", e.what());
         }
-#endif // ARM_NO_EXCEPTIONS
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
     }
 
     /** Fill a tensor with 3 planes (one for each channel) with the content of the currently open PPM file.
@@ -394,7 +394,9 @@ public:
         ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::U8, DataType::F32);
         ARM_COMPUTE_ERROR_ON(tensor.info()->dimension(0) != _width || tensor.info()->dimension(1) != _height || tensor.info()->dimension(2) != 3);
 
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         try
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
         {
             // Map buffer if creating a CLTensor
             map(tensor, true);
@@ -456,10 +458,12 @@ public:
             // Unmap buffer if creating a CLTensor
             unmap(tensor);
         }
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         catch(const std::ifstream::failure &e)
         {
             ARM_COMPUTE_ERROR("Loading PPM file: %s", e.what());
         }
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
     }
 
     /** Return the width of the currently open PPM file.
@@ -496,17 +500,21 @@ public:
     void open(const std::string &npy_filename)
     {
         ARM_COMPUTE_ERROR_ON(is_open());
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         try
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
         {
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _fs.open(npy_filename, std::ios::in | std::ios::binary);
 
             std::tie(_shape, _fortran_order, _typestring) = parse_npy_header(_fs);
         }
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         catch(const std::ifstream::failure &e)
         {
             ARM_COMPUTE_ERROR("Accessing %s: %s", npy_filename.c_str(), e.what());
         }
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
     }
     /** Return true if a NPY file is currently open */
     bool is_open()
@@ -554,7 +562,9 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&tensor, arm_compute::DataType::F32);
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         try
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
         {
             // Map buffer if creating a CLTensor
             map(tensor, true);
@@ -621,10 +631,12 @@ public:
             // Unmap buffer if creating a CLTensor
             unmap(tensor);
         }
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
         catch(const std::ifstream::failure &e)
         {
             ARM_COMPUTE_ERROR("Loading NPY file: %s", e.what());
         }
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
     }
 
 private:
@@ -651,10 +663,10 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
     std::ofstream fs;
 
-#ifndef ARM_NO_EXCEPTIONS
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
     try
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
     {
-#endif // ARM_NO_EXCEPTIONS
         fs.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
         fs.open(ppm_filename, std::ios::out | std::ios::binary);
 
@@ -709,13 +721,13 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
         // Unmap buffer if creating a CLTensor/GCTensor
         unmap(tensor);
-#ifndef ARM_NO_EXCEPTIONS
     }
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
     catch(const std::ofstream::failure &e)
     {
         ARM_COMPUTE_ERROR("Writing %s: (%s)", ppm_filename.c_str(), e.what());
     }
-#endif  // ARM_NO_EXCEPTIONS
+#endif  // ARM_COMPUTE_NO_EXCEPTIONS
 }
 
 /** Template helper function to save a tensor image to a NPY file.
@@ -736,7 +748,9 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 
     std::ofstream fs;
 
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
     try
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
     {
         fs.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
         fs.open(npy_filename, std::ios::out | std::ios::binary);
@@ -789,10 +803,12 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
         // Unmap buffer if creating a CLTensor
         unmap(tensor);
     }
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
     catch(const std::ofstream::failure &e)
     {
         ARM_COMPUTE_ERROR("Writing %s: (%s)", npy_filename.c_str(), e.what());
     }
+#endif // ARM_COMPUTE_NO_EXCEPTIONS
 }
 
 /** Load the tensor with pre-trained data from a binary file
@@ -807,19 +823,21 @@ void load_trained_data(T &tensor, const std::string &filename)
 
     std::ifstream fs;
 
-#ifndef ARM_NO_EXCEPTIONS
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
     try
+#endif  // ARM_COMPUTE_NO_EXCEPTIONS
     {
-#endif  // ARM_NO_EXCEPTIONS
         fs.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
         // Open file
         fs.open(filename, std::ios::in | std::ios::binary);
 
         if(!fs.good())
         {
-#ifndef ARM_NO_EXCEPTIONS
+#ifndef ARM_NO_COMPUTE_EXCEPTIONS
             throw std::runtime_error("Could not load binary data: " + filename);
-#endif  // ARM_NO_EXCEPTIONS
+#else
+            std::cerr << "Could not load binary data: " << filename << std::endl;
+#endif  // ARM_COMPUTE_NO_EXCEPTIONS
         }
 
         // Map buffer if creating a CLTensor/GCTensor
@@ -844,13 +862,13 @@ void load_trained_data(T &tensor, const std::string &filename)
 
         // Unmap buffer if creating a CLTensor/GCTensor
         unmap(tensor);
-#ifndef ARM_NO_EXCEPTIONS
     }
+#ifndef ARM_COMPUTE_NO_EXCEPTIONS
     catch(const std::ofstream::failure &e)
     {
         ARM_COMPUTE_ERROR("Writing %s: (%s)", filename.c_str(), e.what());
     }
-#endif  // ARM_NO_EXCEPTIONS
+#endif  // ARM_COMPUTE_NO_EXCEPTIONS
 }
 
 template <typename T>
