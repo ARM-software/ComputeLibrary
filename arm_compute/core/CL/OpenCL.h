@@ -57,6 +57,9 @@ public:
 #define DECLARE_FUNCTION_PTR(func_name) \
     std::function<decltype(func_name)> func_name##_ptr = nullptr
 
+    DECLARE_FUNCTION_PTR(clCreateContextFromType);
+    DECLARE_FUNCTION_PTR(clCreateCommandQueue);
+    DECLARE_FUNCTION_PTR(clGetContextInfo);
     DECLARE_FUNCTION_PTR(clBuildProgram);
     DECLARE_FUNCTION_PTR(clEnqueueNDRangeKernel);
     DECLARE_FUNCTION_PTR(clSetKernelArg);

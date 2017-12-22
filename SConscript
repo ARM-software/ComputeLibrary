@@ -235,7 +235,7 @@ if env['neon'] and env['opencl']:
     Export('arm_compute_graph_a')
 
     arm_compute_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
-    arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core", "OpenCL" ])
+    arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core"])
     Depends(arm_compute_graph_so, arm_compute_so)
     Depends(arm_compute_graph_so, opencl)
     Export('arm_compute_graph_so')
