@@ -466,7 +466,7 @@ void main(void)
     LOAD16(c, src, src.current_offset);
 
     /* Computes alpha * axb + beta * c */
-    out1 = alpha_ab + vec4(BETA * c);
+    out1 = alpha_ab + vec4(float(BETA) * c);
 
     /* Store final result in axb matrix */
     STORE16(dst, dst.current_offset, out1);
