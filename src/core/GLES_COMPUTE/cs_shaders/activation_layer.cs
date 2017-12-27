@@ -23,7 +23,7 @@
  */
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
 
-#include "helpers.h"
+#include "helpers_cs.h"
 
 #ifdef DATA_TYPE_FP32
 precision highp float;
@@ -114,47 +114,35 @@ float linear_op(float x)
     return MLA_OP(float(B_VAL), float(A_VAL), x);
 }
 
-layout(std140) uniform shader_params
-{
-    TENSOR3D_PARAM_DECLARATION(src);
-    TENSOR3D_PARAM_DECLARATION(dst);
-};
-
-#ifdef DATA_TYPE_FP32
-BUFFER_DECLARATION(src, 1, float, readonly);
-BUFFER_DECLARATION(dst, 2, float, writeonly);
-
 /** This performs an activation function floating point inputs.
  *
+ * @note The data type must be passed at compile time using "#define DATA_TYPE_NAME". e.g. "#define DATA_TYPE_FP32"
  * @note Activation function should be given as a preprocessor argument using "#define act_name". e.g. "#define TANH"
  * @note A, B variables required by some activation functions are set using A_VAL= and B_VAL= respectively.
  *
- * @param[in]  src_ptr                           Pointer to the source image. Supported data types: F32
- * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      ride of the destination image in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[in]  src_ptr   Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_attrs The attributes of the source tensor
+ * @param[out] dst_ptr   Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs The attributes of the destination tensor
  */
+SHADER_PARAMS_DECLARATION
+{
+    Tensor3DAttributes src_attrs;
+    Tensor3DAttributes dst_attrs;
+};
+
+#ifdef DATA_TYPE_FP32
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+
 void main(void)
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
-    float data     = src_ptr[src.current_offset];
+    float data     = LOAD_CURRENT_ITEM(src_ptr, src_iter);
     float data_out = 0.f;
     // Perform activation
-
 #ifdef LOGISTIC
     data_out = logistic_op(data);
 #elif defined(TANH)     /*LOGISTIC*/
@@ -181,44 +169,22 @@ void main(void)
 #error Activation function not provided
 #endif /*LOGISTIC*/
 
-    dst_ptr[dst.current_offset] = data_out;
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, data_out);
 }
 
 #elif defined(DATA_TYPE_FP16)
-BUFFER_DECLARATION(src, 1, uint, readonly);
-BUFFER_DECLARATION(dst, 2, uint, writeonly);
+TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uint, dst_ptr, dst_shift, 2, writeonly);
 
-/** This performs an activation function floating point inputs.
- *
- * @note Activation function should be given as a preprocessor argument using "#define act_name". e.g. "#define TANH"
- * @note A, B variables required by some activation functions are set using A_VAL= and B_VAL= respectively.
- *
- * @param[in]  src_ptr                           Pointer to the source image. Supported data types: F16
- * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      ride of the destination image in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination image
- */
 void main(void)
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT_FP16(src);
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT_FP16(dst);
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
-    uint data = src_ptr[src.current_offset >> 2];
+    vec2 data = LOAD_UNPACK2_CURRENT_ITEM_HALF(src_ptr, src_iter);
     // Perform activation
-    float a = unpackHalf2x16(data).x;
-    float b = unpackHalf2x16(data).y;
+    float a = data.x;
+    float b = data.y;
     vec2  data_out;
 #ifdef LOGISTIC         /*LOGISTIC*/
     data_out.x = logistic_op(a);
@@ -257,6 +223,6 @@ void main(void)
 #error Activation function not provided
 #endif /*LOGISTIC*/
 
-    dst_ptr[dst.current_offset >> 2] = packHalf2x16(data_out);
+    STORE_PACK2_CURRENT_ITEM_HALF(dst_ptr, dst_iter, data_out);
 }
-#endif /*DATA_TYPE_FP32*/
+#endif /*DATA_TYPE_FP16*/
