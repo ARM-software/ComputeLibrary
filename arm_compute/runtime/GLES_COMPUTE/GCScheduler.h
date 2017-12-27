@@ -52,7 +52,7 @@ public:
      * @param[in] kernel Kernel to execute.
      * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel.
      */
-    void enqueue(IGCKernel &kernel, bool flush = true);
+    void dispatch(IGCKernel &kernel, bool flush = true);
 
     /** Initialises the display and context to be used by the scheduler.
      *
@@ -61,8 +61,8 @@ public:
      */
     void init(EGLDisplay dpy, EGLContext ctx);
 
-    /** Blocks until all commands in the associated command queue have finished. */
-    void sync();
+    /** Defines a barrier ordering memory transactions. */
+    void memory_barrier();
 
 private:
     /** Constructor */

@@ -90,14 +90,13 @@ void main_gc_absdiff(int argc, const char **argv)
     // Execute the functions:
     absdiff.run();
 
-    // Make sure all the jobs are done executing:
-    GCScheduler::get().sync();
-
     // Save the result to file:
     if(ppm1.is_open())
     {
         const std::string output_filename = std::string(argv[1]) + "_out.ppm";
-        save_to_ppm(dst, output_filename); // save_to_ppm maps and unmaps the image to store as PPM
+        // save_to_ppm maps and unmaps the image to store as PPM
+        // The GCTensor::map call inside the save_to_ppm will block until all pending operations on that image have completed
+        save_to_ppm(dst, output_filename);
     }
 }
 

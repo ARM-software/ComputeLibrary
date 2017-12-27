@@ -63,7 +63,7 @@ GCScheduler &GCScheduler::get()
     return scheduler;
 }
 
-void GCScheduler::enqueue(IGCKernel &kernel, bool flush)
+void GCScheduler::dispatch(IGCKernel &kernel, bool flush)
 {
     kernel.run(kernel.window());
     if(flush)
@@ -72,7 +72,7 @@ void GCScheduler::enqueue(IGCKernel &kernel, bool flush)
     }
 }
 
-void GCScheduler::sync()
+void GCScheduler::memory_barrier()
 {
     ARM_COMPUTE_GL_CHECK(glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT));
 }

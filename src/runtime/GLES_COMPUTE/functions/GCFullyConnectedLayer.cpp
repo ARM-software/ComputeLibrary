@@ -159,19 +159,22 @@ void GCFullyConnectedLayer::run()
     // Linearize input if it comes from a convolutional layer
     if(_is_fc_after_conv)
     {
-        GCScheduler::get().enqueue(_im2col_kernel, false);
+        GCScheduler::get().dispatch(_im2col_kernel, false);
     }
 
-    GCScheduler::get().sync();
+    if(!_are_weights_reshaped || _is_fc_after_conv)
+    {
+        GCScheduler::get().memory_barrier();
+    }
 
     // Run matrix multiply
-    GCScheduler::get().enqueue(_mm_kernel, !_accumulate_biases);
+    GCScheduler::get().dispatch(_mm_kernel, !_accumulate_biases);
 
     // Accumulate biases if provided
     if(_accumulate_biases)
     {
-        GCScheduler::get().sync();
+        GCScheduler::get().memory_barrier();
 
-        GCScheduler::get().enqueue(_accumulate_biases_kernel);
+        GCScheduler::get().dispatch(_accumulate_biases_kernel);
     }
 }

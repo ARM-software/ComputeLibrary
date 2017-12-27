@@ -44,5 +44,5 @@ void GCNormalizePlanarYUVLayer::configure(const IGCTensor *input, IGCTensor *out
 
 void GCNormalizePlanarYUVLayer::run()
 {
-    GCScheduler::get().enqueue(_norm_kernel, true);
+    GCScheduler::get().dispatch(_norm_kernel, true);
 }
