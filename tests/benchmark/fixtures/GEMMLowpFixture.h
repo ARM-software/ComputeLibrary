@@ -72,6 +72,12 @@ public:
         gemmlowp.run();
     }
 
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(c);
+    }
+
     void teardown()
     {
         a.allocator()->free();

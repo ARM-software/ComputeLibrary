@@ -81,6 +81,12 @@ public:
         scale_func.run();
     }
 
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(dst);
+    }
+
     void teardown()
     {
         src.allocator()->free();

@@ -69,6 +69,12 @@ public:
         gemm.run();
     }
 
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(dst);
+    }
+
     void teardown()
     {
         a.allocator()->free();

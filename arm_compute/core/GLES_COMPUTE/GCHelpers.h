@@ -32,6 +32,8 @@
 
 namespace arm_compute
 {
+namespace gles_compute
+{
 /** Helper function to create and return a unique_ptr pointed to a GLES kernel object
  *  It also calls the kernel's configuration.
  *
@@ -60,5 +62,6 @@ std::unique_ptr<Kernel> create_kernel()
 
 /** Max vector width of an GLES vector */
 static constexpr unsigned int max_gc_vector_width = 16;
-}
+} // namespace gles_compute
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCHELPERS_H__ */

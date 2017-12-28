@@ -300,6 +300,13 @@ public:
         smx.run();
     }
 
+    /** Sync the results */
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(output);
+    }
+
 private:
     void depthwise_conv_block_init(unsigned int idx, unsigned int ifm, unsigned int ofm)
     {

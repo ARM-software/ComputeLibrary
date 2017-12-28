@@ -38,6 +38,7 @@
 #include "arm_compute/runtime/ITensorAllocator.h"
 
 using namespace arm_compute;
+using namespace arm_compute::gles_compute;
 
 GCGEMM::GCGEMM()
     : _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _is_interleaved_transposed(false), _run_addition(false)

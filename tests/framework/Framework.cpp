@@ -25,16 +25,6 @@
 
 #include "support/ToolchainSupport.h"
 
-#ifdef ARM_COMPUTE_CL
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#endif /* ARM_COMPUTE_CL */
-
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#endif /* ARM_COMPUTE_GC */
-
 #include <chrono>
 #include <iostream>
 #include <sstream>
@@ -310,18 +300,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
                     profiler.start();
                 }
                 test_case->do_run();
-#ifdef ARM_COMPUTE_CL
-                if(opencl_is_available())
-                {
-                    CLScheduler::get().sync();
-                }
-#endif /* ARM_COMPUTE_CL */
-#ifdef ARM_COMPUTE_GC
-                if(opengles31_is_available())
-                {
-                    GCScheduler::get().sync();
-                }
-#endif /* ARM_COMPUTE_GC */
+                test_case->do_sync();
                 if(_num_iterations == 1 || i != 0)
                 {
                     profiler.stop();

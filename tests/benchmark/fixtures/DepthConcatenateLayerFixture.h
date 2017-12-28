@@ -123,6 +123,12 @@ public:
         _depth_concat.run();
     }
 
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(_dst);
+    }
+
     void teardown()
     {
         for(auto &src : _srcs)

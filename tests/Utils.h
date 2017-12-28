@@ -32,6 +32,16 @@
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
 
+#ifdef ARM_COMPUTE_CL
+#include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
+#endif /* ARM_COMPUTE_CL */
+
+#ifdef ARM_COMPUTE_GC
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
+#endif /* ARM_COMPUTE_GC */
+
 #include <cmath>
 #include <cstddef>
 #include <limits>
@@ -44,6 +54,9 @@
 
 namespace arm_compute
 {
+#ifdef ARM_COMPUTE_CL
+class CLTensor;
+#endif /* ARM_COMPUTE_CL */
 namespace test
 {
 /** Round floating-point value with half value rounding to positive infinity.
@@ -565,6 +578,39 @@ inline std::string get_typestring(DataType data_type)
         default:
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
+}
+
+/** Sync if necessary.
+ */
+template <typename TensorType>
+inline void sync_if_necessary()
+{
+#ifdef ARM_COMPUTE_CL
+    if(opencl_is_available() && std::is_same<typename std::decay<TensorType>::type, arm_compute::CLTensor>::value)
+    {
+        CLScheduler::get().sync();
+    }
+#endif /* ARM_COMPUTE_CL */
+}
+
+/** Sync tensor if necessary.
+ *
+ * @note: If the destination tensor not being used on OpenGL ES, GPU will optimize out the operation.
+ *
+ * @param[in] tensor Tensor to be sync.
+ */
+template <typename TensorType>
+inline void sync_tensor_if_necessary(TensorType &tensor)
+{
+#ifdef ARM_COMPUTE_GC
+    if(opengles31_is_available() && std::is_same<typename std::decay<TensorType>::type, arm_compute::GCTensor>::value)
+    {
+        // Force sync the tensor by calling map and unmap.
+        IGCTensor &t = dynamic_cast<IGCTensor &>(tensor);
+        t.map();
+        t.unmap();
+    }
+#endif /* ARM_COMPUTE_GC */
 }
 } // namespace test
 } // namespace arm_compute

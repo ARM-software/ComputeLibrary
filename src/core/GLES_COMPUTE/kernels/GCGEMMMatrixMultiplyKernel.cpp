@@ -40,6 +40,7 @@
 #include <string>
 
 using namespace arm_compute;
+using namespace arm_compute::gles_compute;
 
 GCGEMMMatrixMultiplyKernel::GCGEMMMatrixMultiplyKernel()
     : _input0(nullptr), _input1(nullptr), _output(nullptr)

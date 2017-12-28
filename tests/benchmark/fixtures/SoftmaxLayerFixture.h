@@ -31,13 +31,6 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#include "tests/GLES_COMPUTE/Helper.h"
-
-using namespace arm_compute::test::gles_compute;
-#endif /* ARM_COMPUTE_GC */
-
 namespace arm_compute
 {
 namespace test
@@ -73,12 +66,12 @@ public:
     void run()
     {
         smx_layer.run();
-#ifdef ARM_COMPUTE_GC
-        if(opengles31_is_available() && std::is_same<typename std::decay<TensorType>::type, arm_compute::GCTensor>::value)
-        {
-            force_sync_tensor(dst);
-        }
-#endif /* ARM_COMPUTE_GC */
+    }
+
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(dst);
     }
 
     void teardown()

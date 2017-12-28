@@ -57,6 +57,11 @@ public:
         network.run();
     }
 
+    void sync()
+    {
+        network.sync();
+    }
+
     void teardown()
     {
         network.clear();
