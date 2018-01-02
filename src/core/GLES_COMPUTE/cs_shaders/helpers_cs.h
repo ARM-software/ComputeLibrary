@@ -240,6 +240,9 @@ ImageIterator update_image_from_tensor3D_iter_offset(uint element_shift, uint of
 #define TENSOR_ITERATOR_ADVANCE_IN_BYTES(tensor_iter, n) \
     tensor_iter.current_offset_in_bytes += int(n)
 
+#define SET_TENSOR_ITERATOR_OFFSET_IN_BYTES(tensor_iter, n) \
+    tensor_iter.current_offset_in_bytes = int(n)
+
 /** Get the offset of a VectorIterator
  *
  * @param[in] vector_iter The VectorIterator object pointed to the starting position of the buffer
@@ -369,6 +372,19 @@ mediump vec4[2] unpack8_half(highp uvec4 packed_data)
                    vec4(unpackHalf2x16(packed_data.z), unpackHalf2x16(packed_data.w)));
 }
 
+/** Unpacking the uvec2[3] object to 12 half-precision (16-bits) floating point values and converting to a vec4[3] object
+ *
+ * @param[in] packed_data The uvec2[3] object to be unpacked
+ *
+ * @return The unpacked vec4[3] object
+ */
+mediump vec4[3] unpack12_half(highp uvec2[3] packed_data)
+{
+    return vec4[3](vec4(unpackHalf2x16(packed_data[0].x), unpackHalf2x16(packed_data[0].y)),
+                   vec4(unpackHalf2x16(packed_data[1].x), unpackHalf2x16(packed_data[1].y)),
+                   vec4(unpackHalf2x16(packed_data[2].x), unpackHalf2x16(packed_data[2].y)));
+}
+
 // For half-precision (16-bits) floating point packed into a "uint" element
 #define LOAD_UNPACK2_HALF(tensor_ptr, offset) unpackHalf2x16(uint(LOAD(tensor_ptr, offset)))
 #define STORE_PACK2_HALF(tensor_ptr, offset, data) STORE(tensor_ptr, offset, packHalf2x16(data))
@@ -395,6 +411,9 @@ mediump vec4[2] unpack8_half(highp uvec4 packed_data)
 #define VSTORE2_PACK8_HALF(tensor_ptr, offset, data) VSTORE2(tensor_ptr, offset, pack8_half(data))
 #define VLOAD2_UNPACK8_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter) VLOAD2_UNPACK8_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
 #define VSTORE2_PACK8_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter, data) VSTORE2_PACK8_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
+
+#define VLOAD3_UNPACK12_HALF(tensor_ptr, offset) unpack12_half(VLOAD3(uvec2[3], tensor_ptr, offset))
+#define VLOAD3_UNPACK12_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter) VLOAD3_UNPACK12_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
 
 // For half-precision (16-bits) floating point packed into a "uvec4" element
 #define LOAD_UNPACK8_HALF(tensor_ptr, offset) unpack8_half(uvec4(LOAD(tensor_ptr, offset)))

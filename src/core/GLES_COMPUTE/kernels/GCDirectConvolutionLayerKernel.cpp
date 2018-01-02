@@ -119,44 +119,44 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
         {
             switch(input->info()->data_type())
             {
-                    // TODO(APPBROWSER-299): Choose the most optimal path and remove others.
-#define PROCESS_X_4ELEMENTS_Y_3ELEMENTS_FP16
-
                 case DataType::F16:
-#if defined(PROCESS_X_8ELEMENTS_Y_3ELEMENTS_FP16)
-                    options.emplace("#define PROCESS_X_8ELEMENTS_Y_3ELEMENTS_FP16");
+                    // TODO(APPBROWSER-299): Choose the most optimal path and remove others.
+#define PROCESS_4X_3Y_1Z
+
+#if defined(PROCESS_8X_3Y_1Z)
+                    options.emplace("#define PROCESS_8X_3Y_1Z");
                     num_elems_read_per_iteration_x    = 16;
                     num_elems_read_per_iteration_y    = 5;
                     num_elems_written_per_iteration_x = 8;
                     num_elems_written_per_iteration_y = 3;
-#elif defined(PROCESS_X_4ELEMENTS_Y_3ELEMENTS_FP16)
-                    options.emplace("#define PROCESS_X_4ELEMENTS_Y_3ELEMENTS_FP16");
+#elif defined(PROCESS_4X_3Y_1Z)
+                    options.emplace("#define PROCESS_4X_3Y_1Z");
                     num_elems_read_per_iteration_x    = 8;
                     num_elems_read_per_iteration_y    = 5;
                     num_elems_written_per_iteration_x = 4;
                     num_elems_written_per_iteration_y = 3;
-#elif defined(PROCESS_X_4ELEMENTS_Y_4ELEMENTS_FP16)
-                    options.emplace("#define PROCESS_X_4ELEMENTS_Y_4ELEMENTS_FP16");
+#elif defined(PROCESS_4X_4Y_1Z)
+                    options.emplace("#define PROCESS_4X_4Y_1Z");
                     num_elems_read_per_iteration_x    = 8;
                     num_elems_read_per_iteration_y    = 6;
                     num_elems_written_per_iteration_x = 4;
                     num_elems_written_per_iteration_y = 4;
-#elif defined(PROCESS_X_4ELEMENTS_Y_3ELEMENTS_Z_2ELEMENTS_FP16)
-                    options.emplace("#define PROCESS_X_4ELEMENTS_Y_3ELEMENTS_Z_2ELEMENTS_FP16");
+#elif defined(PROCESS_4X_3Y_2Z)
+                    options.emplace("#define PROCESS_4X_3Y_2Z");
                     num_elems_read_per_iteration_x    = 8;
                     num_elems_read_per_iteration_y    = 5;
                     num_elems_written_per_iteration_x = 4;
                     num_elems_written_per_iteration_y = 3;
                     num_elems_written_per_iteration_z = 2;
-#endif /* PROCESS_X_8ELEMENTS_Y_3ELEMENTS_FP16 */
-#undef PROCESS_X_8ELEMENTS_Y_3ELEMENTS_FP16
-#undef PROCESS_X_4ELEMENTS_Y_3ELEMENTS_FP16
-#undef PROCESS_X_4ELEMENTS_Y_4ELEMENTS_FP16
-#undef PROCESS_X_4ELEMENTS_Y_3ELEMENTS_Z_2ELEMENTS_FP16
+#endif /* PROCESS_nX_nY_nZ */
+#undef PROCESS_8X_3Y_1Z
+#undef PROCESS_4X_3Y_1Z
+#undef PROCESS_4X_4Y_1Z
+#undef PROCESS_4X_3Y_2Z
                     break;
 
                 case DataType::F32:
-                    options.emplace("#define PROCESS_X_4ELEMENTS_Y_3ELEMENTS");
+                    options.emplace("#define PROCESS_4X_3Y_1Z");
                     num_elems_read_per_iteration_x    = 8;
                     num_elems_read_per_iteration_y    = 5;
                     num_elems_written_per_iteration_x = 4;
@@ -174,33 +174,33 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
             switch(input->info()->data_type())
             {
                 case DataType::F16:
-                    options.emplace("#define PROCESS_X_4ELEMENTS_FP16");
+                    options.emplace("#define PROCESS_4X_1Y_1Z");
                     num_elems_read_per_iteration_x    = 8;
                     num_elems_written_per_iteration_x = 4;
                     break;
 
                 case DataType::F32:
                     // TODO(APPBROWSER-299): Choose the most optimal path and remove others.
-#define PROCESS_4_ELEMENT
+#define PROCESS_4X_1Y_1Z
 
-#if defined(PROCESS_1_ELEMENT)
-                    options.emplace("#define PROCESS_1_ELEMENT");
+#if defined(PROCESS_1X_1Y_1Z)
+                    options.emplace("#define PROCESS_1X_1Y_1Z");
                     num_elems_read_per_iteration_x    = 3;
                     num_elems_written_per_iteration_x = 1;
-#elif defined(PROCESS_4_ELEMENT)
-                    options.emplace("#define PROCESS_4_ELEMENT");
+#elif defined(PROCESS_4X_1Y_1Z)
+                    options.emplace("#define PROCESS_4X_1Y_1Z");
                     num_elems_read_per_iteration_x    = 8;
                     num_elems_written_per_iteration_x = 4;
-#elif defined(PROCESS_8_ELEMENT)
-                    options.emplace("#define PROCESS_8_ELEMENT");
+#elif defined(PROCESS_8X_1Y_1Z)
+                    options.emplace("#define PROCESS_8X_1Y_1Z");
                     num_elems_read_per_iteration_x    = 12;
                     num_elems_written_per_iteration_x = 8;
-#else /* PROCESS_1_ELEMENT */
+#else /* PROCESS_nX_nY_nZ */
 #error Have to declare how many elements to process in one thread.
-#endif /* PROCESS_1_ELEMENT */
-#undef PROCESS_1_ELEMENT
-#undef PROCESS_4_ELEMENT
-#undef PROCESS_8_ELEMENT
+#endif /* PROCESS_nX_nY_nZ */
+#undef PROCESS_1X_1Y_1Z
+#undef PROCESS_4X_1Y_1Z
+#undef PROCESS_8X_1Y_1Z
                     break;
 
                 default:

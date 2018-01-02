@@ -23,132 +23,107 @@
  */
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
 
-#include "helpers.h"
+#include "helpers_cs.h"
 
-layout(std140) uniform shader_params
+#if defined(DATA_TYPE_FP16)
+precision mediump float;
+#endif // DATA_TYPE_FP16
+
+/** This kernel performs a direct convolution to convolve the low three dimensions.
+ *
+ * @note The data type must be passed at compile time using "#define DATA_TYPE_NAME". e.g. "#define DATA_TYPE_FP32"
+ * @note This kernel has multiple optimized direct convolution options for FP16.
+ *       The direct convolution option must be passed at compile time using "#define PROCESS_nX_nY_nZ" e.g. "#define PROCESS_8X_1Y_1Z"
+ * @note The convolution stride x must be passed at compile time using "#define STRIDE_X n" e.g. "#define STRIDE_X 1"
+ *       This OpenGL ES shader works with stride_x = 1 and 2
+ * @note In case biases will be added to the convolution "#define HAS_BIAS" has to be passed to append the final matrix with 1 in each row.
+ *
+ * @param[in]  src_ptr          Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_attrs        The attributes of the source tensor
+ * @param[out] dst_ptr          Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs        The attributes of the destination tensor
+ * @param[in]  weights_ptr      Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_attrs    The attributes of the weights tensor
+ * @param[in]  biases_ptr       Pointer to the biases tensor. Same as @p src_ptr
+ * @param[in]  biases_attrs     The attributes of the weights tensor
+ * @param[in]  weights_stride_w Stride of the weights tensor in the 4th dimension
+ * @param[in]  weights_depth    The third dimensions of the weights tensors
+ */
+SHADER_PARAMS_DECLARATION
 {
-    TENSOR3D_PARAM_DECLARATION(src);
-    TENSOR3D_PARAM_DECLARATION(dst);
-    TENSOR3D_PARAM_DECLARATION(weights);
+    Tensor3DAttributes src_attrs;
+    Tensor3DAttributes dst_attrs;
+    Tensor3DAttributes weights_attrs;
 #ifdef BIAS
-    VECTOR_PARAM_DECLARATION(biases);
+    VectorAttributes biases_attrs;
 #endif /* BIAS */
     uint weights_stride_w;
     uint weights_depth;
 };
 
-#define LOAD12(r, name, offset)          \
-    r.x = LOAD4(name, offset);           \
-    r.y = LOAD4(name, offset + uint(1)); \
-    r.z = LOAD4(name, offset + uint(2))
-
-#define LOAD3X3(r, name)                                \
-    r[0] = LOAD4(name, tensor3D_offset(name, 0, 0, 0)); \
-    r[1] = LOAD4(name, tensor3D_offset(name, 1, 0, 0)); \
-    r[2] = LOAD4(name, tensor3D_offset(name, 2, 0, 0)); \
-    r[3] = LOAD4(name, tensor3D_offset(name, 0, 1, 0)); \
-    r[4] = LOAD4(name, tensor3D_offset(name, 1, 1, 0)); \
-    r[5] = LOAD4(name, tensor3D_offset(name, 2, 1, 0)); \
-    r[6] = LOAD4(name, tensor3D_offset(name, 0, 2, 0)); \
-    r[7] = LOAD4(name, tensor3D_offset(name, 1, 2, 0)); \
-    r[8] = LOAD4(name, tensor3D_offset(name, 2, 2, 0))
-
-#if defined(PROCESS_1_ELEMENT)
-BUFFER_DECLARATION(src, 1, float, readonly);
-BUFFER_DECLARATION(dst, 2, float, writeonly);
-BUFFER_DECLARATION(weights, 3, float, readonly);
+#if defined(DATA_TYPE_FP32)
+#if defined(PROCESS_1X_1Y_1Z)
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+TENSOR_DECLARATION(3, weightsBuffer, float, weights_ptr, weights_shift, 2, readonly);
 #ifdef BIAS
-BUFFER_DECLARATION(biases, 4, float, readonly);
+TENSOR_DECLARATION(4, biasesBuffer, float, biases_ptr, biases_shift, 2, readonly);
 #endif /* BIAS */
 
-/** This kernel performs a direct convolution to convolve the low three dimensions.
- *
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP32"
- * @note If biases are used then "define HAS_BIAS" has to be passed at compile time
- *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
- * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
- * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
- * @param[in]  weights_depth                         The third dimensions of the weights tensors
- */
 void main()
 {
-    Image    src     = CONVERT_TO_IMAGE_STRUCT(src);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
-    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    ImageIterator    src_iter     = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator weights_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(weights_attrs, weights_shift);
+    Tensor3DIterator dst_iter     = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
 #ifdef BIAS
-    Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+    VectorIterator biases_iter = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
 
-    float pixels = CONVERT(0, float);
+    float pixels = 0.f;
 
     uint z_index = gl_GlobalInvocationID.z;
 
-    weights.current_offset += z_index * weights_stride_w >> 2;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_stride_w);
 
     for(int d = 0; d < int(weights_depth); ++d)
     {
         vec3 temp;
         vec3 w;
 
-        LOAD12(temp, src, offset(src, 0, 0));
-        LOAD12(w, weights, tensor3D_offset(weights, 0, 0, 0));
+        temp = VLOAD3(vec3, src_ptr, IMAGE_OFFSET(src_iter, 0, 0));
+        w    = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 0, 0));
 
         pixels += temp.x * w[0] + temp.y * w[1] + temp.z * w[2];
 
-        LOAD12(temp, src, offset(src, 0, 1));
-        LOAD12(w, weights, tensor3D_offset(weights, 0, 1, 0));
+        temp = VLOAD3(vec3, src_ptr, IMAGE_OFFSET(src_iter, 0, 1));
+        w    = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 1, 0));
 
         pixels += temp.x * w[0] + temp.y * w[1] + temp.z * w[2];
 
-        LOAD12(temp, src, offset(src, 0, 2));
-        LOAD12(w, weights, tensor3D_offset(weights, 0, 2, 0));
+        temp = VLOAD3(vec3, src_ptr, IMAGE_OFFSET(src_iter, 0, 2));
+        w    = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 2, 0));
 
         pixels += temp.x * w[0] + temp.y * w[1] + temp.z * w[2];
 
-        src.current_offset += src_stride_z >> 2;
-        weights.current_offset += weights_stride_z >> 2;
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
     }
 
 #ifdef BIAS
-    pixels += LOAD4(biases, vector_offset(biases, int(z_index)));
+    pixels += LOAD(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
 #endif /* BIAS */
 
-    STORE4(dst, CURRENT_OFFSET(dst), pixels);
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, pixels);
 }
-#elif defined(PROCESS_8_ELEMENT)
-BUFFER_DECLARATION(src, 1, vec4, readonly);
-BUFFER_DECLARATION(dst, 2, vec4, writeonly);
-BUFFER_DECLARATION(weights, 3, float, readonly);
+
+#elif defined(PROCESS_8X_1Y_1Z)
+
+TENSOR_DECLARATION(1, srcBuffer, vec4, src_ptr, src_shift, 4, readonly);
+TENSOR_DECLARATION(2, dstBuffer, vec4, dst_ptr, dst_shift, 4, writeonly);
+TENSOR_DECLARATION(3, weightsBuffer, float, weights_ptr, weights_shift, 2, readonly);
 #ifdef BIAS
-BUFFER_DECLARATION(biases, 4, float, readonly);
+TENSOR_DECLARATION(4, biasesBuffer, float, biases_ptr, biases_shift, 2, readonly);
 #endif /* BIAS */
 
 #if STRIDE_X == 2
@@ -166,7 +141,7 @@ vec4[2] convolve1x3_stride1(uint offset, vec3 w)
     vec4 tmp[3];
     vec4 r[2];
 
-    LOAD3(tmp, src, offset);
+    tmp = VLOAD3(vec4[3], src_ptr, offset);
 
     middle = vec4(tmp[0].yzw, tmp[1].x);
     right  = vec4(tmp[0].zw, tmp[1].xy);
@@ -186,73 +161,37 @@ vec4[2] convolve1x3_stride2(uint offset, vec3 w)
     vec4 left;
     vec4 middle;
     vec4 right;
-    vec4 tmp[3];
+    vec4 tmp1[3];
+    vec4 tmp2[2];
     vec4 r[2];
 
-    LOAD3(tmp, src, offset);
+    tmp1 = VLOAD3(vec4[3], src_ptr, offset);
 
-    left   = vec4(tmp[0].xz, tmp[1].xz);
-    middle = vec4(tmp[0].yw, tmp[1].yw);
-    right  = vec4(tmp[0].z, tmp[1].xz, tmp[2].x);
+    left   = vec4(tmp1[0].xz, tmp1[1].xz);
+    middle = vec4(tmp1[0].yw, tmp1[1].yw);
+    right  = vec4(tmp1[0].z, tmp1[1].xz, tmp1[2].x);
 
     r[0] = left * w[0] + middle * w[1] + right * w[2];
 
-    LOAD2(tmp, src, offset + ((uint(3) * src_stride_x) >> 2));
+    tmp2 = VLOAD2(vec4[2], src_ptr, offset + uint(3));
 
-    left   = vec4(tmp[2].xz, tmp[0].xz);
-    middle = vec4(tmp[2].yw, tmp[0].yw);
-    right  = vec4(tmp[2].z, tmp[0].xz, tmp[1].x);
+    left   = vec4(tmp1[2].xz, tmp2[0].xz);
+    middle = vec4(tmp1[2].yw, tmp2[0].yw);
+    right  = vec4(tmp1[2].z, tmp2[0].xz, tmp2[1].x);
 
     r[1] = left * w[0] + middle * w[1] + right * w[2];
 
     return r;
 }
 
-/** An optimized direct convolution 3x3 OpenGL ES compute shader for process 8 elements at once
- *
- * @note This OpenGL ES shader works with stride_x = 1 and 2
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP32"
- * @note If biases are used then "define HAS_BIAS" has to be passed at compile time
- *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
- * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
- * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
- * @param[in]  weights_depth                         The third dimensions of the weights tensors
- */
 void main()
 {
-    Image    src     = CONVERT_TO_IMAGE_STRUCT(src);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
-    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    ImageIterator    src_iter     = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator weights_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(weights_attrs, weights_shift);
+    Tensor3DIterator dst_iter     = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
 #ifdef BIAS
-    Vector   biases  = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+    VectorIterator   biases_iter  = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
 
     vec4 pixels[2];
@@ -260,8 +199,7 @@ void main()
     pixels[1] = vec4(0);
 
     uint z_index = gl_GlobalInvocationID.z;
-
-    weights.current_offset += z_index * weights_stride_w >> 2;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_stride_w);
 
     for(int d = 0; d < int(weights_depth); ++d)
     {
@@ -270,45 +208,46 @@ void main()
         vec4 r[2];
 
         // first line
-        LOAD3(w, weights, tensor3D_offset(weights, 0, 0, 0));
+        w = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 0, 0));
 
-        r = CONVOLVE1x3(src.current_offset >> uint(2), w);
+        r = CONVOLVE1x3(CURRENT_ITEM_OFFSET(src_iter), w);
         pixels[0] += r[0];
         pixels[1] += r[1];
 
         // second line
-        LOAD3(w, weights, tensor3D_offset(weights, 0, 1, 0));
+        w = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 1, 0));
 
-        r = CONVOLVE1x3((src.current_offset + (src_stride_y >> 2)) >> uint(2), w);
+        r = CONVOLVE1x3(IMAGE_OFFSET(src_iter, 0, 1), w);
         pixels[0] += r[0];
         pixels[1] += r[1];
 
         // third line
-        LOAD3(w, weights, tensor3D_offset(weights, 0, 2, 0));
+        w = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 2, 0));
 
-        r = CONVOLVE1x3((src.current_offset + (src_stride_y >> 1)) >> uint(2), w);
+        r = CONVOLVE1x3(IMAGE_OFFSET(src_iter, 0, 2), w);
         pixels[0] += r[0];
         pixels[1] += r[1];
 
-        src.current_offset += src_stride_z >> 2;
-        weights.current_offset += weights_stride_z >> 2;
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
     }
 
 #ifdef BIAS
-    float b;
-    LOAD1(b, biases, vector_offset(biases, int(z_index)));
+    float b = LOAD(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
     pixels[0] += vec4(b);
     pixels[1] += vec4(b);
 #endif /* BIAS */
 
-    STORE2(dst, dst.current_offset >> uint(2), pixels);
+    VSTORE2_CURRENT_ITEM(dst_ptr, dst_iter, pixels);
 }
-#elif defined(PROCESS_4_ELEMENT)
-BUFFER_DECLARATION(src, 1, vec4, readonly);
-BUFFER_DECLARATION(dst, 2, vec4, writeonly);
-BUFFER_DECLARATION(weights, 3, float, readonly);
+
+#elif defined(PROCESS_4X_1Y_1Z)
+
+TENSOR_DECLARATION(1, srcBuffer, vec4, src_ptr, src_shift, 4, readonly);
+TENSOR_DECLARATION(2, dstBuffer, vec4, dst_ptr, dst_shift, 4, writeonly);
+TENSOR_DECLARATION(3, weightsBuffer, float, weights_ptr, weights_shift, 2, readonly);
 #ifdef BIAS
-BUFFER_DECLARATION(biases, 4, float, readonly);
+TENSOR_DECLARATION(4, biasesBuffer, float, biases_ptr, biases_shift, 2, readonly);
 #endif /* BIAS */
 
 #if STRIDE_X == 2
@@ -325,7 +264,7 @@ vec4 convolve1x3_stride1(uint offset, vec3 w)
     vec4 middle;
     vec4 right;
 
-    LOAD2(tmp, src, offset);
+    tmp = VLOAD2(vec4[2], src_ptr, offset);
 
     middle = vec4(tmp[0].yzw, tmp[1].x);
     right  = vec4(tmp[0].zw, tmp[1].xy);
@@ -343,7 +282,7 @@ vec4 convolve1x3_stride2(uint offset, vec3 w)
 
     vec4 tmp[3];
 
-    LOAD3(tmp, src, offset);
+    tmp = VLOAD3(vec4[3], src_ptr, offset);
 
     left   = vec4(tmp[0].xz, tmp[1].xz);
     middle = vec4(tmp[0].yw, tmp[1].yw);
@@ -354,59 +293,21 @@ vec4 convolve1x3_stride2(uint offset, vec3 w)
     return tmp[0];
 }
 
-/** An optimized direct convolution 3x3 OpenGL ES compute shader for process 4 elements at once
- *
- * @note This OpenGL ES shader works with stride_x = 1 and 2
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP32"
- * @note If biases are used then "define HAS_BIAS" has to be passed at compile time
- *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
- * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
- * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
- * @param[in]  weights_depth                         The third dimensions of the weights tensors
- */
 void main()
 {
-    Image    src     = CONVERT_TO_IMAGE_STRUCT(src);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
-    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    ImageIterator    src_iter     = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator weights_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(weights_attrs, weights_shift);
+    Tensor3DIterator dst_iter     = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
 #ifdef BIAS
-    Vector   biases  = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+    VectorIterator   biases_iter  = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
 
     vec4 pixels;
-    pixels = vec4(0);
+    pixels = vec4(0.f);
 
     uint z_index = gl_GlobalInvocationID.z;
-
-    weights.current_offset += z_index * weights_stride_w >> 2;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_stride_w);
 
     for(int d = 0; d < int(weights_depth); ++d)
     {
@@ -414,38 +315,36 @@ void main()
         vec3 w;
 
         // first line
-        LOAD3(w, weights, tensor3D_offset(weights, 0, 0, 0));
-
-        pixels += CONVOLVE1x3(src.current_offset >> uint(2), w);
+        w = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 0, 0));
+        pixels += CONVOLVE1x3(CURRENT_ITEM_OFFSET(src_iter), w);
 
         // second line
-        LOAD3(w, weights, tensor3D_offset(weights, 0, 1, 0));
-
-        pixels += CONVOLVE1x3((src.current_offset + (src_stride_y >> 2)) >> uint(2), w);
+        w = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 1, 0));
+        pixels += CONVOLVE1x3(IMAGE_OFFSET(src_iter, 0, 1), w);
 
         // third line
-        LOAD3(w, weights, tensor3D_offset(weights, 0, 2, 0));
+        w = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 2, 0));
+        pixels += CONVOLVE1x3(IMAGE_OFFSET(src_iter, 0, 2), w);
 
-        pixels += CONVOLVE1x3((src.current_offset + (src_stride_y >> 1)) >> uint(2), w);
-
-        src.current_offset += src_stride_z >> 2;
-        weights.current_offset += weights_stride_z >> 2;
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
     }
 
 #ifdef BIAS
-    float b;
-    LOAD1(b, biases, vector_offset(biases, int(z_index)));
-    pixels += vec4(b);
+    float b = LOAD(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
+    pixels += b;
 #endif /* BIAS */
 
-    STORE1(dst, dst.current_offset >> uint(2), pixels);
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, pixels);
 }
-#elif defined(PROCESS_X_4ELEMENTS_Y_3ELEMENTS)
-BUFFER_DECLARATION(src, 1, vec4, readonly);
-BUFFER_DECLARATION(dst, 2, vec4, writeonly);
-BUFFER_DECLARATION(weights, 3, float, readonly);
+
+#elif defined(PROCESS_4X_3Y_1Z)
+
+TENSOR_DECLARATION(1, srcBuffer, vec4, src_ptr, src_shift, 4, readonly);
+TENSOR_DECLARATION(2, dstBuffer, vec4, dst_ptr, dst_shift, 4, writeonly);
+TENSOR_DECLARATION(3, weightsBuffer, float, weights_ptr, weights_shift, 2, readonly);
 #ifdef BIAS
-BUFFER_DECLARATION(biases, 4, float, readonly);
+TENSOR_DECLARATION(4, biasesBuffer, float, biases_ptr, biases_shift, 2, readonly);
 #endif /* BIAS */
 
 #define CONVOLVE1x3(left, middle, right, w) convolve1x3_stride1(left, middle, right, w)
@@ -459,51 +358,14 @@ vec4 convolve1x3_stride1(vec4 left, vec4 middle, vec4 right, vec3 w)
     return r;
 }
 
-/** An optimized direct convolution 3x3 OpenGL ES compute shader for process 4x3 elements at once
- *
- * @note This OpenGL ES shader works with stride_x = 1 and 2
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP32"
- * @note If biases are used then "define HAS_BIAS" has to be passed at compile time
- *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
- * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
- * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
- * @param[in]  weights_depth                         The third dimensions of the weights tensors
- */
 void main()
 {
-    Image    src     = CONVERT_TO_IMAGE_STRUCT(src);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
-    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    ImageIterator    src_iter     = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator weights_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(weights_attrs, weights_shift);
+    Tensor3DIterator dst_iter     = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
 #ifdef BIAS
-    Vector   biases  = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+    VectorIterator   biases_iter  = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
 
     vec4 pixels[3];
@@ -512,36 +374,35 @@ void main()
     pixels[2] = vec4(0);
 
     uint z_index = gl_GlobalInvocationID.z;
-
-    weights.current_offset += z_index * weights_stride_w >> 2;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_stride_w);
 
     for(int d = 0; d < int(weights_depth); ++d)
     {
         // load 3 weights once
         vec3 w[3];
 
-        LOAD3(w[0], weights, tensor3D_offset(weights, 0, 0, 0));
-        LOAD3(w[1], weights, tensor3D_offset(weights, 0, 1, 0));
-        LOAD3(w[2], weights, tensor3D_offset(weights, 0, 2, 0));
+        w[0] = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 0, 0));
+        w[1] = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 1, 0));
+        w[2] = VLOAD3(vec3, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 2, 0));
 
         vec4 s[2];
         vec4 middle;
         vec4 right;
         // first line
-        LOAD2(s, src, src.current_offset >> uint(2));
+        s      = VLOAD2_CURRENT_ITEM(vec4[2], src_ptr, src_iter);
         middle = vec4(s[0].yzw, s[1].x);
         right  = vec4(s[0].zw, s[1].xy);
         pixels[0] += CONVOLVE1x3(s[0], middle, right, w[0]);
 
         // second line
-        LOAD2(s, src, (src.current_offset + (src_stride_y >> 2)) >> uint(2));
+        s      = VLOAD2(vec4[2], src_ptr, IMAGE_OFFSET(src_iter, 0, 1));
         middle = vec4(s[0].yzw, s[1].x);
         right  = vec4(s[0].zw, s[1].xy);
         pixels[0] += CONVOLVE1x3(s[0], middle, right, w[1]);
         pixels[1] += CONVOLVE1x3(s[0], middle, right, w[0]);
 
         // third line
-        LOAD2(s, src, (src.current_offset + (src_stride_y >> 1)) >> uint(2));
+        s      = VLOAD2(vec4[2], src_ptr, IMAGE_OFFSET(src_iter, 0, 2));
         middle = vec4(s[0].yzw, s[1].x);
         right  = vec4(s[0].zw, s[1].xy);
         pixels[0] += CONVOLVE1x3(s[0], middle, right, w[2]);
@@ -549,43 +410,45 @@ void main()
         pixels[2] += CONVOLVE1x3(s[0], middle, right, w[0]);
 
         // forth line
-        LOAD2(s, src, (src.current_offset + (uint(3) * (src_stride_y >> 2))) >> uint(2));
+        s      = VLOAD2(vec4[2], src_ptr, IMAGE_OFFSET(src_iter, 0, 3));
         middle = vec4(s[0].yzw, s[1].x);
         right  = vec4(s[0].zw, s[1].xy);
         pixels[1] += CONVOLVE1x3(s[0], middle, right, w[2]);
         pixels[2] += CONVOLVE1x3(s[0], middle, right, w[1]);
 
         // fifth line
-        LOAD2(s, src, (src.current_offset + (src_stride_y)) >> uint(2));
+        s      = VLOAD2(vec4[2], src_ptr, IMAGE_OFFSET(src_iter, 0, 4));
         middle = vec4(s[0].yzw, s[1].x);
         right  = vec4(s[0].zw, s[1].xy);
         pixels[2] += CONVOLVE1x3(s[0], middle, right, w[2]);
 
-        src.current_offset += src_stride_z >> 2;
-        weights.current_offset += weights_stride_z >> 2;
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
     }
 
 #ifdef BIAS
-    float b;
-    LOAD1(b, biases, vector_offset(biases, int(z_index)));
+    float b = LOAD(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
 
     pixels[0] += vec4(b);
     pixels[1] += vec4(b);
     pixels[2] += vec4(b);
 #endif /* BIAS */
 
-    STORE1(dst, dst.current_offset >> uint(2), pixels[0]);
-    STORE1(dst, (dst.current_offset + (dst_stride_y >> 2)) >> uint(2), pixels[1]);
-    STORE1(dst, (dst.current_offset + (dst_stride_y >> 1)) >> uint(2), pixels[2]);
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, pixels[0]);
+    STORE(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels[1]);
+    STORE(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 2, 0), pixels[2]);
 }
-#elif defined(PROCESS_X_8ELEMENTS_Y_3ELEMENTS_FP16)
-precision mediump float;
 
-BUFFER_DECLARATION(src, 1, uvec4, readonly);
-BUFFER_DECLARATION(dst, 2, uvec4, writeonly);
-BUFFER_DECLARATION(weights, 3, uint, readonly);
+#endif // PROCESS_nX_nY
+
+#elif defined(DATA_TYPE_FP16)
+
+#if defined(PROCESS_8X_3Y_1Z)
+TENSOR_DECLARATION(1, srcBuffer, uvec4, src_ptr, src_shift, 4, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec4, dst_ptr, dst_shift, 4, writeonly);
+TENSOR_DECLARATION(3, weightsBuffer, uint, weights_ptr, weights_shift, 2, readonly);
 #ifdef BIAS
-BUFFER_DECLARATION(biases, 4, uint, readonly);
+TENSOR_DECLARATION(4, biasesBuffer, uint, biases_ptr, biases_shift, 2, readonly);
 #endif /* BIAS */
 
 #define CONVOLVE1x3(s, w) convolve1x3_stride1(s, w)
@@ -609,14 +472,12 @@ vec4[2] convolve1x3_stride1(vec4 tmp[3], vec3 w)
     return r;
 }
 
-vec4[3] load_and_unpack(uint offset)
+vec4[3] vload2_src_unpack12_half(uint offset)
 {
     uvec4 packed_s[2];
     vec4  s[3];
 
-    LOAD1(packed_s[0], src, offset);
-    LOAD1(packed_s[1], src, offset + uint(1));
-    ;
+    packed_s = VLOAD2(uvec4[2], src_ptr, offset);
 
     s[0] = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
     s[1] = vec4(unpackHalf2x16(packed_s[0].z), unpackHalf2x16(packed_s[0].w));
@@ -625,55 +486,15 @@ vec4[3] load_and_unpack(uint offset)
     return s;
 }
 
-/** An optimized direct convolution 3x3 OpenGL ES compute shader for process 8x3 elements at once
- *
- * @note This OpenGL ES shader works with stride_x = 1 and 2
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP16"
- * @note If biases are used then "define HAS_BIAS" has to be passed at compile time
- *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F16
- * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
- * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
- * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
- * @param[in]  weights_depth                         The third dimensions of the weights tensors
- */
 void main()
 {
-    Image    src     = CONVERT_TO_IMAGE_STRUCT_FP16(src);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP_FP16(weights);
-    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT_FP16(dst);
+    ImageIterator    src_iter     = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator weights_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(weights_attrs, weights_shift);
+    Tensor3DIterator dst_iter     = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
 #ifdef BIAS
-    Vector   biases  = CONVERT_TO_VECTOR_STRUCT_NO_STEP_FP16(biases);
+    VectorIterator   biases_iter  = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
-
-    uvec2 packed_d[2];
-    uvec4 vd;
 
     vec4 pixels[3][2];
     int  i, j;
@@ -686,17 +507,16 @@ void main()
     }
 
     uint z_index = gl_GlobalInvocationID.z;
-
-    weights.current_offset += z_index * weights_stride_w;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_stride_w);
 
     for(int d = 0; d < int(weights_depth); ++d)
     {
         // load 3 weights once
         uvec2 packed_w[3];
 
-        LOAD2(packed_w[0], weights, tensor3D_offset_fp16(weights, 0, 0, 0) >> 2);
-        LOAD2(packed_w[1], weights, tensor3D_offset_fp16(weights, 0, 1, 0) >> 2);
-        LOAD2(packed_w[2], weights, tensor3D_offset_fp16(weights, 0, 2, 0) >> 2);
+        packed_w[0] = VLOAD2_CURRENT_ITEM(uvec2, weights_ptr, weights_iter);
+        packed_w[1] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 1, 0));
+        packed_w[2] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 2, 0));
 
         vec3 w[3];
         w[0] = vec3(unpackHalf2x16(packed_w[0].x), unpackHalf2x16(packed_w[0].y).x);
@@ -706,18 +526,16 @@ void main()
         uvec4 packed_s[2];
         vec4  s[3];
         vec4  r[2];
-        uint  offset;
+
         // first line
-        offset = src.current_offset >> uint(4);
-        s      = load_and_unpack(offset);
+        s = vload2_src_unpack12_half(CURRENT_ITEM_OFFSET(src_iter));
 
         r = CONVOLVE1x3(s, w[0]);
         pixels[0][0] += r[0];
         pixels[0][1] += r[1];
 
         // second line
-        offset = (src.current_offset + src_stride_y) >> uint(4);
-        s      = load_and_unpack(offset);
+        s = vload2_src_unpack12_half(IMAGE_OFFSET(src_iter, 0, 1));
 
         r = CONVOLVE1x3(s, w[1]);
         pixels[0][0] += r[0];
@@ -727,8 +545,7 @@ void main()
         pixels[1][1] += r[1];
 
         // third line
-        offset = (src.current_offset + (src_stride_y << 1)) >> uint(4);
-        s      = load_and_unpack(offset);
+        s = vload2_src_unpack12_half(IMAGE_OFFSET(src_iter, 0, 2));
 
         r = CONVOLVE1x3(s, w[2]);
         pixels[0][0] += r[0];
@@ -741,8 +558,7 @@ void main()
         pixels[2][1] += r[1];
 
         // forth line
-        offset = (src.current_offset + uint(3) * (src_stride_y)) >> uint(4);
-        s      = load_and_unpack(offset);
+        s = vload2_src_unpack12_half(IMAGE_OFFSET(src_iter, 0, 3));
 
         r = CONVOLVE1x3(s, w[2]);
         pixels[1][0] += r[0];
@@ -752,29 +568,28 @@ void main()
         pixels[2][1] += r[1];
 
         // fifth line
-        offset = (src.current_offset + (src_stride_y << 2)) >> uint(4);
-        s      = load_and_unpack(offset);
+        s = vload2_src_unpack12_half(IMAGE_OFFSET(src_iter, 0, 4));
 
         r = CONVOLVE1x3(s, w[2]);
         pixels[2][0] += r[0];
         pixels[2][1] += r[1];
 
-        src.current_offset += src_stride_z;
-        weights.current_offset += weights_stride_z;
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
     }
 
 #ifdef BIAS
-    uint  packed_b;
+    vec2  vec2_b;
     float b;
-    LOAD1(packed_b, biases, vector_offset_fp16(biases, int(z_index)) >> 2);
+    vec2_b = LOAD_UNPACK2_HALF(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
 
     if(z_index % uint(2) == uint(0))
     {
-        b = unpackHalf2x16(packed_b).x;
+        b = vec2_b.x;
     }
     else
     {
-        b = unpackHalf2x16(packed_b).y;
+        b = vec2_b.y;
     }
 
     for(i = 0; i < 3; i++)
@@ -786,37 +601,25 @@ void main()
     }
 #endif /* BIAS */
 
-    packed_d[0] = uvec2(packHalf2x16(pixels[0][0].xy), packHalf2x16(pixels[0][0].zw));
-    packed_d[1] = uvec2(packHalf2x16(pixels[0][1].xy), packHalf2x16(pixels[0][1].zw));
-    vd          = uvec4(packed_d[0], packed_d[1]);
-    STORE1(dst, dst.current_offset >> uint(4), vd);
-
-    packed_d[0] = uvec2(packHalf2x16(pixels[1][0].xy), packHalf2x16(pixels[1][0].zw));
-    packed_d[1] = uvec2(packHalf2x16(pixels[1][1].xy), packHalf2x16(pixels[1][1].zw));
-    vd          = uvec4(packed_d[0], packed_d[1]);
-    STORE1(dst, (dst.current_offset + dst_stride_y) >> uint(4), vd);
-
-    packed_d[0] = uvec2(packHalf2x16(pixels[2][0].xy), packHalf2x16(pixels[2][0].zw));
-    packed_d[1] = uvec2(packHalf2x16(pixels[2][1].xy), packHalf2x16(pixels[2][1].zw));
-    vd          = uvec4(packed_d[0], packed_d[1]);
-    STORE1(dst, (dst.current_offset + (dst_stride_y << 1)) >> uint(4), vd);
+    STORE_PACK8_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels[0]);
+    STORE_PACK8_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels[1]);
+    STORE_PACK8_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 2, 0), pixels[2]);
 }
-#elif defined(PROCESS_X_4ELEMENTS_FP16)
-precision mediump float;
 
-BUFFER_DECLARATION(src, 1, uvec2, readonly);
-BUFFER_DECLARATION(dst, 2, uvec2, writeonly);
-BUFFER_DECLARATION(weights, 3, uint, readonly);
+#elif defined(PROCESS_4X_1Y_1Z)
+TENSOR_DECLARATION(1, srcBuffer, uvec2, src_ptr, src_shift, 3, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec2, dst_ptr, dst_shift, 3, writeonly);
+TENSOR_DECLARATION(3, weightsBuffer, uint, weights_ptr, weights_shift, 2, readonly);
 #ifdef BIAS
-BUFFER_DECLARATION(biases, 4, uint, readonly);
+TENSOR_DECLARATION(4, biasesBuffer, uint, biases_ptr, biases_shift, 2, readonly);
 #endif /* BIAS */
 
 #if STRIDE_X == 2
 #define CONVOLVE1x3(s, w) convolve1x3_stride2(s, w)
-#define LOAD_AND_UNPACK(offset) load_and_unpack_stride2(offset)
+#define LOAD_AND_UNPACK(offset) VLOAD3_UNPACK12_HALF(src_ptr, offset)
 #elif STRIDE_X == 1 /* STRIDE_X == 1 */
 #define CONVOLVE1x3(s, w) convolve1x3_stride1(s, w)
-#define LOAD_AND_UNPACK(offset) load_and_unpack_stride1(offset)
+#define LOAD_AND_UNPACK(offset) VLOAD2_UNPACK8_HALF(src_ptr, offset)
 #else /* STRIDE_X not equals 1 or 2 */
 #error STRIDE_X larger than 2 is not supported
 #endif /* STRIDE_X == 2 */
@@ -851,81 +654,14 @@ vec4 convolve1x3_stride2(vec4 tmp[3], vec3 w)
     return r;
 }
 
-vec4[2] load_and_unpack_stride1(uint offset)
-{
-    uvec2 packed_s[2];
-    vec4  s[2];
-
-    LOAD1(packed_s[0], src, offset);
-    LOAD1(packed_s[1], src, offset + uint(1));
-
-    s[0] = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
-    s[1] = vec4(unpackHalf2x16(packed_s[1].x), unpackHalf2x16(packed_s[1].y));
-
-    return s;
-}
-
-vec4[3] load_and_unpack_stride2(uint offset)
-{
-    uvec2 packed_s[3];
-    vec4  s[3];
-
-    LOAD1(packed_s[0], src, offset);
-    LOAD1(packed_s[1], src, offset + uint(1));
-    LOAD1(packed_s[2], src, offset + uint(2));
-
-    s[0] = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
-    s[1] = vec4(unpackHalf2x16(packed_s[1].x), unpackHalf2x16(packed_s[1].y));
-    s[2] = vec4(unpackHalf2x16(packed_s[2].x), unpackHalf2x16(packed_s[2].y));
-
-    return s;
-}
-
-/** An optimized direct convolution 3x3 OpenGL ES compute shader for process 4 elements at once
- *
- * @note This OpenGL ES shader works with stride_x = 1 and 2
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP16"
- * @note If biases are used then "define HAS_BIAS" has to be passed at compile time
- *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F16
- * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
- * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
- * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
- * @param[in]  weights_depth                         The third dimensions of the weights tensors
- */
 void main()
 {
-    Image    src     = CONVERT_TO_IMAGE_STRUCT_FP16(src);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP_FP16(weights);
-    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT_FP16(dst);
+    ImageIterator    src_iter     = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator weights_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(weights_attrs, weights_shift);
+    Tensor3DIterator dst_iter     = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
 #ifdef BIAS
-    Vector   biases  = CONVERT_TO_VECTOR_STRUCT_NO_STEP_FP16(biases);
+    VectorIterator   biases_iter  = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
 
     uvec2 packed_d;
@@ -933,17 +669,16 @@ void main()
     vec4 pixels = vec4(0);
 
     uint z_index = gl_GlobalInvocationID.z;
-
-    weights.current_offset += z_index * weights_stride_w;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_stride_w);
 
     for(int d = 0; d < int(weights_depth); ++d)
     {
         // load 3 weights once
         uvec2 packed_w[3];
 
-        LOAD2(packed_w[0], weights, tensor3D_offset_fp16(weights, 0, 0, 0) >> 2);
-        LOAD2(packed_w[1], weights, tensor3D_offset_fp16(weights, 0, 1, 0) >> 2);
-        LOAD2(packed_w[2], weights, tensor3D_offset_fp16(weights, 0, 2, 0) >> 2);
+        packed_w[0] = VLOAD2_CURRENT_ITEM(uvec2, weights_ptr, weights_iter);
+        packed_w[1] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 1, 0));
+        packed_w[2] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 2, 0));
 
         vec3 w[3];
         w[0] = vec3(unpackHalf2x16(packed_w[0].x), unpackHalf2x16(packed_w[0].y).x);
@@ -958,57 +693,50 @@ void main()
 #error STRIDE_X larger than 2 is not supported
 #endif /* STRIDE_X == 2 */
         vec4 r;
-        uint offset;
-        // first line
-        offset = src.current_offset >> uint(3);
-        s      = LOAD_AND_UNPACK(offset);
 
+        // first line
+        s = LOAD_AND_UNPACK(CURRENT_ITEM_OFFSET(src_iter));
         pixels += CONVOLVE1x3(s, w[0]);
 
         // second line
-        offset = (src.current_offset + src_stride_y) >> uint(3);
-        s      = LOAD_AND_UNPACK(offset);
-
+        s = LOAD_AND_UNPACK(IMAGE_OFFSET(src_iter, 0, 1));
         pixels += CONVOLVE1x3(s, w[1]);
 
         // third line
-        offset = (src.current_offset + (src_stride_y << 1)) >> uint(3);
-        s      = LOAD_AND_UNPACK(offset);
-
+        s = LOAD_AND_UNPACK(IMAGE_OFFSET(src_iter, 0, 2));
         pixels += CONVOLVE1x3(s, w[2]);
 
-        src.current_offset += src_stride_z;
-        weights.current_offset += weights_stride_z;
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
     }
 
 #ifdef BIAS
-    uint  packed_b;
+    vec2  vec2_b;
     float b;
-    LOAD1(packed_b, biases, vector_offset_fp16(biases, int(z_index)) >> 2);
+
+    vec2_b = LOAD_UNPACK2_HALF(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
 
     if(z_index % uint(2) == uint(0))
     {
-        b = unpackHalf2x16(packed_b).x;
+        b = vec2_b.x;
     }
     else
     {
-        b = unpackHalf2x16(packed_b).y;
+        b = vec2_b.y;
     }
 
     pixels += vec4(b);
 #endif /* BIAS */
 
-    packed_d = uvec2(packHalf2x16(pixels.xy), packHalf2x16(pixels.zw));
-    STORE1(dst, dst.current_offset >> uint(3), packed_d);
+    STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels);
 }
-#elif defined(PROCESS_X_4ELEMENTS_Y_3ELEMENTS_FP16)
-precision mediump float;
 
-BUFFER_DECLARATION(src, 1, uvec2, readonly);
-BUFFER_DECLARATION(dst, 2, uvec2, writeonly);
-BUFFER_DECLARATION(weights, 3, uint, readonly);
+#elif defined(PROCESS_4X_3Y_1Z)
+TENSOR_DECLARATION(1, srcBuffer, uvec2, src_ptr, src_shift, 3, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec2, dst_ptr, dst_shift, 3, writeonly);
+TENSOR_DECLARATION(3, weightsBuffer, uint, weights_ptr, weights_shift, 2, readonly);
 #ifdef BIAS
-BUFFER_DECLARATION(biases, 4, uint, readonly);
+TENSOR_DECLARATION(4, biasesBuffer, uint, biases_ptr, biases_shift, 2, readonly);
 #endif /* BIAS */
 
 #define CONVOLVE1x3(s, w) convolve1x3_stride1(s, w)
@@ -1027,68 +755,15 @@ vec4 convolve1x3_stride1(vec4 tmp[2], vec3 w)
     return r;
 }
 
-vec4[2] load_and_unpack(uint offset)
-{
-    uvec2 packed_s[2];
-    vec4  s[2];
-
-    LOAD1(packed_s[0], src, offset);
-    LOAD1(packed_s[1], src, offset + uint(1));
-
-    s[0] = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
-    s[1] = vec4(unpackHalf2x16(packed_s[1].x), unpackHalf2x16(packed_s[1].y));
-
-    return s;
-}
-
-/** An optimized direct convolution 3x3 OpenGL ES compute shader for process 4x3 elements at once
- *
- * @note This OpenGL ES shader works with stride_x = 1 and 2
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP16"
- * @note If biases are used then "define HAS_BIAS" has to be passed at compile time
- *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F16
- * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
- * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
- * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
- * @param[in]  weights_depth                         The third dimensions of the weights tensors
- */
 void main()
 {
-    Image    src     = CONVERT_TO_IMAGE_STRUCT_FP16(src);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP_FP16(weights);
-    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT_FP16(dst);
+    ImageIterator    src_iter     = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator weights_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(weights_attrs, weights_shift);
+    Tensor3DIterator dst_iter     = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
 #ifdef BIAS
-    Vector   biases  = CONVERT_TO_VECTOR_STRUCT_NO_STEP_FP16(biases);
+    VectorIterator   biases_iter  = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
-
-    uvec2 packed_d;
 
     vec4 pixels[3];
     int  i;
@@ -1099,17 +774,16 @@ void main()
     }
 
     uint z_index = gl_GlobalInvocationID.z;
-
-    weights.current_offset += z_index * weights_stride_w;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_stride_w);
 
     for(int d = 0; d < int(weights_depth); ++d)
     {
         // load 3 weights once
         uvec2 packed_w[3];
 
-        LOAD2(packed_w[0], weights, tensor3D_offset_fp16(weights, 0, 0, 0) >> 2);
-        LOAD2(packed_w[1], weights, tensor3D_offset_fp16(weights, 0, 1, 0) >> 2);
-        LOAD2(packed_w[2], weights, tensor3D_offset_fp16(weights, 0, 2, 0) >> 2);
+        packed_w[0] = VLOAD2_CURRENT_ITEM(uvec2, weights_ptr, weights_iter);
+        packed_w[1] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 1, 0));
+        packed_w[2] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 2, 0));
 
         vec3 w[3];
         w[0] = vec3(unpackHalf2x16(packed_w[0].x), unpackHalf2x16(packed_w[0].y).x);
@@ -1118,57 +792,47 @@ void main()
 
         vec4 s[2];
         vec4 r;
-        uint offset;
-        // first line
-        offset = src.current_offset >> uint(3);
-        s      = load_and_unpack(offset);
 
+        // first line
+        s = VLOAD2_UNPACK8_CURRENT_ITEM_HALF(src_ptr, src_iter);
         pixels[0] += CONVOLVE1x3(s, w[0]);
 
         // second line
-        offset = (src.current_offset + src_stride_y) >> uint(3);
-        s      = load_and_unpack(offset);
-
+        s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 1));
         pixels[0] += CONVOLVE1x3(s, w[1]);
         pixels[1] += CONVOLVE1x3(s, w[0]);
 
         // third line
-        offset = (src.current_offset + (src_stride_y << 1)) >> uint(3);
-        s      = load_and_unpack(offset);
-
+        s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 2));
         pixels[0] += CONVOLVE1x3(s, w[2]);
         pixels[1] += CONVOLVE1x3(s, w[1]);
         pixels[2] += CONVOLVE1x3(s, w[0]);
 
         // forth line
-        offset = (src.current_offset + uint(3) * (src_stride_y)) >> uint(3);
-        s      = load_and_unpack(offset);
-
+        s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 3));
         pixels[1] += CONVOLVE1x3(s, w[2]);
         pixels[2] += CONVOLVE1x3(s, w[1]);
 
         // fifth line
-        offset = (src.current_offset + (src_stride_y << 2)) >> uint(3);
-        s      = load_and_unpack(offset);
-
+        s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 4));
         pixels[2] += CONVOLVE1x3(s, w[2]);
 
-        src.current_offset += src_stride_z;
-        weights.current_offset += weights_stride_z;
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
     }
 
 #ifdef BIAS
-    uint  packed_b;
+    vec2  vec2_b;
     float b;
-    LOAD1(packed_b, biases, vector_offset_fp16(biases, int(z_index)) >> 2);
+    vec2_b = LOAD_UNPACK2_HALF(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
 
     if(z_index % uint(2) == uint(0))
     {
-        b = unpackHalf2x16(packed_b).x;
+        b = vec2_b.x;
     }
     else
     {
-        b = unpackHalf2x16(packed_b).y;
+        b = vec2_b.y;
     }
 
     for(i = 0; i < 3; i++)
@@ -1177,23 +841,17 @@ void main()
     }
 #endif /* BIAS */
 
-    packed_d = uvec2(packHalf2x16(pixels[0].xy), packHalf2x16(pixels[0].zw));
-    STORE1(dst, dst.current_offset >> uint(3), packed_d);
-
-    packed_d = uvec2(packHalf2x16(pixels[1].xy), packHalf2x16(pixels[1].zw));
-    STORE1(dst, (dst.current_offset + dst_stride_y) >> uint(3), packed_d);
-
-    packed_d = uvec2(packHalf2x16(pixels[2].xy), packHalf2x16(pixels[2].zw));
-    STORE1(dst, (dst.current_offset + (dst_stride_y << 1)) >> uint(3), packed_d);
+    STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels[0]);
+    STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels[1]);
+    STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 2, 0), pixels[2]);
 }
-#elif defined(PROCESS_X_4ELEMENTS_Y_4ELEMENTS_FP16)
-precision mediump float;
 
-BUFFER_DECLARATION(src, 1, uvec2, readonly);
-BUFFER_DECLARATION(dst, 2, uvec2, writeonly);
-BUFFER_DECLARATION(weights, 3, uint, readonly);
+#elif defined(PROCESS_4X_4Y_1Z)
+TENSOR_DECLARATION(1, srcBuffer, uvec2, src_ptr, src_shift, 3, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec2, dst_ptr, dst_shift, 3, writeonly);
+TENSOR_DECLARATION(3, weightsBuffer, uint, weights_ptr, weights_shift, 2, readonly);
 #ifdef BIAS
-BUFFER_DECLARATION(biases, 4, uint, readonly);
+TENSOR_DECLARATION(4, biasesBuffer, uint, biases_ptr, biases_shift, 2, readonly);
 #endif /* BIAS */
 
 #define CONVOLVE1x3(s, w) convolve1x3_stride1(s, w)
@@ -1212,68 +870,15 @@ vec4 convolve1x3_stride1(vec4 tmp[2], vec3 w)
     return r;
 }
 
-vec4[2] load_and_unpack(uint offset)
-{
-    uvec2 packed_s[2];
-    vec4  s[2];
-
-    LOAD1(packed_s[0], src, offset);
-    LOAD1(packed_s[1], src, offset + uint(1));
-
-    s[0] = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
-    s[1] = vec4(unpackHalf2x16(packed_s[1].x), unpackHalf2x16(packed_s[1].y));
-
-    return s;
-}
-
-/** An optimized direct convolution 3x3 OpenGL ES compute shader for process 4x4 elements at once
- *
- * @note This OpenGL ES shader works with stride_x = 1 and 2
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP16"
- * @note If biases are used then "define HAS_BIAS" has to be passed at compile time
- *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F16
- * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
- * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
- * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
- * @param[in]  weights_depth                         The third dimensions of the weights tensors
- */
 void main()
 {
-    Image    src     = CONVERT_TO_IMAGE_STRUCT_FP16(src);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP_FP16(weights);
-    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT_FP16(dst);
+    ImageIterator    src_iter     = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator weights_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(weights_attrs, weights_shift);
+    Tensor3DIterator dst_iter     = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
 #ifdef BIAS
-    Vector   biases  = CONVERT_TO_VECTOR_STRUCT_NO_STEP_FP16(biases);
+    VectorIterator   biases_iter  = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
-
-    uvec2 packed_d;
 
     vec4 pixels[4];
     int  i;
@@ -1284,17 +889,16 @@ void main()
     }
 
     uint z_index = gl_GlobalInvocationID.z;
-
-    weights.current_offset += z_index * weights_stride_w;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_stride_w);
 
     for(int d = 0; d < int(weights_depth); ++d)
     {
         // load 3 weights once
         uvec2 packed_w[3];
 
-        LOAD2(packed_w[0], weights, tensor3D_offset_fp16(weights, 0, 0, 0) >> 2);
-        LOAD2(packed_w[1], weights, tensor3D_offset_fp16(weights, 0, 1, 0) >> 2);
-        LOAD2(packed_w[2], weights, tensor3D_offset_fp16(weights, 0, 2, 0) >> 2);
+        packed_w[0] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 0, 0));
+        packed_w[1] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 1, 0));
+        packed_w[2] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 2, 0));
 
         vec3 w[3];
         w[0] = vec3(unpackHalf2x16(packed_w[0].x), unpackHalf2x16(packed_w[0].y).x);
@@ -1303,65 +907,53 @@ void main()
 
         vec4 s[2];
         vec4 r;
-        uint offset;
-        // first line
-        offset = src.current_offset >> uint(3);
-        s      = load_and_unpack(offset);
 
+        // first line
+        s = VLOAD2_UNPACK8_CURRENT_ITEM_HALF(src_ptr, src_iter);
         pixels[0] += CONVOLVE1x3(s, w[0]);
 
         // second line
-        offset = (src.current_offset + src_stride_y) >> uint(3);
-        s      = load_and_unpack(offset);
-
+        s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 1));
         pixels[0] += CONVOLVE1x3(s, w[1]);
         pixels[1] += CONVOLVE1x3(s, w[0]);
 
         // third line
-        offset = (src.current_offset + (src_stride_y << 1)) >> uint(3);
-        s      = load_and_unpack(offset);
-
+        s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 2));
         pixels[0] += CONVOLVE1x3(s, w[2]);
         pixels[1] += CONVOLVE1x3(s, w[1]);
         pixels[2] += CONVOLVE1x3(s, w[0]);
 
         // forth line
-        offset = (src.current_offset + uint(3) * (src_stride_y)) >> uint(3);
-        s      = load_and_unpack(offset);
-
+        s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 3));
         pixels[1] += CONVOLVE1x3(s, w[2]);
         pixels[2] += CONVOLVE1x3(s, w[1]);
         pixels[3] += CONVOLVE1x3(s, w[0]);
 
         // fifth line
-        offset = (src.current_offset + (src_stride_y << 2)) >> uint(3);
-        s      = load_and_unpack(offset);
-
+        s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 4));
         pixels[2] += CONVOLVE1x3(s, w[2]);
         pixels[3] += CONVOLVE1x3(s, w[1]);
 
         // sixth line
-        offset = (src.current_offset + uint(5) * (src_stride_y)) >> uint(3);
-        s      = load_and_unpack(offset);
-
+        s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 5));
         pixels[3] += CONVOLVE1x3(s, w[2]);
 
-        src.current_offset += src_stride_z;
-        weights.current_offset += weights_stride_z;
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
     }
 
 #ifdef BIAS
-    uint  packed_b;
+    vec2  vec2_b;
     float b;
-    LOAD1(packed_b, biases, vector_offset_fp16(biases, int(z_index)) >> 2);
+    vec2_b = LOAD_UNPACK2_HALF(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
 
     if(z_index % uint(2) == uint(0))
     {
-        b = unpackHalf2x16(packed_b).x;
+        b = vec2_b.x;
     }
     else
     {
-        b = unpackHalf2x16(packed_b).y;
+        b = vec2_b.y;
     }
 
     for(i = 0; i < 4; i++)
@@ -1370,26 +962,17 @@ void main()
     }
 #endif /* BIAS */
 
-    packed_d = uvec2(packHalf2x16(pixels[0].xy), packHalf2x16(pixels[0].zw));
-    STORE1(dst, dst.current_offset >> uint(3), packed_d);
-
-    packed_d = uvec2(packHalf2x16(pixels[1].xy), packHalf2x16(pixels[1].zw));
-    STORE1(dst, (dst.current_offset + dst_stride_y) >> uint(3), packed_d);
-
-    packed_d = uvec2(packHalf2x16(pixels[2].xy), packHalf2x16(pixels[2].zw));
-    STORE1(dst, (dst.current_offset + (dst_stride_y << 1)) >> uint(3), packed_d);
-
-    packed_d = uvec2(packHalf2x16(pixels[3].xy), packHalf2x16(pixels[3].zw));
-    STORE1(dst, (dst.current_offset + uint(3) * (dst_stride_y)) >> uint(3), packed_d);
+    STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels[0]);
+    STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels[1]);
+    STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 2, 0), pixels[2]);
+    STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 3, 0), pixels[3]);
 }
-#elif defined(PROCESS_X_4ELEMENTS_Y_3ELEMENTS_Z_2ELEMENTS_FP16)
-precision mediump float;
-
-BUFFER_DECLARATION(src, 1, uvec2, readonly);
-BUFFER_DECLARATION(dst, 2, uvec2, writeonly);
-BUFFER_DECLARATION(weights, 3, uint, readonly);
+#elif defined(PROCESS_4X_3Y_2Z)
+TENSOR_DECLARATION(1, srcBuffer, uvec2, src_ptr, src_shift, 3, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec2, dst_ptr, dst_shift, 3, writeonly);
+TENSOR_DECLARATION(3, weightsBuffer, uint, weights_ptr, weights_shift, 2, readonly);
 #ifdef BIAS
-BUFFER_DECLARATION(biases, 4, uint, readonly);
+TENSOR_DECLARATION(4, biasesBuffer, uint, biases_ptr, biases_shift, 2, readonly);
 #endif /* BIAS */
 
 #define CONVOLVE1x3(s, w) convolve1x3_stride1(s, w)
@@ -1408,68 +991,15 @@ vec4 convolve1x3_stride1(vec4 tmp[2], vec3 w)
     return r;
 }
 
-vec4[2] load_and_unpack(uint offset)
-{
-    uvec2 packed_s[2];
-    vec4  s[2];
-
-    LOAD1(packed_s[0], src, offset);
-    LOAD1(packed_s[1], src, offset + uint(1));
-
-    s[0] = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
-    s[1] = vec4(unpackHalf2x16(packed_s[1].x), unpackHalf2x16(packed_s[1].y));
-
-    return s;
-}
-
-/** An optimized direct convolution 3x3 OpenGL ES compute shader for process 4x3x2 elements at once
- *
- * @note This OpenGL ES shader works with stride_x = 1 and 2
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP16"
- * @note If biases are used then "define HAS_BIAS" has to be passed at compile time
- *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F16
- * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
- * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
- * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
- * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
- * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
- * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
- * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
- * @param[in]  weights_depth                         The third dimensions of the weights tensors
- */
 void main()
 {
-    Image    src     = CONVERT_TO_IMAGE_STRUCT_FP16(src);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP_FP16(weights);
-    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT_FP16(dst);
+    ImageIterator    src_iter     = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator weights_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(weights_attrs, weights_shift);
+    Tensor3DIterator dst_iter     = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
 #ifdef BIAS
-    Vector   biases  = CONVERT_TO_VECTOR_STRUCT_NO_STEP_FP16(biases);
+    VectorIterator   biases_iter  = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
-
-    uvec2 packed_d;
 
     vec4 pixels[3];
     int  i;
@@ -1477,16 +1007,15 @@ void main()
     uint z_base_index = gl_GlobalInvocationID.z << 1;
 
     // store orginal src current offset
-    uint s_offset = src.current_offset;
+    uint s_offset_in_bytes = CURRENT_ITEM_OFFSET_IN_BYTES(srcc_iter);
 
-    weights.current_offset += z_base_index * weights_stride_w;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_base_index * weights_stride_w);
 
     for(int z = 0; z < 2; ++z)
     {
         uint z_index = z_base_index + uint(z);
 
-        src.current_offset = s_offset;
-        //weights.current_offset = z_index * weights_stride_w;
+        SET_TENSOR_ITERATOR_OFFSET_IN_BYTES(src_iter, s_offset_in_bytes);
 
         for(i = 0; i < 3; i++)
         {
@@ -1498,9 +1027,9 @@ void main()
             // load 3 weights once
             uvec2 packed_w[3];
 
-            LOAD2(packed_w[0], weights, tensor3D_offset_fp16(weights, 0, 0, 0) >> 2);
-            LOAD2(packed_w[1], weights, tensor3D_offset_fp16(weights, 0, 1, 0) >> 2);
-            LOAD2(packed_w[2], weights, tensor3D_offset_fp16(weights, 0, 2, 0) >> 2);
+            packed_w[0] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 0, 0));
+            packed_w[1] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 1, 0));
+            packed_w[2] = VLOAD2(uvec2, weights_ptr, TENSOR3D_OFFSET(weights_iter, 0, 2, 0));
 
             vec3 w[3];
             w[0] = vec3(unpackHalf2x16(packed_w[0].x), unpackHalf2x16(packed_w[0].y).x);
@@ -1509,57 +1038,47 @@ void main()
 
             vec4 s[2];
             vec4 r;
-            uint offset;
-            // first line
-            offset = src.current_offset >> uint(3);
-            s      = load_and_unpack(offset);
 
+            // first line
+            s = VLOAD2_UNPACK8_CURRENT_ITEM_HALF(src_ptr, src_iter);
             pixels[0] += CONVOLVE1x3(s, w[0]);
 
             // second line
-            offset = (src.current_offset + src_stride_y) >> uint(3);
-            s      = load_and_unpack(offset);
-
+            s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 1));
             pixels[0] += CONVOLVE1x3(s, w[1]);
             pixels[1] += CONVOLVE1x3(s, w[0]);
 
             // third line
-            offset = (src.current_offset + (src_stride_y << 1)) >> uint(3);
-            s      = load_and_unpack(offset);
-
+            s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 2));
             pixels[0] += CONVOLVE1x3(s, w[2]);
             pixels[1] += CONVOLVE1x3(s, w[1]);
             pixels[2] += CONVOLVE1x3(s, w[0]);
 
             // forth line
-            offset = (src.current_offset + uint(3) * (src_stride_y)) >> uint(3);
-            s      = load_and_unpack(offset);
-
+            s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 3));
             pixels[1] += CONVOLVE1x3(s, w[2]);
             pixels[2] += CONVOLVE1x3(s, w[1]);
 
             // fifth line
-            offset = (src.current_offset + (src_stride_y << 2)) >> uint(3);
-            s      = load_and_unpack(offset);
-
+            s = VLOAD2_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 4));
             pixels[2] += CONVOLVE1x3(s, w[2]);
 
-            src.current_offset += src_stride_z;
-            weights.current_offset += weights_stride_z;
+            TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, src_attrs.stride_z);
+            TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, weights_attrs.stride_z);
         }
 
 #ifdef BIAS
-        uint  packed_b;
+        vec2  vec2_b;
         float b;
-        LOAD1(packed_b, biases, vector_offset_fp16(biases, int(z_index)) >> 2);
+        vec2_b = LOAD_UNPACK2_HALF(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
 
         if(z_index % uint(2) == uint(0))
         {
-            b = unpackHalf2x16(packed_b).x;
+            b = vec2_b.x;
         }
         else
         {
-            b = unpackHalf2x16(packed_b).y;
+            b = vec2_b.y;
         }
 
         for(i = 0; i < 3; i++)
@@ -1568,16 +1087,16 @@ void main()
         }
 #endif /* BIAS */
 
-        packed_d = uvec2(packHalf2x16(pixels[0].xy), packHalf2x16(pixels[0].zw));
-        STORE1(dst, dst.current_offset >> uint(3), packed_d);
+        STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels[0]);
+        STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels[1]);
+        STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 2, 0), pixels[2]);
 
-        packed_d = uvec2(packHalf2x16(pixels[1].xy), packHalf2x16(pixels[1].zw));
-        STORE1(dst, (dst.current_offset + dst_stride_y) >> uint(3), packed_d);
-
-        packed_d = uvec2(packHalf2x16(pixels[2].xy), packHalf2x16(pixels[2].zw));
-        STORE1(dst, (dst.current_offset + (dst_stride_y << 1)) >> uint(3), packed_d);
-
-        dst.current_offset += dst_stride_z;
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(dst_iter, dst_stride_z);
     }
 }
-#endif /* PROCESS_1_ELEMENT */
+
+#endif /* PROCESS_nX_nY_nZ */
+
+#else /* DATA_TYPE_FP32 */
+#error Data type not supported
+#endif /* DATA_TYPE_FP32 */
