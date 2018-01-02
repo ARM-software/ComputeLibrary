@@ -41,7 +41,7 @@ namespace npy {
 
 /* Compile-time test for byte order.
    If your compiler does not define these per default, you may want to define
-   one of these constants manually. 
+   one of these constants manually.
    Defaults to little endian order. */
 #if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN || \
     defined(__BIG_ENDIAN__) || \
@@ -62,8 +62,8 @@ const char little_endian_char = '<';
 const char big_endian_char = '>';
 const char no_endian_char = '|';
 
-constexpr char host_endian_char = ( big_endian ? 
-    big_endian_char : 
+constexpr char host_endian_char = ( big_endian ?
+    big_endian_char :
     little_endian_char );
 
 /* npy array length */
@@ -80,19 +80,11 @@ inline void read_magic(std::istream& istream, unsigned char& v_major, unsigned c
   istream.read(buf, magic_string_length+2);
 
   if(!istream) {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-    throw std::runtime_error("io error: failed reading file");
-#else
-    std::cerr << "io error: failed reading file" << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+    ARM_COMPUTE_THROW("io error: failed reading file");
   }
 
   if (0 != std::memcmp(buf, magic_string, magic_string_length)) {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-    throw std::runtime_error("this file does not have a valid npy format.");
-#else
-    std::cerr << "this file does not have a valid npy format." << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+    ARM_COMPUTE_THROW("this file does not have a valid npy format.");
   }
 
   v_major = buf[magic_string_length];
@@ -114,18 +106,18 @@ struct Typestring {
       return std::string(buf);
     }
 
-    Typestring(const std::vector<float>& v) 
+    Typestring(const std::vector<float>& v)
       :c_endian {host_endian_char}, c_type {'f'}, len {sizeof(float)} {}
-    Typestring(const std::vector<double>& v) 
+    Typestring(const std::vector<double>& v)
       :c_endian {host_endian_char}, c_type {'f'}, len {sizeof(double)} {}
-    Typestring(const std::vector<long double>& v) 
+    Typestring(const std::vector<long double>& v)
       :c_endian {host_endian_char}, c_type {'f'}, len {sizeof(long double)} {}
 
-    Typestring(const std::vector<char>& v) 
+    Typestring(const std::vector<char>& v)
       :c_endian {no_endian_char}, c_type {'i'}, len {sizeof(char)} {}
-    Typestring(const std::vector<short>& v) 
+    Typestring(const std::vector<short>& v)
       :c_endian {host_endian_char}, c_type {'i'}, len {sizeof(short)} {}
-    Typestring(const std::vector<int>& v) 
+    Typestring(const std::vector<int>& v)
       :c_endian {host_endian_char}, c_type {'i'}, len {sizeof(int)} {}
     Typestring(const std::vector<long>& v)
       :c_endian {host_endian_char}, c_type {'i'}, len {sizeof(long)} {}
@@ -157,11 +149,7 @@ inline void parse_typestring( std::string typestring){
   std::regex_match(typestring, sm, re );
 
   if ( sm.size() != 4 ) {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-    throw std::runtime_error("invalid typestring");
-#else
-    std::cerr << "invalid typestring" << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+    ARM_COMPUTE_THROW("invalid typestring");
   }
 }
 
@@ -210,11 +198,7 @@ inline std::unordered_map<std::string, std::string> parse_dict(std::string in, s
   if ((in.front() == '{') && (in.back() == '}')) {
     in = in.substr(1, in.length()-2);
   } else {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-    throw std::runtime_error("Not a Python dictionary.");
-#else
-    std::cerr << "Not a Python dictionary." << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+    ARM_COMPUTE_THROW("Not a Python dictionary.");
   }
 
   std::vector<std::pair<size_t, std::string>> positions;
@@ -223,11 +207,7 @@ inline std::unordered_map<std::string, std::string> parse_dict(std::string in, s
     size_t pos = in.find( "'" + value + "'" );
 
     if (pos == std::string::npos) {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-      throw std::runtime_error("Missing '"+value+"' key.");
-#else
-      std::cerr << "Missing '" << value << "' key." << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+      ARM_COMPUTE_THROW("Missing '"+value+"' key.");
     }
 
     std::pair<size_t, std::string> position_pair { pos, value };
@@ -269,11 +249,7 @@ inline bool parse_bool(const std::string& in) {
   if (in == "False")
     return false;
 
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-  throw std::runtime_error("Invalid python boolan.");
-#else
-  std::cerr << "Invalid python boolan." << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+  ARM_COMPUTE_THROW("Invalid python boolan.");
 }
 
 /**
@@ -283,11 +259,7 @@ inline std::string parse_str(const std::string& in) {
   if ((in.front() == '\'') && (in.back() == '\''))
     return in.substr(1, in.length()-2);
 
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-  throw std::runtime_error("Invalid python string.");
-#else
-  std::cerr << "Invalid python string." << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+  ARM_COMPUTE_THROW("Invalid python string.");
 }
 
 /**
@@ -302,11 +274,7 @@ inline std::vector<std::string> parse_tuple(std::string in) {
   if ((in.front() == '(') && (in.back() == ')')) {
     in = in.substr(1, in.length()-2);
   } else {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-    throw std::runtime_error("Invalid Python tuple.");
-#else
-    std::cerr << "Invalid Python tuple." << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+    ARM_COMPUTE_THROW("Invalid Python tuple.");
   }
 
   std::istringstream iss(in);
@@ -369,11 +337,7 @@ inline void parse_header(std::string header, std::string& descr, bool& fortran_o
 
   // remove trailing newline
   if (header.back() != '\n') {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-    throw std::runtime_error("invalid header");
-#else
-    std::cerr << "invalid header" << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+    ARM_COMPUTE_THROW("invalid header");
   }
   header.pop_back();
 
@@ -382,11 +346,7 @@ inline void parse_header(std::string header, std::string& descr, bool& fortran_o
   auto dict_map = npy::pyparse::parse_dict(header, keys);
 
   if (dict_map.size() == 0) {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-    throw std::runtime_error("invalid dictionary in header");
-#else
-    std::cerr << "invalid dictionary in header" << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+    ARM_COMPUTE_THROW("invalid dictionary in header");
   }
 
   std::string descr_s = dict_map["descr"];
@@ -394,7 +354,7 @@ inline void parse_header(std::string header, std::string& descr, bool& fortran_o
   std::string shape_s = dict_map["shape"];
 
   parse_typestring(descr_s);
-  // remove 
+  // remove
   descr = npy::pyparse::parse_str(descr_s);
 
   // convert literal Python bool to C++ bool
@@ -403,11 +363,7 @@ inline void parse_header(std::string header, std::string& descr, bool& fortran_o
   // parse the shape tuple
   auto shape_v = npy::pyparse::parse_tuple(shape_s);
   if (shape_v.size() == 0) {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-    throw std::runtime_error("invalid shape tuple in header");
-#else
-    std::cerr << "invalid shape tuple in header" << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+    ARM_COMPUTE_THROW("invalid shape tuple in header");
   }
 
   for ( auto item : shape_v ) {
@@ -491,11 +447,7 @@ inline std::string read_header(std::istream& istream) {
       if((magic_string_length + 2 + 4 + header_length) % 16 != 0) {
       }
     }else{
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-      throw std::runtime_error("unsupported file format version");
-#else
-      std::cerr << "unsupported file format version" << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+      ARM_COMPUTE_THROW("unsupported file format version");
     }
 
     auto buf_v = std::vector<char>();
@@ -522,11 +474,7 @@ inline void SaveArrayAsNumpy( const std::string& filename, bool fortran_order, u
 
     std::ofstream stream( filename, std::ofstream::binary);
     if(!stream) {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-      throw std::runtime_error("io error: failed to open a file.");
-#else
-      std::cerr << "io error: failed to open a file." << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+      ARM_COMPUTE_THROW("io error: failed to open a file.");
     }
 
     std::vector<ndarray_len_t> shape_v(shape, shape+n_dims);
@@ -543,11 +491,7 @@ inline void LoadArrayFromNumpy(const std::string& filename, std::vector<unsigned
 {
     std::ifstream stream(filename, std::ifstream::binary);
     if(!stream) {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-      throw std::runtime_error("io error: failed to open a file.");
-#else
-      std::cerr << "io error: failed to open a file." << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+      ARM_COMPUTE_THROW("io error: failed to open a file.");
     }
 
     std::string header = read_header(stream);
@@ -562,11 +506,7 @@ inline void LoadArrayFromNumpy(const std::string& filename, std::vector<unsigned
     Typestring typestring_o {data};
     std::string expect_typestr = typestring_o.str();
     if (typestr != expect_typestr) {
-#ifndef ARM_COMPUTE_NO_EXCEPTIONS
-      throw std::runtime_error("formatting error: typestrings not matching");
-#else
-      std::cerr << "formatting error: typestrings not matching" << std::endl;
-#endif // ARM_COMPUTE_NO_EXCEPTIONS
+      ARM_COMPUTE_THROW("formatting error: typestrings not matching");
     }
 
 
