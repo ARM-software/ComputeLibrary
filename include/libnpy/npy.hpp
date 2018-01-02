@@ -63,7 +63,7 @@ const char big_endian_char = '>';
 const char no_endian_char = '|';
 
 constexpr char host_endian_char = ( big_endian ? 
-    big_endian_char :
+    big_endian_char : 
     little_endian_char );
 
 /* npy array length */
