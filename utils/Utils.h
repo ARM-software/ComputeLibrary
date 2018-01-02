@@ -25,8 +25,8 @@
 #define __UTILS_UTILS_H__
 
 #ifdef ARM_COMPUTE_NO_EXCEPTIONS
-#define ARM_COMPUTE_TRY
-#define ARM_COMPUTE_CATCH()
+#define ARM_COMPUTE_TRY if(true)
+#define ARM_COMPUTE_CATCH(var) else if(false)
 #define ARM_COMPUTE_THROW(var) std::cerr << var << std::endl
 #else
 #define ARM_COMPUTE_TRY try
