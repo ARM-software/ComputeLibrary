@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
 
-#include "arm_compute/core/AccessWindowTranspose.h"
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GLES_COMPUTE/GCHelpers.h"
 #include "arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h"
@@ -57,12 +57,22 @@ void GCTransposeKernel::configure(const IGCTensor *input, IGCTensor *output)
     _input  = input;
     _output = output;
 
+    // for better performance
+    if(w_out < 512 && h_out < 512)
+    {
+        _lws_hint = gles::NDRange(8U, 1U, 1U);
+    }
+    else
+    {
+        _lws_hint = gles::NDRange(1U, 8U, 1U);
+    }
+
     std::set<std::string> build_opts;
     std::string           dt_name = (input->info()->data_type() == DataType::F32) ? "DATA_TYPE_FP32" : "DATA_TYPE_FP16";
     build_opts.emplace(("#define " + dt_name));
-    build_opts.emplace("#define LOCAL_SIZE_X " + support::cpp11::to_string(1));
-    build_opts.emplace("#define LOCAL_SIZE_Y " + support::cpp11::to_string(1));
-    build_opts.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(1));
+    build_opts.emplace("#define LOCAL_SIZE_X " + support::cpp11::to_string(_lws_hint[0]));
+    build_opts.emplace("#define LOCAL_SIZE_Y " + support::cpp11::to_string(_lws_hint[1]));
+    build_opts.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(_lws_hint[2]));
 
     // Configure kernel window
     unsigned int num_elems_processed_per_iteration = 4;
@@ -91,13 +101,21 @@ void GCTransposeKernel::configure(const IGCTensor *input, IGCTensor *output)
     // Create kernel
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("transpose", build_opts));
 
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration, num_elems_processed_per_iteration));
+    const unsigned int width_aligned  = num_elems_processed_per_iteration * static_cast<unsigned int>(_lws_hint[0]);
+    const unsigned int height_aligned = num_elems_processed_per_iteration * static_cast<unsigned int>(_lws_hint[1]);
 
-    AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
-    AccessWindowTranspose output_access(output->info(), 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+    AccessWindowStatic input_access(input->info(), 0, 0,
+                                    ceil_to_multiple(input->info()->dimension(0), width_aligned),
+                                    ceil_to_multiple(input->info()->dimension(1), height_aligned));
+    AccessWindowStatic output_access(output->info(), 0, 0,
+                                     ceil_to_multiple(output->info()->dimension(0), height_aligned),
+                                     ceil_to_multiple(output->info()->dimension(1), width_aligned));
+
+    Window win = calculate_max_window(*input->info(), Steps(width_aligned, height_aligned));
+    win.set_dimension_step(Window::DimX, num_elems_processed_per_iteration);
+    win.set_dimension_step(Window::DimY, num_elems_processed_per_iteration);
     update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
+    output_access.set_valid_region(win, output->info()->valid_region());
 
     IGCKernel::configure(win);
 }
@@ -135,7 +153,7 @@ void GCTransposeKernel::run(const Window &window)
         }
 
         _kernel.update_shader_params();
-        enqueue(*this, slice);
+        enqueue(*this, slice, _lws_hint);
     }
     while(window.slide_window_slice_2D(slice));
 }

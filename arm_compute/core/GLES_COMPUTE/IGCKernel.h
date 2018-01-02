@@ -140,6 +140,17 @@ public:
      */
     virtual void run(const Window &window) = 0;
 
+    /** Set the Local-Workgroup-Size hint
+     *
+     * @note This method should be called after the configuration of the kernel
+     *
+     * @param[in] lws_hint Local-Workgroup-Size to use
+     */
+    void set_lws_hint(gles::NDRange &lws_hint)
+    {
+        _lws_hint = lws_hint;
+    }
+
 private:
     /** Add the passed tensor's parameters to the object's kernel's arguments starting from the index idx.
      *
@@ -159,7 +170,8 @@ private:
     unsigned int           num_arguments_per_tensor() const;
 
 protected:
-    GCKernel _kernel; /**< GLES kernel to run */
+    GCKernel      _kernel;   /**< GLES kernel to run */
+    gles::NDRange _lws_hint; /**< Local workgroup size hint for the GLES kernel */
 };
 
 /** Add the kernel to the command queue with the given window.

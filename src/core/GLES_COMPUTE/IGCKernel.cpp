@@ -62,7 +62,7 @@ void arm_compute::enqueue(IGCKernel &kernel, const Window &window, const gles::N
 }
 
 IGCKernel::IGCKernel()
-    : _kernel()
+    : _kernel(), _lws_hint(gles::NDRange(1U, 1U, 1U))
 {
 }
 
