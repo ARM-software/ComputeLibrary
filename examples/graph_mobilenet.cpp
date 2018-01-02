@@ -86,7 +86,8 @@ void main_graph_mobilenet(int argc, const char **argv)
     constexpr float mean_b = 104.01f; /* Mean value to subtract from blue channel */
 
     // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-    TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+    TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+    ConvolutionMethodHint convolution_hint = target_hint == TargetHint::NEON ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
 
     // Parse arguments
     if(argc < 2)
@@ -125,6 +126,7 @@ void main_graph_mobilenet(int argc, const char **argv)
     graph << target_hint
           << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
                     get_input_accessor(image, mean_r, mean_g, mean_b))
+          << convolution_hint
           << ConvolutionLayer(
               3U, 3U, 32U,
               get_weights_accessor(data_path, "/cnn_data/mobilenet_v1_model/Conv2d_0_weights.npy"),

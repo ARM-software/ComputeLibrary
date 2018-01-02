@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H__
 
 #include "arm_compute/core/ITensorInfo.h"
+#include "arm_compute/core/Utils.h"
 
 namespace arm_compute
 {
@@ -97,6 +98,21 @@ inline TensorShape compute_transposed_shape(const ITensorInfo &input)
     shape_transposed.set(1, input.dimension(0));
 
     return shape_transposed;
+}
+inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, PadStrideInfo conv_info)
+{
+    const TensorShape input_shape{ input.tensor_shape() };
+    const TensorShape weights_shape{ weights.tensor_shape() };
+
+    unsigned int output_width  = 0;
+    unsigned int output_height = 0;
+    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(), weights_shape.x(), weights_shape.y(), conv_info);
+
+    TensorShape output_shape{ input_shape };
+    output_shape.set(0, output_width);
+    output_shape.set(1, output_height);
+
+    return output_shape;
 }
 } // namespace shape_calculator
 } // namespace misc

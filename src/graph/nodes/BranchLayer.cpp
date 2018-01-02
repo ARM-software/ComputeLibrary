@@ -151,7 +151,7 @@ std::unique_ptr<arm_compute::IFunction> BranchLayer::instantiate_node(GraphConte
         }
 
         // Construct sub_graph
-        auto g = sg->construct(ctx.hints().target_hint(), std::move(in), std::move(out));
+        auto g = sg->construct(ctx, std::move(in), std::move(out));
 
         // Register graph to function
         func->register_graph(std::move(g));

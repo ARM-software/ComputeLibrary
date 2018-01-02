@@ -56,13 +56,13 @@ public:
     void add_tensor_object(std::unique_ptr<ITensorObject> tensor);
     /** Constructs a graph from a subgraph
      *
-     * @param[in] hint   Execution target hint
+     * @param[in] ctx    Parent graph context
      * @param[in] input  Input to the graph
      * @param[in] output Output to the graph
      *
      * @return A graph
      */
-    std::unique_ptr<Graph> construct(TargetHint hint, std::unique_ptr<ITensorObject> input, std::unique_ptr<ITensorObject> output);
+    std::unique_ptr<Graph> construct(const GraphContext &ctx, std::unique_ptr<ITensorObject> input, std::unique_ptr<ITensorObject> output);
     /** Checks if the subgraph has an input
      *
      * @return True if the sub-graph has an input else false

@@ -52,13 +52,13 @@ void SubGraph::add_tensor_object(std::unique_ptr<ITensorObject> tensor)
     }
 }
 
-std::unique_ptr<Graph> SubGraph::construct(TargetHint hint, std::unique_ptr<ITensorObject> input, std::unique_ptr<ITensorObject> output)
+std::unique_ptr<Graph> SubGraph::construct(const GraphContext &ctx, std::unique_ptr<ITensorObject> input, std::unique_ptr<ITensorObject> output)
 {
     auto graph = arm_compute::support::cpp14::make_unique<Graph>();
 
     // Set hint
     // TODO(geopin01): store hints of sub-graph
-    graph->hints().set_target_hint(hint);
+    graph->hints() = ctx.hints();
 
     // Configure input
     if(_input == nullptr)

@@ -36,9 +36,11 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 using namespace arm_compute;
 using namespace arm_compute::detail;
+using namespace arm_compute::misc::shape_calculator;
 
 NEDepthwiseConvolutionLayer3x3Kernel::NEDepthwiseConvolutionLayer3x3Kernel()
     : _border_size(0), _input(), _output(), _weights(), _conv_info()
@@ -53,15 +55,21 @@ BorderSize NEDepthwiseConvolutionLayer3x3Kernel::border_size() const
 void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, weights);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
 
-    std::pair<unsigned int, unsigned int> expected_output = scaled_dimensions(input->info()->tensor_shape().x(), input->info()->tensor_shape().y(),
-                                                                              weights->info()->tensor_shape().x(), weights->info()->tensor_shape().y(),
-                                                                              conv_info);
+    // Get convolved dimensions
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info);
 
-    ARM_COMPUTE_ERROR_ON(expected_output.first != output->info()->tensor_shape().x());
-    ARM_COMPUTE_ERROR_ON(expected_output.second != output->info()->tensor_shape().y());
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(),
+                       output_shape,
+                       1,
+                       input->info()->data_type(),
+                       input->info()->fixed_point_position(),
+                       input->info()->quantization_info());
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
     _input                           = input;
     _output                          = output;
@@ -80,12 +88,12 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration));
 
-    const unsigned int num_x_steps               = (expected_output.first + num_elems_written_per_iteration - 1) / num_elems_written_per_iteration;
+    const unsigned int num_x_steps               = (output_shape.x() + num_elems_written_per_iteration - 1) / num_elems_written_per_iteration;
     const int          input_num_elems_processed = get_input_num_elems_processed(num_elems_written_per_iteration, conv_stride_x);
 
-    AccessWindowStatic input_access(input->info(), -conv_pad_x, -conv_pad_y, (num_x_steps - 1) * input_num_elems_processed + 12, conv_stride_y * (expected_output.second - 1) + 2);
+    AccessWindowStatic input_access(input->info(), -conv_pad_x, -conv_pad_y, (num_x_steps - 1) * input_num_elems_processed + 12, conv_stride_y * (output_shape.y() - 1) + 2);
     AccessWindowStatic weights_access(weights->info(), 0, 0, weights->info()->dimension(0), weights->info()->dimension(1));
-    AccessWindowStatic output_access(output->info(), 0, 0, num_x_steps * num_elems_written_per_iteration, expected_output.second);
+    AccessWindowStatic output_access(output->info(), 0, 0, num_x_steps * num_elems_written_per_iteration, output_shape.y());
 
     update_window_and_padding(win, input_access, weights_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));

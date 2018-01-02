@@ -39,9 +39,9 @@ NEDepthwiseConvolutionLayer3x3::NEDepthwiseConvolutionLayer3x3()
 void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, weights);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
-    // Call convolution kernel
+    // Configure kernels
     _kernel.configure(input, weights, output, conv_info);
     _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
     if(biases != nullptr)
