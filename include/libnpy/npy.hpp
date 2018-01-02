@@ -36,6 +36,11 @@
 #include <regex>
 #include <unordered_map>
 
+#ifdef ARM_COMPUTE_NO_EXCEPTIONS
+#define ARM_COMPUTE_THROW(var) std::cerr << var << std::endl
+#else
+#define ARM_COMPUTE_THROW(var) throw std::runtime_error(var)
+#endif /* ARM_COMPUTE_NO_EXCEPTIONS */
 
 namespace npy {
 
