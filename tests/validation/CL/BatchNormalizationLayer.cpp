@@ -59,7 +59,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Ran
                shape0, shape1, epsilon, dt)
 {
     // Set fixed point position data type allowed
-    int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
+    const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
     // Create tensors
     CLTensor src   = create_tensor<CLTensor>(shape0, dt, 1, fixed_point_position);
@@ -77,6 +77,49 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Ran
     const ValidRegion valid_region = shape_to_valid_region(shape0);
     validate(dst.info()->valid_region(), valid_region);
 }
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Window shrink
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Invalid mean/var/beta/gamma shape
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2), // Mismatching fixed point position
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                       TensorInfo(),
+                                                     })),
+               framework::dataset::make("MVBGInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F16),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(5U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                   })),
+               framework::dataset::make("Expected", { true, false, false, false, false, false, true, true})),
+               input_info, output_info, mvbg_info, expected)
+{
+    const auto &mean_info = mvbg_info;
+    const auto &var_info = mvbg_info;
+    const auto &beta_info = mvbg_info;
+    const auto &gamma_info = mvbg_info;
+    bool has_error = bool(CLBatchNormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), (output_info.total_size() == 0) ? nullptr : &output_info.clone()->set_is_resizable(false), &mean_info.clone()->set_is_resizable(false), &var_info.clone()->set_is_resizable(false), &beta_info.clone()->set_is_resizable(false), &gamma_info.clone()->set_is_resizable(false), 1.f));
+    ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)

@@ -49,19 +49,17 @@ public:
 
     /** Initialise the kernel's source, destination and border mode.
      *
-     * @param[in]  input            Source tensor. Data type supported: U8.
-     * @param[out] output           Destination tensor. Data type supported: S16.
-     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     * @param[in]  input  Source tensor. Data type supported: U8.
+     * @param[out] output Destination tensor. Data type supported: S16.
      */
-    void configure(const ITensor *input, ITensor *output, bool border_undefined);
+    void configure(const ITensor *input, ITensor *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;
 
 private:
-    BorderSize _border_size;
-    int        _l2_load_offset;
+    int _l2_load_offset;
 };
 
 /** NEON kernel to perform a GaussianPyramid (vertical pass) */
@@ -83,11 +81,10 @@ public:
 
     /** Initialise the kernel's source, destination and border mode.
      *
-     * @param[in]  input            Source tensor. Data type supported: S16.
-     * @param[out] output           Destination tensor. Data type supported: U8.
-     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     * @param[in]  input  Source tensor. Data type supported: S16.
+     * @param[out] output Destination tensor. Data type supported: U8.
      */
-    void configure(const ITensor *input, ITensor *output, bool border_undefined);
+    void configure(const ITensor *input, ITensor *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

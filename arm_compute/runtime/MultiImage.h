@@ -45,18 +45,18 @@ public:
     MultiImage();
     /** Allocate the multi-planar image
      *
-     *  @param[in] width  Width of the whole image
-     *  @param[in] height Height of the whole image
-     *  @param[in] format Format of the whole image
+     * @param[in] width  Width of the whole image
+     * @param[in] height Height of the whole image
+     * @param[in] format Format of the whole image
      */
     void init(unsigned int width, unsigned int height, Format format);
     /** Allocate the multi-planar image
      *
      * @note Uses conservative padding strategy which fits all kernels.
      *
-     *  @param[in] width  Width of the whole image
-     *  @param[in] height Height of the whole image
-     *  @param[in] format Format of the whole image
+     * @param[in] width  Width of the whole image
+     * @param[in] height Height of the whole image
+     * @param[in] format Format of the whole image
      */
     void init_auto_padding(unsigned int width, unsigned int height, Format format);
     /** Allocated a previously initialised multi image
@@ -67,10 +67,10 @@ public:
     void allocate();
     /** Create a subimage from an existing MultiImage.
      *
-     *  @param[in] image  Image to use backing memory from
-     *  @param[in] coords Starting coordinates of the new image. Should be within the parent image sizes
-     *  @param[in] width  The width of the subimage
-     *  @param[in] height The height of the subimage
+     * @param[in] image  Image to use backing memory from
+     * @param[in] coords Starting coordinates of the new image. Should be within the parent image sizes
+     * @param[in] width  The width of the subimage
+     * @param[in] height The height of the subimage
      */
     void create_subimage(MultiImage *image, const Coordinates &coords, unsigned int width, unsigned int height);
 
@@ -82,10 +82,10 @@ public:
 private:
     /** Init the multi-planar image
      *
-     *  @param[in] width        Width of the whole image
-     *  @param[in] height       Height of the whole image
-     *  @param[in] format       Format of the whole image
-     *  @param[in] auto_padding Specifies whether the image uses auto padding
+     * @param[in] width        Width of the whole image
+     * @param[in] height       Height of the whole image
+     * @param[in] format       Format of the whole image
+     * @param[in] auto_padding Specifies whether the image uses auto padding
      */
     void internal_init(unsigned int width, unsigned int height, Format format, bool auto_padding);
 

@@ -37,6 +37,15 @@ namespace test
 {
 namespace framework
 {
+enum class ScaleFactor : unsigned int
+{
+    NONE,     /* Default scale */
+    SCALE_1K, /* 1000          */
+    SCALE_1M, /* 1 000 000     */
+    TIME_US,  /* Microseconds  */
+    TIME_MS,  /* Milliseconds  */
+    TIME_S,   /* Seconds       */
+};
 /** Interface for classes that can be used to measure performance. */
 class Instrument
 {
@@ -45,10 +54,11 @@ public:
      *
      * @return Instance of an instrument of the given type.
      */
-    template <typename T>
+    template <typename T, ScaleFactor scale>
     static std::unique_ptr<Instrument> make_instrument();
 
-    Instrument()                   = default;
+    Instrument() = default;
+
     Instrument(const Instrument &) = default;
     Instrument(Instrument &&)      = default;
     Instrument &operator=(const Instrument &) = default;
@@ -68,12 +78,15 @@ public:
 
     /** Return the latest measurement. */
     virtual MeasurementsMap measurements() const = 0;
+
+protected:
+    std::string _unit{};
 };
 
-template <typename T>
+template <typename T, ScaleFactor scale>
 inline std::unique_ptr<Instrument> Instrument::make_instrument()
 {
-    return support::cpp14::make_unique<T>();
+    return support::cpp14::make_unique<T>(scale);
 }
 } // namespace framework
 } // namespace test

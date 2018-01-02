@@ -1,26 +1,15 @@
 var _n_e_math_8inl =
 [
-    [ "vexpq_f16", "_n_e_math_8inl.xhtml#a829992d2c673006879696821024df5b7", null ],
     [ "vexpq_f32", "_n_e_math_8inl.xhtml#ade3ef16de304661943c900ac9a47d28f", null ],
     [ "vfloorq_f32", "_n_e_math_8inl.xhtml#adb7ad6f2d80bafc0a8fb0c920909b9fb", null ],
-    [ "vinv_f16", "_n_e_math_8inl.xhtml#aba029f555d1868e560b8a278bdf87341", null ],
     [ "vinv_f32", "_n_e_math_8inl.xhtml#a7bb067c606cdc07805181688b9bee569", null ],
-    [ "vinvq_f16", "_n_e_math_8inl.xhtml#a5ccd23ffe952767d73334cabcdbff246", null ],
     [ "vinvq_f32", "_n_e_math_8inl.xhtml#ac8f459d5899b79c00fb4042a5b3470fb", null ],
-    [ "vinvsqrt_f16", "_n_e_math_8inl.xhtml#ab74b7f62070607d8dfb02364664d7867", null ],
     [ "vinvsqrt_f32", "_n_e_math_8inl.xhtml#a902d274ff1dbe2052b0f2364a98d2b41", null ],
-    [ "vinvsqrtq_f16", "_n_e_math_8inl.xhtml#a78ef1abe4de2152c366a40f638f7fb91", null ],
     [ "vinvsqrtq_f32", "_n_e_math_8inl.xhtml#a2e27db6b9692c4c2013653e276af654d", null ],
-    [ "vlogq_f16", "_n_e_math_8inl.xhtml#a38bedb9142df17a66ff1b90974f19512", null ],
     [ "vlogq_f32", "_n_e_math_8inl.xhtml#a37a3e03a22ad160a2e9e5c133607e020", null ],
-    [ "vpowq_f16", "_n_e_math_8inl.xhtml#a0b601c13358a452569202d3fb718963d", null ],
     [ "vpowq_f32", "_n_e_math_8inl.xhtml#a45c3c1474c3e3ec31ec13efaf6acd261", null ],
-    [ "vtanhq_f16", "_n_e_math_8inl.xhtml#a841e85dc31bee3fa3f1855eabf895325", null ],
     [ "vtanhq_f32", "_n_e_math_8inl.xhtml#a7845701adefdb1adafc98ca3c4918c2e", null ],
-    [ "vtaylor_polyq_f16", "_n_e_math_8inl.xhtml#afaad64bc527ee67d3374b67610a34a13", null ],
     [ "vtaylor_polyq_f32", "_n_e_math_8inl.xhtml#a4fa76a98dce5ed1b655ff840f2ce6e57", null ],
     [ "exp_tab", "_n_e_math_8inl.xhtml#a869945609357fa552d94eb16f7aad4e9", null ],
-    [ "exp_tab_f16", "_n_e_math_8inl.xhtml#a2260e62edc9c3e04a06e8016136b10b1", null ],
-    [ "log_tab", "_n_e_math_8inl.xhtml#a48fb9cf404e8f7043235bf14105c9793", null ],
-    [ "log_tab_f16", "_n_e_math_8inl.xhtml#a0a8b2a577b2f9370e7b1c4735f007be1", null ]
+    [ "log_tab", "_n_e_math_8inl.xhtml#a48fb9cf404e8f7043235bf14105c9793", null ]
 ];

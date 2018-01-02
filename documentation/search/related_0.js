@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['rawtensor',['RawTensor',['../classarm__compute_1_1test_1_1_simple_tensor.xhtml#a467ad6d14558452f498777a7823fa252',1,'arm_compute::test::SimpleTensor']]]
+  ['newinogradlayerkernel',['NEWinogradLayerKernel',['../classarm__compute_1_1_winograd3x3_f32.xhtml#a20382f2c4f5f8cfd34896c7efe2506b1',1,'arm_compute::Winograd3x3F32']]]
 ];

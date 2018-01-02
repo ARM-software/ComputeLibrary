@@ -21,9 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #include "arm_compute/core/Utils.h"
 
 #include "arm_compute/core/FixedPoint.h"
+
+#include "support/ToolchainSupport.h"
 
 #include <algorithm>
 #include <cmath>
@@ -47,10 +50,8 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
     std::string   out;
     std::ifstream fs;
 
-#ifndef ARM_NO_EXCEPTIONS
     try
     {
-#endif // ARM_NO_EXCEPTIONS
         fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         std::ios_base::openmode mode = std::ios::in;
 
@@ -69,13 +70,11 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
         fs.seekg(0, std::ios::beg);
         // Copy the content of the file
         out.assign(std::istreambuf_iterator<char>(fs), std::istreambuf_iterator<char>());
-#ifndef ARM_NO_EXCEPTIONS
     }
     catch(const std::ifstream::failure &e)
     {
         ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
     }
-#endif // ARM_NO_EXCEPTIONS
 
     return out;
 }
@@ -251,41 +250,80 @@ std::string arm_compute::lower_string(const std::string &val)
     return res;
 }
 
+TensorShape arm_compute::deconvolution_output_shape(const std::pair<unsigned int, unsigned int> &out_dims, TensorShape input, TensorShape weights)
+{
+    TensorShape out_shape(input);
+    out_shape.set(0, out_dims.first);
+    out_shape.set(1, out_dims.second);
+    out_shape.set(2, weights[3]);
+    return out_shape;
+}
+
+const std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(
+    unsigned int in_width, unsigned int in_height, unsigned int kernel_width, unsigned int kernel_height, unsigned int padx, unsigned int pady,
+    unsigned int ax, unsigned int ay, float upscalex, float upscaley, DimensionRoundingType round)
+{
+    ARM_COMPUTE_ERROR_ON(in_width < 1 || in_height < 1);
+    ARM_COMPUTE_ERROR_ON(((in_width - 1) * upscalex + kernel_width + ax) < 2.f * padx);
+    ARM_COMPUTE_ERROR_ON(((in_height - 1) * upscaley + kernel_height + ay) < 2.f * pady);
+    const float fw = (in_width - 1) * upscalex - 2.f * padx + kernel_width + ax;
+    const float fh = (in_height - 1) * upscaley - 2.f * pady + kernel_height + ay;
+    int         w  = 0;
+    int         h  = 0;
+    switch(round)
+    {
+        case DimensionRoundingType::FLOOR:
+            w = std::floor(fw);
+            h = std::floor(fh);
+            break;
+        case DimensionRoundingType::CEIL:
+            w = std::ceil(fw);
+            h = std::ceil(fh);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not supported");
+            break;
+    }
+    return std::make_pair<unsigned int, unsigned int>(w, h);
+}
+
 const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height,
                                                                            unsigned int kernel_width, unsigned int kernel_height,
                                                                            const PadStrideInfo &pad_stride_info)
 {
-    const unsigned int pad_x    = pad_stride_info.pad().first;
-    const unsigned int pad_y    = pad_stride_info.pad().second;
-    const unsigned int stride_x = pad_stride_info.stride().first;
-    const unsigned int stride_y = pad_stride_info.stride().second;
-    unsigned int       w        = 0;
-    unsigned int       h        = 0;
+    const unsigned int pad_left   = pad_stride_info.pad_left();
+    const unsigned int pad_top    = pad_stride_info.pad_top();
+    const unsigned int pad_right  = pad_stride_info.pad_right();
+    const unsigned int pad_bottom = pad_stride_info.pad_bottom();
+    const unsigned int stride_x   = pad_stride_info.stride().first;
+    const unsigned int stride_y   = pad_stride_info.stride().second;
+    unsigned int       w          = 0;
+    unsigned int       h          = 0;
     switch(pad_stride_info.round())
     {
         case DimensionRoundingType::FLOOR:
-            w = static_cast<unsigned int>(std::floor((static_cast<float>(width + 2 * pad_x - kernel_width) / stride_x) + 1));
-            h = static_cast<unsigned int>(std::floor((static_cast<float>(height + 2 * pad_y - kernel_height) / stride_y) + 1));
+            w = static_cast<unsigned int>(std::floor((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<unsigned int>(std::floor((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
             break;
         case DimensionRoundingType::CEIL:
-            w = static_cast<unsigned int>(std::ceil((static_cast<float>(width + 2 * pad_x - kernel_width) / stride_x) + 1));
-            h = static_cast<unsigned int>(std::ceil((static_cast<float>(height + 2 * pad_y - kernel_height) / stride_y) + 1));
+            w = static_cast<unsigned int>(std::ceil((static_cast<float>(width + pad_left + pad_right - kernel_width) / stride_x) + 1));
+            h = static_cast<unsigned int>(std::ceil((static_cast<float>(height + pad_top + pad_bottom - kernel_height) / stride_y) + 1));
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported rounding type");
     }
 
     // Make sure that border operations will start from inside the input and not the padded area
-    if(((w - 1) * stride_x) >= (width + pad_x))
+    if(((w - 1) * stride_x) >= (width + pad_left))
     {
         --w;
     }
-    if(((h - 1) * stride_y) >= (height + pad_y))
+    if(((h - 1) * stride_y) >= (height + pad_top))
     {
         --h;
     }
-    ARM_COMPUTE_ERROR_ON(((w - 1) * stride_x) >= (width + pad_x));
-    ARM_COMPUTE_ERROR_ON(((h - 1) * stride_y) >= (height + pad_y));
+    ARM_COMPUTE_ERROR_ON(((w - 1) * stride_x) >= (width + pad_left));
+    ARM_COMPUTE_ERROR_ON(((h - 1) * stride_y) >= (height + pad_top));
 
     return std::make_pair(w, h);
 }
@@ -318,6 +356,7 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
             print_consecutive_elements_impl<float>(s, reinterpret_cast<const float *>(ptr), n, stream_width, element_delim);
             break;
         case DataType::F16:
+            print_consecutive_elements_impl<half>(s, reinterpret_cast<const half *>(ptr), n, stream_width, element_delim);
             break;
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
@@ -345,8 +384,9 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
         case DataType::F32:
             return max_consecutive_elements_display_width_impl<float>(s, reinterpret_cast<const float *>(ptr), n);
         case DataType::F16:
-            return 0;
+            return max_consecutive_elements_display_width_impl<half>(s, reinterpret_cast<const half *>(ptr), n);
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
     }
+    return 0;
 }

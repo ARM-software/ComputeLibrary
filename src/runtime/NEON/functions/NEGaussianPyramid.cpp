@@ -47,7 +47,8 @@ NEGaussianPyramid::NEGaussianPyramid()
 }
 
 NEGaussianPyramidHalf::NEGaussianPyramidHalf() // NOLINT
-    : _border_handler(),
+    : _horizontal_border_handler(),
+      _vertical_border_handler(),
       _horizontal_reduction(),
       _vertical_reduction()
 {
@@ -62,6 +63,9 @@ void NEGaussianPyramidHalf::configure(const ITensor *input, IPyramid *pyramid, B
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != pyramid->info()->height());
     ARM_COMPUTE_ERROR_ON(SCALE_PYRAMID_HALF != pyramid->info()->scale());
 
+    // Constant value to use for vertical fill border when the border mode is CONSTANT
+    const uint16_t pixel_value_u16 = static_cast<uint16_t>(constant_border_value) * 2 + static_cast<uint16_t>(constant_border_value) * 8 + static_cast<uint16_t>(constant_border_value) * 6;
+
     /* Get number of pyramid levels */
     const size_t num_levels = pyramid->info()->num_levels();
 
@@ -70,9 +74,10 @@ void NEGaussianPyramidHalf::configure(const ITensor *input, IPyramid *pyramid, B
 
     if(num_levels > 1)
     {
-        _border_handler       = arm_compute::support::cpp14::make_unique<NEFillBorderKernel[]>(num_levels - 1);
-        _horizontal_reduction = arm_compute::support::cpp14::make_unique<NEGaussianPyramidHorKernel[]>(num_levels - 1);
-        _vertical_reduction   = arm_compute::support::cpp14::make_unique<NEGaussianPyramidVertKernel[]>(num_levels - 1);
+        _horizontal_border_handler = arm_compute::support::cpp14::make_unique<NEFillBorderKernel[]>(num_levels - 1);
+        _vertical_border_handler   = arm_compute::support::cpp14::make_unique<NEFillBorderKernel[]>(num_levels - 1);
+        _horizontal_reduction      = arm_compute::support::cpp14::make_unique<NEGaussianPyramidHorKernel[]>(num_levels - 1);
+        _vertical_reduction        = arm_compute::support::cpp14::make_unique<NEGaussianPyramidVertKernel[]>(num_levels - 1);
 
         // Apply half scale to the X dimension of the tensor shape
         TensorShape tensor_shape = pyramid->info()->tensor_shape();
@@ -84,13 +89,16 @@ void NEGaussianPyramidHalf::configure(const ITensor *input, IPyramid *pyramid, B
         for(unsigned int i = 0; i < num_levels - 1; ++i)
         {
             /* Configure horizontal kernel */
-            _horizontal_reduction[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode == BorderMode::UNDEFINED);
+            _horizontal_reduction[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i));
 
             /* Configure vertical kernel */
-            _vertical_reduction[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), border_mode == BorderMode::UNDEFINED);
+            _vertical_reduction[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1));
 
             /* Configure border */
-            _border_handler[i].configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
+            _horizontal_border_handler[i].configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
+
+            /* Configure border */
+            _vertical_border_handler[i].configure(_tmp.get_pyramid_level(i), _vertical_reduction[i].border_size(), border_mode, PixelValue(pixel_value_u16));
         }
 
         _tmp.allocate();
@@ -109,8 +117,9 @@ void NEGaussianPyramidHalf::run()
 
     for(unsigned int i = 0; i < num_levels - 1; ++i)
     {
-        NEScheduler::get().schedule(_border_handler.get() + i, Window::DimZ);
+        NEScheduler::get().schedule(_horizontal_border_handler.get() + i, Window::DimZ);
         NEScheduler::get().schedule(_horizontal_reduction.get() + i, Window::DimY);
+        NEScheduler::get().schedule(_vertical_border_handler.get() + i, Window::DimZ);
         NEScheduler::get().schedule(_vertical_reduction.get() + i, Window::DimY);
     }
 }

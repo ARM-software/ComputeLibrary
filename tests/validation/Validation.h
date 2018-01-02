@@ -27,6 +27,7 @@
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
+#include "support/ToolchainSupport.h"
 #include "tests/IAccessor.h"
 #include "tests/SimpleTensor.h"
 #include "tests/Types.h"
@@ -230,7 +231,8 @@ bool validate(T target, T reference, U tolerance = AbsoluteTolerance<T>());
 
 /** Validate key points. */
 template <typename T, typename U, typename V = AbsoluteTolerance<float>>
-void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance = AbsoluteTolerance<float>());
+void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance = AbsoluteTolerance<float>(),
+                        float allowed_missing_percentage = 5.f, float allowed_mismatch_percentage = 5.f);
 
 template <typename T>
 struct compare_base
@@ -255,7 +257,7 @@ struct compare<AbsoluteTolerance<U>> : public compare_base<AbsoluteTolerance<U>>
 
     operator bool() const
     {
-        if(!std::isfinite(this->_target) || !std::isfinite(this->_reference))
+        if(!support::cpp11::isfinite(this->_target) || !support::cpp11::isfinite(this->_reference))
         {
             return false;
         }
@@ -279,7 +281,7 @@ struct compare<RelativeTolerance<U>> : public compare_base<RelativeTolerance<U>>
 
     operator bool() const
     {
-        if(!std::isfinite(this->_target) || !std::isfinite(this->_reference))
+        if(!support::cpp11::isfinite(this->_target) || !support::cpp11::isfinite(this->_reference))
         {
             return false;
         }
@@ -313,6 +315,13 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U toler
 {
     // Validate with valid region covering the entire shape
     validate(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number);
+}
+
+template <typename T, typename U, typename = typename std::enable_if<std::is_integral<T>::value>::type>
+void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value, float tolerance_number)
+{
+    // Validate with valid region covering the entire shape
+    validate_wrap(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number);
 }
 
 template <typename T, typename U>
@@ -376,6 +385,88 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
     }
 }
 
+template <typename T, typename U, typename = typename std::enable_if<std::is_integral<T>::value>::type>
+void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value, float tolerance_number)
+{
+    int64_t num_mismatches = 0;
+    int64_t num_elements   = 0;
+
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.element_size(), reference.element_size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.data_type(), reference.data_type(), framework::LogLevel::ERRORS);
+
+    if(reference.format() != Format::UNKNOWN)
+    {
+        ARM_COMPUTE_EXPECT_EQUAL(tensor.format(), reference.format(), framework::LogLevel::ERRORS);
+    }
+
+    ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()), framework::LogLevel::ERRORS);
+
+    const int min_elements = std::min(tensor.num_elements(), reference.num_elements());
+    const int min_channels = std::min(tensor.num_channels(), reference.num_channels());
+
+    // Iterate over all elements within valid region, e.g. U8, S16, RGB888, ...
+    for(int element_idx = 0; element_idx < min_elements; ++element_idx)
+    {
+        const Coordinates id = index2coord(reference.shape(), element_idx);
+
+        if(is_in_valid_region(valid_region, id))
+        {
+            // Iterate over all channels within one element
+            for(int c = 0; c < min_channels; ++c)
+            {
+                const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
+                const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
+
+                bool equal = compare<U>(target_value, reference_value, tolerance_value);
+
+                // check for wrapping
+                if(!equal)
+                {
+                    if(!support::cpp11::isfinite(target_value) || !support::cpp11::isfinite(reference_value))
+                    {
+                        equal = false;
+                    }
+                    else
+                    {
+                        using limits_type = typename std::make_unsigned<T>::type;
+
+                        uint64_t max             = std::numeric_limits<limits_type>::max();
+                        uint64_t abs_sum         = std::abs(static_cast<int64_t>(target_value)) + std::abs(static_cast<int64_t>(reference_value));
+                        uint64_t wrap_difference = max - abs_sum;
+
+                        equal = wrap_difference < static_cast<uint64_t>(tolerance_value);
+                    }
+                }
+
+                if(!equal)
+                {
+                    ARM_COMPUTE_TEST_INFO("id = " << id);
+                    ARM_COMPUTE_TEST_INFO("channel = " << c);
+                    ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << framework::make_printable(target_value));
+                    ARM_COMPUTE_TEST_INFO("reference = " << std::setprecision(5) << framework::make_printable(reference_value));
+                    ARM_COMPUTE_TEST_INFO("wrap_tolerance = " << std::setprecision(5) << framework::make_printable(static_cast<typename U::value_type>(tolerance_value)));
+                    framework::ARM_COMPUTE_PRINT_INFO();
+
+                    ++num_mismatches;
+                }
+
+                ++num_elements;
+            }
+        }
+    }
+
+    if(num_elements > 0)
+    {
+        const int64_t absolute_tolerance_number = tolerance_number * num_elements;
+        const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
+
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
+                              << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number << "%)");
+        ARM_COMPUTE_EXPECT(num_mismatches <= absolute_tolerance_number, framework::LogLevel::ERRORS);
+    }
+}
+
 /** Check which keypoints from [first1, last1) are missing in [first2, last2) */
 template <typename T, typename U, typename V>
 std::pair<int64_t, int64_t> compare_keypoints(T first1, T last1, U first2, U last2, V tolerance)
@@ -393,16 +484,16 @@ std::pair<int64_t, int64_t> compare_keypoints(T first1, T last1, U first2, U las
         if(point == last2)
         {
             ++num_missing;
+            ARM_COMPUTE_TEST_INFO("Key point not found" << *first1)
             ARM_COMPUTE_TEST_INFO("keypoint1 = " << *first1)
-            ARM_COMPUTE_EXPECT_FAIL("Key point not found", framework::LogLevel::DEBUG);
         }
         else if(!validate(point->tracking_status, first1->tracking_status) || !validate(point->strength, first1->strength, tolerance) || !validate(point->scale, first1->scale)
                 || !validate(point->orientation, first1->orientation) || !validate(point->error, first1->error))
         {
             ++num_mismatches;
+            ARM_COMPUTE_TEST_INFO("Mismatching keypoint")
             ARM_COMPUTE_TEST_INFO("keypoint1 = " << *first1)
             ARM_COMPUTE_TEST_INFO("keypoint2 = " << *point)
-            ARM_COMPUTE_EXPECT_FAIL("Mismatching keypoint", framework::LogLevel::DEBUG);
         }
 
         ++first1;
@@ -412,12 +503,11 @@ std::pair<int64_t, int64_t> compare_keypoints(T first1, T last1, U first2, U las
 }
 
 template <typename T, typename U, typename V>
-void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance)
+void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance,
+                        float allowed_missing_percentage, float allowed_mismatch_percentage)
 {
     const int64_t num_elements_target    = std::distance(target_first, target_last);
     const int64_t num_elements_reference = std::distance(reference_first, reference_last);
-
-    ARM_COMPUTE_EXPECT_EQUAL(num_elements_target, num_elements_reference, framework::LogLevel::ERRORS);
 
     int64_t num_missing    = 0;
     int64_t num_mismatches = 0;
@@ -430,10 +520,10 @@ void validate_keypoints(T target_first, T target_last, U reference_first, U refe
         const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements_reference * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_missing << " keypoints (" << std::fixed << std::setprecision(2) << percent_missing << "%) are missing in target");
-        ARM_COMPUTE_EXPECT_EQUAL(num_missing, 0, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " keypoints (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
-        ARM_COMPUTE_EXPECT_EQUAL(num_mismatches, 0, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(percent_mismatches <= allowed_mismatch_percentage, framework::LogLevel::ERRORS);
     }
 
     if(num_elements_target > 0)
@@ -443,7 +533,7 @@ void validate_keypoints(T target_first, T target_last, U reference_first, U refe
         const float percent_missing = static_cast<float>(num_missing) / num_elements_target * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_missing << " keypoints (" << std::fixed << std::setprecision(2) << percent_missing << "%) are not part of target");
-        ARM_COMPUTE_EXPECT_EQUAL(num_missing, 0, framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
     }
 }
 

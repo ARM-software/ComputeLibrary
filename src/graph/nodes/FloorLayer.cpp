@@ -23,65 +23,27 @@
  */
 #include "arm_compute/graph/nodes/FloorLayer.h"
 
-#include "arm_compute/core/Logger.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLFloor.h"
-#include "arm_compute/runtime/NEON/functions/NEFloor.h"
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/graph/Error.h"
+#include "arm_compute/graph/NodeContext.h"
+#include "arm_compute/graph/OperationRegistry.h"
 #include "support/ToolchainSupport.h"
-#include "utils/TypePrinter.h"
 
 using namespace arm_compute::graph;
 
-namespace
+std::unique_ptr<arm_compute::IFunction> FloorLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
-template <typename FloorType, typename TensorType, TargetHint hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *output)
-{
-    auto floorlayer = arm_compute::support::cpp14::make_unique<FloorType>();
-    floorlayer->configure(
-        dynamic_cast<TensorType *>(input),
-        dynamic_cast<TensorType *>(output));
+    ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT(input, output);
 
-    return std::move(floorlayer);
-}
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+    _target_hint              = ctx.hints().target_hint();
 
-template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *output);
+    // Create node context
+    NodeContext node_ctx(OperationType::FloorLayer);
+    node_ctx.set_target(_target_hint);
+    node_ctx.add_input(in);
+    node_ctx.add_output(out);
 
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *output)
-{
-    return instantiate_function<arm_compute::CLFloor, arm_compute::ICLTensor, TargetHint::OPENCL>(input, output);
-}
-
-template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *output)
-{
-    return instantiate_function<arm_compute::NEFloor, arm_compute::ITensor, TargetHint::NEON>(input, output);
-}
-} // namespace
-
-std::unique_ptr<arm_compute::IFunction> FloorLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
-{
-    std::unique_ptr<arm_compute::IFunction> func;
-    _target_hint = ctx.hints().target_hint();
-
-    if(_target_hint == TargetHint::OPENCL)
-    {
-        func = instantiate<TargetHint::OPENCL>(input, output);
-        ARM_COMPUTE_LOG("Instantiating CLFloorLayer");
-    }
-    else
-    {
-        func = instantiate<TargetHint::NEON>(input, output);
-        ARM_COMPUTE_LOG("Instantiating NEFloorLayer");
-    }
-
-    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
-                    << " Input shape: " << input->info()->tensor_shape()
-                    << " Output shape: " << output->info()->tensor_shape()
-                    << std::endl);
-
-    return func;
+    // Get function
+    return OperationRegistry::get().find_operation(OperationType::FloorLayer, _target_hint)->configure(node_ctx);
 }

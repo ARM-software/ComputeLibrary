@@ -10,6 +10,8 @@ var searchData=
   ['reductionoperationvalidationfixture',['ReductionOperationValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_reduction_operation_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['relativetolerance',['RelativeTolerance',['../classarm__compute_1_1test_1_1validation_1_1_relative_tolerance.xhtml',1,'arm_compute::test::validation']]],
   ['relativetolerance_3c_20u_20_3e',['RelativeTolerance&lt; U &gt;',['../classarm__compute_1_1test_1_1validation_1_1_relative_tolerance.xhtml',1,'arm_compute::test::validation']]],
+  ['remapvalidationfixture',['RemapValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_remap_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
+  ['reshapelayer',['ReshapeLayer',['../classarm__compute_1_1graph_1_1_reshape_layer.xhtml',1,'arm_compute::graph']]],
   ['reshapelayerdataset',['ReshapeLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_reshape_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['reshapelayervalidationfixture',['ReshapeLayerValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_reshape_layer_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['roi',['ROI',['../structarm__compute_1_1_r_o_i.xhtml',1,'arm_compute']]],

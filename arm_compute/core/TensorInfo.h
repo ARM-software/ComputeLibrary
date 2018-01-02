@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/ITensorInfo.h"
 
+#include "ITensorInfo.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
@@ -33,6 +34,7 @@
 #include "arm_compute/core/Utils.h"
 
 #include <cstddef>
+#include <memory>
 
 namespace arm_compute
 {
@@ -97,6 +99,16 @@ public:
      * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
      */
     TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position = 0);
+
+    /** Constructor
+     *
+     * @param[in] tensor_shape      It specifies the size for each dimension of the tensor in number of elements.
+     * @param[in] num_channels      It indicates the number of channels for each tensor element
+     * @param[in] data_type         Data type to use for each tensor element
+     * @param[in] quantization_info The quantization settings for the tensor data.
+     */
+    TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, QuantizationInfo quantization_info);
+
     /** Constructor
      *
      * @param[in] hog_info HOG's metadata used to allocate normalized HOG space
@@ -147,6 +159,7 @@ public:
      * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
      */
     void init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position = 0);
+
     /** Initialize the metadata structure with the given parameters
      *
      * @param[in] tensor_shape                  Size for each dimension of the tensor in number of elements.
@@ -200,12 +213,15 @@ public:
     size_t init_auto_padding(const HOGInfo &hog_info, unsigned int width, unsigned int height);
 
     // Inherited methods overridden:
-    void set_data_type(DataType data_type) override;
-    void set_num_channels(int num_channels) override;
-    void set_format(Format format) override;
-    void set_tensor_shape(TensorShape shape) override;
-    void set_fixed_point_position(int fixed_point_position) override;
-    bool auto_padding() override;
+    std::unique_ptr<ITensorInfo> clone() const override;
+    ITensorInfo &set_data_type(DataType data_type) override;
+    ITensorInfo &set_num_channels(int num_channels) override;
+    ITensorInfo &set_format(Format format) override;
+    ITensorInfo &set_tensor_shape(TensorShape shape) override;
+    ITensorInfo &set_fixed_point_position(int fixed_point_position) override;
+    ITensorInfo &set_quantization_info(QuantizationInfo quantization_info) override;
+    ITensorInfo &reset_padding() override;
+    bool         auto_padding() override;
     bool extend_padding(const PaddingSize &padding) override;
     size_t dimension(size_t index) const override
     {
@@ -264,9 +280,10 @@ public:
     {
         return _is_resizable;
     }
-    void set_is_resizable(bool is_resizable) override
+    ITensorInfo &set_is_resizable(bool is_resizable) override
     {
         _is_resizable = is_resizable;
+        return *this;
     }
     ValidRegion valid_region() const override
     {
@@ -276,6 +293,10 @@ public:
     {
         _valid_region = std::move(valid_region);
     }
+    QuantizationInfo quantization_info() const override
+    {
+        return _quantization_info;
+    }
 
 private:
     /** Calculates strides, offset and total size resulting from the specified padding around the XY plane.
@@ -284,17 +305,18 @@ private:
      */
     std::tuple<Strides, size_t, size_t> calculate_padding_requirements(const PaddingSize &padding);
 
-    size_t      _total_size;
-    int         _fixed_point_position;
-    size_t      _offset_first_element_in_bytes;
-    Strides     _strides_in_bytes;
-    size_t      _num_channels;
-    TensorShape _tensor_shape;
-    DataType    _data_type;
-    Format      _format;
-    bool        _is_resizable;
-    ValidRegion _valid_region;
-    PaddingSize _padding;
+    size_t           _total_size;
+    int              _fixed_point_position;
+    size_t           _offset_first_element_in_bytes;
+    Strides          _strides_in_bytes;
+    size_t           _num_channels;
+    TensorShape      _tensor_shape;
+    DataType         _data_type;
+    Format           _format;
+    bool             _is_resizable;
+    ValidRegion      _valid_region;
+    PaddingSize      _padding;
+    QuantizationInfo _quantization_info;
 };
 }
 #endif /*__ARM_COMPUTE_TENSORINFO_H__ */

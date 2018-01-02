@@ -136,7 +136,7 @@ You can mix OpenCL and NEON kernels and functions. However it is the user's resp
 
 @section S4_5_algorithms Algorithms
 
-All algorithms in this library have been implemented following the [OpenVX 1.1 specifications](https://www.khronos.org/registry/vx/specs/1.1/html/). Please refer to the Khronos documentation for more information.
+All computer vision algorithms in this library have been implemented following the [OpenVX 1.1 specifications](https://www.khronos.org/registry/vx/specs/1.1/html/). Please refer to the Khronos documentation for more information.
 
 @section S4_6_images_tensors Images, padding, border modes and tensors
 

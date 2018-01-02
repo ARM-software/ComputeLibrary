@@ -52,10 +52,10 @@ const auto ArithmeticAdditionQS8Dataset = combine(combine(framework::dataset::ma
                                                   framework::dataset::make("DataType", DataType::QS8));
 const auto ArithmeticAdditionQS16Dataset = combine(combine(framework::dataset::make("DataType", DataType::QS16), framework::dataset::make("DataType", DataType::QS16)),
                                                    framework::dataset::make("DataType", DataType::QS16));
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const auto ArithmeticAdditionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
                                                    framework::dataset::make("DataType", DataType::F16));
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 const auto ArithmeticAdditionFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
                                                    framework::dataset::make("DataType", DataType::F32));
 } // namespace
@@ -65,6 +65,41 @@ TEST_SUITE(ArithmeticAddition)
 
 template <typename T>
 using NEArithmeticAdditionFixture = ArithmeticAdditionValidationFixture<Tensor, Accessor, NEArithmeticAddition, T>;
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Window shrink
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),  // Mismatching fixed point
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                      }),
+               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
+                                                       TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                     })),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
+                                                     })),
+               framework::dataset::make("Expected", { true, true, false, false, false, false, true })),
+               input1_info, input2_info, output_info, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(NEArithmeticAddition::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), ConvertPolicy::WRAP)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 TEST_SUITE(U8)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
@@ -180,7 +215,7 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(Float)
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP16Dataset),
                                                                                                          framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
@@ -189,7 +224,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<half>, framework::D
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(F32)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),

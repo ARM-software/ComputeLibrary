@@ -35,12 +35,9 @@ class ITensor;
  * @note @ref NEGEMMLowpMatrixMultiplyKernel low precision matrix product kernel
  *  This kernel performs the following computation:
  *
- *  -# Convert a values from uint8 to int32 and add a_offset to each of them.
- *  -# Convert b values from uint8 to int32 and add b_offset to each of them.
- *  -# Compute the int32 matrix product of the resulting a * b.
- *  -# Add output_offset to each entry of the result.
- *  -# Multiply each entry of the result and round to the nearest integer
- *  -# Clamp the resulting int32 values to the [0..255] range and cast to uint8.
+ *  -# Convert a values from int8 to int32
+ *  -# Convert b values from int8 to int32
+ *  -# Compute the int32 matrix product of the resulting a * b and store the result as int32
  *
  */
 class NEGEMMLowpMatrixMultiplyKernel : public INEKernel
@@ -61,16 +58,21 @@ public:
      * The input matrices @p input0 and @p input1 must be the output of the kernels: @ref NEGEMMInterleave4x4Kernel and @ref NEGEMMTranspose1xWKernel. These two
      * kernels change the layout of the original matrices to be more cache-friendly.
      *
-     * @param[in]  input0          Input tensor containing the interleaved Matrix A. Data type supported: U8
-     * @param[in]  input1          Input tensor containing the transposed Matrix B. Data type supported: same as @p input0
-     * @param[out] output          Output tensor to store the result of matrix multiplication, Data type supported: same as @p input0
-     * @param[in]  a_offset        Offset to be added to each element of the matrix A.
-     * @param[in]  b_offset        Offset to be added to each element of the matrix B.
-     * @param[in]  output_offset   Offset to be added to each element of the output matrix
-     * @param[in]  output_mult_int Value to be multipied to each entry of the result.
-     * @param[in]  shift           Number of bits to shift right the result.
+     * @param[in]  input0 Input tensor containing the interleaved Matrix A. Data type supported: QASYMM8
+     * @param[in]  input1 Input tensor containing the transposed1xW Matrix B. Data type supported: same as @p input0
+     * @param[out] output Output tensor to store the result of matrix multiplication. Data type supported: S32
      */
-    void configure(const ITensor *input0, const ITensor *input1, ITensor *output, int32_t a_offset, int32_t b_offset, int32_t output_offset, int32_t output_mult_int, int32_t shift);
+    void configure(const ITensor *input0, const ITensor *input1, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixMultiplyKernel
+     *
+     * @param[in] input0 Input tensor info containing the interleaved Matrix A. Data type supported: QASYMM8
+     * @param[in] input1 Input tensor info containing the transposed Matrix B. Data type supported: same as @p input0
+     * @param[in] output Output tensor info to store the result of matrix multiplication. Data type supported: S32
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
+
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
@@ -78,11 +80,7 @@ private:
     const ITensor *_input0;
     const ITensor *_input1;
     ITensor       *_output;
-    int32_t        _a_offset;
-    int32_t        _b_offset;
-    int32_t        _output_offset;
-    int32_t        _output_mult_int;
-    int32_t        _shift;
+    bool           _slide_matrix_b;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYKERNEL_H__*/

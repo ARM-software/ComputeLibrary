@@ -106,6 +106,13 @@ Window arm_compute::calculate_max_enlarged_window(const ITensorInfo &info, const
         ++n;
     }
 
+    if(tensor_shape.num_dimensions() > 2)
+    {
+        window.set(2, Window::Dimension(0, std::max<size_t>(1, tensor_shape[n]), steps[2]));
+
+        ++n;
+    }
+
     for(; n < Coordinates::num_max_dimensions; ++n)
     {
         window.set(n, Window::Dimension(0, std::max<size_t>(1, tensor_shape[n])));

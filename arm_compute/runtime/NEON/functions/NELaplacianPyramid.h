@@ -27,7 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
-#include "arm_compute/runtime/NEON/functions/NEDepthConvert.h"
+#include "arm_compute/runtime/NEON/functions/NEDepthConvertLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussian5x5.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussianPyramid.h"
 #include "arm_compute/runtime/Pyramid.h"
@@ -79,7 +79,7 @@ private:
     std::unique_ptr<NEArithmeticSubtraction[]> _subf;
     Pyramid                                    _gauss_pyr;
     Pyramid                                    _conv_pyr;
-    NEDepthConvert                             _depth_function;
+    NEDepthConvertLayer                        _depth_function;
 };
 }
 #endif /*__ARM_COMPUTE_NELAPLACIANPYRAMID_H__ */

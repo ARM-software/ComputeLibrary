@@ -80,7 +80,7 @@ protected:
     float _alpha;
 };
 
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Interface for the accumulate weighted kernel using F16 */
 class NEAccumulateWeightedFP16Kernel : public NEAccumulateWeightedKernel
 {
@@ -88,9 +88,9 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 };
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 using NEAccumulateWeightedFP16Kernel = NEAccumulateWeightedKernel;
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 /** Interface for the accumulate squared kernel
  *

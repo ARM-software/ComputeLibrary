@@ -133,19 +133,15 @@ void Thread::worker_thread()
             return;
         }
 
-#ifndef ARM_NO_EXCEPTIONS
         try
         {
-#endif // ARM_NO_EXCEPTIONS
             _window.validate();
             _kernel->run(_window, _info);
-#ifndef ARM_NO_EXCEPTIONS
         }
         catch(...)
         {
             _current_exception = std::current_exception();
         }
-#endif // ARM_NO_EXCEPTIONS
 
         _job_complete = true;
         lock.unlock();
@@ -214,21 +210,17 @@ void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
         info.thread_id = t;
         kernel->run(win, info);
 
-#ifndef ARM_NO_EXCEPTIONS
         try
         {
-#endif // ARM_NO_EXCEPTIONS
             for(auto &thread : _threads)
             {
                 thread.wait();
             }
-#ifndef ARM_NO_EXCEPTIONS
         }
         catch(const std::system_error &e)
         {
             std::cerr << "Caught system_error with code " << e.code() << " meaning " << e.what() << '\n';
         }
-#endif // ARM_NO_EXCEPTIONS
     }
     /** [Scheduler example] */
 }

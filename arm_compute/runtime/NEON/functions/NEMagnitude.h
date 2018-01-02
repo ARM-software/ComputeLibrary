@@ -39,9 +39,10 @@ public:
      * @param[in]  input1   First tensor input. Data type supported: S16.
      * @param[in]  input2   Second tensor input. Data type supported: S16.
      * @param[out] output   Output tensor. Data type supported: S16.
+     * @param[in]  mag_type (Optional) Magnitude calculation type. Default: L2NORM.
      * @param[in]  use_fp16 (Optional) If true the FP16 kernels will be used. If false F32 kernels are used.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, bool use_fp16 = false);
+    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, MagnitudeType mag_type = MagnitudeType::L2NORM, bool use_fp16 = false);
 };
 }
 #endif /*__ARM_COMPUTE_NEMAGNITUDE_H__ */

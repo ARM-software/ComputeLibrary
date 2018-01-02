@@ -31,7 +31,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/BitwiseOr.h"
+#include "tests/validation/reference/BitwiseOr.h"
 
 namespace arm_compute
 {

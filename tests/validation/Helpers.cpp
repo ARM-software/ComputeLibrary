@@ -112,6 +112,27 @@ HarrisCornersParameters harris_corners_parameters()
 
     return params;
 }
+
+SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
+{
+    const QuantizationInfo &quantization_info = src.quantization_info();
+    SimpleTensor<float>     dst{ src.shape(), DataType::F32, 1, 0 };
+    for(int i = 0; i < src.num_elements(); ++i)
+    {
+        dst[i] = quantization_info.dequantize(src[i]);
+    }
+    return dst;
+}
+
+SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
+{
+    SimpleTensor<uint8_t> dst{ src.shape(), DataType::QASYMM8, 1, 0, quantization_info };
+    for(int i = 0; i < src.num_elements(); ++i)
+    {
+        dst[i] = quantization_info.quantize(src[i], RoundingPolicy::TO_NEAREST_UP);
+    }
+    return dst;
+}
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

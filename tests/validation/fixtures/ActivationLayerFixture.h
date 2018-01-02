@@ -31,8 +31,8 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/ActivationLayer.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/ActivationLayer.h"
 
 #include <random>
 
@@ -43,20 +43,21 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ActivationValidationFixedPointFixture : public framework::Fixture
+class ActivationValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, int fractional_bits)
+    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, int fractional_bits, QuantizationInfo quantization_info)
     {
-        _fractional_bits = fractional_bits;
-        _data_type       = data_type;
-        _function        = function;
+        _fractional_bits   = fractional_bits;
+        _quantization_info = quantization_info;
+        _data_type         = data_type;
+        _function          = function;
 
         ActivationLayerInfo info(function, alpha_beta, alpha_beta);
 
-        _target    = compute_target(shape, in_place, info, data_type, fractional_bits);
-        _reference = compute_reference(shape, info, data_type, fractional_bits);
+        _target    = compute_target(shape, in_place, info, data_type, fractional_bits, quantization_info);
+        _reference = compute_reference(shape, info, data_type, fractional_bits, quantization_info);
     }
 
 protected:
@@ -71,6 +72,10 @@ protected:
             std::uniform_real_distribution<> distribution(min_bound, max_bound);
             library->fill(tensor, distribution, 0);
         }
+        else if(is_data_type_quantized_asymmetric(tensor.data_type()))
+        {
+            library->fill_tensor_uniform(tensor, 0);
+        }
         else
         {
             int min_bound = 0;
@@ -81,11 +86,11 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &shape, bool in_place, ActivationLayerInfo info, DataType data_type, int fixed_point_position = 0)
+    TensorType compute_target(const TensorShape &shape, bool in_place, ActivationLayerInfo info, DataType data_type, int fixed_point_position, QuantizationInfo quantization_info)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position);
-        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position);
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, quantization_info);
+        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, quantization_info);
 
         // Create and configure function
         FunctionType act_layer;
@@ -123,10 +128,10 @@ protected:
         }
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo info, DataType data_type, int fixed_point_position = 0)
+    SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo info, DataType data_type, int fixed_point_position, QuantizationInfo quantization_info)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position };
+        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position, quantization_info };
 
         // Fill reference
         fill(src);
@@ -137,20 +142,44 @@ protected:
     TensorType                              _target{};
     SimpleTensor<T>                         _reference{};
     int                                     _fractional_bits{};
+    QuantizationInfo                        _quantization_info{};
     DataType                                _data_type{};
     ActivationLayerInfo::ActivationFunction _function{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ActivationValidationFixture : public ActivationValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
+class ActivationValidationFixture : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
     void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type)
     {
-        ActivationValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, 0);
+        ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, 0, QuantizationInfo());
     }
 };
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ActivationValidationFixedPointFixture : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, int fractional_bits)
+    {
+        ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, fractional_bits, QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ActivationValidationQuantizedFixture : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
+    {
+        ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, 0, quantization_info);
+    }
+};
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

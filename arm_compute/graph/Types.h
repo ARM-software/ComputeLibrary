@@ -27,24 +27,50 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/SubTensorInfo.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/utils/logging/Macros.h"
+
+/** Create a default core logger
+ *
+ * @note It will eventually create all default loggers in don't exist
+ */
+#define ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER()                                  \
+    do                                                                             \
+    {                                                                              \
+        if(arm_compute::logging::LoggerRegistry::get().logger("GRAPH") == nullptr) \
+        {                                                                          \
+            arm_compute::logging::LoggerRegistry::get().create_reserved_loggers(); \
+        }                                                                          \
+    } while(false)
+
+#define ARM_COMPUTE_LOG_GRAPH(log_level, x)    \
+    ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER(); \
+    ARM_COMPUTE_LOG_STREAM("GRAPH", log_level, x)
+
+#define ARM_COMPUTE_LOG_GRAPH_INFO(x)          \
+    ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER(); \
+    ARM_COMPUTE_LOG_STREAM("GRAPH", arm_compute::logging::LogLevel::INFO, x)
 
 namespace arm_compute
 {
 namespace graph
 {
-using arm_compute::ITensor;
-using arm_compute::TensorInfo;
-using arm_compute::SubTensorInfo;
-using arm_compute::DataType;
-using arm_compute::Coordinates;
-using arm_compute::TensorShape;
-using arm_compute::PadStrideInfo;
-using arm_compute::WeightsInfo;
 using arm_compute::ActivationLayerInfo;
+using arm_compute::Coordinates;
+using arm_compute::DataType;
+using arm_compute::DimensionRoundingType;
+using arm_compute::ITensorInfo;
 using arm_compute::NormType;
 using arm_compute::NormalizationLayerInfo;
+using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
+using arm_compute::SubTensorInfo;
+using arm_compute::TensorInfo;
+using arm_compute::TensorShape;
+using arm_compute::WeightsInfo;
+
+using arm_compute::logging::LogLevel;
+using arm_compute::ConvertPolicy;
 
 /**< Execution hint to the graph executor */
 enum class TargetHint
@@ -54,11 +80,37 @@ enum class TargetHint
     NEON       /**< Run node on a NEON capable device */
 };
 
-/**< Convolution method hint to the graph executor */
+/** Convolution method hint to the graph executor */
 enum class ConvolutionMethodHint
 {
     GEMM,  /**< Convolution using GEMM */
     DIRECT /**< Direct convolution */
+};
+
+/** Supported layer operations */
+enum class OperationType
+{
+    ActivationLayer,
+    BatchNormalizationLayer,
+    ConvolutionLayer,
+    DepthConvertLayer,
+    DepthwiseConvolutionLayer,
+    DequantizationLayer,
+    FlattenLayer,
+    FloorLayer,
+    FullyConnectedLayer,
+    L2NormalizeLayer,
+    NormalizationLayer,
+    PoolingLayer,
+    QuantizationLayer,
+    ReshapeLayer,
+    SoftmaxLayer
+};
+
+/** Branch layer merging method */
+enum class BranchMergeMethod
+{
+    DEPTH_CONCATENATE /**< Concatenate across depth */
 };
 } // namespace graph
 } // namespace arm_compute

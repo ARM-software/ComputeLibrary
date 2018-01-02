@@ -53,7 +53,7 @@ void CLMedian3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, boo
     constexpr unsigned int num_elems_written_per_iteration   = 8;
     constexpr unsigned int num_rows_read_per_iteration       = 3;
 
-    Window win = calculate_max_window_horizontal(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, border_size());
 
     AccessWindowRectangle  input_access(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration);
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);

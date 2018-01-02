@@ -37,7 +37,7 @@ CLNormalizationLayer::CLNormalizationLayer()
 {
 }
 
-void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info)
+void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const NormalizationLayerInfo &norm_info)
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
 
@@ -46,6 +46,11 @@ void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, Normal
 
     // Fill the border by 3 elements since we need vload4 in the IN_MAP normalization kernel
     _border_handler.configure(input, _norm_kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
+}
+
+Status CLNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)
+{
+    return CLNormalizationLayerKernel::validate(input, output, norm_info);
 }
 
 void CLNormalizationLayer::run()

@@ -45,11 +45,11 @@ namespace test
 {
 namespace
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const auto alex_net_data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8 });
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 const auto alex_net_data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8 });
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 
 using NEAlexNetFixture = AlexNetFixture<ITensor,

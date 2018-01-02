@@ -38,7 +38,7 @@ PROJECT_NAME           = "Compute Library"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 17.10
+PROJECT_NUMBER         = 17.12
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -2076,7 +2076,8 @@ PREDEFINED             = DOXYGEN_SKIP_THIS \
                          LOCATE_MAX \
                          HAS_BIAS \
                          POOL_AVG \
-                         ARM_COMPUTE_ENABLE_FP16
+                         ARM_COMPUTE_AARCH64_V8_2 \
+                         ARM_COMPUTE_AARCH64_V8A
 
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this

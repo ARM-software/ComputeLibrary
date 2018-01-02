@@ -1,6 +1,6 @@
 var classarm__compute_1_1test_1_1framework_1_1_mali_counter =
 [
-    [ "MaliCounter", "classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a17bcc07902788df6407481fd5bcd2ec8", null ],
+    [ "MaliCounter", "classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a50a2c38289f6d3d6fb2e813c55f3f01a", null ],
     [ "MaliCounter", "classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#ae5c70ca71b4046301e066696c17174e0", null ],
     [ "~MaliCounter", "classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a87ac9e6ba4855e29fc0f94dc2765daf7", null ],
     [ "id", "classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a501ef37fef441a0a6a8ea8b8e30a7181", null ],

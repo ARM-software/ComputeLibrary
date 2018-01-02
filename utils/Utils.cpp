@@ -70,15 +70,12 @@ int run_example(int argc, const char **argv, example &func)
 {
     std::cout << "\n"
               << argv[0] << "\n\n";
-#ifndef ARM_NO_EXCEPTIONS
     try
     {
-#endif // ARM_NO_EXCEPTIONS
         func(argc, argv);
 
         std::cout << "\nTest passed\n";
         return 0;
-#ifndef ARM_NO_EXCEPTIONS
     }
 #ifdef ARM_COMPUTE_CL
     catch(cl::Error &err)
@@ -100,7 +97,6 @@ int run_example(int argc, const char **argv, example &func)
     std::cout << "\nTest FAILED\n";
 
     return -1;
-#endif // ARM_NO_EXCEPTIONS
 }
 
 void draw_detection_rectangle(ITensor *tensor, const DetectionWindow &rect, uint8_t r, uint8_t g, uint8_t b)
@@ -169,6 +165,26 @@ std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs)
     fs.ignore(1);
 
     return std::make_tuple(width, height, max_val);
+}
+
+std::tuple<std::vector<unsigned long>, bool, std::string> parse_npy_header(std::ifstream &fs) //NOLINT
+{
+    std::vector<unsigned long> shape; // NOLINT
+
+    // Read header
+    std::string header = npy::read_header(fs);
+
+    // Parse header
+    bool        fortran_order = false;
+    std::string typestr;
+    npy::parse_header(header, typestr, fortran_order, shape);
+
+    if(!fortran_order)
+    {
+        std::reverse(shape.begin(), shape.end());
+    }
+
+    return std::make_tuple(shape, fortran_order, typestr);
 }
 } // namespace utils
 } // namespace arm_compute

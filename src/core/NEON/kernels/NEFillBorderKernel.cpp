@@ -47,8 +47,8 @@ inline void fill_constant_value_single_channel_special<float, 1u, 1u>(ITensor *t
     float border_value;
     constant_border_value.get(border_value);
     uint8_t *const start_valid_region = tensor->ptr_to_element(tensor->info()->valid_region().anchor);
-    const size_t &width              = tensor->info()->valid_region().shape[0];
-    const size_t &height             = tensor->info()->valid_region().shape[1];
+    const size_t   width              = tensor->info()->valid_region().shape[0];
+    const size_t   height             = tensor->info()->valid_region().shape[1];
     const int      stridey            = tensor->info()->strides_in_bytes()[1];
 
     // Left and right border
@@ -228,8 +228,8 @@ template <typename T>
 void NEFillBorderKernel::fill_replicate_single_channel(const Window &window)
 {
     uint8_t *const start_valid_region = _tensor->ptr_to_element(_tensor->info()->valid_region().anchor);
-    const size_t &width              = _tensor->info()->valid_region().shape[0];
-    const size_t &height             = _tensor->info()->valid_region().shape[1];
+    const size_t   width              = _tensor->info()->valid_region().shape[0];
+    const size_t   height             = _tensor->info()->valid_region().shape[1];
 
     // Left and right border
     Window vertical(window);
@@ -287,8 +287,8 @@ void NEFillBorderKernel::fill_constant_value_single_channel(const Window &window
     _constant_border_value.get(constant_border_value);
 
     uint8_t *const start_valid_region = _tensor->ptr_to_element(_tensor->info()->valid_region().anchor);
-    const size_t &width              = _tensor->info()->valid_region().shape[0];
-    const size_t &height             = _tensor->info()->valid_region().shape[1];
+    const size_t   width              = _tensor->info()->valid_region().shape[0];
+    const size_t   height             = _tensor->info()->valid_region().shape[1];
     const int      stridey            = _tensor->info()->strides_in_bytes()[1];
 
     // Left and right border

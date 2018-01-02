@@ -18,6 +18,28 @@ different inputs, e.g. different tensor shapes. One limitation is that
 tests/fixtures cannot be parameterized based on the data type if static type
 information is needed within the test (e.g. to validate the results).
 
+@subsection tests_overview_structure Directory structure
+
+    .
+    `-- tests <- Top level test directory. All files in here are shared among validation and benchmark.
+        |-- framework <- Underlying test framework.
+        |-- CL   \
+        |-- NEON -> Backend specific files with helper functions etc.
+        |-- benchmark <- Top level directory for the benchmarking files.
+        |   |-- fixtures <- Fixtures for benchmark tests.
+        |   |-- CL <- OpenCL backend test cases on a function level.
+        |   |   `-- SYSTEM <- OpenCL system tests, e.g. whole networks
+        |   `-- NEON <- Same for NEON
+        |       `-- SYSTEM
+        |-- datasets <- Datasets for benchmark and validation tests.
+        |-- main.cpp <- Main entry point for the tests. Currently shared between validation and benchmarking.
+        |-- networks <- Network classes for system level tests.
+        `-- validation -> Top level directory for validation files.
+            |-- CPP -> C++ reference code
+            |-- CL   \
+            |-- NEON -> Backend specific test cases
+            `-- fixtures -> Fixtures shared among all backends. Used to setup target function and tensors.
+
 @subsection tests_overview_fixtures Fixtures
 
 Fixtures can be used to share common setup, teardown or even run tasks among
@@ -331,10 +353,6 @@ You can use the `--instruments` option to select one or more instruments to meas
 You can pass a combinations of these instruments: `--instruments=PMU,MALI,WALL_CLOCK`
 
 @note You need to make sure the instruments have been selected at compile time using the `pmu=1` or `mali=1` scons options.
-
-@subsection tests_running_tests_validation Validation
-
-@note The new validation tests have the same interface as the benchmarking tests.
 
 */
 } // namespace test

@@ -68,6 +68,11 @@ NERemapKernel::NERemapKernel()
 {
 }
 
+BorderSize NERemapKernel::border_size() const
+{
+    return BorderSize(1);
+}
+
 void NERemapKernel::configure(const ITensor *input, const ITensor *map_x, const ITensor *map_y, ITensor *output, InterpolationPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
@@ -102,15 +107,19 @@ void NERemapKernel::configure(const ITensor *input, const ITensor *map_x, const 
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic output_access(output->info(), 0, 0, output->info()->dimension(0), output->info()->dimension(1));
+    const int total_right  = ceil_to_multiple(input->info()->dimension(0), num_elems_processed_per_iteration);
+    const int access_right = total_right + (((total_right - input->info()->dimension(0)) == 0) ? border_size().right : 0);
 
-    update_window_and_padding(win,
-                              AccessWindowRectangle(input->info(), 0, 0, num_elems_processed_per_iteration, 1),
+    AccessWindowStatic input_access(input->info(), -border_size().left, -border_size().top, access_right, input->info()->dimension(1) + border_size().bottom);
+
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+
+    update_window_and_padding(win, input_access,
                               AccessWindowRectangle(map_x->info(), 0, 0, num_elems_processed_per_iteration, 1),
                               AccessWindowRectangle(map_y->info(), 0, 0, num_elems_processed_per_iteration, 1),
                               output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }

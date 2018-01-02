@@ -26,14 +26,14 @@
 
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/INode.h"
-#include "arm_compute/graph/Tensor.h"
+#include "arm_compute/graph/ITensorObject.h"
 #include "arm_compute/graph/Types.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-/** L2Normalize layer node */
+/** L2NormalizeLayer layer node */
 class L2NormalizeLayer final : public INode
 {
 public:
@@ -42,13 +42,10 @@ public:
      * @param[in] axis    Dimension along which to reduce.
      * @param[in] epsilon Lower bound value for the normalization.
      */
-    explicit L2NormalizeLayer(unsigned int axis, float epsilon)
-        : _axis(axis), _epsilon(epsilon)
-    {
-    }
+    explicit L2NormalizeLayer(unsigned int axis, float epsilon);
 
     // Inherited methods overriden:
-    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output) override;
+    std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) override;
 
 private:
     unsigned int _axis;

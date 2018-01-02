@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Types.h"
 
 #include <algorithm>
 #include <array>
@@ -58,5 +57,5 @@ public:
     /** Default destructor */
     ~Strides() = default;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_STRIDES_H__*/

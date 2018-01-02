@@ -35,14 +35,14 @@ class ICLMultiHOG : public IMultiHOG
 public:
     /** Return a pointer to the requested OpenCL HOG model
      *
-     *  @param[in] index The index of the wanted OpenCL HOG model.
+     * @param[in] index The index of the wanted OpenCL HOG model.
      *
      *  @return A pointer pointed to the HOG model
      */
     virtual ICLHOG *cl_model(size_t index) = 0;
     /** Return a constant pointer to the requested OpenCL HOG model
      *
-     *  @param[in] index The index of the wanted OpenCL HOG model.
+     * @param[in] index The index of the wanted OpenCL HOG model.
      *
      *  @return A constant pointer pointed to the OpenCL HOG model
      */

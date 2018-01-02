@@ -24,6 +24,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <cassert>
 
 #include "gemm_common.hpp"
 #include "profiler.hpp"
@@ -114,12 +115,13 @@ public:
         // Work out the rounded size of M - needed for some buffers.
         Mround = (M + (strat.out_height - 1)) / strat.out_height;
         Mround *= strat.out_height;
+
     }
 
     // Actually execute the GEMM.
     void execute(const To *A, const int lda, const To *B, const int ldb, Tr *C, const int ldc, const Tr alpha, const Tr beta, void *working_space) const override {
+        assert(working_space);
         profiler prof;
-
         int8_t *working_space_bytes = reinterpret_cast<int8_t *>(working_space);
         intptr_t working_space_int = reinterpret_cast<intptr_t>(working_space_bytes);
         size_t diff = 0;
@@ -140,7 +142,7 @@ public:
             int kern_k = ((kmax - k0) + (strat.k_unroll - 1)) / strat.k_unroll;
             kern_k *= strat.k_unroll;
 
-            prof(PROFILE_PREPA, [&](void) {
+            prof(PROFILE_PREPA, (M * (kmax-k0) * sizeof(Toi)), [&](void) {
                 if (trA ^ strategy::A_transpose) {
                     Transform<strategy::A_interleave, strategy::A_block, true>(a_panel, A, lda, 0, M, k0, kmax);
                 } else {
@@ -154,7 +156,7 @@ public:
 
                 int bblocks = (xmax - x0 + strat.out_width - 1) / strat.out_width;
 
-                prof(PROFILE_PREPB, [&](void) {
+                prof(PROFILE_PREPB, (xmax-x0) * (kmax-k0) * sizeof(Toi), [&](void) {
                     if (trB ^ strategy::B_transpose) {
                         Transform<strategy::B_interleave, strategy::B_block, true>(b_panel, B, ldb, x0, xmax, k0, kmax);
                     } else {
@@ -166,8 +168,8 @@ public:
                     unsigned int ymax = y + strat.out_height;
                     if (ymax > M) ymax = M;
 
-                    prof(PROFILE_KERNEL, [&](void) { strat.kernel(a_panel + (y * kern_k), b_panel, c_panel, 1, bblocks, kern_k); });
-                    prof(PROFILE_MERGE, [&](void) { MergeResults<strategy::out_width, strategy::out_height>(C, c_panel, ldc, y, ymax, x0, xmax, alpha, (k0==0 ? beta : static_cast<Tr>(1))); });
+                    prof(PROFILE_KERNEL, (strat.out_height * bblocks * strat.out_width * kern_k), [&](void) { strat.kernel(a_panel + (y * kern_k), b_panel, c_panel, 1, bblocks, kern_k); });
+                    prof(PROFILE_MERGE, (strat.out_height * bblocks * strat.out_width * sizeof(Tr)), [&](void) { MergeResults<strategy::out_width, strategy::out_height>(C, c_panel, ldc, y, ymax, x0, xmax, alpha, (k0==0 ? beta : static_cast<Tr>(1))); });
                 }
             }
         }

@@ -24,21 +24,20 @@
 #ifndef __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__
 #define __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__
 
-#include "arm_compute/runtime/ILifetimeManager.h"
+#include "arm_compute/runtime/ISimpleLifetimeManager.h"
 
-#include "arm_compute/runtime/IMemoryGroup.h"
+#include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
-#include <map>
+#include <memory>
 #include <vector>
 
 namespace arm_compute
 {
-class IMemoryGroup;
-
-/** Class that tracks the lifetime of registered tensors and calculates the systems memory requirements in terms of blobs */
-class BlobLifetimeManager : public ILifetimeManager
+/** Concrete class that tracks the lifetime of registered tensors and
+ *  calculates the systems memory requirements in terms of blobs */
+class BlobLifetimeManager : public ISimpleLifetimeManager
 {
 public:
     /** Constructor */
@@ -53,35 +52,15 @@ public:
     BlobLifetimeManager &operator=(BlobLifetimeManager &&) = default;
 
     // Inherited methods overridden:
-    void register_group(IMemoryGroup *group) override;
-    void start_lifetime(void *obj) override;
-    void end_lifetime(void *obj, void **handle, size_t size) override;
     std::unique_ptr<IMemoryPool> create_pool(IAllocator *allocator) override;
-    bool        are_all_finalized() const override;
     MappingType mapping_type() const override;
 
 private:
-    /** Update blobs and mappings */
-    void update_blobs_and_mappings();
+    // Inherited methods overridden:
+    void update_blobs_and_mappings() override;
 
 private:
-    /** Element struct */
-    struct Element
-    {
-        Element(void *id_ = nullptr, void **handle_ = nullptr, size_t size_ = 0, bool status_ = false)
-            : id(id_), handle(handle_), size(size_), status(status_)
-        {
-        }
-        void *id;      /**< Element id */
-        void **handle; /**< Element's memory handle */
-        size_t size;   /**< Element's size */
-        bool   status; /**< Lifetime status */
-    };
-
-    IMemoryGroup        *_active_group;                               /**< Active group */
-    std::vector<Element> _active_elements;                            /**< A map that contains the active elements */
-    std::map<IMemoryGroup *, std::vector<Element>> _finalized_groups; /**< A map that contains the finalized groups */
-    std::vector<size_t> _blobs;
+    std::vector<size_t> _blobs; /**< Memory blobs' sizes */
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__ */

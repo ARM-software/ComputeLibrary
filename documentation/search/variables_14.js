@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['value',['value',['../structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml#a5b4ee4ae6cba6bb75200ba7af1910873',1,'arm_compute::enable_bitwise_ops&lt; arm_compute::GPUTarget &gt;::value()'],['../structarm__compute_1_1enable__bitwise__ops.xhtml#a5b4ee4ae6cba6bb75200ba7af1910873',1,'arm_compute::enable_bitwise_ops::value()'],['../structarm__compute_1_1test_1_1framework_1_1_typed_measurement.xhtml#a4fc7f59e3113e19697159919a5aad095',1,'arm_compute::test::framework::TypedMeasurement::value()'],['../hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76',1,'value():&#160;hwc.hpp']]],
-  ['varname',['varname',['../namespacecaffe__data__extractor.xhtml#a79c289b28417b230be74544d8f3fb291',1,'caffe_data_extractor.varname()'],['../namespacetensorflow__data__extractor.xhtml#a79c289b28417b230be74544d8f3fb291',1,'tensorflow_data_extractor.varname()']]],
-  ['version_5fstatus',['version_status',['../structmali__userspace_1_1mali__base__gpu__core__props.xhtml#aa0f66be4635ad1d4fa3af18743e31e80',1,'mali_userspace::mali_base_gpu_core_props']]]
+  ['u16',['u16',['../classarm__compute_1_1_pixel_value.xhtml#a1234f83efa812e259523c91799614a3c',1,'arm_compute::PixelValue']]],
+  ['u32',['u32',['../classarm__compute_1_1_pixel_value.xhtml#ae65af0c4a8ee050043fe4b575f0a26a0',1,'arm_compute::PixelValue']]],
+  ['u64',['u64',['../classarm__compute_1_1_pixel_value.xhtml#a91ee3b6e2425e78feef03fb5c69d63e5',1,'arm_compute::PixelValue']]],
+  ['u8',['u8',['../classarm__compute_1_1_pixel_value.xhtml#a0084c9e8c5778849f41d9de5df9c0f85',1,'arm_compute::PixelValue']]],
+  ['unused',['unused',['../structmali__userspace_1_1mali__base__gpu__props.xhtml#a427562a781574201b47267386cc0d2ce',1,'mali_userspace::mali_base_gpu_props']]],
+  ['unused_5f1',['unused_1',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a01a2e4f2e3aa6544f900174de8e06626',1,'mali_userspace::gpu_raw_gpu_props']]]
 ];

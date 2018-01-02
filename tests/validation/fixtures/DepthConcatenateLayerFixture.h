@@ -31,8 +31,8 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/CPP/DepthConcatenateLayer.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/DepthConcatenateLayer.h"
 
 #include <random>
 
@@ -43,7 +43,7 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename ITensorType, typename AccessorType, typename FunctionType, typename T>
-class DepthConcatenateValidationFixture : public framework::Fixture
+class DepthConcatenateLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>

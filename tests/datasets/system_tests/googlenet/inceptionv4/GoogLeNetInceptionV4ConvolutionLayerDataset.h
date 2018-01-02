@@ -37,6 +37,27 @@ namespace test
 {
 namespace datasets
 {
+class GoogLeNetInceptionV4WinogradLayerDataset final : public ConvolutionLayerDataset
+{
+public:
+    // GoogLeNetInceptionV4 inception v1 dataset
+    GoogLeNetInceptionV4WinogradLayerDataset()
+    {
+        // conv2_3x3_s1
+        add_config(TensorShape(149U, 149U, 32U), TensorShape(3U, 3U, 32U, 32U), TensorShape(32U), TensorShape(147U, 147U, 32U), PadStrideInfo(1, 1, 0, 0));
+        // conv3_3x3_s1
+        add_config(TensorShape(147U, 147U, 32U), TensorShape(3U, 3U, 32U, 64U), TensorShape(64U), TensorShape(147U, 147U, 64U), PadStrideInfo(1, 1, 1, 1));
+        // inception_stem2_3x3, inception_stem2_3x3_2
+        add_config(TensorShape(73U, 73U, 64U), TensorShape(3U, 3U, 64U, 96U), TensorShape(96U), TensorShape(71U, 71U, 96U), PadStrideInfo(1, 1, 0, 0));
+        // inception_a1_3x3, inception_a1_3x3_2, inception_a2_3x3, inception_a2_3x3_2, inception_a3_3x3, inception_a3_3x3_2, inception_a4_3x3, inception_a4_3x3_2
+        add_config(TensorShape(35U, 35U, 64U), TensorShape(3U, 3U, 64U, 96U), TensorShape(96U), TensorShape(35U, 35U, 96U), PadStrideInfo(1, 1, 1, 1));
+        // inception_a1_3x3_3, inception_a2_3x3_3, inception_a3_3x3_3, inception_a4_3x3_3
+        add_config(TensorShape(35U, 35U, 96U), TensorShape(3U, 3U, 96U, 96U), TensorShape(96U), TensorShape(35U, 35U, 96U), PadStrideInfo(1, 1, 1, 1));
+        // reduction_a_3x3_2
+        add_config(TensorShape(35U, 35U, 192U), TensorShape(3U, 3U, 192U, 224U), TensorShape(224U), TensorShape(35U, 35U, 224U), PadStrideInfo(1, 1, 1, 1));
+    }
+};
+
 class GoogLeNetInceptionV4ConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:

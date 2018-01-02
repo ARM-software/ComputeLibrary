@@ -2,6 +2,7 @@ var _c_l_2_arithmetic_addition_8cpp =
 [
     [ "CLArithmeticAdditionFixedPointFixture", "_c_l_2_arithmetic_addition_8cpp.xhtml#a28c31187d8ad7da593f2f81e717d263d", null ],
     [ "CLArithmeticAdditionFixture", "_c_l_2_arithmetic_addition_8cpp.xhtml#a6faaa6a770361529ed83471997cea631", null ],
+    [ "DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#aca4dbda19b61b2d72a4d498d03c97f83", null ],
     [ "DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#aa4a6e9fa189c54b63aef5111693d855b", null ],
     [ "DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#a0a202aebdc4af23a8c566add5554b9e7", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#a896a20f4b63edd349eb7ee93223df9d7", null ],

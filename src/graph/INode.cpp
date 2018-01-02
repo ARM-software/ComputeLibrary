@@ -26,8 +26,6 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Validate.h"
 
-#include <ostream>
-
 using namespace arm_compute::graph;
 
 TargetHint INode::override_target_hint(TargetHint target_hint) const

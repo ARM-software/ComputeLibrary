@@ -41,26 +41,27 @@ class CLColorConvert : public ICLSimpleFunction
 public:
     /** Initialize the function's source, destination
      *
-     * @param[in] input  The input single-planar tensor from which to convert
-     * @param[in] output The converted single-planar output tensor
+     * @param[in]  input  Source tensor. Formats supported: RGBA8888/UYVY422/YUYV422/RGB888
+     * @param[out] output Destination tensor. Formats supported: RGB888 (if the formats of @p input are RGBA8888/UYVY422/YUYV422),
+     *                                                          RGBA8888 (if the formats of @p input are UYVY422/YUYV422/RGB888/)
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Initialize the function's source, destination
      *
-     * @param[in] input  The multi-planar input image from which to convert
-     * @param[in] output The converted single-planar output image
+     * @param[in]  input  Multi-planar source image. Formats supported: NV12/NV21/IYUV
+     * @param[out] output Single-planar destination image. Formats supported: RGB888/RGBA8888
      */
     void configure(const ICLMultiImage *input, ICLImage *output);
     /** Initialize the function's source, destination
      *
-     * @param[in] input  The single-planar input image from which to convert
-     * @param[in] output The converted multi-planar output image
+     * @param[in]  input  Single-planar source image. Formats supported: RGB888/RGBA8888/UYVY422/YUYV422
+     * @param[out] output Multi-planar destination image. Formats supported: NV12/IYUV/YUV444 (if the formats of @p input are RGB888/RGB8888)
      */
     void configure(const ICLImage *input, ICLMultiImage *output);
     /** Initialize the function's source, destination
      *
-     * @param[in] input  The multi-planar input image from which to convert
-     * @param[in] output The converted multi-planar output image
+     * @param[in]  input  Multi-planar source image. Formats supported: NV12/NV21/IYUV
+     * @param[out] output Multi-planar destination image. Formats supported: YUV444/IYUV (if the formats of @p input are NV12/NV21)/NV12 (if the format of  @p input is IYUV)
      */
     void configure(const ICLMultiImage *input, ICLMultiImage *output);
 };

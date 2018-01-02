@@ -45,11 +45,11 @@ namespace test
 {
 namespace
 {
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8 });
-#else  /* ARM_COMPUTE_ENABLE_FP16 */
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 const auto data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8 });
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 
 using NEPoolingLayerFixture = PoolingLayerFixture<Tensor, NEPoolingLayer, Accessor>;
@@ -94,7 +94,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, NEPoolingLayerFixture, f
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(VGG16PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));
+                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 2 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2PoolingLayer, NEPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(), data_types), framework::dataset::make("Batches", { 4, 8 })));

@@ -35,7 +35,7 @@
  * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[out] weights_ptr                           Pointer to the weights tensor. Same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)

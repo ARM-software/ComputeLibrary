@@ -29,7 +29,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLArithmeticSubtraction.h"
-#include "arm_compute/runtime/CL/functions/CLDepthConvert.h"
+#include "arm_compute/runtime/CL/functions/CLDepthConvertLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
 #include "arm_compute/runtime/CL/functions/CLGaussianPyramid.h"
 #include "support/ToolchainSupport.h"

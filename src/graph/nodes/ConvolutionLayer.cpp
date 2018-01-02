@@ -23,7 +23,7 @@
  */
 #include "arm_compute/graph/nodes/ConvolutionLayer.h"
 
-#include "arm_compute/core/Logger.h"
+#include "arm_compute/graph/Error.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -67,7 +67,8 @@ TensorShape calculate_convolution_layer_output_shape(const TensorShape &input_sh
 
 // Instantiate GEMM based convolution layer
 template <typename ConvolutionType, typename TensorType, TargetHint target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITensor *weights, ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
+std::unique_ptr<arm_compute::IFunction> instantiate_function(arm_compute::ITensor *input, arm_compute::ITensor *weights, arm_compute::ITensor *biases, arm_compute::ITensor *output,
+                                                             const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
 {
     auto conv = arm_compute::support::cpp14::make_unique<ConvolutionType>();
     conv->configure(
@@ -81,7 +82,8 @@ std::unique_ptr<arm_compute::IFunction> instantiate_function(ITensor *input, ITe
 
 // Instantiate direct convolution layer
 template <typename ConvolutionType, typename TensorType, TargetHint target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate_direct_function(ITensor *input, ITensor *weights, ITensor *biases, ITensor *output, const PadStrideInfo &conv_info)
+std::unique_ptr<arm_compute::IFunction> instantiate_direct_function(arm_compute::ITensor *input, arm_compute::ITensor *weights, arm_compute::ITensor *biases, arm_compute::ITensor *output,
+                                                                    const PadStrideInfo &conv_info)
 {
     auto conv = arm_compute::support::cpp14::make_unique<ConvolutionType>();
     conv->configure(
@@ -94,11 +96,13 @@ std::unique_ptr<arm_compute::IFunction> instantiate_direct_function(ITensor *inp
 }
 
 template <TargetHint                    target_hint>
-std::unique_ptr<arm_compute::IFunction> instantiate(ITensor *input, ITensor *weights, ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
+std::unique_ptr<arm_compute::IFunction> instantiate(arm_compute::ITensor *input, arm_compute::ITensor *weights, arm_compute::ITensor *biases, arm_compute::ITensor *output,
+                                                    const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
                                                     ConvolutionMethodHint conv_method);
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor *input, ITensor *weights, ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(arm_compute::ITensor *input, arm_compute::ITensor *weights, arm_compute::ITensor *biases, arm_compute::ITensor *output,
+                                                                        const PadStrideInfo &conv_info,
                                                                         const WeightsInfo    &weights_info,
                                                                         ConvolutionMethodHint conv_method)
 {
@@ -113,7 +117,8 @@ std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(ITensor 
 }
 
 template <>
-std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(ITensor *input, ITensor *weights, ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(arm_compute::ITensor *input, arm_compute::ITensor *weights, arm_compute::ITensor *biases, arm_compute::ITensor *output,
+                                                                      const PadStrideInfo &conv_info,
                                                                       const WeightsInfo    &weights_info,
                                                                       ConvolutionMethodHint conv_method)
 {
@@ -169,18 +174,24 @@ private:
     std::vector<std::unique_ptr<IFunction>> _convolutions;
 };
 
-std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(GraphContext &ctx, ITensor *input, ITensor *output)
+std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
 {
+    ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT(input, output);
+
+    arm_compute::ITensor *in  = input->tensor();
+    arm_compute::ITensor *out = output->tensor();
+
     // Set weights and biases info
     if(_weights.tensor() == nullptr)
     {
-        _weights.set_info(TensorInfo(TensorShape(_conv_width, _conv_height, input->info()->dimension(2) / _num_groups, _ofm),
-                                     input->info()->num_channels(), input->info()->data_type(),
-                                     input->info()->fixed_point_position()));
+        _weights.set_info(TensorInfo(TensorShape(_conv_width, _conv_height, in->info()->dimension(2) / _num_groups, _ofm),
+                                     in->info()->num_channels(),
+                                     in->info()->data_type(),
+                                     in->info()->fixed_point_position()));
     }
-    if(_biases.tensor() == nullptr)
+    if(_biases.has_accessor() && _biases.tensor() == nullptr)
     {
-        _biases.set_info(TensorInfo(TensorShape(_ofm), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+        _biases.set_info(TensorInfo(TensorShape(_ofm), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
     }
 
     std::unique_ptr<arm_compute::IFunction> func;
@@ -189,28 +200,29 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
 
     // Check if the weights and biases are loaded
     bool weights_are_loaded = _weights.tensor() != nullptr;
-    bool biases_are_loaded  = _weights.tensor() != nullptr;
+    bool biases_are_loaded  = _biases.has_accessor() ? _biases.tensor() != nullptr : true;
 
     // Set bias and weights target
     _weights.set_target(_target_hint);
-    _biases.set_target(_target_hint);
+    if(_biases.has_accessor())
+    {
+        _biases.set_target(_target_hint);
+    }
 
     // Calculate output shape
-    TensorShape output_shape = calculate_convolution_layer_output_shape(input->info()->tensor_shape(), _weights.info().tensor_shape(), _conv_info);
+    TensorShape output_shape = calculate_convolution_layer_output_shape(in->info()->tensor_shape(), _weights.info().tensor_shape(), _conv_info);
 
     // Output auto inizialitation if not yet initialized
-    arm_compute::auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    arm_compute::auto_init_if_empty(*out->info(), output_shape, 1, in->info()->data_type(), in->info()->fixed_point_position());
 
     // Create appropriate convolution function
     if(_num_groups == 1)
     {
-        func = instantiate_convolution(input, output, conv_method_hint);
-        ARM_COMPUTE_LOG("Instantiating CLConvolutionLayer");
+        func = instantiate_convolution(in, out, conv_method_hint);
     }
     else
     {
-        func = instantiate_grouped_convolution(input, output, conv_method_hint);
-        ARM_COMPUTE_LOG("Instantiating NEConvolutionLayer");
+        func = instantiate_grouped_convolution(in, out, conv_method_hint);
     }
 
     // Fill weights
@@ -224,15 +236,15 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
         _biases.allocate_and_fill_if_needed();
     }
 
-    ARM_COMPUTE_LOG(" Data Type: " << input->info()->data_type()
-                    << " Input Shape: " << input->info()->tensor_shape()
-                    << " Weights shape: " << _weights.info().tensor_shape()
-                    << " Biases Shape: " << _biases.info().tensor_shape()
-                    << " Output Shape: " << output->info()->tensor_shape()
-                    << " PadStrideInfo: " << _conv_info
-                    << " Groups: " << _num_groups
-                    << " WeightsInfo: " << _weights_info
-                    << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_INFO(" Data Type: " << in->info()->data_type()
+                               << " Input Shape: " << in->info()->tensor_shape()
+                               << " Weights shape: " << _weights.info().tensor_shape()
+                               << " Biases Shape: " << _biases.info().tensor_shape()
+                               << " Output Shape: " << out->info()->tensor_shape()
+                               << " PadStrideInfo: " << _conv_info
+                               << " Groups: " << _num_groups
+                               << " WeightsInfo: " << _weights_info
+                               << std::endl);
 
     return func;
 }
@@ -242,10 +254,12 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_convolutio
     std::unique_ptr<arm_compute::IFunction> func;
     if(_target_hint == TargetHint::OPENCL)
     {
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLConvolutionLayer");
         func = instantiate<TargetHint::OPENCL>(input, _weights.tensor(), _biases.tensor(), output, _conv_info, _weights_info, conv_method_hint);
     }
     else
     {
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEConvolutionLayer");
         func = instantiate<TargetHint::NEON>(input, _weights.tensor(), _biases.tensor(), output, _conv_info, _weights_info, conv_method_hint);
     }
     return func;
@@ -307,10 +321,12 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_grouped_co
         // Instantiate convolution function
         if(_target_hint == TargetHint::OPENCL)
         {
+            ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLConvolutionLayer");
             func = instantiate<TargetHint::OPENCL>(_is[i].tensor(), _ws[i].tensor(), _bs[i].tensor(), _os[i].tensor(), _conv_info, _weights_info, conv_method_hint);
         }
         else
         {
+            ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEConvolutionLayer");
             func = instantiate<TargetHint::NEON>(_is[i].tensor(), _ws[i].tensor(), _bs[i].tensor(), _os[i].tensor(), _conv_info, _weights_info, conv_method_hint);
         }
 

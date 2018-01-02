@@ -27,7 +27,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
-#include "arm_compute/runtime/NEON/functions/NEDepthConvert.h"
+#include "arm_compute/runtime/NEON/functions/NEDepthConvertLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 #include "arm_compute/runtime/Pyramid.h"
 
@@ -43,7 +43,7 @@ using IImage = ITensor;
  *
  * -# @ref NEArithmeticAddition
  * -# @ref NEScale
- * -# @ref NEDepthConvert
+ * -# @ref NEDepthConvertLayer
  *
  * This function reconstructs the original image from a Laplacian Image Pyramid.
  *
@@ -85,7 +85,7 @@ private:
     Pyramid                                 _tmp_pyr;
     std::unique_ptr<NEArithmeticAddition[]> _addf;
     std::unique_ptr<NEScale[]>              _scalef;
-    NEDepthConvert                          _depthf;
+    NEDepthConvertLayer                     _depthf;
 };
 }
 #endif /*__ARM_COMPUTE_NELAPLACIANRECONSTRUCT_H__ */

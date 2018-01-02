@@ -44,27 +44,67 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.001f);
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 /** Tolerance for fixed point operations */
 constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
 constexpr AbsoluteTolerance<int16_t> tolerance_qs16(4);
 
 /** Input data set. */
-const auto NormalizationDataset = combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()), framework::dataset::make("NormalizationSize", 3, 9, 2)),
-                                          framework::dataset::make("Beta", { 0.5f, 1.f, 2.f }));
+const auto NormalizationDataset = combine(combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()), framework::dataset::make("NormalizationSize", 3, 9, 2)),
+                                                  framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
+                                          framework::dataset::make("IsScaled", { true }));
+const auto NormalizationDatasetFP32 = combine(combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()), framework::dataset::make("NormalizationSize", 3, 9, 2)),
+                                                      framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
+                                              framework::dataset::make("IsScaled", { true, false }));
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(NormalizationLayer)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching data type input/output
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching shapes
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Even normalization
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Non implemented IN_MAP_2D
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4), // Mismatching fixed point position
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Window shrink
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32, 0),
+                                          }),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16, 0),
+                                            TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32, 0),
+                                          })),
+    framework::dataset::make("NormInfo",  { NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
+                                            NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
+                                            NormalizationLayerInfo(NormType::IN_MAP_1D, 4),
+                                            NormalizationLayerInfo(NormType::IN_MAP_2D, 5),
+                                            NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
+                                            NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
+                                            NormalizationLayerInfo(NormType::CROSS_MAP, 1),
+                                           })),
+    framework::dataset::make("Expected", { false, false, false, false, false, false, true })),
+    input_info, output_info, norm_info, expected)
+{
+    bool is_valid = bool(NENormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), norm_info));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using NENormalizationLayerFixture = NormalizationValidationFixture<Tensor, Accessor, NENormalizationLayer, T>;
 
 TEST_SUITE(Float)
-#ifdef ARM_COMPUTE_ENABLE_FP16
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F16)))
 {
@@ -77,15 +117,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<half>, framework::D
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END()
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDatasetFP32, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(NormalizationDatasetFP32, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);

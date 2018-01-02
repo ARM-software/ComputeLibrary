@@ -226,19 +226,19 @@ __kernel void suppress_non_maximum(
 
 #define EDGE 255
 #define hysteresis_local_stack_L1 8  // The size of level 1 stack. This has to agree with the host side
-#define hysteresis_local_stack_L2 16 // The size of level 2 stack, adjust this can impact the match rate with VX implementation
+#define hysteresis_local_stack_L2 16 // The size of level 2 stack, adjust this can impact the match rate
 
 /** Check whether pixel is valid
-*
-* Skip the pixel if the early_test fails.
-* Otherwise, it tries to add the pixel coordinate to the stack, and proceed to popping the stack instead if the stack is full
-*
-* @param[in] early_test Boolean condition based on the minv check and visited buffer check
-* @param[in] x_pos      X-coordinate of pixel that is going to be recorded, has to be within the boundary
-* @param[in] y_pos      Y-coordinate of pixel that is going to be recorded, has to be within the boundary
-* @param[in] x_cur      X-coordinate of current central pixel
-* @param[in] y_cur      Y-coordinate of current central pixel
-*/
+ *
+ * Skip the pixel if the early_test fails.
+ * Otherwise, it tries to add the pixel coordinate to the stack, and proceed to popping the stack instead if the stack is full
+ *
+ * @param[in] early_test Boolean condition based on the minv check and visited buffer check
+ * @param[in] x_pos      X-coordinate of pixel that is going to be recorded, has to be within the boundary
+ * @param[in] y_pos      Y-coordinate of pixel that is going to be recorded, has to be within the boundary
+ * @param[in] x_cur      X-coordinate of current central pixel
+ * @param[in] y_cur      Y-coordinate of current central pixel
+ */
 #define check_pixel(early_test, x_pos, y_pos, x_cur, y_cur)                               \
     {                                                                                     \
         if(!early_test)                                                                   \

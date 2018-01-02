@@ -9,6 +9,5 @@ var pooling__layer_8cl =
     [ "SQRT_OP", "pooling__layer_8cl.xhtml#ac9af19bec38fe50b4b9585c0e5c0ccca", null ],
     [ "calculate_avg_scale", "pooling__layer_8cl.xhtml#a89667fe8f529db8f7abc465f6476414b", null ],
     [ "pooling_layer_2", "pooling__layer_8cl.xhtml#a2d95de36199fd06803ffb62f5ff1df08", null ],
-    [ "pooling_layer_3", "pooling__layer_8cl.xhtml#af5751970a4d8c62febdc6c63d6d4fd1d", null ],
-    [ "pooling_layer_7", "pooling__layer_8cl.xhtml#a46f86250bbe9f5a1cf6c060e72109546", null ]
+    [ "pooling_layer_3", "pooling__layer_8cl.xhtml#af5751970a4d8c62febdc6c63d6d4fd1d", null ]
 ];

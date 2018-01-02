@@ -54,6 +54,7 @@ void CLRemapKernel::configure(const ICLTensor *input, const ICLTensor *map_x, co
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(map_x, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(map_y, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MSG(policy == InterpolationPolicy::AREA, "Area interpolation is not supported!");
+    ARM_COMPUTE_UNUSED(border_undefined);
 
     _input  = input;
     _output = output;
@@ -69,12 +70,14 @@ void CLRemapKernel::configure(const ICLTensor *input, const ICLTensor *map_x, co
 
     // Configure window
     constexpr unsigned int num_elems_processed_per_iteration = 4;
-    const int              border_offset                     = (border_undefined) ? 0 : border_size().left;
+
+    const int total_right  = ceil_to_multiple(input->info()->dimension(0), num_elems_processed_per_iteration);
+    const int access_right = total_right + (((total_right - input->info()->dimension(0)) == 0) ? border_size().right : 0);
 
     Window             win = calculate_max_window(*_output->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowStatic input_access(output->info(), -border_offset, -border_offset,
-                                    _output->info()->dimension(0) + border_offset, _output->info()->dimension(1) + border_offset);
-    AccessWindowHorizontal output_access(input->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowStatic input_access(input->info(), -border_size().left, -border_size().top, access_right, input->info()->dimension(1) + border_size().bottom);
+
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, input_access, output_access);
 

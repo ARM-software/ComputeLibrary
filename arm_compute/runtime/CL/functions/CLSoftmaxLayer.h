@@ -39,7 +39,7 @@ class ICLTensor;
 /** Basic function to compute a SoftmaxLayer.
  *
  * Softmax is calculated by :
- * @f[ out = exp(x - max(x)) / sum(exp(x - max(x))) @f]
+ * @f[ out = exp((x - max(x)) * beta) / sum(exp((x - max(x)) * beta)) @f]
  *
  * This function runs the following kernels:
  * -# @ref CLLogits1DMaxKernel
@@ -53,22 +53,33 @@ public:
     CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  input  Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32
      * @param[out] output Destination tensor. Data types supported: same as @p input
+     * @param[in]  beta   (Optional) A scaling factor for the exponent. Defaults to 1.f
      */
-    void configure(const ICLTensor *input, ICLTensor *output);
+    void configure(const ICLTensor *input, ICLTensor *output, float beta = 1.0f);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLSoftmaxLayer
+     *
+     * @param[in] input  Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32
+     * @param[in] output Destination tensor. Data types supported: same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    CLMemoryGroup               _memory_group;
-    CLLogits1DMaxKernel         _max_kernel;
-    CLLogits1DShiftExpSumKernel _shift_exp_sum_kernel;
-    CLLogits1DNormKernel        _norm_kernel;
-    CLTensor                    _max;
-    CLTensor                    _sum;
-    CLTensor                    _tmp;
+    CLMemoryGroup                  _memory_group;
+    CLLogits1DMaxKernel            _max_kernel;
+    CLLogits1DShiftExpSumKernel    _shift_exp_sum_kernel;
+    CLLogits1DMaxShiftExpSumKernel _max_shift_exp_sum_kernel;
+    CLLogits1DNormKernel           _norm_kernel;
+    CLTensor                       _max;
+    CLTensor                       _sum;
+    CLTensor                       _tmp;
+    bool                           _run_legacy_path;
 };
 }
 #endif /* __ARM_COMPUTE_CLSOFTMAXLAYER_H__ */
