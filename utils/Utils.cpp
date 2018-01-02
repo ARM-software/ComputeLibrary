@@ -70,6 +70,7 @@ int run_example(int argc, const char **argv, example &func)
 {
     std::cout << "\n"
               << argv[0] << "\n\n";
+
     try
     {
         func(argc, argv);
