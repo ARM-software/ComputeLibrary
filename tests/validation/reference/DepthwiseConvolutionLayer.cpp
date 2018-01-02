@@ -89,14 +89,15 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
                     Coordinates coords(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z), static_cast<int>(r));
                     size_t      filter_offset = filter_plane * z;
 
-                    T val = 0;
+                    T val(0);
                     for(int j = y - filter_half_height; j <= static_cast<int>(y + filter_half_height); ++j)
                     {
                         for(int i = x - filter_half_width; i <= static_cast<int>(x + filter_half_width); ++i)
                         {
                             coords.set(0, i);
                             coords.set(1, j);
-                            val += *(weights.data() + filter_offset) * tensor_elem_at(src, coords, BorderMode::CONSTANT, 0.f);
+                            T border_value(0);
+                            val += *(weights.data() + filter_offset) * tensor_elem_at(src, coords, BorderMode::CONSTANT, border_value);
                             ++filter_offset;
                         }
                     }
@@ -189,6 +190,9 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
 
 template SimpleTensor<float> depthwise_convolution(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &biases, const TensorShape &dst_shape,
                                                    const PadStrideInfo &conv_info);
+
+template SimpleTensor<half> depthwise_convolution(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &biases, const TensorShape &dst_shape,
+                                                  const PadStrideInfo &conv_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

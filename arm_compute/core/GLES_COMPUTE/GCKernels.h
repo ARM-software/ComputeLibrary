@@ -31,6 +31,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCBatchNormalizationLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCCol2ImKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDepthConcatenateLayerKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDirectConvolutionLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDropoutLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"

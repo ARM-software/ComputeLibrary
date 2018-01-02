@@ -74,6 +74,7 @@ protected:
                 break;
             }
             case DataType::F32:
+            case DataType::F16:
             {
                 std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
                 library->fill(tensor, distribution, i);

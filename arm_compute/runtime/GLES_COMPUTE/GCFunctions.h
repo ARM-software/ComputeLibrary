@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCArithmeticAddition.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCBatchNormalizationLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenateLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDirectConvolutionLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDropoutLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCFillBorder.h"

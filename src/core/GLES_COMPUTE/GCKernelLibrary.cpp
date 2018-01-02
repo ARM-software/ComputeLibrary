@@ -223,6 +223,7 @@ const std::map<std::string, std::string> GCKernelLibrary::_shader_program_map =
     { "normalize_planar_yuv_layer", "normalize_planar_yuv_layer.cs" },
     { "scale_nearest_neighbour", "scale.cs" },
     { "arithmetic_add", "arithmetic_add.cs" },
+    { "depthwise_convolution_3x3", "depthwise_convolution3x3.cs" },
 };
 
 const std::map<std::string, std::string> GCKernelLibrary::_program_source_map =
@@ -303,6 +304,10 @@ const std::map<std::string, std::string> GCKernelLibrary::_program_source_map =
     {
         "arithmetic_add.cs",
 #include "./cs_shaders/arithmetic_add.csembed"
+    },
+    {
+        "depthwise_convolution3x3.cs",
+#include "./cs_shaders/depthwise_convolution3x3.csembed"
     },
 #endif /* EMBEDDED_KERNELS */
 };
