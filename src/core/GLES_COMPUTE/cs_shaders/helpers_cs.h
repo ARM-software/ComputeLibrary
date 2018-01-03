@@ -222,6 +222,9 @@ ImageIterator update_image_from_tensor3D_iter_offset(uint element_shift, uint of
 #define TENSOR3D_OFFSET(tensor_iter, x, y, z) \
     uint(tensor3D_offset_in_bytes(tensor_iter, int(x), int(y), int(z)) >> tensor_iter.element_shift)
 
+#define TENSOR_OFFSET_ADVANCE(tensor_iter, n) \
+    uint((tensor_iter.current_offset_in_bytes >> tensor_iter.element_shift) + int(n))
+
 #define TENSOR_OFFSET_ADVANCE_IN_BYTES(tensor_iter, n) \
     uint((tensor_iter.current_offset_in_bytes + int(n)) >> tensor_iter.element_shift)
 
@@ -230,6 +233,9 @@ ImageIterator update_image_from_tensor3D_iter_offset(uint element_shift, uint of
 
 #define CURRENT_ITEM_OFFSET_IN_BYTES(tensor_iter) \
     uint(tensor_iter.current_offset_in_bytes)
+
+#define TENSOR_ITERATOR_ADVANCE(tensor_iter, n) \
+    tensor_iter.current_offset_in_bytes += (int(n) << tensor_iter.element_shift)
 
 #define TENSOR_ITERATOR_ADVANCE_IN_BYTES(tensor_iter, n) \
     tensor_iter.current_offset_in_bytes += int(n)

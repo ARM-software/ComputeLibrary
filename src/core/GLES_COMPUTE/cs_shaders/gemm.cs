@@ -22,94 +22,64 @@
  * SOFTWARE.
  */
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
-#include "helpers.h"
+#include "helpers_cs.h"
+
+#if defined(DATA_TYPE_FP16)
+precision mediump float;
+#endif // DATA_TYPE_FP16
 
 #if defined(DATA_TYPE_FP32)
-#define LOAD8(r, name, offset) \
-    r.x = LOAD4(name, offset); \
-    r.y = LOAD4(name, offset + uint(1))
-
-#define LOAD16(r, name, offset)          \
-    r.x = LOAD4(name, offset);           \
-    r.y = LOAD4(name, offset + uint(1)); \
-    r.z = LOAD4(name, offset + uint(2)); \
-    r.w = LOAD4(name, offset + uint(3))
-
-#define STORE16(name, offset, r)         \
-    STORE4(name, offset, r.x);           \
-    STORE4(name, offset + uint(1), r.y); \
-    STORE4(name, offset + uint(2), r.z); \
-    STORE4(name, offset + uint(3), r.w)
-
 #ifdef GEMM_TRANSPOSE1xW
-BUFFER_DECLARATION(src, 1, float, readonly);
-BUFFER_DECLARATION(dst, 2, float, writeonly);
-
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(src);
-    IMAGE_PARAM_DECLARATION(dst);
-};
-
 /** This OpenGL ES kernel computes the "vector" 1x4 transposition of input matrix
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F32
- * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
+ * @param[in]  src_ptr   Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src_attrs The attributes of the source matrix
+ * @param[out] dst_ptr   Pointer to the destination matrix Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs The attributes of the destination matrix
  */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src_attrs;
+    ImageAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+
 void main(void)
 {
     /* Compute address for Matrix B - source */
-    Image src = CONVERT_TO_IMAGE_STRUCT(src);
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+    ImageIterator src_iter = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    ImageIterator dst_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(dst_attrs, dst_shift);
 
     /* Compute address for Matrix B transposed - destination. X and Y are swapped */
-    uint dst_addr_in_bytes = (gl_GlobalInvocationID.y * uint(16) + gl_GlobalInvocationID.x * dst.stride_y + dst.offset_first_element_in_bytes) >> 2;
-    vec4 b0;
-    LOAD16(b0, src, offset(src, 0, 0));
-    STORE16(dst, dst_addr_in_bytes, b0);
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(dst_iter, gl_GlobalInvocationID.y * uint(16) + gl_GlobalInvocationID.x * dst_attrs.stride_y);
+
+    vec4 b0 = VLOAD4_CURRENT_ITEM(vec4, src_ptr, src_iter);
+    VSTORE4_CURRENT_ITEM(dst_ptr, dst_iter, b0);
 }
 #endif /* GEMM_TRANSPOSE1xW */
 
 #ifdef GEMM_INTERLEAVE4x4
-BUFFER_DECLARATION(src, 1, float, readonly);
-BUFFER_DECLARATION(dst, 2, float, writeonly);
-
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(src);
-    IMAGE_PARAM_DECLARATION(dst);
-};
-
 /** This OpenGLES kernel reshapes the input matrix interleaving the values
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F32
- * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
+ * @param[in]  src_ptr   Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src_attrs The attributes of the source matrix
+ * @param[out] dst_ptr   Pointer to the destination matrix Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs The attributes of the destination matrix
  */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src_attrs;
+    ImageAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+
 void main(void)
 {
     /* Compute source and destination addresses */
-    Image src = CONVERT_TO_IMAGE_STRUCT(src);
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+    ImageIterator src_iter = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    ImageIterator dst_iter = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
 
     int i;
     int j;
@@ -118,102 +88,80 @@ void main(void)
     {
         for(j = 0; j < 4; ++j)
         {
-            float res    = LOAD4(src, offset(src, i, j));
-            uint  ofset0 = CURRENT_OFFSET(dst) + uint(i * 4 + j);
-            STORE4(dst, ofset0, res);
+            float res = LOAD(src_ptr, IMAGE_OFFSET(src_iter, i, j));
+            STORE(dst_ptr, TENSOR_OFFSET_ADVANCE(dst_iter, (i * 4 + j)), res);
         }
     }
 }
 #endif /* GEMM_INTERLEAVE4x4 */
 
 #ifdef GEMM_ACCUMULATE_BIASES
-BUFFER_DECLARATION(accum, 1, float, restrict);
-BUFFER_DECLARATION(biases, 2, float, readonly);
-
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(accum);
-    VECTOR_PARAM_DECLARATION(biases);
-};
-
 /** This kernel accumulates each row with the biases vector
  *
- * @param[in, out] accum_ptr                            Pointer to the accumulate tensor. Supported data type: F32
- * @param[in]      accum_stride_x                       Stride of the accmulate tensor in X dimension (in bytes)
- * @param[in]      accum_step_x                         accum_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      accum_stride_y                       Stride of the accumlulate tensor in Y dimension (in bytes)
- * @param[in]      accum_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]      accum_offset_first_element_in_bytes  The offset of the first element in the accumulate tensor
- * @param[in]      biases_ptr                           Pointer to the biases vector. Same as @p accum_ptr
- * @param[in]      biases_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]      biases_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      biases_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in, out] accum_ptr    Pointer to the accumulate tensor. Supported data type: F32
+ * @param[in]      accum_attrs  The attributes of the accumulate tensor
+ * @param[in]      biases_ptr   Pointer to the biases vector. Same as @p accum_ptr
+ * @param[in]      biases_attrs The attributes of the biases tensor
  */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes  accum_attrs;
+    VectorAttributes biases_attrs;
+};
+TENSOR_DECLARATION(1, accumBuffer, float, accum_ptr, accum_shift, 2, restrict);
+TENSOR_DECLARATION(2, biasesBuffer, float, biases_ptr, biases_shift, 2, readonly);
+
 void main(void)
 {
-    Image  accum  = CONVERT_TO_IMAGE_STRUCT(accum);
-    Vector biases = CONVERT_TO_VECTOR_STRUCT(biases);
+    ImageIterator  accum_iter  = CONVERT_TO_IMAGE_ITERATOR(accum_attrs, accum_shift);
+    VectorIterator biases_iter = CONVERT_TO_VECTOR_ITERATOR(biases_attrs, biases_shift);
 
     for(int i = 0; i < 16; ++i)
     {
-        float accum_value  = LOAD4(accum, CURRENT_OFFSET(accum) + uint(i));
-        float biases_value = LOAD4(biases, CURRENT_OFFSET(biases) + uint(i));
+        float accum_value  = LOAD(accum_ptr, TENSOR_OFFSET_ADVANCE(accum_iter, i));
+        float biases_value = LOAD(biases_ptr, TENSOR_OFFSET_ADVANCE(biases_iter, i));
         accum_value        = biases_value + accum_value;
 
         // Store result in the accummulate buffer
-        STORE4(accum, CURRENT_OFFSET(accum) + uint(i), accum_value);
+        STORE(accum_ptr, TENSOR_OFFSET_ADVANCE(accum_iter, i), accum_value);
     }
 }
 #endif /* GEMM_ACCUMULATE_BIASES */
 
 #ifdef GEMM_MM_INTERLEAVED_TRANSPOSED /* unvalidate */
-BUFFER_DECLARATION(src0, 1, float, readonly);
-BUFFER_DECLARATION(src1, 2, float, readonly);
-BUFFER_DECLARATION(dst, 3, float, writeonly);
-
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(src0);
-    IMAGE_PARAM_DECLARATION(src1);
-    IMAGE_PARAM_DECLARATION(dst);
-};
-
 /** This OpenGL ES kernel is optimised for Midgard. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
  * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
  *
- * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
- * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
- * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
- * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  src0_ptr   Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src0_attrs The attributes of the source matrix
+ * @param[in]  src1_ptr   Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_attrs The attributes of the source matrix
+ * @param[out] dst_ptr    Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_attrs  The attributes of the destination matrix
  */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src0_attrs;
+    ImageAttributes src1_attrs;
+    ImageAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, src0Buffer, float, src0_ptr, src0_shift, 2, readonly);
+TENSOR_DECLARATION(2, src1Buffer, float, src1_ptr, src1_shift, 2, readonly);
+TENSOR_DECLARATION(3, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+
 void main()
 {
-    Image src0 = CONVERT_TO_IMAGE_STRUCT(src0);
-    Image src1 = CONVERT_TO_IMAGE_STRUCT(src1);
-    Image dst  = CONVERT_TO_IMAGE_STRUCT(dst);
+    ImageIterator src0_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src0_attrs, src0_shift);
+    ImageIterator src1_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src1_attrs, src1_shift);
+    ImageIterator dst_iter  = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
 
     /* Compute address for matrix A and B */
-    src0.current_offset = (src0.offset_first_element_in_bytes + (uint(gl_GlobalInvocationID.y) * uint(src0.stride_y))) >> uint(2);
-    src1.current_offset = (src1.offset_first_element_in_bytes + (uint(gl_GlobalInvocationID.x) * uint(src1.stride_y))) >> uint(2);
-
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(gl_GlobalInvocationID.y) * (src0_attrs.stride_y));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(gl_GlobalInvocationID.x) * (src1_attrs.stride_y));
     /* Compute end row address for matrix B */
-    int end_row_mtx_b = int(src1.current_offset) + int(COLS_B);
+    int end_row_mtx_b = int(TENSOR_OFFSET_ADVANCE(src1_iter, COLS_B));
 
     /* Reset accumulators */
     vec4 c00 = vec4(0.0f);
@@ -222,13 +170,11 @@ void main()
     vec4 c30 = vec4(0.0f);
 
     // FIXME: loop unrolling really needed for GLES?
-    for(; int(src1.current_offset) <= (end_row_mtx_b - 8); src0.current_offset += uint(8), src1.current_offset += uint(8))
+    for(; int(CURRENT_ITEM_OFFSET(src1_iter)) <= (end_row_mtx_b - 8); TENSOR_ITERATOR_ADVANCE(src0_iter, 8), TENSOR_ITERATOR_ADVANCE(src1_iter, 8))
     {
         /* Load values from matrix A (interleaved) and matrix B (transposed) */
-        vec4 a0;
-        vec4 b0;
-        LOAD16(a0, src0, src0.current_offset);
-        LOAD16(b0, src1, src1.current_offset);
+        vec4 a0 = VLOAD4_CURRENT_ITEM(vec4, src0_ptr, src0_iter);
+        vec4 b0 = VLOAD4_CURRENT_ITEM(vec4, src1_ptr, src1_iter);
 
         c00 += vec4(a0.x) * b0;
         c10 += vec4(a0.y) * b0;
@@ -236,8 +182,8 @@ void main()
         c30 += vec4(a0.w) * b0;
 
         /* Load values from matrix A (interleaved) and matrix B (transposed) */
-        LOAD16(a0, src0, src0.current_offset + uint(4));
-        LOAD16(b0, src1, src1.current_offset + uint(4));
+        a0 = VLOAD4(vec4, src0_ptr, TENSOR_OFFSET_ADVANCE(src0_iter, 4));
+        b0 = VLOAD4(vec4, src1_ptr, TENSOR_OFFSET_ADVANCE(src1_iter, 4));
 
         c00 += vec4(a0.x) * b0;
         c10 += vec4(a0.y) * b0;
@@ -245,13 +191,11 @@ void main()
         c30 += vec4(a0.w) * b0;
     }
 
-    for(; int(src1.current_offset) < end_row_mtx_b; src0.current_offset += uint(4), src1.current_offset += uint(4))
+    for(; int(CURRENT_ITEM_OFFSET(src1_iter)) < end_row_mtx_b; TENSOR_ITERATOR_ADVANCE(src0_iter, 4), TENSOR_ITERATOR_ADVANCE(src1_iter, 4))
     {
         /* Load values from matrix A (interleaved) and matrix B (transposed) */
-        vec4 a0;
-        vec4 b0;
-        LOAD16(a0, src0, src0.current_offset);
-        LOAD16(b0, src1, src1.current_offset);
+        vec4 a0 = VLOAD4_CURRENT_ITEM(vec4, src0_ptr, src0_iter);
+        vec4 b0 = VLOAD4_CURRENT_ITEM(vec4, src1_ptr, src1_iter);
 
         c00 += vec4(a0.x) * b0;
         c10 += vec4(a0.y) * b0;
@@ -266,62 +210,49 @@ void main()
     c30 = c30 * vec4(ALPHA);
 
     /* Store 4x4 block */
-    STORE16(dst, offset(dst, 0, 0), c00);
-    STORE16(dst, offset(dst, 0, 1), c10);
-    STORE16(dst, offset(dst, 0, 2), c20);
-    STORE16(dst, offset(dst, 0, 3), c30);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 0), c00);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 1), c10);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 2), c20);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 3), c30);
 }
 #endif /* GEMM_MM_INTERLEAVED_TRANSPOSED */
 
 #ifdef GEMM_MM_FLOATING_POINT
-BUFFER_DECLARATION(src0, 1, float, readonly);
-BUFFER_DECLARATION(src1, 2, float, readonly);
-BUFFER_DECLARATION(dst, 3, float, writeonly);
-
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(src0);
-    IMAGE_PARAM_DECLARATION(src1);
-    IMAGE_PARAM_DECLARATION(dst);
-};
-
 /** This OpenGL ES kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
  * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
  *
- * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
- * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
- * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
- * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  src0_ptr   Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src0_attrs The attributes of the source matrix
+ * @param[in]  src1_ptr   Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_attrs The attributes of the source matrix
+ * @param[out] dst_ptr    Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_attrs  The attributes of the destination matrix
  */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src0_attrs;
+    ImageAttributes src1_attrs;
+    ImageAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, src0Buffer, float, src0_ptr, src0_shift, 2, readonly);
+TENSOR_DECLARATION(2, src1Buffer, float, src1_ptr, src1_shift, 2, readonly);
+TENSOR_DECLARATION(3, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+
 void main()
 {
-    Image src0 = CONVERT_TO_IMAGE_STRUCT(src0);
-    Image src1 = CONVERT_TO_IMAGE_STRUCT(src1);
-    Image dst  = CONVERT_TO_IMAGE_STRUCT(dst);
+    ImageIterator src0_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src0_attrs, src0_shift);
+    ImageIterator src1_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src1_attrs, src1_shift);
+    ImageIterator dst_iter  = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
 
     int idx = int(gl_GlobalInvocationID.x) * int(NUM_ELEMS_PROCESSED_PER_THREAD_X);
     /* Compute the address for the vector A and matrix B */
-    src0.current_offset = (src0_offset_first_element_in_bytes + uint(gl_GlobalInvocationID.y) * src0_stride_y * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y)) >> uint(2);
-    src1.current_offset = (src1_offset_first_element_in_bytes + uint(idx * 4)) >> uint(2);
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(gl_GlobalInvocationID.y) * (src0_attrs.stride_y) * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, idx * 4);
 
     /* Compute end row address for matrix A */
-    int end_row_vec_a = int(src0.current_offset) + ((COLS_A * 4) >> 2);
+    int end_row_vec_a = int(TENSOR_OFFSET_ADVANCE_IN_BYTES(src0_iter, COLS_A * 4));
 
     /* Reset accumulators */
     vec4 acc0 = vec4(0.0f);
@@ -335,27 +266,21 @@ void main()
     vec4 acc3 = vec4(0.0f);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-    for(; int(src0.current_offset) <= (end_row_vec_a - 2); src0.current_offset += uint(2), src1.current_offset += uint((2 * int(src1_stride_y)) >> 2))
+    for(; int(CURRENT_ITEM_OFFSET(src0_iter)) <= (end_row_vec_a - 2); TENSOR_ITERATOR_ADVANCE(src0_iter, 2), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(2) * src1_attrs.stride_y))
     {
-        vec2 a0;
-        LOAD8(a0, src0, src0.current_offset);
+        vec2 a0 = VLOAD2_CURRENT_ITEM(vec2, src0_ptr, src0_iter);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        vec2 a1;
-        LOAD8(a1, src0, src0.current_offset + (src0_stride_y >> uint(2)));
+        vec2 a1 = VLOAD2(vec2, src0_ptr, IMAGE_OFFSET(src0_iter, 0, 1));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        vec2 a2;
-        LOAD8(a2, src0, src0.current_offset + ((uint(2) * src0_stride_y) >> uint(2)));
+        vec2 a2 = VLOAD2(vec2, src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        vec2 a3;
-        LOAD8(a3, src0, src0.current_offset + ((uint(3) * src0_stride_y) >> uint(2)));
+        vec2 a3 = VLOAD2(vec2, src0_ptr, IMAGE_OFFSET(src0_iter, 0, 3));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-        vec4 b0;
-        vec4 b1;
-        LOAD16(b0, src1, src1.current_offset);
-        LOAD16(b1, src1, src1.current_offset + (src1_stride_y >> uint(2)));
+        vec4 b0 = VLOAD4_CURRENT_ITEM(vec4, src1_ptr, src1_iter);
+        vec4 b1 = VLOAD4(vec4, src1_ptr, IMAGE_OFFSET(src1_iter, 0, 1));
 
         acc0 += b0 * vec4(a0.x);
         acc0 += b1 * vec4(a0.y);
@@ -373,26 +298,22 @@ void main()
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
-    for(; int(src0.current_offset) < end_row_vec_a; src0.current_offset += uint(1), src1.current_offset += uint(int(src1_stride_y) >> 2))
+    for(; int(CURRENT_ITEM_OFFSET(src0_iter)) < end_row_vec_a; TENSOR_ITERATOR_ADVANCE(src0_iter, 1), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, src1_attrs.stride_y))
     {
         // Load values from matrix A
-        float a0;
-        a0 = LOAD4(src0, src0.current_offset);
+        float a0 = LOAD_CURRENT_ITEM(src0_ptr, src0_iter);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        float a1;
-        a1 = LOAD4(src0, src0.current_offset + ((uint(1) * src0_stride_y) >> uint(2)));
+        float a1 = LOAD(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 1));
+        //float a1 = 0;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        float a2;
-        a2 = LOAD4(src0, src0.current_offset + ((uint(2) * src0_stride_y) >> uint(2)));
+        float a2 = LOAD(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        float a3;
-        a3 = LOAD4(src0, src0.current_offset + ((uint(3) * src0_stride_y) >> uint(2)));
+        float a3 = LOAD(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 3));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-        vec4 b0;
-        LOAD16(b0, src1, src1.current_offset);
+        vec4 b0 = VLOAD4_CURRENT_ITEM(vec4, src1_ptr, src1_iter);
 
         acc0 += b0 * vec4(a0);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
@@ -408,122 +329,98 @@ void main()
 
     /* Multiply by the weight of vector-matrix product */
     acc0 = acc0 * vec4(ALPHA);
-    STORE16(dst, offset(dst, 0, 0), acc0);
+    VSTORE4_CURRENT_ITEM(dst_ptr, dst_iter, acc0);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
     acc1 = acc1 * vec4(ALPHA);
-    STORE16(dst, offset(dst, 0, 1), acc1);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 1), acc1);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
     acc2 = acc2 * vec4(ALPHA);
-    STORE16(dst, offset(dst, 0, 2), acc2);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 2), acc2);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     acc3 = acc3 * vec4(ALPHA);
-    STORE16(dst, offset(dst, 0, 3), acc3);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 3), acc3);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 }
 #endif /* GEMM_MM_FLOATING_POINT */
 
 #ifdef GEMM_MATRIXADDITION
-BUFFER_DECLARATION(src, 1, float, readonly);
-BUFFER_DECLARATION(dst, 2, float, restrict);
-
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(src);
-    IMAGE_PARAM_DECLARATION(dst);
-};
-
 /** This OpenGL ES kernel performs the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
  *
  * @attention The beta's value need to be passed at compile time using BETA
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F32
- * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
+ * @param[in]  src_ptr   Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src_attrs The attributes of the source matrix
+ * @param[out] dst_ptr   Pointer to the destination matrix Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs The attributes of the destination matrix
  */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src_attrs;
+    ImageAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, restrict);
+
 void main(void)
 {
     /* Compute source and destination addresses */
-    Image src = CONVERT_TO_IMAGE_STRUCT(src);
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+    ImageIterator src_iter = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    ImageIterator dst_iter = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
 
     /* Load values from A x B */
-    vec4 alpha_ab;
-    vec4 c;
-    vec4 out1;
-
-    LOAD16(alpha_ab, dst, dst.current_offset);
-    LOAD16(c, src, src.current_offset);
+    vec4 alpha_ab = VLOAD4_CURRENT_ITEM(vec4, dst_ptr, dst_iter);
+    vec4 c        = VLOAD4_CURRENT_ITEM(vec4, src_ptr, src_iter);
 
     /* Computes alpha * axb + beta * c */
-    out1 = alpha_ab + vec4(float(BETA) * c);
+    vec4 out1 = alpha_ab + vec4(float(BETA) * c);
 
     /* Store final result in axb matrix */
-    STORE16(dst, dst.current_offset, out1);
+    VSTORE4_CURRENT_ITEM(dst_ptr, dst_iter, out1);
 }
 #endif /* GEMM_MATRIXADDITION */
+
 #elif defined(DATA_TYPE_FP16)
-precision mediump float;
+
 #ifdef GEMM_MM_FLOATING_POINT
-#if defined(MM_PROCESS_4X)
-BUFFER_DECLARATION(src0, 1, uint, readonly);
-BUFFER_DECLARATION(src1, 2, uvec2, readonly);
-BUFFER_DECLARATION(dst, 3, uvec2, writeonly);
-
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(src0);
-    IMAGE_PARAM_DECLARATION(src1);
-    IMAGE_PARAM_DECLARATION(dst);
-};
-
-/** This OpenGL ES kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
- *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
+/** This OpenGL ES kernel computes the matrix multiplication between matrix A(src0) and matrix B(src1)
+ * Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
  * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
  *
- * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
- * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
- * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
- * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  src0_ptr   Pointer to the source matrix.Supported data types: F16
+ * @param[in]  src0_attrs The attributes of the source matrix
+ * @param[in]  src1_ptr   Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_attrs The attributes of the source matrix
+ * @param[out] dst_ptr    Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_attrs  The attributes of the destination matrix
  */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src0_attrs;
+    ImageAttributes src1_attrs;
+    ImageAttributes dst_attrs;
+};
+
+#if defined(MM_PROCESS_4X)
+TENSOR_DECLARATION(1, src0Buffer, uint, src0_ptr, src0_shift, 2, readonly);
+TENSOR_DECLARATION(2, src1Buffer, uvec2, src1_ptr, src1_shift, 3, readonly);
+TENSOR_DECLARATION(3, dstBuffer, uvec2, dst_ptr, dst_shift, 3, writeonly);
+
 void main()
 {
-    Image src0 = GC_CONVERT_TO_IMAGE_STRUCT(src0);
-    Image src1 = GC_CONVERT_TO_IMAGE_STRUCT(src1);
-    Image dst  = GC_CONVERT_TO_IMAGE_STRUCT(dst);
+    ImageIterator src0_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src0_attrs, src0_shift);
+    ImageIterator src1_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src1_attrs, src1_shift);
+    ImageIterator dst_iter  = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
 
     int idx = int(gl_GlobalInvocationID.x) * int(NUM_ELEMS_PROCESSED_PER_THREAD_X);
     /* Compute the address for the vector A and matrix B */
-    src0.current_offset = (src0_offset_first_element_in_bytes + uint(gl_GlobalInvocationID.y) * src0_stride_y * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
-    src1.current_offset = src1_offset_first_element_in_bytes + uint(idx) * src1_stride_x;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(gl_GlobalInvocationID.y) * src0_attrs.stride_y * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(idx) * src1_attrs.stride_x);
 
     /* Compute end row address for matrix A */
-    uint end_row_vec_a = src0.current_offset + uint(COLS_A << 1);
+    uint end_row_vec_a = uint(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) + uint(COLS_A << 1);
 
     /* Reset accumulators */
     vec4 acc0 = vec4(0.0f);
@@ -537,42 +434,22 @@ void main()
     vec4 acc3 = vec4(0.0f);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-    for(; int(src0.current_offset) < int(end_row_vec_a - uint(2)); src0.current_offset += uint(2 * 2), src1.current_offset += uint(2) * src1_stride_y)
+    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) < int(end_row_vec_a - uint(2));
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, 2 * 2), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(2) * src1_attrs.stride_y))
     {
-        uint packed_a;
-        vec2 a0;
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
-        a0 = vec2(unpackHalf2x16(packed_a));
+        vec2 a0 = LOAD_UNPACK2_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        vec2 a1;
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 1);
-        a1 = vec2(unpackHalf2x16(packed_a));
+        vec2 a1 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 1));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        vec2 a2;
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 2);
-        a2 = vec2(unpackHalf2x16(packed_a));
+        vec2 a2 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        vec2 a3;
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 3);
-        a3 = vec2(unpackHalf2x16(packed_a));
+        vec2 a3 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 3));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-        uvec2 packed_b0;
-        uvec2 packed_b1;
-        vec4  b0;
-        vec4  b1;
-
-        GC_LOAD1_2D_OFFSET(packed_b0, src1, 0, 0);
-        GC_LOAD1_2D_OFFSET(packed_b1, src1, 0, 1);
-
-        b0 = vec4(unpackHalf2x16(packed_b0.x), unpackHalf2x16(packed_b0.y));
-        b1 = vec4(unpackHalf2x16(packed_b1.x), unpackHalf2x16(packed_b1.y));
+        vec4 b0 = LOAD_UNPACK4_CURRENT_ITEM_HALF(src1_ptr, src1_iter);
+        vec4 b1 = LOAD_UNPACK4_HALF(src1_ptr, IMAGE_OFFSET(src1_iter, 0, 1));
 
         acc0 += b0 * vec4(a0.x);
         acc0 += b1 * vec4(a0.y);
@@ -590,38 +467,20 @@ void main()
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     }
 
-    for(; src0.current_offset < end_row_vec_a; src0.current_offset += uint(2 * 2), src1.current_offset += src1_stride_y)
+    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) < int(end_row_vec_a); TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, 2 * 2), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, src1_attrs.stride_y))
     {
-        uint packed_a0;
-        vec2 a0;
-
-        GC_LOAD1_2D_OFFSET(packed_a0, src0, 0, 0);
-        a0 = vec2(unpackHalf2x16(packed_a0));
+        vec2 a0 = LOAD_UNPACK2_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        vec2 a1;
-
-        GC_LOAD1_2D_OFFSET(packed_a0, src0, 0, 1);
-        a1 = vec2(unpackHalf2x16(packed_a0));
+        vec2 a1 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 1));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        vec2 a2;
-
-        GC_LOAD1_2D_OFFSET(packed_a0, src0, 0, 2);
-        a2 = vec2(unpackHalf2x16(packed_a0));
+        vec  a2 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        vec2 a3;
-
-        GC_LOAD1_2D_OFFSET(packed_a0, src0, 0, 3);
-        a3 = vec2(unpackHalf2x16(packed_a0));
+        vec2 a3 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 3));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-        uvec2 packed_b0;
-        vec4  b0;
-
-        GC_LOAD1_2D_OFFSET(packed_b0, src1, 0, 0);
-
-        b0 = vec4(unpackHalf2x16(packed_b0.x), unpackHalf2x16(packed_b0.y));
+        vec4 b0 = LOAD_UNPACK4_CURRENT_ITEM_HALF(src1_ptr, src1_iter);
 
         acc0 += b0 * (a0.x);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
@@ -638,71 +497,35 @@ void main()
     /* Multiply by the weight of vector-matrix product */
     acc0 = acc0 * vec4(ALPHA);
 
-    uvec2 packed_d;
-    packed_d = uvec2(packHalf2x16(acc0.xy), packHalf2x16(acc0.zw));
-    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 0);
+    STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, acc0);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-    packed_d = uvec2(packHalf2x16(acc1.xy), packHalf2x16(acc1.zw));
-    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 1);
+    STORE_PACK4_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 1), acc1);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-    packed_d = uvec2(packHalf2x16(acc2.xy), packHalf2x16(acc2.zw));
-    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 2);
+    STORE_PACK4_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 2), acc2);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-    packed_d = uvec2(packHalf2x16(acc3.xy), packHalf2x16(acc3.zw));
-    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 3);
+    STORE_PACK4_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 3), acc3);
 #endif                                 // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 }
 #elif defined(MM_PROCESS_4X_OPTIMIZED) /* PROCESS_4X */
-BUFFER_DECLARATION(src0, 1, uvec4, readonly);
-BUFFER_DECLARATION(src1, 2, uvec2, readonly);
-BUFFER_DECLARATION(dst, 3, uvec2, writeonly);
+TENSOR_DECLARATION(1, src0Buffer, uvec4, src0_ptr, src0_shift, 4, readonly);
+TENSOR_DECLARATION(2, src1Buffer, uvec2, src1_ptr, src1_shift, 3, readonly);
+TENSOR_DECLARATION(3, dstBuffer, uvec2, dst_ptr, dst_shift, 3, writeonly);
 
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(src0);
-    IMAGE_PARAM_DECLARATION(src1);
-    IMAGE_PARAM_DECLARATION(dst);
-};
-
-/** This OpenGL ES kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
- *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
- *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
- *
- * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
- * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
- * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
- * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
- */
 void main()
 {
-    Image src0 = GC_CONVERT_TO_IMAGE_STRUCT(src0);
-    Image src1 = GC_CONVERT_TO_IMAGE_STRUCT(src1);
-    Image dst  = GC_CONVERT_TO_IMAGE_STRUCT(dst);
+    ImageIterator src0_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src0_attrs, src0_shift);
+    ImageIterator src1_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src1_attrs, src1_shift);
+    ImageIterator dst_iter  = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
 
     int idx = int(gl_GlobalInvocationID.x) * int(NUM_ELEMS_PROCESSED_PER_THREAD_X);
     /* Compute the address for the vector A and matrix B */
-    src0.current_offset = (src0_offset_first_element_in_bytes + uint(gl_GlobalInvocationID.y) * src0_stride_y * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
-    src1.current_offset = src1_offset_first_element_in_bytes + uint(idx) * src1_stride_x;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(gl_GlobalInvocationID.y) * src0_attrs.stride_y * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(idx) * src1_attrs.stride_x);
 
     /* Compute end row address for matrix A */
-    uint end_row_vec_a = src0.current_offset + uint(COLS_A << 1);
+    uint end_row_vec_a = uint(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) + uint(COLS_A << 1);
 
     /* Reset accumulators */
     vec4 acc0 = vec4(0.0f);
@@ -717,48 +540,29 @@ void main()
     vec4 acc3 = vec4(0.0f);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-    for(; int(src0.current_offset) < int(end_row_vec_a - uint(16)); src0.current_offset += uint(8) * src0_stride_x, src1.current_offset += uint(8) * src1_stride_y)
+    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) < int(end_row_vec_a - uint(16));
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(8) * src0_attrs.stride_x), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(8) * src1_attrs.stride_y))
     {
-        uvec4 packed_a;
-        vec4  a0[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
-        a0[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a0[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+        vec4 a0[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
 
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        vec4 a1[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 1);
-        a1[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a1[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+        vec4 a1[2] = LOAD_UNPACK8_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 1));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        vec4 a2[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 2);
-        a2[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a2[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+        vec4 a2[2] = LOAD_UNPACK8_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        vec4 a3[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 3);
-        a3[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a3[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+        vec4 a3[2] = LOAD_UNPACK8_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 3));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-        uvec2 packed_b;
-        vec4  b;
+        vec4 b;
 
         for(int i = 0; i < 8; i++)
         {
             int j = i >> 2;
             int k = i % 4;
 
-            GC_LOAD1_2D_OFFSET(packed_b, src1, 0, i);
-
-            b = vec4(unpackHalf2x16(packed_b.x), unpackHalf2x16(packed_b.y));
+            b = LOAD_UNPACK4_HALF(src1_ptr, IMAGE_OFFSET(src1_iter, 0, i));
 
             acc0 += b * vec4(a0[j][k]);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
@@ -773,39 +577,21 @@ void main()
         }
     }
 
-    for(; src0.current_offset < end_row_vec_a; src0.current_offset += uint(2 * 8), src1.current_offset += uint(8) * src1_stride_y)
+    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) < int(end_row_vec_a); TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, 2 * 8), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(8) * src1_attrs.stride_y))
     {
-        uvec4 packed_a;
-        vec4  a0[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
-        a0[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a0[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+        vec4 a0[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
 
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        vec4 a1[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 1);
-        a1[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a1[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+        vec4 a1[2] = LOAD_UNPACK8_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 1));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        vec4 a2[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 2);
-        a2[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a2[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+        vec4 a2[2] = LOAD_UNPACK8_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        vec4 a3[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 3);
-        a3[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a3[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
+        vec4 a3[2] = LOAD_UNPACK8_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 3));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-        uvec2 packed_b;
-        vec4  b;
+        vec4 b;
 
         int leftover = COLS_A % 8;
 
@@ -814,9 +600,7 @@ void main()
             int j = i >> 2;
             int k = i % 4;
 
-            GC_LOAD1_2D_OFFSET(packed_b, src1, 0, i);
-
-            b = vec4(unpackHalf2x16(packed_b.x), unpackHalf2x16(packed_b.y));
+            b = LOAD_UNPACK4_HALF(src1_ptr, IMAGE_OFFSET(src1_iter, 0, i));
 
             acc0 += b * vec4(a0[j][k]);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
@@ -834,71 +618,35 @@ void main()
     /* Multiply by the weight of vector-matrix product */
     acc0 = acc0 * vec4(ALPHA);
 
-    uvec2 packed_d;
-    packed_d = uvec2(packHalf2x16(acc0.xy), packHalf2x16(acc0.zw));
-    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 0);
+    STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, acc0);
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-    packed_d = uvec2(packHalf2x16(acc1.xy), packHalf2x16(acc1.zw));
-    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 1);
+    STORE_PACK4_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 1), acc1);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-    packed_d = uvec2(packHalf2x16(acc2.xy), packHalf2x16(acc2.zw));
-    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 2);
+    STORE_PACK4_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 2), acc2);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-    packed_d = uvec2(packHalf2x16(acc3.xy), packHalf2x16(acc3.zw));
-    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 3);
+    STORE_PACK4_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 3), acc3);
 #endif                       // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 }
-#elif defined(MM_PROCESS_8X) /* PROCESS_4X */
-BUFFER_DECLARATION(src0, 1, uvec4, readonly);
-BUFFER_DECLARATION(src1, 2, uvec4, readonly);
-BUFFER_DECLARATION(dst, 3, uvec4, writeonly);
+#elif defined(MM_PROCESS_8X) /* PROCESS_8X */
+TENSOR_DECLARATION(1, src0Buffer, uvec4, src0_ptr, src0_shift, 4, readonly);
+TENSOR_DECLARATION(2, src1Buffer, uvec4, src1_ptr, src1_shift, 4, readonly);
+TENSOR_DECLARATION(3, dstBuffer, uvec4, dst_ptr, dst_shift, 4, writeonly);
 
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(src0);
-    IMAGE_PARAM_DECLARATION(src1);
-    IMAGE_PARAM_DECLARATION(dst);
-};
-
-/** This OpenGL ES kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
- *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
- *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
- *
- * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
- * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
- * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
- * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
- * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
- * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
- * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
- */
 void main()
 {
-    Image src0 = GC_CONVERT_TO_IMAGE_STRUCT(src0);
-    Image src1 = GC_CONVERT_TO_IMAGE_STRUCT(src1);
-    Image dst  = GC_CONVERT_TO_IMAGE_STRUCT(dst);
+    ImageIterator src0_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src0_attrs, src0_shift);
+    ImageIterator src1_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src1_attrs, src1_shift);
+    ImageIterator dst_iter  = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
 
     int idx = int(gl_GlobalInvocationID.x) * int(NUM_ELEMS_PROCESSED_PER_THREAD_X);
     /* Compute the address for the vector A and matrix B */
-    src0.current_offset = (src0_offset_first_element_in_bytes + uint(gl_GlobalInvocationID.y) * src0_stride_y * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
-    src1.current_offset = src1_offset_first_element_in_bytes + uint(idx) * src1_stride_x;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(gl_GlobalInvocationID.y) * src0_attrs.stride_y * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(idx) * src1_attrs.stride_x);
 
     /* Compute end row address for matrix A */
-    uint end_row_vec_a = src0.current_offset + uint(COLS_A << 1);
+    uint end_row_vec_a = uint(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) + uint(COLS_A << 1);
 
     /* Reset accumulators */
     vec4 acc[2];
@@ -906,44 +654,29 @@ void main()
     acc[0] = vec4(0.0f);
     acc[1] = vec4(0.0f);
 
-    for(; int(src0.current_offset) < int(end_row_vec_a - uint(16)); src0.current_offset += uint(8) * src0_stride_x, src1.current_offset += uint(8) * src1_stride_y)
+    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) < int(end_row_vec_a - uint(16));
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(8) * src0_attrs.stride_x), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(8) * src1_attrs.stride_y))
     {
-        uvec4 packed_a;
-        vec4  a[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
-        a[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
-
-        uvec4 packed_b;
-        vec4  b[2];
+        vec4 a[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
+        vec4 b[2];
 
         for(int i = 0; i < 8; i++)
         {
             int j = i >> 2;
             int k = i % 4;
 
-            GC_LOAD1_2D_OFFSET(packed_b, src1, 0, i);
-
-            b[0] = vec4(unpackHalf2x16(packed_b.x), unpackHalf2x16(packed_b.y));
-            b[1] = vec4(unpackHalf2x16(packed_b.z), unpackHalf2x16(packed_b.w));
+            b = LOAD_UNPACK8_HALF(src1_ptr, IMAGE_OFFSET(src1_iter, 0, i));
 
             acc[0] += b[0] * vec4(a[j][k]);
             acc[1] += b[1] * vec4(a[j][k]);
         }
     }
 
-    for(; src0.current_offset < end_row_vec_a; src0.current_offset += uint(2 * 8), src1.current_offset += uint(8) * src1_stride_y)
+    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) < int(end_row_vec_a);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(8) * uint(2)), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(8) * src1_attrs.stride_y))
     {
-        uvec4 packed_a;
-        vec4  a[2];
-
-        GC_LOAD1_2D_OFFSET(packed_a, src0, 0, 0);
-        a[0] = vec4(unpackHalf2x16(packed_a.x), unpackHalf2x16(packed_a.y));
-        a[1] = vec4(unpackHalf2x16(packed_a.z), unpackHalf2x16(packed_a.w));
-
-        uvec4 packed_b;
-        vec4  b[2];
+        vec4 a[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
+        vec4 b[2];
 
         int leftover = COLS_A % 8;
 
@@ -952,10 +685,7 @@ void main()
             int j = i >> 2;
             int k = i % 4;
 
-            GC_LOAD1_2D_OFFSET(packed_b, src1, 0, i);
-
-            b[0] = vec4(unpackHalf2x16(packed_b.x), unpackHalf2x16(packed_b.y));
-            b[1] = vec4(unpackHalf2x16(packed_b.z), unpackHalf2x16(packed_b.w));
+            b = LOAD_UNPACK8_HALF(src1_ptr, IMAGE_OFFSET(src1_iter, 0, i));
 
             acc[0] += b[0] * vec4(a[j][k]);
             acc[1] += b[1] * vec4(a[j][k]);
@@ -966,102 +696,67 @@ void main()
     acc[0] = acc[0] * vec4(ALPHA);
     acc[1] = acc[1] * vec4(ALPHA);
 
-    uvec4 packed_d;
-    packed_d = uvec4(packHalf2x16(acc[0].xy), packHalf2x16(acc[0].zw), packHalf2x16(acc[1].xy), packHalf2x16(acc[1].zw));
-    GC_STORE1_2D_OFFSET(packed_d, dst, 0, 0);
+    STORE_PACK8_CURRENT_ITEM_HALF(dst_ptr, dst_iter, acc);
 }
-#endif                       /* PROCESS_4X */
+#endif                       /* PROCESS_8X */
 #endif                       /* GEMM_MM_FLOATING_POINT */
 
 #ifdef GEMM_ACCUMULATE_BIASES
 #if defined(ACCUM_PROCESS_4X)
-BUFFER_DECLARATION(accum, 1, uvec2, restrict);
-BUFFER_DECLARATION(biases, 2, uvec2, readonly);
-
-layout(std140) uniform shader_params
-{
-    IMAGE_PARAM_DECLARATION(accum);
-    VECTOR_PARAM_DECLARATION(biases);
-};
-
 /** This kernel accumulates each row with the biases vector
  *
- * @param[in, out] accum_ptr                            Pointer to the accumulate tensor. Supported data type: F16
- * @param[in]      accum_stride_x                       Stride of the accmulate tensor in X dimension (in bytes)
- * @param[in]      accum_step_x                         accum_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      accum_stride_y                       Stride of the accumlulate tensor in Y dimension (in bytes)
- * @param[in]      accum_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]      accum_offset_first_element_in_bytes  The offset of the first element in the accumulate tensor
- * @param[in]      biases_ptr                           Pointer to the biases vector. Same as @p accum_ptr
- * @param[in]      biases_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]      biases_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      biases_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in, out] accum_ptr    Pointer to the accumulate tensor. Supported data type: F16
+ * @param[in]      accum_attrs  The attributes of the accumulate tensor
+ * @param[in]      biases_ptr   Pointer to the biases vector. Same as @p accum_ptr
+ * @param[in]      biases_attrs The attributes of the biases tensor
  */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes  accum_attrs;
+    VectorAttributes biases_attrs;
+};
+
+TENSOR_DECLARATION(1, accumBuffer, uvec2, accum_ptr, accum_shift, 3, restrict);
+TENSOR_DECLARATION(2, biasesBuffer, uvec2, biases_ptr, biases_shift, 3, readonly);
+
 void main(void)
 {
-    Image  accum  = GC_CONVERT_TO_IMAGE_STRUCT(accum);
-    Vector biases = GC_CONVERT_TO_VECTOR_STRUCT(biases);
+    ImageIterator  accum_iter  = CONVERT_TO_IMAGE_ITERATOR(accum_attrs, accum_shift);
+    VectorIterator biases_iter = CONVERT_TO_VECTOR_ITERATOR(biases_attrs, biases_shift);
 
-    vec4  u[2];
-    uvec2 packed_s[2];
-    GC_LOAD1_2D_OFFSET(packed_s[0], accum, 0, 0);
-    GC_LOAD1_1D_OFFSET(packed_s[1], biases, 0);
-    u[0] = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
-    u[1] = vec4(unpackHalf2x16(packed_s[1].x), unpackHalf2x16(packed_s[1].y));
+    vec4 u[2];
+    u[0] = LOAD_UNPACK4_CURRENT_ITEM_HALF(accum_ptr, accum_iter);
+    u[1] = LOAD_UNPACK4_CURRENT_ITEM_HALF(biases_ptr, biases_iter);
 
     vec4 tmp;
-    tmp         = u[0] + u[1];
-    packed_s[0] = uvec2(packHalf2x16(tmp.xy), packHalf2x16(tmp.zw));
-    GC_STORE1_2D_OFFSET(packed_s[0], accum, 0, 0);
+    tmp = u[0] + u[1];
+    STORE_PACK4_CURRENT_ITEM_HALF(accum_ptr, accum_iter, tmp);
 }
-#elif defined(ACCUM_PROCESS_8X) /* ACCUM_PROCESS_4X */
-BUFFER_DECLARATION(accum, 1, uvec4, restrict);
-BUFFER_DECLARATION(biases, 2, uvec4, readonly);
-
-layout(std140) uniform shader_params
+#elif defined(ACCUM_PROCESS_8X) /* ACCUM_PROCESS_8X */
+SHADER_PARAMS_DECLARATION
 {
-    IMAGE_PARAM_DECLARATION(accum);
-    VECTOR_PARAM_DECLARATION(biases);
+    ImageAttributes  accum_attrs;
+    VectorAttributes biases_attrs;
 };
 
-/** This kernel accumulates each row with the biases vector
- *
- * @param[in, out] accum_ptr                            Pointer to the accumulate tensor. Supported data type: F16
- * @param[in]      accum_stride_x                       Stride of the accmulate tensor in X dimension (in bytes)
- * @param[in]      accum_step_x                         accum_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      accum_stride_y                       Stride of the accumlulate tensor in Y dimension (in bytes)
- * @param[in]      accum_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]      accum_offset_first_element_in_bytes  The offset of the first element in the accumulate tensor
- * @param[in]      biases_ptr                           Pointer to the biases vector. Same as @p accum_ptr
- * @param[in]      biases_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]      biases_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      biases_offset_first_element_in_bytes The offset of the first element in the destination tensor
- */
+TENSOR_DECLARATION(1, accumBuffer, uvec4, accum_ptr, accum_shift, 4, restrict);
+TENSOR_DECLARATION(2, biasesBuffer, uvec4, biases_ptr, biases_shift, 4, readonly);
+
 void main(void)
 {
-    Image  accum  = GC_CONVERT_TO_IMAGE_STRUCT(accum);
-    Vector biases = GC_CONVERT_TO_VECTOR_STRUCT(biases);
+    ImageIterator  accum_iter  = CONVERT_TO_IMAGE_ITERATOR(accum_attrs, accum_shift);
+    VectorIterator biases_iter = CONVERT_TO_VECTOR_ITERATOR(biases_attrs, biases_shift);
 
-    vec4  u[2];
-    vec4  v[2];
-    uvec4 packed_s[2];
-    GC_LOAD1_2D_OFFSET(packed_s[0], accum, 0, 0);
-    GC_LOAD1_1D_OFFSET(packed_s[1], biases, 0);
-
-    u[0] = vec4(unpackHalf2x16(packed_s[0].x), unpackHalf2x16(packed_s[0].y));
-    u[1] = vec4(unpackHalf2x16(packed_s[0].z), unpackHalf2x16(packed_s[0].w));
-
-    v[0] = vec4(unpackHalf2x16(packed_s[1].x), unpackHalf2x16(packed_s[1].y));
-    v[1] = vec4(unpackHalf2x16(packed_s[1].z), unpackHalf2x16(packed_s[1].w));
+    vec4 u[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(accum_ptr, accum_iter);
+    vec4 v[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(biases_ptr, bias_iter);
 
     vec4 r[2];
-    r[0]        = u[0] + v[0];
-    r[1]        = u[1] + v[1];
-    packed_s[0] = uvec4(packHalf2x16(r[0].xy), packHalf2x16(r[0].zw), packHalf2x16(r[1].xy), packHalf2x16(r[1].zw));
-    GC_STORE1_2D_OFFSET(packed_s[0], accum, 0, 0);
+    r[0] = u[0] + v[0];
+    r[1] = u[1] + v[1];
+    STORE_PACK8_CURRENT_ITEM_HALF(accum_ptr, accum_iter, r);
 }
-#endif                          /* ACCUM_PROCESS_4X */
+#endif                          /* ACCUM_PROCESS_8X */
 #endif                          /* GEMM_ACCUMULATE_BIASES */
-#else                           /* DATA_TYPE_FP32 */
+#else                           /* DATA_TYPE_FP16 */
 #error Data type not supported
 #endif /* DATA_TYPE_FP32 */
