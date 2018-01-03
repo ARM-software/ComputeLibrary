@@ -146,15 +146,16 @@ void CLArithmeticSubtractionKernel::run(const Window &window, cl::CommandQueue &
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    Window slice = window.first_slice_window_2D();
+    Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window slice     = collapsed.first_slice_window_3D();
 
     do
     {
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input1, slice);
-        add_2D_tensor_argument(idx, _input2, slice);
-        add_2D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, _input1, slice);
+        add_3D_tensor_argument(idx, _input2, slice);
+        add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(collapsed.slide_window_slice_3D(slice));
 }
