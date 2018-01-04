@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ void GCFullyConnectedLayer::configure_conv_fc(const IGCTensor *input, const IGCT
     _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, dt));
 
     // Configure im2col kernel
-    _im2col_kernel.configure(input, &_im2col_output, std::make_pair(1, 1), PadStrideInfo(1, 1, 0, 0), false);
+    _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
 
     // Configure matrix multiply kernel
     _mm_kernel.configure(&_im2col_output, weights, output, 1.0f, false);

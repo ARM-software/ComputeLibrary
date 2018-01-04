@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -383,6 +383,81 @@ void main(void)
 
 #elif defined(DATA_TYPE_FP16)
 
+#ifdef GEMM_TRANSPOSE1xW
+/** This OpenGL ES kernel computes the "vector" 1x8 transposition of input matrix
+ *
+ * @param[in]  src_ptr   Pointer to the source matrix. Supported data types: F16
+ * @param[in]  src_attrs The attributes of the source matrix
+ * @param[out] dst_ptr   Pointer to the destination matrix Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs The attributes of the destination matrix
+ */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src_attrs;
+    ImageAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, srcBuffer, uvec4, src_ptr, src_shift, 4, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec4, dst_ptr, dst_shift, 4, writeonly);
+
+void main(void)
+{
+    /* Compute address for Matrix B - source */
+    ImageIterator src_iter = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    ImageIterator dst_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(dst_attrs, dst_shift);
+
+    /* Compute address for Matrix B transposed - destination. X and Y are swapped */
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(dst_iter, gl_GlobalInvocationID.y * uint(16) + gl_GlobalInvocationID.x * dst_attrs.stride_y);
+
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, LOAD_CURRENT_ITEM(src_ptr, src_iter));
+}
+#endif /* GEMM_TRANSPOSE1xW */
+
+#ifdef GEMM_INTERLEAVE4x4
+/** This OpenGLES kernel reshapes the input matrix interleaving the values
+ *
+ * @param[in]  src_ptr   Pointer to the source matrix. Supported data types: F16
+ * @param[in]  src_attrs The attributes of the source matrix
+ * @param[out] dst_ptr   Pointer to the destination matrix Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs The attributes of the destination matrix
+ */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src_attrs;
+    ImageAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, srcBuffer, uvec4, src_ptr, src_shift, 4, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec4, dst_ptr, dst_shift, 4, writeonly);
+
+void main(void)
+{
+    /* Compute source and destination addresses */
+    ImageIterator src_iter = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    ImageIterator dst_iter = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
+
+    vec4 s0[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src_ptr, src_iter);
+    vec4 s1[2] = LOAD_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 1));
+    vec4 s2[2] = LOAD_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 2));
+    vec4 s3[2] = LOAD_UNPACK8_HALF(src_ptr, IMAGE_OFFSET(src_iter, 0, 3));
+
+    vec4 s[2];
+    s[0] = vec4(s0[0].x, s1[0].x, s2[0].x, s3[0].x);
+    s[1] = vec4(s0[0].y, s1[0].y, s2[0].y, s3[0].y);
+    STORE_PACK8_CURRENT_ITEM_HALF(dst_ptr, dst_iter, s);
+
+    s[0] = vec4(s0[0].z, s1[0].z, s2[0].z, s3[0].z);
+    s[1] = vec4(s0[0].w, s1[0].w, s2[0].w, s3[0].w);
+    STORE_PACK8_HALF(dst_ptr, TENSOR_OFFSET_ADVANCE(dst_iter, 1u), s);
+
+    s[0] = vec4(s0[1].x, s1[1].x, s2[1].x, s3[1].x);
+    s[1] = vec4(s0[1].y, s1[1].y, s2[1].y, s3[1].y);
+    STORE_PACK8_HALF(dst_ptr, TENSOR_OFFSET_ADVANCE(dst_iter, 2u), s);
+
+    s[0] = vec4(s0[1].z, s1[1].z, s2[1].z, s3[1].z);
+    s[1] = vec4(s0[1].w, s1[1].w, s2[1].w, s3[1].w);
+    STORE_PACK8_HALF(dst_ptr, TENSOR_OFFSET_ADVANCE(dst_iter, 3u), s);
+}
+#endif /* GEMM_INTERLEAVE4x4 */
+
 #ifdef GEMM_MM_FLOATING_POINT
 /** This OpenGL ES kernel computes the matrix multiplication between matrix A(src0) and matrix B(src1)
  * Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x4 before running the matrix multiplication
@@ -757,6 +832,119 @@ void main(void)
 }
 #endif                          /* ACCUM_PROCESS_8X */
 #endif                          /* GEMM_ACCUMULATE_BIASES */
-#else                           /* DATA_TYPE_FP16 */
+
+#ifdef GEMM_MM_INTERLEAVED_TRANSPOSED
+/** This OpenGL ES kernel is optimised for Midgard. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
+ *
+ * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
+ *
+ * @param[in]  src0_ptr   Pointer to the source matrix. Supported data types: F16
+ * @param[in]  src0_attrs The attributes of the source matrix
+ * @param[in]  src1_ptr   Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_attrs The attributes of the source matrix
+ * @param[out] dst_ptr    Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_attrs  The attributes of the destination matrix
+ */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src0_attrs;
+    ImageAttributes src1_attrs;
+    ImageAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, src0Buffer, uvec2, src0_ptr, src0_shift, 3, readonly);
+TENSOR_DECLARATION(2, src1Buffer, uvec4, src1_ptr, src1_shift, 4, readonly);
+TENSOR_DECLARATION(3, dstBuffer, uvec4, dst_ptr, dst_shift, 4, writeonly);
+
+void main()
+{
+    ImageIterator src0_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src0_attrs, src0_shift);
+    ImageIterator src1_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src1_attrs, src1_shift);
+    ImageIterator dst_iter  = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
+
+    /* Compute address for matrix A and B */
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(gl_GlobalInvocationID.y) * (src0_attrs.stride_y));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(gl_GlobalInvocationID.x) * (src1_attrs.stride_y));
+    /* Compute end row address for matrix B */
+    int end_row_mtx_b = (int(CURRENT_ITEM_OFFSET_IN_BYTES(src1_iter)) >> 1) + int(COLS_B);
+
+    /* Reset accumulators */
+    vec4 c00[2];
+    vec4 c10[2];
+    vec4 c20[2];
+    vec4 c30[2];
+    c00[0] = vec4(0.0f);
+    c00[1] = vec4(0.0f);
+    c10[0] = vec4(0.0f);
+    c10[1] = vec4(0.0f);
+    c20[0] = vec4(0.0f);
+    c20[1] = vec4(0.0f);
+    c30[0] = vec4(0.0f);
+    c30[1] = vec4(0.0f);
+
+    // FIXME: loop unrolling really needed for GLES?
+    for(; (int(CURRENT_ITEM_OFFSET_IN_BYTES(src1_iter)) >> 1) <= (end_row_mtx_b - 16); TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, 16), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, 32))
+    {
+        /* Load values from matrix A (interleaved) and matrix B (transposed) */
+        vec4 a0    = LOAD_UNPACK4_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
+        vec4 b0[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src1_ptr, src1_iter);
+
+        c00[0] += vec4(a0.x) * b0[0];
+        c00[1] += vec4(a0.x) * b0[1];
+        c10[0] += vec4(a0.y) * b0[0];
+        c10[1] += vec4(a0.y) * b0[1];
+        c20[0] += vec4(a0.z) * b0[0];
+        c20[1] += vec4(a0.z) * b0[1];
+        c30[0] += vec4(a0.w) * b0[0];
+        c30[1] += vec4(a0.w) * b0[1];
+
+        /* Load values from matrix A (interleaved) and matrix B (transposed) */
+        a0 = LOAD_UNPACK4_HALF(src0_ptr, TENSOR_OFFSET_ADVANCE_IN_BYTES(src0_iter, 8));
+        b0 = LOAD_UNPACK8_HALF(src1_ptr, TENSOR_OFFSET_ADVANCE_IN_BYTES(src1_iter, 16));
+
+        c00[0] += vec4(a0.x) * b0[0];
+        c00[1] += vec4(a0.x) * b0[1];
+        c10[0] += vec4(a0.y) * b0[0];
+        c10[1] += vec4(a0.y) * b0[1];
+        c20[0] += vec4(a0.z) * b0[0];
+        c20[1] += vec4(a0.z) * b0[1];
+        c30[0] += vec4(a0.w) * b0[0];
+        c30[1] += vec4(a0.w) * b0[1];
+    }
+
+    for(; (int(CURRENT_ITEM_OFFSET_IN_BYTES(src1_iter)) >> 1) < end_row_mtx_b; TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, 8), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, 16))
+    {
+        /* Load values from matrix A (interleaved) and matrix B (transposed) */
+        vec4 a0    = LOAD_UNPACK4_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
+        vec4 b0[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src1_ptr, src1_iter);
+
+        c00[0] += vec4(a0.x) * b0[0];
+        c00[1] += vec4(a0.x) * b0[1];
+        c10[0] += vec4(a0.y) * b0[0];
+        c10[1] += vec4(a0.y) * b0[1];
+        c20[0] += vec4(a0.z) * b0[0];
+        c20[1] += vec4(a0.z) * b0[1];
+        c30[0] += vec4(a0.w) * b0[0];
+        c30[1] += vec4(a0.w) * b0[1];
+    }
+
+    /* Multiply by the weight of matrix product */
+    c00[0] = c00[0] * vec4(ALPHA);
+    c00[1] = c00[1] * vec4(ALPHA);
+    c10[0] = c10[0] * vec4(ALPHA);
+    c10[1] = c10[1] * vec4(ALPHA);
+    c20[0] = c20[0] * vec4(ALPHA);
+    c20[1] = c20[1] * vec4(ALPHA);
+    c30[0] = c30[0] * vec4(ALPHA);
+    c30[1] = c30[1] * vec4(ALPHA);
+
+    /* Store 4x8 block */
+    STORE_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 0), c00);
+    STORE_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 1), c10);
+    STORE_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 2), c20);
+    STORE_PACK8_HALF(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 3), c30);
+}
+#endif /* GEMM_MM_INTERLEAVED_TRANSPOSED */
+#else  /* DATA_TYPE_FP16 */
 #error Data type not supported
 #endif /* DATA_TYPE_FP32 */

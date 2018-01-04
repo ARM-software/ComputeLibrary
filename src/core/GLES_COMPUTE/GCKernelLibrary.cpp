@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -190,7 +190,6 @@ void GCKernel::update_shader_params()
 const std::map<std::string, std::string> GCKernelLibrary::_shader_program_map =
 {
     { "absdiff", "absdiff.cs" },
-    { "col2im", "convolution_layer.cs" },
     { "direct_convolution1x1", "direct_convolution1x1.cs" },
     { "direct_convolution3x3", "direct_convolution3x3.cs" },
     { "direct_convolution5x5", "direct_convolution5x5.cs" },
@@ -207,9 +206,11 @@ const std::map<std::string, std::string> GCKernelLibrary::_shader_program_map =
     { "gemm_mm_interleaved_transposed", "gemm.cs" },
     { "gemm_mm_floating_point", "gemm.cs" },
     { "gemm_transpose1x4", "gemm.cs" },
+    { "reshape_to_columns", "convolution_layer.cs" },
     { "im2col_kernel3x3_padx0_pady0", "convolution_layer.cs" },
     { "im2col_generic", "convolution_layer.cs" },
     { "im2col_reduced", "convolution_layer.cs" },
+    { "col2im", "convolution_layer.cs" },
     { "transpose", "transpose.cs" },
     { "activation_layer", "activation_layer.cs" },
     { "softmax_layer_max", "softmax_layer.cs" },

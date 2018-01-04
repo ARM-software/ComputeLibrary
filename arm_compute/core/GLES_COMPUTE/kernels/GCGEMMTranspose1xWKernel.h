@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ class GCGEMMTranspose1xWKernel : public IGCSimple2DKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: F32
+     * @param[in]  input  Input tensor. Data types supported: F16, F32
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const IGCTensor *input, IGCTensor *output);
