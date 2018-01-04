@@ -33,6 +33,12 @@ namespace misc
 {
 namespace shape_calculator
 {
+inline TensorShape compute_permutation_output_shape(const ITensorInfo &input, const PermutationVector &perm)
+{
+    TensorShape output_shape = input.tensor_shape();
+    permute(output_shape, perm);
+    return output_shape;
+}
 inline TensorShape compute_interleaved_shape(const ITensorInfo &a)
 {
     // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
