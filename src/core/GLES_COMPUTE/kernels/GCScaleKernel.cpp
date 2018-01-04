@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -128,13 +128,9 @@ void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, Interpo
 
     IGCKernel::configure(win);
 
-    // Set static kernel arguments
-    const float scale_x = static_cast<float>(input->info()->dimension(0)) / output->info()->dimension(0);
-    const float scale_y = static_cast<float>(input->info()->dimension(1)) / output->info()->dimension(1);
-
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the tensor parameters
     _kernel.set_argument<float>(idx++, static_cast<float>(input->info()->dimension(0)));
     _kernel.set_argument<float>(idx++, static_cast<float>(input->info()->dimension(1)));
-    _kernel.set_argument(idx++, scale_x);
-    _kernel.set_argument(idx++, scale_y);
+    _kernel.set_argument<float>(idx++, wr);
+    _kernel.set_argument<float>(idx++, hr);
 }

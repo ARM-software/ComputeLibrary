@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,9 @@ layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = 
 
 #include "helpers_cs.h"
 
+// We DO have to use highp for DATA_TYPE_FP16 float here to calculate the coordinates of source tensor. float is highp by default, but we still write it down here to make it more clearly, and mediump is only used for src/dst tensor in shader body.
+precision highp float;
+
 /** Performs an affine transformation on an image interpolating with the NEAREAST NEIGHBOUR method. Input and output are single channel FP16.
  *
  * @param[in]  src_ptr      Pointer to the source tensor. Supported data types: FP16.
@@ -34,8 +37,7 @@ layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = 
  * @param[in]  dst_attrs    The attributes of the destination tensor
  * @param[in]  input_width  Input image width
  * @param[in]  input_height Input image height
- * @param[in]  scale_x      The scale factor along x dimension
- * @param[in]  scale_y      The scale factor along y dimension
+ * @param[in]  scale        The scale factor along x/y dimension
  */
 SHADER_PARAMS_DECLARATION
 {
@@ -43,8 +45,7 @@ SHADER_PARAMS_DECLARATION
     ImageAttributes dst_attrs;
     float           input_width;
     float           input_height;
-    float           scale_x;
-    float           scale_y;
+    vec2            scale;
 };
 
 #if defined(DATA_TYPE_FP16)
@@ -77,19 +78,18 @@ void main()
     ImageIterator src_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src_attrs, src_shift);
     ImageIterator dst_iter = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
 
-    vec2 r     = vec2(scale_x, scale_y);
-    vec4[2] tc = clamp_to_border_with_size(transform_nearest(vec2(gl_GlobalInvocationID.x << uint(2), gl_GlobalInvocationID.y), r), input_width, input_height, float(BORDER_SIZE));
+    vec4[2] tc = clamp_to_border_with_size(transform_nearest(vec2(gl_GlobalInvocationID.x << uint(2), gl_GlobalInvocationID.y), scale), input_width, input_height, float(BORDER_SIZE));
 
     mediump vec2 s = vec2(0.0f);
     mediump vec4 d = vec4(0.0f);
 
     for(int i = 0; i < 4; i++)
     {
-        uint offset = image_offset_in_bytes(src_iter, int(tc[0][i]), int(tc[1][i]));
+        uint offset_in_bytes = image_offset_in_bytes(src_iter, int(tc[0][i]), int(tc[1][i]));
 
-        s = LOAD_UNPACK2_HALF(src_ptr, uint(offset >> src_shift));
+        s = LOAD_UNPACK2_HALF(src_ptr, uint(offset_in_bytes >> src_shift));
 
-        if(offset % uint(4) == uint(0))
+        if(offset_in_bytes % uint(4) == uint(0))
         {
             d[i] = s.x;
         }
@@ -115,8 +115,7 @@ void main()
     mediump vec4 s = vec4(0.0f);
     mediump      vec4[2] d;
 
-    uint offset = image_offset_in_bytes(src_iter, int(tc[0]), int(tc[1]));
-    s           = LOAD_UNPACK4_HALF(src_ptr, uint(offset >> src_shift));
+    s = LOAD_UNPACK4_HALF(src_ptr, IMAGE_OFFSET(src_iter, int(tc[0]), int(tc[1])));
 
     d[0] = vec4(s.x, s.x, s.y, s.y);
     d[1] = vec4(s.z, s.z, s.w, s.w);
