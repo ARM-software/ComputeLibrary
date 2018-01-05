@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -326,6 +326,23 @@ uint tensor3D_offset_in_bytes(Tensor3DIterator tensor_iter, int x, int y, int z)
 #define VLOAD4_CURRENT_ITEM(return_type, tensor_ptr, tensor_iter) VLOAD4(return_type, tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
 #define VSTORE4_CURRENT_ITEM(tensor_ptr, tensor_iter, data) VSTORE4(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
 
+#define VLOAD5(return_type, tensor_ptr, offset)       \
+    return_type(LOAD(tensor_ptr, offset),             \
+                LOAD(tensor_ptr, (offset) + uint(1)), \
+                LOAD(tensor_ptr, (offset) + uint(2)), \
+                LOAD(tensor_ptr, (offset) + uint(3)), \
+                LOAD(tensor_ptr, (offset) + uint(4)))
+
+#define VSTORE5(tensor_ptr, offset, data)           \
+    STORE(tensor_ptr, offset, data[0]);             \
+    STORE(tensor_ptr, (offset) + uint(1), data[1]); \
+    STORE(tensor_ptr, (offset) + uint(2), data[2]); \
+    STORE(tensor_ptr, (offset) + uint(3), data[3]); \
+    STORE(tensor_ptr, (offset) + uint(4), data[4])
+
+#define VLOAD5_CURRENT_ITEM(return_type, tensor_ptr, tensor_iter) VLOAD5(return_type, tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
+#define VSTORE5_CURRENT_ITEM(tensor_ptr, tensor_iter, data) VSTORE5(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
+
 /** Converting the vec4 object to 4 half-precision (16-bits) floating point values and packing into a uvec2 object
  *
  * @param[in] data The vec4 object to be packed
@@ -346,6 +363,19 @@ highp uvec2 pack4_half(mediump vec4 data)
 mediump vec4 unpack4_half(highp uvec2 packed_data)
 {
     return vec4(unpackHalf2x16(packed_data.x), unpackHalf2x16(packed_data.y));
+}
+
+/** Unpacking the uvec3 object to 6 half-precision (16-bits) floating point values and converting to a vec2[3] object
+ *
+ * @param[in] packed_data The uvec3 object to be unpacked
+ *
+ * @return The unpacked vec2[3] object
+ */
+mediump vec2[3] unpack6_half(highp uvec3 packed_data)
+{
+    return vec2[3](unpackHalf2x16(packed_data[0]),
+                   unpackHalf2x16(packed_data[1]),
+                   unpackHalf2x16(packed_data[2]));
 }
 
 /** Converting the vec4[2] object to 8 half-precision (16-bits) floating point values and packing into a uvec4 object
@@ -395,6 +425,9 @@ mediump vec4[3] unpack12_half(highp uvec2[3] packed_data)
 #define VSTORE2_PACK4_HALF(tensor_ptr, offset, data) VSTORE2(tensor_ptr, offset, pack4_half(data))
 #define VLOAD2_UNPACK4_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter) VLOAD2_UNPACK4_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
 #define VSTORE2_PACK4_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter, data) VSTORE2_PACK4_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter), data)
+
+#define VLOAD3_UNPACK6_HALF(tensor_ptr, offset) unpack6_half(VLOAD3(uvec3, tensor_ptr, offset))
+#define VLOAD3_UNPACK6_CURRENT_ITEM_HALF(tensor_ptr, tensor_iter) VLOAD3_UNPACK6_HALF(tensor_ptr, CURRENT_ITEM_OFFSET(tensor_iter))
 
 #define VLOAD4_UNPACK8_HALF(tensor_ptr, offset) unpack8_half(VLOAD4(uvec4, tensor_ptr, offset))
 #define VSTORE4_PACK8_HALF(tensor_ptr, offset, data) VSTORE4(tensor_ptr, offset, pack8_half(data))
