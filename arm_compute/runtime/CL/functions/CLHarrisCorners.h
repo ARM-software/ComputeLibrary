@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,10 +77,11 @@ public:
      * @param[out]    corners               Array of keypoints to store the results.
      * @param[in]     border_mode           Border mode to use
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     * @param[in]     use_fp16              (Optional) If true the FP16 kernels will be used. If false F32 kernels are used.
      */
     void configure(ICLImage *input, float threshold, float min_dist, float sensitivity,
                    int32_t gradient_size, int32_t block_size, ICLKeyPointArray *corners,
-                   BorderMode border_mode, uint8_t constant_border_value = 0);
+                   BorderMode border_mode, uint8_t constant_border_value = 0, bool use_fp16 = false);
 
     // Inherited methods overridden:
     void run() override;
