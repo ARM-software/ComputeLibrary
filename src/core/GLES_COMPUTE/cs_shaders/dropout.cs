@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,14 +24,11 @@
 
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
 
-#include "helpers.h"
+#include "helpers_cs.h"
 
-layout(std140) uniform shader_params
-{
-    TENSOR3D_PARAM_DECLARATION(src);
-    TENSOR3D_PARAM_DECLARATION(mask);
-    TENSOR3D_PARAM_DECLARATION(dst);
-};
+#if defined(DATA_TYPE_FP16)
+precision mediump float;
+#endif /*DATA_TYPE_FP16*/
 
 uint hash(uint x)
 {
@@ -65,48 +62,34 @@ float rand(vec3 v, float seed)
     return float_construct(hash(floatBitsToUint(v + seed)));
 }
 
-#ifdef DATA_TYPE_FP32
-
-precision highp float;
-
-BUFFER_DECLARATION(src, 1, float, readonly);
-BUFFER_DECLARATION(mask, 2, float, );
-BUFFER_DECLARATION(dst, 3, float, writeonly);
-
 /** Dropout is used to improve over-fit on neural networks.
  *
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP32"
+ * @note The data type must be passed at compile time using "#define DATA_TYPE_NAME". e.g. "#define DATA_TYPE_FP32"
  *
- * @param[in]  src_ptr                            Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                       Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                       Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                       Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                         src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out] mask_ptr                           Pointer to the mask tensor. Supported data types: same as @p src_ptr
- * @param[in]  mask_stride_x                      Stride of the mask tensor in X dimension (in bytes)
- * @param[in]  mask_step_x                        mask_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  mask_stride_y                      Stride of the mask tensor in Y dimension (in bytes)
- * @param[in]  mask_step_y                        mask_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  mask_stride_z                      Stride of the mask tensor in Z dimension (in bytes)
- * @param[in]  mask_step_z                        mask_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  mask_offset_first_element_in_bytes The offset of the first element in the mask tensor
- * @param[out] dst_ptr                            Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                       Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                         dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
+ * @param[in]  src_ptr    Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_attrs  The attributes of the source tensor
+ * @param[out] mask_ptr   Pointer to the mask tensor. Supported data types: same as @p src_ptr
+ * @param[in]  mask_attrs The attributes of the mask tensor
+ * @param[out] dst_ptr    Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs  The attributes of the destination tensor
  */
+SHADER_PARAMS_DECLARATION
+{
+    Tensor3DAttributes src_attrs;
+    Tensor3DAttributes mask_attrs;
+    Tensor3DAttributes dst_attrs;
+};
+
+#ifdef DATA_TYPE_FP32
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, maskBuffer, float, mask_ptr, mask_shift, 2, );
+TENSOR_DECLARATION(3, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+
 void main(void)
 {
-    Tensor3D src  = GC_CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D mask = GC_CONVERT_TO_TENSOR3D_STRUCT(mask);
-    Tensor3D dst  = GC_CONVERT_TO_TENSOR3D_STRUCT(dst);
+    Tensor3DIterator src_iter  = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator mask_iter = CONVERT_TO_TENSOR3D_ITERATOR(mask_attrs, mask_shift);
+    Tensor3DIterator dst_iter  = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
     float random  = 0.f;
     float inputv  = 0.f;
@@ -116,64 +99,29 @@ void main(void)
 #ifdef FORWARD
     random = rand(vec3(gl_GlobalInvocationID.xyz), SEED);
     maskv  = (random > RATIO) ? 1.f : 0.f;
-    GC_STORE1_3D_OFFSET(maskv, mask, 0, 0, 0);
+    STORE_CURRENT_ITEM(mask_ptr, mask_iter, maskv);
 #else  /* FORWARD */
-    GC_LOAD1_3D_OFFSET(maskv, mask, 0, 0, 0);
+    maskv = LOAD_CURRENT_ITEM(mask_ptr, mask_iter);
 #endif /* FORWARD */
 
-    GC_LOAD1_3D_OFFSET(inputv, src, 0, 0, 0);
+    inputv  = LOAD_CURRENT_ITEM(src_ptr, src_iter);
     outputv = maskv * inputv * float(SCALE);
-    GC_STORE1_3D_OFFSET(outputv, dst, 0, 0, 0);
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, outputv);
 }
 
 #elif defined(DATA_TYPE_FP16)
+TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, maskBuffer, uint, mask_ptr, mask_shift, 2, );
+TENSOR_DECLARATION(3, dstBuffer, uint, dst_ptr, dst_shift, 2, writeonly);
 
-precision mediump float;
-
-BUFFER_DECLARATION(src, 1, uint, readonly);
-BUFFER_DECLARATION(mask, 2, uint, );
-BUFFER_DECLARATION(dst, 3, uint, writeonly);
-
-/** Dropout is used to improve over-fit on neural networks.
- *
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP16"
- *
- * @param[in]  src_ptr                            Pointer to the source tensor. Supported data types: F16
- * @param[in]  src_stride_x                       Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                       Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                       Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                         src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out] mask_ptr                           Pointer to the mask tensor. Supported data types: same as @p src_ptr
- * @param[in]  mask_stride_x                      Stride of the mask tensor in X dimension (in bytes)
- * @param[in]  mask_step_x                        mask_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  mask_stride_y                      Stride of the mask tensor in Y dimension (in bytes)
- * @param[in]  mask_step_y                        mask_stride_y * number of elements along y processed per workitem(in bytes)
- * @param[in]  mask_stride_z                      Stride of the mask tensor in Z dimension (in bytes)
- * @param[in]  mask_step_z                        mask_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  mask_offset_first_element_in_bytes The offset of the first element in the mask tensor
- * @param[out] dst_ptr                            Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                       Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_stride_y * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                         dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
- */
 void main(void)
 {
-    Tensor3D src  = GC_CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D mask = GC_CONVERT_TO_TENSOR3D_STRUCT(mask);
-    Tensor3D dst  = GC_CONVERT_TO_TENSOR3D_STRUCT(dst);
+    Tensor3DIterator src_iter  = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator mask_iter = CONVERT_TO_TENSOR3D_ITERATOR(mask_attrs, mask_shift);
+    Tensor3DIterator dst_iter  = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
     float random1    = 0.f;
     float random2    = 0.f;
-    uint  inputv     = uint(0);
-    uint  outputv    = uint(0);
-    uint  maskv      = uint(0);
     vec2  input_vec  = vec2(0, 0);
     vec2  output_vec = vec2(0, 0);
     vec2  mask_vec   = vec2(0, 0);
@@ -183,20 +131,16 @@ void main(void)
     random2          = rand(vec3(float(gl_GlobalInvocationID.x) + 0.5f, gl_GlobalInvocationID.yz), SEED);
     mask_vec.x       = (random1 > RATIO) ? 1.f : 0.f;
     mask_vec.y       = (random2 > RATIO) ? 1.f : 0.f;
-    maskv            = packHalf2x16(mask_vec);
-    GC_STORE1_3D_OFFSET(maskv, mask, 0, 0, 0);
+
+    STORE_PACK2_CURRENT_ITEM_HALF(mask_ptr, mask_iter, mask_vec);
 #else  /* FORWARD */
-    GC_LOAD1_3D_OFFSET(maskv, mask, 0, 0, 0);
-    mask_vec = unpackHalf2x16(maskv);
+    mask_vec = LOAD_UNPACK2_CURRENT_ITEM_HALF(mask_ptr, mask_iter);
 #endif /* FORWARD */
 
-    GC_LOAD1_3D_OFFSET(inputv, src, 0, 0, 0);
-
-    input_vec  = unpackHalf2x16(inputv);
+    input_vec  = LOAD_UNPACK2_CURRENT_ITEM_HALF(src_ptr, src_iter);
     output_vec = mask_vec * input_vec * float(SCALE);
-    outputv    = packHalf2x16(output_vec);
 
-    GC_STORE1_3D_OFFSET(outputv, dst, 0, 0, 0);
+    STORE_PACK2_CURRENT_ITEM_HALF(dst_ptr, dst_iter, output_vec);
 }
 
 #else /* DATA_TYPE_FP32 */
