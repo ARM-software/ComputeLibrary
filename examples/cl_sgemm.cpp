@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@
 using namespace arm_compute;
 using namespace utils;
 
-void main_cl_sgemm(int argc, const char **argv)
+void main_cl_sgemm(int argc, char **argv)
 {
     NPYLoader npy0, npy1, npy2;
     CLTensor  src0, src1, src2, dst;
@@ -210,7 +210,7 @@ void main_cl_sgemm(int argc, const char **argv)
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Matrix A, [optional] Matrix B, [optional] Matrix C, [optional] alpha, [optional] beta )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
     return utils::run_example(argc, argv, main_cl_sgemm);
 }

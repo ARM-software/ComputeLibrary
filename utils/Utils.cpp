@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,8 @@ void discard_comments_and_spaces(std::ifstream &fs)
 }
 } // namespace
 
-int run_example(int argc, const char **argv, example &func)
+//FIXME: Delete once tests have been ported (COMPMID-782)
+int run_example(int argc, char **argv, example &func)
 {
     std::cout << "\n"
               << argv[0] << "\n\n";
@@ -99,6 +100,44 @@ int run_example(int argc, const char **argv, example &func)
 
     return -1;
 }
+
+#ifndef BENCHMARK_EXAMPLES
+int run_example(int argc, char **argv, Example &example)
+{
+    std::cout << "\n"
+              << argv[0] << "\n\n";
+
+    try
+    {
+        example.do_setup(argc, argv);
+        example.do_run();
+        example.do_teardown();
+
+        std::cout << "\nTest passed\n";
+        return 0;
+    }
+#ifdef ARM_COMPUTE_CL
+    catch(cl::Error &err)
+    {
+        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        std::cerr << std::endl
+                  << "ERROR " << err.what() << "(" << err.err() << ")" << std::endl;
+        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    }
+#endif /* ARM_COMPUTE_CL */
+    catch(std::runtime_error &err)
+    {
+        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        std::cerr << std::endl
+                  << "ERROR " << err.what() << " " << (errno ? strerror(errno) : "") << std::endl;
+        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+    }
+
+    std::cout << "\nTest FAILED\n";
+
+    return -1;
+}
+#endif /* BENCHMARK_EXAMPLES */
 
 void draw_detection_rectangle(ITensor *tensor, const DetectionWindow &rect, uint8_t r, uint8_t g, uint8_t b)
 {

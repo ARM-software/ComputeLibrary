@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ std::unique_ptr<ITensorAccessor> get_accessor(const std::string &path, const std
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches )
  */
-void main_graph_lenet(int argc, const char **argv)
+void main_graph_lenet(int argc, char **argv)
 {
     std::string  data_path;   /** Path to the trainable data */
     unsigned int batches = 4; /** Number of batches */
@@ -132,7 +132,7 @@ void main_graph_lenet(int argc, const char **argv)
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
     return arm_compute::utils::run_example(argc, argv, main_graph_lenet);
 }

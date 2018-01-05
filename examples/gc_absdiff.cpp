@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@
 using namespace arm_compute;
 using namespace utils;
 
-void main_gc_absdiff(int argc, const char **argv)
+void main_gc_absdiff(int argc, char **argv)
 {
     PPMLoader ppm1, ppm2;
     GCImage   src1, src2, dst;
@@ -105,7 +105,7 @@ void main_gc_absdiff(int argc, const char **argv)
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to the first PPM image to process, [optional] Path the the second PPM image to process )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
     return utils::run_example(argc, argv, main_gc_absdiff);
 }

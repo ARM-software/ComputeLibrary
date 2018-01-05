@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ TensorShape get_output_shape(TensorShape in_shape, TensorShape kernel_shape, con
 }
 } // namespace
 
-void main_gc_dc(int argc, const char **argv)
+void main_gc_dc(int argc, char **argv)
 {
     ARM_COMPUTE_UNUSED(argc);
     ARM_COMPUTE_UNUSED(argv);
@@ -117,7 +117,7 @@ void main_gc_dc(int argc, const char **argv)
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
     return utils::run_example(argc, argv, main_gc_dc);
 }

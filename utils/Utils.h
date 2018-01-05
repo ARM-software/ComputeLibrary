@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,20 +55,52 @@ namespace arm_compute
 {
 namespace utils
 {
+//FIXME: Delete once tests have been ported (COMPMID-782)
 /** Signature of an example to run
  *
  * @param[in] argc Number of command line arguments
  * @param[in] argv Command line arguments
  */
-using example = void(int argc, const char **argv);
+using example = void(int argc, char **argv);
 
+//FIXME: Delete once tests have been ported (COMPMID-782)
 /** Run an example and handle the potential exceptions it throws
  *
  * @param[in] argc Number of command line arguments
  * @param[in] argv Command line arguments
  * @param[in] func Pointer to the function containing the code to run
  */
-int run_example(int argc, const char **argv, example &func);
+int run_example(int argc, char **argv, example &func);
+
+/** Abstract Example class.
+ *
+ * All examples have to inherit from this class.
+ */
+class Example
+{
+public:
+    virtual void do_setup(int argc, char **argv) {};
+    virtual void do_run() {};
+    virtual void do_teardown() {};
+
+    /** Default destructor. */
+    virtual ~Example() = default;
+};
+
+/** Run an example and handle the potential exceptions it throws
+ *
+ * @param[in] argc    Number of command line arguments
+ * @param[in] argv    Command line arguments
+ * @param[in] example Example to run
+ */
+int run_example(int argc, char **argv, Example &example);
+
+template <typename T>
+int run_example(int argc, char **argv)
+{
+    T example;
+    return run_example(argc, argv, example);
+}
 
 /** Draw a RGB rectangular window for the detected object
  *
@@ -258,7 +290,7 @@ public:
 
             ARM_COMPUTE_ERROR_ON_MSG(max_val >= 256, "2 bytes per colour channel not supported in file %s", ppm_filename.c_str());
         }
-        catch(const std::ifstream::failure &e)
+        catch(std::runtime_error &e)
         {
             ARM_COMPUTE_ERROR("Accessing %s: %s", ppm_filename.c_str(), e.what());
         }
@@ -545,7 +577,7 @@ public:
     void fill_tensor(T &tensor)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(&tensor, arm_compute::DataType::F32);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::F32);
         try
         {
             // Map buffer if creating a CLTensor
@@ -566,19 +598,19 @@ public:
             ARM_COMPUTE_ERROR_ON_MSG(_typestring != expect_typestr, "Typestrings mismatch");
 
             // Validate tensor shape
-            ARM_COMPUTE_ERROR_ON_MSG(_shape.size() != tensor.shape().num_dimensions(), "Tensor ranks mismatch");
+            ARM_COMPUTE_ERROR_ON_MSG(_shape.size() != tensor.info()->tensor_shape().num_dimensions(), "Tensor ranks mismatch");
             if(_fortran_order)
             {
                 for(size_t i = 0; i < _shape.size(); ++i)
                 {
-                    ARM_COMPUTE_ERROR_ON_MSG(tensor.shape()[i] != _shape[i], "Tensor dimensions mismatch");
+                    ARM_COMPUTE_ERROR_ON_MSG(tensor.info()->tensor_shape()[i] != _shape[i], "Tensor dimensions mismatch");
                 }
             }
             else
             {
                 for(size_t i = 0; i < _shape.size(); ++i)
                 {
-                    ARM_COMPUTE_ERROR_ON_MSG(tensor.shape()[i] != _shape[_shape.size() - i - 1], "Tensor dimensions mismatch");
+                    ARM_COMPUTE_ERROR_ON_MSG(tensor.info()->tensor_shape()[i] != _shape[_shape.size() - i - 1], "Tensor dimensions mismatch");
                 }
             }
 

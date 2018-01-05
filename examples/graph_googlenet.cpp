@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,7 +97,7 @@ BranchLayer get_inception_node(const std::string &data_path, std::string &&param
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
-void main_graph_googlenet(int argc, const char **argv)
+void main_graph_googlenet(int argc, char **argv)
 {
     std::string data_path; /* Path to the trainable data */
     std::string image;     /* Image data */
@@ -198,7 +198,7 @@ void main_graph_googlenet(int argc, const char **argv)
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
     return arm_compute::utils::run_example(argc, argv, main_graph_googlenet);
 }

@@ -31,6 +31,7 @@ SConscript('./framework/SConscript', duplicate=0)
 variables = [
     BoolVariable("validation_tests", "Build validation test programs", True),
     BoolVariable("benchmark_tests", "Build benchmark test programs", True),
+    BoolVariable("benchmark_examples", "Build benchmark examples programs", True),
     ("test_filter", "Pattern to specify the tests' filenames to be compiled", "*.cpp")
 ]
 
@@ -50,6 +51,9 @@ vars.Update(test_env)
 
 Help(new_options.GenerateHelpText(test_env))
 
+Import("arm_compute_test_framework")
+test_env.Append(LIBS = arm_compute_test_framework)
+
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
     Import("arm_compute_core_a")
@@ -68,9 +72,6 @@ test_env.Append(CPPPATH = ["#3rdparty/include"])
 test_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
 test_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
 test_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
-
-Import("arm_compute_test_framework")
-test_env.Append(LIBS = arm_compute_test_framework)
 
 common_files = Glob('*.cpp')
 common_objects = [test_env.StaticObject(f) for f in common_files]
@@ -162,3 +163,46 @@ if test_env['validation_tests']:
 
     Default(arm_compute_validation)
     Export('arm_compute_validation')
+
+if test_env['benchmark_examples']:
+    files_benchmark_examples = test_env.Object('benchmark_examples/RunExample.cpp')
+    arm_compute_benchmark_examples = []
+    if test_env['neon']:
+        for file in Glob("../examples/neon_*.cpp"):
+            example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
+            arm_compute_benchmark_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_benchmark_examples) ]
+    if test_env['opencl']:
+        cl_examples = []
+        files = Glob("../examples/cl_*.cpp")
+        if test_env['neon']:
+            files += Glob("../examples/neoncl_*.cpp")
+        for file in files:
+            example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
+            cl_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_benchmark_examples, CPPDEFINES=['ARM_COMPUTE_CL'], LIBS = test_env["LIBS"] + ["OpenCL"]) ]
+        Depends(cl_examples, opencl)
+        arm_compute_benchmark_examples += cl_examples
+        if test_env['opencl'] and test_env['neon']:
+            if env['os'] == 'android':
+                Import('arm_compute_graph_a')
+                graph_dependency = arm_compute_graph_a
+            else:
+                Import('arm_compute_graph_so')
+                graph_dependency = arm_compute_graph_so
+
+            graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
+            for file in Glob("../examples/graph_*.cpp"):
+                example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
+                if env['os'] == 'android':
+                    prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["OpenCL"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
+                    Depends(prog, [graph_dependency, opencl])
+                    arm_compute_benchmark_examples += [ prog ]
+                else:
+                    #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
+                    prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+                    Depends(prog, graph_dependency)
+                    arm_compute_benchmark_examples += [ prog ]
+    Depends(arm_compute_benchmark_examples, arm_compute_test_framework)
+    Depends(arm_compute_benchmark_examples, arm_compute_lib)
+    Default(arm_compute_benchmark_examples)
+    Export('arm_compute_benchmark_examples')
+

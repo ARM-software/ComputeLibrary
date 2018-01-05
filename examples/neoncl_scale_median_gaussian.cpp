@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ using namespace utils;
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to PPM image to process )
  */
-void main_neoncl_scale_median_gaussian(int argc, const char **argv)
+void main_neoncl_scale_median_gaussian(int argc, char **argv)
 {
     /** [NEON / OpenCL Interop] */
     PPMLoader ppm;
@@ -123,7 +123,7 @@ void main_neoncl_scale_median_gaussian(int argc, const char **argv)
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to PPM image to process )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
     return utils::run_example(argc, argv, main_neoncl_scale_median_gaussian);
 }

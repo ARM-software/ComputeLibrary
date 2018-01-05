@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,7 @@
 using namespace arm_compute;
 using namespace utils;
 
-void main_neon_scale(int argc, const char **argv)
+void main_neon_scale(int argc, char **argv)
 {
     PPMLoader ppm;
     Image     src, dst;
@@ -84,7 +84,7 @@ void main_neon_scale(int argc, const char **argv)
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to PPM image to process )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
     return utils::run_example(argc, argv, main_neon_scale);
 }
