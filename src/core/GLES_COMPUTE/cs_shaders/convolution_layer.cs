@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,177 +23,12 @@
  */
 
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
-#include "helpers.h"
 
-layout(std140) uniform shader_params
-{
-#ifdef IM2COL_GENERIC
-    TENSOR3D_PARAM_DECLARATION(src);
-    IMAGE_PARAM_DECLARATION(dst);
-    uint filter_depth;
-    uint src_stride_w;
-    uint dst_stride_w;
-#endif // IM2COL_GENERIC
+#include "helpers_cs.h"
 
-#ifdef IM2COL_REDUCED
-    TENSOR3D_PARAM_DECLARATION(src);
-    VECTOR_PARAM_DECLARATION(dst);
-    uint width;
-    uint height;
-#endif // IM2COL_REDUCED
-
-#ifdef COL2IM
-    IMAGE_PARAM_DECLARATION(src);
-    TENSOR3D_PARAM_DECLARATION(dst);
-    uint width;
-#endif // COL2IM
-};
-
-#ifdef DATA_TYPE_FP16
-#if defined(IM2COL_REDUCED_8X)
-BUFFER_DECLARATION(src, 1, uvec4, readonly);
-BUFFER_DECLARATION(dst, 2, uvec4, restrict);
-#elif defined(IM2COL_REDUCED_4X) /* IM2COL_REDUCED_8X */
-BUFFER_DECLARATION(src, 1, uvec2, readonly);
-BUFFER_DECLARATION(dst, 2, uvec2, restrict);
-#else                            /* IM2COL_REDUCED_8X */
-BUFFER_DECLARATION(src, 1, uint, readonly);
-BUFFER_DECLARATION(dst, 2, uint, restrict);
-#endif                           /* IM2COL_REDUCED_8X */
-
+#if defined(DATA_TYPE_FP16)
 precision mediump float;
-
-#ifdef IM2COL_REDUCED
-#if defined(IM2COL_REDUCED_GENERIC)
-/** This kernel reshapes the tensor's low three dimensions to single row for GEMM operation
- *
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP16"
- * @note In case biases will be added in late stage, "#define HAS_BIAS" has to be passed to append the final matrix with 1 in each row.
- *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in]  width                             The width of the input tensor
- * @param[in]  height                            The height of the input tensor
- */
-void main(void)
-{
-    uvec3    pos            = uvec3(gl_GlobalInvocationID.xyz);
-    uvec3    size           = uvec3(gl_WorkGroupSize.xyz);
-    Tensor3D src            = CONVERT_TO_TENSOR3D_STRUCT_FP16(src);
-    Tensor3D src_nostep     = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP_FP16(src);
-    Vector   dst            = CONVERT_TO_VECTOR_STRUCT_NO_STEP_FP16(dst);
-    uint     image_size     = width * height;
-    uint     element_count  = src_step_x / src_stride_x;
-    uint     tmp_out_offset = dst.current_offset + ((pos.x * element_count + pos.y * width + pos.z * image_size) * dst.stride_x);
-    uint     width_fp16     = ((width + uint(1)) >> uint(1));
-    uint     tmp;
-
-    // odd width
-    if(width % uint(2) != uint(0))
-    {
-        // even row
-        if((pos.y + pos.z * height) % uint(2) == uint(0))
-        {
-            LOAD1(tmp, src, src.current_offset >> uint(2));
-            STORE1(dst, tmp_out_offset >> uint(2), tmp);
-        }
-        else
-        {
-            // special op
-            uint tmpleft  = uint(0);
-            uint tmpright = uint(0);
-            LOAD1(tmpright, src, src.current_offset >> uint(2)); // right half
-            if(pos.x == uint(0))
-            {
-                LOAD1(tmpleft, src, tensor3D_offset_fp16(src_nostep, int(width), int(pos.y) - 1, int(pos.z)) >> uint(2)); // left half
-                tmpright = (tmpleft & uint(0xffff)) + (tmpright << uint(16));
-            }
-            else
-            {
-                LOAD1(tmpleft, src, tensor3D_offset_fp16(src_nostep, (int(pos.x) - 1) * int(element_count), int(pos.y), int(pos.z)) >> uint(2)); // left half
-                tmpright = ((tmpleft >> uint(16)) + (tmpright << uint(16)));
-            }
-            STORE1(dst, tmp_out_offset >> uint(2), tmpright);
-        }
-    }
-    else
-    {
-        LOAD1(tmp, src, src.current_offset >> uint(2));
-        STORE1(dst, tmp_out_offset >> uint(2), tmp);
-    }
-
-#ifdef HAS_BIAS
-    // If it is the last thread in the 3 dimensional workgroup
-    if(pos.x == (size.x - 1) && pos.y == (size.y - 1) && pos.z == (size.z - 1))
-    {
-        tmp_out_offset += dst.stride_x;
-
-        // FIXME: need odd/even detection for tmp_out_offset?
-        mediump vec2 bias_vec = vec2(1.0f, 1.0f);
-        uint         bias_u   = packHalf2x16(bias_vec);
-        STORE1(dst, tmp_out_offset >> uint(2), bias_u);
-    }
-#endif // HAS_BIAS
-}
-#else /* IM2COL_REDUCED_GENERIC */
-/** This kernel reshapes the tensor's low three dimensions to single row for GEMM operation
- *
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP16"
- * @note In case biases will be added in late stage, "#define HAS_BIAS" has to be passed to append the final matrix with 1 in each row.
- *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in]  width                             The width of the input tensor
- * @param[in]  height                            The height of the input tensor
- */
-void main(void)
-{
-    uvec3    pos            = uvec3(gl_GlobalInvocationID.xyz);
-    Tensor3D src            = CONVERT_TO_TENSOR3D_STRUCT_FP16(src);
-    Vector   dst            = CONVERT_TO_VECTOR_STRUCT_NO_STEP_FP16(dst);
-#if defined(IM2COL_REDUCED_8X)
-    uint     tmp_out_offset = dst.current_offset + ((pos.x * uint(8) + pos.y * width + pos.z * uint(IMAGE_SIZE)) * dst.stride_x);
-    uvec4    tmp;
-    LOAD1(tmp, src, src.current_offset >> uint(4));
-    STORE1(dst, tmp_out_offset >> uint(4), tmp);
-#elif defined(IM2COL_REDUCED_4X) /* IM2COL_REDUCED_8X */
-    uint  tmp_out_offset = dst.current_offset + ((pos.x * uint(4) + pos.y * width + pos.z * uint(IMAGE_SIZE)) * dst.stride_x);
-    uvec2 tmp;
-    LOAD1(tmp, src, src.current_offset >> uint(3));
-    STORE1(dst, tmp_out_offset >> uint(3), tmp);
-#else                            /* IM2COL_REDUCED_8X */
-    uint tmp_out_offset = dst.current_offset + ((pos.x * uint(2) + pos.y * width + pos.z * uint(IMAGE_SIZE)) * dst.stride_x);
-    uint tmp;
-    LOAD1(tmp, src, src.current_offset >> uint(2));
-    STORE1(dst, tmp_out_offset >> uint(2), tmp);
-#endif                           /* IM2COL_REDUCED_8X */
-}
-#endif                           /* IM2COL_REDUCED_GENERIC */
-#endif                           // IM2COL_REDUCED
-
-#elif defined(DATA_TYPE_FP32)
-BUFFER_DECLARATION(src, 1, float, readonly);
-BUFFER_DECLARATION(dst, 2, float, restrict);
+#endif // DATA_TYPE_FP16
 
 #ifdef IM2COL_GENERIC
 /** This kernel performs a reshaping of the input tensor to a tensor used to perform convolution using GEMM.
@@ -201,26 +36,31 @@ BUFFER_DECLARATION(dst, 2, float, restrict);
  * @note The data type must be passed at compile time using "#define DATA_TYPE_FP32"
  * @note In case biases will be added to the convolution "#define HAS_BIAS" has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in]  filter_depth                      The depth of the used filter
- * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
- * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
+ * @param[in]  src_ptr      Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_attrs    The attributes of the source tensor
+ * @param[out] dst_ptr      Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs    The attributes of the destination tensor
+ * @param[in]  filter_depth The depth of the used filter
+ * @param[in]  src_stride_w Stride of the source tensor in W dimension (in bytes).
+ * @param[in]  dst_stride_w Stride of the destination tensor in W dimension (in bytes).
  */
+SHADER_PARAMS_DECLARATION
+{
+    Tensor3DAttributes src_attrs;
+    ImageAttributes    dst_attrs;
+    uint               filter_depth;
+    uint               src_stride_w;
+    uint               dst_stride_w;
+};
+
+#ifdef DATA_TYPE_FP32
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, restrict);
 void main(void)
 {
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(src_attrs, src_shift);
+    ImageIterator    dst_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(dst_attrs, dst_shift);
+
     uint xc    = gl_GlobalInvocationID.x;                // x coordinate in the convolved tensor
     uint yc    = gl_GlobalInvocationID.y;                // y coordinate in the convolved tensor
     uint ch    = gl_GlobalInvocationID.z % filter_depth; // input feature map
@@ -229,12 +69,12 @@ void main(void)
     // Calculate input indeces
     uint xi           = xc * uint(STRIDE_X) - uint(PAD_X);
     uint yi           = yc * uint(STRIDE_Y) - uint(PAD_Y);
-    uint input_offset = (src_offset_first_element_in_bytes + (ch * src_stride_z) + (batch * src_stride_w)) >> uint(2);
+    uint input_offset = TENSOR_OFFSET_ADVANCE_IN_BYTES(src_iter, (ch * src_attrs.stride_z) + (batch * src_stride_w));
 
     // Calculate output indeces
     uint xo            = ch * uint(KERNEL_WIDTH) * uint(KERNEL_HEIGHT);
     uint yo            = xc + yc * uint(CONVOLVED_WIDTH); // Index of the convolution
-    uint output_offset = (dst_offset_first_element_in_bytes + (yo * dst_stride_y) + (batch * dst_stride_w) + xo) >> uint(2);
+    uint output_offset = TENSOR_OFFSET_ADVANCE_IN_BYTES(dst_iter, (yo * dst_attrs.stride_y) + (batch * dst_stride_w) + xo);
 
     // Linearize convolution elements
     for(uint y = yi, y_e = yi + uint(KERNEL_HEIGHT); y < y_e; ++y)
@@ -242,17 +82,18 @@ void main(void)
         for(uint x = xi, x_e = xi + uint(KERNEL_WIDTH); x < x_e; ++x)
         {
 #if PAD_X == 0 && PAD_Y == 0
-            output_offset = input_offset + ((x * src_stride_x + y * src_stride_y) >> uint(2));
-            STORE4(dst, output_offset, LOAD4(src, input_offset));
+            output_offset = input_offset + ((x * src_attrs.stride_x + y * src_attrs.stride_y) >> uint(2));
+            STORE(dst_ptr, output_offset, LOAD(src_ptr, input_offset));
+
 #else  // PAD_X == 0 && PAD_Y == 0
             if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
             {
-                STORE4(dst, output_offset, 0.0f);
+                STORE(dst_ptr, output_offset, 0.0f);
             }
             else
             {
-                output_offset = input_offset + (x * src_stride_x + y * src_stride_y) >> uint(2));
-                STORE4(dst, output_offset, LOAD4(src, input_offset));
+                output_offset = input_offset + (x * srcs_attrs.stride_x + y * src_attrs.stride_y) >> uint(2));
+                STORE(dst_ptr, output_offset, LOAD(src_ptr, input_offset));
             }
 #endif // PAD_X == 0 && PAD_Y == 0
         }
@@ -261,91 +102,208 @@ void main(void)
 #ifdef HAS_BIAS
     if(ch == (uint(KERNEL_DEPTH) - 1))
     {
-        STORE4(dst, output_offset, 1.0f);
+        STORE(dst_ptr, output_offset, 1.0f);
     }
 #endif // HAS_BIAS
 }
-#endif // IM2COL_GENERIC
+
+#elif defined(DATA_TYPE_FP16)
+TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uint, dst_ptr, dst_shift, 2, writeonly);
+
+void main(void)
+{
+}
+
+#else /* DATA_TYPE_FP32 */
+#error Data type not supported
+#endif /* DATA_TYPE_FP32 */
+#endif /* IM2COL_GENERIC */
 
 #ifdef IM2COL_REDUCED
 /** This kernel reshapes the tensor's low three dimensions to single row for GEMM operation
  *
- * @note The data type must be passed at compile time using "#define DATA_TYPE_FP32"
+ * @note The data type must be passed at compile time using "#define DATA_TYPE_FP16"
  * @note In case biases will be added in late stage, "#define HAS_BIAS" has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in]  width                             The width of the input tensor
- * @param[in]  height                            The height of the input tensor
+ * @param[in]  src_ptr   Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_attrs The attributes of the source tensor
+ * @param[out] dst_ptr   Pointer to the destination tensor. Same as @p src_ptr
+ * @param[in]  dst_attrs The attributes of the destination tensor
+ * @param[in]  width     The width of the input tensor
+ * @param[in]  height    The height of the input tensor
  */
+SHADER_PARAMS_DECLARATION
+{
+    Tensor3DAttributes src_attrs;
+    VectorAttributes   dst_attrs;
+    uint               width;
+    uint               height;
+};
+
+#ifdef DATA_TYPE_FP32
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, restrict);
+
 void main(void)
 {
-    uvec3    pos            = uvec3(gl_GlobalInvocationID.xyz);
-    uvec3    size           = uvec3(gl_WorkGroupSize.xyz);
-    Tensor3D src            = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Vector   dst            = CONVERT_TO_VECTOR_STRUCT_NO_STEP(dst);
-    uint     image_size     = width * height;
-    uint     tmp_out_offset = dst.current_offset + (((pos.x + pos.y * width + pos.z * image_size) * dst.stride_x) >> 2);
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    VectorIterator   dst_iter = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(dst_attrs, dst_shift);
 
-    STORE4(dst, tmp_out_offset, LOAD4(src, src.current_offset));
+    uvec3 pos            = uvec3(gl_GlobalInvocationID.xyz);
+    uvec3 size           = uvec3(gl_WorkGroupSize.xyz);
+    uint  image_size     = width * height;
+    uint  tmp_out_offset = VECTOR_OFFSET(dst_iter, pos.x + pos.y * width + pos.z * image_size);
+
+    STORE(dst_ptr, tmp_out_offset, LOAD_CURRENT_ITEM(src_ptr, src_iter));
 
 #ifdef HAS_BIAS
     // If it is the last thread in the 3 dimensional workgroup
     if(pos.x == (size.x - 1) && pos.y == (size.y - 1) && pos.z == (size.z - 1))
     {
-        tmp_out_offset += (dst.stride_x >> uint(2));
-        STORE4(dst, tmp_out_offset, 1.f);
+        tmp_out_offset += (dst_attrs.stride_x >> uint(2));
+        STORE(dst_ptr, tmp_out_offset, 1.f);
     }
 #endif // HAS_BIAS
 }
-#endif // IM2COL_REDUCED
+
+#elif defined(DATA_TYPE_FP16)
+
+#if defined(IM2COL_REDUCED_8X)
+TENSOR_DECLARATION(1, srcBuffer, uvec4, src_ptr, src_shift, 4, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec4, dst_ptr, dst_shift, 4, restrict);
+#elif defined(IM2COL_REDUCED_4X) /* IM2COL_REDUCED_8X */
+TENSOR_DECLARATION(1, srcBuffer, uvec2, src_ptr, src_shift, 3, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec2, dst_ptr, dst_shift, 3, restrict);
+#else                            /* IM2COL_REDUCED_8X */
+TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uint, dst_ptr, dst_shift, 2, restrict);
+#endif                           /* IM2COL_REDUCED_8X */
+
+#if defined(IM2COL_REDUCED_GENERIC)
+void main(void)
+{
+    Tensor3DIterator src_iter        = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator src_nostep_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(src_attrs, src_shift);
+    VectorIterator   dst_iter        = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(dst_attrs, dst_shift);
+
+    uvec3 pos            = uvec3(gl_GlobalInvocationID.xyz);
+    uvec3 size           = uvec3(gl_WorkGroupSize.xyz);
+    uint  image_size     = width * height;
+    uint  element_count  = src_attrs.step_x / src_attrs.stride_x;
+    uint  tmp_out_offset = VECTOR_OFFSET(dst_iter, pos.x * element_count + pos.y * width + pos.z * image_size);
+    uint  width_fp16     = (width + uint(1)) >> uint(1);
+    uint  tmp;
+
+    // odd width
+    if(width % uint(2) != uint(0))
+    {
+        // even row
+        if((pos.y + pos.z * height) % uint(2) == uint(0))
+        {
+            tmp = LOAD_CURRENT_ITEM(src_ptr, src_iter);
+            STORE(dst_ptr, tmp_out_offset, tmp);
+        }
+        else
+        {
+            // special op
+            uint tmpleft  = uint(0);
+            uint tmpright = uint(0);
+            tmpright      = LOAD_CURRENT_ITEM(src_ptr, src_iter); //right half
+            if(pos.x == uint(0))
+            {
+                tmpleft  = LOAD(src_ptr, TENSOR3D_OFFSET(src_nostep_iter, int(width), int(pos.y) - 1, int(pos.z))); //left half
+                tmpright = (tmpleft & uint(0xffff)) + (tmpright << uint(16));
+            }
+            else
+            {
+                tmpleft  = LOAD(src_ptr, TENSOR3D_OFFSET(src_nostep_iter, (int(pos.x) - 1) * int(element_count), int(pos.y), int(pos.z)));
+                tmpright = ((tmpleft >> uint(16)) + (tmpright << uint(16)));
+            }
+            STORE(dst_ptr, tmp_out_offset, tmpright);
+        }
+    }
+    else
+    {
+        tmp = LOAD_CURRENT_ITEM(src_ptr, src_iter);
+        STORE(dst_ptr, tmp_out_offset, tmp);
+
+#ifdef HAS_BIAS
+        // If it is the last thread in the 3 dimensional workgroup
+        if(pos.x == (size.x - 1) && pos.y == (size.y - 1) && pos.z == (size.z - 1))
+        {
+            tmp_out_offset += (dst_attrs.stride_x >> dst_shift);
+
+            // FIXME: need odd/even detection for tmp_out_offset?
+            mediump vec2 bias_vec = vec2(1.0f, 1.0f);
+            STORE_PACK2_HALF(dst_ptr, tmp_out_offset, bias_vec);
+        }
+#endif // HAS_BIAS
+    }
+}
+
+#else /* IM2COL_REDUCED_GENERIC */
+void main(void)
+{
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    VectorIterator   dst_iter = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(dst_attrs, dst_shift);
+
+    uvec3 pos            = uvec3(gl_GlobalInvocationID.xyz);
+#if defined(IM2COL_REDUCED_8X)
+    uint  tmp_out_offset = VECTOR_OFFSET(dst_iter, pos.x * uint(8) + pos.y * width + pos.z * uint(IMAGE_SIZE));
+    uvec4 tmp            = LOAD_CURRENT_ITEM(src_ptr, src_iter);
+    STORE(dst_ptr, tmp_out_offset, tmp);
+#elif defined(IM2COL_REDUCED_4X) /* IM2COL_REDUCED_8X */
+    uint  tmp_out_offset = VECTOR_OFFSET(dst_iter, pos.x * uint(4) + pos.y * width + pos.z * uint(IMAGE_SIZE));
+    uvec2 tmp            = LOAD_CURRENT_ITEM(src_ptr, src_iter);
+    STORE(dst_ptr, tmp_out_offset, tmp);
+#else                            /* IM2COL_REDUCED_8X */
+    uint tmp_out_offset = VECTOR_OFFSET(dst_iter, pos.x * uint(2) + pos.y * width + pos.z * uint(IMAGE_SIZE));
+    uint tmp            = LOAD_CURRENT_ITEM(src_ptr, src_iter);
+    STORE(dst_ptr, tmp_out_offset, tmp);
+#endif                           /* IM2COL_REDUCED_8X */
+}
+#endif                           /* IM2COL_REDUCED_GENERIC */
+#else                            /* DATA_TYPE_FP32 */
+#error Data type not supported
+#endif /* DATA_TYPE_FP32 */
+#endif /* IM2COL_REDUCED */
 
 #ifdef COL2IM
 /** This kernel performs a reshaping of the output of the convolution layer.
  *
  * @note The data type must be passed at compile time using "#define DATA_TYPE_FP32"
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
+ * @param[in]  src_ptr   Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_attrs The attributes of the source tensor
+ * @param[out] dst_ptr   Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs The attributes of the destination tensor
+ * @param[in]  width     The width of output convolved dimensions
  */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes    src_attrs;
+    Tensor3DAttributes dst_attrs;
+    uint               width;
+};
+
+#ifdef DATA_TYPE_FP32
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, restrict);
 void main(void)
 {
-    uvec2    pos = uvec2(gl_GlobalInvocationID.xy);
-    Image    src = CONVERT_TO_IMAGE_STRUCT(src);
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    ImageIterator    src_iter = CONVERT_TO_IMAGE_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
-    uint idx            = pos.x * dst.stride_z + (pos.y / width) * dst.stride_y + (pos.y % width) * dst.stride_x;
-    uint tmp_out_offset = dst.current_offset + (idx >> 2);
+    uvec2 pos            = uvec2(gl_GlobalInvocationID.xy);
+    uint  tmp_out_offset = TENSOR3D_OFFSET(dst_iter, pos.y % width, pos.y / width, pos.x);
 
-    STORE4(dst, tmp_out_offset, LOAD4(src, src.current_offset));
+    STORE(dst_ptr, tmp_out_offset, LOAD_CURRENT_ITEM(src_ptr, src_iter));
 }
-#endif // COL2IM
 
-#else // DATA_TYPE_FP16
+#elif defined(DATA_TYPE_FP16)
+
+#else /* DATA_TYPE_FP32 */
 #error Data type not supported
-#endif // DATA_TYPE_FP16
+#endif /* DATA_TYPE_FP32 */
+#endif /* COL2IM */
