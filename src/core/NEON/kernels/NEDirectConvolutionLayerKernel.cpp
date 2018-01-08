@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1052,8 +1052,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 {
     // Calculate right and bottom border
     unsigned int       kernel_size   = weights->dimension(0);
-    const unsigned int conv_pad_x    = std::get<0>(conv_info.pad());
-    const unsigned int conv_pad_y    = std::get<1>(conv_info.pad());
     const unsigned int conv_stride_x = std::get<0>(conv_info.stride());
     const unsigned int conv_stride_y = std::get<1>(conv_info.stride());
     const int          input_width   = input->dimension(0);
@@ -1122,12 +1120,22 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         }
     }
 
-    const int upper_bound_w    = ceil_to_multiple(((output->dimension(0) - 1) * conv_stride_x + kernel_size), num_elems_read_per_iteration) - conv_pad_x - input_width;
-    const int upper_bound_h    = ((output->dimension(1) - 1) * conv_stride_y - conv_pad_y + kernel_size) - input_height;
-    border_size.right          = std::max(upper_bound_w, static_cast<int>(kernel_size));
-    border_size.bottom         = std::max(upper_bound_h, static_cast<int>(kernel_size));
+    // Calculate border
+    int upper_bound_w = ceil_to_multiple(((output->dimension(0) - 1) * conv_stride_x + kernel_size), num_elems_read_per_iteration) - conv_info.pad_left() - conv_info.pad_right() - input_width;
+    int upper_bound_h = ((output->dimension(1) - 1) * conv_stride_y - conv_info.pad_top() - conv_info.pad_bottom() + kernel_size) - input_height;
+
+    const unsigned int conv_pad_left   = std::max(upper_bound_w - static_cast<int>(conv_info.pad_right()), static_cast<int>(kernel_size) / 2);
+    const unsigned int conv_pad_top    = std::max(upper_bound_h - static_cast<int>(conv_info.pad_bottom()), static_cast<int>(kernel_size) / 2);
+    const unsigned int conv_pad_right  = std::max(upper_bound_w - static_cast<int>(conv_info.pad_left()), static_cast<int>(kernel_size) / 2);
+    const unsigned int conv_pad_bottom = std::max(upper_bound_h - static_cast<int>(conv_info.pad_top()), static_cast<int>(kernel_size) / 2);
+
+    border_size.right  = conv_pad_right;
+    border_size.bottom = conv_pad_bottom;
+    border_size.left   = conv_pad_left;
+    border_size.top    = conv_pad_top;
+
     Window                 win = calculate_max_window(*output, Steps(num_elems_written_per_iteration));
-    AccessWindowStatic     input_access(input, -conv_pad_x, -conv_pad_y, input_width + border_size.right, input_height + border_size.bottom);
+    AccessWindowStatic     input_access(input, -conv_pad_left, -conv_pad_top, input_width + conv_pad_right, input_height + conv_pad_bottom);
     AccessWindowStatic     weights_access(weights, 0, 0, num_weight_elems_read_per_row, kernel_size);
     AccessWindowHorizontal output_access(output, 0, num_elems_written_per_iteration);
     bool                   window_changed = update_window_and_padding(win, input_access, weights_access, output_access);
@@ -1152,15 +1160,18 @@ BorderSize NEDirectConvolutionLayerKernel::border_size() const
 void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    const unsigned int conv_pad_x = std::get<0>(conv_info.pad());
-    const unsigned int conv_pad_y = std::get<1>(conv_info.pad());
 
     _input       = input;
     _weights     = weights;
     _output      = output;
     _conv_info   = conv_info;
     _kernel_size = weights->info()->dimension(0);
-    _border_size = BorderSize(conv_pad_y, conv_pad_x);
+
+    const unsigned int conv_pad_left   = conv_info.pad_left();
+    const unsigned int conv_pad_top    = conv_info.pad_top();
+    const unsigned int conv_pad_right  = conv_info.pad_right();
+    const unsigned int conv_pad_bottom = conv_info.pad_bottom();
+    _border_size                       = BorderSize(conv_pad_top, conv_pad_right, conv_pad_bottom, conv_pad_left);
 
     // Get convolved dimensions
     TensorShape output_shape = get_convolved_dimensions(input->info(), weights->info(), _kernel_size, conv_info);

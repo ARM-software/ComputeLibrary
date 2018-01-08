@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,13 +77,13 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const
     _conv_info                       = conv_info;
     const unsigned int conv_stride_x = conv_info.stride().first;
     const unsigned int conv_stride_y = conv_info.stride().second;
-    const unsigned int conv_pad_x    = conv_info.pad().first;
-    const unsigned int conv_pad_y    = conv_info.pad().second;
+    const unsigned int conv_pad_left = conv_info.pad_left();
+    const unsigned int conv_pad_top  = conv_info.pad_top();
 
     ARM_COMPUTE_ERROR_ON(conv_stride_x < 1 || conv_stride_x > 3);
 
     const unsigned int num_elems_written_per_iteration = 16 >> conv_stride_x;
-    _border_size                                       = BorderSize(conv_pad_y, conv_pad_x);
+    _border_size                                       = BorderSize(conv_pad_top, conv_info.pad_right(), conv_info.pad_bottom(), conv_pad_left);
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration));
@@ -91,7 +91,7 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const
     const unsigned int num_x_steps               = (output_shape.x() + num_elems_written_per_iteration - 1) / num_elems_written_per_iteration;
     const int          input_num_elems_processed = get_input_num_elems_processed(num_elems_written_per_iteration, conv_stride_x);
 
-    AccessWindowStatic input_access(input->info(), -conv_pad_x, -conv_pad_y, (num_x_steps - 1) * input_num_elems_processed + 12, conv_stride_y * (output_shape.y() - 1) + 2);
+    AccessWindowStatic input_access(input->info(), -conv_pad_left, -conv_pad_top, (num_x_steps - 1) * input_num_elems_processed + 12, conv_stride_y * (output_shape.y() - 1) + 2);
     AccessWindowStatic weights_access(weights->info(), 0, 0, weights->info()->dimension(0), weights->info()->dimension(1));
     AccessWindowStatic output_access(output->info(), 0, 0, num_x_steps * num_elems_written_per_iteration, output_shape.y());
 
