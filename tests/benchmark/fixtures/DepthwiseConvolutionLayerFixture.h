@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ public:
         // Create tensors
         src     = create_tensor<TensorType>(src_shape, data_type, 1, fixed_point_position);
         weights = create_tensor<TensorType>(weights_shape, data_type, 1, fixed_point_position);
-        biases  = create_tensor<TensorType>(TensorShape(weights_shape[2]), data_type, 1, fixed_point_position);
+        biases  = create_tensor<TensorType>(TensorShape(weights_shape[2]), is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type, 1, fixed_point_position);
         dst     = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
 
         // Create and configure function
