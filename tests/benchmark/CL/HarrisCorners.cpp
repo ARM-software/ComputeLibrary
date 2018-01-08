@@ -55,7 +55,7 @@ TEST_SUITE(CL)
 TEST_SUITE(HarrisCorners)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageShapes(),
-                                                                                                                     framework::dataset::make("Format", { Format::S16 })),
+                                                                                                                     framework::dataset::make("Format", { Format::U8 })),
                                                                                                                      threshold),
                                                                                                                      min_dist),
                                                                                                                      sensitivity),
@@ -65,7 +65,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture, framework::Dat
                                                                                                              framework::dataset::make("UseFP16", { false })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageShapes(),
-                                                                                                                   framework::dataset::make("Format", { Format::S16 })),
+                                                                                                                   framework::dataset::make("Format", { Format::U8 })),
                                                                                                                    threshold),
                                                                                                                    min_dist),
                                                                                                                    sensitivity),

@@ -57,7 +57,7 @@ TEST_SUITE(HarrisCorners)
 TEST_SUITE(FP16)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageShapes(),
-                                                                                                                     framework::dataset::make("Format", { Format::S16 })),
+                                                                                                                     framework::dataset::make("Format", { Format::U8 })),
                                                                                                                      threshold),
                                                                                                                      min_dist),
                                                                                                                      sensitivity),
@@ -66,7 +66,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::Dat
                                                                                                                      border_mode),
                                                                                                              framework::dataset::make("UseFP16", { true })));
 REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageShapes(),
-                                                                                                                   framework::dataset::make("Format", { Format::S16 })),
+                                                                                                                   framework::dataset::make("Format", { Format::U8 })),
                                                                                                                    threshold),
                                                                                                                    min_dist),
                                                                                                                    sensitivity),
@@ -79,7 +79,7 @@ TEST_SUITE_END() // FP16
 
 TEST_SUITE(S16)
 REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageShapes(),
-                                                                                                                     framework::dataset::make("Format", { Format::S16 })),
+                                                                                                                     framework::dataset::make("Format", { Format::U8 })),
                                                                                                                      threshold),
                                                                                                                      min_dist),
                                                                                                                      sensitivity),
@@ -88,7 +88,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::Dat
                                                                                                                      border_mode),
                                                                                                              framework::dataset::make("UseFP16", { false })));
 REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageShapes(),
-                                                                                                                   framework::dataset::make("Format", { Format::S16 })),
+                                                                                                                   framework::dataset::make("Format", { Format::U8 })),
                                                                                                                    threshold),
                                                                                                                    min_dist),
                                                                                                                    sensitivity),
