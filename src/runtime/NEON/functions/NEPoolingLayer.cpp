@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,9 +43,14 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     // Configure pooling kernel
     _pooling_layer_kernel.configure(input, output, pool_info);
 
-    // Configure border depending on operation required
+    // Configure border depending on operation required (quantize border in case of asymmetric data_type)
     BorderMode border_mode = (pool_info.pool_type() == PoolingType::MAX) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
-    _border_handler.configure(input, _pooling_layer_kernel.border_size(), border_mode, PixelValue(static_cast<float>(0.f)));
+    PixelValue zero_value(0.f);
+    if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding())
+    {
+        zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
+    }
+    _border_handler.configure(input, _pooling_layer_kernel.border_size(), border_mode, zero_value);
 }
 
 Status NEPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)

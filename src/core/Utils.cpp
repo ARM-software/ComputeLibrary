@@ -320,6 +320,7 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
 {
     switch(dt)
     {
+        case DataType::QASYMM8:
         case DataType::U8:
             print_consecutive_elements_impl<uint8_t>(s, ptr, n, stream_width, element_delim);
             break;
@@ -355,6 +356,7 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
 {
     switch(dt)
     {
+        case DataType::QASYMM8:
         case DataType::U8:
             return max_consecutive_elements_display_width_impl<uint8_t>(s, ptr, n);
         case DataType::QS8:

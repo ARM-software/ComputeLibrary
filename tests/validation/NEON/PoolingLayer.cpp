@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,12 +53,18 @@ const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::m
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                            framework::dataset::make("ExcludePadding", { false }));
 
+/** Input data set for asymmetric data type */
+const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3, 9 })),
+                                                        framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
+                                                framework::dataset::make("ExcludePadding", { true, false }));
+
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for float types */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for float types */
-#endif                                                   /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-constexpr AbsoluteTolerance<float> tolerance_qs8(0);     /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
-constexpr AbsoluteTolerance<float> tolerance_qs16(0);    /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
+constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);   /**< Tolerance value for comparing reference's output against implementation's output for float types */
+#endif                                                     /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+constexpr AbsoluteTolerance<float>   tolerance_qs8(0);     /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
+constexpr AbsoluteTolerance<float>   tolerance_qs16(0);    /**< Tolerance value for comparing reference's output against implementation's output for quantized input */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
 } // namespace
 
 TEST_SUITE(NEON)
@@ -148,7 +154,7 @@ TEST_SUITE_END()
 template <typename T>
 using NEPoolingLayerFixedPointFixture = PoolingLayerValidationFixedPointFixture<Tensor, Accessor, NEPoolingLayer, T>;
 
-TEST_SUITE(Quantized)
+TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
                                                                                                                        framework::dataset::make("DataType", DataType::QS8))),
@@ -180,6 +186,31 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixedPointFixture<int16_t>, frame
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qs16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+TEST_SUITE(Quantized)
+
+template <typename T>
+using NEPoolingLayerQuantizedFixture = PoolingLayerValidationQuantizedFixture<Tensor, Accessor, NEPoolingLayer, T>;
+
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQASYMM8,
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8))),
+                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127),
+                                                                                                                       QuantizationInfo(7.f / 255, 123)
+                                                                                                                                                            })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQASYMM8,
+                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8))),
+                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
