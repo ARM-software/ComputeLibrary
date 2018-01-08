@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,18 +122,9 @@ void GCDepthConcatenateLayerKernel::run(const Window &window)
 
     do
     {
-        if(_input->info()->data_type() == DataType::F32)
-        {
-            unsigned int idx = 0;
-            add_3D_tensor_argument(idx, _input, 1, slice);
-            add_3D_tensor_argument(idx, _output, 2, slice);
-        }
-        else if(_input->info()->data_type() == DataType::F16)
-        {
-            unsigned int idx = 0;
-            add_3D_tensor_argument(idx, _input, BufferParam(1, 3), slice);
-            add_3D_tensor_argument(idx, _output, BufferParam(2, 3), slice);
-        }
+        unsigned int idx = 0;
+        add_3D_tensor_argument(idx, _input, 1, slice);
+        add_3D_tensor_argument(idx, _output, 2, slice);
 
         _kernel.update_shader_params();
 

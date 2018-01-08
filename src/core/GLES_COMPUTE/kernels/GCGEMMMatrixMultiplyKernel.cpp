@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -201,35 +201,10 @@ void GCGEMMMatrixMultiplyKernel::run(const Window &window)
         }
 
         unsigned int idx = 0;
-        switch(_input0->info()->data_type())
-        {
-            case DataType::F16:
-#if defined(MM_PROCESS_4X)
-                add_2D_tensor_argument(idx, _input0, BufferParam(1, 2), slice);
-                add_2D_tensor_argument(idx, _input1, BufferParam(2, 3), slice_b);
-                add_2D_tensor_argument(idx, _output, BufferParam(3, 3), slice);
-#elif defined(MM_PROCESS_4X_OPTIMIZED) /* MM_PROCESS_4X */
-                add_2D_tensor_argument(idx, _input0, BufferParam(1, 4), slice);
-                add_2D_tensor_argument(idx, _input1, BufferParam(2, 3), slice_b);
-                add_2D_tensor_argument(idx, _output, BufferParam(3, 3), slice);
-#elif defined(MM_PROCESS_8X)           /* MM_PROCESS_4X */
-                add_2D_tensor_argument(idx, _input0, BufferParam(1, 4), slice);
-                add_2D_tensor_argument(idx, _input1, BufferParam(2, 4), slice_b);
-                add_2D_tensor_argument(idx, _output, BufferParam(3, 4), slice);
-#endif                                 /* MM_PROCESS_4X */
-                break;
 
-            case DataType::F32:
-                add_2D_tensor_argument(idx, _input0, BufferParam(1, 2), slice);
-                add_2D_tensor_argument(idx, _input1, BufferParam(2, 2), slice_b);
-                add_2D_tensor_argument(idx, _output, BufferParam(3, 2), slice);
-                break;
-
-            default:
-                ARM_COMPUTE_ERROR("Current data type is not supported");
-                break;
-        }
-
+        add_2D_tensor_argument(idx, _input0, 1, slice);
+        add_2D_tensor_argument(idx, _input1, 2, slice_b);
+        add_2D_tensor_argument(idx, _output, 3, slice);
         _kernel.update_shader_params();
         enqueue(*this, slice);
     }

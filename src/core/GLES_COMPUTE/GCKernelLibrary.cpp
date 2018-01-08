@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -380,20 +380,8 @@ const std::string GCKernelLibrary::preprocess_shader(const std::string &shader_s
         FIRST,
         SKIP_COMMENTS = FIRST,
         RESOLVE_INCLUDES,
-        SKIP_PREPROCESSOR_DIRECTIVES,
-        SEARCH_MACRO_DEFINITIONS,
-        EXPAND_MACRO_USES,
         LAST
     };
-
-    struct MacroDefinitionInfo
-    {
-        const std::vector<std::string> param_list;
-        const std::string              content;
-    };
-
-    // Found macro definitions so far
-    std::map<const std::string, const MacroDefinitionInfo> macro_definitions;
 
     // Define a GLES compute shader parser function
     std::function<std::string(const std::string &, ParserStage, int)> cs_parser;
@@ -416,35 +404,6 @@ const std::string GCKernelLibrary::preprocess_shader(const std::string &shader_s
             case ParserStage::RESOLVE_INCLUDES:
                 search_pattern = R"rgx((?:^|\n)[ \t]*#include "(.*)")rgx";
                 break;
-            case ParserStage::SKIP_PREPROCESSOR_DIRECTIVES:
-                search_pattern = R"((^|\n)[ \t]*(#ifdef|#ifndef|#if)[^\n]+)";
-                break;
-            case ParserStage::SEARCH_MACRO_DEFINITIONS:
-                search_pattern = R"((?:^|\n)[ \t]*#define[ \t]+(\w+)(?:\((\w+(?:[ \t]*,[ \t]*\w+)*)\))?(?: |\t|\\\n)*((?:(?:[^\\\n]|\\[^\n])*\\+\n)*(?:[ \t]*[^ \t\n]+)*)[ \t]*)";
-                break;
-            case ParserStage::EXPAND_MACRO_USES:
-            {
-                if(macro_definitions.empty())
-                {
-                    // Nothing to expand
-                    return src;
-                }
-                int i = 0;
-                for(auto &def : macro_definitions)
-                {
-                    if(i == 0)
-                    {
-                        search_pattern = R"((\b)" + def.first;
-                    }
-                    else
-                    {
-                        search_pattern += R"(\b|\b)" + def.first;
-                    }
-                    i++;
-                }
-                search_pattern += R"(\b))";
-                break;
-            }
             default:
                 break;
         }
@@ -469,126 +428,7 @@ const std::string GCKernelLibrary::preprocess_shader(const std::string &shader_s
                     dst.append(cs_parser(read_file(source_name, false), ParserStage::FIRST, 0));
                     break;
                 }
-                case ParserStage::SEARCH_MACRO_DEFINITIONS:
-                {
-                    std::regex                     params_regex(R"(\b\w+\b)");
-                    const std::string              macro_param_str = match.str(2);
-                    const std::vector<std::string> macro_param_list(
-                        std::sregex_token_iterator(macro_param_str.begin(),
-                                                   macro_param_str.end(),
-                                                   params_regex),
-                        std::sregex_token_iterator());
-
-                    const MacroDefinitionInfo info =
-                    {
-                        macro_param_list,
-                        match.str(3)
-                    };
-                    // Collect the macro definition data and not change the shader source
-                    macro_definitions.insert(std::pair<const std::string, const MacroDefinitionInfo>(match.str(1), info));
-                    dst.append(match.str());
-                    break;
-                }
-                case ParserStage::EXPAND_MACRO_USES:
-                {
-                    ptrdiff_t                args_str_length = 0;
-                    std::vector<std::string> args_list;
-
-                    // Walk through argument list, because the regular expression does NOT support nested parentheses
-                    size_t cur_args_str_pos = match.position() + match.length();
-                    if(src[cur_args_str_pos++] == '(')
-                    {
-                        int       nested_parentheses = 0;
-                        ptrdiff_t cur_arg_pos        = cur_args_str_pos;
-                        ptrdiff_t cur_arg_length     = 0;
-
-                        args_str_length++;
-                        while(src[cur_args_str_pos] != ')' || nested_parentheses != 0)
-                        {
-                            switch(src[cur_args_str_pos++])
-                            {
-                                case '(':
-                                    nested_parentheses++;
-                                    cur_arg_length++;
-                                    break;
-                                case ',':
-                                    if(nested_parentheses == 0)
-                                    {
-                                        args_list.push_back(src.substr(cur_arg_pos, cur_arg_length));
-                                        cur_arg_pos    = cur_args_str_pos;
-                                        cur_arg_length = 0;
-                                    }
-                                    else
-                                    {
-                                        cur_arg_length++;
-                                    }
-                                    break;
-                                case ' ':
-                                case '\t':
-                                    if(cur_arg_length == 0)
-                                    {
-                                        cur_arg_pos++;
-                                    }
-                                    else
-                                    {
-                                        cur_arg_length++;
-                                    }
-                                    break;
-                                case ')':
-                                    nested_parentheses--;
-                                // no break here!
-                                default:
-                                    cur_arg_length++;
-                                    break;
-                            }
-                            args_str_length++;
-                        }
-                        if(src[cur_args_str_pos] == ')' && nested_parentheses == 0)
-                        {
-                            args_list.push_back(src.substr(cur_arg_pos, cur_arg_length));
-                        }
-                        args_str_length++;
-                    }
-
-                    std::string                    expanded_content = match.str();
-                    const std::vector<std::string> macro_param_list = macro_definitions.at(match.str()).param_list;
-
-                    if((nested_level != 0 || !macro_param_list.empty()) && macro_param_list.size() == args_list.size())
-                    {
-                        parsed_pos += args_str_length;
-                        expanded_content = macro_definitions.at(match.str()).content;
-                        size_t i         = 0;
-                        for(auto &param_name : macro_param_list)
-                        {
-                            std::regex params_regex(R"(\b)" + param_name + R"(\b)");
-                            expanded_content.assign(std::regex_replace(expanded_content, params_regex, args_list[i]));
-                            ++i;
-                        }
-                        // Expand macro recursively
-                        expanded_content = cs_parser(expanded_content, stage, nested_level + 1);
-
-                        if(nested_level == 0)
-                        {
-                            const std::regex token_pasting_rgx = std::regex(R"(\b##\b)");
-                            if(std::regex_search(expanded_content, token_pasting_rgx))
-                            {
-                                // Remove token pasting operator "##"
-                                expanded_content.assign(std::regex_replace(expanded_content, std::regex(token_pasting_rgx), ""));
-                                // Trim trailing whitespace
-                                expanded_content.assign(std::regex_replace(expanded_content, std::regex(R"([ \t]*\\\n)"), "\n"));
-                            }
-                            else
-                            {
-                                // Do not expand the macro if the result does not have token pasting operator "##"
-                                expanded_content = src.substr(match.position(), match.length() + args_str_length);
-                            }
-                        }
-                    }
-                    dst.append(expanded_content);
-                    break;
-                }
                 case ParserStage::SKIP_COMMENTS:
-                case ParserStage::SKIP_PREPROCESSOR_DIRECTIVES:
                 default:
                     dst.append(match.str());
                     break;
@@ -622,12 +462,7 @@ const GCProgram &GCKernelLibrary::load_program(const std::string &program_name) 
         ARM_COMPUTE_ERROR("Embedded program for %s does not exist.", program_name.c_str());
     }
 
-    // TODO(APPBROWSER-298): Do not call shader preprocessor here
-    //       We should do the preprocess at compile time
-    //       The preprocess_shader function is used for support "#include" directive and token pasting operator "##".
-    //       This job could be done at compile time by using a python script in order to get better performance at runtime.
-    //       BTW: We usually defined EMBEDDED_KERNELS in release build.
-    program = GCProgram(program_name, preprocess_shader(program_source_it->second));
+    program = GCProgram(program_name, program_source_it->second);
 #else  /* EMBEDDED_KERNELS */
     // Check for binary
     std::string source_name = _shader_path + program_name;

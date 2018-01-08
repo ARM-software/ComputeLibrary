@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -397,69 +397,21 @@ void GCDirectConvolutionLayerKernel<kernel_size>::run(const Window &window)
     Window slice_in = win_in.first_slice_window_3D();
 
     unsigned int idx1 = 2 * num_arguments_per_3D_tensor();
-    add_3D_tensor_argument(idx1, _weights, BufferParam(3, 2), slice);
+    add_3D_tensor_argument(idx1, _weights, 3, slice);
 
     if(_bias != nullptr)
     {
         Window slice_bias;
         slice_bias.use_tensor_dimensions(_bias->info()->tensor_shape());
-        add_1D_tensor_argument(idx1, _bias, BufferParam(4, 2), slice_bias);
+        add_1D_tensor_argument(idx1, _bias, 4, slice_bias);
     }
 
     do
     {
         unsigned int idx = 0;
 
-        switch(_input->info()->data_type())
-        {
-            case DataType::F16:
-                switch(kernel_size)
-                {
-                    case 1:
-                        add_3D_tensor_argument(idx, _input, BufferParam(1, 4), slice_in);
-                        add_3D_tensor_argument(idx, _output, BufferParam(2, 4), slice);
-                        break;
-
-                    case 3:
-                        add_3D_tensor_argument(idx, _input, BufferParam(1, 3), slice_in);
-                        add_3D_tensor_argument(idx, _output, BufferParam(2, 3), slice);
-                        break;
-
-                    case 5:
-                        add_3D_tensor_argument(idx, _input, BufferParam(1, 3), slice_in);
-                        add_3D_tensor_argument(idx, _output, BufferParam(2, 3), slice);
-                        break;
-
-                    default:
-                        ARM_COMPUTE_ERROR("Current kernel size %d is not supported", kernel_size);
-                        break;
-                }
-                break;
-
-            case DataType::F32:
-                switch(kernel_size)
-                {
-                    case 1:
-                    case 5:
-                        add_3D_tensor_argument(idx, _input, BufferParam(1, 2), slice_in);
-                        add_3D_tensor_argument(idx, _output, BufferParam(2, 2), slice);
-                        break;
-
-                    case 3:
-                        add_3D_tensor_argument(idx, _input, BufferParam(1, 4), slice_in);
-                        add_3D_tensor_argument(idx, _output, BufferParam(2, 4), slice);
-                        break;
-
-                    default:
-                        ARM_COMPUTE_ERROR("Current kernel size %d is not supported", kernel_size);
-                        break;
-                }
-                break;
-
-            default:
-                ARM_COMPUTE_ERROR("Current data type is not supported");
-                break;
-        }
+        add_3D_tensor_argument(idx, _input, 1, slice_in);
+        add_3D_tensor_argument(idx, _output, 2, slice);
 
         _kernel.update_shader_params();
         enqueue(*this, slice, _lws);

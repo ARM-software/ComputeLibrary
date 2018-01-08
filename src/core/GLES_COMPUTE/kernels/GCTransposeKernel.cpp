@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,26 +132,9 @@ void GCTransposeKernel::run(const Window &window)
     do
     {
         unsigned int idx = 0;
-        if(_input->info()->data_type() == DataType::F32)
-        {
-            add_2D_tensor_argument(idx, _input, 1, slice);
-            add_2D_tensor_argument(idx, _output, 2, slice);
-        }
-        else if(_input->info()->data_type() == DataType::F16)
-        {
-#if defined(TRANSPOSE_4X4)
-            BufferParam param = { 1, 3 };
-            add_2D_tensor_argument(idx, _input, param, slice);
-            param.binding_point = 2;
-            add_2D_tensor_argument(idx, _output, param, slice);
-#elif defined(TRANSPOSE_8X8) /* TRANSPOSE_4X4 */
-            BufferParam param = { 1, 4 };
-            add_2D_tensor_argument(idx, _input, param, slice);
-            param.binding_point = 2;
-            add_2D_tensor_argument(idx, _output, param, slice);
-#endif                       /* TRANSPOSE_4X4 */
-        }
 
+        add_2D_tensor_argument(idx, _input, 1, slice);
+        add_2D_tensor_argument(idx, _output, 2, slice);
         _kernel.update_shader_params();
         enqueue(*this, slice, _lws_hint);
     }

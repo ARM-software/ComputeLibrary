@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,25 +46,6 @@ public:
      */
     GCKernel &kernel();
 
-    class BufferParam
-    {
-    public:
-        /** Tensor's binding point in this kernel. */
-        unsigned int binding_point = 0;
-        /** The base 2 logarithm of SSBO buffer data type size (Number of bits to be shift for offset calculation) */
-        unsigned int buffer_data_type_shift = 0;
-
-        /** Constructor
-         *
-         * @param[in] binding Tensor's binding point.
-         * @param[in] shift   Number of bits to be shift for offset calculation
-         */
-        BufferParam(const unsigned int binding, const unsigned int shift)
-            : binding_point(binding), buffer_data_type_shift(shift)
-        {
-        }
-    };
-
     /** Add the passed 1D tensor's parameters to the object's kernel's arguments starting from the index idx.
      *
      * @param[in] idx           Index at which to start adding the tensor's arguments.Input and output tensor will have sperated index, multiple indices start from 1, single index have to be set to 0.
@@ -73,15 +54,6 @@ public:
      * @param[in] window        Window the kernel will be executed on.
      */
     void add_1D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const unsigned int binding_point, const Window &window);
-
-    /** Add the passed 1D tensor's parameters to the object's kernel's arguments starting from the index idx.
-     *
-     * @param[in] idx    Index at which to start adding the tensor's arguments.Input and output tensor will have sperated index, multiple indices start from 1, single index have to be set to 0.
-     * @param[in] tensor Tensor to set as an argument of the object's kernel.
-     * @param[in] param  Additional parameter for GLES SSBO buffer.
-     * @param[in] window Window the kernel will be executed on.
-     */
-    void add_1D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const BufferParam &param, const Window &window);
 
     /** Add the passed 2D tensor's parameters to the object's kernel's arguments starting from the index idx.
      *
@@ -92,15 +64,6 @@ public:
      */
     void add_2D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const unsigned int binding_point, const Window &window);
 
-    /** Add the passed 2D tensor's parameters to the object's kernel's arguments starting from the index idx.
-     *
-     * @param[in] idx    Index at which to start adding the tensor's arguments.Input and output tensor will have sperated index, multiple indices start from 1, single index have to be set to 0.
-     * @param[in] tensor Tensor to set as an argument of the object's kernel.
-     * @param[in] param  Additional parameter for GLES SSBO buffer.
-     * @param[in] window Window the kernel will be executed on.
-     */
-    void add_2D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const BufferParam &param, const Window &window);
-
     /** Add the passed 3D tensor's parameters to the object's kernel's arguments starting from the index idx.
      *
      * @param[in] idx           Index at which to start adding the tensor's arguments.Input and output tensor will have sperated index, multiple indices start from 1, single index have to be set to 0.
@@ -109,15 +72,6 @@ public:
      * @param[in] window        Window the kernel will be executed on.
      */
     void add_3D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const unsigned int binding_point, const Window &window);
-
-    /** Add the passed 3D tensor's parameters to the object's kernel's arguments starting from the index idx.
-     *
-     * @param[in] idx    Index at which to start adding the tensor's arguments.Input and output tensor will have sperated index, multiple indices start from 1, single index have to be set to 0.
-     * @param[in] tensor Tensor to set as an argument of the object's kernel.
-     * @param[in] param  Additional parameter for GLES SSBO buffer.
-     * @param[in] window Window the kernel will be executed on.
-     */
-    void add_3D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const BufferParam &param, const Window &window);
 
     /** Returns the number of arguments enqueued per 1D tensor object.
      *
@@ -154,13 +108,13 @@ public:
 private:
     /** Add the passed tensor's parameters to the object's kernel's arguments starting from the index idx.
      *
-     * @param[in] idx    Index at which to start adding the tensor's arguments.Input and output tensor will have sperated index, multiple indices start from 1, single index have to be set to 0.
-     * @param[in] tensor Tensor to set as an argument of the object's kernel.
-     * @param[in] param  Additional parameter for GLES SSBO buffer.
-     * @param[in] window Window the kernel will be executed on.
+     * @param[in] idx           Index at which to start adding the tensor's arguments.Input and output tensor will have sperated index, multiple indices start from 1, single index have to be set to 0.
+     * @param[in] tensor        Tensor to set as an argument of the object's kernel.
+     * @param[in] binding_point Tensor's binding point in this kernel.
+     * @param[in] window        Window the kernel will be executed on.
      */
     template <unsigned int dimension_size>
-    void add_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const BufferParam &param, const Window &window);
+    void add_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const unsigned int binding_point, const Window &window);
 
     /** Returns the number of arguments enqueued per tensor object.
      *
