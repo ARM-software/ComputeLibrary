@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/benchmark/fixtures/HarrisCornersFixture.h"
-#include "tests/datasets/ShapeDatasets.h"
+#include "tests/datasets/ImageFileDatasets.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "utils/TypePrinter.h"
@@ -56,7 +56,7 @@ TEST_SUITE(HarrisCorners)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageShapes(),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageFiles(),
                                                                                                                      framework::dataset::make("Format", { Format::U8 })),
                                                                                                                      threshold),
                                                                                                                      min_dist),
@@ -65,7 +65,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::Dat
                                                                                                                      block_size),
                                                                                                                      border_mode),
                                                                                                              framework::dataset::make("UseFP16", { true })));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageShapes(),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageFiles(),
                                                                                                                    framework::dataset::make("Format", { Format::U8 })),
                                                                                                                    threshold),
                                                                                                                    min_dist),
@@ -78,7 +78,7 @@ TEST_SUITE_END() // FP16
 #endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 TEST_SUITE(S16)
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageShapes(),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageFiles(),
                                                                                                                      framework::dataset::make("Format", { Format::U8 })),
                                                                                                                      threshold),
                                                                                                                      min_dist),
@@ -87,7 +87,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::Dat
                                                                                                                      block_size),
                                                                                                                      border_mode),
                                                                                                              framework::dataset::make("UseFP16", { false })));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageShapes(),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageFiles(),
                                                                                                                    framework::dataset::make("Format", { Format::U8 })),
                                                                                                                    threshold),
                                                                                                                    min_dist),

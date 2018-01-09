@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "tests/NEON/ArrayAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/BorderModeDataset.h"
+#include "tests/datasets/ImageFileDatasets.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -107,7 +108,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 template <typename T>
 using NEHarrisCornersFixture = HarrisCornersValidationFixture<Tensor, Accessor, KeyPointArray, NEHarrisCorners, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::Small2DShapes(), data), framework::dataset::make("Format", Format::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageFiles(), data), framework::dataset::make("Format",
+                                                                                                             Format::U8)))
 {
     // Validate output
     ArrayAccessor<KeyPoint> array(_target);
@@ -120,7 +122,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture<uint8_t>, framework::Dat
                        allowed_mismatch_percentage);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::Large2DShapes(), data), framework::dataset::make("Format", Format::U8)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeImageFiles(), data), framework::dataset::make("Format", Format::U8)))
 {
     // Validate output
     ArrayAccessor<KeyPoint> array(_target);

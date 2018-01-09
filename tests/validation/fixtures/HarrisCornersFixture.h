@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,20 +47,20 @@ class HarrisCornersValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, int gradient_size, int block_size, BorderMode border_mode, bool use_fp16, Format format)
+    void setup(std::string image, int gradient_size, int block_size, BorderMode border_mode, bool use_fp16, Format format)
     {
         HarrisCornersParameters params = harris_corners_parameters();
 
-        _target = compute_target(shape, gradient_size, block_size, border_mode, use_fp16, format, params);
+        _target = compute_target(image, gradient_size, block_size, border_mode, use_fp16, format, params);
         //TODO(COMPMID-543): Add use_fp16 to reference
-        _reference = compute_reference(shape, gradient_size, block_size, border_mode, format, params);
+        _reference = compute_reference(image, gradient_size, block_size, border_mode, format, params);
     }
 
 protected:
     template <typename U>
-    void fill(U &&tensor)
+    void fill(U &&tensor, RawTensor raw)
     {
-        library->fill_tensor_uniform(tensor, 0);
+        library->fill(tensor, raw);
     }
 
     template <typename F, typename std::enable_if<std::is_same<F, NEHarrisCorners>::value, int>::type = 0>
@@ -77,14 +77,16 @@ protected:
         func.configure(&src, params.threshold, params.min_dist, params.sensitivity, gradient_size, block_size, &corners, border_mode, params.constant_border_value);
     }
 
-    ArrayType compute_target(const TensorShape &shape, int gradient_size, int block_size, BorderMode border_mode, bool use_fp16, Format format, const HarrisCornersParameters &params)
+    ArrayType compute_target(std::string image, int gradient_size, int block_size, BorderMode border_mode, bool use_fp16, Format format, const HarrisCornersParameters &params)
     {
+        // Load the image (cached by the library if loaded before)
+        const RawTensor &raw = library->get(image, format);
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type_from_format(format));
-        src.info()->set_format(format);
+        TensorType src = create_tensor<TensorType>(raw.shape(), format);
 
         // Create array of keypoints
-        ArrayType corners(shape.total_size());
+        ArrayType corners(raw.shape().total_size());
 
         // Create harris corners configure function
         FunctionType harris_corners;
@@ -98,7 +100,7 @@ protected:
         ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(AccessorType(src));
+        fill(AccessorType(src), raw);
 
         // Compute function
         harris_corners.run();
@@ -106,13 +108,15 @@ protected:
         return corners;
     }
 
-    std::vector<KeyPoint> compute_reference(const TensorShape &shape, int gradient_size, int block_size, BorderMode border_mode, Format format, const HarrisCornersParameters &params)
+    std::vector<KeyPoint> compute_reference(std::string image, int gradient_size, int block_size, BorderMode border_mode, Format format, const HarrisCornersParameters &params)
     {
+        // Load the image (cached by the library if loaded before)
+        const RawTensor &raw = library->get(image, format);
         // Create reference
-        SimpleTensor<T> src{ shape, format };
+        SimpleTensor<T> src{ raw.shape(), format };
 
         // Fill reference
-        fill(src);
+        fill(src, raw);
 
         return reference::harris_corner_detector<T>(src, params.threshold, params.min_dist, params.sensitivity, gradient_size, block_size, border_mode, params.constant_border_value);
     }

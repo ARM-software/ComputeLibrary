@@ -41,12 +41,15 @@ class HarrisCornersFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(const TensorShape &shape, Format format, float threshold, float min_dist, float sensitivity,
+    void setup(std::string image, Format format, float threshold, float min_dist, float sensitivity,
                int32_t gradient_size, int32_t block_size,
                BorderMode border_mode, bool use_fp16)
     {
+        // Load the image (cached by the library if loaded before)
+        const RawTensor &raw = library->get(image, format);
+
         // Create tensor
-        src = create_tensor<TensorType>(shape, format);
+        src = create_tensor<TensorType>(raw.shape(), format);
 
         // Create and configure function
         harris_corners_func.configure(&src, threshold, min_dist, sensitivity, gradient_size, block_size, &out, border_mode, 0, use_fp16);
@@ -54,9 +57,8 @@ public:
         // Allocate tensor
         src.allocator()->allocate();
 
-        // Fill tensor
-        std::uniform_int_distribution<int32_t> distribution(100, 100);
-        library->fill(Accessor(src), distribution, 0);
+        // Copy image data to tensor
+        library->fill(Accessor(src), raw);
     }
 
     void run()

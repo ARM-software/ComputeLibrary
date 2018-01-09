@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/CL/functions/CLHarrisCorners.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/benchmark/fixtures/HarrisCornersFixture.h"
-#include "tests/datasets/ShapeDatasets.h"
+#include "tests/datasets/ImageFileDatasets.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "utils/TypePrinter.h"
@@ -54,7 +54,7 @@ using CLHarrisCornersFixture = HarrisCornersFixture<CLTensor, CLHarrisCorners, C
 TEST_SUITE(CL)
 TEST_SUITE(HarrisCorners)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageShapes(),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageFiles(),
                                                                                                                      framework::dataset::make("Format", { Format::U8 })),
                                                                                                                      threshold),
                                                                                                                      min_dist),
@@ -64,7 +64,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture, framework::Dat
                                                                                                                      border_mode),
                                                                                                              framework::dataset::make("UseFP16", { false })));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageShapes(),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageFiles(),
                                                                                                                    framework::dataset::make("Format", { Format::U8 })),
                                                                                                                    threshold),
                                                                                                                    min_dist),
