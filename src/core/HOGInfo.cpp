@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ void HOGInfo::init(const Size2D &cell_size, const Size2D &block_size, const Size
     _phase_type            = phase_type;
 
     // Compute descriptor size. +1 takes into account of the bias
-    _descriptor_size = num_cells_per_block().area() * num_blocks_per_image(_detection_window_size).area() * _num_bins + 1;
+    _descriptor_size = num_cells_per_block().area() * num_block_positions_per_image(_detection_window_size).area() * _num_bins + 1;
 }
 
 Size2D HOGInfo::num_cells_per_block() const
@@ -80,8 +80,10 @@ Size2D HOGInfo::num_cells_per_block_stride() const
                   _block_stride.height / _cell_size.height);
 }
 
-Size2D HOGInfo::num_blocks_per_image(const Size2D &image_size) const
+Size2D HOGInfo::num_block_positions_per_image(const Size2D &image_size) const
 {
+    ARM_COMPUTE_ERROR_ON(_block_stride.width == 0 || _block_stride.height == 0);
+
     return Size2D(((image_size.width - _block_size.width) / _block_stride.width) + 1,
                   ((image_size.height - _block_size.height) / _block_stride.height) + 1);
 }

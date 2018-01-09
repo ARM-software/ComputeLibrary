@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,29 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H__
-#define __ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H__
-
-#include "tests/SimpleTensor.h"
+#ifndef __ARM_COMPUTE_TEST_IHOGACCESSOR_H__
+#define __ARM_COMPUTE_TEST_IHOGACCESSOR_H__
 
 namespace arm_compute
 {
 namespace test
 {
-namespace validation
+/** Common interface to access HOG structure */
+class IHOGAccessor
 {
-namespace reference
-{
-template <typename T, typename U, typename V>
-void hog_orientation_binning(const SimpleTensor<T> &mag, const SimpleTensor<U> &phase, SimpleTensor<V> &hog_space, const HOGInfo &hog_info);
+public:
+    /** Virtual destructor. */
+    virtual ~IHOGAccessor() = default;
 
-template <typename T>
-void hog_block_normalization(SimpleTensor<T> &desc, const SimpleTensor<T> &hog_space, const HOGInfo &hog_info);
-
-template <typename T, typename U>
-SimpleTensor<T> hog_descriptor(const SimpleTensor<U> &src, BorderMode border_mode, U constant_border_value, const HOGInfo &hog_info);
-} // namespace reference
-} // namespace validation
+    /** Pointer to the first element of the array which stores the linear SVM coefficients of HOG descriptor
+     *
+     * @note Other elements of the array can be accessed using descriptor()[idx] for idx=[0, descriptor_size() - 1]
+     *
+     * @return A pointer to the first element of the array which stores the linear SVM coefficients of HOG descriptor
+     */
+    virtual float *descriptor() const = 0;
+};
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H__ */
+#endif /* __ARM_COMPUTE_TEST_IHOGACCESSOR_H__ */

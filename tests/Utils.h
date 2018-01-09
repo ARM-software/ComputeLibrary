@@ -535,23 +535,14 @@ inline T create_multi_image(const TensorShape &shape, Format format)
 
 /** Create and initialize a HOG (Histogram of Oriented Gradients) of the given type.
  *
- * @param[in] cell_size             Cell size in pixels
- * @param[in] block_size            Block size in pixels. Must be a multiple of cell_size.
- * @param[in] detection_window_size Detection window size in pixels. Must be a multiple of block_size and block_stride.
- * @param[in] block_stride          Distance in pixels between 2 consecutive blocks along the x and y direction. Must be a multiple of cell size
- * @param[in] num_bins              Number of histogram bins for each cell
- * @param[in] normalization_type    (Optional) Normalization type to use for each block
- * @param[in] l2_hyst_threshold     (Optional) Threshold used for L2HYS_NORM normalization method
- * @param[in] phase_type            (Optional) Type of @ref PhaseType
+ * @param[in] hog_info HOGInfo object
  *
  * @return Initialized HOG of given type.
  */
 template <typename T>
-inline T create_HOG(const Size2D &cell_size, const Size2D &block_size, const Size2D &detection_window_size, const Size2D &block_stride, size_t num_bins,
-                    HOGNormType normalization_type = HOGNormType::L2HYS_NORM, float l2_hyst_threshold = 0.2f, PhaseType phase_type = PhaseType::UNSIGNED)
+inline T create_HOG(const HOGInfo &hog_info)
 {
-    T       hog;
-    HOGInfo hog_info(cell_size, block_size, block_size, block_stride, num_bins, normalization_type, l2_hyst_threshold, phase_type);
+    T hog;
     hog.init(hog_info);
 
     return hog;
@@ -601,6 +592,30 @@ inline std::vector<ROI> generate_random_rois(const TensorShape &shape, const ROI
     }
 
     return rois;
+}
+
+/** Create a vector with a uniform distribution of floating point values across the specified range.
+ *
+ * @param[in] num_values The number of values to be created.
+ * @param[in] min        The minimum value in distribution (inclusive).
+ * @param[in] max        The maximum value in distribution (inclusive).
+ * @param[in] seed       The random seed to be used.
+ *
+ * @return A vector that contains the requested number of random floating point values
+ */
+template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
+inline std::vector<T> generate_random_real(unsigned int num_values, T min, T max, std::random_device::result_type seed)
+{
+    std::vector<T>                    v(num_values);
+    std::mt19937                      gen(seed);
+    std::uniform_real_distribution<T> dist(min, max);
+
+    for(unsigned int i = 0; i < num_values; ++i)
+    {
+        v.at(i) = dist(gen);
+    }
+
+    return v;
 }
 
 template <typename T, typename ArrayAccessor_T>

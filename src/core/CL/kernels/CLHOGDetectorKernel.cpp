@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,10 +70,10 @@ void CLHOGDetectorKernel::configure(const ICLTensor *input, const ICLHOG *hog, I
     args_str << "-DTHRESHOLD=" << threshold << " ";
     args_str << "-DMAX_NUM_DETECTION_WINDOWS=" << detection_windows->max_num_values() << " ";
     args_str << "-DIDX_CLASS=" << idx_class << " ";
-    args_str << "-DBLOCK_STRIDE_WIDTH=" << block_stride.width << " ";
-    args_str << "-DBLOCK_STRIDE_HEIGHT=" << block_stride.height << " ";
     args_str << "-DDETECTION_WINDOW_WIDTH=" << detection_window_size.width << " ";
     args_str << "-DDETECTION_WINDOW_HEIGHT=" << detection_window_size.height << " ";
+    args_str << "-DDETECTION_WINDOW_STRIDE_WIDTH=" << detection_window_stride.width << " ";
+    args_str << "-DDETECTION_WINDOW_STRIDE_HEIGHT=" << detection_window_stride.height << " ";
 
     // Construct kernel name
     std::set<std::string> build_opts = {};
@@ -102,8 +102,8 @@ void CLHOGDetectorKernel::configure(const ICLTensor *input, const ICLHOG *hog, I
 
     // Configure kernel window
     Window win;
-    win.set(Window::DimX, Window::Dimension(0, floor_to_multiple(num_blocks_x - num_blocks_per_detection_window_x, window_step_x), window_step_x));
-    win.set(Window::DimY, Window::Dimension(0, floor_to_multiple(num_blocks_y - num_blocks_per_detection_window_y, window_step_y), window_step_y));
+    win.set(Window::DimX, Window::Dimension(0, floor_to_multiple(num_blocks_x - num_blocks_per_detection_window_x, window_step_x) + window_step_x, window_step_x));
+    win.set(Window::DimY, Window::Dimension(0, floor_to_multiple(num_blocks_y - num_blocks_per_detection_window_y, window_step_y) + window_step_y, window_step_y));
 
     constexpr unsigned int num_elems_read_per_iteration = 1;
     const unsigned int     num_rows_read_per_iteration  = num_blocks_per_descriptor_y;

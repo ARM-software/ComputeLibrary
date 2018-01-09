@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H__
-#define __ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H__
+#ifndef __ARM_COMPUTE_TEST_HOG_DETECTOR_H__
+#define __ARM_COMPUTE_TEST_HOG_DETECTOR_H__
 
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "tests/SimpleTensor.h"
+
+#include <vector>
 
 namespace arm_compute
 {
@@ -34,16 +38,11 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename U, typename V>
-void hog_orientation_binning(const SimpleTensor<T> &mag, const SimpleTensor<U> &phase, SimpleTensor<V> &hog_space, const HOGInfo &hog_info);
-
 template <typename T>
-void hog_block_normalization(SimpleTensor<T> &desc, const SimpleTensor<T> &hog_space, const HOGInfo &hog_info);
-
-template <typename T, typename U>
-SimpleTensor<T> hog_descriptor(const SimpleTensor<U> &src, BorderMode border_mode, U constant_border_value, const HOGInfo &hog_info);
+std::vector<DetectionWindow> hog_detector(const SimpleTensor<T> &src, const std::vector<T> &descriptor, unsigned int max_num_detection_windows,
+                                          const HOGInfo &hog_info, const Size2D &detection_window_stride, float threshold = 0.0f, uint16_t idx_class = 0);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H__ */
+#endif /* __ARM_COMPUTE_TEST_HOG_DETECTOR_H__ */

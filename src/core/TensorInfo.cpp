@@ -168,13 +168,13 @@ void TensorInfo::init(const HOGInfo &hog_info, unsigned int width, unsigned int 
     // Number of cells for each block
     const Size2D num_cells_per_block = hog_info.num_cells_per_block();
 
-    // Tensor Size = (Number of horizontal blocks) * (Number of vertical blocks )
-    const Size2D num_blocks_per_img = hog_info.num_blocks_per_image(Size2D(width, height));
+    // Tensor Size = (Number of horizontal block positions) * (Number of vertical block positions)
+    const Size2D num_block_positions_per_img = hog_info.num_block_positions_per_image(Size2D(width, height));
 
     // Number of tensor channels = (Number of cells per block) * (Number of bins per cell)
     const size_t num_channels = num_cells_per_block.area() * hog_info.num_bins();
 
-    init(TensorShape(num_blocks_per_img.width, num_blocks_per_img.height), num_channels, DataType::F32);
+    init(TensorShape(num_block_positions_per_img.width, num_block_positions_per_img.height), num_channels, DataType::F32);
 }
 
 size_t TensorInfo::init_auto_padding(const TensorShape &tensor_shape, Format format)
@@ -212,13 +212,13 @@ size_t TensorInfo::init_auto_padding(const HOGInfo &hog_info, unsigned int width
     // Number of cells for each block
     const Size2D num_cells_per_block = hog_info.num_cells_per_block();
 
-    // Tensor Size = (Number of horizontal blocks) * (Number of vertical blocks )
-    const Size2D num_blocks_per_img = hog_info.num_blocks_per_image(Size2D(width, height));
+    // Tensor Size = (Number of horizontal block positions) * (Number of vertical block positions)
+    const Size2D num_block_positions_per_img = hog_info.num_block_positions_per_image(Size2D(width, height));
 
     // Number of tensor channels = (Number of cells per block) * (Number of bins per cell)
     const size_t num_channels = num_cells_per_block.area() * hog_info.num_bins();
 
-    return init_auto_padding(TensorShape(num_blocks_per_img.width, num_blocks_per_img.height), num_channels, DataType::F32);
+    return init_auto_padding(TensorShape(num_block_positions_per_img.width, num_block_positions_per_img.height), num_channels, DataType::F32);
 }
 
 bool TensorInfo::auto_padding()

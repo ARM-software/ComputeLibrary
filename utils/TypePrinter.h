@@ -1454,5 +1454,24 @@ inline std::string to_string(const GPUTarget &gpu_target)
     str << gpu_target;
     return str.str();
 }
+/** Formatted output of the DetectionWindow type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const DetectionWindow &detection_window)
+{
+    os << "{x=" << detection_window.x << ","
+       << "y=" << detection_window.y << ","
+       << "width=" << detection_window.width << ","
+       << "height=" << detection_window.height << ","
+       << "idx_class=" << detection_window.idx_class << ","
+       << "score=" << detection_window.score << "}";
+
+    return os;
+}
+
+inline std::string to_string(const DetectionWindow &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

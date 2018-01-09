@@ -255,6 +255,8 @@ SimpleTensor<T> hog_descriptor(const SimpleTensor<U> &src, BorderMode border_mod
     return desc;
 }
 
+template void hog_orientation_binning(const SimpleTensor<int16_t> &mag, const SimpleTensor<uint8_t> &phase, SimpleTensor<float> &hog_space, const HOGInfo &hog_info);
+template void hog_block_normalization(SimpleTensor<float> &desc, const SimpleTensor<float> &hog_space, const HOGInfo &hog_info);
 template SimpleTensor<float> hog_descriptor(const SimpleTensor<uint8_t> &src, BorderMode border_mode, uint8_t constant_border_value, const HOGInfo &hog_info);
 } // namespace reference
 } // namespace validation

@@ -247,7 +247,11 @@ template <typename T, typename U, typename V = AbsoluteTolerance<float>>
 void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance = AbsoluteTolerance<float>(),
                         float allowed_missing_percentage = 5.f, float allowed_mismatch_percentage = 5.f);
 
-/** Compare values with a tolerance. */
+/** Validate detection windows. */
+template <typename T, typename U, typename V = AbsoluteTolerance<float>>
+void validate_detection_windows(T target_first, T target_last, U reference_first, U reference_last, V tolerance = AbsoluteTolerance<float>(),
+                                float allowed_missing_percentage = 5.f, float allowed_mismatch_percentage = 5.f);
+
 template <typename T>
 struct compare_base
 {
@@ -729,6 +733,77 @@ void validate_keypoints(T target_first, T target_last, U reference_first, U refe
         ARM_COMPUTE_TEST_INFO(num_missing << " keypoints (" << std::fixed << std::setprecision(2) << percent_missing << "%) in target are missing from ref");
         ARM_COMPUTE_TEST_INFO("Missing (not in ref): " << num_missing << "/" << num_elements_target << " = " << std::fixed << std::setprecision(2) << percent_missing
                               << "% \tMax allowed: " << allowed_missing_percentage << "%");
+        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
+    }
+}
+
+/** Check which detection windows from [first1, last1) are missing in [first2, last2) */
+template <typename T, typename U, typename V>
+std::pair<int64_t, int64_t> compare_detection_windows(T first1, T last1, U first2, U last2, V tolerance)
+{
+    int64_t num_missing    = 0;
+    int64_t num_mismatches = 0;
+
+    while(first1 != last1)
+    {
+        const auto window = std::find_if(first2, last2, [&](DetectionWindow window)
+        {
+            return window.x == first1->x && window.y == first1->y && window.width == first1->width && window.height == first1->height && window.idx_class == first1->idx_class;
+        });
+
+        if(window == last2)
+        {
+            ++num_missing;
+            ARM_COMPUTE_TEST_INFO("Detection window not found " << *first1)
+        }
+        else
+        {
+            if(!compare<V>(window->score, first1->score, tolerance))
+            {
+                ++num_mismatches;
+                ARM_COMPUTE_TEST_INFO("Mismatching detection window")
+                ARM_COMPUTE_TEST_INFO("detection window 1= " << *first1)
+                ARM_COMPUTE_TEST_INFO("detection window 2= " << *window)
+            }
+        }
+
+        ++first1;
+    }
+
+    return std::make_pair(num_missing, num_mismatches);
+}
+
+template <typename T, typename U, typename V>
+void validate_detection_windows(T target_first, T target_last, U reference_first, U reference_last, V tolerance,
+                                float allowed_missing_percentage, float allowed_mismatch_percentage)
+{
+    const int64_t num_elements_target    = std::distance(target_first, target_last);
+    const int64_t num_elements_reference = std::distance(reference_first, reference_last);
+
+    int64_t num_missing    = 0;
+    int64_t num_mismatches = 0;
+
+    if(num_elements_reference > 0)
+    {
+        std::tie(num_missing, num_mismatches) = compare_detection_windows(reference_first, reference_last, target_first, target_last, tolerance);
+
+        const float percent_missing    = static_cast<float>(num_missing) / num_elements_reference * 100.f;
+        const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements_reference * 100.f;
+
+        ARM_COMPUTE_TEST_INFO(num_missing << " detection windows (" << std::fixed << std::setprecision(2) << percent_missing << "%) are missing in target");
+        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
+
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " detection windows (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_EXPECT(percent_mismatches <= allowed_mismatch_percentage, framework::LogLevel::ERRORS);
+    }
+
+    if(num_elements_target > 0)
+    {
+        std::tie(num_missing, num_mismatches) = compare_detection_windows(target_first, target_last, reference_first, reference_last, tolerance);
+
+        const float percent_missing = static_cast<float>(num_missing) / num_elements_target * 100.f;
+
+        ARM_COMPUTE_TEST_INFO(num_missing << " detection windows (" << std::fixed << std::setprecision(2) << percent_missing << "%) are not part of target");
         ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
     }
 }
