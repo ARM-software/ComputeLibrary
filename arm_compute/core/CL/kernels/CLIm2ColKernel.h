@@ -77,9 +77,6 @@ public:
      * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
-
-    // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLIm2ColKernel
      *
      * @param[in] input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
@@ -93,6 +90,9 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
+
+    // Inherited methods overridden:
+    void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
     /** Run the reshape kernel optimised for the special case (stride is 1, padding is 0 and kernel's low 3 dimensions are same as input)

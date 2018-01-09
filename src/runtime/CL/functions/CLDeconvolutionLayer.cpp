@@ -80,7 +80,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionLayerUpsample::validate(input, &scale_out_info, BorderSize(inner_border_right, inner_border_top), info));
-    // TODO (COMPMID-754): Add validation of CLConvolutionLayer when added.
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayer::validate(&scale_out_info, weights, bias, output, info, WeightsInfo()));
 
     return Status{};
 }

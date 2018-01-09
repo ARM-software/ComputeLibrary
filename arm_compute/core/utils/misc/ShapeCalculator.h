@@ -40,6 +40,17 @@ inline TensorShape compute_permutation_output_shape(const ITensorInfo &input, co
     permute(output_shape, perm);
     return output_shape;
 }
+inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bool has_bias = false)
+{
+    // Calculate output shape
+    TensorShape weights_reshaped{ weights.tensor_shape() };
+    weights_reshaped.collapse(3);
+    const size_t tmp_dim = weights_reshaped[0];
+    weights_reshaped.set(0, weights_reshaped[1]);
+    weights_reshaped.set(1, tmp_dim + (has_bias ? 1 : 0));
+
+    return weights_reshaped;
+}
 inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_interleave4x4_height = 1)
 {
     // The interleaved output matrix will have the following shape: [ a_height * W, ceil(a_width / W) ] where W = 4 * mult_interleave4x4_height
@@ -100,6 +111,15 @@ inline TensorShape compute_im2col_shape(const ITensorInfo &input)
     shape_im2col.collapse(3);
 
     return shape_im2col;
+}
+inline TensorShape compute_col2im_shape(const ITensorInfo &input, std::pair<unsigned int, unsigned int> convolved_dims)
+{
+    TensorShape col2im_shape{ input.tensor_shape() };
+    col2im_shape.set(0, convolved_dims.first);
+    col2im_shape.set(1, convolved_dims.second);
+    col2im_shape.set(2, input.tensor_shape()[0]);
+
+    return col2im_shape;
 }
 inline TensorShape compute_transposed_shape(const ITensorInfo &input)
 {

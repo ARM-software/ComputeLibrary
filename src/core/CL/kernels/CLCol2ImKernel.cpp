@@ -31,10 +31,55 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <cmath>
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
+
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_col2im_shape(*input, convolved_dims));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_col2im_shape(*input, convolved_dims)));
+
+    const unsigned int num_elems_read_per_iteration = is_data_type_fixed_point(input->data_type()) ? 1 : 8;
+
+    // Configure window
+    Window win = calculate_max_window(*input, Steps(num_elems_read_per_iteration));
+
+    // Update window and padding just for the input tensor as we cannot access out-of-bounds elements in the output one
+    AccessWindowHorizontal input_access(input, 0, num_elems_read_per_iteration);
+    bool                   window_changed = update_window_and_padding(win, input_access);
+
+    Coordinates coord;
+    coord.set_num_dimensions(output->num_dimensions());
+    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
 
 CLCol2ImKernel::CLCol2ImKernel()
     : _input(nullptr), _output(nullptr), _convolved_dims()
@@ -43,20 +88,10 @@ CLCol2ImKernel::CLCol2ImKernel()
 
 void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    TensorShape output_shape = input->info()->tensor_shape();
-    output_shape.set(0, convolved_dims.first);
-    output_shape.set(1, convolved_dims.second);
-    output_shape.set(2, input->info()->tensor_shape()[0]);
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), convolved_dims));
 
     _input          = input;
     _output         = output;
@@ -89,20 +124,10 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
         }
     }
 
-    const unsigned int num_elems_read_per_iteration = is_data_type_fixed_point(data_type) ? 1 : 8;
-
-    // Configure window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_read_per_iteration));
-
-    // Update window and padding just for the input tensor as we cannot access out-of-bounds elements in the output one
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_read_per_iteration);
-    update_window_and_padding(win, input_access);
-
-    Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
-
-    ICLKernel::configure(win);
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), output->info(), _convolved_dims);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "col2im_";
@@ -115,6 +140,12 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
+}
+
+Status CLCol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, convolved_dims));
+    return Status{};
 }
 
 void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)

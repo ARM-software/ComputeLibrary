@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,6 +72,16 @@ public:
      * @param[in]  convolved_dims Output convolved dimensions.
      */
     void configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLCol2ImKernel
+     *
+     * @param[in] input          The input tensor to convert. Data types supported: QS8/QS16/QASYMM8/F16/F32
+     * @param[in] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
+     *                           while the rest represent batch of outputs. Data types supported: Same as @p input
+     * @param[in] convolved_dims Output convolved dimensions.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

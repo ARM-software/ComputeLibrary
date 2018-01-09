@@ -60,6 +60,31 @@ inline bool is_interleaved_transposed(int m, int n, int k, DataType data_type, b
 
     return flag;
 }
+
+Status validate_arguments(const ITensorInfo *a, const ITensorInfo *b, const ICLTensor *c, const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info = GEMMInfo())
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
+
+    if(c != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, c->info());
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(1) != c->info()->dimension(1), "The C matrix must have the same number of rows as the matrix A");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(b->dimension(0) != c->info()->dimension(0), "The C matrix must have the same number of columns as the matrix B");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(c->info()->dimension(0) != output->dimension(0), "The C matrix must have the same number of rows as the output matrix");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(c->info()->dimension(1) != output->dimension(1), "The C matrix must have the same number of columns as the output matrix");
+    }
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(0) != b->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
+
+    ARM_COMPUTE_UNUSED(alpha);
+    ARM_COMPUTE_UNUSED(beta);
+    return Status{};
+}
 } // namespace
 
 CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager)
@@ -70,21 +95,10 @@ CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager)
 
 void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, output);
-    ARM_COMPUTE_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
-    ARM_COMPUTE_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
+    ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
 
-    if(c != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, c);
-        ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(1) != c->info()->dimension(1), "The C matrix must have the same number of rows as the matrix A");
-        ARM_COMPUTE_ERROR_ON_MSG(b->info()->dimension(0) != c->info()->dimension(0), "The C matrix must have the same number of columns as the matrix B");
-        ARM_COMPUTE_ERROR_ON_MSG(c->info()->dimension(0) != output->info()->dimension(0), "The C matrix must have the same number of rows as the output matrix");
-        ARM_COMPUTE_ERROR_ON_MSG(c->info()->dimension(1) != output->info()->dimension(1), "The C matrix must have the same number of columns as the output matrix");
-    }
-
-    ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(0) != b->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(a->info(), b->info(), c, output->info(), alpha, beta, gemm_info));
 
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
@@ -150,6 +164,12 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         _ma_kernel.configure(c, output, beta);
         _run_addition = true;
     }
+}
+
+Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ICLTensor *c, const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(a, b, c, output, alpha, beta, gemm_info));
+    return Status{};
 }
 
 void CLGEMM::run()

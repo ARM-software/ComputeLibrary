@@ -58,14 +58,22 @@ public:
     CLConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                          Data type supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[out] output       Destination tensor. Data types supported: Same as @p weights.
-     * @param[in]  transpose1xW True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise.
-     *                          Data types supported: Same as @p weights.
+     * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                     Data type supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in]  biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[out] output  Destination tensor. Data types supported: Same as @p weights.
      */
-    void configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose1xW);
+    void configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLConvolutionLayerReshapeWeights
+     *
+     * @param[in] weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                    Data type supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[in] output  Destination tensor. Data types supported: Same as @p weights.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output);
     // Inherited methods overridden:
     void run() override;
 
@@ -74,7 +82,6 @@ private:
     CLWeightsReshapeKernel   _weights_reshape_kernel;
     CLGEMMTranspose1xWKernel _weights_transposed_kernel;
     CLTensor                 _weights_reshaped;
-    bool                     _transpose1xW;
 };
 
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
@@ -112,6 +119,22 @@ public:
      *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer.
+     *
+     * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
+     *                          while every optional dimension from 4 and above represent a batch of inputs.
+     *                          Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
+     * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
+     * @param[out] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
+     *                          Data types supported: Same as @p input.
+     * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
+     *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                           const WeightsInfo &weights_info = WeightsInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -123,16 +146,23 @@ private:
      * @param weights                   Weights tensor. Data type supported: Same as @p input.
      * @param output                    Output tensor. Data types supported: Same as @p input,
      *                                                 except for input of QASYMM8 type where output should be of S32 type.
-     * @param is_interleaved_transposed Flag that signals if matrix is interleaved transposed
      */
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool is_interleaved_transposed, bool are_weights_reshaped);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer matrix multiply routines
+     *
+     * @param[in] input   Input tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] weights Weights tensor. Data type supported: Same as @p input.
+     * @param[in] output  Output tensor. Data types supported: Same as @p input,
+     *                                      except for input of QASYMM8 type where output should be of S32 type.
+     *
+     * @return a status
+     */
+    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output);
 
 private:
     CLMemoryGroup                                       _memory_group;
     CLConvolutionLayerReshapeWeights                    _reshape_weights;
     CLIm2ColKernel                                      _im2col_kernel;
-    CLGEMMInterleave4x4Kernel                           _interleave_kernel;
-    CLGEMMMatrixMultiplyKernel                          _mm_kernel;
     CLGEMM                                              _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
@@ -145,9 +175,7 @@ private:
     CLTensor _gemm_output;
     CLTensor _tmp_output;
 
-    bool _are_weights_reshaped;
     bool _is_quantized;
-    bool _is_interleaved_transposed;
 };
 }
 #endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,15 @@ public:
      * @param[in]      beta   Weight of matrix C
      */
     void configure(const ICLTensor *input, ICLTensor *output, float beta);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixAdditionKernel.
+     *
+     * @param[in] input  Input tensor (Matrix C). Data types supported: QS8/QS16/F16/F32
+     * @param[in] output Output tensor. If this kernel is used to finalize the GEMM result (alpha * AB + beta * C), output must contain the result obtained by @ref CLGEMMMatrixMultiplyKernel. Data type supported: same as @p input
+     * @param[in] beta   Weight of matrix C
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const float beta);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
