@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,18 +32,15 @@ namespace arm_compute
 class ITensor;
 class NEWinogradLayerKernel;
 
-class Winograd3x3F32
+class Winograd3x3F32 final
 {
 public:
     friend class NEWinogradLayerKernel;
     Winograd3x3F32(const KernelShape &kernel_shape, const Tensor4DShape input_shape, const PaddingType padding_type, void *kernel_storage);
     ~Winograd3x3F32();
-    std::pair<void *, void *> get_nhwc_ptrs(const Tensor4DShape &input_shape, const PaddingType padding_type, void *working_space);
     void transform_weights(const void *const kernel, void *transform_working_space);
     void reshape_input(const Tensor4DShape &input_shape, const PaddingType padding_type, const void *const input, void *working_space);
     void reshape_output(const Tensor4DShape &input_shape, const PaddingType padding_type, void *const output);
-    void nchw2nhwc(const Tensor4DShape &input_shape, const PaddingType padding_type, void *working_space, const void *const input);
-    void nhwc2nchw(const Tensor4DShape &input_shape, const PaddingType padding_type, void *working_space, void *const output);
 
 private:
     class Private;

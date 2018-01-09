@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -125,6 +125,13 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
     // configure the kernel to transform the input tensor from NCHW -> NHWC
     _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
 
+    // configure and allocate dst tensor to be used to convert from winograd domain to spatial domain when calling to reshape_output()
+    TensorInfo info(TensorShape(_output->info()->dimension(2), _output->info()->dimension(0),
+                                _output->info()->dimension(1), _output->info()->dimension(3)),
+                    1, _output->info()->data_type());
+    _output_nhwc.allocator()->init(info);
+
+    _output_nhwc.allocator()->allocate();
     _weights_hwio.allocator()->allocate();
     _input_nhwc.allocator()->allocate();
 }
@@ -145,9 +152,6 @@ void NEWinogradLayer::run()
     //Bring channels to the front as Winograd code expects the tensor to be in the format NHWC
     _permute_input.run();
 
-    //Get ptrs into the workspace
-    std::pair<void *, void *> nhwc_ptrs = _conv->get_nhwc_ptrs(in_shape, padding, _workspace.buffer());
-
     //Setup matrices ptrs and transfor the input tensor to the appropriate form before running GEMM.
     _conv->reshape_input(in_shape, padding, reinterpret_cast<float *>(_input_nhwc.buffer()), _workspace.buffer());
 
@@ -155,21 +159,10 @@ void NEWinogradLayer::run()
     NEScheduler::get().schedule(&_winograd_kernel, Window::DimX);
 
     //Transform the output to the appropriate form
-    _conv->reshape_output(in_shape, padding, nhwc_ptrs.first);
-
-    const unsigned int out_width    = _output->info()->dimension(0);
-    const unsigned int out_height   = _output->info()->dimension(1);
-    const unsigned int out_channels = _output->info()->dimension(2);
-    const unsigned int out_batches  = _output->info()->dimension(3);
-
-    // We create a temporary tensor with the results in the workspace so that the we can run a function to reorder from NHWC -> NCHW
-    Tensor     output_nhwc;
-    TensorInfo info(TensorShape(out_channels, out_width, out_height, out_batches), 1, _output->info()->data_type());
-    output_nhwc.allocator()->init(info);
-    output_nhwc.allocator()->import_memory(Memory(static_cast<uint8_t *>(nhwc_ptrs.first)));
+    _conv->reshape_output(in_shape, padding, reinterpret_cast<float *>(_output_nhwc.buffer()));
 
     // Reorder the convoluted output to ACL's ordering NCHW
-    _permute_output.configure(&output_nhwc, _output, PermutationVector(1U, 2U, 0U));
+    _permute_output.configure(&_output_nhwc, _output, PermutationVector(1U, 2U, 0U));
     _permute_output.run();
 
     _memory_group.release();

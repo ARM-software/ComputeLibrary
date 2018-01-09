@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,9 +29,12 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "support/ToolchainSupport.h"
 
-#include "src/core/NEON/kernels/winograd/winograd_shim_nchw.hpp"
+#include "src/core/NEON/kernels/winograd/winograd_gemm.hpp"
 
-using T = winograd_shim_nchw::Winograd2x2_3x3GEMM<float, float>;
+namespace
+{
+using T = winograd::Winograd2x2_3x3GEMM<float, float>;
+} // namespace
 
 namespace arm_compute
 {
@@ -48,16 +51,6 @@ public:
 
 Winograd3x3F32::~Winograd3x3F32()
 {
-}
-
-void Winograd3x3F32::nchw2nhwc(const Tensor4DShape &input_shape, const PaddingType padding_type, void *working_space, const void *const input)
-{
-    _pimpl->convolver.nchw2nhwc(input_shape, padding_type, working_space, reinterpret_cast<const float *>(input));
-}
-
-void Winograd3x3F32::nhwc2nchw(const Tensor4DShape &input_shape, const PaddingType padding_type, void *working_space, void *const output)
-{
-    _pimpl->convolver.nhwc2nchw(input_shape, padding_type, working_space, reinterpret_cast<float *const>(output));
 }
 
 void Winograd3x3F32::transform_weights(const void *const kernel, void *transform_working_space)
@@ -80,11 +73,6 @@ void Winograd3x3F32::reshape_output(const Tensor4DShape &input_shape, const Padd
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_ERROR("Not implemented");
 #endif /* __aarch64__ */
-}
-
-std::pair<void *, void *> Winograd3x3F32::get_nhwc_ptrs(const Tensor4DShape &input_shape, const PaddingType padding_type, void *working_space)
-{
-    return _pimpl->convolver.get_nhwc_ptrs(input_shape, padding_type, working_space);
 }
 
 Winograd3x3F32::Winograd3x3F32(const KernelShape &kernel_shape, const Tensor4DShape input_shape, const PaddingType padding_type, void *kernel_storage)
