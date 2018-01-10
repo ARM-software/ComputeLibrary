@@ -34,71 +34,83 @@
 using namespace arm_compute;
 using namespace utils;
 
-void main_gc_absdiff(int argc, char **argv)
+class GCAbsDiffExample : public Example
 {
-    PPMLoader ppm1, ppm2;
-    GCImage   src1, src2, dst;
-    GCScheduler::get().default_init();
-    if(argc < 2)
+public:
+    void do_setup(int argc, char **argv) override
     {
-        // Print help
-        std::cout << "Usage: " << argv[0] << " [input0_image.ppm] [input1_image.ppm] \n\n";
-        std::cout << "No input_image provided, creating two dummy 640x480 images\n";
-        // Create two empty grayscale 640x480 images
-        src1.allocator()->init(TensorInfo(640, 480, Format::U8));
-        src2.allocator()->init(TensorInfo(640, 480, Format::U8));
+        PPMLoader ppm1, ppm2;
+
+        GCScheduler::get().default_init();
+        if(argc < 2)
+        {
+            // Print help
+            std::cout << "Usage: " << argv[0] << " [input0_image.ppm] [input1_image.ppm] \n\n";
+            std::cout << "No input_image provided, creating two dummy 640x480 images\n";
+            // Create two empty grayscale 640x480 images
+            src1.allocator()->init(TensorInfo(640, 480, Format::U8));
+            src2.allocator()->init(TensorInfo(640, 480, Format::U8));
+        }
+        else if(argc < 3)
+        {
+            // Print help
+            std::cout << "Usage: " << argv[0] << " [input0_image.ppm] [input1_image.ppm] \n\n";
+            std::cout << "Only one input_image provided, creating a dummy 640x480 image\n";
+            ppm1.open(argv[1]);
+            ppm1.init_image(src1, Format::U8);
+            // Create an empty grayscale 640x480 image
+            src2.allocator()->init(TensorInfo(640, 480, Format::U8));
+        }
+        else
+        {
+            ppm1.open(argv[1]);
+            ppm1.init_image(src1, Format::U8);
+            ppm2.open(argv[2]);
+            ppm2.init_image(src2, Format::U8);
+        }
+
+        // Configure the temporary and destination images
+        dst.allocator()->init(*src1.info());
+
+        absdiff.configure(&src1, &src2, &dst);
+
+        // Allocate all the images
+        src1.allocator()->allocate();
+        src2.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        // Fill the input image with the content of the PPM image if a filename was provided:
+        if(ppm1.is_open())
+        {
+            ppm1.fill_image(src1);
+            output_filename = std::string(argv[1]) + "_out.ppm";
+        }
+        if(ppm2.is_open())
+        {
+            ppm2.fill_image(src2);
+        }
     }
-    else if(argc < 3)
+    void do_run() override
     {
-        // Print help
-        std::cout << "Usage: " << argv[0] << " [input0_image.ppm] [input1_image.ppm] \n\n";
-        std::cout << "Only one input_image provided, creating a dummy 640x480 image\n";
-        ppm1.open(argv[1]);
-        ppm1.init_image(src1, Format::U8);
-        // Create an empty grayscale 640x480 image
-        src2.allocator()->init(TensorInfo(640, 480, Format::U8));
+        // Execute the functions:
+        absdiff.run();
     }
-    else
+    void do_teardown() override
     {
-        ppm1.open(argv[1]);
-        ppm1.init_image(src1, Format::U8);
-        ppm2.open(argv[2]);
-        ppm2.init_image(src2, Format::U8);
+        // Save the result to file:
+        if(!output_filename.empty())
+        {
+            // save_to_ppm maps and unmaps the image to store as PPM
+            // The GCTensor::map call inside the save_to_ppm will block until all pending operations on that image have completed
+            save_to_ppm(dst, output_filename);
+        }
     }
 
-    // Configure the temporary and destination images
-    dst.allocator()->init(*src1.info());
-
-    GCAbsoluteDifference absdiff;
-    absdiff.configure(&src1, &src2, &dst);
-
-    // Allocate all the images
-    src1.allocator()->allocate();
-    src2.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    // Fill the input image with the content of the PPM image if a filename was provided:
-    if(ppm1.is_open())
-    {
-        ppm1.fill_image(src1);
-    }
-    if(ppm2.is_open())
-    {
-        ppm2.fill_image(src2);
-    }
-
-    // Execute the functions:
-    absdiff.run();
-
-    // Save the result to file:
-    if(ppm1.is_open())
-    {
-        const std::string output_filename = std::string(argv[1]) + "_out.ppm";
-        // save_to_ppm maps and unmaps the image to store as PPM
-        // The GCTensor::map call inside the save_to_ppm will block until all pending operations on that image have completed
-        save_to_ppm(dst, output_filename);
-    }
-}
+private:
+    GCImage              src1{}, src2{}, dst{};
+    GCAbsoluteDifference absdiff{};
+    std::string          output_filename{};
+};
 
 /** Main program for absdiff test
  *
@@ -107,5 +119,5 @@ void main_gc_absdiff(int argc, char **argv)
  */
 int main(int argc, char **argv)
 {
-    return utils::run_example(argc, argv, main_gc_absdiff);
+    return utils::run_example<GCAbsDiffExample>(argc, argv);
 }

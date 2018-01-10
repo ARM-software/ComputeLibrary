@@ -66,41 +66,6 @@ void discard_comments_and_spaces(std::ifstream &fs)
 }
 } // namespace
 
-//FIXME: Delete once tests have been ported (COMPMID-782)
-int run_example(int argc, char **argv, example &func)
-{
-    std::cout << "\n"
-              << argv[0] << "\n\n";
-
-    try
-    {
-        func(argc, argv);
-
-        std::cout << "\nTest passed\n";
-        return 0;
-    }
-#ifdef ARM_COMPUTE_CL
-    catch(cl::Error &err)
-    {
-        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        std::cerr << std::endl
-                  << "ERROR " << err.what() << "(" << err.err() << ")" << std::endl;
-        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-    }
-#endif /* ARM_COMPUTE_CL */
-    catch(std::runtime_error &err)
-    {
-        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        std::cerr << std::endl
-                  << "ERROR " << err.what() << " " << (errno ? strerror(errno) : "") << std::endl;
-        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-    }
-
-    std::cout << "\nTest FAILED\n";
-
-    return -1;
-}
-
 #ifndef BENCHMARK_EXAMPLES
 int run_example(int argc, char **argv, Example &example)
 {

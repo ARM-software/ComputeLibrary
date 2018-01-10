@@ -55,23 +55,6 @@ namespace arm_compute
 {
 namespace utils
 {
-//FIXME: Delete once tests have been ported (COMPMID-782)
-/** Signature of an example to run
- *
- * @param[in] argc Number of command line arguments
- * @param[in] argv Command line arguments
- */
-using example = void(int argc, char **argv);
-
-//FIXME: Delete once tests have been ported (COMPMID-782)
-/** Run an example and handle the potential exceptions it throws
- *
- * @param[in] argc Number of command line arguments
- * @param[in] argv Command line arguments
- * @param[in] func Pointer to the function containing the code to run
- */
-int run_example(int argc, char **argv, example &func);
-
 /** Abstract Example class.
  *
  * All examples have to inherit from this class.
