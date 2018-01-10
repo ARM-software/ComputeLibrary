@@ -128,6 +128,7 @@ int main(int argc, char **argv)
         {
             for(auto &p : printers)
             {
+                p->print_entry("Version", build_information());
                 p->print_entry("Seed", support::cpp11::to_string(seed->value()));
                 p->print_entry("Iterations", support::cpp11::to_string(options.iterations->value()));
                 p->print_entry("Threads", support::cpp11::to_string(options.threads->value()));
