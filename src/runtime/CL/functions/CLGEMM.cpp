@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     {
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, c);
         ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(1) != c->info()->dimension(1), "The C matrix must have the same number of rows as the matrix A");
-        ARM_COMPUTE_ERROR_ON_MSG(b->info()->dimension(0) != c->info()->dimension(0), "The C matrix must have the same number of columns as the matrix C");
+        ARM_COMPUTE_ERROR_ON_MSG(b->info()->dimension(0) != c->info()->dimension(0), "The C matrix must have the same number of columns as the matrix B");
         ARM_COMPUTE_ERROR_ON_MSG(c->info()->dimension(0) != output->info()->dimension(0), "The C matrix must have the same number of rows as the output matrix");
         ARM_COMPUTE_ERROR_ON_MSG(c->info()->dimension(1) != output->info()->dimension(1), "The C matrix must have the same number of columns as the output matrix");
     }
