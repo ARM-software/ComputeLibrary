@@ -23,9 +23,12 @@
  */
 
 #pragma once
+#include "convolution.hpp"
+#include "tensor.hpp"
 
-#ifdef ALLOC_ALIGN
-#define ALLOCATE(x) aligned_alloc(ALLOC_ALIGN, x)
-#else
-#define ALLOCATE(x) malloc(x)
-#endif
+void direct_convolution(
+  const Tensor4D<Tensor4DShape, float>& input,
+  const Tensor4D<KernelShape, float>& kernel,
+  Tensor4D<Tensor4DShape, float>& output,
+  const PaddingType padding
+);

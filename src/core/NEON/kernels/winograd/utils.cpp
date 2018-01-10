@@ -21,12 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#pragma once
 
-/* Prototypes from perf.c */
+#include <cstdio>
+#include <ctime>
 
-void start_counter(int fd);
-long long get_counter(int fd);
-long long stop_counter(int fd);
-int open_instruction_counter(void);
-int open_cycle_counter(void);
+double TimeInUs(void)
+{
+#ifdef CYCLE_PROFILING
+  timespec t;
+  clock_gettime(CLOCK_REALTIME, &t);
+  return 1e6*t.tv_sec + 1e-3*t.tv_nsec;
+#else
+  return 0;
+#endif
+}
+
+void PrintMatrix(const float* const m, const int M, const int N, const int row_stride)
+{
+  for (int i = 0; i < M; i++)
+  {
+    for (int j = 0; j < N; j++)
+    {
+      printf("%.3f ", m[i*row_stride + j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+}

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2017 ARM Limited.
  *
@@ -22,34 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #pragma once
-#include <ctime>
 
-inline double TimeInUs(void) {
-#ifdef CYCLE_PROFILING
-  timespec t;
-  clock_gettime(CLOCK_THREAD_CPUTIME_ID, &t);
-  return 1e6*t.tv_sec + 1e-3*t.tv_nsec;
-#else
-  return 0;
-#endif
-}
-
-inline int iceildiv(const int a, const int b) {
-  return (a + b - 1) / b;
-}
-
-template <typename T>
-inline T roundup(const T a, const T b) {
-  return a + b - (a % b);
-}
-
-inline void PrintMatrix(const float* const m, const int M, const int N, const int row_stride) {
-  for (int i = 0; i < M; i++) {
-    for (int j = 0; j < N; j++) {
-      printf("%.3f ", m[i*row_stride + j]);
-    }
-    printf("\n");
-  }
-  printf("\n");
-}
+enum PaddingType {
+  PADDING_SAME, PADDING_VALID
+};

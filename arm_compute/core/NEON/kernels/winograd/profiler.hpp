@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2017 ARM Limited.
  *
@@ -22,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #pragma once
 
 #include <algorithm>
@@ -29,10 +29,84 @@
 #include <cstring>
 #include <cstdio>
 #include <map>
+#include <mutex>
+#include <thread>
 #include <vector>
 
 #include "perf.h"
 #include <unistd.h>
+
+#ifdef CYCLE_PROFILING
+class EventIDContainer
+{
+  public:
+  EventIDContainer() : container_lock(), event_ids()
+  {
+  }
+
+  int get_event_id(const char *id)
+  {
+    std::lock_guard<std::mutex> lock(container_lock);
+    if (!event_ids.count(id)) {
+      event_ids.emplace(id, event_ids.size());
+    }
+    return event_ids[id];
+  }
+
+  unsigned int size() const
+  {
+    return event_ids.size();
+  }
+
+  auto begin()
+  {
+    return event_ids.begin();
+  }
+
+  auto end()
+  {
+    return event_ids.end();
+  }
+
+  private:
+  std::mutex container_lock;
+  std::map<const char *, int> event_ids;
+};
+
+
+class ThreadEventCounterContainer
+{
+  public:
+  ThreadEventCounterContainer() : container_lock(), thread_counter_fds()
+  {
+  }
+
+  int get_counter_fd()
+  {
+    const auto id = std::this_thread::get_id();
+    std::lock_guard<std::mutex> lock(container_lock);
+    if (!thread_counter_fds.count(id))
+    {
+      thread_counter_fds.emplace(id, open_cycle_counter());
+    }
+    return thread_counter_fds[id];
+  }
+
+  ~ThreadEventCounterContainer()
+  {
+    // Close all counter file descriptors
+    for (auto& fd : thread_counter_fds)
+    {
+      close(fd.second);
+    }
+  }
+
+  private:
+  std::mutex container_lock;
+  std::map<std::thread::id, int> thread_counter_fds;
+};
+#endif  // CYCLE_PROFILING
+
 
 class profiler {
 private:
@@ -46,27 +120,29 @@ private:
     static const int maxevents = 10000;
     ProfileEntry events[maxevents];
     int currentevent;
-    int countfd;
+    std::mutex event_lock;
 
-    std::map<const char *, int> event_ids;
+    EventIDContainer event_ids;
+    ThreadEventCounterContainer thread_counter_fds;
 
-    int get_event_id(const char *id) {
-      if (!event_ids.count(id)) {
-        event_ids.emplace(id, event_ids.size());
-      }
-      return event_ids[id];
+    int get_event_id(const char *id)
+    {
+      return event_ids.get_event_id(id);
     }
 #endif  // CYCLE_PROFILING
 
 public:
 #ifdef CYCLE_PROFILING
-    profiler() {
-        currentevent = 0;
-        countfd = open_cycle_counter();
+    profiler() :
+      currentevent(0),
+      event_lock(),
+      event_ids(),
+      thread_counter_fds()
+    {
     }
 
     ~profiler() {
-        close(countfd);
+      std::lock_guard<std::mutex> lock_events(event_lock);
 
         // Compute performance from recorded events
         struct ProfileResult {
@@ -228,16 +304,22 @@ public:
         if (currentevent==maxevents) {
             func();
         } else {
+            const auto countfd = thread_counter_fds.get_counter_fd();
             start_counter(countfd);
             func();
             long long cycs = stop_counter(countfd);
 
             // Store the profiling data
+            std::lock_guard<std::mutex> lock_events(event_lock);
             events[currentevent++] = {
               get_event_id(event), bytes_read, ops, bytes_written, cycs
             };
         }
 #else
+      (void) event;
+      (void) bytes_read;
+      (void) ops;
+      (void) bytes_written;
       func();
 #endif  // CYCLE_PROFILING
     }

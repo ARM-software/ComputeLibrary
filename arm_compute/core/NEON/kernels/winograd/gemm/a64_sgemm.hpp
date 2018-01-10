@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #pragma once
 #include <cassert>
 #include "../utils.hpp"
@@ -347,8 +348,7 @@ inline void BlockedGemm<4, 16, float, float>(
       );
       break;
     default:
-      assert(0);
-      break;
+      assert(false);
   }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,11 +29,11 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "support/ToolchainSupport.h"
 
-#include "src/core/NEON/kernels/winograd/winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/winograd/winograd_layer.hpp"
 
 namespace
 {
-using T = winograd::Winograd2x2_3x3GEMM<float, float>;
+using T = WinogradConvolutionLayer<2, 2, 3, 3, float, float>;
 } // namespace
 
 namespace arm_compute
@@ -41,11 +41,23 @@ namespace arm_compute
 class Winograd3x3F32::Private
 {
 public:
-    Private(const KernelShape &kernel_shape, const Tensor4DShape input_shape, const PaddingType padding_type, void *kernel_storage)
-        : convolver(kernel_shape, input_shape, padding_type, kernel_storage)
+    Private(
+        const int          n_batches,         /** Number of batches in the input and output tensors. */
+        const int          n_input_channels,  /** Number of feature maps in a batch of the input tensor. */
+        const int          n_input_rows,      /** Number of rows in a feature map of the input tensor. */
+        const int          n_input_cols,      /** Number of columns in a feature map of the input tensor. */
+        const int          n_output_channels, /** Number of feature maps in the output tensor. */
+        const bool         same_padding,      /** Use "SAME" padding, otherwise use "VALID". */
+        const float *const weights,           /** Pointer to weight tensor in spatial domain. Must be ordered as "Height x Rows x Input Feature Maps x Output Feature Maps. */
+        float *const       weights_storage,   /** Pointer to storage for weight tensor in the Winograd domain. Must be at least the size returned by `get_weight_storage_size`. */
+        const float *const input,             /** Pointer to NHWC ordered input tensor, in the spatial domain. */
+        float *const       winograd_input,    /** Pointer to working space for the input tensor in the Winograd domain. Must be at least the size returned by `get_input_storage_size`. */
+        float *const       output,            /** Pointer to NHWC ordered output tensor, in the spatial domain. */
+        float *const       winograd_output    /** Pointer to working space for the output tensor in the Winograd domain. Must be at least the size returned by `get_output_storage_size`. */
+    )
+        : convolver(n_batches, n_input_channels, n_input_rows, n_input_cols, n_output_channels, same_padding, weights, weights_storage, input, winograd_input, output, winograd_output)
     {
     }
-
     T convolver;
 };
 
@@ -53,46 +65,62 @@ Winograd3x3F32::~Winograd3x3F32()
 {
 }
 
-void Winograd3x3F32::transform_weights(const void *const kernel, void *transform_working_space)
+void Winograd3x3F32::transform_output()
 {
-    _pimpl->convolver.transform_weights(reinterpret_cast<const float *>(kernel), transform_working_space);
+    auto win = _pimpl->convolver.output_transform.get_window();
+    _pimpl->convolver.output_transform.run(0, win);
 }
 
-void Winograd3x3F32::reshape_input(const Tensor4DShape &input_shape, const PaddingType padding_type, const void *const input, void *working_space)
+void Winograd3x3F32::transform_input()
 {
-    _pimpl->convolver.reshape_input(input_shape, padding_type, reinterpret_cast<const float *>(input), working_space);
+    auto win = _pimpl->convolver.input_transform.get_window();
+    _pimpl->convolver.input_transform.run(0, win);
 }
 
-void Winograd3x3F32::reshape_output(const Tensor4DShape &input_shape, const PaddingType padding_type, void *const output)
+void Winograd3x3F32::transform_weights()
 {
-#if defined(__aarch64__)
-    _pimpl->convolver.reshape_output(input_shape, padding_type, reinterpret_cast<float *const>(output));
-#else  /* __aarch64__ */
-    ARM_COMPUTE_UNUSED(input_shape);
-    ARM_COMPUTE_UNUSED(padding_type);
-    ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_ERROR("Not implemented");
-#endif /* __aarch64__ */
+    auto win = _pimpl->convolver.weights_transform.get_window();
+    _pimpl->convolver.weights_transform.run(0, win);
 }
 
-Winograd3x3F32::Winograd3x3F32(const KernelShape &kernel_shape, const Tensor4DShape input_shape, const PaddingType padding_type, void *kernel_storage)
-    : _pimpl(support::cpp14::make_unique<Private>(kernel_shape, input_shape, padding_type, kernel_storage))
+Winograd3x3F32::Winograd3x3F32(
+    const int          n_batches,         /** Number of batches in the input and output tensors. */
+    const int          n_input_channels,  /** Number of feature maps in a batch of the input tensor. */
+    const int          n_input_rows,      /** Number of rows in a feature map of the input tensor. */
+    const int          n_input_cols,      /** Number of columns in a feature map of the input tensor. */
+    const int          n_output_channels, /** Number of feature maps in the output tensor. */
+    const bool         same_padding,      /** Use "SAME" padding, otherwise use "VALID". */
+    const float *const weights,           /** Pointer to weight tensor in spatial domain. Must be ordered as "Height x Rows x Input Feature Maps x Output Feature Maps. */
+    float *const       weights_storage,   /** Pointer to storage for weight tensor in the Winograd domain. Must be at least the size returned by `get_weight_storage_size`. */
+    const float *const input,             /** Pointer to NHWC ordered input tensor, in the spatial domain. */
+    float *const       winograd_input,    /** Pointer to working space for the input tensor in the Winograd domain. Must be at least the size returned by `get_input_storage_size`. */
+    float *const       output,            /** Pointer to NHWC ordered output tensor, in the spatial domain. */
+    float *const       winograd_output    /** Pointer to working space for the output tensor in the Winograd domain. Must be at least the size returned by `get_output_storage_size`. */
+)
+    : _pimpl(support::cpp14::make_unique<Private>(n_batches, n_input_channels, n_input_rows, n_input_cols, n_output_channels, same_padding, weights, weights_storage, input, winograd_input, output,
+                                                  winograd_output))
 {
 }
 
-size_t NEWinogradLayerKernel::get_kernel_storage_size(const KernelShape &shape)
+unsigned int NEWinogradLayerKernel::get_input_storage_size(const int n_batches, const int n_channels, const int n_rows, const int n_cols, const bool same_padding)
 {
-    return T::get_kernel_storage_size(shape);
+    return T::get_input_storage_size(n_batches, n_channels, n_rows, n_cols, same_padding);
 }
 
-size_t NEWinogradLayerKernel::get_working_space_size(const Tensor4DShape &input_shape, const KernelShape &k_shape, const PaddingType padding)
+unsigned int NEWinogradLayerKernel::get_output_storage_size(
+    const int  n_batches,         /** Number of batches in the output tensor. */
+    const int  n_rows,            /** Number of rows in each feature map of the input tensor. */
+    const int  n_cols,            /** Number of columns in each feature map of the input tensor. */
+    const int  n_output_channels, /** Number of feature maps in the output tensor. */
+    const bool same_padding       /** Use "SAME" padding, otherwise use "VALID". */
+)
 {
-    return T::get_working_space_size(input_shape, k_shape, padding);
+    return T::get_output_storage_size(n_batches, n_rows, n_cols, n_output_channels, same_padding);
 }
 
-size_t NEWinogradLayerKernel::get_kernel_transform_working_size(const KernelShape &shape)
+size_t NEWinogradLayerKernel::get_weight_storage_size(const int n_output_channels, const int n_input_channels)
 {
-    return T::get_kernel_transform_working_size(shape);
+    return T::get_weight_storage_size(n_output_channels, n_input_channels);
 }
 
 NEWinogradLayerKernel::NEWinogradLayerKernel()
@@ -105,7 +133,8 @@ void NEWinogradLayerKernel::configure(Winograd3x3F32 *convolver)
     ARM_COMPUTE_ERROR_ON_NULLPTR(convolver);
     _convolver = convolver;
     Window win;
-    win.set(Window::DimX, Window::Dimension(0, 15, 1));
+    auto   win_last = _convolver->_pimpl->convolver.gemms.get_window();
+    win.set(Window::DimX, Window::Dimension(0, win_last, 1));
     INEKernel::configure(win);
 }
 
@@ -115,6 +144,6 @@ void NEWinogradLayerKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     const size_t first_gemm = window.x().start();
     const size_t last_gemm  = window.x().end();
-    _convolver->_pimpl->convolver.execute(first_gemm, last_gemm);
+    _convolver->_pimpl->convolver.gemms.run(first_gemm, last_gemm);
 }
 } // namespace arm_compute

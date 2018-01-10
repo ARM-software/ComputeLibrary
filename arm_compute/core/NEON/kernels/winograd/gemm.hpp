@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2017 ARM Limited.
  *
@@ -22,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #pragma once
 #include "utils.hpp"
 
 template <typename TIn, typename TOut>
-void Gemm(const TIn* const a, const TIn* const b, TOut *c,
+inline void Gemm(const TIn* const a, const TIn* const b, TOut *c,
           const int M, const int K, const int N,
           const int a_row_stride,
           const int b_row_stride,
@@ -57,7 +57,7 @@ void Gemm(const TIn* const a, const TIn* const b, TOut *c,
 }
 
 template <const int M_BLOCK, const int N_BLOCK, typename TIn, typename TOut>
-void BlockedGemm(
+inline void BlockedGemm(
   const TIn* const a, const TIn* const b, TOut *c,
   const int M, const int K, const int N,
   const int a_row_stride,
@@ -65,11 +65,11 @@ void BlockedGemm(
   const int c_row_stride
 ) {
   // Array access methods
-  const auto A = [a, a_row_stride] (const int i, const int j) -> TIn {
+  const auto A = [a, M, K, a_row_stride] (const int i, const int j) -> TIn {
     return a[i*a_row_stride + j];
   };
 
-  const auto B = [b, b_row_stride] (const int i, const int j) -> TIn {
+  const auto B = [b, K, N, b_row_stride] (const int i, const int j) -> TIn {
     return b[i*b_row_stride + j];
   };
 

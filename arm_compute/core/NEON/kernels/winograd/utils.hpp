@@ -24,8 +24,14 @@
 
 #pragma once
 
-#ifdef ALLOC_ALIGN
-#define ALLOCATE(x) aligned_alloc(ALLOC_ALIGN, x)
-#else
-#define ALLOCATE(x) malloc(x)
-#endif
+double TimeInUs(void);
+void PrintMatrix(const float* const m, const int M, const int N, const int row_stride);
+
+inline int iceildiv(const int a, const int b) {
+  return (a + b - 1) / b;
+}
+
+template <typename T>
+inline T roundup(const T a, const T b) {
+  return a + b - (a % b);
+}
