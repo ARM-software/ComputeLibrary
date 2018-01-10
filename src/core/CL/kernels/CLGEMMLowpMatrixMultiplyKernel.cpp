@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -94,8 +95,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     else
     {
         // Special case for 1xN, 2xN, 3xN and 4xN input0 tensor. num_elems_processed_per_iteration_x
-        num_elems_processed_per_iteration_x = 16;
-        num_elems_processed_per_iteration_y = std::min(static_cast<int>(output->dimension(1)), 4);
+        num_elems_processed_per_iteration_x = 4;
+        num_elems_processed_per_iteration_y = std::min(static_cast<int>(output->dimension(1)), 5);
 
         // Configure window
         win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
@@ -132,6 +133,9 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
 
     ElementsProcessed num_elements_processed{};
 
+    // Get target architecture
+    GPUTarget arch_target = get_arch_from_target(get_target());
+
     // Configure kernel window
     auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info(), is_interleaved_transposed, num_elements_processed);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
@@ -150,7 +154,7 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
         build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(input0->info()->dimension(0)));
         build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_X=" + support::cpp11::to_string(num_elements_processed.x()));
         build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_Y=" + support::cpp11::to_string(num_elements_processed.y()));
-        kernel_name = "gemmlowp_mm";
+        kernel_name = "gemmlowp_mm_" + string_from_target(arch_target);
     }
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));

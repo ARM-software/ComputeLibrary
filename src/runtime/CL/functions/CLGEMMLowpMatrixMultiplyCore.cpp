@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,10 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     _b_offset                    = b->info()->quantization_info().offset;
 
     // If the input tensor has less than 16 rows, we run a special version of GEMMLowp without reshaping the input tensors
-    _is_interleaved_transposed = a->info()->dimension(1) > 16;
+    _is_interleaved_transposed = (a->info()->dimension(1)) > 16 && (CLScheduler::get().target() != GPUTarget::BIFROST);
+
+    // Set the target for the matrix multiply kernel
+    _mm_kernel.set_target(CLScheduler::get().target());
 
     const ICLTensor *matrix_a = a;
     const ICLTensor *matrix_b = b;
@@ -138,7 +141,7 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
 
     int32_t a_offset                  = a->quantization_info().offset;
     int32_t b_offset                  = b->quantization_info().offset;
-    bool    is_interleaved_transposed = a->dimension(1) > 16;
+    bool    is_interleaved_transposed = (a->dimension(1)) > 16 && (CLScheduler::get().target() != GPUTarget::BIFROST);
 
     if(is_interleaved_transposed)
     {
