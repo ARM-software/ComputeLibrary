@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,12 +46,13 @@ public:
     SubTensorInfo();
     /** Default constructor
      *
-     * @param[in] parent       Metadata of parent tensor.
-     * @param[in] tensor_shape Tensor shape. Shape must fit inside parent's shape.
-     *                         X and Y dimensions must match the parent's ones.
-     * @param[in] coords       Coordinates of starting element inside parent tensor.
+     * @param[in] parent        Metadata of parent tensor.
+     * @param[in] tensor_shape  Tensor shape. Shape must fit inside parent's shape.
+     *                          X and Y dimensions must match the parent's ones.
+     * @param[in] coords        Coordinates of starting element inside parent tensor.
+     * @param[in] extend_parent (Optional) Extend parent with subtensor shape if subtensor indexes out of bounds
      */
-    SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coordinates coords);
+    SubTensorInfo(ITensorInfo *parent, TensorShape tensor_shape, Coordinates coords, bool extend_parent = false);
     /** Default destructor */
     ~SubTensorInfo() = default;
     /** Allow instances of this class to be copy constructed */
@@ -216,6 +217,7 @@ private:
     TensorShape  _tensor_shape;
     Coordinates  _coords;
     ValidRegion  _valid_region;
+    bool         _extend_parent;
 };
 }
 #endif /*__ARM_COMPUTE_SUBTENSORINFO_H__ */

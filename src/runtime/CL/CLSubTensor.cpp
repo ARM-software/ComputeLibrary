@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,11 +29,11 @@
 
 using namespace arm_compute;
 
-CLSubTensor::CLSubTensor(ICLTensor *parent, const TensorShape &tensor_shape, const Coordinates &coords)
+CLSubTensor::CLSubTensor(ICLTensor *parent, const TensorShape &tensor_shape, const Coordinates &coords, bool extend_parent)
     : _parent(nullptr), _info()
 {
     ARM_COMPUTE_ERROR_ON(parent == nullptr);
-    _info   = SubTensorInfo(parent->info(), tensor_shape, coords);
+    _info   = SubTensorInfo(parent->info(), tensor_shape, coords, extend_parent);
     _parent = parent;
 }
 
