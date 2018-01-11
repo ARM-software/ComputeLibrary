@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ TEST_SUITE(SYSTEM_TEST)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, CLAlexNetFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::make("DataType", { DataType::F16, DataType::F32 }),
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1, 2, 4 })));
 
 TEST_SUITE_END()
 TEST_SUITE_END()
