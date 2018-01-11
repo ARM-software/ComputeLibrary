@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,13 +64,6 @@ public:
         variance.allocator()->allocate();
         beta.allocator()->allocate();
         gamma.allocator()->allocate();
-
-        // Fill tensors
-        library->fill_tensor_uniform(Accessor(src), 0);
-        library->fill_tensor_uniform(Accessor(mean), 1);
-        library->fill_tensor_uniform(Accessor(variance), 2);
-        library->fill_tensor_uniform(Accessor(beta), 3);
-        library->fill_tensor_uniform(Accessor(gamma), 4);
     }
 
     void run()

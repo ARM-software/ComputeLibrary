@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,12 +110,6 @@ public:
         }
 
         _dst.allocator()->allocate();
-
-        int i = 0;
-        for(auto &src : _srcs)
-        {
-            library->fill_tensor_uniform(AccessorType(src), i++);
-        }
     }
 
     void run()

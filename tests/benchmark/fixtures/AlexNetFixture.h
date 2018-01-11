@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,6 @@ public:
         network.init(data_type, fixed_point_position, batches, weights_reshaped);
         network.build();
         network.allocate();
-        network.fill_random();
     }
 
     void run()

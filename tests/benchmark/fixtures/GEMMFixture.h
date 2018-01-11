@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,10 +58,6 @@ public:
         b.allocator()->allocate();
         c.allocator()->allocate();
         dst.allocator()->allocate();
-
-        library->fill_tensor_uniform(Accessor(a), 0);
-        library->fill_tensor_uniform(Accessor(b), 1);
-        library->fill_tensor_uniform(Accessor(c), 2);
     }
 
     void run()
