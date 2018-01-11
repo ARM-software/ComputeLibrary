@@ -60,6 +60,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
     const TensorShape output_shape = deconvolution_output_shape(out_dims, input->info()->tensor_shape(), weights->info()->tensor_shape());
 
+    ARM_COMPUTE_UNUSED(output_shape);
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->dimension(Window::DimX) != output_shape.x(), "Output's width is invalid.");
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->dimension(Window::DimY) != output_shape.y(), "Output's height is invalid.");
     ARM_COMPUTE_ERROR_ON_MSG(output->info()->dimension(Window::DimZ) != output_shape.z(), "Output's depth is invalid.");
