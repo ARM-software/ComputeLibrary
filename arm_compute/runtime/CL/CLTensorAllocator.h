@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/ITensorAllocator.h"
 
 #include "arm_compute/core/CL/OpenCL.h"
-
+#include "arm_compute/runtime/CL/SVMMemory.h"
 #include <cstdint>
 
 namespace arm_compute
@@ -68,6 +68,9 @@ public:
      * @return pointer to the CL data.
      */
     const cl::Buffer &cl_data() const;
+    /** SVM memory */
+    void *svm_ptr();
+
     /** Enqueue a map operation of the allocated buffer on the given queue.
      *
      * @param[in,out] q        The CL command queue to use for the mapping operation.
@@ -121,6 +124,7 @@ private:
     cl::Buffer     _buffer;                  /**< OpenCL buffer containing the tensor data. */
     uint8_t       *_mapping;                 /**< Pointer to the CPU mapping of the OpenCL buffer. */
     CLTensor      *_owner;                   /**< Owner of the allocator */
+    SVMMemory      _svm_memory;              /**< Svm memory */
 };
 }
 #endif /* __ARM_COMPUTE_CLTENSORALLOCATOR_H__ */

@@ -713,7 +713,6 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     {
         ARM_COMPUTE_ERROR("Kernel %s not found in the CLKernelLibrary", kernel_name.c_str());
     }
-
     std::string concat_str;
 
     if(fp16_support(_device))
@@ -721,13 +720,13 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
         concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";
     }
 
-    if(non_uniform_workgroup_support(_device))
-    {
-        concat_str += " -cl-arm-non-uniform-work-group-size ";
-    }
-    else if(get_cl_version(_device) == CLVersion::CL20)
+    if(get_cl_version(_device) == CLVersion::CL20)
     {
         concat_str += " -cl-std=CL2.0 ";
+    }
+    else if(non_uniform_workgroup_support(_device))
+    {
+        concat_str += " -cl-arm-non-uniform-work-group-size ";
     }
     else
     {

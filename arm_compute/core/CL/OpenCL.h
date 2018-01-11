@@ -115,6 +115,10 @@ public:
     DECLARE_FUNCTION_PTR(clGetCommandQueueInfo);
     DECLARE_FUNCTION_PTR(clGetKernelInfo);
     DECLARE_FUNCTION_PTR(clGetEventProfilingInfo);
+    DECLARE_FUNCTION_PTR(clSVMAlloc);
+    DECLARE_FUNCTION_PTR(clSVMFree);
+    DECLARE_FUNCTION_PTR(clEnqueueSVMMap);
+    DECLARE_FUNCTION_PTR(clEnqueueSVMUnmap);
 
 #undef DECLARE_FUNCTION_PTR
 

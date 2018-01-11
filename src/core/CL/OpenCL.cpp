@@ -111,6 +111,10 @@ bool CLSymbols::load(const std::string &library)
     LOAD_FUNCTION_PTR(clGetCommandQueueInfo, handle);
     LOAD_FUNCTION_PTR(clGetKernelInfo, handle);
     LOAD_FUNCTION_PTR(clGetEventProfilingInfo, handle);
+    LOAD_FUNCTION_PTR(clSVMAlloc, handle);
+    LOAD_FUNCTION_PTR(clSVMFree, handle);
+    LOAD_FUNCTION_PTR(clEnqueueSVMMap, handle);
+    LOAD_FUNCTION_PTR(clEnqueueSVMUnmap, handle);
 
 #undef LOAD_FUNCTION_PTR
 
@@ -128,6 +132,60 @@ bool opencl_is_available()
     return CLSymbols::get().clBuildProgram_ptr != nullptr;
 }
 } // namespace arm_compute
+
+cl_int clEnqueueSVMMap(cl_command_queue command_queue, cl_bool blocking_map, cl_map_flags flags, void *svm_ptr,
+                       size_t size, cl_uint num_events_in_wait_list, const cl_event *event_wait_list, cl_event *event)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clEnqueueSVMMap_ptr;
+    if(func != nullptr)
+    {
+        return func(command_queue, blocking_map, flags, svm_ptr, size, num_events_in_wait_list, event_wait_list, event);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clEnqueueSVMUnmap(cl_command_queue command_queue, void *svm_ptr, cl_uint num_events_in_wait_list,
+                         const cl_event *event_wait_list, cl_event *event)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clEnqueueSVMUnmap_ptr;
+    if(func != nullptr)
+    {
+        return func(command_queue, svm_ptr, num_events_in_wait_list, event_wait_list, event);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+void *clSVMAlloc(cl_context context, cl_svm_mem_flags_arm flags, size_t size, cl_uint alignment)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clSVMAlloc_ptr;
+    if(func != nullptr)
+    {
+        return func(context, flags, size, alignment);
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+void clSVMFree(cl_context context, void *svm_pointer)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clSVMFree_ptr;
+    if(func != nullptr)
+    {
+        func(context, svm_pointer);
+    }
+}
 
 cl_int clGetContextInfo(cl_context      context,
                         cl_context_info param_name,

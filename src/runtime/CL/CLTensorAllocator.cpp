@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Log.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -31,7 +32,7 @@
 using namespace arm_compute;
 
 CLTensorAllocator::CLTensorAllocator(CLTensor *owner)
-    : _associated_memory_group(nullptr), _buffer(), _mapping(nullptr), _owner(owner)
+    : _associated_memory_group(nullptr), _buffer(), _mapping(nullptr), _owner(owner), _svm_memory()
 {
 }
 
@@ -50,12 +51,47 @@ const cl::Buffer &CLTensorAllocator::cl_data() const
     return _buffer;
 }
 
+void *SVMMemory::allocate(cl_context context, size_t size, cl_svm_mem_flags flags, cl_uint alignment)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(context);
+    ARM_COMPUTE_ERROR_ON(size == 0);
+    ARM_COMPUTE_ERROR_ON(_ptr != nullptr);
+    ARM_COMPUTE_ERROR_ON(size > CL_DEVICE_MAX_MEM_ALLOC_SIZE);
+    _ptr = clSVMAlloc(context, flags, size, alignment);
+    if(_ptr == nullptr)
+    {
+        ARM_COMPUTE_LOG_INFO_MSG_CORE("Call to clSVMAlloc() failed.");
+    }
+    else
+    {
+        _size       = size;
+        _fine_grain = static_cast<bool>(flags & CL_MEM_SVM_FINE_GRAIN_BUFFER);
+    }
+    return _ptr;
+}
+void *CLTensorAllocator::svm_ptr()
+{
+    return _svm_memory.ptr();
+}
+
 void CLTensorAllocator::allocate()
 {
     ARM_COMPUTE_ERROR_ON(_buffer.get() != nullptr);
     if(_associated_memory_group == nullptr)
     {
-        _buffer = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info().total_size());
+        if(_svm_memory.allocate(CLScheduler::get().context()(), CL_MEM_READ_WRITE | CL_MEM_SVM_FINE_GRAIN_BUFFER, info().total_size(), 0) == nullptr)
+        {
+            // try at coarse grain svm memory
+            _svm_memory.allocate(CLScheduler::get().context()(), CL_MEM_READ_WRITE, info().total_size(), 0);
+        }
+        if(_svm_memory.ptr() != nullptr)
+        {
+            _buffer = cl::Buffer(CLScheduler::get().context(), CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, info().total_size(), _svm_memory.ptr());
+        }
+        else
+        {
+            _buffer = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info().total_size());
+        }
     }
     else
     {
@@ -69,6 +105,10 @@ void CLTensorAllocator::free()
     if(_associated_memory_group == nullptr)
     {
         _buffer = cl::Buffer();
+        if(_svm_memory.ptr() != nullptr)
+        {
+            clSVMFree(CLScheduler::get().context()(), _svm_memory.ptr());
+        }
         info().set_is_resizable(true);
     }
 }
@@ -97,12 +137,47 @@ void CLTensorAllocator::unlock()
 
 uint8_t *CLTensorAllocator::map(cl::CommandQueue &q, bool blocking)
 {
-    ARM_COMPUTE_ERROR_ON(_buffer.get() == nullptr);
-    return static_cast<uint8_t *>(q.enqueueMapBuffer(_buffer, blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, 0, info().total_size()));
+    const bool svm_mem        = _svm_memory.ptr() != nullptr;
+    const bool fine_grain_svm = _svm_memory.fine_grain();
+    if(!svm_mem)
+    {
+        ARM_COMPUTE_ERROR_ON(_buffer.get() == nullptr);
+        return static_cast<uint8_t *>(q.enqueueMapBuffer(_buffer, blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, 0, info().total_size()));
+    }
+    else if(!fine_grain_svm)
+    {
+        const cl_int ret = clEnqueueSVMMap(q(), blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, _svm_memory.ptr(), _svm_memory.size(), 0, nullptr, nullptr);
+        ARM_COMPUTE_ERROR_ON(ret != CL_SUCCESS);
+        if(ret == CL_SUCCESS)
+        {
+            return reinterpret_cast<uint8_t *>(_svm_memory.ptr());
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+    else
+    {
+        if(blocking)
+        {
+            clFinish(q());
+        }
+        return reinterpret_cast<uint8_t *>(_svm_memory.ptr());
+    }
 }
 
 void CLTensorAllocator::unmap(cl::CommandQueue &q, uint8_t *mapping)
 {
-    ARM_COMPUTE_ERROR_ON(_buffer.get() == nullptr);
-    q.enqueueUnmapMemObject(_buffer, mapping);
+    const bool svm_mem        = _svm_memory.ptr() != nullptr;
+    const bool fine_grain_svm = _svm_memory.fine_grain();
+    if(!svm_mem)
+    {
+        ARM_COMPUTE_ERROR_ON(_buffer.get() == nullptr);
+        q.enqueueUnmapMemObject(_buffer, mapping);
+    }
+    else if(!fine_grain_svm)
+    {
+        clEnqueueSVMUnmap(q(), _svm_memory.ptr(), 0, nullptr, nullptr);
+    }
 }
