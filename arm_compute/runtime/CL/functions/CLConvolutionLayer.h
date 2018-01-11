@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -76,15 +77,20 @@ private:
     bool                     _transpose1xW;
 };
 
-/** Basic function to compute the convolution layer. This function calls the following OpenCL kernels:
+/** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
  *
- * -# @ref CLWeightsReshapeKernel (executed only once for each configuration)
- * -# @ref CLGEMMTranspose1xWKernel (executed only once for each configuration)
+ * Note: weights already reshaped for quantized asymmetric is not supported
+ *
  * -# @ref CLIm2ColKernel
- * -# @ref CLGEMMInterleave4x4Kernel
- * -# @ref CLGEMMMatrixMultiplyKernel or @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
+ * -# @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
  * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale (if quantized asymmetric)
  * -# @ref CLCol2ImKernel
+ *
+ * if the weights are already reshaped:
+ * -# @ref CLGEMMInterleave4x4Kernel
+ * -# @ref CLGEMMMatrixMultiplyKernel
+ * else
+ * -# @ref CLGEMM
  */
 class CLConvolutionLayer : public IFunction
 {
@@ -119,20 +125,21 @@ private:
      *                                                 except for input of QASYMM8 type where output should be of S32 type.
      * @param is_interleaved_transposed Flag that signals if matrix is interleaved transposed
      */
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool is_interleaved_transposed = true);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool is_interleaved_transposed, bool are_weights_reshaped);
 
 private:
     CLMemoryGroup                                       _memory_group;
     CLConvolutionLayerReshapeWeights                    _reshape_weights;
-    CLIm2ColKernel                                      _input_im2col_kernel;
-    CLGEMMInterleave4x4Kernel                           _input_interleave_kernel;
+    CLIm2ColKernel                                      _im2col_kernel;
+    CLGEMMInterleave4x4Kernel                           _interleave_kernel;
     CLGEMMMatrixMultiplyKernel                          _mm_kernel;
+    CLGEMM                                              _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
-    CLCol2ImKernel                                      _output_col2im_kernel;
+    CLCol2ImKernel                                      _col2im_kernel;
 
-    CLTensor _input_im2col_reshaped;
-    CLTensor _input_interleaved_reshaped;
+    CLTensor _im2col_output;
+    CLTensor _interleave_output;
     CLTensor _weights_reshaped;
     CLTensor _weights_transposed;
     CLTensor _gemm_output;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,7 +80,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         matrix_a = &_tmp_a;
         matrix_b = &_tmp_b;
 
-        // _tmp_a and _tmp_n will be auto configured in _interleave_kernel and in _transpose_kernel
+        // _tmp_a and _tmp_b will be auto configured in _interleave_kernel and in _transpose_kernel
 
         // Configure interleave kernel
         _interleave_kernel.configure(a, &_tmp_a);
