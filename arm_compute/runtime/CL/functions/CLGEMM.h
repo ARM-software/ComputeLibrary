@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,7 +68,8 @@ public:
      * @param[in]  alpha     Weight of the matrix product
      * @param[in]  beta      Weight of matrix C
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
-     *                       if the reshape of matrix B should happen only for the first run
+     *                       if the reshape of matrix B should happen only for the first run. GEMMInfo also contains information about the reshaping
+     *                       in case matrix A and matrix B have been already transformed.
      */
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_GRAPH_GRAPH_H__
 #define __ARM_COMPUTE_GRAPH_GRAPH_H__
 
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/graph/ITensorObject.h"
 #include "arm_compute/graph/SubTensor.h"
@@ -67,9 +68,12 @@ public:
      * @param[in] tensor Tensor to add
      */
     void add_tensor_object(std::unique_ptr<ITensorObject> tensor);
-    /** Finalizes the current node's configuration
+    /** Check if the OpenCL target is available
      */
     static bool opencl_is_available();
+    /** Returns the GPU target
+     */
+    static GPUTarget gpu_target();
     /** Manually sets the output of the current node
      *
      * @param[in] tmp Output info to set

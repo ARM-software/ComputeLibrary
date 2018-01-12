@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,8 +54,10 @@ public:
         constexpr float mean_b = 104.01f; /* Mean value to subtract from blue channel */
 
         // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
-        ConvolutionMethodHint convolution_hint = target_hint == TargetHint::NEON ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
+        TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+
+        const bool            is_gemm_convolution5x5 = Graph::gpu_target() == arm_compute::GPUTarget::MIDGARD || target_hint == TargetHint::NEON;
+        ConvolutionMethodHint convolution_5x5_hint   = is_gemm_convolution5x5 ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
 
         // Parse arguments
         if(argc < 2)
@@ -102,7 +104,7 @@ public:
               << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)))
               // Layer 2
-              << convolution_hint
+              << convolution_5x5_hint
               << ConvolutionLayer(
                   5U, 5U, 256U,
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv2_w.npy"),
@@ -111,6 +113,7 @@ public:
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)))
+              << ConvolutionMethodHint::GEMM
               // Layer 3
               << ConvolutionLayer(
                   3U, 3U, 384U,

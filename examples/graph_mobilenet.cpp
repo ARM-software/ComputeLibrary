@@ -52,7 +52,7 @@ public:
 
         // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
         TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
-        ConvolutionMethodHint convolution_hint = target_hint == TargetHint::NEON ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
+        ConvolutionMethodHint convolution_hint = ConvolutionMethodHint::GEMM;
 
         // Set model to execute. 0 (MobileNetV1_1.0_224), 1 (MobileNetV1_0.75_160)
         int model_id = (argc > 2) ? std::strtol(argv[2], nullptr, 10) : 0;

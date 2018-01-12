@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -215,9 +215,23 @@ void Graph::add_tensor_object(std::unique_ptr<ITensorObject> tensor)
         _pimpl->_graph_output->allocate();
     }
 }
+
 bool Graph::opencl_is_available()
 {
     return arm_compute::opencl_is_available();
+}
+
+arm_compute::GPUTarget Graph::gpu_target()
+{
+    // Check if OpenCL is available before returning the GPU target
+    if(opencl_is_available())
+    {
+        return arm_compute::CLScheduler::get().target();
+    }
+    else
+    {
+        return GPUTarget::MIDGARD;
+    }
 }
 
 void Graph::set_temp(TensorInfo &&tmp)

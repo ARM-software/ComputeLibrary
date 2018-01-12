@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ class ICLTensor;
  * \end{array} \right)
  * @f]
  *
- * After this operation, the output matrix will have the following shape: [ height * 4, ceil(width / 4.0f) ]
+ * After this operation, the output matrix will have the following shape: [ height * W, ceil(width / W) ] where W = 4 * mult_interleave4x4_height
  */
 class CLGEMMInterleave4x4Kernel : public ICLKernel
 {
@@ -64,18 +64,20 @@ public:
     CLGEMMInterleave4x4Kernel &operator=(CLGEMMInterleave4x4Kernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
-     * @param[out] output Output tensor. Data type supported: same as @p input
+     * @param[in]  input                     Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[out] output                    Output tensor. Data type supported: same as @p input
+     * @param[in]  mult_interleave4x4_height (Optional) Multiplication factor for the height of the 4x4 interleave block
      */
-    void configure(const ICLTensor *input, ICLTensor *output);
+    void configure(const ICLTensor *input, ICLTensor *output, int mult_interleave4x4_height = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMInterleave4x4Kernel
      *
-     * @param[in] input  Input tensor info. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
-     * @param[in] output Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
+     * @param[in] input                     Input tensor info. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[in] output                    Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
+     * @param[in] mult_interleave4x4_height Multiplication factor for the height of the 4x4 interleave block
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, int mult_interleave4x4_height);
 
     // Inherited methods overridden
     void run(const Window &window, cl::CommandQueue &queue) override;

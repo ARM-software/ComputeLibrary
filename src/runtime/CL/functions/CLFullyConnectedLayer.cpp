@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const I
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(&input, &weights, &output, 1.f, is_interleaved_transposed, gpu_target));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(&input, &weights, &output, 1.f, is_interleaved_transposed, GEMMReshapeInfo(), gpu_target));
     }
 
     return Status{};

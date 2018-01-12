@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,7 +91,6 @@ public:
               << convolution_hint
               << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
                         get_input_accessor(image, mean_r, mean_g, mean_b))
-              << ConvolutionMethodHint::DIRECT
               // Layer 1
               << ConvolutionLayer(
                   3U, 3U, 64U,

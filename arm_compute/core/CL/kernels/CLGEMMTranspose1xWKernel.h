@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,7 +62,7 @@ class ICLTensor;
  * \end{array} \right)
  * @f]
  *
- * @note The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor)
+ * @note The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor) * mult_transpose1xW_width
  *
  */
 class CLGEMMTranspose1xWKernel : public ICLSimple2DKernel
@@ -70,18 +70,20 @@ class CLGEMMTranspose1xWKernel : public ICLSimple2DKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
-     * @param[out] output Output tensor. Data type supported: same as @p input
+     * @param[in]  input                   Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[out] output                  Output tensor. Data type supported: same as @p input
+     * @param[in]  mult_transpose1xW_width (Optional) Multiplication factor for the width of the 1xW transposed block
      */
-    void configure(const ICLTensor *input, ICLTensor *output);
+    void configure(const ICLTensor *input, ICLTensor *output, int mult_transpose1xW_width = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMTranspose1xWKernel
      *
-     * @param[in] input  Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
-     * @param[in] output Output tensor. Data type supported: same as @p input.
+     * @param[in] input                   Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[in] output                  Output tensor. Data type supported: same as @p input.
+     * @param[in] mult_transpose1xW_width Multiplication factor for the width of the 1xW transposed block
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, int mult_transpose1xW_width);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
