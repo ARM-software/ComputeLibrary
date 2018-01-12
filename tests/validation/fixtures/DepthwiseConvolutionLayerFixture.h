@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,8 @@
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/DepthwiseConvolutionLayer.h"
+
+#include "utils/Utils.h"
 
 #include <random>
 
@@ -82,7 +84,7 @@ protected:
             }
             case DataType::S32:
             {
-                std::uniform_int_distribution<int32_t> distribution(-1000, 1000);
+                std::uniform_int_distribution<int32_t> distribution(-100, 100);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -136,7 +138,7 @@ protected:
     {
         SimpleTensor<T>     src{ in_shape, data_type, 1, 0, quantization_info };
         SimpleTensor<T>     weights{ weights_shape, data_type, 1, 0, quantization_info };
-        SimpleTensor<TBias> biases{ biases_shape, data_type, 1, 0, quantization_info };
+        SimpleTensor<TBias> biases{ biases_shape, bias_data_type, 1, 0, quantization_info };
 
         fill(src, 0);
         fill(weights, 1);

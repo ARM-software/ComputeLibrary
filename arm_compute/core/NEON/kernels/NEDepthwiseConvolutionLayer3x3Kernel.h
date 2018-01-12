@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ public:
     NEDepthwiseConvolutionLayer3x3Kernel &operator=(NEDepthwiseConvolutionLayer3x3Kernel &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in]  input     Source tensor. DataType supported: F32.
+     * @param[in]  input     Source tensor. DataType supported: QASYMM8, F32.
      * @param[in]  weights   Weights tensor. This is a 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
      * @param[out] output    Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info Padding and stride information to use for the convolution.
@@ -64,6 +64,7 @@ private:
     ITensor       *_output;
     const ITensor *_weights;
     PadStrideInfo  _conv_info;
+    unsigned int   _num_elems_written_per_iteration;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL3x3_H__ */

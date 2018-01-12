@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,28 +26,56 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/PixelValue.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 NEDepthwiseConvolutionLayer3x3::NEDepthwiseConvolutionLayer3x3()
-    : _kernel(), _output_stage_kernel(), _border_handler(), _has_bias(false)
+    : _kernel(), _output_stage_kernel(), _border_handler(), _accumulator(), _has_bias(false), _is_quantized(false)
 {
 }
 
 void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
-    // Configure kernels
-    _kernel.configure(input, weights, output, conv_info);
-    _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
-    if(biases != nullptr)
+    PixelValue zero_value(0.f);
+
+    _is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
+    _has_bias     = biases != nullptr;
+
+    // Allocate the intermediate accumulator tensor in case of fixed point input
+    if(_is_quantized)
     {
-        _output_stage_kernel.configure(output, biases);
-        _has_bias = true;
+        _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::S32));
+        _accumulator.info()->set_quantization_info(input->info()->quantization_info());
+        zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
+    }
+
+    // Configure depthwise convolution kernel
+    _kernel.configure(input, weights, (_is_quantized) ? &_accumulator : output, conv_info);
+
+    // Configure border handler
+    _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, zero_value);
+
+    // Configure biases accumulation
+    if(_has_bias || _is_quantized)
+    {
+        if(_is_quantized)
+        {
+            float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output->info()->quantization_info().scale;
+            int   output_multiplier, output_shift;
+            quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+            _output_stage_kernel.configure(&_accumulator, biases, output, output_multiplier, output_shift, output->info()->quantization_info().offset);
+            _accumulator.allocator()->allocate();
+        }
+        else
+        {
+            _output_stage_kernel.configure(output, biases);
+        }
     }
 }
 
@@ -55,7 +83,7 @@ void NEDepthwiseConvolutionLayer3x3::run()
 {
     NEScheduler::get().schedule(&_border_handler, Window::DimX);
     NEScheduler::get().schedule(&_kernel, Window::DimX);
-    if(_has_bias)
+    if(_has_bias || _is_quantized)
     {
         NEScheduler::get().schedule(&_output_stage_kernel, Window::DimX);
     }
