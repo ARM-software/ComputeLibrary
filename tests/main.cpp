@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -190,6 +190,10 @@ int main(int argc, char **argv)
                 p->print_global_footer();
             }
         }
+
+#ifdef ARM_COMPUTE_CL
+        CLScheduler::get().sync();
+#endif /* ARM_COMPUTE_CL */
 
         return (success ? 0 : 1);
     }

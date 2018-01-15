@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,11 +33,6 @@ std::once_flag CLScheduler::_initialize_symbols;
 CLScheduler::CLScheduler()
     : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner()
 {
-}
-
-CLScheduler::~CLScheduler()
-{
-    _queue.finish();
 }
 
 CLScheduler &CLScheduler::get()

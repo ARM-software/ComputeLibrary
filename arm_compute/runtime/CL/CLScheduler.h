@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,8 +52,6 @@ class CLScheduler
 private:
     /** Constructor */
     CLScheduler();
-    /** Destructor */
-    ~CLScheduler();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLScheduler(const CLScheduler &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
