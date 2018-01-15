@@ -28,6 +28,10 @@
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+#pragma OPENCL EXTENSION cl_arm_integer_dot_product_int8 : enable
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
 #if defined(cl_arm_printf)
 #pragma OPENCL EXTENSION cl_arm_printf : enable

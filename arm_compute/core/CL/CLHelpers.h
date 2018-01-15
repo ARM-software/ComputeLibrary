@@ -102,5 +102,12 @@ bool fp16_supported(const cl::Device &device);
  * @return True if the extension is supported
  */
 bool arm_non_uniform_workgroup_supported(const cl::Device &device);
+/** Helper function to check whether the cl_arm_integer_dot_product_int8 extension is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the extension is supported
+ */
+bool dot8_supported(const cl::Device &device);
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

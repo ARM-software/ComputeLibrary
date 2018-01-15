@@ -753,6 +753,11 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
         concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";
     }
 
+    if(dot8_supported(_device))
+    {
+        concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ENABLED=1 ";
+    }
+
     if(get_cl_version(_device) == CLVersion::CL20)
     {
         concat_str += " -cl-std=CL2.0 ";
