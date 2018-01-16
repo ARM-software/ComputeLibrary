@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -246,7 +246,8 @@ int stof(Ts &&... args)
 template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
 inline T round(T value)
 {
-    return std::round(value);
+    //Workaround Valgrind's mismatches: when running from Valgrind the call to std::round(-4.500000) == -4.000000 instead of 5.00000
+    return (value < 0.f) ? static_cast<int>(value - 0.5f) : static_cast<int>(value + 0.5f);
 }
 
 /** Truncate floating-point value.
