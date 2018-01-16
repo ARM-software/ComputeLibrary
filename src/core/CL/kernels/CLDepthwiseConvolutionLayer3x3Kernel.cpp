@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -158,9 +158,9 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     }
 
     // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = 2;
-    const unsigned int num_elems_written_per_iteration   = 2;
-    const unsigned int num_elems_read_per_iteration      = 3 + _conv_stride_x;
+    const unsigned int num_elems_processed_per_iteration = 8 / data_size_from_type(input->info()->data_type());
+    const unsigned int num_elems_written_per_iteration   = num_elems_processed_per_iteration;
+    const unsigned int num_elems_read_per_iteration      = 3 + (num_elems_processed_per_iteration - 1) * _conv_stride_x;
     const unsigned int num_rows_read_per_iteration       = 3;
 
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
