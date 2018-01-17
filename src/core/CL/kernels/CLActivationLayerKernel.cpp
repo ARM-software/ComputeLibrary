@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -145,18 +145,21 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
         build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
 
-        // Set scale and offset of the input and output
-        if(is_data_type_quantized_asymmetric(dt))
+        // Set scale and offset of the input and output if they have different quantization info
+        if(is_data_type_quantized_asymmetric(dt) && output != nullptr)
         {
-            float s1 = input->info()->quantization_info().scale;
-            int   o1 = input->info()->quantization_info().offset;
-            // If output is nullptr, assume same quantization scale/offset as input
-            float s2 = output != nullptr ? output->info()->quantization_info().scale : s1;
-            int   o2 = output != nullptr ? output->info()->quantization_info().offset : o1;
-            build_opts.emplace(("-DS1_VAL=" + float_to_string_with_full_precision(s1)));
-            build_opts.emplace(("-DS2_VAL=" + float_to_string_with_full_precision(s2)));
-            build_opts.emplace(("-DO1_VAL=" + support::cpp11::to_string(o1)));
-            build_opts.emplace(("-DO2_VAL=" + support::cpp11::to_string(o2)));
+            const float s1 = input->info()->quantization_info().scale;
+            const float s2 = output->info()->quantization_info().scale;
+            const int   o1 = input->info()->quantization_info().offset;
+            const int   o2 = output->info()->quantization_info().offset;
+
+            if(o1 != o2 || s1 != s2)
+            {
+                build_opts.emplace(("-DS1_VAL=" + float_to_string_with_full_precision(s1)));
+                build_opts.emplace(("-DS2_VAL=" + float_to_string_with_full_precision(s2)));
+                build_opts.emplace(("-DO1_VAL=" + support::cpp11::to_string(o1)));
+                build_opts.emplace(("-DO2_VAL=" + support::cpp11::to_string(o2)));
+            }
         }
     }
     else

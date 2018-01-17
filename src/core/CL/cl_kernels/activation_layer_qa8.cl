@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,12 +89,16 @@ __kernel void activation_layer_qa8(
     // Perform activation
     data = ACTIVATION_OP(ACT, data);
 
+#if defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL)
     // requantize to output space
-    float16 fdata = convert_float16(data);
-    fdata         = round((fdata - (float)O1_VAL) * ((float)S1_VAL / (float)S2_VAL) + (float)O2_VAL);
-    uchar16 qdata = convert_uchar16_sat(fdata);
+    VEC_DATA_TYPE(float, VEC_SIZE)
+    fdata = CONVERT(data, VEC_DATA_TYPE(float, VEC_SIZE));
+
+    fdata = round((fdata - (float)O1_VAL) * ((float)S1_VAL / (float)S2_VAL) + (float)O2_VAL);
+    data  = CONVERT_SAT(fdata, VEC_DATA_TYPE(uchar, VEC_SIZE));
+#endif // defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL)
 
     // Store result
     VSTORE(VEC_SIZE)
-    (qdata, 0, (__global DATA_TYPE *)output.ptr);
+    (data, 0, (__global DATA_TYPE *)output.ptr);
 }
