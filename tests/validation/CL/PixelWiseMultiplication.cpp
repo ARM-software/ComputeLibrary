@@ -86,6 +86,8 @@ template <typename T>
 using CLPixelWiseMultiplicationToQS16Fixture = PixelWiseMultiplicationValidationFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, qint16_t>;
 template <typename T>
 using CLFixedPointPixelWiseMultiplicationFixture = FixedPointPixelWiseMultiplicationValidationFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T>;
+template <typename T>
+using CLPixelWiseMultiplicationBroadcastFixture = PixelWiseMultiplicationBroadcastValidationFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
 
 TEST_SUITE(CL)
 TEST_SUITE(PixelWiseMultiplication)
@@ -168,6 +170,10 @@ FP_PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunTiny, Fixture<qint16_t>, 
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE_END() // QS16
+
+TEST_SUITE(Broadcast)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<float>, PRECOMMIT, SmallShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, VALIDATE(float, 1.f))
+TEST_SUITE_END() // Broadcast
 
 TEST_SUITE_END() // FixedPointPixelWiseMultiplication
 TEST_SUITE_END()
