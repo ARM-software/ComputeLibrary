@@ -317,12 +317,20 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
     const int output_padding_bottom = ceil_to_multiple(output_height, num_elems_written_per_iteration_y * _lws[1]) - output_height;
 
     // Calculate input right and bottom border
-    const int input_width    = input->info()->dimension(0);
-    const int input_height   = input->info()->dimension(1);
-    const int upper_bound_w  = ceil_to_multiple(((output_width + output_padding_right) * _conv_stride_x + (kernel_size - 1)), num_elems_read_per_iteration_x * _lws[0]) - _conv_pad_x - input_width;
-    const int upper_bound_h  = ceil_to_multiple(((output_height + output_padding_bottom) * _conv_stride_y + (kernel_size - 1)), num_elems_read_per_iteration_y * _lws[1]) - _conv_pad_y - input_height;
-    const int padding_right  = std::max(upper_bound_w, _conv_pad_x);
-    const int padding_bottom = std::max(upper_bound_h, _conv_pad_y);
+    const int input_width        = input->info()->dimension(0);
+    const int input_height       = input->info()->dimension(1);
+    const int input_total_width  = std::max(int(input->info()->padding().left), int(_conv_pad_x)) + input_width + std::max(int(input->info()->padding().right), int(_conv_pad_x));
+    const int input_total_height = std::max(int(input->info()->padding().top), int(_conv_pad_y)) + input_height + std::max(int(input->info()->padding().bottom), int(_conv_pad_y));
+    const int padding_right1     = ceil_to_multiple(input_total_width, num_elems_read_per_iteration_x * _lws[0]) - input_width - _conv_pad_x;
+    const int padding_bottom1    = ceil_to_multiple(input_total_height, num_elems_read_per_iteration_y * _lws[1]) - input_height - _conv_pad_y;
+
+    const int upper_bound_w   = ceil_to_multiple(((output_width + output_padding_right) * _conv_stride_x + (kernel_size - 1)), num_elems_read_per_iteration_x * _lws[0]) - _conv_pad_x - input_width;
+    const int upper_bound_h   = ceil_to_multiple(((output_height + output_padding_bottom) * _conv_stride_y + (kernel_size - 1)), num_elems_read_per_iteration_y * _lws[1]) - _conv_pad_y - input_height;
+    const int padding_right2  = std::max(upper_bound_w, _conv_pad_x);
+    const int padding_bottom2 = std::max(upper_bound_h, _conv_pad_y);
+
+    const int padding_right  = std::max(padding_right1, padding_right2);
+    const int padding_bottom = std::max(padding_bottom1, padding_bottom2);
 
     BorderSize border = BorderSize(0, output_padding_right, output_padding_bottom, 0);
 
@@ -405,6 +413,8 @@ void GCDirectConvolutionLayerKernel<kernel_size>::run(const Window &window)
         slice_bias.use_tensor_dimensions(_bias->info()->tensor_shape());
         add_1D_tensor_argument(idx1, _bias, 4, slice_bias);
     }
+
+    slice.shift(Window::DimX, -(_output->info()->padding()).left);
 
     do
     {

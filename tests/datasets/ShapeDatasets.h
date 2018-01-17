@@ -387,6 +387,28 @@ public:
     }
 };
 
+/** Data set containing small tensor shapes for direct convolution. */
+class SmallDirectConvolutionTensorShiftShapes final : public ShapeDataset
+{
+public:
+    SmallDirectConvolutionTensorShiftShapes()
+        : ShapeDataset("InputShape",
+    {
+        // Batch size 1
+        TensorShape{ 35U, 35U, 3U },
+                     TensorShape{ 32U, 37U, 3U },
+                     // Batch size 4
+                     TensorShape{ 32U, 37U, 3U, 4U },
+                     // Batch size 8
+                     TensorShape{ 32U, 37U, 3U, 8U },
+                     TensorShape{ 33U, 35U, 3U, 8U },
+                     // Arbitrary batch size
+                     TensorShape{ 32U, 37U, 3U, 8U }
+    })
+    {
+    }
+};
+
 /** Data set containing 2D tensor shapes for DepthConcatenateLayer. */
 class DepthConcatenateLayerShapes final : public ShapeDataset
 {

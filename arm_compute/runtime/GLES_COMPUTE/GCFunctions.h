@@ -45,6 +45,7 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCPoolingLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCScale.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCSoftmaxLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCTensorShift.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCTranspose.h"
 
 #endif /* __ARM_COMPUTE_GCFUNCTIONS_H__ */
