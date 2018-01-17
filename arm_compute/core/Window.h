@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -245,6 +245,14 @@ public:
     {
         return first_slice_window<3>();
     };
+    /** First 4D slice of the window
+     *
+     * @return The first slice of the window.
+     */
+    Window first_slice_window_4D() const
+    {
+        return first_slice_window<4>();
+    };
     /** Slide the passed 1D window slice.
      *
      * If slice contains the last slice then it will remain unchanged and false will be returned.
@@ -304,6 +312,17 @@ public:
      * @return Collapsed window.
      */
     Window collapse_if_possible(const Window &full_window, size_t first) const;
+
+    /* Collapse the dimensions higher than @p first.
+     *
+     * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
+     *
+     * @param[in] full_window Full window @p window has been created from.
+     * @param[in] first       Dimensions into which the following are collapsed.
+     *
+     * @return Collapsed window if successful.
+     */
+    Window collapse(const Window &full_window, size_t first) const;
 
 private:
     /** First slice of the window

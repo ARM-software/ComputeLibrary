@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,6 +86,7 @@
 #include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
 #include "arm_compute/runtime/CL/functions/CLNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLOpticalFlow.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLPhase.h"
 #include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"

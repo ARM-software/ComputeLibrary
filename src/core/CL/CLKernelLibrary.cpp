@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -291,6 +291,9 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "NV21_to_RGB888_bt709", "color_convert.cl" },
     { "NV21_to_RGBA8888_bt709", "color_convert.cl" },
     { "NV21_to_YUV444_bt709", "color_convert.cl" },
+    { "permute_201", "permute.cl" },
+    { "permute_120", "permute.cl" },
+    { "permute_3201", "permute.cl" },
     { "pixelwise_mul_float", "pixelwise_mul_float.cl" },
     { "pixelwise_mul_int", "pixelwise_mul_int.cl" },
     { "pooling_layer_2", "pooling_layer.cl" },
@@ -572,6 +575,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "optical_flow_pyramid_lk.cl",
 #include "./cl_kernels/optical_flow_pyramid_lk.clembed"
+    },
+    {
+        "permute.cl",
+#include "./cl_kernels/permute.clembed"
     },
     {
         "pixelwise_mul_float.cl",

@@ -184,6 +184,12 @@ size_t ICLKernel::get_max_workgroup_size()
 
 cl::NDRange ICLKernel::gws_from_window(const Window &window)
 {
+    // Make sure that dimensions > Z are 1
+    for(unsigned int i = 3; i < Coordinates::num_max_dimensions; ++i)
+    {
+        ARM_COMPUTE_ERROR_ON((window[i].end() - window[i].start()) != 1);
+    }
+
     if((window.x().end() - window.x().start()) == 0 || (window.y().end() - window.y().start()) == 0)
     {
         return cl::NullRange;

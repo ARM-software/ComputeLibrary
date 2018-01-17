@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CPP/functions/CPPPermute.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/CLTensorAllocator.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
+#include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
@@ -47,7 +47,7 @@ const auto PermuteParametersSmall = combine(datasets::Small4DShapes(),
 const auto PermuteParametersLarge = combine(datasets::Large4DShapes(),
                                             framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U), PermutationVector(3U, 2U, 0U, 1U) }));
 } // namespace
-TEST_SUITE(CPP)
+TEST_SUITE(CL)
 TEST_SUITE(Permute)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::S8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32 })),
@@ -61,11 +61,11 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
     permute(output_shape, perm);
 
     // Create tensors
-    Tensor ref_src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst     = create_tensor<Tensor>(output_shape, data_type);
+    CLTensor ref_src = create_tensor<CLTensor>(shape, data_type);
+    CLTensor dst     = create_tensor<CLTensor>(output_shape, data_type);
 
     // Create and Configure function
-    CPPPermute perm_func;
+    CLPermute perm_func;
     perm_func.configure(&ref_src, &dst, perm);
 
     // Validate valid region
@@ -74,44 +74,44 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
 }
 
 template <typename T>
-using CPPPermuteFixture = PermuteValidationFixture<Tensor, Accessor, CPPPermute, T>;
+using CLPermuteFixture = PermuteValidationFixture<CLTensor, CLAccessor, CLPermute, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U8)))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U8)))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END()
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END()
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U32)))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U32)))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END()
 

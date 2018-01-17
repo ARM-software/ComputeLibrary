@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,6 +88,7 @@
 #include "arm_compute/core/CL/kernels/CLNonLinearFilterKernel.h"
 #include "arm_compute/core/CL/kernels/CLNonMaximaSuppression3x3Kernel.h"
 #include "arm_compute/core/CL/kernels/CLNormalizationLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/CL/kernels/CLPoolingLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLQuantizationLayerKernel.h"
