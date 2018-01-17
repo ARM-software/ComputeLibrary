@@ -32,6 +32,7 @@
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ActivationLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ActivationLayerDataset.h"
 #include "tests/datasets/system_tests/lenet5/LeNet5ActivationLayerDataset.h"
+#include "tests/datasets/system_tests/mobilenet/MobileNetActivationLayerDataset.h"
 #include "tests/datasets/system_tests/squeezenet/SqueezeNetActivationLayerDataset.h"
 #include "tests/datasets/system_tests/vgg/vgg16/VGG16ActivationLayerDataset.h"
 #include "tests/datasets/system_tests/yolo/v2/YOLOV2ActivationLayerDataset.h"
@@ -46,9 +47,11 @@ namespace test
 namespace
 {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+const auto data_types           = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8, DataType::QS16 });
+const auto data_types_mobilenet = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8, DataType::QS16, DataType::QASYMM8 });
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
+const auto data_types           = framework::dataset::make("DataType", { DataType::F32, DataType::QS8, DataType::QS16 });
+const auto data_types_mobilenet = framework::dataset::make("DataType", { DataType::F32, DataType::QS8, DataType::QS16, DataType::QASYMM8 });
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 
@@ -62,6 +65,10 @@ REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetActivationLayer, NEActivationLayerFixture
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::MobileNetActivationLayerDataset(), data_types_mobilenet),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL,
@@ -91,6 +98,10 @@ REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetActivationLayer, NEActivationLayerFixture
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(datasets::MobileNetActivationLayerDataset(), data_types_mobilenet),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY,
