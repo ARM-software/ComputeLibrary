@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ namespace test
 {
 namespace
 {
-const auto data_types = framework::dataset::make("DataType", { DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::QASYMM8, DataType::F16, DataType::F32 });
 } // namespace
 
 using CLSoftmaxLayerFixture = SoftmaxLayerFixture<CLTensor, CLSoftmaxLayer, CLAccessor>;
