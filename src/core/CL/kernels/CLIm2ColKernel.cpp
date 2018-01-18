@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,9 +41,10 @@ using namespace arm_compute;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, bool has_bias)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::QASYMM8 && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
 
     // Checks performed when output is configured
@@ -67,7 +68,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), has_bias));
 
     _input  = input;
     _output = output;
@@ -208,7 +209,7 @@ Status CLIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *out
     ARM_COMPUTE_UNUSED(kernel_dims);
     ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_UNUSED(has_bias);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, has_bias));
     return Status{};
 }
 

@@ -47,9 +47,10 @@ namespace test
 namespace
 {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QASYMM8 });
+#else /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+const auto data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 });
+
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 

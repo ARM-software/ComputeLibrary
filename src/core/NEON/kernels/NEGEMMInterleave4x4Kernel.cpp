@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <arm_neon.h>
 #include <cstddef>
@@ -37,6 +38,7 @@
 #include <tuple>
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
@@ -178,12 +180,8 @@ void NEGEMMInterleave4x4Kernel::configure(const ITensor *input, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    TensorShape output_shape = input->info()->tensor_shape();
-    output_shape.set(0, input->info()->dimension(0) * 4);
-    output_shape.set(1, std::ceil(input->info()->dimension(1) / 4.0f));
-
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_interleaved_shape(*input->info())));
 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));

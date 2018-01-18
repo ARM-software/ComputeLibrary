@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -143,13 +143,10 @@ void NEGEMMLowpOffsetContributionKernel::configure(ITensor *mm_result, const ITe
     // If a_offset == 0, vector_sum_col can be a nullptr
     if(a_offset != 0)
     {
-        TensorShape vector_sum_col_shape = vector_sum_col->info()->tensor_shape(); // NOLINT
-        vector_sum_col_shape.collapse(1);
-
         // Check if vector_sum_col_shape should be slidden or not
         // Don't slide vector_sum_col_shape along the y dimension if vector_sum_col_shape has just 1 dimension and vector_sum_row_shape more than 1
         // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-        _slide_vector_sum_col = vector_sum_col_shape[1] != 1;
+        _slide_vector_sum_col = vector_sum_col->info()->tensor_shape().num_dimensions() > 1;
     }
 
     // Configure kernel window
@@ -201,7 +198,7 @@ void NEGEMMLowpOffsetContributionKernel::run(const Window &window, const ThreadI
         Iterator vector_sum_row(_vector_sum_row, win_vector_sum_row);
         Iterator mm_result(_mm_result, window);
 
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(collapsed_window, [&](const Coordinates & id)
         {
             // Compute the leftover term due to a_offset.
             int32x4x4_t a_offset_term_s32 =

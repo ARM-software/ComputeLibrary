@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,7 +68,8 @@ inline void linearize_volume(const uint8_t *const in_ptr,
                              int                  input_stride_x,
                              int                  input_stride_y,
                              int                  input_stride_z,
-                             int                  fixed_point_position)
+                             int                  fixed_point_position,
+                             int                  pad_value)
 {
     const int kernel_size2 = kernel_width * kernel_height;
     const int x_e          = top_left_x + kernel_width;
@@ -85,12 +86,12 @@ inline void linearize_volume(const uint8_t *const in_ptr,
         {
             if((y < 0 || y >= input_h) && has_pads)
             {
-                // All the values will be zeros
+                // All the values will be the offset (will be zeros when not quantized)
                 for(int x = top_left_x; x < x_e; ++x, ++out_ptr)
                 {
-                    *(out_ptr + 0 * kernel_size2) = 0;
-                    *(out_ptr + 1 * kernel_size2) = 0;
-                    *(out_ptr + 2 * kernel_size2) = 0;
+                    *(out_ptr + 0 * kernel_size2) = pad_value;
+                    *(out_ptr + 1 * kernel_size2) = pad_value;
+                    *(out_ptr + 2 * kernel_size2) = pad_value;
                 }
             }
             else
@@ -99,9 +100,9 @@ inline void linearize_volume(const uint8_t *const in_ptr,
                 {
                     if((x < 0 || x >= input_w) && has_pads)
                     {
-                        *(out_ptr + 0 * kernel_size2) = 0;
-                        *(out_ptr + 1 * kernel_size2) = 0;
-                        *(out_ptr + 2 * kernel_size2) = 0;
+                        *(out_ptr + 0 * kernel_size2) = pad_value;
+                        *(out_ptr + 1 * kernel_size2) = pad_value;
+                        *(out_ptr + 2 * kernel_size2) = pad_value;
                     }
                     else
                     {
@@ -122,8 +123,8 @@ inline void linearize_volume(const uint8_t *const in_ptr,
         {
             if((y < 0 || y >= input_h) && has_pads)
             {
-                // All the values will be zeros
-                memset(out_ptr, 0, kernel_width * sizeof(T));
+                // All the values will be the offset (will be zeros when not quantized)
+                memset(out_ptr, pad_value, kernel_width * sizeof(T));
                 out_ptr += kernel_width;
             }
             else
@@ -132,7 +133,7 @@ inline void linearize_volume(const uint8_t *const in_ptr,
                 {
                     if((x < 0 || x >= input_w) && has_pads)
                     {
-                        *out_ptr = 0;
+                        *out_ptr = pad_value;
                     }
                     else
                     {
@@ -174,6 +175,7 @@ void NEIm2ColKernel::run_generic(const Window &window)
     const int input_stride_x = _input->info()->strides_in_bytes().x();
     const int input_stride_y = _input->info()->strides_in_bytes().y();
     const int input_stride_z = _input->info()->strides_in_bytes().z();
+    const int offset         = is_data_type_quantized(_input->info()->data_type()) ? _input->info()->quantization_info().offset : 0;
 
     int pad_left = 0;
     int pad_top  = 0;
@@ -226,7 +228,8 @@ void NEIm2ColKernel::run_generic(const Window &window)
                                       input_stride_x,
                                       input_stride_y,
                                       input_stride_z,
-                                      _input->info()->fixed_point_position());
+                                      _input->info()->fixed_point_position(),
+                                      offset);
     },
     in, out);
 }
@@ -335,6 +338,9 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
             case DataType::QS16:
                 _func = &NEIm2ColKernel::run_reduced<qint16_t>;
                 break;
+            case DataType::QASYMM8:
+                _func = &NEIm2ColKernel::run_reduced<qasymm8_t>;
+                break;
             default:
                 ARM_COMPUTE_ERROR("Data type not supported");
                 break;
@@ -357,6 +363,9 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                 break;
             case DataType::QS16:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<qint16_t, false> : &NEIm2ColKernel::run_generic<qint16_t, true>;
+                break;
+            case DataType::QASYMM8:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<qasymm8_t, false> : &NEIm2ColKernel::run_generic<qasymm8_t, true>;
                 break;
             default:
                 ARM_COMPUTE_ERROR("Data type not supported");

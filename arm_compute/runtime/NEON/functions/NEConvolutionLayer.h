@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,8 +36,9 @@
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
-
 #include <memory>
 
 namespace arm_compute
@@ -55,7 +56,7 @@ public:
     NEConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QS16/F32.
+     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QASYMM8/QS16/F32.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] output       Destination tensor. Data types supported: Same as @p weights.
      * @param[in]  transpose1xW True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise.
@@ -64,7 +65,7 @@ public:
     void configure(const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose1xW);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayerReshapeWeights
      *
-     * @param[in] weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QS16/F16/F32.
+     * @param[in] weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QASYMM8/QS16/F16/F32.
      * @param[in] biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[in] output       Destination tensor. Data types supported: Same as @p weights.
      * @param[in] transpose1xW True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise.
@@ -89,7 +90,8 @@ private:
  * -# @ref NEWeightsReshapeKernel   (executed only once for each configuration)
  * -# @ref NEIm2ColKernel
  * -# @ref NEGEMMInterleave4x4Kernel (executed only in case GEMM is required for the operation)
- * -# @ref NEGEMMMatrixMultiplyKernel
+ * -# @ref NEGEMMMatrixMultiplyKernel or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
+ * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale (if quantized asymmetric)
  * -# @ref NECol2ImKernel
  */
 class NEConvolutionLayer : public IFunction
@@ -102,9 +104,10 @@ public:
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QS8/QS16/F32.
+     *                          Data types supported: QS8/QASYMM8/QS16/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
-     * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
      * @param[out] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                          Data types supported: Same as @p input.
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
@@ -116,9 +119,10 @@ public:
      *
      * @param[in] input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                         while every optional dimension from 4 and above represent a batch of inputs.
-     *                         Data types supported: QS8/QS16/F16/F32.
+     *                         Data types supported: QS8/QASYMM8/QS16/F16/F32.
      * @param[in] weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
-     * @param[in] biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported:Same as @p input.
+     * @param[in] biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     *                         Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
      * @param[in] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                         Data types supported: Same as @p input.
      * @param[in] conv_info    Contains padding and stride information described in @ref PadStrideInfo.
@@ -134,21 +138,38 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                               _memory_group;
-    NEIm2ColKernel                            _input_im2col_kernel;
-    NEGEMMInterleave4x4Kernel                 _input_interleave_kernel;
-    NEConvolutionLayerReshapeWeights          _reshape_weights;
-    NEGEMMMatrixMultiplyKernel                _mm_kernel;
-    std::unique_ptr<NEGEMMAssemblyBaseKernel> _mm_optimised_kernel;
-    NECol2ImKernel                            _output_col2im_kernel;
-    Tensor                                    _input_im2col_reshaped;
-    Tensor                                    _input_interleaved_reshaped;
-    Tensor                                    _weights_reshaped;
-    Tensor                                    _gemm_output;
-    Tensor                                    _workspace;
-    bool                                      _has_bias;
-    bool                                      _is_fully_connected_convolution;
-    bool                                      _are_weights_reshaped;
+    /** Configures the appropriate matrix multiply routine
+     *
+     * @param[in]  input   Input tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in]  weights Weights tensor. Data type supported: Same as @p input.
+     * @param[out] output  Output tensor. Data types supported: Same as @p input,
+     *                     except for input of QASYMM8 type where output should be of S32 type.
+     */
+    void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output);
+
+private:
+    MemoryGroup                                         _memory_group;
+    NEIm2ColKernel                                      _input_im2col_kernel;
+    NEGEMMInterleave4x4Kernel                           _input_interleave_kernel;
+    NEConvolutionLayerReshapeWeights                    _reshape_weights;
+    NEGEMMMatrixMultiplyKernel                          _mm_kernel;
+    std::unique_ptr<NEGEMMAssemblyBaseKernel>           _mm_optimised_kernel;
+    NEGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
+    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
+    NECol2ImKernel                                      _output_col2im_kernel;
+
+    Tensor _input_im2col_reshaped;
+    Tensor _input_interleaved_reshaped;
+    Tensor _weights_reshaped;
+    Tensor _gemm_output;
+    Tensor _tmp_output;
+    Tensor _workspace;
+
+    bool _append_bias;
+    bool _is_fully_connected_convolution;
+    bool _are_weights_reshaped;
+    bool _is_quantized;
+    bool _is_interleaved_transposed;
 };
 }
 #endif /* __ARM_COMPUTE_NECONVOLUTIONLAYER_H__ */

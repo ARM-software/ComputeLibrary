@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,9 +47,10 @@ namespace
 {
 const AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-const AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-const AbsoluteTolerance<float> tolerance_q(1.0f);    /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+const AbsoluteTolerance<float> tolerance_f16(0.01f);       /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+#endif                                                     /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+const AbsoluteTolerance<float>     tolerance_q(1.0f);      /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -60,6 +61,7 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F32,
     DataType::QS8,
     DataType::QS16,
+    DataType::QASYMM8,
 });
 } // namespace
 
@@ -89,16 +91,21 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     // Set fixed point position data type allowed
     int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
 
+    auto bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
+
     // Create tensors
-    Tensor src     = create_tensor<Tensor>(input_shape, data_type, 1, fixed_point_position);
-    Tensor weights = create_tensor<Tensor>(weights_shape, data_type, 1, fixed_point_position);
-    Tensor bias    = create_tensor<Tensor>(bias_shape, data_type, 1, fixed_point_position);
-    Tensor dst     = create_tensor<Tensor>(output_shape, data_type, 1, fixed_point_position);
+    Tensor src     = create_tensor<Tensor>(input_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
+    Tensor weights = create_tensor<Tensor>(weights_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
+    Tensor bias    = create_tensor<Tensor>(bias_shape, bias_data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
+    Tensor dst     = create_tensor<Tensor>(output_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    const QuantizationInfo src_quantization_info     = src.info()->quantization_info();
+    const QuantizationInfo weights_quantization_info = weights.info()->quantization_info();
 
     // Create and configure function
     NEConvolutionLayer conv;
@@ -114,6 +121,10 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(weights.info()->valid_region(), weights_valid_region);
     validate(bias.info()->valid_region(), bias_valid_region);
     validate(dst.info()->valid_region(), dst_valid_region);
+
+    // Validate QuantizationInfo
+    ARM_COMPUTE_EXPECT(src.info()->quantization_info() == src_quantization_info, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
 
     // Validate padding
     //TODO(COMPMID-415) Need to validate padding?
@@ -163,7 +174,7 @@ TEST_SUITE_END()
 template <typename T>
 using NEConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 
-TEST_SUITE(Quantized)
+TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // We test for fixed point precision [4,6]
 FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
@@ -201,6 +212,30 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixedPointFixture<int16_t>, f
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using NEConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true })),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

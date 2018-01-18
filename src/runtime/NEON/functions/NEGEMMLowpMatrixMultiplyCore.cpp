@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "support/ToolchainSupport.h"
@@ -45,6 +46,7 @@ namespace arm_compute
 } // namespace arm_compute
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(),
@@ -102,17 +104,9 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         else
         {
             // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
-            TensorShape shape_tmp_a = a->info()->tensor_shape();
-            shape_tmp_a.set(0, a->info()->dimension(0) * 4);
-            shape_tmp_a.set(1, std::ceil(a->info()->dimension(1) / 4.f));
-
+            TensorInfo info_a(compute_interleaved_shape(*a->info()), 1, a->info()->data_type());
             // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
-            TensorShape shape_tmp_b = b->info()->tensor_shape();
-            shape_tmp_b.set(0, b->info()->dimension(1) * 16);
-            shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / 16.f));
-
-            TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type());
-            TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type());
+            TensorInfo info_b(compute_transpose1xW_shape(*b->info()), 1, b->info()->data_type());
             _tmp_a.allocator()->init(info_a);
             _tmp_b.allocator()->init(info_b);
             _memory_group.manage(&_tmp_a);
@@ -144,12 +138,8 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
     if(_a_offset != 0)
     {
-        TensorShape shape_vector_sum_col = b->info()->tensor_shape();
-        if(b->info()->num_dimensions() > 1)
-        {
-            shape_vector_sum_col.remove_dimension(1);
-        }
-        TensorInfo info_vector_sum_col(shape_vector_sum_col, 1, DataType::S32);
+        TensorInfo info_vector_sum_col(compute_reductionA_shape(*b->info()), 1, DataType::S32);
+
         _vector_sum_col.allocator()->init(info_vector_sum_col);
         _memory_group.manage(&_vector_sum_col);
 
@@ -160,13 +150,8 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     // Initialize Matrix A reduction kernel only if _b_offset is not equal to 0
     if(_b_offset != 0)
     {
-        TensorShape shape_vector_sum_row = a->info()->tensor_shape();
-        shape_vector_sum_row.set(Window::DimX, a->info()->dimension(1));
-        if(a->info()->num_dimensions() > 1)
-        {
-            shape_vector_sum_row.remove_dimension(1);
-        }
-        TensorInfo info_vector_sum_row(shape_vector_sum_row, 1, DataType::S32);
+        TensorInfo info_vector_sum_row(compute_reductionB_shape(*a->info()), 1, DataType::S32);
+
         _vector_sum_row.allocator()->init(info_vector_sum_row);
         _memory_group.manage(&_vector_sum_row);
 
@@ -261,9 +246,7 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     // Validate matrix B reduction kernel only if _a_offset is not equal to 0
     if(a_offset != 0)
     {
-        TensorShape shape_vector_sum_col = b->tensor_shape();
-        shape_vector_sum_col.remove_dimension(1);
-        info_vector_sum_col = TensorInfo(shape_vector_sum_col, 1, DataType::S32);
+        info_vector_sum_col = TensorInfo(compute_reductionA_shape(*b), 1, DataType::S32);
 
         // Configure Matrix B reduction kernel
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixBReductionKernel::validate(b, &info_vector_sum_col, a->dimension(0), false));
@@ -272,10 +255,7 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     // Validate Matrix A reduction kernel only if _b_offset is not equal to 0
     if(b_offset != 0)
     {
-        TensorShape shape_vector_sum_row = a->tensor_shape();
-        shape_vector_sum_row.set(Window::DimX, a->dimension(1));
-        shape_vector_sum_row.remove_dimension(1);
-        info_vector_sum_row = TensorInfo(shape_vector_sum_row, 1, DataType::S32);
+        info_vector_sum_row = TensorInfo(compute_reductionB_shape(*a), 1, DataType::S32);
 
         // Configure matrix A reduction kernel
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(a, &info_vector_sum_row, a->dimension(0), false));

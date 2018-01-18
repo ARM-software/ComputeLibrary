@@ -260,8 +260,8 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     if(_is_interleaved_transposed)
     {
         // Configure GEMMInterleave4x4. _input_interleaved_reshaped will be auto configured in the kernel
-        _interleave_kernel.configure(&_im2col_output, &_interleave_output);
         _memory_group.manage(&_interleave_output);
+        _interleave_kernel.configure(&_im2col_output, &_interleave_output);
 
         // Configure GEMM
         configure_mm(&_interleave_output, weights, &_gemm_output, true, _are_weights_reshaped);
@@ -279,8 +279,8 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
         float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output->info()->quantization_info().scale;
         int   output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+        _memory_group.manage(&_tmp_output);
         _gemmlowp_output_stage.configure(&_gemm_output, biases, &_tmp_output, output_multiplier, output_shift, output->info()->quantization_info().offset);
-        _gemm_output.allocator()->allocate();
     }
 
     // Configure Col2Im
@@ -289,10 +289,7 @@ void CLConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weig
     {
         _tmp_output.allocator()->allocate();
     }
-    else
-    {
-        _gemm_output.allocator()->allocate();
-    }
+    _gemm_output.allocator()->allocate();
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
