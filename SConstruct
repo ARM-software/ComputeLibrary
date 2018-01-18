@@ -88,7 +88,15 @@ env.Append(CXXFLAGS = ['-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
-if os.environ.get('CXX', 'g++') == 'clang++':
+default_cpp_compiler = 'g++' if env['os'] != 'android' else 'clang++'
+default_c_compiler = 'gcc' if env['os'] != 'android' else 'clang'
+cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
+c_compiler = os.environ.get('CC', default_c_compiler)
+
+if env['os'] == 'android' and ( cpp_compiler != 'clang++' or c_compiler != 'clang'):
+    print "WARNING: Only clang is officially supported to build the Compute Library for Android"
+
+if cpp_compiler == 'clang++':
     env.Append(CXXFLAGS = ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags'])
 else:
     env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
@@ -97,7 +105,7 @@ if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])
 
 if env['openmp']:
-    if os.environ.get('CXX', 'g++') == 'clang++':
+    if cpp_compiler == 'clang++':
         print "Clang does not support OpenMP. Use scheduler=cpp."
         Exit(1)
 
@@ -130,7 +138,7 @@ elif env['arch'] == 'arm64-v8a':
 elif env['arch'] == 'arm64-v8.2-a':
     env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
 
-    if os.environ.get('CXX', 'g++') == 'clang++':
+    if cpp_compiler == 'clang++':
         env.Append(CXXFLAGS = ['-fno-integrated-as'])
 
     if env['os'] == 'linux':
@@ -149,8 +157,8 @@ elif env['arch'] == 'x86_64':
 if env['build'] == 'native':
     prefix = ""
 
-env['CC'] = prefix + os.environ.get('CC', 'gcc')
-env['CXX'] = prefix + os.environ.get('CXX', 'g++')
+env['CC'] = prefix + c_compiler
+env['CXX'] = prefix + cpp_compiler
 env['LD'] = prefix + "ld"
 env['AS'] = prefix + "as"
 env['AR'] = prefix + "ar"
@@ -163,7 +171,7 @@ if not GetOption("help"):
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
 
-    if os.environ.get('CXX','g++') == 'g++':
+    if cpp_compiler == 'g++':
         if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
             print "GCC 6.2.1 or newer is required to compile armv8.2-a code"
             Exit(1)
