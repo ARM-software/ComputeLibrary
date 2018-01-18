@@ -21,28 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEGEMMAARCH32KERNEL_H__
-#define __ARM_COMPUTE_NEGEMMAARCH32KERNEL_H__
+#ifndef ARM_COMPUTE_TEST_SCHEDULER_TIMER
+#define ARM_COMPUTE_TEST_SCHEDULER_TIMER
 
-#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
+#include "Instrument.h"
+#include "arm_compute/runtime/Scheduler.h"
+#include <list>
 
 namespace arm_compute
 {
-class ITensor;
-
-/** AArch32/armv7a NEON kernel to multiply two input matrices "A" and "B". */
-class NEGEMMAArch32Kernel : public NEGEMMAssemblyBaseKernel
+namespace test
+{
+namespace framework
+{
+/** Instrument creating measurements based on the information returned by clGetEventProfilingInfo for each OpenCL kernel executed*/
+class SchedulerTimer : public Instrument
 {
 public:
-    const char *name() const override
+    SchedulerTimer(const SchedulerTimer &) = delete;
+    SchedulerTimer &operator=(const SchedulerTimer &) = delete;
+    SchedulerTimer(ScaleFactor scale_factor);
+    std::string                 id() const override;
+    void                        start() override;
+    void                        stop() override;
+    Instrument::MeasurementsMap measurements() const override;
+    struct kernel_info
     {
-        return "NEGEMMAArch32Kernel";
-    }
-    // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+        Instrument::MeasurementsMap measurements{}; /**< Time it took the kernel to run */
+        std::string                 name{};         /**< Kernel name */
+    };
 
-protected:
-    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool is_transposed_0, bool is_transposed_1) override;
+private:
+    std::list<kernel_info> _kernels;
+    IScheduler            *_real_scheduler;
+    Scheduler::Type        _real_scheduler_type;
+    ScaleFactor            _scale_factor;
 };
+} // namespace framework
+} // namespace test
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEGEMMAARCH32KERNEL_H__*/
+#endif /* ARM_COMPUTE_TEST_SCHEDULER_TIMER */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,10 @@ protected:
 class NEGEMMLowpMatrixAReductionKernel : public INEGEMMLowpReductionKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGEMMLowpMatrixAReductionKernel";
+    }
     /** Initialise the kernel's input and output.
      *
      * @param[in]  mtx_a             Input tensor. Data type supported: QASYMM8
@@ -100,6 +104,10 @@ public:
 class NEGEMMLowpMatrixBReductionKernel : public INEGEMMLowpReductionKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGEMMLowpMatrixBReductionKernel";
+    }
     /** Initialise the kernel's input and output.
      *
      * @param[in]  mtx_b            Input tensor. Data type supported: Data type supported: QASYMM8

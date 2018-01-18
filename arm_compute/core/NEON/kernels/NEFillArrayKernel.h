@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,10 @@ using IImage = ITensor;
 class NEFillArrayKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEFillArrayKernel";
+    }
     /** Default contructor */
     NEFillArrayKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

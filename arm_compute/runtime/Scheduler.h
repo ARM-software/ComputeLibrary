@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ public:
      *
      * @param[in] scheduler A shared pointer to a custom scheduler implemented by the user.
      */
-    static void set(std::shared_ptr<IScheduler> &scheduler);
+    static void set(std::shared_ptr<IScheduler> scheduler);
     /** Access the scheduler singleton.
      *
      * @return A reference to the scheduler object.

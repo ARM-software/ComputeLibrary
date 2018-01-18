@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,10 @@ class ITensor;
 class NEGaussianPyramidHorKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGaussianPyramidHorKernel";
+    }
     /** Default constructor */
     NEGaussianPyramidHorKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -66,6 +70,10 @@ private:
 class NEGaussianPyramidVertKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGaussianPyramidVertKernel";
+    }
     /** Default constructor */
     NEGaussianPyramidVertKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

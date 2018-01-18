@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,10 @@ class ILut;
 class NETableLookupKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NETableLookupKernel";
+    }
     /** Default constructor */
     NETableLookupKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

@@ -79,6 +79,10 @@ private:
 class NEWinogradLayerKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEWinogradLayerKernel";
+    }
     /** Constructor */
     NEWinogradLayerKernel();
 

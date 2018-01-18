@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,10 @@ namespace arm_compute
 class CPPSortEuclideanDistanceKernel : public ICPPKernel
 {
 public:
+    const char *name() const override
+    {
+        return "CPPSortEuclideanDistanceKernel";
+    }
     /** Default constructor */
     CPPSortEuclideanDistanceKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

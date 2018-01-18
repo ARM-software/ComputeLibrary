@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,12 @@ public:
      * @param[in] info   Info about executing thread and CPU.
      */
     virtual void run(const Window &window, const ThreadInfo &info) = 0;
+
+    /** Name of the kernel
+     *
+     * @return Kernel name
+     */
+    virtual const char *name() const = 0;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_ICPPKERNEL_H__ */

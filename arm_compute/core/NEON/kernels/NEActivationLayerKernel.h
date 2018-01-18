@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,10 @@ class ITensor;
 class NEActivationLayerKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEActivationLayerKernel";
+    }
     /** Constructor */
     NEActivationLayerKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

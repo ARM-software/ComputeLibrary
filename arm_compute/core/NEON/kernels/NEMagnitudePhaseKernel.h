@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,10 @@ template <MagnitudeType mag_type, PhaseType phase_type>
 class NEMagnitudePhaseKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEMagnitudePhaseKernel";
+    }
     /** Default constructor */
     NEMagnitudePhaseKernel();
     /** Destructor */
@@ -100,6 +104,10 @@ template <MagnitudeType mag_type, PhaseType phase_type>
 class NEMagnitudePhaseFP16Kernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEMagnitudePhaseFP16Kernel";
+    }
     /** Default constructor */
     NEMagnitudePhaseFP16Kernel();
     /** Destructor */

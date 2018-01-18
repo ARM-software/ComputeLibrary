@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,10 @@ class ITensor;
 class NELogits1DMaxKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NELogits1DMaxKernel";
+    }
     /** Default constructor */
     NELogits1DMaxKernel();
     /** Set the input and output tensors.
@@ -68,6 +72,10 @@ private:
 class NELogits1DShiftExpSumKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NELogits1DShiftExpSumKernel";
+    }
     /** Default constructor */
     NELogits1DShiftExpSumKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -120,6 +128,10 @@ private:
 class NELogits1DNormKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NELogits1DNormKernel";
+    }
     /** Default constructor */
     NELogits1DNormKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

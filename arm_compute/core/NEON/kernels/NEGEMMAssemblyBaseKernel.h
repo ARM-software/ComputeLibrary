@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,10 @@ class ITensor;
 class NEGEMMAssemblyBaseKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGEMMAssemblyBaseKernel";
+    }
     /** Constructor */
     NEGEMMAssemblyBaseKernel()
         : _input0(nullptr), _input1(nullptr), _output(nullptr), _workspace(nullptr), _alpha(1.f), _beta(0.f), _is_transposed_0(false), _is_transposed_1(false)

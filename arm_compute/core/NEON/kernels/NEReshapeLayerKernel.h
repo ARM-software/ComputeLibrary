@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,10 @@ class ITensor;
 class NEReshapeLayerKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEReshapeLayerKernel";
+    }
     /** Set the input and output of the kernel
      *
      * @param[in]  input  Source tensor. Data type supported: U8/S8/QS8/U16/S16/QS16/U32/S32/F16/F32

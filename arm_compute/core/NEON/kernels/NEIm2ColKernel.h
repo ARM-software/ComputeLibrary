@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,10 @@ class Size2D;
 class NEIm2ColKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEIm2ColKernel";
+    }
     /** Default constructor */
     NEIm2ColKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

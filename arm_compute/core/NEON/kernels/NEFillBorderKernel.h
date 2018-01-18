@@ -36,6 +36,10 @@ class ITensor;
 class NEFillBorderKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEFillBorderKernel";
+    }
     /** Default Constructor */
     NEFillBorderKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

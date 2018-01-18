@@ -35,6 +35,10 @@ class ITensor;
 class NEDepthwiseConvolutionLayer3x3Kernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEDepthwiseConvolutionLayer3x3Kernel";
+    }
     /** Default constructor */
     NEDepthwiseConvolutionLayer3x3Kernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

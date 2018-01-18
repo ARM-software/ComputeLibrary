@@ -34,6 +34,10 @@ class ITensor;
 class NEPoolingLayerKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEPoolingLayerKernel";
+    }
     /** Default constructor */
     NEPoolingLayerKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

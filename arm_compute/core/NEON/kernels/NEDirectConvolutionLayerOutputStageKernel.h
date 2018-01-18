@@ -36,6 +36,10 @@ class ITensor;
 class NEDirectConvolutionLayerOutputStageKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEDirectConvolutionLayerOutputStageKernel";
+    }
     /** Default constructor */
     NEDirectConvolutionLayerOutputStageKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

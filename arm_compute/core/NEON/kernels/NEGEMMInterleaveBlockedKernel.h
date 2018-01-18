@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,10 @@ class ITensor;
 class NEGEMMInterleaveBlockedKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGEMMInterleaveBlockedKernel";
+    }
     /* Constructor */
     NEGEMMInterleaveBlockedKernel();
     /** Initialise the kernel's input and output.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,10 @@ class ITensor;
 class NEGradientKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGradientKernel";
+    }
     /** Default constructor */
     NEGradientKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -87,6 +91,10 @@ protected:
 class NEGradientFP16Kernel : public NEGradientKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGradientFP16Kernel";
+    }
     // Inherited methods overriden:
     void configure(const ITensor *gx, const ITensor *gy, ITensor *magnitude, ITensor *phase, int32_t norm_type) override;
 };
@@ -104,6 +112,10 @@ using NEGradientFP16Kernel = NEGradientKernel;
 class NEEdgeNonMaxSuppressionKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEEdgeNonMaxSuppressionKernel";
+    }
     /** Default constructor */
     NEEdgeNonMaxSuppressionKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -157,6 +169,10 @@ private:
 class NEEdgeTraceKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEEdgeTraceKernel";
+    }
     /** Default constructor */
     NEEdgeTraceKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
