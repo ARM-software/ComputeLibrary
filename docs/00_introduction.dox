@@ -189,6 +189,34 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v18.01 Public maintenance release
+ - Various bug fixes
+ - Added some of the missing validate() methods
+ - Added @ref arm_compute::CLDeconvolutionLayerUpsampleKernel / @ref arm_compute::CLDeconvolutionLayer @ref arm_compute::CLDeconvolutionLayerUpsample
+ - Added @ref arm_compute::CLPermuteKernel / @ref arm_compute::CLPermute
+ - Added method to clean the programs cache in the CL Kernel library.
+ - Added @ref arm_compute::GCArithmeticAdditionKernel / @ref arm_compute::GCArithmeticAddition
+ - Added @ref arm_compute::GCDepthwiseConvolutionLayer3x3Kernel / @ref arm_compute::GCDepthwiseConvolutionLayer3x3
+ - Added @ref arm_compute::GCNormalizePlanarYUVLayerKernel / @ref arm_compute::GCNormalizePlanarYUVLayer
+ - Added @ref arm_compute::GCScaleKernel / @ref arm_compute::GCScale
+ - Added @ref arm_compute::GCWeightsReshapeKernel / @ref arm_compute::GCConvolutionLayer
+ - Added FP16 support to the following GLES compute kernels:
+    - @ref arm_compute::GCCol2ImKernel
+    - @ref arm_compute::GCGEMMInterleave4x4Kernel
+    - @ref arm_compute::GCGEMMTranspose1xWKernel
+    - @ref arm_compute::GCIm2ColKernel
+ - Refactored NEON Winograd (@ref arm_compute::NEWinogradLayerKernel)
+ - Added @ref arm_compute::NEDirectConvolutionLayerOutputStageKernel
+ - Added QASYMM8 support to the following NEON kernels:
+    - @ref arm_compute::NEDepthwiseConvolutionLayer3x3Kernel
+    - @ref arm_compute::NEFillBorderKernel
+    - @ref arm_compute::NEPoolingLayerKernel
+ - Added new examples:
+    - graph_cl_mobilenet_qasymm8.cpp
+    - graph_inception_v3.cpp
+    - gc_dc.cpp
+ - More tests added to both validation and benchmarking suites.
+
 v17.12 Public major release
  - Most machine learning functions on OpenCL support the new data type QASYMM8
  - Introduced logging interface
