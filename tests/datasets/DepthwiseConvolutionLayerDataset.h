@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,7 +118,7 @@ class SmallDepthwiseConvolutionLayerDataset final : public DepthwiseConvolutionL
 public:
     SmallDepthwiseConvolutionLayerDataset()
     {
-        add_config(TensorShape(7U, 7U, 3U), TensorShape(3U, 3U, 3U), TensorShape(5U, 5U, 3U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(7U, 7U, 1U), TensorShape(3U, 3U, 1U), TensorShape(5U, 5U, 1U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 5U, 5U), TensorShape(11U, 23U, 5U), PadStrideInfo(2, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 7U), TensorShape(7U, 3U, 7U), TensorShape(10U, 13U, 7U), PadStrideInfo(3, 2, 1, 0));
         add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(31U, 14U, 11U), PadStrideInfo(1, 2, 0, 1));

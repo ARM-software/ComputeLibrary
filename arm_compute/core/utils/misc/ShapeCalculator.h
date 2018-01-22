@@ -116,8 +116,9 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
 
     unsigned int output_width  = 0;
     unsigned int output_height = 0;
-    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(), weights_shape.x(),
-                                                              weights_shape.y(), conv_info);
+    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(),
+                                                              weights_shape.x(), weights_shape.y(),
+                                                              conv_info);
 
     TensorShape output_shape{ input_shape };
     output_shape.set(0, output_width);

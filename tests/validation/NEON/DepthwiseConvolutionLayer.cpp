@@ -128,9 +128,19 @@ TEST_SUITE_END()
 
 template <typename T>
 using NEDepthwiseConvolutionLayerQuantizedFixture3x3 = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer3x3, T>;
+template <typename T>
+using NEDepthwiseConvolutionLayerQuantizedFixture = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
+TEST_SUITE(Generic)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+{
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END()
 TEST_SUITE(W3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
