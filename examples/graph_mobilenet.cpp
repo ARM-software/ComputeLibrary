@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,81 +47,102 @@ public:
         std::string image;     /* Image data */
         std::string label;     /* Label data */
 
-        constexpr float mean_r = 122.68f; /* Mean value to subtract from red channel */
-        constexpr float mean_g = 116.67f; /* Mean value to subtract from green channel */
-        constexpr float mean_b = 104.01f; /* Mean value to subtract from blue channel */
+        constexpr float mean = 0.f;   /* Mean value to subtract from the channels */
+        constexpr float std  = 255.f; /* Standard deviation value to divide from the channels */
 
         // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
         TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
         ConvolutionMethodHint convolution_hint = target_hint == TargetHint::NEON ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
 
+        // Set model to execute. 0 (MobileNetV1_1.0_224), 1 (MobileNetV1_0.75_160)
+        int model_id = (argc > 2) ? std::strtol(argv[2], nullptr, 10) : 0;
+        ARM_COMPUTE_ERROR_ON_MSG(model_id > 1, "Invalid model ID. Model must be 0 (MobileNetV1_1.0_224) or 1 (MobileNetV1_0.75_160)");
+        float        depth_scale  = (model_id == 0) ? 1.f : 0.75;
+        unsigned int spatial_size = (model_id == 0) ? 224 : 160;
+        std::string  model_path   = (model_id == 0) ? "/cnn_data/mobilenet_v1_1_224_model/" : "/cnn_data/mobilenet_v1_075_160_model/";
+
         // Parse arguments
         if(argc < 2)
         {
             // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " [target] [model] [path_to_data] [image] [labels]\n\n";
+            std::cout << "No model ID provided: using MobileNetV1_1.0_224\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 2)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [model] [path_to_data] [image] [labels]\n\n";
+            std::cout << "No model ID provided: using MobileNetV1_1.0_224\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 3)
         {
-            data_path = argv[2];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [image] [labels]\n\n";
-            std::cout << "No image provided: using random values\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [path_to_data] [image] [labels]\n\n";
+            std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 4)
         {
-            data_path = argv[2];
-            image     = argv[3];
+            data_path = argv[3];
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [image] [labels]\n\n";
+            std::cout << "No image provided: using random values\n\n";
+        }
+        else if(argc == 5)
+        {
+            data_path = argv[3];
+            image     = argv[4];
             std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels]\n\n";
             std::cout << "No text file with labels provided: skipping output accessor\n\n";
         }
         else
         {
-            data_path = argv[2];
-            image     = argv[3];
-            label     = argv[4];
+            data_path = argv[3];
+            image     = argv[4];
+            label     = argv[5];
+        }
+
+        // Add model path to data path
+        if(!data_path.empty())
+        {
+            data_path += model_path;
         }
 
         graph << target_hint
-              << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image, mean_r, mean_g, mean_b))
               << convolution_hint
+              << Tensor(TensorInfo(TensorShape(spatial_size, spatial_size, 3U, 1U), 1, DataType::F32),
+                        get_input_accessor(image,
+                                           mean, mean, mean,
+                                           std, std, std, false /* Do not convert to BGR */))
               << ConvolutionLayer(
-                  3U, 3U, 32U,
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_v1_model/Conv2d_0_weights.npy"),
+                  3U, 3U, 32U * depth_scale,
+                  get_weights_accessor(data_path, "Conv2d_0_weights.npy"),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))
               << BatchNormalizationLayer(
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_v1_model/Conv2d_0_BatchNorm_moving_mean.npy"),
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_v1_model/Conv2d_0_BatchNorm_moving_variance.npy"),
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_v1_model/Conv2d_0_BatchNorm_beta.npy"),
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_v1_model/Conv2d_0_BatchNorm_gamma.npy"),
+                  get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_mean.npy"),
+                  get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_variance.npy"),
+                  get_weights_accessor(data_path, "Conv2d_0_BatchNorm_gamma.npy"),
+                  get_weights_accessor(data_path, "Conv2d_0_BatchNorm_beta.npy"),
                   0.001f)
-
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
-              << get_dwsc_node(data_path, "Conv2d_1", 64, PadStrideInfo(1, 1, 1, 1), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_2", 128, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_3", 128, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_4", 256, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_5", 256, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_6", 512, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_7", 512, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_8", 512, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_9", 512, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_10", 512, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_11", 512, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_12", 1024, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
-              << get_dwsc_node(data_path, "Conv2d_13", 1024, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+
+              << get_dwsc_node(data_path, "Conv2d_1", 64 * depth_scale, PadStrideInfo(1, 1, 1, 1), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_2", 128 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_3", 128 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_4", 256 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_5", 256 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_6", 512 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_7", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_8", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_9", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_10", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_11", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_12", 1024 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
+              << get_dwsc_node(data_path, "Conv2d_13", 1024 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR), PadStrideInfo(1, 1, 0, 0))
               << PoolingLayer(PoolingLayerInfo(PoolingType::AVG))
               << ConvolutionLayer(
                   1U, 1U, 1001U,
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_v1_model/Logits_Conv2d_1c_1x1_weights.npy"),
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_v1_model/Logits_Conv2d_1c_1x1_biases.npy"),
+                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy"),
+                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_biases.npy"),
                   PadStrideInfo(1, 1, 0, 0))
               << ReshapeLayer(TensorShape(1001U))
               << SoftmaxLayer()
@@ -140,7 +161,7 @@ private:
                               unsigned int  conv_filt,
                               PadStrideInfo dwc_pad_stride_info, PadStrideInfo conv_pad_stride_info)
     {
-        std::string total_path = "/cnn_data/mobilenet_v1_model/" + param_path + "_";
+        std::string total_path = param_path + "_";
         SubGraph    sg;
         sg << DepthwiseConvolutionLayer(
                3U, 3U,
@@ -151,8 +172,8 @@ private:
            << BatchNormalizationLayer(
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_mean.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_variance.npy"),
-               get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_beta.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_gamma.npy"),
+               get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_beta.npy"),
                0.001f)
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
            << ConvolutionLayer(
@@ -163,8 +184,8 @@ private:
            << BatchNormalizationLayer(
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_mean.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_variance.npy"),
-               get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_beta.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_gamma.npy"),
+               get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_beta.npy"),
                0.001f)
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f));
 
@@ -175,7 +196,11 @@ private:
 /** Main program for MobileNetV1
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL),
+ *                             [optional] Model ID (0 = MobileNetV1_1.0_224, 1 = MobileNetV1_0.75_160),
+ *                             [optional] Path to the weights folder,
+ *                             [optional] image,
+ *                             [optional] labels )
  */
 int main(int argc, char **argv)
 {
