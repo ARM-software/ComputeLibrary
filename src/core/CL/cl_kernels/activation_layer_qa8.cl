@@ -25,10 +25,15 @@
 
 #define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
+// RELU Activation
+inline TYPE relu_op(TYPE x)
+{
+    return max((TYPE)CONST_0, x);
+}
 // Bounded RELU Activation
 inline TYPE brelu_op(TYPE x)
 {
-    return min((TYPE)A_VAL, max(0, x));
+    return min((TYPE)A_VAL, max(CONST_0, x));
 }
 // Lower Upper Bounded RELU Activation
 inline TYPE lu_brelu_op(TYPE x)
@@ -49,6 +54,7 @@ inline TYPE lu_brelu_op(TYPE x)
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively.
  * @note Quantization scales of the input/output tensors are passed in with -DS1_VAL= and -DS2_VAL= respectively.
  * @note Quantization offsets of the input/output tensors are passed in with -DO1_VAL= and -DO2_VAL= respectively.
+ * @note Quantized value of constant zero should be given as a preprocessor argument using -DCONST_0=value. e.g. -DCONST_0=128.
  *
  * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)

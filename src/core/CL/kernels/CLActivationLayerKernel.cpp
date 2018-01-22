@@ -47,8 +47,10 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
-                                    "For QASYMM8 only lower/upper bounded relu is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU),
+                                    "For QASYMM8 only relu, lower bounded relu and lower-upper bounded relu are supported");
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
@@ -160,6 +162,9 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
                 build_opts.emplace(("-DO1_VAL=" + support::cpp11::to_string(o1)));
                 build_opts.emplace(("-DO2_VAL=" + support::cpp11::to_string(o2)));
             }
+
+            // Quantized value of 0 corresponds to the offset o1
+            build_opts.emplace(("-DCONST_0=" + support::cpp11::to_string(o1)));
         }
     }
     else

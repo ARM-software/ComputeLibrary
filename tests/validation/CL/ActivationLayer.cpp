@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -183,7 +183,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
-                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
@@ -284,7 +284,12 @@ template <typename T>
 using CLActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
 
 /** Input data sets. */
-const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU })),
+const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                                                                  ActivationLayerInfo::ActivationFunction::RELU,
+                                                                                                  ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
+                                                                                                });
+
+const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), QuantizedActivationFunctionsDataset),
                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
 TEST_SUITE(Quantized)
