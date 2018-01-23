@@ -21,17 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "ConvolutionLayer.h"
+#include "LocallyConnected.h"
 
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Convolution3d.h"
 #include "tests/validation/reference/Utils.h"
-#include "tests/validation/reference/UtilsQuantizedAsymm.h"
 
 #include "tests/framework/Asserts.h"
-
-#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 namespace arm_compute
 {
@@ -41,30 +37,29 @@ namespace validation
 {
 namespace reference
 {
-namespace
-{
-} // namespace
-
 template <typename T, typename TB>
-SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info)
+SimpleTensor<T> locally_connected(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info)
 {
     // Create reference
     SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
 
     // Compute reference
-    const int width_in       = src.shape().x();
-    const int height_in      = src.shape().y();
-    const int depth_in       = src.shape().z();
-    const int width_out      = dst.shape().x();
-    const int height_out     = dst.shape().y();
-    const int depth_out      = dst.shape().z();
+    const int width_in  = src.shape().x();
+    const int height_in = src.shape().y();
+    const int depth_in  = src.shape().z();
+
+    const int width_out  = dst.shape().x();
+    const int height_out = dst.shape().y();
+    const int depth_out  = dst.shape().z();
+
     const int width_weights  = weights.shape().x();
     const int height_weights = weights.shape().y();
     const int depth_weights  = weights.shape().z();
-    const int pad_left       = info.pad_left();
-    const int pad_top        = info.pad_top();
-    const int stride_xi      = info.stride().first;
-    const int stride_yi      = info.stride().second;
+
+    const int pad_left  = info.pad_left();
+    const int pad_top   = info.pad_top();
+    const int stride_xi = info.stride().first;
+    const int stride_yi = info.stride().second;
 
     auto output_wh = scaled_dimensions(width_in, height_in, width_weights, height_weights, info);
 
@@ -76,6 +71,7 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
 
     for(int r = 0; r < num_batches; ++r)
     {
+        int count = 0;
         for(int yi = start_yi; yi < start_yi + end_yi; yi += stride_yi)
         {
             for(int xi = start_xi; xi < start_xi + end_xi; xi += stride_xi)
@@ -93,10 +89,11 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
 
                     // Compute 3D convolution
                     convolution_3d::detail::convolution3d(src, weights, bias, dst,
-                                                          offset_in, ofm * width_weights * height_weights * depth_weights, ofm, offset_out,
+                                                          offset_in, count * width_weights * height_weights * depth_weights, count, offset_out,
                                                           xi, yi,
                                                           width_in, height_in, depth_in,
                                                           width_weights, height_weights);
+                    count++;
                 }
             }
         }
@@ -105,16 +102,9 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
     return dst;
 }
 
-template SimpleTensor<float> convolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
+// Locally Connected only supports F32
+template SimpleTensor<float> locally_connected(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
                                                const PadStrideInfo &info);
-template SimpleTensor<half> convolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
-                                              const PadStrideInfo &info);
-template SimpleTensor<qint8_t> convolution_layer(const SimpleTensor<qint8_t> &src, const SimpleTensor<qint8_t> &weights, const SimpleTensor<qint8_t> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info);
-template SimpleTensor<qint16_t> convolution_layer(const SimpleTensor<qint16_t> &src, const SimpleTensor<qint16_t> &weights, const SimpleTensor<qint16_t> &bias, const TensorShape &output_shape,
-                                                  const PadStrideInfo &info);
-template SimpleTensor<uint8_t> convolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info);
 } // namespace reference
 } // namespace validation
 } // namespace test

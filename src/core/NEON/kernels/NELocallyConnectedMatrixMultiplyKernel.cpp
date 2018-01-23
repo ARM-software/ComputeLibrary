@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -186,7 +186,7 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
     win_out.set(Window::DimX, Window::Dimension(window_start_x, window_end_x, window_step_x));
 
     Window win_a(window);
-    win_a.set(Window::DimX, Window::Dimension(0, 1, 1));
+    win_a.set(Window::DimX, Window::Dimension(0, 0, 0));
 
     Iterator ina(input0, win_a);
     Iterator out(output, win_out);
@@ -234,7 +234,7 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
             asm volatile("PLD [%0, #128*1]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + 2 * in_b_stride)));
             asm volatile("PLD [%0, #128*1]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + 3 * in_b_stride)));
             asm volatile("PLD [%0, #128*1]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + 4 * in_b_stride)));
-#endif /* __arm __ */
+#endif /* __arm__ */
 
             acc0 = vmlaq_lane_f32(acc0, b00, a0l, 0);
             acc1 = vmlaq_lane_f32(acc1, b01, a0l, 0);
