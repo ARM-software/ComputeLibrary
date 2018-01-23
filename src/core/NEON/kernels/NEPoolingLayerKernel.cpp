@@ -155,22 +155,18 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
-    int                 pool_pad_x        = 0;
-    int                 pool_pad_y        = 0;
     int                 pool_stride_x     = 0;
     int                 pool_stride_y     = 0;
     PoolingType         pool_type         = pool_info.pool_type();
     const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
     const bool          exclude_padding   = pool_info.exclude_padding();
     const bool          is_global_pooling = pool_info.is_global_pooling();
-    std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
     static const std::set<int> supported_pool_sizes = { 2, 3 };
 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_quantized(input->data_type()));
     ARM_COMPUTE_RETURN_ERROR_ON((supported_pool_sizes.find(pool_size) == supported_pool_sizes.end()) && ((input->data_type() != DataType::F32) && (input->data_type() != DataType::QASYMM8)));
-    ARM_COMPUTE_RETURN_ERROR_ON(!is_global_pooling && (pool_pad_x >= pool_size || pool_pad_y >= pool_size));
     ARM_COMPUTE_RETURN_ERROR_ON(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()));
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_fixed_point(input->data_type()) && pool_stride_x > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(exclude_padding && is_data_type_fixed_point(input->data_type()));
@@ -188,10 +184,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 Status validate_arguments_pool_info(const ITensorInfo *input, const PoolingLayerInfo &pool_info, const unsigned int pool_size)
 {
     const bool is_global_pooling = pool_info.is_global_pooling();
+    ARM_COMPUTE_UNUSED(pool_size);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()),
                                     "Global pooling is supported only with rectangular inputs!");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_global_pooling && ((pool_info.pad_stride_info().pad().first >= pool_size) || (pool_info.pad_stride_info().pad().second >= pool_size)),
-                                    "Invalid pool size and pool pad combination!");
 
     return Status{};
 }
@@ -202,15 +197,16 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 {
     unsigned int        num_elems_read_per_iteration = 0;
     unsigned int        num_elems_horizontal_window  = 0;
-    int                 pool_pad_x                   = 0;
-    int                 pool_pad_y                   = 0;
     int                 pool_stride_x                = 0;
     int                 pool_stride_y                = 0;
     const int           input_width                  = input->dimension(0);
     const int           input_height                 = input->dimension(1);
     const PadStrideInfo pad_stride_info              = pool_info.pad_stride_info();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
-    std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
+    const int pool_pad_right  = pad_stride_info.pad_right();
+    const int pool_pad_top    = pad_stride_info.pad_top();
+    const int pool_pad_left   = pad_stride_info.pad_left();
+    const int pool_pad_bottom = pad_stride_info.pad_bottom();
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->dimension(0),
@@ -321,12 +317,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const int num_iterations_x = (pooled_w + num_elems_processed_per_iteration - 1) / num_elems_processed_per_iteration;
 
     // Upper limit for the number of right/bottom border elements that are accessed
-    const int upper_bound_w = ((num_iterations_x - 1) * num_elems_processed_per_iteration * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
-    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+    const int upper_bound_w = ((num_iterations_x - 1) * num_elems_processed_per_iteration * pool_stride_x - pool_pad_left + num_elems_read_per_iteration) - input_width;
+    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_top + pool_size) - input_height;
 
-    border_size         = BorderSize(pool_pad_y, pool_pad_x);
-    border_size.right   = std::max(upper_bound_w, pool_pad_x);
-    border_size.bottom  = std::max(upper_bound_h, pool_pad_y);
+    border_size         = BorderSize(pool_pad_top, pool_pad_right, pool_pad_bottom, pool_pad_left);
+    border_size.right   = std::max(upper_bound_w, pool_pad_right);
+    border_size.bottom  = std::max(upper_bound_h, pool_pad_bottom);
     bool window_changed = false;
 
     TensorShape output_shape{ input->tensor_shape() };
@@ -335,7 +331,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     TensorInfo output_info(input->clone()->set_tensor_shape(output_shape));
 
     Window             win = calculate_max_window(output_info, Steps(num_elems_processed_per_iteration));
-    AccessWindowStatic input_access(input, -pool_pad_x, -pool_pad_y, input_width + border_size.right, input_height + border_size.bottom);
+    AccessWindowStatic input_access(input, -pool_pad_left, -pool_pad_top, input_width + border_size.right, input_height + border_size.bottom);
 
     if(output->total_size() != 0)
     {
@@ -640,17 +636,18 @@ void NEPoolingLayerKernel::pooling2_q8(const Window &window_input, const Window 
 
     const int     fixed_point_position = _input->info()->fixed_point_position();
     constexpr int pool_size            = 2;
-    int           pool_pad_x           = 0;
-    int           pool_pad_y           = 0;
     int           pool_stride_x        = 0;
     int           pool_stride_y        = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    const int     pool_pad_right       = _pool_info.pad_stride_info().pad_right();
+    const int     pool_pad_top         = _pool_info.pad_stride_info().pad_top();
+    const int     pool_pad_left        = _pool_info.pad_stride_info().pad_left();
+    const int     pool_pad_bottom      = _pool_info.pad_stride_info().pad_bottom();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_right;
+    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_bottom;
 
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
+    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -661,7 +658,7 @@ void NEPoolingLayerKernel::pooling2_q8(const Window &window_input, const Window 
         if(pooling_type == PoolingType::AVG)
         {
             // Calculate scale
-            const qint8_t   scale     = calculate_avg_scale_q8(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y, fixed_point_position);
+            const qint8_t   scale     = calculate_avg_scale_q8(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y, fixed_point_position);
             const qint8x8_t scale_vec = vdup_n_qs8(scale);
 
             // Perform pooling
@@ -702,18 +699,19 @@ void NEPoolingLayerKernel::pooling2_qasymm8(const Window &window_input, const Wi
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    constexpr int pool_size     = 2;
-    int           pool_pad_x    = 0;
-    int           pool_pad_y    = 0;
-    int           pool_stride_x = 0;
-    int           pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    constexpr int pool_size       = 2;
+    int           pool_stride_x   = 0;
+    int           pool_stride_y   = 0;
+    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
+    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
 
     const int scale_step_x = (pool_stride_x == 1) ? 2 : 1;
 
@@ -752,7 +750,7 @@ void NEPoolingLayerKernel::pooling2_qasymm8(const Window &window_input, const Wi
             // Scale lower result
             scale_vector_s16x8<exclude_padding>(res_lower, id, 0, scale_step_x,
                                                 pool_size, upper_bound_w, upper_bound_h,
-                                                pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+                                                pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
             lower_res = vmovn_u16(res_lower);
 
             // Compute upper result for stride_x == 1
@@ -780,7 +778,7 @@ void NEPoolingLayerKernel::pooling2_qasymm8(const Window &window_input, const Wi
                 // Scale lower result
                 scale_vector_s16x8<exclude_padding>(res_upper, id, 1, 2,
                                                     pool_size, upper_bound_w, upper_bound_h,
-                                                    pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
                 upper_res = vmovn_u16(res_upper);
             }
         }
@@ -817,17 +815,18 @@ void NEPoolingLayerKernel::pooling2_q16(const Window &window_input, const Window
 
     const int     fixed_point_position = _input->info()->fixed_point_position();
     constexpr int pool_size            = 2;
-    int           pool_pad_x           = 0;
-    int           pool_pad_y           = 0;
+    const int     pool_pad_right       = _pool_info.pad_stride_info().pad_right();
+    const int     pool_pad_top         = _pool_info.pad_stride_info().pad_top();
+    const int     pool_pad_left        = _pool_info.pad_stride_info().pad_left();
+    const int     pool_pad_bottom      = _pool_info.pad_stride_info().pad_bottom();
     int           pool_stride_x        = 0;
     int           pool_stride_y        = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_right;
+    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_bottom;
 
-    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
+    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -838,7 +837,7 @@ void NEPoolingLayerKernel::pooling2_q16(const Window &window_input, const Window
         if(pooling_type == PoolingType::AVG)
         {
             // Calculate scale
-            const qint16_t   scale     = calculate_avg_scale_q16(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y, fixed_point_position);
+            const qint16_t   scale     = calculate_avg_scale_q16(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y, fixed_point_position);
             const qint16x4_t scale_vec = vdup_n_qs16(scale);
 
             // Perform pooling
@@ -880,19 +879,20 @@ void NEPoolingLayerKernel::pooling3_f16(const Window &window_input, const Window
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    constexpr const int pool_size     = 3;
-    int                 pool_pad_x    = 0;
-    int                 pool_pad_y    = 0;
-    int                 pool_stride_x = 0;
-    int                 pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    constexpr const int pool_size       = 3;
+    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
-    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const unsigned char *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
-    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 2));
+    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const unsigned char *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -912,7 +912,7 @@ void NEPoolingLayerKernel::pooling3_f16(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            const float       scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            const float       scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
             const float16x4_t scale_v = vdup_n_f16(scale);
             // Perform pooling
             const float16x4_t sum_data = vadd_f16(vadd_f16(top_data, bottom_data), middle_data);
@@ -948,15 +948,18 @@ void NEPoolingLayerKernel::pooling2_f16(const Window &window_input, const Window
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     Iterator      input(_input, window_input);
     Iterator      output(_output, window);
-    constexpr int pool_size = 2;
-    int           pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
+    constexpr int pool_size       = 2;
+    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int           pool_stride_x, pool_stride_y = 0;
+    std::tie(pool_stride_x, pool_stride_y)     = _pool_info.pad_stride_info().stride();
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
-    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
+    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -975,7 +978,7 @@ void NEPoolingLayerKernel::pooling2_f16(const Window &window_input, const Window
 
         if(pooling_type != PoolingType::MAX)
         {
-            const float       scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            const float       scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
             const float16x8_t scale_v = vdupq_n_f16(scale);
             res                       = vmulq_f16(scale_v, vaddq_f16(bottom_data.val[1], vaddq_f16(bottom_data.val[0], vaddq_f16(top_data.val[0], top_data.val[1]))));
         }
@@ -1007,18 +1010,19 @@ void NEPoolingLayerKernel::pooling2_f32(const Window &window_input, const Window
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    constexpr int pool_size     = 2;
-    int           pool_pad_x    = 0;
-    int           pool_pad_y    = 0;
-    int           pool_stride_x = 0;
-    int           pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    constexpr int pool_size       = 2;
+    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int           pool_stride_x   = 0;
+    int           pool_stride_y   = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
+    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -1037,7 +1041,7 @@ void NEPoolingLayerKernel::pooling2_f32(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            float             scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            float             scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
             const float32x2_t scale_v = vdup_n_f32(scale);
 
             // Perform pooling
@@ -1071,18 +1075,19 @@ void NEPoolingLayerKernel::pooling3_q8(const Window &window_input, const Window 
 
     const int     fixed_point_position = _input->info()->fixed_point_position();
     constexpr int pool_size            = 3;
-    int           pool_pad_x           = 0;
-    int           pool_pad_y           = 0;
+    const int     pool_pad_right       = _pool_info.pad_stride_info().pad_right();
+    const int     pool_pad_top         = _pool_info.pad_stride_info().pad_top();
+    const int     pool_pad_left        = _pool_info.pad_stride_info().pad_left();
+    const int     pool_pad_bottom      = _pool_info.pad_stride_info().pad_bottom();
     int           pool_stride_x        = 0;
     int           pool_stride_y        = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_right;
+    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_bottom;
 
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 2));
+    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -1093,7 +1098,7 @@ void NEPoolingLayerKernel::pooling3_q8(const Window &window_input, const Window 
         if(pooling_type == PoolingType::AVG)
         {
             // Calculate scale
-            const qint8_t scale = calculate_avg_scale_q8(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y, fixed_point_position);
+            const qint8_t scale = calculate_avg_scale_q8(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y, fixed_point_position);
 
             // Perform pooling for stride 2
             const qint8x16_t sum_data  = vqaddq_qs8(vqaddq_qs8(top_data, bottom_data), middle_data);
@@ -1144,19 +1149,20 @@ void NEPoolingLayerKernel::pooling3_qasymm8(const Window &window_input, const Wi
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    constexpr int pool_size     = 3;
-    int           pool_pad_x    = 0;
-    int           pool_pad_y    = 0;
-    int           pool_stride_x = 0;
-    int           pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    constexpr int pool_size       = 3;
+    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int           pool_stride_x   = 0;
+    int           pool_stride_y   = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 2));
+    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -1217,7 +1223,7 @@ void NEPoolingLayerKernel::pooling3_qasymm8(const Window &window_input, const Wi
 
                 scale_vector_s16x8<exclude_padding>(res, id, 0, 1,
                                                     pool_size, upper_bound_w, upper_bound_h,
-                                                    pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
                 vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vmovn_u16(res));
             }
             else
@@ -1225,11 +1231,11 @@ void NEPoolingLayerKernel::pooling3_qasymm8(const Window &window_input, const Wi
                 // Scale lower result
                 scale_vector_s16x8<exclude_padding>(final_sum.val[0], id, 0, 1,
                                                     pool_size, upper_bound_w, upper_bound_h,
-                                                    pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
                 // Scale lower result
                 scale_vector_s16x8<exclude_padding>(final_sum.val[1], id, 8, 1,
                                                     pool_size, upper_bound_w, upper_bound_h,
-                                                    pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
                 const uint8x16_t res = vcombine_u8(vmovn_u16(final_sum.val[0]), vmovn_u16(final_sum.val[1]));
                 vst1q_u8(reinterpret_cast<uint8_t *>(output.ptr()), res);
             }
@@ -1265,18 +1271,19 @@ void NEPoolingLayerKernel::pooling3_q16(const Window &window_input, const Window
 
     const int     fixed_point_position = _input->info()->fixed_point_position();
     constexpr int pool_size            = 3;
-    int           pool_pad_x           = 0;
-    int           pool_pad_y           = 0;
+    const int     pool_pad_right       = _pool_info.pad_stride_info().pad_right();
+    const int     pool_pad_top         = _pool_info.pad_stride_info().pad_top();
+    const int     pool_pad_left        = _pool_info.pad_stride_info().pad_left();
+    const int     pool_pad_bottom      = _pool_info.pad_stride_info().pad_bottom();
     int           pool_stride_x        = 0;
     int           pool_stride_y        = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_x;
-    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_y;
+    const int upper_bound_w = _input->info()->dimension(0) + pool_pad_right;
+    const int upper_bound_h = _input->info()->dimension(1) + pool_pad_bottom;
 
-    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const unsigned char *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
-    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 2));
+    const unsigned char *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const unsigned char *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+    const unsigned char *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -1287,7 +1294,7 @@ void NEPoolingLayerKernel::pooling3_q16(const Window &window_input, const Window
         if(pooling_type == PoolingType::AVG)
         {
             // Calculate scale
-            const qint16_t scale = calculate_avg_scale_q16(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y, fixed_point_position);
+            const qint16_t scale = calculate_avg_scale_q16(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y, fixed_point_position);
 
             // Perform pooling for stride 2
             const qint16x8_t sum_data  = vqaddq_qs16(vqaddq_qs16(top_data, bottom_data), middle_data);
@@ -1333,19 +1340,20 @@ void NEPoolingLayerKernel::pooling3_f32(const Window &window_input, const Window
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    constexpr const int pool_size     = 3;
-    int                 pool_pad_x    = 0;
-    int                 pool_pad_y    = 0;
-    int                 pool_stride_x = 0;
-    int                 pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    constexpr const int pool_size       = 3;
+    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y)));
-    const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 1));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + 2));
+    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -1366,7 +1374,7 @@ void NEPoolingLayerKernel::pooling3_f32(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            float             scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            float             scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
             const float32x2_t scale_v = vdup_n_f32(scale);
 
             // Perform pooling
@@ -1400,20 +1408,21 @@ void NEPoolingLayerKernel::pooling7_f32(const Window &window_input, const Window
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    constexpr const int pool_size     = 7;
-    int                 pool_pad_x    = 0;
-    int                 pool_pad_y    = 0;
-    int                 pool_stride_x = 0;
-    int                 pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    constexpr const int pool_size       = 7;
+    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
     std::array<const uint8_t *, pool_size> input_ptrs{ {} };
     for(int i = 0; i < pool_size; ++i)
     {
-        input_ptrs[i] = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_x), -static_cast<int>(pool_pad_y) + i));
+        input_ptrs[i] = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + i));
     }
 
     execute_window_loop(window, [&](const Coordinates & id)
@@ -1423,7 +1432,7 @@ void NEPoolingLayerKernel::pooling7_f32(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            float             scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            float             scale   = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
             const float32x2_t scale_v = vdup_n_f32(scale);
 
             // Perform pooling
@@ -1482,15 +1491,16 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size();
-    int       pool_pad_x    = 0;
-    int       pool_pad_y    = 0;
-    int       pool_stride_x = 0;
-    int       pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    const int pool_size       = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size();
+    const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int       pool_stride_x   = 0;
+    int       pool_stride_y   = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -1499,7 +1509,7 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            const float scale = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            const float scale = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
 
             // Perform pooling
             float32x4_t vres = vdupq_n_f32(0.0f);
@@ -1509,8 +1519,8 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
                 int x = 0;
                 for(; x <= (pool_size - 4); x += 4)
                 {
-                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() +
-                                                                                       (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
+                                                                                       (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
 
                     // Get power of 2 in case of l2 pooling and accumulate
                     if(pooling_type == PoolingType::L2)
@@ -1526,7 +1536,7 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
                 // Leftover for loop
                 for(; x < pool_size; ++x)
                 {
-                    float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() + (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
 
                     // Get power of 2 in case of l2 pooling
                     if(pooling_type == PoolingType::L2)
@@ -1561,15 +1571,15 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
                 int x = 0;
                 for(; x <= (pool_size - 4); x += 4)
                 {
-                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() +
-                                                                                       (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
+                                                                                       (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
                     vres                   = vmaxq_f32(vres, data);
                 }
 
                 // Leftover for loop
                 for(; x < pool_size; ++x)
                 {
-                    const float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() + (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    const float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
                     res              = std::max(res, data);
                 }
             }
@@ -1603,15 +1613,16 @@ void NEPoolingLayerKernel::poolingN_qasymm8(const Window &window_input, const Wi
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size();
-    int       pool_pad_x    = 0;
-    int       pool_pad_y    = 0;
-    int       pool_stride_x = 0;
-    int       pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    const int pool_size       = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size();
+    const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int       pool_stride_x   = 0;
+    int       pool_stride_y   = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y);
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -1623,7 +1634,7 @@ void NEPoolingLayerKernel::poolingN_qasymm8(const Window &window_input, const Wi
             uint32_t   sres = 0;
 
             // Calculate scale
-            const float scale = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y);
+            const float scale = calculate_avg_scale<exclude_padding>(id, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
 
             // Perform pooling
             for(int y = 0; y < pool_size; ++y)
@@ -1631,7 +1642,8 @@ void NEPoolingLayerKernel::poolingN_qasymm8(const Window &window_input, const Wi
                 int x = 0;
                 for(; x <= (pool_size - 8); x += 8)
                 {
-                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() + (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
+                                                                                     (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
 
                     const uint16x8_t data_u16 = vmovl_u8(data);
                     vres                      = vaddq_u32(vres, vaddl_u16(vget_high_u16(data_u16), vget_low_u16(data_u16)));
@@ -1640,7 +1652,7 @@ void NEPoolingLayerKernel::poolingN_qasymm8(const Window &window_input, const Wi
                 // Leftover for loop
                 for(; x < pool_size; ++x)
                 {
-                    uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() + (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
                     sres += data;
                 }
             }
@@ -1662,14 +1674,15 @@ void NEPoolingLayerKernel::poolingN_qasymm8(const Window &window_input, const Wi
                 int x = 0;
                 for(; x <= (pool_size - 8); x += 8)
                 {
-                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() + (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
+                                                                                     (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
                     vres                 = vmax_u8(vres, data);
                 }
 
                 // Leftover for loop
                 for(; x < pool_size; ++x)
                 {
-                    const uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_x) * _input->info()->strides_in_bytes().x() + (y - pool_pad_y) * _input->info()->strides_in_bytes().y()));
+                    const uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
                     res                = std::max(res, data);
                 }
             }

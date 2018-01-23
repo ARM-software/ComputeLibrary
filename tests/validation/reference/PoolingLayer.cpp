@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,8 +62,10 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
     PoolingType type            = info.pool_type();
     int         pool_stride_x   = info.pad_stride_info().stride().first;
     int         pool_stride_y   = info.pad_stride_info().stride().second;
-    int         pad_x           = info.pad_stride_info().pad().first;
-    int         pad_y           = info.pad_stride_info().pad().second;
+    int         pad_left        = info.pad_stride_info().pad_left();
+    int         pad_top         = info.pad_stride_info().pad_top();
+    int         pad_right       = info.pad_stride_info().pad_right();
+    int         pad_bottom      = info.pad_stride_info().pad_bottom();
     bool        exclude_padding = info.exclude_padding();
 
     const auto w_src      = static_cast<int>(src.shape()[0]);
@@ -84,8 +86,8 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
             {
                 for(int w = 0; w < w_dst; ++w)
                 {
-                    int wstart = w * pool_stride_x - pad_x;
-                    int hstart = h * pool_stride_y - pad_y;
+                    int wstart = w * pool_stride_x - pad_left;
+                    int hstart = h * pool_stride_y - pad_top;
                     int wend   = std::min(wstart + pool_size, w_src);
                     int hend   = std::min(hstart + pool_size, h_src);
                     wstart     = std::max(wstart, 0);
@@ -118,10 +120,10 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
                 for(int w = 0; w < w_dst; ++w)
                 {
                     T   avg_val(0);
-                    int wstart = w * pool_stride_x - pad_x;
-                    int hstart = h * pool_stride_y - pad_y;
-                    int wend   = std::min(wstart + pool_size, w_src + pad_x);
-                    int hend   = std::min(hstart + pool_size, h_src + pad_y);
+                    int wstart = w * pool_stride_x - pad_left;
+                    int hstart = h * pool_stride_y - pad_top;
+                    int wend   = std::min(wstart + pool_size, w_src + pad_right);
+                    int hend   = std::min(hstart + pool_size, h_src + pad_bottom);
                     int pool   = (hend - hstart) * (wend - wstart);
                     wstart     = std::max(wstart, 0);
                     hstart     = std::max(hstart, 0);
@@ -173,8 +175,10 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
     PoolingType type            = info.pool_type();
     int         pool_stride_x   = info.pad_stride_info().stride().first;
     int         pool_stride_y   = info.pad_stride_info().stride().second;
-    int         pad_x           = info.pad_stride_info().pad().first;
-    int         pad_y           = info.pad_stride_info().pad().second;
+    int         pad_left        = info.pad_stride_info().pad_left();
+    int         pad_top         = info.pad_stride_info().pad_top();
+    int         pad_right       = info.pad_stride_info().pad_right();
+    int         pad_bottom      = info.pad_stride_info().pad_bottom();
     bool        exclude_padding = info.exclude_padding();
 
     const auto w_src      = static_cast<int>(src.shape()[0]);
@@ -195,8 +199,8 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
             {
                 for(int w = 0; w < w_dst; ++w)
                 {
-                    int wstart = w * pool_stride_x - pad_x;
-                    int hstart = h * pool_stride_y - pad_y;
+                    int wstart = w * pool_stride_x - pad_left;
+                    int hstart = h * pool_stride_y - pad_top;
                     int wend   = std::min(wstart + pool_size, w_src);
                     int hend   = std::min(hstart + pool_size, h_src);
                     wstart     = std::max(wstart, 0);
@@ -228,10 +232,10 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
             {
                 for(int w = 0; w < w_dst; ++w)
                 {
-                    int wstart = w * pool_stride_x - pad_x;
-                    int hstart = h * pool_stride_y - pad_y;
-                    int wend   = std::min(wstart + pool_size, w_src + pad_x);
-                    int hend   = std::min(hstart + pool_size, h_src + pad_y);
+                    int wstart = w * pool_stride_x - pad_left;
+                    int hstart = h * pool_stride_y - pad_top;
+                    int wend   = std::min(wstart + pool_size, w_src + pad_right);
+                    int hend   = std::min(hstart + pool_size, h_src + pad_bottom);
                     int pool   = (hend - hstart) * (wend - wstart);
                     wstart     = std::max(wstart, 0);
                     hstart     = std::max(hstart, 0);
