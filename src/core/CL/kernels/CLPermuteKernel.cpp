@@ -46,7 +46,8 @@ TensorShape get_output_shape(const ITensorInfo *input, const PermutationVector &
     permute(output_shape, perm);
     return output_shape;
 }
-}
+} // namespace
+
 void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,

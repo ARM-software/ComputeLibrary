@@ -118,7 +118,7 @@ unsigned int NEWinogradLayerKernel::get_output_storage_size(
     return T::get_output_storage_size(n_batches, n_rows, n_cols, n_output_channels, same_padding);
 }
 
-size_t NEWinogradLayerKernel::get_weight_storage_size(const int n_output_channels, const int n_input_channels)
+unsigned int NEWinogradLayerKernel::get_weight_storage_size(const int n_output_channels, const int n_input_channels)
 {
     return T::get_weight_storage_size(n_output_channels, n_input_channels);
 }

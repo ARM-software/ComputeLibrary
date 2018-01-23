@@ -74,55 +74,87 @@ class WinogradConvolutionLayer
 
     /** Determine how much memory (in units of TIn) to allocate for the
      * transformed weights.
+     *
+     * @param[in]  n_output_channels Number of output feature maps.
+     * @param[in]  n_input_channels  Number of input feature maps.
      */
     static unsigned int get_weight_storage_size(
-      const int n_output_channels,  /** Number of output feature maps. */
-      const int n_input_channels    /** Number of input feature maps. */
+      const int n_output_channels,
+      const int n_input_channels
     );
 
     /** Determine how much memory (in units of TIn) to allocate for the
      * transformed input.
+     *
+     * @param[in]  n_batches  Number of batches in the input tensor.
+     * @param[in]  n_channels Number of feature maps in the input tensor.
+     * @param[in]  n_rows Number of rows in each feature map.
+     * @param[in]  n_cols Number of columns in each feature map.
+     * @param[in]  same_padding Use "SAME" padding, otherwise use "VALID".
      */
     static unsigned int get_input_storage_size(
-      const int n_batches,     /** Number of batches in the input tensor. */
-      const int n_channels,    /** Number of feature maps in the input tensor. */
-      const int n_rows,        /** Number of rows in each feature map. */
-      const int n_cols,        /** Number of columns in each feature map. */
-      const bool same_padding  /** Use "SAME" padding, otherwise use "VALID". */
+      const int n_batches,
+      const int n_channels,
+      const int n_rows,
+      const int n_cols,
+      const bool same_padding
     );
 
     /** Determine how much memory (in units of TOut) to allocate for the
      * (Winograd domain) output.
+     *
+     * @param[in]  n_batches  Number of batches in the output tensor.
+     * @param[in]  n_rows Number of rows in each feature map of the input tensor.
+     * @param[in]  n_cols Number of columns in each feature map of the input tensor.
+     * @param[in]  n_output_channels Number of feature maps in the output tensor.
+     * @param[in]  same_padding Use "SAME" padding, otherwise use "VALID".
      */
     static unsigned int get_output_storage_size(
-      const int n_batches,          /** Number of batches in the output tensor. */
-      const int n_rows,             /** Number of rows in each feature map of the input tensor. */
-      const int n_cols,             /** Number of columns in each feature map of the input tensor. */
-      const int n_output_channels,  /** Number of feature maps in the output tensor. */
-      const bool same_padding       /** Use "SAME" padding, otherwise use "VALID". */
+      const int n_batches,
+      const int n_rows,
+      const int n_cols,
+      const int n_output_channels,
+      const bool same_padding
     );
 
-    /** Get the shape (rows, cols) of a feature map of the output tensor. */
+    /** Get the shape (rows, cols) of a feature map of the output tensor.
+     *
+     * @param[in]  n_input_rows  Number of rows in the input feature map.
+     * @param[in]  n_input_cols  Number of columns in the input feature map.
+     * @param[in]  same_padding Use "SAME" padding, otherwise use "VALID".
+    */
     static std::pair<int, int> get_output_feature_map_shape(
-      const int n_input_rows,  /** Number of rows in the input feature map. */
-      const int n_input_cols,  /** Number of columns in the input feature map. */
-      const bool same_padding  /** Use "SAME" padding, otherwise use "VALID". */
+      const int n_input_rows,
+      const int n_input_cols,
+      const bool same_padding
     );
 
     /** Create a new Winograd convolution layer.
+     * @param[in]  n_batches Number of batches in the input and output tensors.
+     * @param[in]  n_input_channels Number of feature maps in a batch of the input tensor.
+     * @param[in]  n_input_rows Number of rows in a feature map of the input tensor.
+     * @param[in]  n_input_cols Number of columns in a feature map of the input tensor.
+     * @param[in]  n_output_channels Number of feature maps in the output tensor.
+     * @param[in]  same_padding Use "SAME" padding, otherwise use "VALID".
+     * @param[in]  weights Pointer to weight tensor in spatial domain. Must be ordered as "Height x Rows x Input Feature Maps x Output Feature Maps.
+     * @param[out]  weights_storage Pointer to storage for weight tensor in the Winograd domain. Must be at least the size returned by `get_weight_storage_size
+     * @param[in]  input Pointer to NHWC ordered input tensor, in the spatial domain.
+     * @param[out] winograd_input Pointer to working space for the input tensor in the Winograd domain. Must be at least the size returned by `get_input_storage_size`.
+     * @param[out]  output Pointer to NHWC ordered output tensor, in the spatial domain.
+     * @param[out]  winograd_output Pointer to working space for the output tensor in the Winograd domain. Must be at least the size returned by `get_output_storage_size`.
      */
     WinogradConvolutionLayer(
-      const int n_batches,          /** Number of batches in the input and output tensors. */
-      const int n_input_channels,   /** Number of feature maps in a batch of the input tensor. */
-      const int n_input_rows,       /** Number of rows in a feature map of the input tensor. */
-      const int n_input_cols,       /** Number of columns in a feature map of the input tensor. */
-      const int n_output_channels,  /** Number of feature maps in the output tensor. */
-      const bool same_padding,      /** Use "SAME" padding, otherwise use "VALID". */
-      const TIn* const weights,     /** Pointer to weight tensor in spatial domain. Must be ordered as "Height x Rows x Input Feature Maps x Output Feature Maps. */
-      TIn* const weights_storage,   /** Pointer to storage for weight tensor in the Winograd domain. Must be at least the size returned by `get_weight_storage_size`. */
-      const TIn* const input,       /** Pointer to NHWC ordered input tensor, in the spatial domain. */
-      TIn* const winograd_input,    /** Pointer to working space for the input tensor in the Winograd domain. Must be at least the size returned by `get_input_storage_size`. */
-      TOut* const output,           /** Pointer to NHWC ordered output tensor, in the spatial domain. */
-      TOut* const winograd_output   /** Pointer to working space for the output tensor in the Winograd domain. Must be at least the size returned by `get_output_storage_size`. */
+      const int n_batches,
+      const int n_input_channels,
+      const int n_input_rows,
+      const int n_input_cols,
+      const int n_output_channels,
+      const bool same_padding,
+      const TIn* const weights,
+      TIn* const weights_storage,
+      const TIn* const input,
+      TIn* const winograd_input,
+      TOut* const output,
+      TOut* const winograd_output
     );
 };

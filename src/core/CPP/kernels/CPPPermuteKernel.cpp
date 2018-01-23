@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,17 +76,13 @@ inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &
 
 } // namespace
 
-
-
-
 template <typename T>
 void CPPPermuteKernel::run_permute(const Window &window)
 {
-
-    Strides strides = _output->info()->strides_in_bytes();
+    Strides strides      = _output->info()->strides_in_bytes();
     Strides perm_strides = strides;
-    permute_strides(perm_strides,_perm);
-    const int output_stride_w = strides[3];
+    permute_strides(perm_strides, _perm);
+    const int               output_stride_w = strides[3];
     Window                  window_out(window);
     const Window::Dimension zero_window = Window::Dimension(0, 0, 0);
     for(size_t d = 0; d <= _perm.num_dimensions(); ++d)
