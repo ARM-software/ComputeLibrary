@@ -157,6 +157,7 @@ WinogradConvolutionLayer(
   TIn* const winograd_weights,  /** Pointer to storage for weight tensor in the Winograd domain. Must be at least the size returned by `get_weight_storage_size`. */
   const TIn* const input,       /** Pointer to NHWC ordered input tensor, in the spatial domain. */
   TIn* const winograd_input,    /** Pointer to working space for the input tensor in the Winograd domain. Must be at least the size returned by `get_input_storage_size`. */
+  const TOut* const biases,     /** Pointer to biases vector. */
   TOut* const output,           /** Pointer to NHWC ordered output tensor, in the spatial domain. */
   TOut* const winograd_output   /** Pointer to working space for the output tensor in the Winograd domain. Must be at least the size returned by `get_output_storage_size`. */
 ) : _kernel_shape(n_output_channels, KernelRows, KernelCols, n_input_channels),
@@ -193,7 +194,7 @@ WinogradConvolutionLayer(
       winograd_input, winograd_weights, winograd_output
     ),
     output_transform(
-      winograd_output, _output_matrix_stride, _output_matrix_row_stride,
+      winograd_output, _output_matrix_stride, _output_matrix_row_stride, biases,
       output, n_batches, _n_output_rows, _n_output_cols, n_output_channels
     )
 {
@@ -202,3 +203,4 @@ WinogradConvolutionLayer(
 // Instantiate valid implementations.
 template class WinogradConvolutionLayer<2, 2, 3, 3, float, float>;
 template class WinogradConvolutionLayer<4, 4, 3, 3, float, float>;
+template class WinogradConvolutionLayer<2, 2, 5, 5, float, float>;

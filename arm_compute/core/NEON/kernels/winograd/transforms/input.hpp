@@ -71,7 +71,7 @@ namespace winograd
         const int row_offset = (tile_i == 0) ?
           0 : ((padding_type == PADDING_VALID) ? 0 : 1);
         const T* const input_base_row = (
-          input_base_batch + ((inner_tile_rows - 2)*tile_i - row_offset)*input_row_stride
+          input_base_batch + ((inner_tile_rows - (kernel_rows - 1))*tile_i - row_offset)*input_row_stride
         );
         T* const outptr_base_row = outptr_base_batch + tile_i*output_row_stride;
 

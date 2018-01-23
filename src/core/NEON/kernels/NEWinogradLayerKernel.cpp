@@ -55,7 +55,7 @@ public:
         float *const       output,            /** Pointer to NHWC ordered output tensor, in the spatial domain. */
         float *const       winograd_output    /** Pointer to working space for the output tensor in the Winograd domain. Must be at least the size returned by `get_output_storage_size`. */
     )
-        : convolver(n_batches, n_input_channels, n_input_rows, n_input_cols, n_output_channels, same_padding, weights, weights_storage, input, winograd_input, output, winograd_output)
+        : convolver(n_batches, n_input_channels, n_input_rows, n_input_cols, n_output_channels, same_padding, weights, weights_storage, input, winograd_input, nullptr, output, winograd_output)
     {
     }
     T convolver;
@@ -63,24 +63,6 @@ public:
 
 Winograd3x3F32::~Winograd3x3F32()
 {
-}
-
-void Winograd3x3F32::transform_output()
-{
-    auto win = _pimpl->convolver.output_transform.get_window();
-    _pimpl->convolver.output_transform.run(0, win);
-}
-
-void Winograd3x3F32::transform_input()
-{
-    auto win = _pimpl->convolver.input_transform.get_window();
-    _pimpl->convolver.input_transform.run(0, win);
-}
-
-void Winograd3x3F32::transform_weights()
-{
-    auto win = _pimpl->convolver.weights_transform.get_window();
-    _pimpl->convolver.weights_transform.run(0, win);
 }
 
 Winograd3x3F32::Winograd3x3F32(
@@ -146,4 +128,128 @@ void NEWinogradLayerKernel::run(const Window &window, const ThreadInfo &info)
     const size_t last_gemm  = window.x().end();
     _convolver->_pimpl->convolver.gemms.run(first_gemm, last_gemm);
 }
+
+INEWinogradLayerTransformKernel::INEWinogradLayerTransformKernel()
+    : _convolver(nullptr)
+{
+}
+
+void INEWinogradLayerTransformKernel::configure(Winograd3x3F32 *convolver)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(convolver);
+    _convolver = convolver;
+}
+
+// Weights transform
+
+void NEWinogradLayerTransformWeightsKernel::configure(Winograd3x3F32 *convolver)
+{
+    INEWinogradLayerTransformKernel::configure(convolver);
+    Window win;
+    auto   win_last = _convolver->_pimpl->convolver.weights_transform.get_window();
+    win.set(Window::DimX, Window::Dimension(0, win_last, 1));
+    INEKernel::configure(win);
+}
+
+void NEWinogradLayerTransformWeightsKernel::run(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    const size_t fst = window.x().start();
+    const size_t lst = window.x().end();
+    _convolver->_pimpl->convolver.weights_transform.run(fst, lst);
+}
+
+bool NEWinogradLayerTransformWeightsKernel::is_parallelisable() const
+{
+    return false;
+}
+
+// Input transform
+
+void NEWinogradLayerTransformInputKernel::configure(Winograd3x3F32 *convolver)
+{
+    INEWinogradLayerTransformKernel::configure(convolver);
+    Window win;
+    auto   win_last = _convolver->_pimpl->convolver.input_transform.get_window();
+    win.set(Window::DimX, Window::Dimension(0, win_last, 1));
+    INEKernel::configure(win);
+}
+
+void NEWinogradLayerTransformInputKernel::run(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    const size_t fst = window.x().start();
+    const size_t lst = window.x().end();
+    _convolver->_pimpl->convolver.input_transform.run(fst, lst);
+}
+bool NEWinogradLayerTransformInputKernel::is_parallelisable() const
+{
+    return false;
+}
+
+// Output transform
+NEWinogradLayerTransformOutputKernel::NEWinogradLayerTransformOutputKernel()
+    : _biases(nullptr), _output_workspace(nullptr), _matrix_stride(0), _matrix_row_stride(0), _output(nullptr), _n_batches(0), _n_rows(0), _n_cols(0), _n_channels(0)
+{
+}
+
+void NEWinogradLayerTransformOutputKernel::configure(
+    const ITensor     *biases,
+    const float *const output_workingspace,
+    const int          matrix_stride,
+    float *const       output,
+    const int          n_batches,
+    const int          n_rows,
+    const int          n_cols,
+    const int          n_channels)
+{
+    using WinogradBase    = winograd::WinogradGEMM<2, 2, 3, 3>;
+    using OutputTransform = typename WinogradBase::template OutputTransform<float>;
+
+    _biases            = biases;
+    _output_workspace  = output_workingspace;
+    _matrix_stride     = matrix_stride;
+    _matrix_row_stride = roundup(n_channels, WinogradBase::Convolution<float, float>::N_BLOCK);
+    _output            = output;
+    _n_batches         = n_batches;
+    _n_rows            = n_rows;
+    _n_cols            = n_cols;
+    _n_channels        = n_channels;
+
+    // We don't have the biases buffer at this stage as it hasn't been allocated, we pass in nullptr OutputTransform is only used here to compute the window
+    OutputTransform output_transform(_output_workspace, _matrix_stride, _matrix_row_stride, nullptr, _output, _n_batches, _n_rows, _n_cols, _n_channels);
+    Window          win;
+    auto            win_last = output_transform.get_window();
+    win.set(Window::DimX, Window::Dimension(0, win_last, 1));
+    INEKernel::configure(win);
+}
+
+void NEWinogradLayerTransformOutputKernel::run(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_biases->buffer());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_output_workspace);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_output);
+
+    using WinogradBase    = winograd::WinogradGEMM<2, 2, 3, 3>;
+    using OutputTransform = typename WinogradBase::template OutputTransform<float>;
+
+    OutputTransform output_transform(_output_workspace, _matrix_stride, _matrix_row_stride,
+                                     reinterpret_cast<float *>(_biases->buffer()), _output,
+                                     _n_batches, _n_rows, _n_cols, _n_channels);
+
+    // The code below cannot be moved to configure because biases hasn't been allocated at that point
+    const size_t fst = window.x().start();
+    const size_t lst = window.x().end();
+    output_transform.run(fst, lst);
+}
+
+bool NEWinogradLayerTransformOutputKernel::is_parallelisable() const
+{
+    return false;
+}
+
 } // namespace arm_compute

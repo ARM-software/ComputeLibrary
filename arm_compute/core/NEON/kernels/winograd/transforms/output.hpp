@@ -35,6 +35,7 @@ namespace winograd
     const T* const matrix_base,
     const int matrix_stride,
     const int matrix_row_stride,
+    const T* const biases,
     T* const output
   )
   {
@@ -69,8 +70,9 @@ namespace winograd
         // Process the row
         process_tile_row(
           tile_N, output_shape.n_channels, matrix_tile_row, matrix_stride,
-          matrix_row_stride, outptr_row, output_row_stride,
-          output_col_stride, row_pad_bottom, pad_right
+          matrix_row_stride, biases,
+          outptr_row, output_row_stride, output_col_stride, row_pad_bottom,
+          pad_right
         );
       }
     }
@@ -85,6 +87,7 @@ namespace winograd
     const T* const matrix_base,
     const int matrix_stride,
     const int matrix_row_stride,
+    const T* const biases,
     T* const output,
     const int output_row_stride,
     const int output_col_stride,
@@ -102,7 +105,7 @@ namespace winograd
 
       // Perform the output transformation
       tile_fns[row_pad_bottom][tile_pad_right](
-        n_channels, matrix_row, matrix_stride,
+        n_channels, matrix_row, matrix_stride, biases,
         outptr, output_row_stride, output_col_stride
       );
     }
@@ -131,14 +134,17 @@ namespace winograd
     const T* const matrix_base,
     const int matrix_stride,
     const int matrix_row_stride,
+    const T* const biases,
     T* const output,
     const int n_batches,
     const int n_rows,
     const int n_cols,
     const int n_channels
-  ) : _matrix_base(matrix_base), _matrix_stride(matrix_stride), _matrix_row_stride(matrix_row_stride),
-      _outptr(output), _n_batches(n_batches), _n_rows(n_rows), _n_cols(n_cols), _n_channels(n_channels),
-      _tile_M(iceildiv(n_rows, output_tile_rows)), _tile_N(iceildiv(n_cols, output_tile_cols))
+  ) : _matrix_base(matrix_base), _biases(biases),
+      _matrix_stride(matrix_stride), _matrix_row_stride(matrix_row_stride),
+      _outptr(output), _n_batches(n_batches), _n_rows(n_rows), _n_cols(n_cols),
+      _n_channels(n_channels), _tile_M(iceildiv(n_rows, output_tile_rows)),
+      _tile_N(iceildiv(n_cols, output_tile_cols))
   {
   }
 
@@ -168,7 +174,8 @@ namespace winograd
       _n_batches, _n_rows, _n_cols, _n_channels, NHWC
     };
     execute(
-      output_shape, _matrix_base, _matrix_stride, _matrix_row_stride, _outptr
+      output_shape, _matrix_base, _matrix_stride, _matrix_row_stride, _biases,
+      _outptr
     );
   }
 }  // namespace winograd

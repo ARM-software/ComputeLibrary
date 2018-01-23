@@ -29,6 +29,7 @@
 void direct_convolution(
   const Tensor4D<Tensor4DShape, float>& input,
   const Tensor4D<KernelShape, float>& kernel,
+  const Tensor4D<Tensor4DShape, float>& biases,
   Tensor4D<Tensor4DShape, float>& output,
   const PaddingType padding
 );

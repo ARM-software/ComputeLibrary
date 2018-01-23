@@ -28,6 +28,8 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
 
+#include "arm_compute/core/NEON/kernels/winograd/winograd_gemm.hpp"
+
 namespace
 {
 inline Tensor4DShape internal_get_input_shape(const arm_compute::ITensor *input)
@@ -43,15 +45,15 @@ inline Tensor4DShape internal_get_input_shape(const arm_compute::ITensor *input)
 namespace arm_compute
 {
 NEWinogradLayer::NEWinogradLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _winograd_kernel(), _permute_input(), _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(),
-      _output_nhwc(), _weights_hwio(), _input(), _weights(), _output(), _reshaped_kernel(false), _conv()
+    : _memory_group(std::move(memory_manager)), _winograd_kernel(), _transform_input_kernel(), _transform_output_kernel(), _transform_weights_kernel(), _permute_input(), _permute_weights(),
+      _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(), _input(), _weights(), _output(), _reshaped_kernel(false), _conv()
 {
 } /* arm_compute */
 
 void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, biases);
     ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(1) != 3 || weights->info()->dimension(0) != 3, "Only 3x3 kernels are supported");
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
 
@@ -76,22 +78,22 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
     const int out_channels = output->info()->dimension(2);
 
     const Tensor4DShape in_shape(internal_get_input_shape(input));
-
+    const size_t        data_type_size = input->info()->element_size();
     // Get the memory required to instantiate a new Winograd operator.
     constexpr size_t storage_alignment   = 64;
-    const size_t     kernel_storage_size = NEWinogradLayerKernel::get_weight_storage_size(out_channels, in_channels) * sizeof(float);
+    const size_t     kernel_storage_size = NEWinogradLayerKernel::get_weight_storage_size(out_channels, in_channels) * data_type_size;
     _kernel_storage.allocator()->init(TensorInfo(TensorShape{ (kernel_storage_size + storage_alignment - 1) }, 1, DataType::U8));
     _memory_group.manage(&_kernel_storage);
     _memory_group.manage(&_input_nhwc);
     _kernel_storage.allocator()->allocate();
     // Input storage
-    const size_t input_storage_size = NEWinogradLayerKernel::get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols, false) * sizeof(float);
+    const size_t input_storage_size = NEWinogradLayerKernel::get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols, false) * data_type_size;
     _input_workspace.allocator()->init(TensorInfo(TensorShape{ (input_storage_size + storage_alignment - 1) }, 1, DataType::U8));
     _memory_group.manage(&_input_workspace);
     _input_workspace.allocator()->allocate();
 
     // Output storage
-    const size_t output_storage_size = NEWinogradLayerKernel::get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels, false) * sizeof(float);
+    const size_t output_storage_size = NEWinogradLayerKernel::get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels, false) * data_type_size;
     _output_workspace.allocator()->init(TensorInfo(TensorShape{ (output_storage_size + storage_alignment - 1) }, 1, DataType::U8));
     _memory_group.manage(&_output_workspace);
     _output_workspace.allocator()->allocate();
@@ -130,7 +132,6 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
     _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
 
     _input_nhwc.allocator()->allocate();
-
     // Create Winograd operator object
     _conv = support::cpp14::make_unique<Winograd3x3F32>(
                 in_shape.n_batches,
@@ -148,6 +149,20 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
 
     // Configure the kernel, padding not needed so it's safe to call configure after allocare
     _winograd_kernel.configure(_conv.get());
+    _transform_input_kernel.configure(_conv.get());
+    _transform_weights_kernel.configure(_conv.get());
+
+    //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
+    using T                          = winograd::WinogradGEMM<2, 2, 3, 3>::Convolution<float, float>;
+    const int         weights_width  = weights->info()->dimension(0);
+    const int         weights_height = weights->info()->dimension(1);
+    const KernelShape kernel_shape({ out_channels, weights_height, weights_width, in_channels });
+    const int         output_matrix_stride = T::get_output_matrix_stride(kernel_shape, in_shape, PADDING_VALID);
+    const auto        output_shape(T::get_output_shape(kernel_shape, in_shape, PADDING_VALID));
+
+    _transform_output_kernel.configure(biases, reinterpret_cast<float *>(_output_workspace.buffer()),
+                                       output_matrix_stride, reinterpret_cast<float *>(_output_nhwc.buffer()),
+                                       in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
 
     // Reorder the convoluted output to ACL's ordering NCHW
     _permute_output.configure(&_output_nhwc, _output, PermutationVector(1U, 2U, 0U));
@@ -160,16 +175,20 @@ void NEWinogradLayer::run()
     {
         _reshaped_kernel = true;
         _permute_weights.run();
-        _conv->transform_weights();
+        NEScheduler::get().schedule(&_transform_weights_kernel, Window::DimX);
     }
+
     //Bring channels to the front as Winograd code expects the tensor to be in the format NHWC
     _permute_input.run();
     // Transform input tensor to the winograd domain
-    _conv->transform_input();
+    NEScheduler::get().schedule(&_transform_input_kernel, Window::DimX);
+
     //Run 16 GEMMs in multiple threads, each kernel runs one or more GEMMs
     NEScheduler::get().schedule(&_winograd_kernel, Window::DimX);
+
     // Transform output tensor to the spatial domain
-    _conv->transform_output();
+    NEScheduler::get().schedule(&_transform_output_kernel, Window::DimX);
+
     // Reorder the convoluted output to ACL's ordering NCHW
     _permute_output.run();
     _memory_group.release();

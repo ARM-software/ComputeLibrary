@@ -32,6 +32,8 @@ namespace arm_compute
 {
 class ITensor;
 class NEWinogradLayerKernel;
+class NEWinogradLayerTransformInputKernel;
+class NEWinogradLayerTransformWeightsKernel;
 
 class Winograd3x3F32 final
 {
@@ -48,10 +50,15 @@ public:
      * @param[out] weights_storage   Pointer to storage for weight tensor in the Winograd domain. Must be at least the size returned by `get_weight_storage_size
      * @param[in]  input             Pointer to NHWC ordered input tensor, in the spatial domain.
      * @param[out] winograd_input    Pointer to working space for the input tensor in the Winograd domain. Must be at least the size returned by `get_input_storage_size`.
+     * @param[in]  biases            Pointer to the biases vector.
      * @param[out] output            Pointer to NHWC ordered output tensor, in the spatial domain.
      * @param[out] winograd_output   Pointer to working space for the output tensor in the Winograd domain. Must be at least the size returned by `get_output_storage_size`.
      */
     friend class NEWinogradLayerKernel;
+    friend class NEWinogradLayerTransformInputKernel;
+    friend class NEWinogradLayerTransformOutputKernel;
+    friend class NEWinogradLayerTransformWeightsKernel;
+
     Winograd3x3F32(
         const int          n_batches,
         const int          n_input_channels,
@@ -67,16 +74,124 @@ public:
         float *const       winograd_output);
 
     ~Winograd3x3F32();
-    void transform_weights();
-    void transform_input();
-    void transform_output();
 
 private:
     class Private;
     std::unique_ptr<Private> _pimpl;
 };
 
-class NEWinogradLayerKernel : public INEKernel
+class INEWinogradLayerTransformKernel : public INEKernel
+{
+public:
+    /** Constructor */
+    INEWinogradLayerTransformKernel();
+
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    INEWinogradLayerTransformKernel(const INEWinogradLayerTransformKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    INEWinogradLayerTransformKernel &operator=(const INEWinogradLayerTransformKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    INEWinogradLayerTransformKernel(INEWinogradLayerTransformKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    INEWinogradLayerTransformKernel &operator=(INEWinogradLayerTransformKernel &&) = default;
+
+    virtual ~INEWinogradLayerTransformKernel() = default;
+
+    /** Initialise the kernel
+     *
+     * @param[in] convolver A pointer to the winograd convolver, this object must have been configured and is ready to execute 16 GEMMS .
+     */
+    virtual void configure(Winograd3x3F32 *convolver);
+
+protected:
+    Winograd3x3F32 *_convolver;
+};
+
+class NEWinogradLayerTransformInputKernel final : public INEWinogradLayerTransformKernel
+{
+public:
+    const char *name() const override
+    {
+        return "NEWinogradLayerTransformInputKernel";
+    }
+    // Inherited methods overridden:
+    void configure(Winograd3x3F32 *convolver) override;
+    void run(const Window &window, const ThreadInfo &info) override;
+    bool is_parallelisable() const override;
+};
+
+class NEWinogradLayerTransformOutputKernel final : public INEKernel
+{
+public:
+    const char *name() const override
+    {
+        return "NEWinogradLayerTransformOutputKernel";
+    }
+    /** Constructor */
+    NEWinogradLayerTransformOutputKernel();
+
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEWinogradLayerTransformOutputKernel(const NEWinogradLayerTransformOutputKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEWinogradLayerTransformOutputKernel &operator=(const NEWinogradLayerTransformOutputKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    NEWinogradLayerTransformOutputKernel(NEWinogradLayerTransformOutputKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    NEWinogradLayerTransformOutputKernel &operator=(NEWinogradLayerTransformOutputKernel &&) = default;
+
+    ~NEWinogradLayerTransformOutputKernel() = default;
+
+    /** Configure the output transform kernel.
+     *
+     * @param[in]  biases              Pointer to the biases tensor.
+     * @param[in]  output_workingspace Pointer to working space for the output tensor in the Winograd domain.
+     * @param[in]  matrix_stride       Output matrix stride, can be computed with winograd::WinogradGEMM<2, 2, 3, 3>::Convolution<float, float>::get_output_matrix_stride()
+     * @param[out] output              Pointer to NHWC ordered output tensor, in the spatial domain.
+     * @param[in]  n_batches           Number of batches in the input tensor.
+     * @param[in]  n_rows              Number of rows in output tensor.
+     * @param[in]  n_cols              Number of columns in output tensor.
+     * @param[in]  n_channels          Number of feature maps in the output tensor.
+     */
+    void configure(
+        const ITensor     *biases,
+        const float *const output_workingspace,
+        const int          matrix_stride,
+        float *const       output,
+        const int          n_batches,
+        const int          n_rows,
+        const int          n_cols,
+        const int          n_channels);
+
+    // Inherited methods overridden:
+    void run(const Window &window, const ThreadInfo &info) override;
+    bool is_parallelisable() const override;
+
+private:
+    const ITensor *_biases;
+    const float   *_output_workspace;
+    int            _matrix_stride;
+    int            _matrix_row_stride;
+    float         *_output;
+    int            _n_batches;
+    int            _n_rows;
+    int            _n_cols;
+    int            _n_channels;
+};
+
+class NEWinogradLayerTransformWeightsKernel final : public INEWinogradLayerTransformKernel
+{
+public:
+    const char *name() const override
+    {
+        return "NEWinogradLayerTransformWeightsKernel";
+    }
+    // Inherited methods overridden:
+    void configure(Winograd3x3F32 *convolver) override;
+    void run(const Window &window, const ThreadInfo &info) override;
+    bool is_parallelisable() const override;
+};
+
+class NEWinogradLayerKernel final : public INEKernel
 {
 public:
     const char *name() const override
@@ -95,7 +210,7 @@ public:
     /** Allow instances of this class to be moved */
     NEWinogradLayerKernel &operator=(NEWinogradLayerKernel &&) = default;
 
-    virtual ~NEWinogradLayerKernel() = default;
+    ~NEWinogradLayerKernel() = default;
 
     /** Initialise the kernel
      *

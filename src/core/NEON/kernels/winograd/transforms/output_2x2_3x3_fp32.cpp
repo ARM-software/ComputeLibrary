@@ -65,6 +65,7 @@ void Transform::process_tile(
   const int n_channels,
   const float* const matrix_base,
   const int matrix_stride,
+  const float* const biases,
   float* const output,
   const int output_row_stride,
   const int output_col_stride
@@ -83,6 +84,7 @@ void Transform::process_tile(
     }
   }
   const float *inptr = matrix_base;
+  const float *bptr = biases;
 
   // For each channel of the output
   int channels_remaining = n_channels;
@@ -90,7 +92,7 @@ void Transform::process_tile(
   for (; channels_remaining >= 4; channels_remaining -= 4)
   {
     // Matrices used and computed during this transform
-    float32x4_t F[4][4], FZ[4][2], f[2][2];
+    float32x4_t F[4][4], FZ[4][2], f[2][2], b;
 
     // Read a 4x4 tile in the Winograd domain
     for (int i = 0, m = 0; i < 4; i++)
@@ -122,12 +124,16 @@ void Transform::process_tile(
       f[1][j] = vsubq_f32(vsubq_f32(FZ[1][j], FZ[2][j]), FZ[3][j]);
     }
 
+    // Load the bias vector
+    b = vld1q_f32(bptr);
+    bptr += 4;
+
     // Write out the output tile
     for (int i = 0; i < cells_i; i++)
     {
       for (int j = 0; j < cells_j; j++)
       {
-        vst1q_f32(outptrs[i][j], f[i][j]);
+        vst1q_f32(outptrs[i][j], vaddq_f32(f[i][j], b));
         outptrs[i][j] += 4;
       }
     }
@@ -137,7 +143,7 @@ void Transform::process_tile(
   for (; channels_remaining >= 2; channels_remaining -= 2)
   {
     // Matrices used and computed during this transform
-    float32x2_t F[4][4], FZ[4][2], f[2][2];
+    float32x2_t F[4][4], FZ[4][2], f[2][2], b;
 
     // Read a 4x4 tile in the Winograd domain
     for (int i = 0, m = 0; i < 4; i++)
@@ -169,12 +175,16 @@ void Transform::process_tile(
       f[1][j] = vsub_f32(vsub_f32(FZ[1][j], FZ[2][j]), FZ[3][j]);
     }
 
+    // Load the bias vector
+    b = vld1_f32(bptr);
+    bptr += 2;
+
     // Write out the output tile
     for (int i = 0; i < cells_i; i++)
     {
       for (int j = 0; j < cells_j; j++)
       {
-        vst1_f32(outptrs[i][j], f[i][j]);
+        vst1_f32(outptrs[i][j], vadd_f32(f[i][j], b));
         outptrs[i][j] += 2;
       }
     }
@@ -183,7 +193,7 @@ void Transform::process_tile(
   for (; channels_remaining; channels_remaining--)
   {
     // Matrices used and computed during this transform
-    float F[4][4], FZ[4][2], f[2][2];
+    float F[4][4], FZ[4][2], f[2][2], b;
 
     // Read a 4x4 tile in the Winograd domain
     for (int i = 0, m = 0; i < 4; i++)
@@ -209,12 +219,15 @@ void Transform::process_tile(
       f[1][j] =  FZ[1][j] - FZ[2][j] - FZ[3][j];
     }
 
+    // Load the bias
+    b = *(bptr++);
+
     // Write out the output tile
     for (int i = 0; i < cells_i; i++)
     {
       for (int j = 0; j < cells_j; j++)
       {
-        *(outptrs[i][j]++) = f[i][j];
+        *(outptrs[i][j]++) = f[i][j] + b;
       }
     }
   }

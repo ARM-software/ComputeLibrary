@@ -52,7 +52,7 @@ public:
      *                       Data types supported: F32.
      * @param[in]  weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      *                       Currently only 3x3 kernels are supported.
-     * @param[in]  biases    Not supported, biases will be ignored.
+     * @param[in]  biases    Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] output    Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                       Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
@@ -68,22 +68,25 @@ public:
     NEWinogradLayer &operator=(const NEWinogradLayer &) = delete;
 
 private:
-    MemoryGroup                     _memory_group;
-    NEWinogradLayerKernel           _winograd_kernel;
-    CPPPermute                      _permute_input;
-    CPPPermute                      _permute_weights;
-    CPPPermute                      _permute_output;
-    Tensor                          _input_workspace;
-    Tensor                          _output_workspace;
-    Tensor                          _kernel_storage;
-    Tensor                          _input_nhwc;
-    Tensor                          _output_nhwc;
-    Tensor                          _weights_hwio;
-    const ITensor                  *_input;
-    const ITensor                  *_weights;
-    ITensor                        *_output;
-    bool                            _reshaped_kernel;
-    std::unique_ptr<Winograd3x3F32> _conv;
+    MemoryGroup                           _memory_group;
+    NEWinogradLayerKernel                 _winograd_kernel;
+    NEWinogradLayerTransformInputKernel   _transform_input_kernel;
+    NEWinogradLayerTransformOutputKernel  _transform_output_kernel;
+    NEWinogradLayerTransformWeightsKernel _transform_weights_kernel;
+    CPPPermute                            _permute_input;
+    CPPPermute                            _permute_weights;
+    CPPPermute                            _permute_output;
+    Tensor                                _input_workspace;
+    Tensor                                _output_workspace;
+    Tensor                                _kernel_storage;
+    Tensor                                _input_nhwc;
+    Tensor                                _output_nhwc;
+    Tensor                                _weights_hwio;
+    const ITensor                        *_input;
+    const ITensor                        *_weights;
+    ITensor                              *_output;
+    bool                                  _reshaped_kernel;
+    std::unique_ptr<Winograd3x3F32>       _conv;
 };
 }
 #endif /* __ARM_COMPUTE_NEWINOGRADLAYER_H__ */

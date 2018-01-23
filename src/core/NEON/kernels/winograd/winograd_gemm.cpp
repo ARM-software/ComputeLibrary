@@ -372,6 +372,7 @@ void WinogradGEMM<output_tile_rows, output_tile_cols, kernel_rows, kernel_cols>:
 Convolution<TOut, TIn>::execute(
   TOut* const output,
   const TIn* const input,
+  const TOut* const biases,
   void *working_space,
   const int n_threads
 )
@@ -479,7 +480,11 @@ Convolution<TOut, TIn>::execute(
     kernel_matrices[0],
     output_matrices[0]
   );
-  gemms.run(0, gemms.get_window());
+  for (unsigned int i = 0; i < gemms.get_window(); i++)
+  {
+    auto run_gemm = [&] () { gemms.run(i, i+1); };
+    prof("GEMM", run_gemm, 0, 0, 0);
+  }
 
   // If the output tensor needs to be in NCHW form then store the NHWC output
   // tensor in temporary storage and then reorder. If the output tensor needs
@@ -498,6 +503,7 @@ Convolution<TOut, TIn>::execute(
     output_matrices[0],
     out_matrix_stride_bytes / sizeof(TOut),
     out_matrix_row_stride,
+    biases,
     output_nhwc,
     output_shape.n_batches,
     output_shape.n_rows,
@@ -548,13 +554,16 @@ void WinogradGEMM<output_tile_rows, output_tile_cols, kernel_rows, kernel_cols>:
 Convolution<TOut, TIn>::execute(
   TOut* const output,
   const TIn* const input,
+  const TOut* const biases,
   const int n_threads
 )
 {
-  execute(output, input, NULL, n_threads);
+  execute(output, input, biases, NULL, n_threads);
 }
 
 
 // Instantiate required implementations
 template class WinogradGEMM<2, 2, 3, 3>::Convolution<float, float>;
 template class WinogradGEMM<4, 4, 3, 3>::Convolution<float, float>;
+
+template class WinogradGEMM<2, 2, 5, 5>::Convolution<float, float>;

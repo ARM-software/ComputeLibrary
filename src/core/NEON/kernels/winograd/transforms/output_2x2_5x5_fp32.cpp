@@ -29,52 +29,32 @@
 namespace winograd
 {
 
-using Transform = WinogradGEMM<4, 4, 3, 3>::OutputTransform<float>;
+using Transform = WinogradGEMM<2, 2, 5, 5>::OutputTransform<float>;
 
 template <>
 template <>
 int Transform::ops_performed(const Tensor4DShape &shape)
 {
-  // NOTE: Cost in FLOPs rather than instructions or uops.
-  const int tile_M = iceildiv(shape.n_rows, 4);
-  const int tile_N = iceildiv(shape.n_cols, 4);
-  return 170 * tile_M * tile_N * shape.n_channels;
+  return 0;  // TODO
 }
 
-// Instantiate cost methods
-template int Transform::ops_performed(const Tensor4DShape&);
-
-/* F(4x4, 3x3) constructs 4x4 output tiles from a 3x3 convolution. Since we use
- * enough tiles to cover the output space each output tile may contain up to 3
+/* F(2x2, 5x5) constructs 2x2 output tiles from a 5x5 convolution. Since we use
+ * enough tiles to cover the output space each output tile may contain 0 or 1
  * padded values to the right and bottom columns or rows of the tile, e.g.:
-*
-*      ________    ________   ________   ________
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |_______|   |______X|  |____X_X|  |__X_X_X|
-*
-*      ________    ________   ________   ________
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |X_X_X_X|   |X_X_X_X|  |X_X_X_X|  |X_X_X_X|
-*
-*      ________    ________   ________   ________
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |X X X X|   |X X X X|  |X X X X|  |X X X X|
-*     |X_X_X_X|   |X_X_X_X|  |X_X_X_X|  |X_X_X_X|
-*
-*      ________    ________   ________   ________
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |X X X X|   |X X X X|  |X X X X|  |X X X X|
-*     |X X X X|   |X X X X|  |X X X X|  |X X X X|
-*     |X_X_X_X|   |X_X_X_X|  |X_X_X_X|  |X_X_X_X|
-*
-*
-* We provide a specialised output transform for each of these instances.
-*/
+ *
+ *      ___     ___
+ *     |   |   |  X|
+ *     |___|   |__X|
+ *
+ *      ___     ___
+ *     |   |   |  X|
+ *     |X_X|   |X_X|
+ *
+ *
+ * We provide a specialised output transform for each of these instances.
+ * Consequently we below construct an array of the various padding options, the
+ * array contains pointers to the specific implementations.
+ */
 template <>
 template <>
 template <int pad_bottom, int pad_right>
@@ -88,8 +68,8 @@ void Transform::process_tile(
   const int output_col_stride
 )
 {
-  constexpr int cells_i = 4 - pad_bottom;
-  constexpr int cells_j = 4 - pad_right;
+  constexpr int cells_i = 2 - pad_bottom;
+  constexpr int cells_j = 2 - pad_right;
 
   // Construct a map to the output cells
   float *outptrs[cells_i][cells_j];
@@ -109,7 +89,7 @@ void Transform::process_tile(
   for (; channels_remaining >= 4; channels_remaining -= 4)
   {
     // Matrices used and computed during this transform
-    float32x4_t F[6][6], FZ[6][4], f[4][4], b;
+    float32x4_t F[6][6], FZ[6][2], f[2][2], b;
 
     // Read a 6x6 tile in the Winograd domain
     for (int i = 0, m = 0; i < 6; i++)
@@ -127,30 +107,18 @@ void Transform::process_tile(
       // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
       FZ[i][0] = vaddq_f32(vaddq_f32(vaddq_f32(F[i][0], F[i][1]), vaddq_f32(F[i][2], F[i][3])), F[i][4]);
 
-      // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
-      FZ[i][1] = vmlaq_n_f32(vsubq_f32(F[i][1], F[i][2]), vsubq_f32(F[i][3], F[i][4]), 2.0f);
-
-      // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
-      FZ[i][2] = vmlaq_n_f32(vaddq_f32(F[i][1], F[i][2]), vaddq_f32(F[i][3], F[i][4]), 4.0f);
-
-      // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
-      FZ[i][3] = vaddq_f32(vmlaq_n_f32(vsubq_f32(F[i][1], F[i][2]), vsubq_f32(F[i][3], F[i][4]), 8.0f), F[i][5]);
+      // FZ[i][1] =               1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4] +  1*F[i][5];
+      FZ[i][1] = vaddq_f32(vmlaq_n_f32(vsubq_f32(F[i][1], F[i][2]), vsubq_f32(F[i][3], F[i][4]), 2.0f), F[i][5]);
     }
 
     // Compute the output tile f = ZT F Z
-    for (int j = 0; j < 4; j++)
+    for (int j = 0; j < 2; j++)
     {
       // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
       f[0][j] = vaddq_f32(vaddq_f32(vaddq_f32(FZ[0][j], FZ[1][j]), vaddq_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
 
-      // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
-      f[1][j] = vmlaq_n_f32(vsubq_f32(FZ[1][j], FZ[2][j]), vsubq_f32(FZ[3][j], FZ[4][j]), 2.0f);
-
-      // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
-      f[2][j] = vmlaq_n_f32(vaddq_f32(FZ[1][j], FZ[2][j]), vaddq_f32(FZ[3][j], FZ[4][j]), 4.0f);
-
-      // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
-      f[3][j] = vaddq_f32(vmlaq_n_f32(vsubq_f32(FZ[1][j], FZ[2][j]), vsubq_f32(FZ[3][j], FZ[4][j]), 8.0f), FZ[5][j]);
+      // f[1][j] =               1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j] +  1*FZ[5][j];
+      f[1][j] = vaddq_f32(vmlaq_n_f32(vsubq_f32(FZ[1][j], FZ[2][j]), vsubq_f32(FZ[3][j], FZ[4][j]), 2.0f), FZ[5][j]);
     }
 
     // Write out the output tile
@@ -170,7 +138,7 @@ void Transform::process_tile(
   for (; channels_remaining >= 2; channels_remaining -= 2)
   {
     // Matrices used and computed during this transform
-    float32x2_t F[6][6], FZ[6][4], f[4][4], b;
+    float32x2_t F[6][6], FZ[6][2], f[2][2], b;
 
     // Read a 6x6 tile in the Winograd domain
     for (int i = 0, m = 0; i < 6; i++)
@@ -188,30 +156,18 @@ void Transform::process_tile(
       // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
       FZ[i][0] = vadd_f32(vadd_f32(vadd_f32(F[i][0], F[i][1]), vadd_f32(F[i][2], F[i][3])), F[i][4]);
 
-      // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
-      FZ[i][1] = vmla_n_f32(vsub_f32(F[i][1], F[i][2]), vsub_f32(F[i][3], F[i][4]), 2.0f);
-
-      // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
-      FZ[i][2] = vmla_n_f32(vadd_f32(F[i][1], F[i][2]), vadd_f32(F[i][3], F[i][4]), 4.0f);
-
-      // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
-      FZ[i][3] = vadd_f32(vmla_n_f32(vsub_f32(F[i][1], F[i][2]), vsub_f32(F[i][3], F[i][4]), 8.0f), F[i][5]);
+      // FZ[i][1] =               1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4] +  1*F[i][5];
+      FZ[i][1] = vadd_f32(vmla_n_f32(vsub_f32(F[i][1], F[i][2]), vsub_f32(F[i][3], F[i][4]), 2.0f), F[i][5]);
     }
 
     // Compute the output tile f = ZT F Z
-    for (int j = 0; j < 4; j++)
+    for (int j = 0; j < 2; j++)
     {
       // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
       f[0][j] = vadd_f32(vadd_f32(vadd_f32(FZ[0][j], FZ[1][j]), vadd_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
 
-      // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
-      f[1][j] = vmla_n_f32(vsub_f32(FZ[1][j], FZ[2][j]), vsub_f32(FZ[3][j], FZ[4][j]), 2.0f);
-
-      // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
-      f[2][j] = vmla_n_f32(vadd_f32(FZ[1][j], FZ[2][j]), vadd_f32(FZ[3][j], FZ[4][j]), 4.0f);
-
-      // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
-      f[3][j] = vadd_f32(vmla_n_f32(vsub_f32(FZ[1][j], FZ[2][j]), vsub_f32(FZ[3][j], FZ[4][j]), 8.0f), FZ[5][j]);
+      // f[1][j] =               1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j] +  1*FZ[5][j];
+      f[1][j] = vadd_f32(vmla_n_f32(vsub_f32(FZ[1][j], FZ[2][j]), vsub_f32(FZ[3][j], FZ[4][j]), 2.0f), FZ[5][j]);
     }
 
     // Write out the output tile
@@ -226,11 +182,11 @@ void Transform::process_tile(
       }
     }
   }
-#endif
+#endif  // __arm_any__
   for (; channels_remaining; channels_remaining--)
   {
     // Matrices used and computed during this transform
-    float F[6][6], FZ[6][4], f[4][4], b;
+    float F[6][6], FZ[6][2], f[2][2], b;
 
     // Read a 6x6 tile in the Winograd domain
     for (int i = 0, m = 0; i < 6; i++)
@@ -246,18 +202,14 @@ void Transform::process_tile(
     for (int i = 0; i < 6; i++)
     {
       FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
-      FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
-      FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
-      FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
+      FZ[i][1] =               1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4] +  1*F[i][5];
     }
 
     // Compute the output tile f = ZT F Z
-    for (int j = 0; j < 4; j++)
+    for (int j = 0; j < 2; j++)
     {
       f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
-      f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
-      f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
-      f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
+      f[1][j] =                1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j] +  1*FZ[5][j];
     }
 
     // Write out the output tile
@@ -277,30 +229,14 @@ template <>
 const Transform::TileFn Transform::tile_fns[max_pad_bottom][max_pad_right] =
 {
   {
-    Transform::template process_tile<0, 0>,
-    Transform::template process_tile<0, 1>,
-    Transform::template process_tile<0, 2>,
-    Transform::template process_tile<0, 3>,
+    Transform::template process_tile<0, 0>,  // No padding
+    Transform::template process_tile<0, 1>,  // Right padding
   },
   {
-    Transform::template process_tile<1, 0>,
-    Transform::template process_tile<1, 1>,
-    Transform::template process_tile<1, 2>,
-    Transform::template process_tile<1, 3>,
-  },
-  {
-    Transform::template process_tile<2, 0>,
-    Transform::template process_tile<2, 1>,
-    Transform::template process_tile<2, 2>,
-    Transform::template process_tile<2, 3>,
-  },
-  {
-    Transform::template process_tile<3, 0>,
-    Transform::template process_tile<3, 1>,
-    Transform::template process_tile<3, 2>,
-    Transform::template process_tile<3, 3>,
+    Transform::template process_tile<1, 0>,  // Bottom padding
+    Transform::template process_tile<1, 1>,  // Bottom and right padding
   }
 };
 
-template struct WinogradGEMM<4, 4, 3, 3>::OutputTransform<float>;
+template struct WinogradGEMM<2, 2, 5, 5>::OutputTransform<float>;
 }  // namespace winograd
