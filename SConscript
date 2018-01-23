@@ -126,7 +126,7 @@ def create_version_file(target, source, env):
 
 arm_compute_env = env.Clone()
 # Don't allow undefined references in the libraries:
-arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined','-Wl,--no-allow-shlib-undefined'])
+arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined'])
 
 generate_embed = [ arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file) ]
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
